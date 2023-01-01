@@ -787,6 +787,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             iTermin = if (!pTermin.isNullOrEmpty()) pTermin else null
                             setupTermin(iTermin)
 
+                            // Remove image temp
+                            currentPhotoUri?.let {
+                                val contentResolver = contentResolver
+                                contentResolver.delete(it, null, null)
+                            }
+
                             getDetailContact()
 
                         }
@@ -850,6 +856,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             }
 
                             hasEdited = true
+                            loadingState(false)
 
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
