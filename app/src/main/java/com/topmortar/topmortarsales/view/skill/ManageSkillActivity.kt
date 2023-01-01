@@ -129,7 +129,7 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
                     }
                     else -> {
 
-                        handleMessage(this@ManageSkillActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                        handleMessage(this@ManageSkillActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
                         loadingState(true, getString(R.string.failed_request))
 
                     }

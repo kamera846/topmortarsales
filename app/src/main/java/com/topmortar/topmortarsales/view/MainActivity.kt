@@ -224,7 +224,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         try {
             startActivity(intent)
         } catch (e: ActivityNotFoundException) {
-            Toast.makeText(this, "Failed direct to whatsapp", TOAST_SHORT).show()
+            Toast.makeText(this, "Gagal mengarahkan ke whatsapp", TOAST_SHORT).show()
         }
 
     }
@@ -499,12 +499,12 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        loadingState(true, "Contact data is empty!")
+                        loadingState(true, "Daftar kontak kosong!")
 
                     }
                     else -> {
 
-                        handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                        handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
                         loadingState(true, getString(R.string.failed_request))
 
                     }
@@ -584,12 +584,12 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
                         }
                         RESPONSE_STATUS_EMPTY -> {
 
-                            loadingState(true, "Contact data is empty!")
+                            loadingState(true, "Daftar kontak kosong!")
 
                         }
                         else -> {
 
-                            handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                            handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
                             loadingState(true, getString(R.string.failed_request))
 
                         }

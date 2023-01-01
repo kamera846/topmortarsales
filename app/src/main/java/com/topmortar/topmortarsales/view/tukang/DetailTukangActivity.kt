@@ -161,7 +161,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
     private var selectedSkill: ModalSearchModel? = null
     private var itemSendMessage: TukangModel? = null
 
-    private var statusItem: List<String> = listOf("Choose Customer Status", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
+    private var statusItem: List<String> = listOf("Pilih Status", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
     private var selectedStatus: String = ""
 //    private var cameraPermissionLauncher: ActivityResultLauncher<String>? = null
 //    private var imagePicker: ActivityResultLauncher<Intent>? = null
@@ -399,14 +399,14 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         //////////
 
         // Tooltip Handler
-        tooltipHandler(tooltipPhone, "Phone Number (WA)")
-        tooltipHandler(tooltipOwner, "Tukang Full Name")
-        tooltipHandler(tooltipLocation, "Tukang City")
-        tooltipHandler(tooltipSkill, "Tukang Skill")
-        tooltipHandler(tooltipBirthday, "Tukang Birthday")
+        tooltipHandler(tooltipPhone, "Nomor Telpon (WA)")
+        tooltipHandler(tooltipOwner, "Nama Lengkap Tukang")
+        tooltipHandler(tooltipLocation, "Kota Tukang")
+        tooltipHandler(tooltipSkill, "Keahlian Tukang")
+        tooltipHandler(tooltipBirthday, "Tanggal Lahir Tukang")
 
         val tooltipMapsText = "Maps URL"
-        val tooltipMapsTextOpen = "Click to open tukang location on maps apps"
+        val tooltipMapsTextOpen = "Tekan untuk menampilkan lokasi pada maps"
         tooltipMaps.setOnClickListener {
             if (tvMaps.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsTextOpen)
             else TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsText)
@@ -478,15 +478,15 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             etOwner.setText("")
         }
         if (!iLocation.isNullOrEmpty()) {
-            tvLocation.text = "Loading..."
-            etLocation.setText("Loading...")
+            tvLocation.text = getString(R.string.txt_loading)
+            etLocation.setText(getString(R.string.txt_loading))
         } else {
             tvLocation.text = EMPTY_FIELD_VALUE
             etLocation.setText("")
         }
         if (!iSkill.isNullOrEmpty()) {
-            tvSkill.text = "Loading..."
-            etSkill.setText("Loading...")
+            tvSkill.text = getString(R.string.txt_loading)
+            etSkill.setText(getString(R.string.txt_loading))
         } else {
             tvSkill.text = EMPTY_FIELD_VALUE
             etSkill.setText("")
@@ -500,7 +500,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             }
         }
         if (!iMapsUrl.isNullOrEmpty()) {
-            tvMaps.text = "Click to open"
+            tvMaps.text = "Tekan untuk menampilkan lokasi"
             etMaps.setText(iMapsUrl)
         } else {
             iMapsUrl = EMPTY_FIELD_VALUE
@@ -726,7 +726,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                             etPhone.setText(formatPhoneNumber("${ etPhone.text }"))
                             iAddress = "${ etAddress.text }"
 
-                            handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
+                            handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Berhasil mengubah data!")
                             loadingState(false)
                             toggleEdit(false)
 
@@ -735,7 +735,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                             if (!etBirthday.text.isNullOrEmpty()) tvBirthday.text = "${ etBirthday.text }"
                             else tvBirthday.text = EMPTY_FIELD_VALUE
                             if (!etMaps.text.isNullOrEmpty()) {
-                                tvMaps.text = "Click to open"
+                                tvMaps.text = "Tekan untuk menampilkan lokasi"
                                 iMapsUrl = "${ etMaps.text }"
                             } else {
                                 tvMaps.text = EMPTY_FIELD_VALUE
@@ -759,14 +759,14 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Failed to edit! Message: ${ responseBody.message }")
+                            handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Gagal mengubah! Message: ${ responseBody.message }")
                             loadingState(false)
                             toggleEdit(false)
 
                         }
                         else -> {
 
-                            handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Failed to edit data!")
+                            handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Gagal mengubah data!")
                             loadingState(false)
                             toggleEdit(false)
 
@@ -775,7 +775,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
                 } else {
 
-                    handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Failed to edit data! Error: " + response.message())
+                    handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Gagal mengubah data! Error: " + response.message())
                     loadingState(false)
                     toggleEdit(false)
 
@@ -839,11 +839,11 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
     private fun formValidation(phone: String, name: String, owner: String = "", mapsUrl: String = "", location: String = "", birthday: String = "", address: String = ""): Boolean {
         return if (name.isEmpty()) {
-            etName.error = "Name cannot be empty!"
+            etName.error = "Nama wajib diisi!"
             etName.requestFocus()
             false
         } else if (phone.isEmpty()) {
-            etPhone.error = "Phone number cannot be empty!"
+            etPhone.error = "Nomor telpon wajib diisi!"
             etPhone.requestFocus()
             false
         } else if (!PhoneHandler.phoneValidation(phone, etPhone)) {
@@ -939,7 +939,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
         searchModal = SearchModal(this, items)
         searchModal.setCustomDialogListener(this)
-        searchModal.searchHint = "Enter city name..."
+        searchModal.searchHint = "Masukan nama kota…"
         searchModal.setOnDismissListener { etLocation.clearFocus() }
 
     }
@@ -948,8 +948,8 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
         searchModalSkill = SearchModal(this, items)
         searchModalSkill.setCustomDialogListener(this)
-        searchModalSkill.label = "Select Skill Option"
-        searchModalSkill.searchHint = "Enter skill name..."
+        searchModalSkill.label = "Pilih Opsi Keahlian"
+        searchModalSkill.searchHint = "Masukan nama keahlian…"
         searchModalSkill.setOnDismissListener { etSkill.clearFocus() }
 
     }
@@ -1014,13 +1014,13 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        handleMessage(this@DetailTukangActivity, "LIST CITY", "Empty cities data!")
+                        handleMessage(this@DetailTukangActivity, "LIST CITY", "Daftar kota kosong!")
 //                        searchModal.isLoading(true)
 
                     }
                     else -> {
 
-                        handleMessage(this@DetailTukangActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                        handleMessage(this@DetailTukangActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
 //                        searchModal.isLoading(true)
 
                     }
@@ -1072,13 +1072,13 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        handleMessage(this@DetailTukangActivity, "LIST SKILL", "Empty skills data!")
+                        handleMessage(this@DetailTukangActivity, "LIST SKILL", "Daftar keahlian kosong!")
 //                        searchModal.isLoading(true)
 
                     }
                     else -> {
 
-                        handleMessage(this@DetailTukangActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                        handleMessage(this@DetailTukangActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
 //                        searchModal.isLoading(true)
 
                     }

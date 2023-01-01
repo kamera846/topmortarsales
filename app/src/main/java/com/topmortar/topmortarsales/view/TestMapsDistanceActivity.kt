@@ -53,8 +53,7 @@ class TestMapsDistanceActivity : AppCompatActivity() {
 
             } else {
 
-                println("Failed to retrieve the original URL")
-                Toast.makeText(this, "Failed to retrieve the original URL", TOAST_SHORT).show()
+                Toast.makeText(this, "Gagal mendapatkan URL asli", TOAST_SHORT).show()
 
             }
         }
@@ -80,7 +79,7 @@ class TestMapsDistanceActivity : AppCompatActivity() {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 getDistance()
             } else {
-                Toast.makeText(this, "Permission denied!", TOAST_SHORT).show()
+                Toast.makeText(this, "Izin ditolak!", TOAST_SHORT).show()
             }
         }
     }

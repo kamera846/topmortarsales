@@ -195,7 +195,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
                     }
                     else -> {
 
-                        handleMessage(this@ListSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                        handleMessage(this@ListSuratJalanActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
                         loadingState(true, getString(R.string.failed_request))
 
                     }

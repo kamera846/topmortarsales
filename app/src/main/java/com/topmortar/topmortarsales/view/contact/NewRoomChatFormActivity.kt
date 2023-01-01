@@ -482,7 +482,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
     private fun formValidation(phone: String, name: String, location: String = "", birthday: String = "", owner: String = "", termin: String? = "", mapsUrl: String = "", message: String): Boolean {
         return if (phone.isEmpty()) {
-            etPhone.error = "Phone number cannot be empty!"
+            etPhone.error = "Nomor telpon wajib diisi!"
             etPhone.requestFocus()
             false
         } else if (!phoneValidation(phone, etPhone)) {
@@ -491,13 +491,13 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         } else if (name.isEmpty()) {
             etPhone.error = null
             etPhone.clearFocus()
-            etName.error = "Name cannot be empty!"
+            etName.error = "Nama wajib diisi!"
             etName.requestFocus()
             false
         } else if (owner.isEmpty()) {
             etPhone.error = null
             etPhone.clearFocus()
-            etOwner.error = "Owner name cannot be empty!"
+            etOwner.error = "Nama pemilik wajib diisi!"
             etOwner.requestFocus()
             false
 //        } else if (birthday.isEmpty()) {
@@ -510,7 +510,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         } else if (mapsUrl.isEmpty()) {
             etBirthday.error = null
             etBirthday.clearFocus()
-            etMapsUrl.error = "Choose the coordinate first!"
+            etMapsUrl.error = "Pilih koordinat!"
 //            etMapsUrl.requestFocus()
             false
 //        } else if (location.isEmpty()) {

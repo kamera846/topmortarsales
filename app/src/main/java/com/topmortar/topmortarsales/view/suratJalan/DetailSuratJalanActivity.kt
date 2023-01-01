@@ -405,7 +405,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
         if (state) {
 
-            btnPrint.text = "Printing..."
+            btnPrint.text = "Printing…"
             btnPrint.isEnabled = false
 
         } else {
@@ -454,12 +454,12 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                             if (stringDistance.contains(",")) stringDistance = stringDistance.replace(",", ".")
                             shortDistance = stringDistance.toDouble()
 
-                            if (distance > 0.2) {
+                            if (distance > 0.4) {
                                 val builder = AlertDialog.Builder(this)
                                 builder.setTitle("Peringatan!")
                                     .setMessage("Titik anda saat ini $shortDistance km dari titik toko. Cobalah untuk lebih dekat dengan toko!")
-                                    .setPositiveButton("Ok") { dialog, _ -> dialog.dismiss() }
-                                    .setNegativeButton("Open Maps") { dialog, _ ->
+                                    .setPositiveButton("Oke") { dialog, _ -> dialog.dismiss() }
+                                    .setNegativeButton("Buka Maps") { dialog, _ ->
                                         val intent = Intent(this@DetailSuratJalanActivity, MapsActivity::class.java)
                                         intent.putExtra(CONST_MAPS, mapsUrl)
                                         startActivity(intent)

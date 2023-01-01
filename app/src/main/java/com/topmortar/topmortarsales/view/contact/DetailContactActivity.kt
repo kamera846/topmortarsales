@@ -190,8 +190,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var selectedCity: ModalSearchModel? = null
     private var itemSendMessage: ContactModel? = null
 
-    private var statusItem: List<String> = listOf("Choose Customer Status", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
-    private var terminItem: List<String> = listOf("Choose Termin Payment", "COD", "COD + Transfer", "COD + Tunai", "30 Hari", "45 Hari", "60 Hari")
+    private var statusItem: List<String> = listOf("Pilih Status", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
+    private var terminItem: List<String> = listOf("Pilih Termin Payment", "COD", "COD + Transfer", "COD + Tunai", "30 Hari", "45 Hari", "60 Hari")
     private var selectedStatus: String = ""
     private var selectedTermin: String = ""
     private var cameraPermissionLauncher: ActivityResultLauncher<String>? = null
@@ -310,7 +310,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             if (isGranted) {
                 chooseFile()
             } else {
-                handleMessage(this@DetailContactActivity, "CAMERA ACCESS DENIED", "Permission camera denied")
+                handleMessage(this@DetailContactActivity, "CAMERA ACCESS DENIED", "Izin kamera ditolak")
             }
             etKtp.clearFocus()
         }
@@ -318,7 +318,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             if (result.resultCode == Activity.RESULT_OK) {
                 val data: Intent? = result.data
                 selectedUri = if (data == null || data.data == null) currentPhotoUri else data.data
-                tvSelectedKtp.text = "Selected file: " + selectedUri?.let { getFileNameFromUri(it) }
+                tvSelectedKtp.text = "File terpilih: " + selectedUri?.let { getFileNameFromUri(it) }
 //                navigateToPreviewKtp()
             }
             etKtp.clearFocus()
@@ -442,13 +442,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         //////////
 
         // Tooltip Handler
-        tooltipHandler(tooltipPhone, "Phone Number (WA)")
-        tooltipHandler(tooltipOwner, "Owner Name")
-        tooltipHandler(tooltipLocation, "Customer City")
-        tooltipHandler(tooltipBirthday, "Owner Birthday")
+        tooltipHandler(tooltipPhone, "Nomor Telpon (WA)")
+        tooltipHandler(tooltipOwner, "Nama Pemilik")
+        tooltipHandler(tooltipLocation, "Kota Pelanggan")
+        tooltipHandler(tooltipBirthday, "Tanggal Lahir Pemilik")
 
         val tooltipMapsText = "Maps URL"
-        val tooltipMapsTextOpen = "Click to open store location on maps apps"
+        val tooltipMapsTextOpen = "Tekan untuk menampilkan lokasi pada maps"
         tooltipMaps.setOnClickListener {
             if (tvMaps.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsTextOpen)
             else TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsText)
@@ -459,7 +459,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             false
         }
         val tooltipKtpText = "Ktp File"
-        val tooltipKtpTextOpen = "Click to open KTP and see the details"
+        val tooltipKtpTextOpen = "Tekan untuk menampilkan KTP dan melihat detailnya"
         tooltipKtp.setOnClickListener {
             if (tvKtp.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(tooltipKtp, tooltipKtpTextOpen)
             else TooltipCompat.setTooltipText(tooltipKtp, tooltipKtpText)
@@ -522,8 +522,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             etOwner.setText("")
         }
         if (!iLocation.isNullOrEmpty()) {
-            tvLocation.text = "Loading..."
-            etLocation.setText("Loading...")
+            tvLocation.text = getString(R.string.txt_loading)
+            etLocation.setText(getString(R.string.txt_loading))
         } else {
             tvLocation.text = EMPTY_FIELD_VALUE
             etLocation.setText("")
@@ -537,7 +537,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
         }
         if (!iMapsUrl.isNullOrEmpty()) {
-            tvMaps.text = "Click to open"
+            tvMaps.text = "Tekan untuk menampilkan lokasi"
             etMaps.setText(iMapsUrl)
         } else {
             iMapsUrl = EMPTY_FIELD_VALUE
@@ -545,7 +545,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             etMaps.setText("")
         }
         if (!iKtp.isNullOrEmpty()) {
-            tvKtp.text = "Click to open preview KTP"
+            tvKtp.text = "Tekan untuk menampilkan KTP"
             etKtp.setText("")
         } else {
             iKtp = EMPTY_FIELD_VALUE
@@ -625,7 +625,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 etBirthdayContainer.visibility = View.VISIBLE
                 etKtpContainer.visibility = View.VISIBLE
                 tvSelectedKtp.visibility = View.VISIBLE
-                tvSelectedKtp.text = "Selected file: "
+                tvSelectedKtp.text = "File Terpilih: "
 
                 // Other Columns Handle
                 addressContainer.setBackgroundResource(R.drawable.et_background)
@@ -771,7 +771,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             if (byteArray != null) {
                 val requestFile: RequestBody = RequestBody.create("image/*".toMediaTypeOrNull(), byteArray)
                 imagePart = MultipartBody.Part.createFormData("ktp", "image.jpg", requestFile)
-            } else handleMessage(this, TAG_RESPONSE_CONTACT, "Image not located")
+            } else handleMessage(this, TAG_RESPONSE_CONTACT, "Gambar tidak ditemukan")
         }
 
         pBirthday = if (pBirthday.isEmpty() || pBirthday == EMPTY_FIELD_VALUE) "0000-00-00"
@@ -849,7 +849,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             if (!etBirthday.text.isNullOrEmpty()) tvBirthday.text = "${ etBirthday.text }"
                             else tvBirthday.text = EMPTY_FIELD_VALUE
                             if (!etMaps.text.isNullOrEmpty()) {
-                                tvMaps.text = "Click to open"
+                                tvMaps.text = "Tekan untuk menampilkan lokasi"
                                 iMapsUrl = "${ etMaps.text }"
                             } else {
                                 tvMaps.text = EMPTY_FIELD_VALUE
@@ -882,14 +882,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed to edit! Message: ${ responseBody.message }")
+                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal mengubah! Message: ${ responseBody.message }")
                             loadingState(false)
                             toggleEdit(false)
 
                         }
                         else -> {
 
-                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed to edit data!")
+                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal mengubah data!")
                             loadingState(false)
                             toggleEdit(false)
 
@@ -898,7 +898,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 } else {
 
-                    handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed to edit data! Error: " + response.message())
+                    handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal mengubah data! Error: " + response.message())
                     loadingState(false)
                     toggleEdit(false)
 
@@ -935,11 +935,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                             val data = responseBody.results[0]
                             if (!data.ktp_owner.isNullOrEmpty()) {
-                                tvKtp.text = "Click to open preview KTP"
+                                tvKtp.text = "Tekan untuk menampilkan KTP"
                                 iKtp = data.ktp_owner
                             }
 
-                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
+                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Berhasil mengubah data!")
                             loadingState(false)
                             toggleEdit(false)
 
@@ -958,14 +958,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed to get contact! Message: Response status $RESPONSE_STATUS_FAIL or $RESPONSE_STATUS_FAILED")
+                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak! Message: Response status $RESPONSE_STATUS_FAIL or $RESPONSE_STATUS_FAILED")
                             loadingState(false)
                             toggleEdit(false)
 
                         }
                         else -> {
 
-                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed to get contact!")
+                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak!")
                             loadingState(false)
                             toggleEdit(false)
 
@@ -974,7 +974,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 } else {
 
-                    handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed to get contact! Error: " + response.message())
+                    handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak! Error: " + response.message())
                     loadingState(false)
                     toggleEdit(false)
 
@@ -1037,11 +1037,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun formValidation(phone: String, name: String, owner: String = "", mapsUrl: String = "", location: String = "", birthday: String = "", address: String = ""): Boolean {
         return if (name.isEmpty()) {
-            etName.error = "Name cannot be empty!"
+            etName.error = "Nama wajib diisi!"
             etName.requestFocus()
             false
         } else if (phone.isEmpty()) {
-            etPhone.error = "Phone number cannot be empty!"
+            etPhone.error = "Nomor telpon wajib diisi!"
             etPhone.requestFocus()
             false
         } else if (!PhoneHandler.phoneValidation(phone, etPhone)) {
@@ -1237,7 +1237,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         searchModal = SearchModal(this, items)
         searchModal.setCustomDialogListener(this)
-        searchModal.searchHint = "Enter city name..."
+        searchModal.searchHint = "Enter city name…"
         searchModal.setOnDismissListener { etLocation.clearFocus() }
 
     }
@@ -1300,13 +1300,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        handleMessage(this@DetailContactActivity, "LIST CITY", "Empty cities data!")
+                        handleMessage(this@DetailContactActivity, "LIST CITY", "Daftar kota kosong!")
 //                        searchModal.isLoading(true)
 
                     }
                     else -> {
 
-                        handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                        handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
 //                        searchModal.isLoading(true)
 
                     }

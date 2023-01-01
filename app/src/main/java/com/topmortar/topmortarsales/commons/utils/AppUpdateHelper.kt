@@ -24,10 +24,10 @@ object AppUpdateHelper {
 
     private fun showUpdateDialog(context: Context) {
         val builder = AlertDialog.Builder(context)
-        builder.setTitle("Update Required")
-            .setMessage("A new version of the app is available. Please update to the latest version.")
+        builder.setTitle("Update Diperlukan")
+            .setMessage("Versi baru aplikasi telah tersedia. Harap perbarui ke versi terbaru.")
             .setCancelable(false)
-            .setPositiveButton("Update") { dialog, _ ->
+            .setPositiveButton("Perbarui Sekarang") { dialog, _ ->
                 openPlayStore(context)
                 dialog.dismiss()
             }
