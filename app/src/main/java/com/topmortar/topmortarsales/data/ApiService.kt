@@ -46,8 +46,11 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.*
+import java.util.Calendar
 
 interface ApiService {
+
+    val currenMonth: Int get() = Calendar.getInstance().get(Calendar.MONTH) + 1
 
     @GET(CONTACT)
     suspend fun getContacts(@Query("c") cityId: String, @Query("dst") distributorID: String): ResponseContactList
@@ -349,6 +352,7 @@ interface ApiService {
     @GET(BID)
     suspend fun getContactsUserBid(
         @Query("u") userId: String,
+        @Query("bulan") month: String = currenMonth.toString(),
         @Query("visit") visit: String = BID_ON_GOING
     ): ResponseContactList
 
