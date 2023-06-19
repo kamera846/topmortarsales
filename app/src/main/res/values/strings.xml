@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Qontak</string>
+    <string name="list_chat">List Chat</string>
+    <string name="new_chat_room">New Chat Room</string>
+    <string name="logo_horizontal">Logo Horizontal</string>
+    <string name="btn_submit_new_chat_room">Selesai</string>
+    <string name="input_message_placeholder">Pesan</string>
+    <string name="input_name_placeholder">Nama</string>
+    <string name="input_phon_number_placeholder">Nomor Telepon</string>
 </resources>

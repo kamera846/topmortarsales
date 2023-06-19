@@ -1,22 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:theme="@style/Theme.AppCompat.NoActionBar">
 
+    <!-- Title Bar -->
     <RelativeLayout
+        android:id="@+id/titleBar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:src="@drawable/logo_horizontal"
+            android:contentDescription="@string/logo_horizontal"/>
+
+        <View
+            android:id="@+id/v_horizontal_border"
+            android:layout_width="1dp"
+            android:layout_height="40dp"
+            android:background="@color/border_color"
+            android:layout_marginHorizontal="16dp"
+            android:layout_toEndOf="@id/logo"></View>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true"
-            android:text="Page List Chat Item"/>
+            android:layout_toEndOf="@id/v_horizontal_border"
+            android:layout_marginStart="8dp"
+            android:text="@string/list_chat"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/txt_title"
+            android:layout_centerVertical="true"/>
 
     </RelativeLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <View
+        android:id="@+id/v_border"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/border_color"
+        android:layout_below="@id/titleBar"></View>
+
+    <!-- Chat List -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/chatList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:listitem="@layout/item_chat_room"
+        android:layout_below="@id/v_border"/>
+
+    <!-- Floating Action Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:src="@mipmap/ic_add_white" />
+
+</RelativeLayout>

@@ -1,22 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".NewRoomChatFormActivity">
 
+    <!-- Title Bar -->
     <RelativeLayout
+        android:id="@+id/titleBar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/logo"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:src="@drawable/logo_horizontal"
+            android:contentDescription="@string/logo_horizontal"/>
+
+        <View
+            android:id="@+id/v_horizontal_border"
+            android:layout_width="1dp"
+            android:layout_height="40dp"
+            android:background="@color/border_color"
+            android:layout_marginHorizontal="16dp"
+            android:layout_toEndOf="@id/logo"></View>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true"
-            android:text="Page Add New Chat Room"/>
+            android:layout_toEndOf="@id/v_horizontal_border"
+            android:layout_marginStart="8dp"
+            android:text="@string/new_chat_room"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/txt_title"
+            android:layout_centerVertical="true"/>
 
     </RelativeLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <View
+        android:id="@+id/v_border"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/border_color"></View>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:orientation="vertical">
+
+        <!-- Nomor Telepon -->
+        <EditText
+            android:id="@+id/phoneNumberEditText"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:textColor="@color/txt_title"
+            android:textColorHint="@color/txt_body"
+            android:hint="@string/input_phon_number_placeholder"
+            android:inputType="phone"
+            android:autofillHints="08xxxxxxx"/>
+
+        <!-- Nama -->
+        <EditText
+            android:id="@+id/nameEditText"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:textColor="@color/txt_title"
+            android:textColorHint="@color/txt_body"
+            android:hint="@string/input_name_placeholder"
+            android:inputType="textPersonName"
+            android:autofillHints="John Doe"/>
+
+        <!-- Pesan -->
+        <EditText
+            android:id="@+id/messageEditText"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:textColor="@color/txt_title"
+            android:textColorHint="@color/txt_body"
+            android:maxLines="5"
+            android:inputType="textMultiLine"
+            android:hint="@string/input_message_placeholder"
+            android:autofillHints="Halo!"
+            android:maxLength="30" />
+
+        <!-- Tombol Selesai -->
+        <Button
+            android:id="@+id/submitButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_gravity="end"
+            android:backgroundTint="@color/primary"
+            android:text="@string/btn_submit_new_chat_room" />
+
+    </LinearLayout>
+
+</LinearLayout>
