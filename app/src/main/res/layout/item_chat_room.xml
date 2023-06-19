@@ -15,14 +15,15 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:src="@drawable/logo"
-            android:layout_gravity="center_vertical"></ImageView>
+            android:layout_gravity="center_vertical"
+            android:contentDescription="@string/logo_square" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_gravity="center_vertical"
-            android:layout_marginLeft="16dp">
+            android:layout_marginStart="16dp">
 
             <TextView
                 android:id="@+id/tv_contact_name"
@@ -32,7 +33,7 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="@color/txt_title"
-                android:text="Contact Name"></TextView>
+                android:text="@string/list_chat_contact_name"/>
 
             <TextView
                 android:id="@+id/tv_message"
@@ -40,8 +41,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
                 android:textColor="@color/txt_body"
-                android:text="Lorem ipsum sit dolor amet"></TextView>
-
+                android:text="@string/list_chat_contact_description"/>
        </LinearLayout>
 
     </LinearLayout>
@@ -49,6 +49,5 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/border_color"></View>
-
+        android:background="@color/border_color"/>
 </LinearLayout>

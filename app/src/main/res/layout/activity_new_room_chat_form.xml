@@ -8,35 +8,29 @@
 
     <!-- Title Bar -->
     <RelativeLayout
-        android:id="@+id/titleBar"
+        android:id="@+id/rl_title_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/primary"
         android:padding="16dp">
 
         <ImageView
-            android:id="@+id/logo"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:src="@drawable/logo_horizontal"
-            android:contentDescription="@string/logo_horizontal"/>
-
-        <View
-            android:id="@+id/v_horizontal_border"
-            android:layout_width="1dp"
-            android:layout_height="40dp"
-            android:background="@color/border_color"
-            android:layout_marginHorizontal="16dp"
-            android:layout_toEndOf="@id/logo"></View>
+            android:id="@+id/ic_back"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_centerVertical="true"
+            android:src="@mipmap/ic_arrow_left_white"/>
 
         <TextView
+            android:id="@+id/tv_title_bar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/v_horizontal_border"
-            android:layout_marginStart="8dp"
+            android:layout_toEndOf="@+id/ic_back"
             android:text="@string/new_chat_room"
-            android:textSize="18sp"
+            android:layout_marginStart="16dp"
+            android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="@color/txt_title"
+            android:textColor="@color/white"
             android:layout_centerVertical="true"/>
 
     </RelativeLayout>
@@ -45,7 +39,7 @@
         android:id="@+id/v_border"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/border_color"></View>
+        android:background="@color/border_color"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -55,7 +49,7 @@
 
         <!-- Nomor Telepon -->
         <EditText
-            android:id="@+id/phoneNumberEditText"
+            android:id="@+id/et_phone"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:textColor="@color/txt_title"
@@ -66,7 +60,7 @@
 
         <!-- Nama -->
         <EditText
-            android:id="@+id/nameEditText"
+            android:id="@+id/et_name"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:textColor="@color/txt_title"
@@ -77,7 +71,7 @@
 
         <!-- Pesan -->
         <EditText
-            android:id="@+id/messageEditText"
+            android:id="@+id/et_message"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:textColor="@color/txt_title"
@@ -90,7 +84,7 @@
 
         <!-- Tombol Selesai -->
         <Button
-            android:id="@+id/submitButton"
+            android:id="@+id/btn_submit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
