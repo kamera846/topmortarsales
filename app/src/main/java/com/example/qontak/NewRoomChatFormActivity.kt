@@ -11,6 +11,7 @@ class NewRoomChatFormActivity : AppCompatActivity() {
     private lateinit var btnSubmit: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_new_room_chat_form)
 
@@ -21,5 +22,6 @@ class NewRoomChatFormActivity : AppCompatActivity() {
 
         icBack.setOnClickListener { finish() }
         btnSubmit.setOnClickListener { finish() }
+
     }
 }
