@@ -41,6 +41,22 @@
         tools:listitem="@layout/item_chat_room"
         android:layout_below="@id/v_border"/>
 
+    <RelativeLayout
+        android:id="@+id/rl_loading"
+        android:layout_below="@+id/v_border"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="@string/txt_loading"
+            android:textColor="@color/txt_body" />
+
+    </RelativeLayout>
+
     <!-- Floating Action Button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btn_fab"

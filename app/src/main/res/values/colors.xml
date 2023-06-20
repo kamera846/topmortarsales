@@ -11,4 +11,5 @@
     <color name="border_color">#d0d6dd</color>
     <color name="txt_title">#2d3d54</color>
     <color name="txt_body">#626b79</color>
+    <color name="txt_danger">#EF5350</color>
 </resources>

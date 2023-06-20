@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.qontak.R
 import com.example.qontak.model.ChatModel
 
-class ListChatRecyclerViewAdapter(private val chatList: List<ChatModel>) : RecyclerView.Adapter<ListChatRecyclerViewAdapter.ChatViewHolder>() {
+class ListChatRecyclerViewAdapter(private val chatList: ArrayList<ChatModel>) : RecyclerView.Adapter<ListChatRecyclerViewAdapter.ChatViewHolder>() {
 
     inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 //        private val ivContactProfile: ImageView = itemView.findViewById(R.id.iv_contact_profile)
@@ -18,8 +18,8 @@ class ListChatRecyclerViewAdapter(private val chatList: List<ChatModel>) : Recyc
         fun bind(chatItem: ChatModel) {
             // Set data to the views
 //            ivContactProfile.setImageResource(chatItem.profileImage)
-            tvContactName.text = chatItem.name
-            tvMessage.text = chatItem.message
+            tvContactName.text = chatItem.title
+            tvMessage.text = chatItem.content
         }
     }
 

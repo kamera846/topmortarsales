@@ -19,19 +19,19 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_centerVertical="true"
-            android:src="@mipmap/ic_arrow_left_white"/>
+            android:src="@mipmap/ic_arrow_left_white" />
 
         <TextView
             android:id="@+id/tv_title_bar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
             android:layout_toEndOf="@+id/ic_back"
             android:text="@string/new_chat_room"
-            android:layout_marginStart="16dp"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="@color/white"
-            android:layout_centerVertical="true"/>
+            android:layout_centerVertical="true" />
 
     </RelativeLayout>
 
@@ -39,56 +39,114 @@
         android:id="@+id/v_border"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/border_color"/>
+        android:background="@color/border_color" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="16dp">
 
         <!-- Nomor Telepon -->
+        <TextView
+            android:id="@+id/tv_phone_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/input_phon_number_label"
+            android:textColor="@color/txt_title"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
         <EditText
+            android:labelFor="@+id/tv_phone_label"
             android:id="@+id/et_phone"
             android:layout_width="match_parent"
             android:layout_height="48dp"
+            android:layout_marginBottom="16dp"
             android:textColor="@color/txt_title"
             android:textColorHint="@color/txt_body"
             android:hint="@string/input_phon_number_placeholder"
             android:inputType="phone"
-            android:autofillHints="08xxxxxxx"/>
+            android:autofillHints="@string/input_phon_number_placeholder"
+            android:textSize="14sp"
+            android:background="@drawable/et_background"
+            android:padding="8dp"
+            android:outlineProvider="none"/>
 
         <!-- Nama -->
+        <TextView
+            android:id="@+id/tv_name_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/input_name_label"
+            android:textColor="@color/txt_title"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
         <EditText
+            android:labelFor="@+id/tv_name_label"
             android:id="@+id/et_name"
             android:layout_width="match_parent"
             android:layout_height="48dp"
+            android:layout_marginBottom="16dp"
             android:textColor="@color/txt_title"
             android:textColorHint="@color/txt_body"
             android:hint="@string/input_name_placeholder"
-            android:inputType="textPersonName"
-            android:autofillHints="John Doe"/>
+            android:inputType="textCapCharacters"
+            android:autofillHints="@string/input_name_placeholder"
+            android:textSize="14sp"
+            android:background="@drawable/et_background"
+            android:padding="8dp"
+            android:outlineProvider="none" />
 
         <!-- Pesan -->
+        <TextView
+            android:id="@+id/tv_message_label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/input_message_label"
+            android:textColor="@color/txt_title"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
         <EditText
+            android:labelFor="@+id/tv_message_label"
             android:id="@+id/et_message"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:layout_marginBottom="4dp"
             android:textColor="@color/txt_title"
             android:textColorHint="@color/txt_body"
-            android:maxLines="5"
+            android:maxLines="3"
             android:inputType="textMultiLine"
             android:hint="@string/input_message_placeholder"
-            android:autofillHints="Halo!"
-            android:maxLength="30" />
+            android:autofillHints="@string/input_message_placeholder"
+            android:textSize="14sp"
+            android:maxLength="30"
+            android:background="@drawable/et_background"
+            android:padding="8dp"
+            android:outlineProvider="none"/>
+
+        <TextView
+            android:id="@+id/tv_max_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginBottom="16dp"
+            android:textColor="@color/txt_danger"
+            android:text="@string/message_length" />
 
         <!-- Tombol Selesai -->
         <Button
             android:id="@+id/btn_submit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:layout_gravity="end"
+            android:layout_marginTop="16dp"
             android:backgroundTint="@color/primary"
             android:text="@string/btn_submit_new_chat_room" />
 
