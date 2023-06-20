@@ -3,9 +3,13 @@ package com.example.qontak
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.os.Message
 import android.util.Log
 import android.view.View
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import android.widget.ImageView
 import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -20,9 +24,12 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var scaleAnimation: Animation
+
     private lateinit var rlLoading: RelativeLayout
     private lateinit var rvListChat: RecyclerView
     private lateinit var btnFab: FloatingActionButton
+    private lateinit var icSyncNow: ImageView
 
     private var isLoading = true
 
@@ -33,18 +40,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        supportActionBar?.hide()
+        scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
+
         rlLoading = findViewById(R.id.rl_loading)
         rvListChat = findViewById(R.id.rv_chat_list)
         btnFab = findViewById(R.id.btn_fab)
-
-        supportActionBar?.hide()
-
-        btnFab.setOnClickListener {
-            navigateAddNewRoom()
-        }
+        icSyncNow = findViewById(R.id.ic_sync_now)
 
         loadingState(true)
         setRecyclerView()
+        initClickHandler()
 
     }
 
@@ -88,17 +94,25 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadingState(state: Boolean) {
 
-        isLoading = state
-
-        if (isLoading) {
+        if (state) {
 
             rlLoading.visibility = View.VISIBLE
             rvListChat.visibility = View.GONE
+
+            icSyncNow.startAnimation(scaleAnimation)
+            isLoading = true
 
         } else {
 
             rlLoading.visibility = View.GONE
             rvListChat.visibility = View.VISIBLE
+
+            Handler().postDelayed({
+
+                icSyncNow.clearAnimation()
+                isLoading = false
+
+            }, 500)
 
         }
 
@@ -115,6 +129,13 @@ class MainActivity : AppCompatActivity() {
 
         val intent = Intent(this, NewRoomChatFormActivity::class.java)
         startActivity(intent)
+
+    }
+
+    private fun initClickHandler() {
+
+        btnFab.setOnClickListener { navigateAddNewRoom() }
+        icSyncNow.setOnClickListener { setRecyclerView() }
 
     }
 

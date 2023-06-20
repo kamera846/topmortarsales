@@ -4,6 +4,7 @@
     <string name="new_chat_room">New Chat Room</string>
     <string name="logo_horizontal">Logo Horizontal</string>
     <string name="logo_square">Logo Square</string>
+    <string name="icon_sync">Icon Sync</string>
     <string name="btn_submit_new_chat_room">Submit</string>
     <string name="input_message_label">Message</string>
     <string name="input_name_label">Name</string>
