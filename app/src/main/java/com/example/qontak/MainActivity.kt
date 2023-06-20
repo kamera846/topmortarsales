@@ -31,8 +31,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnFab: FloatingActionButton
     private lateinit var icSyncNow: ImageView
 
-    private var isLoading = true
-
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -41,14 +39,10 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.hide()
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
 
-        rlLoading = findViewById(R.id.rl_loading)
-        rvListChat = findViewById(R.id.rv_chat_list)
-        btnFab = findViewById(R.id.btn_fab)
-        icSyncNow = findViewById(R.id.ic_sync_now)
-
+        initVariable()
+        initClickHandler()
         loadingState(true)
         setRecyclerView()
-        initClickHandler()
 
     }
 
@@ -98,7 +92,6 @@ class MainActivity : AppCompatActivity() {
             rvListChat.visibility = View.GONE
 
             icSyncNow.startAnimation(scaleAnimation)
-            isLoading = true
 
         } else {
 
@@ -108,7 +101,6 @@ class MainActivity : AppCompatActivity() {
             Handler().postDelayed({
 
                 icSyncNow.clearAnimation()
-                isLoading = false
 
             }, 500)
 
@@ -127,6 +119,18 @@ class MainActivity : AppCompatActivity() {
 
         val intent = Intent(this, NewRoomChatFormActivity::class.java)
         startActivity(intent)
+
+    }
+
+    private fun initVariable() {
+
+        rlLoading = findViewById(R.id.rl_loading)
+        rvListChat = findViewById(R.id.rv_chat_list)
+        btnFab = findViewById(R.id.btn_fab)
+        icSyncNow = findViewById(R.id.ic_sync_now)
+
+        // Set Title Bar
+        icSyncNow.visibility = View.VISIBLE
 
     }
 

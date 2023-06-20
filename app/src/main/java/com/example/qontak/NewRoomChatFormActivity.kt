@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.InputFilter
 import android.text.TextWatcher
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -18,8 +19,10 @@ import com.example.qontak.commons.ET_PHONE
 class NewRoomChatFormActivity : AppCompatActivity() {
 
     private lateinit var icBack: ImageView
-    private lateinit var btnSubmit: Button
+    private lateinit var icSyncNow: ImageView
+    private lateinit var tvTitleBar: TextView
     private lateinit var tvMaxMessage: TextView
+    private lateinit var btnSubmit: Button
     private lateinit var etPhone: EditText
     private lateinit var etName: EditText
     private lateinit var etMessage: EditText
@@ -35,10 +38,7 @@ class NewRoomChatFormActivity : AppCompatActivity() {
         supportActionBar?.hide()
 
         initVariable()
-
-        icBack.setOnClickListener { finish() }
-        btnSubmit.setOnClickListener { finish() }
-
+        initClickHandler()
         dataActivityValidation()
         etMessageListener()
 
@@ -86,11 +86,25 @@ class NewRoomChatFormActivity : AppCompatActivity() {
     private fun initVariable() {
 
         icBack = findViewById(R.id.ic_back)
-        btnSubmit = findViewById(R.id.btn_submit)
+        icSyncNow = findViewById(R.id.ic_sync_now)
+        tvTitleBar = findViewById(R.id.tv_title_bar)
         tvMaxMessage = findViewById(R.id.tv_max_message)
+        btnSubmit = findViewById(R.id.btn_submit)
         etPhone = findViewById(R.id.et_phone)
         etName = findViewById(R.id.et_name)
         etMessage = findViewById(R.id.et_message)
+
+        // Set Title Bar
+        icBack.visibility = View.VISIBLE
+        icSyncNow.visibility = View.GONE
+        tvTitleBar.text = getString(R.string.new_chat_room)
+
+    }
+
+    private fun initClickHandler() {
+
+        icBack.setOnClickListener { finish() }
+        btnSubmit.setOnClickListener { finish() }
 
     }
 
