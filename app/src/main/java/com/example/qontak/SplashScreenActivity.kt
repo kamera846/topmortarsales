@@ -1,13 +1,13 @@
 package com.example.qontak
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import androidx.appcompat.app.AppCompatActivity
 
 class SplashScreenActivity : AppCompatActivity() {
 
-    private val splashScreenDuration = 3000L
+    private val splashScreenDuration = 2000L
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -17,10 +17,11 @@ class SplashScreenActivity : AppCompatActivity() {
         supportActionBar?.hide()
 
         Handler().postDelayed({
-            // Start your main activity here
-            val intent = Intent(this, MainActivity::class.java)
+
+            val intent = Intent(this@SplashScreenActivity, MainActivity::class.java)
             startActivity(intent)
-            finish() // Finish the splash activity to prevent going back to it
+            finish()
+
         }, splashScreenDuration)
 
     }

@@ -1,10 +1,8 @@
 package com.example.qontak
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import android.os.Message
 import android.util.Log
 import android.view.View
 import android.view.animation.Animation
@@ -17,11 +15,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.qontak.adapter.ListChatRecyclerViewAdapter
+import com.example.qontak.commons.LIST_CHAT_TAG
 import com.example.qontak.data.HttpClient
 import com.example.qontak.model.ChatModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 
+@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
 
     private lateinit var scaleAnimation: Animation
@@ -32,8 +32,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var icSyncNow: ImageView
 
     private var isLoading = true
-
-    private var LIST_CHAT_TAG = "FETCH LIST CHAT"
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -71,7 +69,7 @@ class MainActivity : AppCompatActivity() {
                     listItem = data
 
                     rvListChat.layoutManager = LinearLayoutManager(this@MainActivity)
-                    rvListChat.adapter = ListChatRecyclerViewAdapter(listItem)
+                    rvListChat.adapter = ListChatRecyclerViewAdapter(this@MainActivity, listItem)
 
                     loadingState(false)
 
@@ -140,8 +138,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
+
         super.onResume()
         setRecyclerView()
+
     }
 
 }
