@@ -9,23 +9,23 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.qontak.NewRoomChatFormActivity
 import com.example.qontak.R
-import com.example.qontak.commons.ET_MESSAGE
 import com.example.qontak.commons.ET_NAME
-import com.example.qontak.model.ChatModel
+import com.example.qontak.commons.ET_PHONE
+import com.example.qontak.model.ContactModel
 
-class ListChatRecyclerViewAdapter(private val ctx: Context, private val chatList: ArrayList<ChatModel>) : RecyclerView.Adapter<ListChatRecyclerViewAdapter.ChatViewHolder>() {
+class ListContactRecyclerViewAdapter(private val ctx: Context, private val chatList: ArrayList<ContactModel>) : RecyclerView.Adapter<ListContactRecyclerViewAdapter.ChatViewHolder>() {
 
     inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
 //        private val ivContactProfile: ImageView = itemView.findViewById(R.id.iv_contact_profile)
         private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
-        private val tvMessage: TextView = itemView.findViewById(R.id.tv_message)
+        private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
 
-        fun bind(chatItem: ChatModel) {
+        fun bind(chatItem: ContactModel) {
 
 //            ivContactProfile.setImageResource(chatItem.profileImage)
-            tvContactName.text = chatItem.title
-            tvMessage.text = chatItem.content
+            tvContactName.text = chatItem.nama
+            tvPhoneNumber.text = "+${ chatItem.nomorhp }"
 
         }
 
@@ -48,9 +48,8 @@ class ListChatRecyclerViewAdapter(private val ctx: Context, private val chatList
 
             val intent = Intent(ctx, NewRoomChatFormActivity::class.java)
 
-//            intent.putExtra("etPhone", chatItem.title)
-            intent.putExtra(ET_NAME, chatItem.title)
-            intent.putExtra(ET_MESSAGE, chatItem.content)
+            intent.putExtra(ET_NAME, chatItem.nama)
+            intent.putExtra(ET_PHONE, chatItem.nomorhp)
 
             ctx.startActivity(intent)
 

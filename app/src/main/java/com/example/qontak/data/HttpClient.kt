@@ -4,21 +4,17 @@ import com.example.qontak.commons.BASE_URL
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-object HttpClient {
+class HttpClient {
+    companion object {
 
-    private val retrofit: Retrofit by lazy {
+        fun create(): ApiService {
+            val retrofit = Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
 
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-    }
-
-    val apiService: ApiService by lazy {
-
-        retrofit.create(ApiService::class.java)
+            return retrofit.create(ApiService::class.java)
+        }
 
     }
-
 }

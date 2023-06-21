@@ -14,10 +14,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.qontak.adapter.ListChatRecyclerViewAdapter
-import com.example.qontak.commons.LIST_CHAT_TAG
+import com.example.qontak.adapter.ListContactRecyclerViewAdapter
+import com.example.qontak.commons.RESPONSE_STATUS_OK
+import com.example.qontak.commons.TAG_RESPONSE_CONTACT
+import com.example.qontak.data.ApiService
 import com.example.qontak.data.HttpClient
-import com.example.qontak.model.ChatModel
+import com.example.qontak.model.ContactModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 
@@ -53,33 +55,33 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val response = HttpClient.apiService.getPosts()
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.getContacts()
 
-                if (response.success) {
+                if (response.status == RESPONSE_STATUS_OK) {
 
-                    val listItem: ArrayList<ChatModel>
-                    val data = response.data.data
-
-                    listItem = data
+                    val listItem: ArrayList<ContactModel> = response.results
 
                     rvListChat.layoutManager = LinearLayoutManager(this@MainActivity)
-                    rvListChat.adapter = ListChatRecyclerViewAdapter(this@MainActivity, listItem)
+                    rvListChat.adapter = ListContactRecyclerViewAdapter(this@MainActivity, listItem)
 
                     loadingState(false)
 
                 } else {
 
-                    handleMessage(LIST_CHAT_TAG, "Failed get data: " + response.message)
+                    handleMessage(TAG_RESPONSE_CONTACT, "Failed get data")
                     loadingState(false)
 
                 }
 
+
             } catch (e: Exception) {
 
-                handleMessage(LIST_CHAT_TAG, "Failed run service: " + e.message)
+                handleMessage(TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(false)
 
             }
+
         }
 
     }

@@ -1,8 +1,13 @@
 package com.example.qontak.commons
 
-const val BASE_URL = "http://192.168.80.69:8000/api/"
+const val BASE_URL = "https://saleswa.topmortarindonesia.com/"
 
-const val LIST_CHAT_TAG = "FETCH LIST CHAT"
+const val RESPONSE_STATUS_OK = "ok"
+
+const val GET_CONTACT = "contacts.php"
+const val SEND_MESSAGE = "messages.php"
+
+const val TAG_RESPONSE_CONTACT = "TAG RESPONSE CONTACT"
 
 const val ET_PHONE = "et_phone"
 const val ET_NAME = "et_name"

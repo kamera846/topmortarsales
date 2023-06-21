@@ -1,12 +1,13 @@
 package com.example.qontak.data
 
-import com.example.qontak.model.ChatModel
-import com.example.qontak.response.ChatResponse
+import com.example.qontak.commons.GET_CONTACT
+import com.example.qontak.response.ResponseContactList
+import retrofit2.Call
 import retrofit2.http.*
 
 interface ApiService {
 
-    @GET("posts")
-    suspend fun getPosts(): ChatResponse
+    @GET(GET_CONTACT)
+    suspend fun getContacts(): ResponseContactList
 
 }
