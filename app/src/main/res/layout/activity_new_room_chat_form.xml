@@ -70,7 +70,7 @@
             android:textColor="@color/txt_title"
             android:textColorHint="@color/border_color"
             android:hint="@string/input_name_placeholder"
-            android:inputType="textCapCharacters"
+            android:inputType="textCapWords"
             android:autofillHints="@string/input_name_placeholder"
             android:textSize="14sp"
             android:background="@drawable/et_background"

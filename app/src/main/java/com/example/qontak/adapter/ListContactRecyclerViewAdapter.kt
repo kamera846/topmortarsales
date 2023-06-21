@@ -25,7 +25,7 @@ class ListContactRecyclerViewAdapter(private val ctx: Context, private val chatL
 
 //            ivContactProfile.setImageResource(chatItem.profileImage)
             tvContactName.text = chatItem.nama
-            tvPhoneNumber.text = "+${ chatItem.nomorhp }"
+            tvPhoneNumber.text = if (chatItem.nomorhp != "") "+${ chatItem.nomorhp }" else ""
 
         }
 

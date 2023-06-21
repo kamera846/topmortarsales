@@ -1,19 +1,34 @@
 package com.example.qontak
 
 import android.annotation.SuppressLint
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
 import android.text.Editable
 import android.text.InputFilter
+import android.text.TextUtils
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.example.qontak.commons.ET_MESSAGE
 import com.example.qontak.commons.ET_NAME
 import com.example.qontak.commons.ET_PHONE
+import com.example.qontak.commons.RESPONSE_STATUS_OK
+import com.example.qontak.commons.TAG_RESPONSE_MESSAGE
+import com.example.qontak.data.ApiService
+import com.example.qontak.data.HttpClient
+import com.example.qontak.model.MessageModel
+import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
 @SuppressLint("SetTextI18n")
 class NewRoomChatFormActivity : AppCompatActivity() {
@@ -41,6 +56,63 @@ class NewRoomChatFormActivity : AppCompatActivity() {
         initClickHandler()
         dataActivityValidation()
         etMessageListener()
+
+    }
+
+    private fun sendMessage() {
+
+        val phone = "${ etPhone.text }"
+        val name = "${etName.text}"
+        val message = "${etMessage.text}"
+
+        if (!formValidation(phone, name, message)) return
+
+        loadingState(true)
+
+        lifecycleScope.launch {
+            try {
+
+                val rbPhone = createPartFromString(formatPhoneNumber(phone))
+                val rbName = createPartFromString(name)
+                val rbMessage = createPartFromString(message)
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.sendMessage(rbName, rbPhone, rbMessage)
+
+                if (response.isSuccessful) {
+
+                    val responseBdoy = response.body()!!
+
+                    if (responseBdoy.status == RESPONSE_STATUS_OK) {
+
+                        handleMessage(TAG_RESPONSE_MESSAGE, "Successfully added transaction data!")
+                        loadingState(false)
+
+                        finish()
+
+                    } else {
+
+                        handleMessage(TAG_RESPONSE_MESSAGE, "Failed to send message!")
+                        loadingState(false)
+
+                    }
+
+                } else {
+
+                    handleMessage(TAG_RESPONSE_MESSAGE, "Failed to send message! Error: " + response.message())
+                    loadingState(false)
+
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                loadingState(false)
+
+            }
+
+        }
 
     }
 
@@ -104,8 +176,47 @@ class NewRoomChatFormActivity : AppCompatActivity() {
     private fun initClickHandler() {
 
         icBack.setOnClickListener { finish() }
-        btnSubmit.setOnClickListener { finish() }
+        btnSubmit.setOnClickListener { sendMessage() }
 
+    }
+
+    private fun loadingState(state: Boolean) {
+
+        btnSubmit.setTextColor(ContextCompat.getColor(this, R.color.white))
+
+        if (state) {
+
+            btnSubmit.isEnabled = false
+            btnSubmit.text = getString(R.string.txt_sending)
+
+        } else {
+
+            Handler().postDelayed({
+
+                btnSubmit.isEnabled = true
+                btnSubmit.text = getString(R.string.btn_submit_new_chat_room)
+
+            }, 500)
+
+        }
+
+    }
+
+    private fun handleMessage(tag: String, message: String) {
+
+        Log.d(tag, message)
+        Toast.makeText(this@NewRoomChatFormActivity, message, Toast.LENGTH_LONG).show()
+
+    }
+
+    private fun formatPhoneNumber(input: String): String {
+        val trimmedInput = input.trim()
+
+        return if (trimmedInput.startsWith("0") || trimmedInput.startsWith("8")) {
+            "62${trimmedInput.substring(1)}"
+        } else {
+            trimmedInput
+        }
     }
 
     private fun updateTxtMaxLength(length: Int) {
@@ -116,5 +227,45 @@ class NewRoomChatFormActivity : AppCompatActivity() {
 
         filters = arrayOf<InputFilter>(InputFilter.LengthFilter(maxLength))
 
+    }
+
+    private fun createPartFromString(string: String): RequestBody {
+        return string.toRequestBody("multipart/form-data".toMediaType())
+    }
+
+    private fun formValidation(phone: String, name: String, message: String): Boolean {
+        return if (TextUtils.isEmpty(phone)) {
+            etPhone.error = "Phone number cannot be empty!"
+            false
+        } else if (!phoneValidation(phone)) {
+            false
+        } else if (TextUtils.isEmpty(name)) {
+            etPhone.error = null
+            etName.error = "Name cannot be empty!"
+            false
+        } else if (TextUtils.isEmpty(message)) {
+            etPhone.error = null
+            etName.error = null
+            etMessage.error = "Message cannot be empty!"
+            false
+        } else {
+            etPhone.error = null
+            etName.error = null
+            etMessage.error = null
+            true
+        }
+    }
+
+    private fun phoneValidation(input: String): Boolean {
+        val pattern = Regex("^\\d{10,16}$")
+        val trimmedInput = input.trim()
+
+        return if (!trimmedInput.startsWith("0") && !trimmedInput.startsWith("8") && !trimmedInput.startsWith("62")) {
+            etPhone.error = "Phone number must consist of starting with: 0, 8, 62"
+            false
+        } else if (!pattern.matches(input)) {
+            etPhone.error = "Phone number must be 10 to 16 digits long"
+            false
+        } else true
     }
 }
