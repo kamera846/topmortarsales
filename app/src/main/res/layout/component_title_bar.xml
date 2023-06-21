@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/primary"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
     android:padding="16dp">
 
     <ImageView
@@ -11,19 +13,17 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_marginEnd="16dp"
-        android:layout_centerVertical="true"
         android:src="@mipmap/ic_arrow_left_white" />
 
     <TextView
         android:id="@+id/tv_title_bar"
-        android:layout_toEndOf="@+id/ic_back"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:text="@string/list_chat"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="@color/white"
-        android:layout_centerVertical="true"/>
+        android:textColor="@color/white" />
 
     <ImageView
         android:visibility="gone"
@@ -32,7 +32,16 @@
         android:layout_height="32dp"
         android:src="@mipmap/ic_sync_white"
         android:layout_gravity="center_vertical"
-        android:layout_alignParentEnd="true"
         android:contentDescription="@string/logo_square" />
 
-</RelativeLayout>
+    <ImageView
+        android:visibility="gone"
+        android:id="@+id/ic_more"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:padding="4dp"
+        android:src="@mipmap/ic_more_white"
+        android:layout_gravity="center_vertical"
+        android:contentDescription="@string/more" />
+
+</LinearLayout>

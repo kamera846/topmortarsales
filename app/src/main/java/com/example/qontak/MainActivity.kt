@@ -4,10 +4,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -32,6 +34,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var rvListChat: RecyclerView
     private lateinit var btnFab: FloatingActionButton
     private lateinit var icSyncNow: ImageView
+    private lateinit var icMore: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -130,17 +133,39 @@ class MainActivity : AppCompatActivity() {
         rvListChat = findViewById(R.id.rv_chat_list)
         btnFab = findViewById(R.id.btn_fab)
         icSyncNow = findViewById(R.id.ic_sync_now)
+        icMore = findViewById(R.id.ic_more)
 
         // Set Title Bar
-        icSyncNow.visibility = View.VISIBLE
+//        icSyncNow.visibility = View.VISIBLE
+        icMore.visibility = View.VISIBLE
 
     }
 
     private fun initClickHandler() {
 
         btnFab.setOnClickListener { navigateAddNewRoom() }
-        icSyncNow.setOnClickListener { setRecyclerView() }
+//        icSyncNow.setOnClickListener { setRecyclerView() }
+        icMore.setOnClickListener { showPopupMenu() }
 
+    }
+
+    private fun showPopupMenu() {
+        val popupMenu = PopupMenu(this@MainActivity, icMore)
+        popupMenu.inflate(R.menu.option_main_menu)
+        popupMenu.setOnMenuItemClickListener { item: MenuItem ->
+            when (item.itemId) {
+                R.id.option_sync_now -> {
+                    handleMessage(TAG_RESPONSE_CONTACT, "Option Sync Now Selected")
+                    true
+                }
+                R.id.option_search -> {
+                    handleMessage(TAG_RESPONSE_CONTACT, "Option Search Selected")
+                    true
+                }
+                else -> false
+            }
+        }
+        popupMenu.show()
     }
 
     override fun onResume() {
