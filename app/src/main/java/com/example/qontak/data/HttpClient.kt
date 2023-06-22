@@ -4,12 +4,19 @@ import com.example.qontak.commons.BASE_URL
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 
 class HttpClient {
     companion object {
 
         fun create(): ApiService {
+            val timeOutValue = 10L
+
             val okHttpClient = OkHttpClient.Builder()
+                .connectTimeout(timeOutValue, TimeUnit.SECONDS)
+                .readTimeout(timeOutValue, TimeUnit.SECONDS)
+                .callTimeout(timeOutValue, TimeUnit.SECONDS)
+                .writeTimeout(timeOutValue, TimeUnit.SECONDS)
                 .build()
 
             val retrofit = Retrofit.Builder()

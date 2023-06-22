@@ -32,4 +32,5 @@ const val ET_MESSAGE = "et_message"
 // Status
 const val SEARCH_OPEN = "search_open"
 const val SEARCH_CLOSE = "search_close"
+const val SEARCH_CLEAR = "search_clear"
 const val SYNC_NOW = "sync_now"

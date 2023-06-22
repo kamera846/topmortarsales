@@ -21,17 +21,26 @@
 
       <EditText
           android:id="@+id/et_search_box"
-          android:layout_width="match_parent"
+          android:layout_width="0dp"
           android:layout_height="wrap_content"
+          android:layout_weight="1"
           android:textColor="@color/txt_title"
           android:textColorHint="@color/border_color"
           android:hint="@string/search_contact"
-          android:inputType="text"
+          android:inputType="none"
           android:autofillHints="@string/search_contact"
-          android:textSize="14sp"
-          android:background="@drawable/et_background"
-          android:padding="10dp"
+          android:textSize="16sp"
+          android:paddingVertical="8dp"
+          android:background="@color/white"
           android:outlineProvider="none"/>
+
+      <ImageView
+          android:visibility="gone"
+          android:id="@+id/ic_clear_search"
+          android:layout_width="24dp"
+          android:layout_height="24dp"
+          android:layout_marginStart="16dp"
+          android:src="@drawable/baseline_close" />
 
    </LinearLayout>
 

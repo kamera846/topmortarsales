@@ -5,8 +5,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.Editable
+import android.text.TextUtils
 import android.text.TextWatcher
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -24,6 +26,7 @@ import com.example.qontak.adapter.ListContactRecyclerViewAdapter
 import com.example.qontak.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.example.qontak.commons.RESPONSE_STATUS_EMPTY
 import com.example.qontak.commons.RESPONSE_STATUS_OK
+import com.example.qontak.commons.SEARCH_CLEAR
 import com.example.qontak.commons.SEARCH_CLOSE
 import com.example.qontak.commons.SEARCH_OPEN
 import com.example.qontak.commons.SYNC_NOW
@@ -44,6 +47,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var scaleAnimation: Animation
 
     private lateinit var rlLoading: RelativeLayout
+    private lateinit var rlParent: RelativeLayout
     private lateinit var txtLoading: TextView
     private lateinit var rvListChat: RecyclerView
     private lateinit var llTitleBar: LinearLayout
@@ -51,6 +55,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnFab: FloatingActionButton
     private lateinit var icMore: ImageView
     private lateinit var icCloseSearch: ImageView
+    private lateinit var icClearSearch: ImageView
     private lateinit var etSearchBox: EditText
 
     // Global
@@ -81,6 +86,7 @@ class MainActivity : AppCompatActivity() {
     private fun initVariable() {
 
         rlLoading = findViewById(R.id.rl_loading)
+        rlParent = findViewById(R.id.rl_parent)
         txtLoading = findViewById(R.id.txt_loading)
         rvListChat = findViewById(R.id.rv_chat_list)
         llTitleBar = findViewById(R.id.title_bar)
@@ -88,6 +94,7 @@ class MainActivity : AppCompatActivity() {
         btnFab = findViewById(R.id.btn_fab)
         icMore = findViewById(R.id.ic_more)
         icCloseSearch = findViewById(R.id.ic_close_search)
+        icClearSearch = findViewById(R.id.ic_clear_search)
         etSearchBox = findViewById(R.id.et_search_box)
 
         // Set Title Bar
@@ -100,6 +107,10 @@ class MainActivity : AppCompatActivity() {
         btnFab.setOnClickListener { navigateAddNewRoom() }
         icMore.setOnClickListener { showPopupMenu() }
         icCloseSearch.setOnClickListener { toggleSearchEvent(SEARCH_CLOSE) }
+        icClearSearch.setOnClickListener { etSearchBox.setText("") }
+        rlLoading.setOnTouchListener { _, event -> blurSearchBox(event) }
+//        rlParent.setOnTouchListener { _, event -> blurSearchBox(event) }
+        rvListChat.setOnTouchListener { _, event -> blurSearchBox(event) }
 
     }
 
@@ -150,9 +161,29 @@ class MainActivity : AppCompatActivity() {
         popupMenu.show()
     }
 
+    private fun blurSearchBox(event: MotionEvent): Boolean {
+
+        return when (event.action) {
+
+            MotionEvent.ACTION_DOWN -> {
+                if (isSearchActive && TextUtils.isEmpty(etSearchBox.text)) toggleSearchEvent(SEARCH_CLOSE)
+                true
+            }
+
+            else -> false
+
+        }
+
+    }
+
     private fun toggleSearchEvent(state: String) {
 
-        val animationDuration = 300L
+        val animationDuration = 200L
+
+        val fadeIn = AnimationUtils.loadAnimation(this@MainActivity, R.anim.fade_in)
+        fadeIn.duration = animationDuration
+        val fadeOut = AnimationUtils.loadAnimation(this@MainActivity, R.anim.fade_out)
+        fadeOut.duration = animationDuration
         val slideInFromLeft = AnimationUtils.loadAnimation(this@MainActivity, R.anim.fade_slide_in_from_left)
         slideInFromLeft.duration = animationDuration
         val slideOutToRight = AnimationUtils.loadAnimation(this@MainActivity, R.anim.fade_slide_out_to_right)
@@ -164,8 +195,6 @@ class MainActivity : AppCompatActivity() {
 
         if (state == SEARCH_OPEN && !isSearchActive) {
 
-            isSearchActive = true
-
             llSearchBox.visibility = View.VISIBLE
 
             llSearchBox.startAnimation(slideInFromLeft)
@@ -173,6 +202,7 @@ class MainActivity : AppCompatActivity() {
 
             Handler().postDelayed({
                 llTitleBar.visibility = View.GONE
+                isSearchActive = true
             }, animationDuration)
 
             etSearchBox.addTextChangedListener(object: TextWatcher {
@@ -193,6 +223,8 @@ class MainActivity : AppCompatActivity() {
                         searchRunnable?.let { searchHandler.removeCallbacks(it) }
 
                         searchRunnable = Runnable {
+
+                            toggleSearchEvent(SEARCH_CLEAR)
                             searchContact(searchTerm)
                         }
 
@@ -210,8 +242,6 @@ class MainActivity : AppCompatActivity() {
 
         if (state == SEARCH_CLOSE && isSearchActive) {
 
-            isSearchActive = false
-
             llTitleBar.visibility = View.VISIBLE
 
             llTitleBar.startAnimation(slideInFromRight)
@@ -219,9 +249,38 @@ class MainActivity : AppCompatActivity() {
 
             Handler().postDelayed({
                 llSearchBox.visibility = View.GONE
+                isSearchActive = false
             }, animationDuration)
 
             if (etSearchBox.text.toString() != "") etSearchBox.setText("")
+
+        }
+
+        if (state == SEARCH_CLEAR) {
+
+            if (TextUtils.isEmpty(etSearchBox.text)) {
+
+                if (icClearSearch.visibility == View.VISIBLE) {
+
+                    icClearSearch.startAnimation(fadeOut)
+                    Handler().postDelayed({
+                        icClearSearch.visibility = View.GONE
+                    }, animationDuration)
+
+                }
+
+            } else {
+
+                if (icClearSearch.visibility == View.GONE) {
+
+                    icClearSearch.startAnimation(fadeIn)
+                    Handler().postDelayed({
+                        icClearSearch.visibility = View.VISIBLE
+                    }, animationDuration)
+
+                }
+
+            }
 
         }
 
@@ -246,13 +305,13 @@ class MainActivity : AppCompatActivity() {
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        loadingState(false, "Contact data is empty!")
+                        loadingState(true, "Contact data is empty!")
 
                     }
                     else -> {
 
                         handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed get data")
-                        loadingState(false)
+                        loadingState(true, getString(R.string.failed_request))
 
                     }
                 }
@@ -261,7 +320,7 @@ class MainActivity : AppCompatActivity() {
             } catch (e: Exception) {
 
                 handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
-                loadingState(false)
+                loadingState(true, getString(R.string.failed_request))
 
             }
 
@@ -300,7 +359,7 @@ class MainActivity : AppCompatActivity() {
                         else -> {
 
                             handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed get data")
-                            loadingState(false)
+                            loadingState(true, getString(R.string.failed_request))
 
                         }
                     }
@@ -308,7 +367,7 @@ class MainActivity : AppCompatActivity() {
                 } else {
 
                     handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed get data! Message: " + response.message())
-                    loadingState(false)
+                    loadingState(true, getString(R.string.failed_request))
 
                 }
 
@@ -316,7 +375,7 @@ class MainActivity : AppCompatActivity() {
             } catch (e: Exception) {
 
                 handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
-                loadingState(false)
+                loadingState(true, getString(R.string.failed_request))
 
             }
 
