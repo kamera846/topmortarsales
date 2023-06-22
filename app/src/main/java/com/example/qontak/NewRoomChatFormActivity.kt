@@ -1,6 +1,7 @@
 package com.example.qontak
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.text.Editable
@@ -18,7 +19,9 @@ import androidx.lifecycle.lifecycleScope
 import com.example.qontak.commons.ET_MESSAGE
 import com.example.qontak.commons.ET_NAME
 import com.example.qontak.commons.ET_PHONE
+import com.example.qontak.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.example.qontak.commons.RESPONSE_STATUS_OK
+import com.example.qontak.commons.SYNC_NOW
 import com.example.qontak.commons.TAG_RESPONSE_MESSAGE
 import com.example.qontak.commons.utils.createPartFromString
 import com.example.qontak.commons.utils.formatPhoneNumber
@@ -84,6 +87,10 @@ class NewRoomChatFormActivity : AppCompatActivity() {
 
                         handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Successfully added transaction data!")
                         loadingState(false)
+
+                        val resultIntent = Intent()
+                        resultIntent.putExtra("$MAIN_ACTIVITY_REQUEST_CODE", SYNC_NOW)
+                        setResult(RESULT_OK, resultIntent)
 
                         finish()
 

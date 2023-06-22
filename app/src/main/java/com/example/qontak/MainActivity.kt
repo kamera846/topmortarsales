@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.Editable
-import android.text.TextUtils
 import android.text.TextWatcher
 import android.view.MenuItem
 import android.view.View
@@ -22,10 +21,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.qontak.adapter.ListContactRecyclerViewAdapter
+import com.example.qontak.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.example.qontak.commons.RESPONSE_STATUS_EMPTY
 import com.example.qontak.commons.RESPONSE_STATUS_OK
 import com.example.qontak.commons.SEARCH_CLOSE
 import com.example.qontak.commons.SEARCH_OPEN
+import com.example.qontak.commons.SYNC_NOW
 import com.example.qontak.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.example.qontak.commons.TAG_RESPONSE_CONTACT
 import com.example.qontak.commons.TOAST_SHORT
@@ -124,8 +125,8 @@ class MainActivity : AppCompatActivity() {
 
         toggleSearchEvent(SEARCH_CLOSE)
 
-        val intent = Intent(this, NewRoomChatFormActivity::class.java)
-        startActivity(intent)
+        val intent = Intent(this@MainActivity, NewRoomChatFormActivity::class.java)
+        startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
 
     }
 
@@ -327,6 +328,23 @@ class MainActivity : AppCompatActivity() {
 
         rvListChat.layoutManager = LinearLayoutManager(this@MainActivity)
         rvListChat.adapter = ListContactRecyclerViewAdapter(this@MainActivity, listItem)
+
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == MAIN_ACTIVITY_REQUEST_CODE) {
+
+            val resultData = data?.getStringExtra("$MAIN_ACTIVITY_REQUEST_CODE")
+
+            if (resultData == SYNC_NOW) {
+
+                getContacts()
+
+            }
+
+        }
 
     }
 

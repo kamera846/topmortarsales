@@ -12,6 +12,9 @@ const val GET_CONTACT = "contacts.php"
 const val SEND_MESSAGE = "messages.php"
 const val SEARCH_CONTACT = "contactsSearch.php"
 
+// Request Code
+const val MAIN_ACTIVITY_REQUEST_CODE = 111
+
 // Tag Log
 const val TAG_RESPONSE_CONTACT = "TAG RESPONSE CONTACT"
 const val TAG_RESPONSE_MESSAGE = "TAG RESPONSE MESSAGE"
@@ -29,3 +32,4 @@ const val ET_MESSAGE = "et_message"
 // Status
 const val SEARCH_OPEN = "search_open"
 const val SEARCH_CLOSE = "search_close"
+const val SYNC_NOW = "sync_now"
