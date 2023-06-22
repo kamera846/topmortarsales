@@ -7,13 +7,11 @@ import android.text.Editable
 import android.text.InputFilter
 import android.text.TextUtils
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -22,13 +20,12 @@ import com.example.qontak.commons.ET_NAME
 import com.example.qontak.commons.ET_PHONE
 import com.example.qontak.commons.RESPONSE_STATUS_OK
 import com.example.qontak.commons.TAG_RESPONSE_MESSAGE
+import com.example.qontak.commons.utils.createPartFromString
+import com.example.qontak.commons.utils.formatPhoneNumber
+import com.example.qontak.commons.utils.handleMessage
 import com.example.qontak.data.ApiService
 import com.example.qontak.data.HttpClient
-import com.example.qontak.model.MessageModel
 import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
 
 @SuppressLint("SetTextI18n")
 class NewRoomChatFormActivity : AppCompatActivity() {
@@ -85,21 +82,21 @@ class NewRoomChatFormActivity : AppCompatActivity() {
 
                     if (responseBody.status == RESPONSE_STATUS_OK) {
 
-                        handleMessage(TAG_RESPONSE_MESSAGE, "Successfully added transaction data!")
+                        handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Successfully added transaction data!")
                         loadingState(false)
 
                         finish()
 
                     } else {
 
-                        handleMessage(TAG_RESPONSE_MESSAGE, "Failed to send message!")
+                        handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Failed to send message!")
                         loadingState(false)
 
                     }
 
                 } else {
 
-                    handleMessage(TAG_RESPONSE_MESSAGE, "Failed to send message! Error: " + response.message())
+                    handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Failed to send message! Error: " + response.message())
                     loadingState(false)
 
                 }
@@ -107,7 +104,7 @@ class NewRoomChatFormActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                handleMessage(TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
 
             }
@@ -202,23 +199,6 @@ class NewRoomChatFormActivity : AppCompatActivity() {
 
     }
 
-    private fun handleMessage(tag: String, message: String) {
-
-        Log.d(tag, message)
-        Toast.makeText(this@NewRoomChatFormActivity, message, Toast.LENGTH_LONG).show()
-
-    }
-
-    private fun formatPhoneNumber(input: String): String {
-        val trimmedInput = input.trim()
-
-        return if (trimmedInput.startsWith("0") || trimmedInput.startsWith("8")) {
-            "62${trimmedInput.substring(1)}"
-        } else {
-            trimmedInput
-        }
-    }
-
     private fun updateTxtMaxLength(length: Int) {
         tvMaxMessage.text = "$length/$msgMaxLength"
     }
@@ -227,10 +207,6 @@ class NewRoomChatFormActivity : AppCompatActivity() {
 
         filters = arrayOf<InputFilter>(InputFilter.LengthFilter(maxLength))
 
-    }
-
-    private fun createPartFromString(string: String): RequestBody {
-        return string.toRequestBody("multipart/form-data".toMediaType())
     }
 
     private fun formValidation(phone: String, name: String, message: String): Boolean {

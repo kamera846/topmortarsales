@@ -7,7 +7,6 @@ import android.os.Looper
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
-import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.view.animation.Animation
@@ -18,7 +17,6 @@ import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.RelativeLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -30,16 +28,14 @@ import com.example.qontak.commons.SEARCH_CLOSE
 import com.example.qontak.commons.SEARCH_OPEN
 import com.example.qontak.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.example.qontak.commons.TAG_RESPONSE_CONTACT
-import com.example.qontak.commons.TOAST_LONG
 import com.example.qontak.commons.TOAST_SHORT
+import com.example.qontak.commons.utils.createPartFromString
+import com.example.qontak.commons.utils.handleMessage
 import com.example.qontak.data.ApiService
 import com.example.qontak.data.HttpClient
 import com.example.qontak.model.ContactModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
 
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
@@ -124,13 +120,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun handleMessage(tag: String, message: String, duration: Int = TOAST_LONG) {
-
-        Log.d(tag, message)
-        Toast.makeText(this@MainActivity, message, duration).show()
-
-    }
-
     private fun navigateAddNewRoom() {
 
         toggleSearchEvent(SEARCH_CLOSE)
@@ -200,21 +189,13 @@ class MainActivity : AppCompatActivity() {
                     if (searchTerm != previousSearchTerm) {
                         previousSearchTerm = searchTerm
 
-                        if (!TextUtils.isEmpty(searchTerm)) {
+                        searchRunnable?.let { searchHandler.removeCallbacks(it) }
 
-                            searchRunnable?.let { searchHandler.removeCallbacks(it) }
-
-                            searchRunnable = Runnable {
-                                searchContact(searchTerm)
-                            }
-
-                            searchRunnable?.let { searchHandler.postDelayed(it, searchDelayMillis) }
-
-                        } else {
-
-                            getContacts()
-
+                        searchRunnable = Runnable {
+                            searchContact(searchTerm)
                         }
+
+                        searchRunnable?.let { searchHandler.postDelayed(it, searchDelayMillis) }
 
                     }
 
@@ -269,7 +250,7 @@ class MainActivity : AppCompatActivity() {
                     }
                     else -> {
 
-                        handleMessage(TAG_RESPONSE_CONTACT, "Failed get data")
+                        handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed get data")
                         loadingState(false)
 
                     }
@@ -278,7 +259,7 @@ class MainActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                handleMessage(TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(false)
 
             }
@@ -317,7 +298,7 @@ class MainActivity : AppCompatActivity() {
                         }
                         else -> {
 
-                            handleMessage(TAG_RESPONSE_CONTACT, "Failed get data")
+                            handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed get data")
                             loadingState(false)
 
                         }
@@ -325,7 +306,7 @@ class MainActivity : AppCompatActivity() {
 
                 } else {
 
-                    handleMessage(TAG_RESPONSE_CONTACT, "Failed get data! Message: " + response.message())
+                    handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed get data! Message: " + response.message())
                     loadingState(false)
 
                 }
@@ -333,7 +314,7 @@ class MainActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                handleMessage(TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(false)
 
             }
@@ -349,10 +330,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun createPartFromString(string: String): RequestBody {
-        return string.toRequestBody("multipart/form-data".toMediaType())
-    }
-
     override fun onBackPressed() {
         if (isSearchActive) toggleSearchEvent(SEARCH_CLOSE)
         else {
@@ -363,7 +340,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             this@MainActivity.doubleBackToExitPressedOnce = true
-            handleMessage(TAG_ACTION_MAIN_ACTIVITY, "Tekan sekali lagi untuk keluar!", TOAST_SHORT)
+            handleMessage(this@MainActivity, TAG_ACTION_MAIN_ACTIVITY, "Tekan sekali lagi untuk keluar!", TOAST_SHORT)
 
             Handler(Looper.getMainLooper()).postDelayed({
                 doubleBackToExitPressedOnce = false
