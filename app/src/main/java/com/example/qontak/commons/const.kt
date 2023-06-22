@@ -1,5 +1,7 @@
 package com.example.qontak.commons
 
+import android.widget.Toast
+
 // Services
 const val BASE_URL = "https://saleswa.topmortarindonesia.com/"
 
@@ -11,6 +13,11 @@ const val SEND_MESSAGE = "messages.php"
 // Tag Log
 const val TAG_RESPONSE_CONTACT = "TAG RESPONSE CONTACT"
 const val TAG_RESPONSE_MESSAGE = "TAG RESPONSE MESSAGE"
+const val TAG_ACTION_MAIN_ACTIVITY = "TAG ACTION MAIN ACTIVITY"
+
+// Global
+const val TOAST_LONG = Toast.LENGTH_LONG
+const val TOAST_SHORT = Toast.LENGTH_SHORT
 
 // Props
 const val ET_PHONE = "et_phone"

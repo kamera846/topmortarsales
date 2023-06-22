@@ -25,7 +25,10 @@ import com.example.qontak.adapter.ListContactRecyclerViewAdapter
 import com.example.qontak.commons.RESPONSE_STATUS_OK
 import com.example.qontak.commons.SEARCH_CLOSE
 import com.example.qontak.commons.SEARCH_OPEN
+import com.example.qontak.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.example.qontak.commons.TAG_RESPONSE_CONTACT
+import com.example.qontak.commons.TOAST_LONG
+import com.example.qontak.commons.TOAST_SHORT
 import com.example.qontak.data.ApiService
 import com.example.qontak.data.HttpClient
 import com.example.qontak.model.ContactModel
@@ -46,11 +49,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var icCloseSearch: ImageView
     private lateinit var etSearchBox: EditText
 
+    // Global
+    private var doubleBackToExitPressedOnce = false
+
     // Initialize Search Engine
     private val searchDelayMillis = 500L
     private val searchHandler = Handler(Looper.getMainLooper())
     private var searchRunnable: Runnable? = null
     private var previousSearchTerm = ""
+    private var isSearchActive = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -145,10 +152,10 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun handleMessage(tag: String, message: String) {
+    private fun handleMessage(tag: String, message: String, duration: Int = TOAST_LONG) {
 
         Log.d(tag, message)
-        Toast.makeText(this@MainActivity, message, Toast.LENGTH_LONG).show()
+        Toast.makeText(this@MainActivity, message, duration).show()
 
     }
 
@@ -193,7 +200,9 @@ class MainActivity : AppCompatActivity() {
         val slideOutToLeft = AnimationUtils.loadAnimation(this@MainActivity, R.anim.fade_slide_out_to_left)
         slideOutToLeft.duration = animationDuration
 
-        if (state == SEARCH_OPEN) {
+        if (state == SEARCH_OPEN && !isSearchActive) {
+
+            isSearchActive = true
 
             llSearchBox.visibility = View.VISIBLE
 
@@ -235,7 +244,11 @@ class MainActivity : AppCompatActivity() {
 
             })
 
-        } else {
+        }
+
+        if (state == SEARCH_CLOSE && isSearchActive) {
+
+            isSearchActive = false
 
             llTitleBar.visibility = View.VISIBLE
 
@@ -250,6 +263,25 @@ class MainActivity : AppCompatActivity() {
 
         }
 
+    }
+
+    override fun onBackPressed() {
+        if (isSearchActive) toggleSearchEvent(SEARCH_CLOSE)
+        else {
+
+            if (doubleBackToExitPressedOnce) {
+                super.onBackPressed()
+                return
+            }
+
+            this@MainActivity.doubleBackToExitPressedOnce = true
+            handleMessage(TAG_ACTION_MAIN_ACTIVITY, "Tekan sekali lagi untuk keluar!", TOAST_SHORT)
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                doubleBackToExitPressedOnce = false
+            }, 2000)
+
+        }
     }
 
 }
