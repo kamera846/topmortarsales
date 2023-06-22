@@ -6,26 +6,25 @@
     tools:context=".MainActivity"
     android:theme="@style/Theme.AppCompat.NoActionBar">
 
-    <!-- Title Bar -->
-    <include
-        android:id="@+id/title_bar"
-        layout="@layout/component_title_bar"/>
-
-    <!-- Search Box -->
-    <include
-        android:visibility="gone"
-        android:id="@+id/search_box"
-        android:layout_below="@+id/title_bar"
+    <RelativeLayout
+        android:id="@+id/rl_header"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        layout="@layout/component_search_box"/>
+        android:layout_height="wrap_content">
 
-    <View
-        android:id="@+id/v_border"
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/border_color"
-        android:layout_below="@id/search_box"/>
+        <!-- Title Bar -->
+        <include
+            android:id="@+id/title_bar"
+            layout="@layout/component_title_bar"/>
+
+        <!-- Search Box -->
+        <include
+            android:visibility="gone"
+            android:id="@+id/search_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/component_search_box"/>
+
+    </RelativeLayout>
 
     <!-- Chat List -->
     <androidx.recyclerview.widget.RecyclerView
@@ -33,12 +32,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:listitem="@layout/item_chat_room"
-        android:layout_below="@id/v_border"/>
+        android:layout_below="@id/rl_header"/>
 
     <RelativeLayout
         android:visibility="gone"
         android:id="@+id/rl_loading"
-        android:layout_below="@+id/v_border"
+        android:layout_below="@+id/rl_header"
         android:padding="16dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">

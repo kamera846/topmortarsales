@@ -24,4 +24,5 @@
     <string name="et_hint">Enter your text here</string>
     <string name="sync_now">Sync Now</string>
     <string name="search">Search</string>
+    <string name="search_contact">Search Contact</string>
 </resources>
