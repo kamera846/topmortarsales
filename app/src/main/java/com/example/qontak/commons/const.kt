@@ -6,9 +6,11 @@ import android.widget.Toast
 const val BASE_URL = "https://saleswa.topmortarindonesia.com/"
 
 const val RESPONSE_STATUS_OK = "ok"
+const val RESPONSE_STATUS_EMPTY = "empty"
 
 const val GET_CONTACT = "contacts.php"
 const val SEND_MESSAGE = "messages.php"
+const val SEARCH_CONTACT = "contactsSearch.php"
 
 // Tag Log
 const val TAG_RESPONSE_CONTACT = "TAG RESPONSE CONTACT"

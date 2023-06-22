@@ -1,6 +1,7 @@
 package com.example.qontak.data
 
 import com.example.qontak.commons.GET_CONTACT
+import com.example.qontak.commons.SEARCH_CONTACT
 import com.example.qontak.commons.SEND_MESSAGE
 import com.example.qontak.model.MessageModel
 import com.example.qontak.response.ResponseContactList
@@ -21,5 +22,11 @@ interface ApiService {
         @Part("nomorhp") phone: RequestBody,
         @Part("message_body") message: RequestBody
     ): Response<ResponseMessage>
+
+    @Multipart
+    @POST(SEARCH_CONTACT)
+    suspend fun searchContact(
+        @Part("key") key: RequestBody
+    ): Response<ResponseContactList>
 
 }
