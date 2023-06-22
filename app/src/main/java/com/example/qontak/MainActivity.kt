@@ -162,6 +162,10 @@ class MainActivity : AppCompatActivity() {
     private fun showPopupMenu() {
         val popupMenu = PopupMenu(this@MainActivity, icMore)
         popupMenu.inflate(R.menu.option_main_menu)
+
+        // Hide search button
+        popupMenu.menu.findItem(R.id.option_search)?.isVisible = false
+
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
                 R.id.option_sync_now -> {

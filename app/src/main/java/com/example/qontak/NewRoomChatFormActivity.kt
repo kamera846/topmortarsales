@@ -43,7 +43,7 @@ class NewRoomChatFormActivity : AppCompatActivity() {
     private lateinit var etMessage: EditText
 
     private val msgMaxLines = 5
-    private val msgMaxLength = 50
+    private val msgMaxLength = 200
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -81,9 +81,9 @@ class NewRoomChatFormActivity : AppCompatActivity() {
 
                 if (response.isSuccessful) {
 
-                    val responseBdoy = response.body()!!
+                    val responseBody = response.body()!!
 
-                    if (responseBdoy.status == RESPONSE_STATUS_OK) {
+                    if (responseBody.status == RESPONSE_STATUS_OK) {
 
                         handleMessage(TAG_RESPONSE_MESSAGE, "Successfully added transaction data!")
                         loadingState(false)
