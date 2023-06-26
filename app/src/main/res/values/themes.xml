@@ -1,6 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+
     <!-- Base application theme. -->
-    <style name="Theme.Qontak" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="Theme.TopMortarSales" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryVariant">@color/primary</item>
@@ -12,5 +13,27 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+        <item name="android:background">@color/white</item>
     </style>
+
+    <!-- Title bar theme. -->
+    <style name="Theme.TopMortarSales.TitleBar" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="android:background">@color/primary</item>
+    </style>
+
+    <!-- Base line theme. -->
+    <style name="Theme.TopMortarSales.BaseLine" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="android:background">@color/light</item>
+    </style>
+
+    <!-- Base text title theme. -->
+    <style name="Theme.TopMortarSales.BaseTextTitle" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <!-- Base text description theme. -->
+    <style name="Theme.TopMortarSales.BaseTextDescription" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="android:textColor">@color/black_200</item>
+    </style>
+
 </resources>

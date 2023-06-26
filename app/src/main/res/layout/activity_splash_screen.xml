@@ -3,17 +3,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/white"
+    android:background="@color/primary"
     tools:context=".SplashScreenActivity">
 
     <ImageView
         android:id="@+id/logo"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="250dp"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
         android:scaleType="fitCenter"
-        android:src="@drawable/logo_horizontal"
+        android:background="@color/primary"
+        android:src="@mipmap/logo_light_horizontal"
         android:contentDescription="@string/logo_horizontal"/>
 
 </RelativeLayout>

@@ -1,16 +1,39 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+
     <!-- Base application theme. -->
-    <style name="Theme.Qontak" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="Theme.TopMortarSales" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/primary</item>
-        <item name="colorPrimaryVariant">@color/primary</item>
-        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorPrimary">@color/black_200</item>
+        <item name="colorPrimaryVariant">@color/black_200</item>
+        <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/primary</item>
         <item name="colorSecondaryVariant">@color/primary</item>
-        <item name="colorOnSecondary">@color/black</item>
+        <item name="colorOnSecondary">@color/white</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+        <item name="android:background">@color/black_300</item>
     </style>
+
+    <!-- Title bar theme. -->
+    <style name="Theme.TopMortarSales.TitleBar" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="android:background">@color/black_200</item>
+    </style>
+
+    <!-- Base line theme. -->
+    <style name="Theme.TopMortarSales.BaseLine" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="android:background">@color/black_600</item>
+    </style>
+
+    <!-- Base text title theme. -->
+    <style name="Theme.TopMortarSales.BaseTextTitle" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <!-- Base text description theme. -->
+    <style name="Theme.TopMortarSales.BaseTextDescription" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="android:textColor">@color/black_300</item>
+    </style>
+
 </resources>

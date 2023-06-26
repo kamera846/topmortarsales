@@ -1,15 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#3b82f6</color>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
+    <color name="primary">#D81920</color>
+    <color name="primary_200">#e14336</color>
+    <color name="primary_300">#e95f4d</color>
+    <color name="primary_400">#f07864</color>
+    <color name="primary_500">#f6907c</color>
+    <color name="primary_600">#fba695</color>
+    <color name="black">#030001</color>
+    <color name="black_200">#1f1e1e</color>
+    <color name="black_300">#373536</color>
+    <color name="black_400">#504e4f</color>
+    <color name="black_500">#6a6969</color>
+    <color name="black_600">#868585</color>
+    <color name="mixed">#1e0b06</color>
+    <color name="mixed_200">#1f1e1e</color>
+    <color name="mixed_300">#373536</color>
+    <color name="mixed_400">#504e4f</color>
+    <color name="mixed_500">#6a6969</color>
+    <color name="mixed_600">#868585</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="border_color">#d0d6dd</color>
-    <color name="txt_title">#2d3d54</color>
-    <color name="txt_body">#626b79</color>
-    <color name="txt_danger">#EF5350</color>
+    <color name="light">#d0d6dd</color>
 </resources>

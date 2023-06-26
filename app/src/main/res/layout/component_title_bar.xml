@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/primary"
+    android:theme="@style/Theme.TopMortarSales.TitleBar"
     android:orientation="vertical">
 
     <LinearLayout
@@ -55,6 +55,6 @@
         android:id="@+id/v_border"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/border_color"/>
+        android:theme="@style/Theme.TopMortarSales.BaseLine"/>
 
 </LinearLayout>

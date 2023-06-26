@@ -24,8 +24,8 @@
           android:layout_width="0dp"
           android:layout_height="wrap_content"
           android:layout_weight="1"
-          android:textColor="@color/txt_title"
-          android:textColorHint="@color/border_color"
+          android:textColor="@color/black_200"
+          android:textColorHint="@color/black_600"
           android:hint="@string/search_contact"
           android:inputType="none"
           android:autofillHints="@string/search_contact"
@@ -48,6 +48,5 @@
        android:id="@+id/v_border"
        android:layout_width="match_parent"
        android:layout_height="1dp"
-       android:background="@color/border_color"/>
-
+       android:theme="@style/Theme.TopMortarSales.BaseLine" />
 </LinearLayout>
