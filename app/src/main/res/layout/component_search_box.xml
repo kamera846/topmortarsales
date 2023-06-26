@@ -7,7 +7,6 @@
    <LinearLayout
        android:layout_width="match_parent"
        android:layout_height="wrap_content"
-       android:background="@color/white"
        android:gravity="center_vertical"
        android:padding="16dp"
        android:orientation="horizontal">
@@ -24,14 +23,14 @@
           android:layout_width="0dp"
           android:layout_height="wrap_content"
           android:layout_weight="1"
-          android:textColor="@color/black_200"
           android:textColorHint="@color/black_600"
           android:hint="@string/search_contact"
           android:inputType="none"
           android:autofillHints="@string/search_contact"
           android:textSize="16sp"
           android:paddingVertical="8dp"
-          android:background="@color/white"
+          android:background="@drawable/et_search_background"
+          android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
           android:outlineProvider="none"/>
 
       <ImageView

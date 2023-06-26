@@ -23,7 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/input_phon_number_label"
-            android:textColor="@color/black"
+            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
             android:textSize="16sp"
             android:textStyle="bold"
             android:layout_marginBottom="8dp"/>
@@ -34,8 +34,8 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginBottom="16dp"
-            android:textColor="@color/black_200"
-            android:textColorHint="@color/black_500"
+            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+            android:textColorHint="@color/black_600"
             android:hint="@string/input_phon_number_placeholder"
             android:inputType="phone"
             android:autofillHints="@string/input_phon_number_placeholder"
@@ -50,7 +50,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/input_name_label"
-            android:textColor="@color/black"
+            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
             android:textSize="16sp"
             android:textStyle="bold"
             android:layout_marginBottom="8dp"/>
@@ -61,7 +61,7 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginBottom="16dp"
-            android:textColor="@color/black_200"
+            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
             android:textColorHint="@color/black_600"
             android:hint="@string/input_name_placeholder"
             android:inputType="textCapWords"
@@ -77,7 +77,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/input_message_label"
-            android:textColor="@color/black"
+            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
             android:textSize="16sp"
             android:textStyle="bold"
             android:layout_marginBottom="8dp"/>
@@ -89,7 +89,7 @@
             android:layout_height="wrap_content"
             android:minHeight="48dp"
             android:layout_marginBottom="4dp"
-            android:textColor="@color/black_200"
+            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
             android:textColorHint="@color/black_600"
             android:maxLines="3"
             android:inputType="textMultiLine"
@@ -108,7 +108,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:layout_marginBottom="16dp"
-            android:textColor="@color/primary_200"
+            android:textColor="@color/primary"
             android:text="@string/message_length" />
 
         <!-- Submit -->
@@ -118,7 +118,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="end"
             android:layout_marginTop="16dp"
-            android:backgroundTint="@color/primary"
             android:text="@string/btn_submit_new_chat_room" />
 
     </LinearLayout>

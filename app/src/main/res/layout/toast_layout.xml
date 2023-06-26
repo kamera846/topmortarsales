@@ -6,7 +6,7 @@
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:padding="12dp"
-    android:background="@drawable/et_background">
+    android:background="@drawable/toast_background">
 
     <ImageView
         android:id="@+id/toast_icon"

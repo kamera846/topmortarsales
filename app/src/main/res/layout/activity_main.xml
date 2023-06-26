@@ -13,7 +13,7 @@
         android:layout_height="wrap_content">
 
         <!-- Title Bar -->
-        t<include
+        <include
             android:id="@+id/title_bar"
             layout="@layout/component_title_bar"/>
 
