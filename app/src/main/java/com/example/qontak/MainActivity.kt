@@ -1,5 +1,6 @@
 package com.example.qontak
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -12,6 +13,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -172,17 +174,13 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
     private fun blurSearchBox(event: MotionEvent): Boolean {
 
-        return when (event.action) {
-
-            MotionEvent.ACTION_DOWN -> {
-                if (isSearchActive && TextUtils.isEmpty(etSearchBox.text)) toggleSearchEvent(SEARCH_CLOSE)
-                true
+        if (isSearchActive && TextUtils.isEmpty(etSearchBox.text)) {
+            if (event.action == MotionEvent.ACTION_DOWN || event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_SCROLL || event.action == MotionEvent.ACTION_MOVE) {
+                toggleSearchEvent(SEARCH_CLOSE)
+                return true
             }
-
-            else -> false
-
         }
-
+        return false
     }
 
     private fun toggleSearchEvent(state: String) {
@@ -202,6 +200,13 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         val slideOutToLeft = AnimationUtils.loadAnimation(this@MainActivity, R.anim.fade_slide_out_to_left)
         slideOutToLeft.duration = animationDuration
 
+        etSearchBox.setOnFocusChangeListener { _, hasFocus ->
+            run {
+                if (hasFocus) showKeyboard()
+                else hideKeyboard()
+            }
+        }
+
         if (state == SEARCH_OPEN && !isSearchActive) {
 
             llSearchBox.visibility = View.VISIBLE
@@ -211,6 +216,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
             Handler().postDelayed({
                 llTitleBar.visibility = View.GONE
+                etSearchBox.requestFocus()
                 isSearchActive = true
             }, animationDuration)
 
@@ -258,6 +264,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
             Handler().postDelayed({
                 llSearchBox.visibility = View.GONE
+                etSearchBox.clearFocus()
                 isSearchActive = false
             }, animationDuration)
 
@@ -281,6 +288,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
             } else {
 
                 if (icClearSearch.visibility == View.GONE) {
+
+                    etSearchBox.clearFocus()
 
                     icClearSearch.startAnimation(fadeIn)
                     Handler().postDelayed({
@@ -398,6 +407,16 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         rvListChat.layoutManager = LinearLayoutManager(this@MainActivity)
         rvListChat.adapter = rvAdapter
 
+    }
+
+    private fun showKeyboard() {
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(etSearchBox, InputMethodManager.SHOW_IMPLICIT)
+    }
+
+    private fun hideKeyboard() {
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(etSearchBox.windowToken, 0)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
