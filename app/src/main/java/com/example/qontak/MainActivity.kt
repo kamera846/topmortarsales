@@ -23,6 +23,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.qontak.adapter.ListContactRecyclerViewAdapter
+import com.example.qontak.adapter.ListContactRecyclerViewAdapter.ItemClickListener
+import com.example.qontak.commons.ET_NAME
+import com.example.qontak.commons.ET_PHONE
 import com.example.qontak.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.example.qontak.commons.RESPONSE_STATUS_EMPTY
 import com.example.qontak.commons.RESPONSE_STATUS_OK
@@ -42,7 +45,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ItemClickListener {
 
     private lateinit var scaleAnimation: Animation
 
@@ -132,11 +135,17 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun navigateAddNewRoom() {
+    private fun navigateAddNewRoom(data: ContactModel? = null) {
 
         toggleSearchEvent(SEARCH_CLOSE)
 
         val intent = Intent(this@MainActivity, NewRoomChatFormActivity::class.java)
+
+        if (data != null) {
+            intent.putExtra(ET_NAME, data.nama)
+            intent.putExtra(ET_PHONE, data.nomorhp)
+        }
+
         startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
 
     }
@@ -384,9 +393,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setRecyclerView(listItem: ArrayList<ContactModel>) {
+        val rvAdapter = ListContactRecyclerViewAdapter(listItem, this@MainActivity)
 
         rvListChat.layoutManager = LinearLayoutManager(this@MainActivity)
-        rvListChat.adapter = ListContactRecyclerViewAdapter(this@MainActivity, listItem)
+        rvListChat.adapter = rvAdapter
 
     }
 
@@ -424,6 +434,10 @@ class MainActivity : AppCompatActivity() {
             }, 2000)
 
         }
+    }
+
+    override fun onItemClick(data: ContactModel?) {
+        navigateAddNewRoom(data)
     }
 
 }
