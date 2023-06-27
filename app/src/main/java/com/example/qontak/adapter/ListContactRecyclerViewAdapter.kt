@@ -1,21 +1,18 @@
 package com.example.qontak.adapter
 
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.qontak.NewRoomChatFormActivity
 import com.example.qontak.R
-import com.example.qontak.commons.ET_NAME
-import com.example.qontak.commons.ET_PHONE
-import com.example.qontak.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.example.qontak.model.ContactModel
 
-class ListContactRecyclerViewAdapter(private val ctx: Context, private val chatList: ArrayList<ContactModel>) : RecyclerView.Adapter<ListContactRecyclerViewAdapter.ChatViewHolder>() {
+class ListContactRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<ListContactRecyclerViewAdapter.ChatViewHolder>() {
+
+    interface ItemClickListener {
+        fun onItemClick(data: ContactModel? = null)
+    }
 
     inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -48,12 +45,10 @@ class ListContactRecyclerViewAdapter(private val ctx: Context, private val chatL
 
         holder.itemView.setOnClickListener {
 
-            val intent = Intent(ctx, NewRoomChatFormActivity::class.java)
-
-            intent.putExtra(ET_NAME, chatItem.nama)
-            intent.putExtra(ET_PHONE, chatItem.nomorhp)
-
-            if (ctx is Activity) ctx.startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
+            if (position != RecyclerView.NO_POSITION) {
+                val data = chatList[position]
+                itemClickListener.onItemClick(data)
+            }
 
         }
 

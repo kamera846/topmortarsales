@@ -1,5 +1,6 @@
 package com.example.qontak
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -12,6 +13,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -23,6 +25,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.qontak.adapter.ListContactRecyclerViewAdapter
+import com.example.qontak.adapter.ListContactRecyclerViewAdapter.ItemClickListener
+import com.example.qontak.commons.ET_NAME
+import com.example.qontak.commons.ET_PHONE
 import com.example.qontak.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.example.qontak.commons.RESPONSE_STATUS_EMPTY
 import com.example.qontak.commons.RESPONSE_STATUS_OK
@@ -42,7 +47,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ItemClickListener {
 
     private lateinit var scaleAnimation: Animation
 
@@ -132,11 +137,17 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun navigateAddNewRoom() {
+    private fun navigateAddNewRoom(data: ContactModel? = null) {
 
         toggleSearchEvent(SEARCH_CLOSE)
 
         val intent = Intent(this@MainActivity, NewRoomChatFormActivity::class.java)
+
+        if (data != null) {
+            intent.putExtra(ET_NAME, data.nama)
+            intent.putExtra(ET_PHONE, data.nomorhp)
+        }
+
         startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
 
     }
@@ -163,17 +174,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun blurSearchBox(event: MotionEvent): Boolean {
 
-        return when (event.action) {
-
-            MotionEvent.ACTION_DOWN -> {
-                if (isSearchActive && TextUtils.isEmpty(etSearchBox.text)) toggleSearchEvent(SEARCH_CLOSE)
-                true
+        if (isSearchActive && TextUtils.isEmpty(etSearchBox.text)) {
+            if (event.action == MotionEvent.ACTION_DOWN || event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_SCROLL || event.action == MotionEvent.ACTION_MOVE) {
+                toggleSearchEvent(SEARCH_CLOSE)
+                return true
             }
-
-            else -> false
-
         }
-
+        return false
     }
 
     private fun toggleSearchEvent(state: String) {
@@ -193,6 +200,13 @@ class MainActivity : AppCompatActivity() {
         val slideOutToLeft = AnimationUtils.loadAnimation(this@MainActivity, R.anim.fade_slide_out_to_left)
         slideOutToLeft.duration = animationDuration
 
+        etSearchBox.setOnFocusChangeListener { _, hasFocus ->
+            run {
+                if (hasFocus) showKeyboard()
+                else hideKeyboard()
+            }
+        }
+
         if (state == SEARCH_OPEN && !isSearchActive) {
 
             llSearchBox.visibility = View.VISIBLE
@@ -202,6 +216,7 @@ class MainActivity : AppCompatActivity() {
 
             Handler().postDelayed({
                 llTitleBar.visibility = View.GONE
+                etSearchBox.requestFocus()
                 isSearchActive = true
             }, animationDuration)
 
@@ -249,6 +264,7 @@ class MainActivity : AppCompatActivity() {
 
             Handler().postDelayed({
                 llSearchBox.visibility = View.GONE
+                etSearchBox.clearFocus()
                 isSearchActive = false
             }, animationDuration)
 
@@ -272,6 +288,8 @@ class MainActivity : AppCompatActivity() {
             } else {
 
                 if (icClearSearch.visibility == View.GONE) {
+
+                    etSearchBox.clearFocus()
 
                     icClearSearch.startAnimation(fadeIn)
                     Handler().postDelayed({
@@ -384,10 +402,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setRecyclerView(listItem: ArrayList<ContactModel>) {
+        val rvAdapter = ListContactRecyclerViewAdapter(listItem, this@MainActivity)
 
         rvListChat.layoutManager = LinearLayoutManager(this@MainActivity)
-        rvListChat.adapter = ListContactRecyclerViewAdapter(this@MainActivity, listItem)
+        rvListChat.adapter = rvAdapter
 
+    }
+
+    private fun showKeyboard() {
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.showSoftInput(etSearchBox, InputMethodManager.SHOW_IMPLICIT)
+    }
+
+    private fun hideKeyboard() {
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(etSearchBox.windowToken, 0)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -424,6 +453,10 @@ class MainActivity : AppCompatActivity() {
             }, 2000)
 
         }
+    }
+
+    override fun onItemClick(data: ContactModel?) {
+        navigateAddNewRoom(data)
     }
 
 }
