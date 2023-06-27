@@ -10,7 +10,7 @@ android {
     defaultConfig {
         archivesBaseName "Top Mortar Sales"
         applicationId "com.example.qontak"
-        minSdk 29
+        minSdk 24
         targetSdk 33
         versionCode 1
         versionName "1.0"
@@ -18,17 +18,29 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        release {
+            keyAlias 'topmortarsalesrelease'
+            keyPassword 'topmortarsalesrelease'
+            storeFile file('/Users/rafliram/Projects/ProjectMobile/Qontak/app/build/keystores/release-keystore')
+            storePassword 'topmortarsalesrelease'
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             archivesBaseName "Top Mortar Sales"
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = '1.8'
     }
