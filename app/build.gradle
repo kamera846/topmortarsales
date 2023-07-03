@@ -22,7 +22,7 @@ android {
         release {
             keyAlias 'topmortarsalesrelease'
             keyPassword 'topmortarsalesrelease'
-            storeFile file('/Users/rafliram/Projects/ProjectMobile/topmortarsales/app/build/keystores/release-keystore')
+            storeFile file('/Users/rafliram/Projects/ProjectMobile/topmortarsales/app/keystores/release-keystore')
             storePassword 'topmortarsalesrelease'
         }
     }
