@@ -1,8 +1,8 @@
-package com.example.qontak.commons.utils
+package com.topmortar.topmortarsales.commons.utils
 
 import android.content.Context
 import android.util.Log
-import com.example.qontak.commons.TOAST_LONG
+import com.topmortar.topmortarsales.commons.TOAST_LONG
 
 fun handleMessage(context: Context, tag: String, message: String, duration: Int = TOAST_LONG) {
 

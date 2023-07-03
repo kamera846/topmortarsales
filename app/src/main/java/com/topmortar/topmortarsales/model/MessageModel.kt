@@ -1,4 +1,4 @@
-package com.example.qontak.model
+package com.topmortar.topmortarsales.model
 
 data class MessageModel(
     val nama: String,

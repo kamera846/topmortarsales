@@ -1,4 +1,4 @@
-package com.example.qontak.response
+package com.topmortar.topmortarsales.response
 
 data class ResponseMessage (
     val response: Int,

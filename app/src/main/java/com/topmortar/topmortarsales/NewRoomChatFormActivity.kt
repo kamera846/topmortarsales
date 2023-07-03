@@ -1,4 +1,4 @@
-package com.example.qontak
+package com.topmortar.topmortarsales
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -16,18 +16,18 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import com.example.qontak.commons.ET_MESSAGE
-import com.example.qontak.commons.ET_NAME
-import com.example.qontak.commons.ET_PHONE
-import com.example.qontak.commons.MAIN_ACTIVITY_REQUEST_CODE
-import com.example.qontak.commons.RESPONSE_STATUS_OK
-import com.example.qontak.commons.SYNC_NOW
-import com.example.qontak.commons.TAG_RESPONSE_MESSAGE
-import com.example.qontak.commons.utils.createPartFromString
-import com.example.qontak.commons.utils.formatPhoneNumber
-import com.example.qontak.commons.utils.handleMessage
-import com.example.qontak.data.ApiService
-import com.example.qontak.data.HttpClient
+import com.topmortar.topmortarsales.commons.ET_MESSAGE
+import com.topmortar.topmortarsales.commons.ET_NAME
+import com.topmortar.topmortarsales.commons.ET_PHONE
+import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.SYNC_NOW
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.utils.createPartFromString
+import com.topmortar.topmortarsales.commons.utils.formatPhoneNumber
+import com.topmortar.topmortarsales.commons.utils.handleMessage
+import com.topmortar.topmortarsales.data.ApiService
+import com.topmortar.topmortarsales.data.HttpClient
 import kotlinx.coroutines.launch
 
 @SuppressLint("SetTextI18n")

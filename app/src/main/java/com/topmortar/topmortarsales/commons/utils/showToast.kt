@@ -1,10 +1,10 @@
-package com.example.qontak.commons.utils
+package com.topmortar.topmortarsales.commons.utils
 
 import android.content.Context
 import android.view.LayoutInflater
 import android.widget.TextView
 import android.widget.Toast
-import com.example.qontak.R
+import com.topmortar.topmortarsales.R
 
 fun showToast(context: Context, message: String, duration: Int = Toast.LENGTH_SHORT) {
     val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
