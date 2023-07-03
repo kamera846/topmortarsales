@@ -26,4 +26,9 @@
     <string name="search">Search</string>
     <string name="search_contact">Search contact...</string>
     <string name="failed_request">Failed request!</string>
+    <string name="card_auth_title">Authentification</string>
+    <string name="text_email">Email</string>
+    <string name="text_password">Password</string>
+    <string name="text_login">Login</string>
+    <string name="text_copyright">© 2023 Top Mortar Sales</string>
 </resources>

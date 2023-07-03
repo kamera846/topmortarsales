@@ -41,7 +41,7 @@
             android:autofillHints="@string/input_phon_number_placeholder"
             android:textSize="14sp"
             android:background="@drawable/et_background"
-            android:padding="8dp"
+            android:padding="12dp"
             android:outlineProvider="none"/>
 
         <!-- Name -->
@@ -68,7 +68,7 @@
             android:autofillHints="@string/input_name_placeholder"
             android:textSize="14sp"
             android:background="@drawable/et_background"
-            android:padding="8dp"
+            android:padding="12dp"
             android:outlineProvider="none" />
 
         <!-- Message -->
@@ -98,7 +98,7 @@
             android:textSize="14sp"
             android:maxLength="30"
             android:background="@drawable/et_background"
-            android:padding="8dp"
+            android:padding="12dp"
             android:outlineProvider="none"/>
 
         <!-- Max Text Length -->
