@@ -44,6 +44,7 @@ import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.ContactModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.topmortar.topmortarsales.commons.utils.SessionManager
 import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
@@ -64,6 +65,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     private lateinit var etSearchBox: EditText
 
     // Global
+    private lateinit var sessionManager: SessionManager
     private var doubleBackToExitPressedOnce = false
 
     // Initialize Search Engine
@@ -78,6 +80,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
+        sessionManager = SessionManager(this@MainActivity)
+
         setContentView(R.layout.activity_main)
 
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
@@ -86,6 +90,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         initClickHandler()
         loadingState(true)
         getContacts()
+
+        handleMessage(this, TAG_ACTION_MAIN_ACTIVITY, "${ sessionManager.userKind() }")
 
     }
 

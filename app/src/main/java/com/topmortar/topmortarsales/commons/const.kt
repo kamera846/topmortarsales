@@ -30,7 +30,13 @@ const val ET_NAME = "et_name"
 const val ET_MESSAGE = "et_message"
 
 // Status
+const val LOGGED_IN = true
+const val LOGGED_OUT = false
 const val SEARCH_OPEN = "search_open"
 const val SEARCH_CLOSE = "search_close"
 const val SEARCH_CLEAR = "search_clear"
 const val SYNC_NOW = "sync_now"
+
+// User Kind
+const val USER_KIND_ADMIN = "user_kind_admin"
+const val USER_KIND_SALES = "user_kind_sales"
