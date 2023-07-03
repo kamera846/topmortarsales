@@ -13,7 +13,7 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
-        <item name="android:background">@color/black_200</item>
+        <item name="android:windowBackground">@color/black_200</item>
     </style>
 
     <!-- Title bar theme. -->

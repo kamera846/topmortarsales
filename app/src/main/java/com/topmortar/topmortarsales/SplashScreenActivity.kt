@@ -1,4 +1,4 @@
-package com.example.qontak
+package com.topmortar.topmortarsales
 
 import android.content.Intent
 import android.os.Bundle

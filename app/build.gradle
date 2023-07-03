@@ -4,12 +4,12 @@ plugins {
 }
 
 android {
-    namespace 'com.example.qontak'
+    namespace 'com.topmortar.topmortarsales'
     compileSdk 33
 
     defaultConfig {
         archivesBaseName "Top Mortar Sales"
-        applicationId "com.example.qontak"
+        applicationId "com.topmortar.topmortarsales"
         minSdk 24
         targetSdk 33
         versionCode 1
@@ -22,7 +22,7 @@ android {
         release {
             keyAlias 'topmortarsalesrelease'
             keyPassword 'topmortarsalesrelease'
-            storeFile file('/Users/rafliram/Projects/ProjectMobile/Qontak/app/build/keystores/release-keystore')
+            storeFile file('/Users/rafliram/Projects/ProjectMobile/topmortarsales/app/build/keystores/release-keystore')
             storePassword 'topmortarsalesrelease'
         }
     }

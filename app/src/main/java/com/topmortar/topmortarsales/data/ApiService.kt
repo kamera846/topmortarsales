@@ -1,11 +1,10 @@
-package com.example.qontak.data
+package com.topmortar.topmortarsales.data
 
-import com.example.qontak.commons.GET_CONTACT
-import com.example.qontak.commons.SEARCH_CONTACT
-import com.example.qontak.commons.SEND_MESSAGE
-import com.example.qontak.model.MessageModel
-import com.example.qontak.response.ResponseContactList
-import com.example.qontak.response.ResponseMessage
+import com.topmortar.topmortarsales.commons.GET_CONTACT
+import com.topmortar.topmortarsales.commons.SEARCH_CONTACT
+import com.topmortar.topmortarsales.commons.SEND_MESSAGE
+import com.topmortar.topmortarsales.response.ResponseContactList
+import com.topmortar.topmortarsales.response.ResponseMessage
 import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.*

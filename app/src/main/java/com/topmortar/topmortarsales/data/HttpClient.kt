@@ -1,6 +1,6 @@
-package com.example.qontak.data
+package com.topmortar.topmortarsales.data
 
-import com.example.qontak.commons.BASE_URL
+import com.topmortar.topmortarsales.commons.BASE_URL
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

@@ -1,12 +1,12 @@
-package com.example.qontak.adapter
+package com.topmortar.topmortarsales.adapter
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.qontak.R
-import com.example.qontak.model.ContactModel
+import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.model.ContactModel
 
 class ListContactRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<ListContactRecyclerViewAdapter.ChatViewHolder>() {
 
