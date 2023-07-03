@@ -44,6 +44,7 @@ import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.ContactModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import kotlinx.coroutines.launch
 
@@ -171,6 +172,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
                 }
                 R.id.option_search -> {
                     toggleSearchEvent(SEARCH_OPEN)
+                    true
+                }
+                R.id.option_logout -> {
+                    logoutHandler()
                     true
                 }
                 else -> false
@@ -424,6 +429,14 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     private fun hideKeyboard() {
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(etSearchBox.windowToken, 0)
+    }
+
+    private fun logoutHandler() {
+        sessionManager.setLoggedIn(LOGGED_OUT)
+        sessionManager.setUserKind("")
+        val intent = Intent(this@MainActivity, SplashScreenActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
