@@ -37,7 +37,7 @@ object AppUpdateHelper {
 
     private fun openPlayStore(context: Context) {
         val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse("market://details?id=${context.packageName}")
+        intent.data = Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}")
         context.startActivity(intent)
     }
 }
