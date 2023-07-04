@@ -463,8 +463,9 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     override fun onResume() {
         super.onResume()
 
-        // Panggil AsyncTask untuk memeriksa versi aplikasi terbaru
+        // Check apps for update
         AppUpdateHelper.checkForUpdates(this)
+
     }
 
 }
