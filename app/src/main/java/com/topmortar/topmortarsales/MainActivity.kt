@@ -46,6 +46,7 @@ import com.topmortar.topmortarsales.model.ContactModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
 import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
@@ -477,6 +478,14 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
     override fun onItemClick(data: ContactModel?) {
         navigateAddNewRoom(data)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        // Check apps for update
+        AppUpdateHelper.checkForUpdates(this)
+
     }
 
 }
