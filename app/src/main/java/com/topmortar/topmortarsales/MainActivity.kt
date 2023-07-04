@@ -20,6 +20,7 @@ import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -433,11 +434,20 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     }
 
     private fun logoutHandler() {
-        sessionManager.setLoggedIn(LOGGED_OUT)
-        sessionManager.setUserKind("")
-        val intent = Intent(this@MainActivity, SplashScreenActivity::class.java)
-        startActivity(intent)
-        finish()
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Logout Confirmation")
+            .setMessage("Are you sure you want to log out?")
+            .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+            .setPositiveButton("Yes") { dialog, _ ->
+                dialog.dismiss()
+                sessionManager.setLoggedIn(LOGGED_OUT)
+                sessionManager.setUserKind("")
+                val intent = Intent(this@MainActivity, SplashScreenActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
+        val dialog = builder.create()
+        dialog.show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
