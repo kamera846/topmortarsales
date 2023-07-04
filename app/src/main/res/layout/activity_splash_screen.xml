@@ -1,74 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/primary"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_vertical"
+    android:orientation="vertical"
     tools:context=".SplashScreenActivity">
 
     <ImageView
         android:id="@+id/logo"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginVertical="16dp"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:scaleType="fitCenter"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:layout_marginVertical="48dp"
         android:background="@color/primary"
-        android:src="@drawable/logo_light_horizontal"
-        android:contentDescription="@string/logo_horizontal"/>
+        android:contentDescription="@string/logo_horizontal"
+        android:scaleType="fitCenter"
+        android:src="@drawable/logo_light_horizontal" />
 
     <LinearLayout
-        android:visibility="gone"
         android:id="@+id/card_auth"
-        android:layout_below="@+id/logo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
+        android:gravity="end"
         android:background="@drawable/background_auth"
-        android:layout_alignParentBottom="true"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="48dp"
+        android:visibility="gone">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="48dp"
             android:text="@string/card_auth_title"
-            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
-            android:textSize="20sp"
-            android:textAllCaps="true"
-            android:textStyle="bold"
             android:textAlignment="center"
-            android:layout_marginBottom="32dp"/>
+            android:textAllCaps="true"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
 
         <!-- Email Address -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="24dp"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/tv_email_address"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
                 android:text="@string/text_email"
-                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="8dp"/>
+                android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
 
             <EditText
-                android:labelFor="@+id/tv_email_address"
                 android:id="@+id/et_email_address"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-                android:textColorHint="@color/black_600"
-                android:inputType="textEmailAddress"
-                android:textSize="14sp"
                 android:background="@drawable/et_background"
+                android:inputType="textEmailAddress"
+                android:labelFor="@+id/tv_email_address"
+                android:outlineProvider="none"
                 android:padding="12dp"
-                android:outlineProvider="none"/>
+                android:textColorHint="@color/black_600"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
         </LinearLayout>
 
@@ -76,18 +77,18 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
+            android:layout_marginBottom="48dp"
             android:orientation="vertical">
 
             <TextView
                 android:id="@+id/tv_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
                 android:text="@string/text_password"
-                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="8dp"/>
+                android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -95,18 +96,18 @@
                 android:background="@drawable/et_background">
 
                 <EditText
-                    android:labelFor="@+id/tv_password"
                     android:id="@+id/et_password"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
-                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-                    android:textColorHint="@color/black_600"
-                    android:inputType="textPassword"
                     android:autofillHints="johndoe@gmail.com"
                     android:background="@android:color/transparent"
-                    android:textSize="14sp"
+                    android:inputType="textPassword"
+                    android:labelFor="@+id/tv_password"
+                    android:outlineProvider="none"
                     android:padding="12dp"
-                    android:outlineProvider="none"/>
+                    android:textColorHint="@color/black_600"
+                    android:textSize="16sp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
                 <RelativeLayout
                     android:id="@+id/ic_eye_container"
@@ -117,18 +118,18 @@
                     android:layout_marginHorizontal="12dp">
 
                     <ImageView
-                        android:visibility="visible"
                         android:id="@+id/ic_eye_close"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:src="@drawable/eye_close_fill"/>
+                        android:src="@drawable/eye_off_line"
+                        android:visibility="visible" />
 
                     <ImageView
-                        android:visibility="gone"
                         android:id="@+id/ic_eye_show"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:src="@drawable/eye_fill"/>
+                        android:src="@drawable/eye_line"
+                        android:visibility="gone" />
 
                 </RelativeLayout>
 
@@ -145,19 +146,22 @@
                 android:id="@+id/btn_login"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                android:padding="16dp"
-                android:text="@string/text_login"/>
+                android:layout_marginBottom="24dp"
+                android:padding="12dp"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:text="@string/text_login" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textAlignment="center"
                 android:text="@string/text_copyright"
-                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+                android:textAlignment="center"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
         </LinearLayout>
 
     </LinearLayout>
 
-</RelativeLayout>
+</LinearLayout>
