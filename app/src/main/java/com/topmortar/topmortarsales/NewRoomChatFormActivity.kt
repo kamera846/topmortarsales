@@ -85,7 +85,7 @@ class NewRoomChatFormActivity : AppCompatActivity() {
 
                     if (responseBody.status == RESPONSE_STATUS_OK) {
 
-                        handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Successfully added transaction data!")
+                        handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Successfully added data!")
                         loadingState(false)
 
                         val resultIntent = Intent()
@@ -187,6 +187,7 @@ class NewRoomChatFormActivity : AppCompatActivity() {
     private fun loadingState(state: Boolean) {
 
         btnSubmit.setTextColor(ContextCompat.getColor(this, R.color.white))
+        btnSubmit.setBackgroundColor(ContextCompat.getColor(this, R.color.primary_200))
 
         if (state) {
 
@@ -195,12 +196,9 @@ class NewRoomChatFormActivity : AppCompatActivity() {
 
         } else {
 
-            Handler().postDelayed({
-
-                btnSubmit.isEnabled = true
-                btnSubmit.text = getString(R.string.btn_submit_new_chat_room)
-
-            }, 500)
+            btnSubmit.isEnabled = true
+            btnSubmit.text = getString(R.string.btn_submit_new_chat_room)
+            btnSubmit.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
 
         }
 

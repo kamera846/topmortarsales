@@ -3,20 +3,33 @@ package com.topmortar.topmortarsales
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_PHONE
-import java.text.SimpleDateFormat
+import com.topmortar.topmortarsales.commons.LOGGED_OUT
+import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.SYNC_NOW
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.utils.DateFormat
+import com.topmortar.topmortarsales.commons.utils.createPartFromString
+import com.topmortar.topmortarsales.commons.utils.handleMessage
+import com.topmortar.topmortarsales.data.ApiService
+import com.topmortar.topmortarsales.data.HttpClient
+import kotlinx.coroutines.launch
 import java.util.Calendar
-import java.util.Locale
 
 @Suppress("DEPRECATION")
 class DetailContactActivity : AppCompatActivity() {
@@ -42,6 +55,7 @@ class DetailContactActivity : AppCompatActivity() {
     private var contactId: String? = null
     private var isEdit: Boolean = false
     private var selectedDate: Calendar = Calendar.getInstance()
+    private var hasEdited: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -82,11 +96,11 @@ class DetailContactActivity : AppCompatActivity() {
 
     private fun initClickHandler() {
 
-        icBack.setOnClickListener { finish() }
-        icEdit.setOnClickListener { toggleEdit() }
-        tvCancelEdit.setOnClickListener { toggleEdit() }
+        icBack.setOnClickListener { backHandler() }
+        icEdit.setOnClickListener { toggleEdit(true) }
+        tvCancelEdit.setOnClickListener { toggleEdit(false) }
         btnSendMessage.setOnClickListener { navigateAddNewRoom() }
-        btnSaveEdit.setOnClickListener { saveEdit() }
+        btnSaveEdit.setOnClickListener { editConfirmation() }
         etBirthdayContainer.setOnClickListener { showDatePickerDialog() }
         tvEditBirthday.setOnClickListener { showDatePickerDialog() }
 
@@ -113,20 +127,19 @@ class DetailContactActivity : AppCompatActivity() {
             etName.setText(iName)
         }
         if (iBirthday!!.isNotEmpty() ) {
-            tvBirthday.text = formatDate(iBirthday)
-            tvEditBirthday.text = formatDate(iBirthday)
+            tvBirthday.text = DateFormat.format(iBirthday)
+            tvEditBirthday.text = DateFormat.format(iBirthday)
         }
 
     }
 
-    private fun toggleEdit() {
+    private fun toggleEdit(value: Boolean? = null) {
 
-        isEdit = !isEdit
+        isEdit = if (value!!) value else !isEdit
 
         if (isEdit) {
 
             tvName.visibility = View.GONE
-//            tvPhoneContainer.visibility = View.GONE
             tvBirthdayContainer.visibility = View.GONE
             tvDescription.visibility = View.GONE
             icBack.visibility = View.GONE
@@ -134,18 +147,17 @@ class DetailContactActivity : AppCompatActivity() {
             btnSendMessage.visibility = View.GONE
 
             tvCancelEdit.visibility = View.VISIBLE
-            tvTitleBar.visibility = View.VISIBLE
             etName.visibility = View.VISIBLE
-//            etPhoneContainer.visibility = View.VISIBLE
             etBirthdayContainer.visibility = View.VISIBLE
             btnSaveEdit.visibility = View.VISIBLE
 
+            tvTitleBar.text = "Edit Contact"
             etName.requestFocus()
+            etName.setSelection(etName.text.length)
 
         } else {
 
             tvName.visibility = View.VISIBLE
-//            tvPhoneContainer.visibility = View.VISIBLE
             tvBirthdayContainer.visibility = View.VISIBLE
             tvDescription.visibility = View.VISIBLE
             icBack.visibility = View.VISIBLE
@@ -153,22 +165,90 @@ class DetailContactActivity : AppCompatActivity() {
             btnSendMessage.visibility = View.VISIBLE
 
             tvCancelEdit.visibility = View.GONE
-            tvTitleBar.visibility = View.GONE
             etName.visibility = View.GONE
-//            etPhoneContainer.visibility = View.GONE
             etBirthdayContainer.visibility = View.GONE
             btnSaveEdit.visibility = View.GONE
+
+            tvTitleBar.text = "Detail Contact"
+            etName.clearFocus()
 
         }
 
     }
 
+    private fun editConfirmation() {
+
+        if (!formValidation("${ etName.text }", "${ tvEditBirthday.text }")) return
+
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Edit Confirmation")
+            .setMessage("Are you sure you want to save changes?")
+            .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+            .setPositiveButton("Yes") { dialog, _ ->
+                dialog.dismiss()
+                saveEdit()
+            }
+        val dialog = builder.create()
+        dialog.show()
+    }
+
     private fun saveEdit() {
 
-        tvName.text = etName.text.toString()
-        tvBirthday.text = tvEditBirthday.text.toString()
+        val pName = "${ etName.text }"
+        val pBirthday = DateFormat.format("${ tvEditBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
 
-        toggleEdit()
+        loadingState(true)
+
+        lifecycleScope.launch {
+            try {
+
+                val rbId = createPartFromString(contactId!!)
+                val rbName = createPartFromString(pName)
+                val rbBirthday = createPartFromString(pBirthday)
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.editContact(rbId, rbName, rbBirthday)
+
+                if (response.isSuccessful) {
+
+                    val responseBody = response.body()!!
+
+                    if (responseBody.status == RESPONSE_STATUS_OK) {
+
+                        tvName.text = "${ etName.text }"
+                        tvBirthday.text = "${ tvEditBirthday.text }"
+                        hasEdited = true
+
+                        handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
+                        loadingState(false)
+                        toggleEdit(false)
+
+                    } else {
+
+                        handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed to edit data!")
+                        loadingState(false)
+                        toggleEdit(false)
+
+                    }
+
+                } else {
+
+                    handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed to edit data! Error: " + response.message())
+                    loadingState(false)
+                    toggleEdit(false)
+
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                loadingState(false)
+                toggleEdit(false)
+
+            }
+
+        }
 
     }
 
@@ -181,7 +261,7 @@ class DetailContactActivity : AppCompatActivity() {
                 selectedDate.set(Calendar.DAY_OF_MONTH, day)
 
                 // Do something with the selected date
-                val formattedDate = formatDate(selectedDate)
+                val formattedDate = DateFormat.format(selectedDate)
                 tvEditBirthday.text = formattedDate
             },
             selectedDate.get(Calendar.YEAR),
@@ -192,24 +272,61 @@ class DetailContactActivity : AppCompatActivity() {
         datePicker.show()
     }
 
-    private fun formatDate(calendar: Calendar): String {
-        val format = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
-        return format.format(calendar.time)
+    private fun loadingState(state: Boolean) {
+
+        btnSaveEdit.setTextColor(ContextCompat.getColor(this, R.color.white))
+        btnSaveEdit.setBackgroundColor(ContextCompat.getColor(this, R.color.primary_200))
+
+        if (state) {
+
+            btnSaveEdit.isEnabled = false
+            btnSaveEdit.text = "LOADING..."
+
+        } else {
+
+            btnSaveEdit.isEnabled = true
+            btnSaveEdit.text = "SAVE"
+            btnSaveEdit.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
+
+        }
+
     }
 
-    private fun formatDate(dateString: String): String {
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val outputFormat = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault())
+    private fun formValidation(name: String, birthday: String): Boolean {
+        return if (name.isEmpty()) {
+            etName.error = "Name cannot be empty!"
+            false
+        } else if (birthday.isEmpty()) {
+            etName.error = null
+            handleMessage(this@DetailContactActivity, "ERROR EDIT CONTACT", "Choose a birthday")
+            false
+        } else {
+            etName.error = null
+            true
+        }
+    }
 
-        val date = inputFormat.parse(dateString)
-        return outputFormat.format(date!!)
+    private fun backHandler() {
+
+        if (hasEdited) {
+
+            val resultIntent = Intent()
+            resultIntent.putExtra("$MAIN_ACTIVITY_REQUEST_CODE", SYNC_NOW)
+            setResult(RESULT_OK, resultIntent)
+            finish()
+
+        } else finish()
+
     }
 
     private fun navigateAddNewRoom() {
 
         val intent = Intent(this@DetailContactActivity, NewRoomChatFormActivity::class.java)
+
         intent.putExtra(CONST_NAME, tvName.text)
-        intent.putExtra(CONST_PHONE, tvPhone.text)
+        // Remove "+" on text phone
+        val trimmedInput = tvPhone.text.trim()
+        if (trimmedInput.startsWith("+")) intent.putExtra(CONST_PHONE, trimmedInput.substring(1))
 
         startActivity(intent)
 
@@ -232,9 +349,10 @@ class DetailContactActivity : AppCompatActivity() {
 //    }
 
     override fun onBackPressed() {
+//      return super.onBackPressed()
 
-        if (isEdit) toggleEdit()
-        else return super.onBackPressed()
+        if (isEdit) toggleEdit(false)
+        else backHandler()
     }
 
 }

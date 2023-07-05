@@ -9,6 +9,7 @@ const val RESPONSE_STATUS_OK = "ok"
 const val RESPONSE_STATUS_EMPTY = "empty"
 
 const val GET_CONTACT = "contacts.php"
+const val EDIT_CONTACT = "contacts.php"
 const val SEND_MESSAGE = "messages.php"
 const val SEARCH_CONTACT = "contactsSearch.php"
 

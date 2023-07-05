@@ -16,15 +16,16 @@
             android:id="@+id/ic_back"
             android:layout_width="26dp"
             android:layout_height="26dp"
+            android:layout_marginEnd="16dp"
             android:layout_alignParentStart="true"
             android:src="@drawable/arrow_back_black" />
 
         <TextView
-            android:visibility="gone"
             android:id="@+id/tv_title_bar"
+            android:layout_toEndOf="@+id/ic_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Edit Contact"
+            android:text="Detail Contact"
             android:textSize="20sp"
             android:textStyle="bold"
             android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
@@ -84,7 +85,7 @@
                 android:id="@+id/tv_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="John Doe ajja jhd kajhs da h dkajs ajkshd a kas ahla"
+                android:text="John Doe"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
@@ -97,9 +98,9 @@
                 android:layout_height="wrap_content"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                 android:textColorHint="@color/black_600"
-                android:hint="@string/input_name_placeholder"
+                android:hint="Input Name"
                 android:inputType="textCapWords"
-                android:autofillHints="@string/input_name_placeholder"
+                android:autofillHints="Input Name"
                 android:textSize="14sp"
                 android:background="@drawable/et_background"
                 android:padding="12dp"
