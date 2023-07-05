@@ -16,9 +16,9 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import com.topmortar.topmortarsales.commons.ET_MESSAGE
-import com.topmortar.topmortarsales.commons.ET_NAME
-import com.topmortar.topmortarsales.commons.ET_PHONE
+import com.topmortar.topmortarsales.commons.CONST_MESSAGE
+import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
@@ -143,9 +143,9 @@ class NewRoomChatFormActivity : AppCompatActivity() {
 
         val intent = intent
 
-        val iPhone = intent.getStringExtra(ET_PHONE)
-        val iName = intent.getStringExtra(ET_NAME)
-        val iMessage = intent.getStringExtra(ET_MESSAGE)
+        val iPhone = intent.getStringExtra(CONST_PHONE)
+        val iName = intent.getStringExtra(CONST_NAME)
+        val iMessage = intent.getStringExtra(CONST_MESSAGE)
 
         if (iPhone != "") etPhone.setText(iPhone)
         if (iName != "") etName.setText(iName)

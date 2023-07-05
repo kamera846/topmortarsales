@@ -27,8 +27,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.adapter.ListContactRecyclerViewAdapter
 import com.topmortar.topmortarsales.adapter.ListContactRecyclerViewAdapter.ItemClickListener
-import com.topmortar.topmortarsales.commons.ET_NAME
-import com.topmortar.topmortarsales.commons.ET_PHONE
+import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -45,6 +45,8 @@ import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.ContactModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
+import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -155,8 +157,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         val intent = Intent(this@MainActivity, NewRoomChatFormActivity::class.java)
 
         if (data != null) {
-            intent.putExtra(ET_NAME, data.nama)
-            intent.putExtra(ET_PHONE, data.nomorhp)
+            intent.putExtra(CONST_NAME, data.nama)
+            intent.putExtra(CONST_PHONE, data.nomorhp)
         }
 
         startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
@@ -170,8 +172,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         val intent = Intent(this@MainActivity, DetailContactActivity::class.java)
 
         if (data != null) {
-            intent.putExtra(ET_NAME, data.nama)
-            intent.putExtra(ET_PHONE, data.nomorhp)
+            intent.putExtra(CONST_CONTACT_ID, data.id_contact)
+            intent.putExtra(CONST_NAME, data.nama)
+            intent.putExtra(CONST_PHONE, data.nomorhp)
+            intent.putExtra(CONST_BIRTHDAY, data.tgl_lahir)
         }
 
         startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)

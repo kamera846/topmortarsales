@@ -19,6 +19,16 @@
             android:layout_alignParentStart="true"
             android:src="@drawable/arrow_back_black" />
 
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/tv_title_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edit Contact"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
+
         <ImageView
             android:id="@+id/ic_edit"
             android:layout_width="26dp"
@@ -74,16 +84,32 @@
                 android:id="@+id/tv_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="John Doe"
+                android:text="John Doe ajja jhd kajhs da h dkajs ajkshd a kas ahla"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
+
+            <EditText
+                android:visibility="gone"
+                android:id="@+id/et_name"
+                android:contentDescription="Input Contact Name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:textColorHint="@color/black_600"
+                android:hint="@string/input_name_placeholder"
+                android:inputType="textCapWords"
+                android:autofillHints="@string/input_name_placeholder"
+                android:textSize="14sp"
+                android:background="@drawable/et_background"
+                android:padding="12dp"
+                android:outlineProvider="none" />
 
             <TextView
                 android:id="@+id/tv_description"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="120 contacts followed up"
+                android:text="Top Mortar Customer"
                 android:textSize="14sp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
@@ -108,7 +134,9 @@
         android:orientation="vertical"
         android:gravity="center">
 
+        <!--    Text Phone    -->
         <LinearLayout
+            android:id="@+id/tv_phone_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp"
@@ -135,7 +163,43 @@
 
         </LinearLayout>
 
+        <!--    Edit Phone    -->
         <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/et_phone_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp"
+            android:gravity="center_vertical"
+            android:background="@drawable/et_background"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/phone_black" />
+
+            <EditText
+                android:id="@+id/et_phone"
+                android:contentDescription="Input Phone Number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:textColorHint="@color/black_600"
+                android:hint="@string/input_phon_number_placeholder"
+                android:inputType="phone"
+                android:autofillHints="@string/input_phon_number_placeholder"
+                android:textSize="16sp"
+                android:background="@android:color/transparent"
+                android:outlineProvider="none"/>
+
+        </LinearLayout>
+
+        <!--    Text Birthday    -->
+        <LinearLayout
+            android:id="@+id/tv_birthday_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:padding="16dp"
@@ -155,9 +219,44 @@
                 android:id="@+id/tv_birthday"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="05 July 2023"
+                android:text="05 Juli 2023"
                 android:textSize="16sp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+
+        </LinearLayout>
+
+        <!--    Edit Birthday    -->
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/et_birthday_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:gravity="center_vertical"
+            android:background="@drawable/et_background"
+            android:orientation="horizontal">
+
+
+            <ImageView
+                android:layout_width="26dp"
+                android:layout_height="26dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/date_black" />
+
+            <TextView
+                android:id="@+id/tv_edit_birthday"
+                android:contentDescription="Input Date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:textColorHint="@color/black_600"
+                android:hint="01 January 2001"
+                android:inputType="date"
+                android:autofillHints="01 January 2001"
+                android:textSize="16sp"
+                android:background="@android:color/transparent"
+                android:outlineProvider="none"/>
 
         </LinearLayout>
 
@@ -172,5 +271,16 @@
         android:textSize="18sp"
         android:textStyle="bold"
         android:text="Send Message" />
+
+    <Button
+        android:visibility="gone"
+        android:id="@+id/btn_save_edit"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:text="Save" />
 
 </RelativeLayout>

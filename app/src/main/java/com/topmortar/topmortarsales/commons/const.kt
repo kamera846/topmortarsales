@@ -25,9 +25,11 @@ const val TOAST_LONG = Toast.LENGTH_LONG
 const val TOAST_SHORT = Toast.LENGTH_SHORT
 
 // Props
-const val ET_PHONE = "et_phone"
-const val ET_NAME = "et_name"
-const val ET_MESSAGE = "et_message"
+const val CONST_CONTACT_ID = "const_contact_id"
+const val CONST_PHONE = "const_phone"
+const val CONST_NAME = "const_name"
+const val CONST_MESSAGE = "const_message"
+const val CONST_BIRTHDAY = "const_birthday"
 
 // Status
 const val LOGGED_IN = true
