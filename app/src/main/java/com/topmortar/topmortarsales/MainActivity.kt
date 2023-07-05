@@ -46,6 +46,7 @@ import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.ContactModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
 import kotlinx.coroutines.launch
@@ -152,6 +153,21 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         toggleSearchEvent(SEARCH_CLOSE)
 
         val intent = Intent(this@MainActivity, NewRoomChatFormActivity::class.java)
+
+        if (data != null) {
+            intent.putExtra(ET_NAME, data.nama)
+            intent.putExtra(ET_PHONE, data.nomorhp)
+        }
+
+        startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
+
+    }
+
+    private fun navigateDetailContact(data: ContactModel? = null) {
+
+        toggleSearchEvent(SEARCH_CLOSE)
+
+        val intent = Intent(this@MainActivity, DetailContactActivity::class.java)
 
         if (data != null) {
             intent.putExtra(ET_NAME, data.nama)
@@ -487,12 +503,15 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     }
 
     override fun onItemClick(data: ContactModel?) {
-        navigateAddNewRoom(data)
+
+        if (sessionManager.userKind() == USER_KIND_ADMIN) navigateDetailContact(data)
+        else navigateAddNewRoom(data)
+
     }
 
     override fun onResume() {
-        super.onResume()
 
+        super.onResume()
         // Check apps for update
         AppUpdateHelper.checkForUpdates(this)
 
