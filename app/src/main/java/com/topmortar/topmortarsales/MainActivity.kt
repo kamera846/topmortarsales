@@ -97,8 +97,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         loadingState(true)
         getContacts()
 
-        handleMessage(this, TAG_ACTION_MAIN_ACTIVITY, "${ sessionManager.userKind() }")
-
     }
 
     private fun initVariable() {

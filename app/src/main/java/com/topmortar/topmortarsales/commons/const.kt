@@ -43,3 +43,9 @@ const val SYNC_NOW = "sync_now"
 // User Kind
 const val USER_KIND_ADMIN = "user_kind_admin"
 const val USER_KIND_SALES = "user_kind_sales"
+
+// DUMMY
+const val DUMMY_ADMIN_USERNAME = "topmortar"
+const val DUMMY_ADMIN_PASSWORD = "admintopmortar123"
+const val DUMMY_SALES_USERNAME = "topmortarsales"
+const val DUMMY_SALES_PASSWORD = "topmortar123"
