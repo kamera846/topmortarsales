@@ -125,7 +125,7 @@ class SplashScreenActivity : AppCompatActivity() {
     private fun showCardLogin() {
 
         val logoParams = ivLogo.layoutParams as LinearLayout.LayoutParams
-        logoParams.width = 600
+        logoParams.height = 500
         ivLogo.layoutParams = logoParams
         rlModal.visibility = View.VISIBLE
 
