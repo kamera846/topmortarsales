@@ -183,7 +183,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
         if (username == DUMMY_ADMIN_USERNAME && password == DUMMY_ADMIN_PASSWORD) sessionManager.setUserKind(USER_KIND_ADMIN)
         else if (username == DUMMY_SALES_USERNAME && password == DUMMY_SALES_PASSWORD) sessionManager.setUserKind(USER_KIND_SALES)
-        else return showAlert("Your username or password seems wrong!")
+        else return showAlert("Your username or password seems wrong!", 5000)
 
         sessionManager.setLoggedIn(LOGGED_IN)
         navigateToMain()
