@@ -115,9 +115,14 @@ class DetailContactActivity : AppCompatActivity() {
         btnSaveEdit.setOnClickListener { editConfirmation() }
         etBirthdayContainer.setOnClickListener { showDatePickerDialog() }
         tvEditBirthday.setOnClickListener { showDatePickerDialog() }
+
+        val tooltipText = "Owner Store Name"
         tooltipOwner.setOnClickListener {
-            val tooltipText = "Store owner name"
             TooltipCompat.setTooltipText(tooltipOwner, tooltipText)
+        }
+        tooltipOwner.setOnLongClickListener {
+            TooltipCompat.setTooltipText(tooltipOwner, tooltipText)
+            false
         }
 
     }
