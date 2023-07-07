@@ -20,7 +20,6 @@ import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
-import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
@@ -45,6 +44,7 @@ class DetailContactActivity : AppCompatActivity() {
     private lateinit var icBack: ImageView
     private lateinit var icEdit: ImageView
     private lateinit var tooltipOwner: ImageView
+    private lateinit var tooltipBirthday: ImageView
     private lateinit var tvTitleBar: TextView
     private lateinit var tvCancelEdit: TextView
     private lateinit var tvName: TextView
@@ -91,6 +91,7 @@ class DetailContactActivity : AppCompatActivity() {
         icBack = findViewById(R.id.ic_back)
         icEdit = findViewById(R.id.ic_edit)
         tooltipOwner = findViewById(R.id.tooltip_owner)
+        tooltipBirthday = findViewById(R.id.tooltip_birthday)
         tvTitleBar = findViewById(R.id.tv_title_bar)
         tvCancelEdit = findViewById(R.id.tv_cancel_edit)
         tvName = findViewById(R.id.tv_name)
@@ -116,12 +117,21 @@ class DetailContactActivity : AppCompatActivity() {
         etBirthdayContainer.setOnClickListener { showDatePickerDialog() }
         tvEditBirthday.setOnClickListener { showDatePickerDialog() }
 
-        val tooltipText = "Owner Store Name"
+        val tooltipText = "Owner Name"
         tooltipOwner.setOnClickListener {
             TooltipCompat.setTooltipText(tooltipOwner, tooltipText)
         }
         tooltipOwner.setOnLongClickListener {
             TooltipCompat.setTooltipText(tooltipOwner, tooltipText)
+            false
+        }
+
+        val tooltipBirthdayText = "Owner Birthday"
+        tooltipBirthday.setOnClickListener {
+            TooltipCompat.setTooltipText(tooltipBirthday, tooltipBirthdayText)
+        }
+        tooltipBirthday.setOnLongClickListener {
+            TooltipCompat.setTooltipText(tooltipBirthday, tooltipBirthdayText)
             false
         }
 
@@ -139,7 +149,7 @@ class DetailContactActivity : AppCompatActivity() {
             contactId = iContactId
         }
         if (!iOwner.isNullOrEmpty() ) {
-            tvOwner.text = "+$iOwner"
+            tvOwner.text = iOwner
             etOwner.setText(iOwner)
         }
         if (!iPhone.isNullOrEmpty() ) {
@@ -204,7 +214,7 @@ class DetailContactActivity : AppCompatActivity() {
 
     private fun editConfirmation() {
 
-        if (!formValidation("${ etName.text }", "${ tvEditBirthday.text }")) return
+        if (!formValidation("${ etName.text }", "${ etOwner.text }", "${ tvEditBirthday.text }")) return
 
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Edit Confirmation")
@@ -221,6 +231,7 @@ class DetailContactActivity : AppCompatActivity() {
     private fun saveEdit() {
 
         val pName = "${ etName.text }"
+        val pOwner = "${ etOwner.text }"
         val pBirthday = DateFormat.format("${ tvEditBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
 
         loadingState(true)
@@ -230,10 +241,11 @@ class DetailContactActivity : AppCompatActivity() {
 
                 val rbId = createPartFromString(contactId!!)
                 val rbName = createPartFromString(pName)
+                val rbOwner = createPartFromString(pOwner)
                 val rbBirthday = createPartFromString(pBirthday)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.editContact(rbId, rbName, rbBirthday)
+                val response = apiService.editContact(rbId, rbName, rbOwner, rbBirthday)
 
                 if (response.isSuccessful) {
 
@@ -242,6 +254,7 @@ class DetailContactActivity : AppCompatActivity() {
                     if (responseBody.status == RESPONSE_STATUS_OK) {
 
                         tvName.text = "${ etName.text }"
+                        tvOwner.text = "${ etOwner.text }"
                         tvBirthday.text = "${ tvEditBirthday.text }"
                         hasEdited = true
 
@@ -318,16 +331,29 @@ class DetailContactActivity : AppCompatActivity() {
 
     }
 
-    private fun formValidation(name: String, birthday: String): Boolean {
+    private fun formValidation(name: String, owner: String, birthday: String): Boolean {
         return if (name.isEmpty()) {
             etName.error = "Name cannot be empty!"
+            etName.requestFocus()
+            false
+        } else if (owner.isEmpty()) {
+            etName.error = null
+            etName.clearFocus()
+            etOwner.error = "Store Owner Name cannot be empty!"
+            etOwner.requestFocus()
             false
         } else if (birthday.isEmpty()) {
             etName.error = null
-            handleMessage(this@DetailContactActivity, "ERROR EDIT CONTACT", "Choose a birthday")
+            etName.clearFocus()
+            etOwner.error = null
+            etOwner.requestFocus()
+            handleMessage(this@DetailContactActivity, "ERROR EDIT CONTACT", "Choose a date of birth!")
             false
         } else {
             etName.error = null
+            etName.clearFocus()
+            etOwner.error = null
+            etOwner.requestFocus()
             true
         }
     }
@@ -354,10 +380,14 @@ class DetailContactActivity : AppCompatActivity() {
 
         val intent = Intent(this@DetailContactActivity, NewRoomChatFormActivity::class.java)
 
-        intent.putExtra(CONST_NAME, tvName.text)
         // Remove "+" on text phone
         val trimmedInput = tvPhone.text.trim()
         if (trimmedInput.startsWith("+")) intent.putExtra(CONST_PHONE, trimmedInput.substring(1))
+
+        intent.putExtra(CONST_NAME, tvName.text)
+        intent.putExtra(CONST_OWNER, tvOwner.text)
+        intent.putExtra(CONST_BIRTHDAY, DateFormat.format("${ tvBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
+        )
 
         startActivity(intent)
 

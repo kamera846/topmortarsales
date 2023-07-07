@@ -229,7 +229,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center_vertical"
-                android:text="Owner Store Name"
+                android:text="Owner Name"
                 android:textSize="16sp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
@@ -268,7 +268,7 @@
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                 android:textColorHint="@color/black_600"
                 android:hint="Enter Owner Name"
-                android:inputType="phone"
+                android:inputType="textCapWords"
                 android:autofillHints="Enter Owner Name"
                 android:textSize="16sp"
                 android:background="@android:color/transparent"
@@ -303,6 +303,12 @@
                 android:textSize="16sp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
+            <ImageView
+                android:id="@+id/tooltip_birthday"
+                android:layout_width="58dp"
+                android:layout_height="58dp"
+                android:padding="18dp"
+                android:src="@drawable/circle_info_black" />
 
         </LinearLayout>
 

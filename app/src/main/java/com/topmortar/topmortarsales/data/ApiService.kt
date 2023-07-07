@@ -20,6 +20,7 @@ interface ApiService {
     suspend fun editContact(
         @Part("id") id: RequestBody,
         @Part("nama") nama: RequestBody,
+        @Part("owner_name") ownerName: RequestBody,
         @Part("tgl_lahir") tglLahir: RequestBody
     ): Response<ResponseMessage>
 

@@ -16,13 +16,17 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
+import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_MESSAGE
 import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -37,9 +41,11 @@ class NewRoomChatFormActivity : AppCompatActivity() {
     private lateinit var icSyncNow: ImageView
     private lateinit var tvTitleBar: TextView
     private lateinit var tvMaxMessage: TextView
+    private lateinit var tvInputBirthday: TextView
     private lateinit var btnSubmit: Button
     private lateinit var etPhone: EditText
     private lateinit var etName: EditText
+    private lateinit var etOwner: EditText
     private lateinit var etMessage: EditText
 
     private val msgMaxLines = 5
@@ -141,21 +147,15 @@ class NewRoomChatFormActivity : AppCompatActivity() {
 
     private fun dataActivityValidation() {
 
-        val intent = intent
-
+        val iOwner = intent.getStringExtra(CONST_OWNER)
         val iPhone = intent.getStringExtra(CONST_PHONE)
         val iName = intent.getStringExtra(CONST_NAME)
-        val iMessage = intent.getStringExtra(CONST_MESSAGE)
+        val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
 
-        if (iPhone != "") etPhone.setText(iPhone)
-        if (iName != "") etName.setText(iName)
-
-        if (iMessage != "") {
-
-            etMessage.setText(iMessage)
-            updateTxtMaxLength(iMessage?.length ?: 0)
-
-        }
+        if (!iPhone.isNullOrEmpty()) etPhone.setText(iPhone)
+        if (!iName.isNullOrEmpty()) etName.setText(iName)
+        if (!iOwner.isNullOrEmpty() ) etOwner.setText(iOwner)
+        if (!iBirthday.isNullOrEmpty() ) tvInputBirthday.text = DateFormat.format(iBirthday)
 
     }
 
@@ -168,6 +168,8 @@ class NewRoomChatFormActivity : AppCompatActivity() {
         btnSubmit = findViewById(R.id.btn_submit)
         etPhone = findViewById(R.id.et_phone)
         etName = findViewById(R.id.et_name)
+        etOwner = findViewById(R.id.et_owner)
+        tvInputBirthday = findViewById(R.id.tv_input_birthday)
         etMessage = findViewById(R.id.et_message)
 
         // Set Title Bar
