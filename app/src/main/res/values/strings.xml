@@ -19,7 +19,7 @@
     <string name="list_chat_contact_description">Lorem ipsum sit dolor amet</string>
     <string name="txt_loading">Loading...</string>
     <string name="txt_sending">Sending...</string>
-    <string name="message_length">0/50</string>
+    <string name="message_length">0/200</string>
     <string name="et_label">Label for the input field</string>
     <string name="et_hint">Enter your text here</string>
     <string name="sync_now">Sync Now</string>

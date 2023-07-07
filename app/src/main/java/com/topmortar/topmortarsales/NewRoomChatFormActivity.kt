@@ -155,7 +155,10 @@ class NewRoomChatFormActivity : AppCompatActivity() {
         if (!iPhone.isNullOrEmpty()) etPhone.setText(iPhone)
         if (!iName.isNullOrEmpty()) etName.setText(iName)
         if (!iOwner.isNullOrEmpty() ) etOwner.setText(iOwner)
-        if (!iBirthday.isNullOrEmpty() ) tvInputBirthday.text = DateFormat.format(iBirthday)
+        if (!iBirthday.isNullOrEmpty() ) {
+            if (iBirthday == "0000-00-00") tvInputBirthday.text = ""
+            else tvInputBirthday.text = DateFormat.format(iBirthday)
+        }
 
     }
 

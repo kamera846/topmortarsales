@@ -1,11 +1,15 @@
 package com.topmortar.topmortarsales
 
 import android.app.DatePickerDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.widget.Button
+import android.widget.DatePicker
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -51,11 +55,11 @@ class DetailContactActivity : AppCompatActivity() {
     private lateinit var tvDescription: TextView
     private lateinit var tvPhone: TextView
     private lateinit var tvBirthday: TextView
-    private lateinit var tvEditBirthday: TextView
     private lateinit var etName: EditText
     private lateinit var tvOwner: TextView
     private lateinit var etOwner: EditText
     private lateinit var etPhone: EditText
+    private lateinit var etBirthday: EditText
     private lateinit var btnSendMessage: Button
     private lateinit var btnSaveEdit: Button
 
@@ -63,6 +67,7 @@ class DetailContactActivity : AppCompatActivity() {
     private var isEdit: Boolean = false
     private var selectedDate: Calendar = Calendar.getInstance()
     private var hasEdited: Boolean = false
+    private lateinit var datePicker: DatePickerDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -101,9 +106,12 @@ class DetailContactActivity : AppCompatActivity() {
         etName = findViewById(R.id.et_name)
         etOwner = findViewById(R.id.et_owner)
         etPhone = findViewById(R.id.et_phone)
-        tvEditBirthday = findViewById(R.id.tv_edit_birthday)
+        etBirthday = findViewById(R.id.et_birthday)
         btnSendMessage = findViewById(R.id.btn_send_message)
         btnSaveEdit = findViewById(R.id.btn_save_edit)
+
+        // Disable input etBirthday
+        setDatePickerDialog()
 
     }
 
@@ -114,9 +122,40 @@ class DetailContactActivity : AppCompatActivity() {
         tvCancelEdit.setOnClickListener { toggleEdit(false) }
         btnSendMessage.setOnClickListener { navigateAddNewRoom() }
         btnSaveEdit.setOnClickListener { editConfirmation() }
-        etBirthdayContainer.setOnClickListener { showDatePickerDialog() }
-        tvEditBirthday.setOnClickListener { showDatePickerDialog() }
+        etBirthdayContainer.setOnClickListener { datePicker.show() }
+        etBirthday.setOnClickListener { datePicker.show() }
 
+        // Focus Listener
+        etName.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) etName.setSelection(etName.length())
+        }
+        etOwner.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) etOwner.setSelection(etOwner.length())
+        }
+        etBirthday.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                datePicker.show()
+                etBirthday.setSelection(etBirthday.length())
+            } else etBirthday.clearFocus()
+        }
+
+        // Change Listener
+        etBirthday.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                if (isEdit) datePicker.show()
+            }
+
+        })
+
+        // Tooltip Handler
         val tooltipText = "Owner Name"
         tooltipOwner.setOnClickListener {
             TooltipCompat.setTooltipText(tooltipOwner, tooltipText)
@@ -148,10 +187,6 @@ class DetailContactActivity : AppCompatActivity() {
         if (!iContactId.isNullOrEmpty() ) {
             contactId = iContactId
         }
-        if (!iOwner.isNullOrEmpty() ) {
-            tvOwner.text = iOwner
-            etOwner.setText(iOwner)
-        }
         if (!iPhone.isNullOrEmpty() ) {
             tvPhone.text = "+$iPhone"
             etPhone.setText(iPhone)
@@ -160,9 +195,20 @@ class DetailContactActivity : AppCompatActivity() {
             tvName.text = iName
             etName.setText(iName)
         }
+        if (!iOwner.isNullOrEmpty() ) {
+            tvOwner.text = iOwner
+            etOwner.setText(iOwner)
+        } else {
+            tvOwner.text = "Not set"
+            etOwner.setText("")
+        }
         if (!iBirthday.isNullOrEmpty() ) {
-            tvBirthday.text = DateFormat.format(iBirthday)
-            tvEditBirthday.text = DateFormat.format(iBirthday)
+            if (iBirthday == "0000-00-00") {
+                tvBirthday.text = "Not set"
+            } else {
+                tvBirthday.text = DateFormat.format(iBirthday)
+                etBirthday.setText(DateFormat.format(iBirthday))
+            }
         }
 
     }
@@ -214,7 +260,7 @@ class DetailContactActivity : AppCompatActivity() {
 
     private fun editConfirmation() {
 
-        if (!formValidation("${ etName.text }", "${ etOwner.text }", "${ tvEditBirthday.text }")) return
+        if (!formValidation("${ etName.text }", "${ etOwner.text }", "${ etBirthday.text }")) return
 
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Edit Confirmation")
@@ -232,7 +278,7 @@ class DetailContactActivity : AppCompatActivity() {
 
         val pName = "${ etName.text }"
         val pOwner = "${ etOwner.text }"
-        val pBirthday = DateFormat.format("${ tvEditBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
+        val pBirthday = DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
 
         loadingState(true)
 
@@ -255,7 +301,7 @@ class DetailContactActivity : AppCompatActivity() {
 
                         tvName.text = "${ etName.text }"
                         tvOwner.text = "${ etOwner.text }"
-                        tvBirthday.text = "${ tvEditBirthday.text }"
+                        tvBirthday.text = "${ etBirthday.text }"
                         hasEdited = true
 
                         handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
@@ -291,8 +337,9 @@ class DetailContactActivity : AppCompatActivity() {
 
     }
 
-    private fun showDatePickerDialog() {
-        val datePicker = DatePickerDialog(
+    private fun setDatePickerDialog() {
+
+        datePicker = DatePickerDialog(
             this,
             { _, year, month, day ->
                 selectedDate.set(Calendar.YEAR, year)
@@ -301,14 +348,16 @@ class DetailContactActivity : AppCompatActivity() {
 
                 // Do something with the selected date
                 val formattedDate = DateFormat.format(selectedDate)
-                tvEditBirthday.text = formattedDate
+                etBirthday.setText(formattedDate)
+                etBirthday.clearFocus()
             },
             selectedDate.get(Calendar.YEAR),
             selectedDate.get(Calendar.MONTH),
             selectedDate.get(Calendar.DAY_OF_MONTH)
         )
 
-        datePicker.show()
+        datePicker.setOnDismissListener { etBirthday.clearFocus() }
+
     }
 
     private fun loadingState(state: Boolean) {
@@ -339,21 +388,25 @@ class DetailContactActivity : AppCompatActivity() {
         } else if (owner.isEmpty()) {
             etName.error = null
             etName.clearFocus()
-            etOwner.error = "Store Owner Name cannot be empty!"
+            etOwner.error = "Owner Name cannot be empty!"
             etOwner.requestFocus()
             false
-        } else if (birthday.isEmpty()) {
+        } else if (birthday.isEmpty() || birthday == "Not set") {
             etName.error = null
             etName.clearFocus()
             etOwner.error = null
             etOwner.requestFocus()
-            handleMessage(this@DetailContactActivity, "ERROR EDIT CONTACT", "Choose a date of birth!")
+            etBirthday.error = "Choose owner birthday!"
+            etBirthday.requestFocus()
+            handleMessage(this@DetailContactActivity, "ERROR EDIT CONTACT", "Choose owner birthday!")
             false
         } else {
             etName.error = null
             etName.clearFocus()
             etOwner.error = null
-            etOwner.requestFocus()
+            etOwner.clearFocus()
+            etBirthday.error = null
+            etBirthday.clearFocus()
             true
         }
     }
@@ -385,9 +438,11 @@ class DetailContactActivity : AppCompatActivity() {
         if (trimmedInput.startsWith("+")) intent.putExtra(CONST_PHONE, trimmedInput.substring(1))
 
         intent.putExtra(CONST_NAME, tvName.text)
-        intent.putExtra(CONST_OWNER, tvOwner.text)
-        intent.putExtra(CONST_BIRTHDAY, DateFormat.format("${ tvBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
-        )
+
+        if (tvOwner.text == "Not set") intent.putExtra(CONST_OWNER, "")
+        else intent.putExtra(CONST_OWNER, tvOwner.text)
+        if (tvBirthday.text == "Not set") intent.putExtra(CONST_BIRTHDAY, "0000-00-00")
+        else intent.putExtra(CONST_BIRTHDAY, DateFormat.format("${ tvBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd"))
 
         startActivity(intent)
 

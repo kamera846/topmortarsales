@@ -264,6 +264,7 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:layout_marginEnd="16dp"
                 android:gravity="center_vertical"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                 android:textColorHint="@color/black_600"
@@ -329,17 +330,18 @@
                 android:padding="16dp"
                 android:src="@drawable/date_black" />
 
-            <TextView
-                android:id="@+id/tv_edit_birthday"
+            <EditText
+                android:id="@+id/et_birthday"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:layout_marginEnd="16dp"
                 android:gravity="center_vertical"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                 android:textColorHint="@color/black_600"
-                android:hint="01 January 2001"
-                android:inputType="date"
-                android:autofillHints="01 January 2001"
+                android:hint="Choose Owner Birthday"
+                android:inputType="textCapWords"
+                android:autofillHints="Choose Owner Birthday"
                 android:textSize="16sp"
                 android:background="@android:color/transparent"
                 android:outlineProvider="none"/>
