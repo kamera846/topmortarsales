@@ -1,15 +1,12 @@
 package com.topmortar.topmortarsales
 
 import android.app.DatePickerDialog
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.Button
-import android.widget.DatePicker
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -19,14 +16,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.TooltipCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
+import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
+import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -63,6 +63,7 @@ class DetailContactActivity : AppCompatActivity() {
     private lateinit var btnSendMessage: Button
     private lateinit var btnSaveEdit: Button
 
+    private var activityRequestCode = MAIN_ACTIVITY_REQUEST_CODE
     private var contactId: String? = null
     private var isEdit: Boolean = false
     private var selectedDate: Calendar = Calendar.getInstance()
@@ -110,7 +111,7 @@ class DetailContactActivity : AppCompatActivity() {
         btnSendMessage = findViewById(R.id.btn_send_message)
         btnSaveEdit = findViewById(R.id.btn_save_edit)
 
-        // Disable input etBirthday
+        // Setup Date Picker Dialog
         setDatePickerDialog()
 
     }
@@ -183,6 +184,7 @@ class DetailContactActivity : AppCompatActivity() {
         val iPhone = intent.getStringExtra(CONST_PHONE)
         val iName = intent.getStringExtra(CONST_NAME)
         val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
+        activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
 
         if (!iContactId.isNullOrEmpty() ) {
             contactId = iContactId
@@ -419,8 +421,9 @@ class DetailContactActivity : AppCompatActivity() {
             if (hasEdited) {
 
                 val resultIntent = Intent()
-                resultIntent.putExtra("$MAIN_ACTIVITY_REQUEST_CODE", SYNC_NOW)
+                resultIntent.putExtra("$activityRequestCode", SYNC_NOW)
                 setResult(RESULT_OK, resultIntent)
+                handleMessage(this, TAG_ACTION_MAIN_ACTIVITY, "$activityRequestCode : $SYNC_NOW")
                 finish()
 
             } else finish()
@@ -443,26 +446,24 @@ class DetailContactActivity : AppCompatActivity() {
         else intent.putExtra(CONST_OWNER, tvOwner.text)
         if (tvBirthday.text == "Not set") intent.putExtra(CONST_BIRTHDAY, "0000-00-00")
         else intent.putExtra(CONST_BIRTHDAY, DateFormat.format("${ tvBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd"))
+        intent.putExtra(ACTIVITY_REQUEST_CODE, DETAIL_ACTIVITY_REQUEST_CODE)
 
-        startActivity(intent)
+        startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
 
     }
 
-//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-//        super.onActivityResult(requestCode, resultCode, data)
-//
-//        if (requestCode == MAIN_ACTIVITY_REQUEST_CODE) {
-//
-//            val resultData = data?.getStringExtra("$MAIN_ACTIVITY_REQUEST_CODE")
-//
-//            if (resultData == SYNC_NOW) {
-//
-//                finish()
-//
-//            }
-//
-//        }
-//    }
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == DETAIL_ACTIVITY_REQUEST_CODE) {
+
+            val resultData = data?.getStringExtra("$DETAIL_ACTIVITY_REQUEST_CODE")
+
+            if (resultData == SYNC_NOW) hasEdited = true
+
+        }
+
+    }
 
     override fun onBackPressed() {
 //      return super.onBackPressed()

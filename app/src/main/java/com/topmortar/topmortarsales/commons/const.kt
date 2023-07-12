@@ -14,7 +14,9 @@ const val SEND_MESSAGE = "messages.php"
 const val SEARCH_CONTACT = "contactsSearch.php"
 
 // Request Code
+const val ACTIVITY_REQUEST_CODE = "activity_request_code"
 const val MAIN_ACTIVITY_REQUEST_CODE = 111
+const val DETAIL_ACTIVITY_REQUEST_CODE = 222
 
 // Tag Log
 const val TAG_RESPONSE_CONTACT = "TAG RESPONSE CONTACT"

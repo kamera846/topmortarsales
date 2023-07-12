@@ -26,15 +26,29 @@
             android:layout_marginBottom="16dp"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/tv_phone_label"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/input_phon_number_label"
-                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp"/>
+                android:layout_marginBottom="8dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_phone_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/input_phon_number_label"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                    android:textSize="16sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="*"
+                    android:textColor="@color/primary"/>
+
+            </LinearLayout>
 
             <EditText
                 android:labelFor="@+id/tv_phone_label"
@@ -60,16 +74,29 @@
             android:layout_marginBottom="16dp"
             android:orientation="vertical">
 
-
-            <TextView
-                android:id="@+id/tv_name_label"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Store Name"
-                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp"/>
+                android:layout_marginBottom="8dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_name_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Store Name"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                    android:textSize="16sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="*"
+                    android:textColor="@color/primary"/>
+
+            </LinearLayout>
 
             <EditText
                 android:labelFor="@+id/tv_name_label"
@@ -90,7 +117,7 @@
 
         <!-- Owner Name -->
         <LinearLayout
-            android:visibility="gone"
+            android:visibility="visible"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
@@ -125,7 +152,7 @@
 
         <!-- Birthday -->
         <LinearLayout
-            android:visibility="gone"
+            android:visibility="visible"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
@@ -141,15 +168,15 @@
                 android:textStyle="bold"
                 android:layout_marginBottom="8dp"/>
 
-            <TextView
-                android:labelFor="@+id/tv_birthday"
-                android:id="@+id/tv_input_birthday"
+            <EditText
+                android:id="@+id/et_birthday"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:gravity="center_vertical"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                 android:textColorHint="@color/black_600"
-                android:hint="e.g 01 January 1990"
+                android:hint="Choose Owner Birthday"
+                android:inputType="textCapWords"
+                android:autofillHints="e.g John Doe"
                 android:textSize="14sp"
                 android:background="@drawable/et_background"
                 android:padding="12dp"
@@ -164,15 +191,29 @@
             android:layout_marginBottom="16dp"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/tv_message_label"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/input_message_label"
-                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp"/>
+                android:layout_marginBottom="8dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_message_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/input_message_label"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                    android:textSize="16sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="*"
+                    android:textColor="@color/primary"/>
+
+            </LinearLayout>
 
             <EditText
                 android:labelFor="@+id/tv_message_label"

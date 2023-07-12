@@ -29,7 +29,9 @@ interface ApiService {
     suspend fun sendMessage(
         @Part("nama") name: RequestBody,
         @Part("nomorhp") phone: RequestBody,
-        @Part("message_body") message: RequestBody
+        @Part("tgl_lahir") birthday: RequestBody,
+        @Part("owner_name") ownerName: RequestBody,
+        @Part("message_body") message: RequestBody,
     ): Response<ResponseMessage>
 
     @Multipart
