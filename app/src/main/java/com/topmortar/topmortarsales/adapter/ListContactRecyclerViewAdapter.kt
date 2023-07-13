@@ -3,6 +3,7 @@ package com.topmortar.topmortarsales.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
@@ -16,13 +17,11 @@ class ListContactRecyclerViewAdapter(private val chatList: ArrayList<ContactMode
 
     inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-//        private val ivContactProfile: ImageView = itemView.findViewById(R.id.iv_contact_profile)
         private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
 
         fun bind(chatItem: ContactModel) {
 
-//            ivContactProfile.setImageResource(chatItem.profileImage)
             tvContactName.text = chatItem.nama
             tvPhoneNumber.text = if (chatItem.nomorhp != "") "+${ chatItem.nomorhp }" else ""
 
@@ -42,6 +41,7 @@ class ListContactRecyclerViewAdapter(private val chatList: ArrayList<ContactMode
         val chatItem = chatList[position]
 
         holder.bind(chatItem)
+        holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
 
         holder.itemView.setOnClickListener {
 

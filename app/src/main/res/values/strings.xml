@@ -12,18 +12,24 @@
     <string name="input_phon_number_label">Phone Number</string>
     <string name="input_message_placeholder">Hello!</string>
     <string name="input_name_placeholder">TB BAROKAH MAJU JAYA</string>
-    <string name="input_phon_number_placeholder">eg. 628XXXXXXXXX</string>
+    <string name="input_phon_number_placeholder">e.g 628XXXXXXXXX</string>
     <string name="fab_label">Create new chat room</string>
     <string name="fab_description">Navigate to page create new chat room</string>
     <string name="list_chat_contact_name">Contact Name</string>
     <string name="list_chat_contact_description">Lorem ipsum sit dolor amet</string>
     <string name="txt_loading">Loading...</string>
     <string name="txt_sending">Sending...</string>
-    <string name="message_length">0/50</string>
+    <string name="message_length">0/200</string>
     <string name="et_label">Label for the input field</string>
     <string name="et_hint">Enter your text here</string>
     <string name="sync_now">Sync Now</string>
     <string name="search">Search</string>
+    <string name="logout">Logout</string>
     <string name="search_contact">Search contact...</string>
     <string name="failed_request">Failed request!</string>
+    <string name="card_auth_title">Authentification</string>
+    <string name="text_email">Email</string>
+    <string name="text_password">Password</string>
+    <string name="text_login">Login</string>
+    <string name="text_copyright">© 2023 Top Mortar Sales</string>
 </resources>

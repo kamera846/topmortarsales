@@ -1,12 +1,12 @@
 package com.topmortar.topmortarsales
 
 import android.annotation.SuppressLint
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.text.Editable
 import android.text.InputFilter
-import android.text.TextUtils
 import android.text.TextWatcher
 import android.view.View
 import android.widget.Button
@@ -16,19 +16,23 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import com.topmortar.topmortarsales.commons.ET_MESSAGE
-import com.topmortar.topmortarsales.commons.ET_NAME
-import com.topmortar.topmortarsales.commons.ET_PHONE
+import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
+import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.CONST_OWNER
+import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import kotlinx.coroutines.launch
+import java.util.Calendar
 
 @SuppressLint("SetTextI18n")
 class NewRoomChatFormActivity : AppCompatActivity() {
@@ -40,32 +44,47 @@ class NewRoomChatFormActivity : AppCompatActivity() {
     private lateinit var btnSubmit: Button
     private lateinit var etPhone: EditText
     private lateinit var etName: EditText
+    private lateinit var etOwner: EditText
+    private lateinit var etBirthday: EditText
     private lateinit var etMessage: EditText
 
+    private var isLoaded = false
+    private var activityRequestCode = MAIN_ACTIVITY_REQUEST_CODE
     private val msgMaxLines = 5
     private val msgMaxLength = 200
+    private var selectedDate: Calendar = Calendar.getInstance()
+    private lateinit var datePicker: DatePickerDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_new_room_chat_form)
 
         supportActionBar?.hide()
+        setContentView(R.layout.activity_new_room_chat_form)
 
         initVariable()
         initClickHandler()
         dataActivityValidation()
         etMessageListener()
 
+        Handler().postDelayed({
+            isLoaded = true
+        }, 500)
+
     }
 
     private fun sendMessage() {
 
         val phone = "${ etPhone.text }"
-        val name = "${etName.text}"
-        val message = "${etMessage.text}"
+        val name = "${ etName.text }"
+        var birthday = "${ etBirthday.text }"
+        val owner = "${ etOwner.text }"
+        val message = "${ etMessage.text }"
 
-        if (!formValidation(phone, name, message)) return
+        if (!formValidation(phone, name, birthday, owner, message)) return
+
+        birthday = if (birthday.isEmpty()) "0000-00-00"
+        else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
 
         loadingState(true)
 
@@ -74,10 +93,12 @@ class NewRoomChatFormActivity : AppCompatActivity() {
 
                 val rbPhone = createPartFromString(formatPhoneNumber(phone))
                 val rbName = createPartFromString(name)
+                val rbBirthday = createPartFromString(birthday)
+                val rbOwner = createPartFromString(owner)
                 val rbMessage = createPartFromString(message)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.sendMessage(rbName, rbPhone, rbMessage)
+                val response = apiService.sendMessage(rbName, rbPhone, rbBirthday, rbOwner, rbMessage)
 
                 if (response.isSuccessful) {
 
@@ -85,13 +106,12 @@ class NewRoomChatFormActivity : AppCompatActivity() {
 
                     if (responseBody.status == RESPONSE_STATUS_OK) {
 
-                        handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Successfully added transaction data!")
+                        handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Successfully added data!")
                         loadingState(false)
 
                         val resultIntent = Intent()
-                        resultIntent.putExtra("$MAIN_ACTIVITY_REQUEST_CODE", SYNC_NOW)
+                        resultIntent.putExtra("$activityRequestCode", SYNC_NOW)
                         setResult(RESULT_OK, resultIntent)
-
                         finish()
 
                     } else {
@@ -141,20 +161,38 @@ class NewRoomChatFormActivity : AppCompatActivity() {
 
     private fun dataActivityValidation() {
 
-        val intent = intent
+        val iOwner = intent.getStringExtra(CONST_OWNER)
+        val iPhone = intent.getStringExtra(CONST_PHONE)
+        val iName = intent.getStringExtra(CONST_NAME)
+        val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
+        activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
 
-        val iPhone = intent.getStringExtra(ET_PHONE)
-        val iName = intent.getStringExtra(ET_NAME)
-        val iMessage = intent.getStringExtra(ET_MESSAGE)
-
-        if (iPhone != "") etPhone.setText(iPhone)
-        if (iName != "") etName.setText(iName)
-
-        if (iMessage != "") {
-
-            etMessage.setText(iMessage)
-            updateTxtMaxLength(iMessage?.length ?: 0)
-
+        if (!iPhone.isNullOrEmpty()) {
+            etPhone.setText(iPhone)
+            etPhone.setTextColor(getColor(R.color.black_500))
+            etPhone.setBackgroundResource(R.drawable.et_background_disabled)
+            etPhone.isEnabled = false
+        }
+        if (!iName.isNullOrEmpty()) {
+            etName.setText(iName)
+            etName.setTextColor(getColor(R.color.black_500))
+            etName.setBackgroundResource(R.drawable.et_background_disabled)
+            etName.isEnabled = false
+        }
+        if (!iOwner.isNullOrEmpty() ) {
+            etOwner.setText(iOwner)
+            etOwner.setTextColor(getColor(R.color.black_500))
+            etOwner.setBackgroundResource(R.drawable.et_background_disabled)
+            etOwner.isEnabled = false
+        }
+        if (!iBirthday.isNullOrEmpty() ) {
+            if (iBirthday == "0000-00-00") etBirthday.setText("")
+            else {
+                etBirthday.setText(DateFormat.format(iBirthday))
+                etBirthday.setTextColor(getColor(R.color.black_500))
+                etBirthday.setBackgroundResource(R.drawable.et_background_disabled)
+                etBirthday.isEnabled = false
+            }
         }
 
     }
@@ -168,6 +206,8 @@ class NewRoomChatFormActivity : AppCompatActivity() {
         btnSubmit = findViewById(R.id.btn_submit)
         etPhone = findViewById(R.id.et_phone)
         etName = findViewById(R.id.et_name)
+        etOwner = findViewById(R.id.et_owner)
+        etBirthday = findViewById(R.id.et_birthday)
         etMessage = findViewById(R.id.et_message)
 
         // Set Title Bar
@@ -175,18 +215,53 @@ class NewRoomChatFormActivity : AppCompatActivity() {
         icSyncNow.visibility = View.GONE
         tvTitleBar.text = getString(R.string.new_chat_room)
 
+        // Setup Date Picker Dialog
+        setDatePickerDialog()
+
     }
 
     private fun initClickHandler() {
 
         icBack.setOnClickListener { finish() }
         btnSubmit.setOnClickListener { sendMessage() }
+        etBirthday.setOnClickListener { datePicker.show() }
+
+        // Focus Listener
+        etName.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) etName.setSelection(etName.length())
+        }
+        etOwner.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) etOwner.setSelection(etOwner.length())
+        }
+        etBirthday.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                datePicker.show()
+                etBirthday.setSelection(etBirthday.length())
+            } else etBirthday.clearFocus()
+        }
+
+        // Change Listener
+        etBirthday.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                if (isLoaded) datePicker.show()
+            }
+
+        })
 
     }
 
     private fun loadingState(state: Boolean) {
 
         btnSubmit.setTextColor(ContextCompat.getColor(this, R.color.white))
+        btnSubmit.setBackgroundColor(ContextCompat.getColor(this, R.color.primary_200))
 
         if (state) {
 
@@ -195,12 +270,9 @@ class NewRoomChatFormActivity : AppCompatActivity() {
 
         } else {
 
-            Handler().postDelayed({
-
-                btnSubmit.isEnabled = true
-                btnSubmit.text = getString(R.string.btn_submit_new_chat_room)
-
-            }, 500)
+            btnSubmit.isEnabled = true
+            btnSubmit.text = getString(R.string.btn_submit_new_chat_room)
+            btnSubmit.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
 
         }
 
@@ -216,25 +288,49 @@ class NewRoomChatFormActivity : AppCompatActivity() {
 
     }
 
-    private fun formValidation(phone: String, name: String, message: String): Boolean {
-        return if (TextUtils.isEmpty(phone)) {
+    private fun formValidation(phone: String, name: String, birthday: String, owner: String, message: String): Boolean {
+        return if (phone.isEmpty()) {
             etPhone.error = "Phone number cannot be empty!"
+            etPhone.requestFocus()
             false
         } else if (!phoneValidation(phone)) {
+            etPhone.requestFocus()
             false
-        } else if (TextUtils.isEmpty(name)) {
+        } else if (name.isEmpty()) {
             etPhone.error = null
+            etPhone.clearFocus()
             etName.error = "Name cannot be empty!"
+            etName.requestFocus()
             false
-        } else if (TextUtils.isEmpty(message)) {
-            etPhone.error = null
-            etName.error = null
+//        } else if (owner.isEmpty()) {
+//            etBirthday.error = null
+//            etBirthday.clearFocus()
+//            etOwner.error = "Owner Name cannot be empty!"
+//            etOwner.requestFocus()
+//            false
+//        } else if (birthday.isEmpty()) {
+//            etName.error = null
+//            etName.clearFocus()
+//            etBirthday.error = "Choose owner birthday!"
+//            etBirthday.requestFocus()
+//            false
+        } else if (message.isEmpty()) {
+            etOwner.error = null
+            etOwner.clearFocus()
             etMessage.error = "Message cannot be empty!"
+            etMessage.requestFocus()
             false
         } else {
             etPhone.error = null
             etName.error = null
+            etBirthday.error = null
+            etOwner.error = null
             etMessage.error = null
+            etPhone.clearFocus()
+            etName.clearFocus()
+            etBirthday.clearFocus()
+            etOwner.clearFocus()
+            etMessage.clearFocus()
             true
         }
     }
@@ -250,5 +346,28 @@ class NewRoomChatFormActivity : AppCompatActivity() {
             etPhone.error = "Phone number must be 10 to 16 digits long"
             false
         } else true
+    }
+
+    private fun setDatePickerDialog() {
+
+        datePicker = DatePickerDialog(
+            this,
+            { _, year, month, day ->
+                selectedDate.set(Calendar.YEAR, year)
+                selectedDate.set(Calendar.MONTH, month)
+                selectedDate.set(Calendar.DAY_OF_MONTH, day)
+
+                // Do something with the selected date
+                val formattedDate = DateFormat.format(selectedDate)
+                etBirthday.setText(formattedDate)
+                etBirthday.clearFocus()
+            },
+            selectedDate.get(Calendar.YEAR),
+            selectedDate.get(Calendar.MONTH),
+            selectedDate.get(Calendar.DAY_OF_MONTH)
+        )
+
+        datePicker.setOnDismissListener { etBirthday.clearFocus() }
+
     }
 }

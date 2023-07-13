@@ -1,19 +1,186 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/primary"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:fillViewport="true"
     tools:context=".SplashScreenActivity">
 
-    <ImageView
-        android:id="@+id/logo"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:scaleType="fitCenter"
-        android:background="@color/primary"
-        android:src="@drawable/logo_light_horizontal"
-        android:contentDescription="@string/logo_horizontal"/>
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical">
 
-</RelativeLayout>
+        <!-- Logo -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/logo"
+                android:layout_width="wrap_content"
+                android:layout_height="200dp"
+                android:layout_gravity="center"
+                android:layout_marginVertical="48dp"
+                android:background="@color/primary"
+                android:contentDescription="@string/logo_horizontal"
+                android:scaleType="fitCenter"
+                android:src="@drawable/logo_light_horizontal" />
+
+        </LinearLayout>
+
+        <!-- Card Auth -->
+        <LinearLayout
+            android:id="@+id/card_auth"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:background="@drawable/background_auth"
+            android:orientation="vertical"
+            android:padding="48dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Hey,"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                android:text="Login Now."
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
+
+            <!-- Card Alert -->
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/card_alert"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                android:background="@drawable/background_auth_alert">
+
+                <TextView
+                    android:id="@+id/tv_alert"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/white"
+                    android:textSize="16sp"/>
+
+            </LinearLayout>
+
+            <!-- Email Address -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="24dp"
+                android:orientation="vertical">
+
+                <EditText
+                    android:id="@+id/et_username"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/et_background"
+                    android:inputType="textEmailAddress"
+                    android:outlineProvider="none"
+                    android:padding="12dp"
+                    android:hint="Enter username"
+                    android:textColorHint="@color/black_600"
+                    android:textSize="16sp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+            </LinearLayout>
+
+            <!-- Password -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="64dp"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/et_background">
+
+                    <EditText
+                        android:id="@+id/et_password"
+                        android:layout_toLeftOf="@+id/ic_eye_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:autofillHints="johndoe@gmail.com"
+                        android:background="@android:color/transparent"
+                        android:inputType="textPassword"
+                        android:hint="Enter password"
+                        android:outlineProvider="none"
+                        android:padding="12dp"
+                        android:textColorHint="@color/black_600"
+                        android:textSize="16sp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                    <RelativeLayout
+                        android:id="@+id/ic_eye_container"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:layout_marginHorizontal="12dp">
+
+                        <ImageView
+                            android:id="@+id/ic_eye_close"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/eye_off_line"
+                            android:visibility="visible" />
+
+                        <ImageView
+                            android:id="@+id/ic_eye_show"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/eye_line"
+                            android:visibility="gone" />
+
+                    </RelativeLayout>
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/btn_login"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="24dp"
+                    android:padding="14dp"
+                    android:textSize="20sp"
+                    android:textAllCaps="false"
+                    android:text="@string/text_login" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/text_copyright"
+                    android:textAlignment="center"
+                    android:textSize="16sp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

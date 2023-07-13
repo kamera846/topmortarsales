@@ -20,14 +20,15 @@ import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.adapter.ListContactRecyclerViewAdapter
 import com.topmortar.topmortarsales.adapter.ListContactRecyclerViewAdapter.ItemClickListener
-import com.topmortar.topmortarsales.commons.ET_NAME
-import com.topmortar.topmortarsales.commons.ET_PHONE
+import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -44,6 +45,13 @@ import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.ContactModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
+import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_OWNER
+import com.topmortar.topmortarsales.commons.LOGGED_OUT
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
 import kotlinx.coroutines.launch
 
@@ -65,6 +73,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     private lateinit var etSearchBox: EditText
 
     // Global
+    private lateinit var sessionManager: SessionManager
     private var doubleBackToExitPressedOnce = false
 
     // Initialize Search Engine
@@ -77,9 +86,12 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
 
         supportActionBar?.hide()
+        sessionManager = SessionManager(this@MainActivity)
+
+        setContentView(R.layout.activity_main)
+
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
 
         initVariable()
@@ -145,8 +157,30 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         val intent = Intent(this@MainActivity, NewRoomChatFormActivity::class.java)
 
         if (data != null) {
-            intent.putExtra(ET_NAME, data.nama)
-            intent.putExtra(ET_PHONE, data.nomorhp)
+            intent.putExtra(CONST_NAME, data.nama)
+            intent.putExtra(CONST_PHONE, data.nomorhp)
+            intent.putExtra(CONST_BIRTHDAY, data.tgl_lahir)
+            intent.putExtra(CONST_OWNER, data.store_owner)
+            intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
+        }
+
+        startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
+
+    }
+
+    private fun navigateDetailContact(data: ContactModel? = null) {
+
+        toggleSearchEvent(SEARCH_CLOSE)
+
+        val intent = Intent(this@MainActivity, DetailContactActivity::class.java)
+
+        if (data != null) {
+            intent.putExtra(CONST_CONTACT_ID, data.id_contact)
+            intent.putExtra(CONST_NAME, data.nama)
+            intent.putExtra(CONST_PHONE, data.nomorhp)
+            intent.putExtra(CONST_BIRTHDAY, data.tgl_lahir)
+            intent.putExtra(CONST_OWNER, data.store_owner)
+            intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
         }
 
         startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
@@ -165,6 +199,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
                 }
                 R.id.option_search -> {
                     toggleSearchEvent(SEARCH_OPEN)
+                    true
+                }
+                R.id.option_logout -> {
+                    logoutHandler()
                     true
                 }
                 else -> false
@@ -407,6 +445,26 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
         rvListChat.layoutManager = LinearLayoutManager(this@MainActivity)
         rvListChat.adapter = rvAdapter
+        rvListChat.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            private var lastScrollPosition = 0
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (dy < 0) {
+                    // Scrolled up
+                    val firstVisibleItemPosition =
+                        (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                    if (lastScrollPosition != firstVisibleItemPosition) {
+                        recyclerView.findViewHolderForAdapterPosition(firstVisibleItemPosition)?.itemView?.startAnimation(
+                            AnimationUtils.loadAnimation(
+                                recyclerView.context,
+                                R.anim.rv_item_fade_slide_down
+                            )
+                        )
+                        lastScrollPosition = firstVisibleItemPosition
+                    }
+                } else lastScrollPosition = -1
+            }
+        })
 
     }
 
@@ -418,6 +476,23 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     private fun hideKeyboard() {
         val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(etSearchBox.windowToken, 0)
+    }
+
+    private fun logoutHandler() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Logout Confirmation")
+            .setMessage("Are you sure you want to log out?")
+            .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+            .setPositiveButton("Yes") { dialog, _ ->
+                dialog.dismiss()
+                sessionManager.setLoggedIn(LOGGED_OUT)
+                sessionManager.setUserKind("")
+                val intent = Intent(this@MainActivity, SplashScreenActivity::class.java)
+                startActivity(intent)
+                finish()
+            }
+        val dialog = builder.create()
+        dialog.show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -457,12 +532,15 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     }
 
     override fun onItemClick(data: ContactModel?) {
-        navigateAddNewRoom(data)
+
+        if (sessionManager.userKind() == USER_KIND_ADMIN) navigateDetailContact(data)
+        else navigateAddNewRoom(data)
+
     }
 
     override fun onResume() {
-        super.onResume()
 
+        super.onResume()
         // Check apps for update
         AppUpdateHelper.checkForUpdates(this)
 

@@ -1,5 +1,6 @@
 package com.topmortar.topmortarsales.data
 
+import com.topmortar.topmortarsales.commons.EDIT_CONTACT
 import com.topmortar.topmortarsales.commons.GET_CONTACT
 import com.topmortar.topmortarsales.commons.SEARCH_CONTACT
 import com.topmortar.topmortarsales.commons.SEND_MESSAGE
@@ -15,11 +16,22 @@ interface ApiService {
     suspend fun getContacts(): ResponseContactList
 
     @Multipart
+    @POST(EDIT_CONTACT)
+    suspend fun editContact(
+        @Part("id") id: RequestBody,
+        @Part("nama") nama: RequestBody,
+        @Part("owner_name") ownerName: RequestBody,
+        @Part("tgl_lahir") tglLahir: RequestBody
+    ): Response<ResponseMessage>
+
+    @Multipart
     @POST(SEND_MESSAGE)
     suspend fun sendMessage(
         @Part("nama") name: RequestBody,
         @Part("nomorhp") phone: RequestBody,
-        @Part("message_body") message: RequestBody
+        @Part("tgl_lahir") birthday: RequestBody,
+        @Part("owner_name") ownerName: RequestBody,
+        @Part("message_body") message: RequestBody,
     ): Response<ResponseMessage>
 
     @Multipart
