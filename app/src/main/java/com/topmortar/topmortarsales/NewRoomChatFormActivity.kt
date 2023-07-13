@@ -24,7 +24,6 @@ import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
-import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -168,12 +167,32 @@ class NewRoomChatFormActivity : AppCompatActivity() {
         val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
         activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
 
-        if (!iPhone.isNullOrEmpty()) etPhone.setText(iPhone)
-        if (!iName.isNullOrEmpty()) etName.setText(iName)
-        if (!iOwner.isNullOrEmpty() ) etOwner.setText(iOwner)
+        if (!iPhone.isNullOrEmpty()) {
+            etPhone.setText(iPhone)
+            etPhone.setTextColor(getColor(R.color.black_500))
+            etPhone.setBackgroundResource(R.drawable.et_background_disabled)
+            etPhone.isEnabled = false
+        }
+        if (!iName.isNullOrEmpty()) {
+            etName.setText(iName)
+            etName.setTextColor(getColor(R.color.black_500))
+            etName.setBackgroundResource(R.drawable.et_background_disabled)
+            etName.isEnabled = false
+        }
+        if (!iOwner.isNullOrEmpty() ) {
+            etOwner.setText(iOwner)
+            etOwner.setTextColor(getColor(R.color.black_500))
+            etOwner.setBackgroundResource(R.drawable.et_background_disabled)
+            etOwner.isEnabled = false
+        }
         if (!iBirthday.isNullOrEmpty() ) {
             if (iBirthday == "0000-00-00") etBirthday.setText("")
-            else etBirthday.setText(DateFormat.format(iBirthday))
+            else {
+                etBirthday.setText(DateFormat.format(iBirthday))
+                etBirthday.setTextColor(getColor(R.color.black_500))
+                etBirthday.setBackgroundResource(R.drawable.et_background_disabled)
+                etBirthday.isEnabled = false
+            }
         }
 
     }
