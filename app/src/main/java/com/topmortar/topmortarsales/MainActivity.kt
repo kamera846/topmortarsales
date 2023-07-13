@@ -445,6 +445,26 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
         rvListChat.layoutManager = LinearLayoutManager(this@MainActivity)
         rvListChat.adapter = rvAdapter
+        rvListChat.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            private var lastScrollPosition = 0
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (dy < 0) {
+                    // Scrolled up
+                    val firstVisibleItemPosition =
+                        (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                    if (lastScrollPosition != firstVisibleItemPosition) {
+                        recyclerView.findViewHolderForAdapterPosition(firstVisibleItemPosition)?.itemView?.startAnimation(
+                            AnimationUtils.loadAnimation(
+                                recyclerView.context,
+                                R.anim.rv_item_fade_slide_down
+                            )
+                        )
+                        lastScrollPosition = firstVisibleItemPosition
+                    }
+                } else lastScrollPosition = -1
+            }
+        })
 
     }
 
