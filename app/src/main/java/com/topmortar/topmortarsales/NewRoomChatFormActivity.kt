@@ -272,7 +272,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         etStoreLocated.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 showSearchModal()
-                etStoreLocated.setSelection(etBirthday.length())
+                etStoreLocated.setSelection(etStoreLocated.length())
             } else etStoreLocated.clearFocus()
         }
 
@@ -358,7 +358,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         } else if (location.isEmpty()) {
             etName.error = null
             etName.clearFocus()
-            etStoreLocated.error = "Choose owner birthday!"
+            etStoreLocated.error = "Choose store location!"
             etStoreLocated.requestFocus()
             false
 //        } else if (owner.isEmpty()) {

@@ -19,6 +19,7 @@ import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
@@ -40,25 +41,30 @@ class DetailContactActivity : AppCompatActivity() {
 
     private lateinit var tvPhoneContainer: LinearLayout
     private lateinit var tvBirthdayContainer: LinearLayout
+    private lateinit var tvLocationContainer: LinearLayout
     private lateinit var etPhoneContainer: LinearLayout
     private lateinit var etBirthdayContainer: LinearLayout
+    private lateinit var etLocationContainer: LinearLayout
     private lateinit var tvOwnerContainer: LinearLayout
     private lateinit var etOwnerContainer: LinearLayout
     private lateinit var icBack: ImageView
     private lateinit var icEdit: ImageView
     private lateinit var tooltipOwner: ImageView
     private lateinit var tooltipBirthday: ImageView
+    private lateinit var tooltipLocation: ImageView
     private lateinit var tvTitleBar: TextView
     private lateinit var tvCancelEdit: TextView
     private lateinit var tvName: TextView
     private lateinit var tvDescription: TextView
     private lateinit var tvPhone: TextView
     private lateinit var tvBirthday: TextView
+    private lateinit var tvLocation: TextView
     private lateinit var etName: EditText
     private lateinit var tvOwner: TextView
     private lateinit var etOwner: EditText
     private lateinit var etPhone: EditText
     private lateinit var etBirthday: EditText
+    private lateinit var etLocation: EditText
     private lateinit var btnSendMessage: Button
     private lateinit var btnSaveEdit: Button
 
@@ -86,8 +92,10 @@ class DetailContactActivity : AppCompatActivity() {
 
         tvPhoneContainer = findViewById(R.id.tv_phone_container)
         tvBirthdayContainer = findViewById(R.id.tv_birthday_container)
+        tvLocationContainer = findViewById(R.id.tv_location_container)
         etPhoneContainer = findViewById(R.id.et_phone_container)
         etBirthdayContainer = findViewById(R.id.et_birthday_container)
+        etLocationContainer = findViewById(R.id.et_location_container)
         tvOwnerContainer = findViewById(R.id.tv_owner_container)
         etOwnerContainer = findViewById(R.id.et_owner_container)
         tvOwner = findViewById(R.id.tv_owner)
@@ -97,16 +105,19 @@ class DetailContactActivity : AppCompatActivity() {
         icEdit = findViewById(R.id.ic_edit)
         tooltipOwner = findViewById(R.id.tooltip_owner)
         tooltipBirthday = findViewById(R.id.tooltip_birthday)
+        tooltipLocation = findViewById(R.id.tooltip_location)
         tvTitleBar = findViewById(R.id.tv_title_bar)
         tvCancelEdit = findViewById(R.id.tv_cancel_edit)
         tvName = findViewById(R.id.tv_name)
         tvDescription = findViewById(R.id.tv_description)
         tvPhone = findViewById(R.id.tv_phone)
         tvBirthday = findViewById(R.id.tv_birthday)
+        tvLocation = findViewById(R.id.tv_location)
         etName = findViewById(R.id.et_name)
         etOwner = findViewById(R.id.et_owner)
         etPhone = findViewById(R.id.et_phone)
         etBirthday = findViewById(R.id.et_birthday)
+        etLocation = findViewById(R.id.et_location)
         btnSendMessage = findViewById(R.id.btn_send_message)
         btnSaveEdit = findViewById(R.id.btn_save_edit)
 
@@ -165,6 +176,15 @@ class DetailContactActivity : AppCompatActivity() {
             false
         }
 
+        val tooltipLocationText = "Store Location"
+        tooltipLocation.setOnClickListener {
+            TooltipCompat.setTooltipText(tooltipLocation, tooltipLocationText)
+        }
+        tooltipLocation.setOnLongClickListener {
+            TooltipCompat.setTooltipText(tooltipLocation, tooltipLocationText)
+            false
+        }
+
         val tooltipBirthdayText = "Owner Birthday"
         tooltipBirthday.setOnClickListener {
             TooltipCompat.setTooltipText(tooltipBirthday, tooltipBirthdayText)
@@ -179,8 +199,9 @@ class DetailContactActivity : AppCompatActivity() {
     private fun dataActivityValidation() {
 
         val iContactId = intent.getStringExtra(CONST_CONTACT_ID)
-        val iOwner = intent.getStringExtra(CONST_OWNER)
         val iPhone = intent.getStringExtra(CONST_PHONE)
+        val iOwner = intent.getStringExtra(CONST_OWNER)
+        val iLocation = intent.getStringExtra(CONST_LOCATION)
         val iName = intent.getStringExtra(CONST_NAME)
         val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
         activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
@@ -195,6 +216,13 @@ class DetailContactActivity : AppCompatActivity() {
         if (!iName.isNullOrEmpty() ) {
             tvName.text = iName
             etName.setText(iName)
+        }
+        if (!iLocation.isNullOrEmpty() ) {
+            tvLocation.text = iLocation
+            etLocation.setText(iLocation)
+        } else {
+            tvLocation.text = "Not set"
+            etLocation.setText("")
         }
         if (!iOwner.isNullOrEmpty() ) {
             tvOwner.text = iOwner
@@ -221,6 +249,7 @@ class DetailContactActivity : AppCompatActivity() {
         if (isEdit) {
 
             tvBirthdayContainer.visibility = View.GONE
+            tvLocationContainer.visibility = View.GONE
             tvOwnerContainer.visibility = View.GONE
             tvName.visibility = View.GONE
             tvDescription.visibility = View.GONE
@@ -228,6 +257,7 @@ class DetailContactActivity : AppCompatActivity() {
             btnSendMessage.visibility = View.GONE
 
             etBirthdayContainer.visibility = View.VISIBLE
+            etLocationContainer.visibility = View.VISIBLE
             etOwnerContainer.visibility = View.VISIBLE
             tvCancelEdit.visibility = View.VISIBLE
             etName.visibility = View.VISIBLE
@@ -240,6 +270,7 @@ class DetailContactActivity : AppCompatActivity() {
         } else {
 
             tvBirthdayContainer.visibility = View.VISIBLE
+            tvLocationContainer.visibility = View.VISIBLE
             tvOwnerContainer.visibility = View.VISIBLE
             tvName.visibility = View.VISIBLE
             tvDescription.visibility = View.VISIBLE
@@ -247,6 +278,7 @@ class DetailContactActivity : AppCompatActivity() {
             btnSendMessage.visibility = View.VISIBLE
 
             etBirthdayContainer.visibility = View.GONE
+            etLocationContainer.visibility = View.GONE
             etOwnerContainer.visibility = View.GONE
             tvCancelEdit.visibility = View.GONE
             etName.visibility = View.GONE
