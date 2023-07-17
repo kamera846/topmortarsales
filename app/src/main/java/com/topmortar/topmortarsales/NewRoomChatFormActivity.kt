@@ -9,9 +9,13 @@ import android.text.Editable
 import android.text.InputFilter
 import android.text.TextWatcher
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -24,6 +28,7 @@ import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
+import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -47,13 +52,17 @@ class NewRoomChatFormActivity : AppCompatActivity() {
     private lateinit var etOwner: EditText
     private lateinit var etBirthday: EditText
     private lateinit var etMessage: EditText
+    private lateinit var spinnerSearchbox: AutoCompleteTextView
+
+    private lateinit var spinnerAdapter: ArrayAdapter<CharSequence>
+    private lateinit var datePicker: DatePickerDialog
 
     private var isLoaded = false
     private var activityRequestCode = MAIN_ACTIVITY_REQUEST_CODE
     private val msgMaxLines = 5
     private val msgMaxLength = 200
     private var selectedDate: Calendar = Calendar.getInstance()
-    private lateinit var datePicker: DatePickerDialog
+    private var cities = listOf("Malang", "Gresik", "Sidoarjo", "Blitar", "Surabaya", "Jakarta", "Bandung", "Yogyakarta", "Kediri")
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -209,6 +218,7 @@ class NewRoomChatFormActivity : AppCompatActivity() {
         etOwner = findViewById(R.id.et_owner)
         etBirthday = findViewById(R.id.et_birthday)
         etMessage = findViewById(R.id.et_message)
+        spinnerSearchbox = findViewById(R.id.spinner_searchbox)
 
         // Set Title Bar
         icBack.visibility = View.VISIBLE
@@ -217,6 +227,9 @@ class NewRoomChatFormActivity : AppCompatActivity() {
 
         // Setup Date Picker Dialog
         setDatePickerDialog()
+
+        // Setup Spinner
+        setSpinnerCities()
 
     }
 
@@ -370,4 +383,18 @@ class NewRoomChatFormActivity : AppCompatActivity() {
         datePicker.setOnDismissListener { etBirthday.clearFocus() }
 
     }
+
+    private fun setSpinnerCities() {
+
+        spinnerAdapter = ArrayAdapter(
+            this@NewRoomChatFormActivity,
+            android.R.layout.simple_dropdown_item_1line,
+            cities
+        )
+
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line)
+        spinnerSearchbox.setAdapter(spinnerAdapter)
+
+    }
+
 }

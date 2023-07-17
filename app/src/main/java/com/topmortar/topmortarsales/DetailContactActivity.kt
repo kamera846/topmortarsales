@@ -26,7 +26,6 @@ import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
-import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -423,7 +422,7 @@ class DetailContactActivity : AppCompatActivity() {
                 val resultIntent = Intent()
                 resultIntent.putExtra("$activityRequestCode", SYNC_NOW)
                 setResult(RESULT_OK, resultIntent)
-                handleMessage(this, TAG_ACTION_MAIN_ACTIVITY, "$activityRequestCode : $SYNC_NOW")
+
                 finish()
 
             } else finish()
