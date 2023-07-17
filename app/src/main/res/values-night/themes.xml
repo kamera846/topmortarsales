@@ -21,6 +21,11 @@
         <item name="android:background">@color/black_300</item>
     </style>
 
+    <!-- Title bar theme. -->
+    <style name="Theme.TopMortarSales.BaseBackground" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="android:background">@color/black_200</item>
+    </style>
+
     <!-- Base line theme. -->
     <style name="Theme.TopMortarSales.BaseLine" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <item name="android:background">@color/black_300</item>

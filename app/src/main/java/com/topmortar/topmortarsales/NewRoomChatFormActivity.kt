@@ -9,13 +9,11 @@ import android.text.Editable
 import android.text.InputFilter
 import android.text.TextWatcher
 import android.view.View
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
-import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -36,11 +34,13 @@ import com.topmortar.topmortarsales.commons.utils.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.modal.SearchModal
+import com.topmortar.topmortarsales.model.ModalSearchModel
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
 @SuppressLint("SetTextI18n")
-class NewRoomChatFormActivity : AppCompatActivity() {
+class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
     private lateinit var icBack: ImageView
     private lateinit var icSyncNow: ImageView
@@ -51,17 +51,20 @@ class NewRoomChatFormActivity : AppCompatActivity() {
     private lateinit var etName: EditText
     private lateinit var etOwner: EditText
     private lateinit var etBirthday: EditText
+    private lateinit var etStoreLocated: EditText
     private lateinit var etMessage: EditText
-    private lateinit var spinnerSearchbox: AutoCompleteTextView
+    private lateinit var spinnerSearchBox: AutoCompleteTextView
 
     private lateinit var spinnerAdapter: ArrayAdapter<CharSequence>
     private lateinit var datePicker: DatePickerDialog
+    private lateinit var searchModal: SearchModal
 
     private var isLoaded = false
     private var activityRequestCode = MAIN_ACTIVITY_REQUEST_CODE
     private val msgMaxLines = 5
     private val msgMaxLength = 200
     private var selectedDate: Calendar = Calendar.getInstance()
+    private var selectedCity: ModalSearchModel? = null
     private var cities = listOf("Malang", "Gresik", "Sidoarjo", "Blitar", "Surabaya", "Jakarta", "Bandung", "Yogyakarta", "Kediri")
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,22 +89,31 @@ class NewRoomChatFormActivity : AppCompatActivity() {
 
         val phone = "${ etPhone.text }"
         val name = "${ etName.text }"
+        val location = "${ etStoreLocated.text }"
         var birthday = "${ etBirthday.text }"
         val owner = "${ etOwner.text }"
         val message = "${ etMessage.text }"
 
-        if (!formValidation(phone, name, birthday, owner, message)) return
+        if (!formValidation(phone, name, location, birthday, owner, message)) return
 
         birthday = if (birthday.isEmpty()) "0000-00-00"
         else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
 
         loadingState(true)
 
+        Handler().postDelayed({
+            handleMessage(this@NewRoomChatFormActivity, TAG_ACTION_MAIN_ACTIVITY, "$phone : $name : $location : $birthday : $owner : $message")
+            loadingState(false)
+        }, 1000)
+
+        return
+
         lifecycleScope.launch {
             try {
 
                 val rbPhone = createPartFromString(formatPhoneNumber(phone))
                 val rbName = createPartFromString(name)
+//                val rbLocation = createPartFromString(selectedCity!!.id)
                 val rbBirthday = createPartFromString(birthday)
                 val rbOwner = createPartFromString(owner)
                 val rbMessage = createPartFromString(message)
@@ -217,8 +229,9 @@ class NewRoomChatFormActivity : AppCompatActivity() {
         etName = findViewById(R.id.et_name)
         etOwner = findViewById(R.id.et_owner)
         etBirthday = findViewById(R.id.et_birthday)
+        etStoreLocated = findViewById(R.id.et_store_located)
         etMessage = findViewById(R.id.et_message)
-        spinnerSearchbox = findViewById(R.id.spinner_searchbox)
+        spinnerSearchBox = findViewById(R.id.spinner_searchbox)
 
         // Set Title Bar
         icBack.visibility = View.VISIBLE
@@ -231,6 +244,9 @@ class NewRoomChatFormActivity : AppCompatActivity() {
         // Setup Spinner
         setSpinnerCities()
 
+        // Setup Dialog Search
+        setupDialogSearch()
+
     }
 
     private fun initClickHandler() {
@@ -238,6 +254,7 @@ class NewRoomChatFormActivity : AppCompatActivity() {
         icBack.setOnClickListener { finish() }
         btnSubmit.setOnClickListener { sendMessage() }
         etBirthday.setOnClickListener { datePicker.show() }
+        etStoreLocated.setOnClickListener { showSearchModal() }
 
         // Focus Listener
         etName.setOnFocusChangeListener { _, hasFocus ->
@@ -252,6 +269,12 @@ class NewRoomChatFormActivity : AppCompatActivity() {
                 etBirthday.setSelection(etBirthday.length())
             } else etBirthday.clearFocus()
         }
+        etStoreLocated.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                showSearchModal()
+                etStoreLocated.setSelection(etBirthday.length())
+            } else etStoreLocated.clearFocus()
+        }
 
         // Change Listener
         etBirthday.addTextChangedListener(object : TextWatcher {
@@ -265,6 +288,23 @@ class NewRoomChatFormActivity : AppCompatActivity() {
 
             override fun afterTextChanged(s: Editable?) {
                 if (isLoaded) datePicker.show()
+            }
+
+        })
+        etStoreLocated.addTextChangedListener (object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                if (isLoaded) {
+                    if (s.toString().isNotEmpty()) etStoreLocated.error = null
+                    showSearchModal()
+                }
             }
 
         })
@@ -301,7 +341,7 @@ class NewRoomChatFormActivity : AppCompatActivity() {
 
     }
 
-    private fun formValidation(phone: String, name: String, birthday: String, owner: String, message: String): Boolean {
+    private fun formValidation(phone: String, name: String, location: String, birthday: String, owner: String, message: String): Boolean {
         return if (phone.isEmpty()) {
             etPhone.error = "Phone number cannot be empty!"
             etPhone.requestFocus()
@@ -314,6 +354,12 @@ class NewRoomChatFormActivity : AppCompatActivity() {
             etPhone.clearFocus()
             etName.error = "Name cannot be empty!"
             etName.requestFocus()
+            false
+        } else if (location.isEmpty()) {
+            etName.error = null
+            etName.clearFocus()
+            etStoreLocated.error = "Choose owner birthday!"
+            etStoreLocated.requestFocus()
             false
 //        } else if (owner.isEmpty()) {
 //            etBirthday.error = null
@@ -336,11 +382,13 @@ class NewRoomChatFormActivity : AppCompatActivity() {
         } else {
             etPhone.error = null
             etName.error = null
+            etStoreLocated.error = null
             etBirthday.error = null
             etOwner.error = null
             etMessage.error = null
             etPhone.clearFocus()
             etName.clearFocus()
+            etStoreLocated.clearFocus()
             etBirthday.clearFocus()
             etOwner.clearFocus()
             etMessage.clearFocus()
@@ -380,7 +428,10 @@ class NewRoomChatFormActivity : AppCompatActivity() {
             selectedDate.get(Calendar.DAY_OF_MONTH)
         )
 
-        datePicker.setOnDismissListener { etBirthday.clearFocus() }
+        datePicker.setOnDismissListener {
+            etBirthday.clearFocus()
+            etMessage.requestFocus()
+        }
 
     }
 
@@ -393,8 +444,42 @@ class NewRoomChatFormActivity : AppCompatActivity() {
         )
 
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line)
-        spinnerSearchbox.setAdapter(spinnerAdapter)
+        spinnerSearchBox.setAdapter(spinnerAdapter)
 
+    }
+
+    private fun setupDialogSearch() {
+
+        val items = ArrayList<ModalSearchModel>()
+        items.add(ModalSearchModel("1", "Malang"))
+        items.add(ModalSearchModel("2", "Gresik"))
+        items.add(ModalSearchModel("3", "Sidoarjo"))
+        items.add(ModalSearchModel("4", "Blitar"))
+        items.add(ModalSearchModel("5", "Surabaya"))
+        items.add(ModalSearchModel("6", "Jakarta"))
+        items.add(ModalSearchModel("7", "Bandung"))
+        items.add(ModalSearchModel("8", "Yogyakarta"))
+        items.add(ModalSearchModel("9", "Kediri"))
+
+        searchModal = SearchModal(this, items)
+        searchModal.setCustomDialogListener(this)
+        searchModal.searchHint = "Enter city name..."
+        searchModal.setOnDismissListener {
+            etStoreLocated.clearFocus()
+            etOwner.requestFocus()
+        }
+
+    }
+
+    private fun showSearchModal() {
+        val searchKey = etStoreLocated.text.toString()
+        if (searchKey.isNotEmpty()) searchModal.setSearchKey(searchKey)
+        searchModal.show()
+    }
+
+    override fun onDataReceived(data: ModalSearchModel) {
+        etStoreLocated.setText(data.title)
+        selectedCity = data
     }
 
 }

@@ -5,6 +5,7 @@
     android:orientation="vertical">
 
    <LinearLayout
+       android:id="@+id/container"
        android:layout_width="match_parent"
        android:layout_height="wrap_content"
        android:gravity="center_vertical"
@@ -29,7 +30,7 @@
           android:autofillHints="@string/search_contact"
           android:textSize="16sp"
           android:paddingVertical="8dp"
-          android:background="@drawable/et_search_background"
+          android:background="@android:color/transparent"
           android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
           android:outlineProvider="none"/>
 
