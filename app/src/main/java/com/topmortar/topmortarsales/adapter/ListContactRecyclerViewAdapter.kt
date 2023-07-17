@@ -1,15 +1,19 @@
 package com.topmortar.topmortarsales.adapter
 
+import android.content.Context
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.model.ContactModel
 
 class ListContactRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<ListContactRecyclerViewAdapter.ChatViewHolder>() {
+    private var context: Context? = null
 
     interface ItemClickListener {
         fun onItemClick(data: ContactModel? = null)
@@ -32,6 +36,7 @@ class ListContactRecyclerViewAdapter(private val chatList: ArrayList<ContactMode
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
 
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
+        context = parent.context
         return ChatViewHolder(view)
 
     }
@@ -46,8 +51,25 @@ class ListContactRecyclerViewAdapter(private val chatList: ArrayList<ContactMode
         holder.itemView.setOnClickListener {
 
             if (position != RecyclerView.NO_POSITION) {
+                val animateDuration = 200L
+
+                val fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in)
+                fadeIn.duration = animateDuration
+
+                val overlayView = holder.itemView.findViewById<LinearLayout>(R.id.overlay_view)
+
+                overlayView.alpha = 0.7f
+                overlayView.visibility = View.VISIBLE
+                overlayView.startAnimation(fadeIn)
+
+                Handler().postDelayed({
+                    overlayView.alpha = 0f
+                    overlayView.visibility = View.GONE
+                }, animateDuration)
+
                 val data = chatList[position]
                 itemClickListener.onItemClick(data)
+
             }
 
         }
