@@ -101,12 +101,12 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
         loadingState(true)
 
-        Handler().postDelayed({
-            handleMessage(this@NewRoomChatFormActivity, TAG_ACTION_MAIN_ACTIVITY, "$phone : $name : $location : $birthday : $owner : $message")
-            loadingState(false)
-        }, 1000)
-
-        return
+//        Handler().postDelayed({
+//            handleMessage(this@NewRoomChatFormActivity, TAG_ACTION_MAIN_ACTIVITY, "$phone : $name : $location : $birthday : $owner : $message")
+//            loadingState(false)
+//        }, 1000)
+//
+//        return
 
         lifecycleScope.launch {
             try {
@@ -355,12 +355,12 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             etName.error = "Name cannot be empty!"
             etName.requestFocus()
             false
-        } else if (location.isEmpty()) {
-            etName.error = null
-            etName.clearFocus()
-            etStoreLocated.error = "Choose store location!"
-            etStoreLocated.requestFocus()
-            false
+//        } else if (location.isEmpty()) {
+//            etName.error = null
+//            etName.clearFocus()
+//            etStoreLocated.error = "Choose store location!"
+//            etStoreLocated.requestFocus()
+//            false
 //        } else if (owner.isEmpty()) {
 //            etBirthday.error = null
 //            etBirthday.clearFocus()
