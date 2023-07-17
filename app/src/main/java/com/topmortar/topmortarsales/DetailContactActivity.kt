@@ -33,11 +33,13 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.modal.SearchModal
+import com.topmortar.topmortarsales.model.ModalSearchModel
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
 @Suppress("DEPRECATION")
-class DetailContactActivity : AppCompatActivity() {
+class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
     private lateinit var tvPhoneContainer: LinearLayout
     private lateinit var tvBirthdayContainer: LinearLayout
@@ -72,8 +74,11 @@ class DetailContactActivity : AppCompatActivity() {
     private var contactId: String? = null
     private var isEdit: Boolean = false
     private var selectedDate: Calendar = Calendar.getInstance()
+    private var selectedCity: ModalSearchModel? = null
     private var hasEdited: Boolean = false
+
     private lateinit var datePicker: DatePickerDialog
+    private lateinit var searchModal: SearchModal
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -124,6 +129,9 @@ class DetailContactActivity : AppCompatActivity() {
         // Setup Date Picker Dialog
         setDatePickerDialog()
 
+        // Setup Dialog Search
+        setupDialogSearch()
+
     }
 
     private fun initClickHandler() {
@@ -135,6 +143,8 @@ class DetailContactActivity : AppCompatActivity() {
         btnSaveEdit.setOnClickListener { editConfirmation() }
         etBirthdayContainer.setOnClickListener { datePicker.show() }
         etBirthday.setOnClickListener { datePicker.show() }
+        etLocationContainer.setOnClickListener { showSearchModal() }
+        etLocation.setOnClickListener { showSearchModal() }
 
         // Focus Listener
         etName.setOnFocusChangeListener { _, hasFocus ->
@@ -149,6 +159,12 @@ class DetailContactActivity : AppCompatActivity() {
                 etBirthday.setSelection(etBirthday.length())
             } else etBirthday.clearFocus()
         }
+        etLocation.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                showSearchModal()
+                etLocation.setSelection(etLocation.length())
+            } else etLocation.clearFocus()
+        }
 
         // Change Listener
         etBirthday.addTextChangedListener(object : TextWatcher {
@@ -162,6 +178,20 @@ class DetailContactActivity : AppCompatActivity() {
 
             override fun afterTextChanged(s: Editable?) {
                 if (isEdit) datePicker.show()
+            }
+
+        })
+        etLocation.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                if (isEdit) showSearchModal()
             }
 
         })
@@ -483,6 +513,35 @@ class DetailContactActivity : AppCompatActivity() {
 
     }
 
+    private fun setupDialogSearch() {
+
+        val items = ArrayList<ModalSearchModel>()
+        items.add(ModalSearchModel("1", "Malang"))
+        items.add(ModalSearchModel("2", "Gresik"))
+        items.add(ModalSearchModel("3", "Sidoarjo"))
+        items.add(ModalSearchModel("4", "Blitar"))
+        items.add(ModalSearchModel("5", "Surabaya"))
+        items.add(ModalSearchModel("6", "Jakarta"))
+        items.add(ModalSearchModel("7", "Bandung"))
+        items.add(ModalSearchModel("8", "Yogyakarta"))
+        items.add(ModalSearchModel("9", "Kediri"))
+
+        searchModal = SearchModal(this, items)
+        searchModal.setCustomDialogListener(this)
+        searchModal.searchHint = "Enter city name..."
+        searchModal.setOnDismissListener {
+            etLocation.clearFocus()
+            etOwner.requestFocus()
+        }
+
+    }
+
+    private fun showSearchModal() {
+        val searchKey = etLocation.text.toString()
+        if (searchKey.isNotEmpty()) searchModal.setSearchKey(searchKey)
+        searchModal.show()
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -499,6 +558,11 @@ class DetailContactActivity : AppCompatActivity() {
     override fun onBackPressed() {
 //      return super.onBackPressed()
         backHandler()
+    }
+
+    override fun onDataReceived(data: ModalSearchModel) {
+        etLocation.setText(data.title)
+        selectedCity = data
     }
 
 }
