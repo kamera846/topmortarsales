@@ -29,6 +29,7 @@ import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.utils.DateFormat
+import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -237,6 +238,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         icBack.visibility = View.VISIBLE
         icSyncNow.visibility = View.GONE
         tvTitleBar.text = getString(R.string.new_chat_room)
+        tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Setup Date Picker Dialog
         setDatePickerDialog()

@@ -8,6 +8,7 @@ import android.os.Looper
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
+import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
@@ -68,6 +69,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     private lateinit var llSearchBox: LinearLayout
     private lateinit var btnFab: FloatingActionButton
     private lateinit var icMore: ImageView
+    private lateinit var icSearch: ImageView
     private lateinit var icCloseSearch: ImageView
     private lateinit var icClearSearch: ImageView
     private lateinit var etSearchBox: EditText
@@ -110,13 +112,15 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         llTitleBar = findViewById(R.id.title_bar)
         llSearchBox = findViewById(R.id.search_box)
         btnFab = findViewById(R.id.btn_fab)
-        icMore = findViewById(R.id.ic_more)
+        icMore = llTitleBar.findViewById(R.id.ic_more)
+        icSearch = llTitleBar.findViewById(R.id.ic_search)
         icCloseSearch = findViewById(R.id.ic_close_search)
         icClearSearch = findViewById(R.id.ic_clear_search)
         etSearchBox = findViewById(R.id.et_search_box)
 
         // Set Title Bar
         icMore.visibility = View.VISIBLE
+        icSearch.visibility = View.VISIBLE
 
     }
 
@@ -124,6 +128,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
         btnFab.setOnClickListener { navigateAddNewRoom() }
         icMore.setOnClickListener { showPopupMenu() }
+        icSearch.setOnClickListener { toggleSearchEvent(SEARCH_OPEN) }
         icCloseSearch.setOnClickListener { toggleSearchEvent(SEARCH_CLOSE) }
         icClearSearch.setOnClickListener { etSearchBox.setText("") }
         rlLoading.setOnTouchListener { _, event -> blurSearchBox(event) }
@@ -190,6 +195,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     private fun showPopupMenu() {
         val popupMenu = PopupMenu(this@MainActivity, icMore)
         popupMenu.inflate(R.menu.option_main_menu)
+
+        val searchItem = popupMenu.menu.findItem(R.id.option_search)
+
+        searchItem.isVisible = false
 
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
