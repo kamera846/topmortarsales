@@ -74,6 +74,8 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
     private var citiesResults: ArrayList<CityModel> = ArrayList()
     private var cities = listOf("Malang", "Gresik", "Sidoarjo", "Blitar", "Surabaya", "Jakarta", "Bandung", "Yogyakarta", "Kediri")
 
+    private var iLocation: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -87,7 +89,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         etMessageListener()
 
         Handler().postDelayed({
-            isLoaded = true
+            getCities()
         }, 500)
 
     }
@@ -193,6 +195,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         val iPhone = intent.getStringExtra(CONST_PHONE)
         val iName = intent.getStringExtra(CONST_NAME)
         val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
+        iLocation = intent.getStringExtra(CONST_LOCATION)
         activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
 
         if (!iPhone.isNullOrEmpty()) {
@@ -212,6 +215,12 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             etOwner.setTextColor(getColor(R.color.black_500))
             etOwner.setBackgroundResource(R.drawable.et_background_disabled)
             etOwner.isEnabled = false
+        }
+        if (!iLocation.isNullOrEmpty()) {
+            etStoreLocated.setText("Loading...")
+            etStoreLocated.setTextColor(getColor(R.color.black_500))
+            etStoreLocated.setBackgroundResource(R.drawable.et_background_disabled)
+            etStoreLocated.isEnabled = false
         }
         if (!iBirthday.isNullOrEmpty()) {
             if (iBirthday == "0000-00-00") etBirthday.setText("")
@@ -254,9 +263,6 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
         // Setup Dialog Search
         setupDialogSearch()
-
-        // Get List City
-        getCities()
 
     }
 
@@ -480,6 +486,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
     private fun getCities() {
         // Get Cities
         isCitiesLoaded = false
+
         lifecycleScope.launch {
             try {
 
@@ -494,26 +501,25 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
                         for (i in 0 until citiesResults.size) {
                             val data = citiesResults[i]
-                            items.add(ModalSearchModel(data.id_city, data.nama_city))
+                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
                         }
 
                         setupDialogSearch(items)
-                        isCitiesLoaded = true
-//                        searchModal.isLoading(false)
 
-                        val iLocation = intent.getStringExtra(CONST_LOCATION)
-                        if (!iLocation.isNullOrEmpty()) {
-                            if (isCitiesLoaded) {
-                                val foundItem = citiesResults.find { it.id_city == iLocation }
-                                if (foundItem != null) {
-                                    selectedCity = ModalSearchModel(foundItem.id_city, foundItem.nama_city)
-                                    etStoreLocated.setText(foundItem.nama_city)
-                                    etStoreLocated.setTextColor(getColor(R.color.black_500))
-                                    etStoreLocated.setBackgroundResource(R.drawable.et_background_disabled)
-                                    etStoreLocated.isEnabled = false
-                                }
-                            }
+                        val foundItem = citiesResults.find { it.id_city == iLocation }
+                        if (foundItem != null) {
+                            selectedCity = ModalSearchModel(foundItem.id_city, "${foundItem.nama_city} - ${foundItem.kode_city}")
+                            etStoreLocated.setText("${foundItem.nama_city} - ${foundItem.kode_city}")
+                        } else {
+                            etStoreLocated.setText("")
+                            etStoreLocated.setTextColor(getColor(R.color.black_200))
+                            etStoreLocated.setBackgroundResource(R.drawable.et_background)
+                            etStoreLocated.isEnabled = true
                         }
+
+                        isCitiesLoaded = true
+                        isLoaded = true
+//                        searchModal.isLoading(false)
 
                     }
                     RESPONSE_STATUS_EMPTY -> {

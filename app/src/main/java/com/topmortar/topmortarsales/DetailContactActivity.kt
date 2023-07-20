@@ -3,6 +3,7 @@ package com.topmortar.topmortarsales
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -28,6 +29,7 @@ import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
+import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.utils.DateFormat
@@ -79,6 +81,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var selectedCity: ModalSearchModel? = null
     private var hasEdited: Boolean = false
 
+    private var iLocation: String? = null
+
     private lateinit var datePicker: DatePickerDialog
     private lateinit var searchModal: SearchModal
 
@@ -92,6 +96,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         initVariable()
         initClickHandler()
         dataActivityValidation()
+
+        // Get List City
+        getCities()
 
     }
 
@@ -133,9 +140,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         // Setup Dialog Search
         setupDialogSearch()
-
-        // Get List City
-        getCities()
 
     }
 
@@ -236,9 +240,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val iContactId = intent.getStringExtra(CONST_CONTACT_ID)
         val iPhone = intent.getStringExtra(CONST_PHONE)
         val iOwner = intent.getStringExtra(CONST_OWNER)
-        val iLocation = intent.getStringExtra(CONST_LOCATION)
         val iName = intent.getStringExtra(CONST_NAME)
         val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
+        iLocation = intent.getStringExtra(CONST_LOCATION)
         activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
 
         if (!iContactId.isNullOrEmpty() ) {
@@ -252,19 +256,19 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tvName.text = iName
             etName.setText(iName)
         }
-        if (!iLocation.isNullOrEmpty() ) {
-            tvLocation.text = iLocation
-            etLocation.setText(iLocation)
-        } else {
-            tvLocation.text = "Not set"
-            etLocation.setText("")
-        }
         if (!iOwner.isNullOrEmpty() ) {
             tvOwner.text = iOwner
             etOwner.setText(iOwner)
         } else {
             tvOwner.text = "Not set"
             etOwner.setText("")
+        }
+        if (!iLocation.isNullOrEmpty()) {
+            tvLocation.text = "Loading..."
+            etLocation.setText("Loading...")
+        } else {
+            tvLocation.text = "Not set"
+            etLocation.setText("")
         }
         if (!iBirthday.isNullOrEmpty() ) {
             if (iBirthday == "0000-00-00") {
@@ -328,7 +332,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun editConfirmation() {
 
-        if (!formValidation("${ etName.text }", "${ etOwner.text }", "${ etBirthday.text }")) return
+        if (!formValidation("${ etName.text }", "${ etOwner.text }", "${ etBirthday.text }", "${ etLocation.text }")) return
 
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Edit Confirmation")
@@ -346,9 +350,19 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         val pName = "${ etName.text }"
         val pOwner = "${ etOwner.text }"
-        val pBirthday = DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
+        var pBirthday = "${ etBirthday.text }"
+
+        pBirthday = if (pBirthday.isEmpty() || pBirthday == "Not set") "0000-00-00"
+        else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
 
         loadingState(true)
+
+//        Handler().postDelayed({
+//            handleMessage(this@DetailContactActivity, TAG_ACTION_MAIN_ACTIVITY, "$pName : $pOwner : ${selectedCity!!.id} : $pBirthday")
+//            loadingState(false)
+//        }, 1000)
+//
+//        return
 
         lifecycleScope.launch {
             try {
@@ -357,9 +371,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbName = createPartFromString(pName)
                 val rbOwner = createPartFromString(pOwner)
                 val rbBirthday = createPartFromString(pBirthday)
+                val rbLocation = createPartFromString(selectedCity!!.id)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.editContact(rbId, rbName, rbOwner, rbBirthday)
+                val response = apiService.editContact(rbId, rbName, rbOwner, rbBirthday, rbLocation)
 
                 if (response.isSuccessful) {
 
@@ -448,7 +463,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     }
 
-    private fun formValidation(name: String, owner: String, birthday: String): Boolean {
+    private fun formValidation(name: String, owner: String = "", birthday: String = "", location: String = ""): Boolean {
         return if (name.isEmpty()) {
             etName.error = "Name cannot be empty!"
             etName.requestFocus()
@@ -459,11 +474,16 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             etOwner.error = "Owner Name cannot be empty!"
             etOwner.requestFocus()
             false
-        } else if (birthday.isEmpty() || birthday == "Not set") {
-            etName.error = null
-            etName.clearFocus()
+        } else if (location.isEmpty() || location == "Not set") {
             etOwner.error = null
             etOwner.requestFocus()
+            etLocation.error = "Choose store location!"
+            etLocation.requestFocus()
+            handleMessage(this@DetailContactActivity, "ERROR EDIT CONTACT", "Choose store location!")
+            false
+        } else if (birthday.isEmpty() || birthday == "Not set") {
+            etLocation.error = null
+            etLocation.clearFocus()
             etBirthday.error = "Choose owner birthday!"
             etBirthday.requestFocus()
             handleMessage(this@DetailContactActivity, "ERROR EDIT CONTACT", "Choose owner birthday!")
@@ -473,6 +493,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             etName.clearFocus()
             etOwner.error = null
             etOwner.clearFocus()
+            etLocation.error = null
+            etLocation.clearFocus()
             etBirthday.error = null
             etBirthday.clearFocus()
             true
@@ -541,6 +563,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     }
 
     private fun getCities() {
+
         // Get Cities
         lifecycleScope.launch {
             try {
@@ -556,22 +579,21 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                         for (i in 0 until results.size) {
                             val data = results[i]
-                            items.add(ModalSearchModel(data.id_city, data.nama_city))
+                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
                         }
 
                         setupDialogSearch(items)
 //                        searchModal.isLoading(false)
 
-                        val iLocation = intent.getStringExtra(CONST_LOCATION)
-                        if (!iLocation.isNullOrEmpty()) {
-                            val foundItem = results.find { it.id_city == iLocation }
-                            if (foundItem != null) {
-                                tvLocation.text = foundItem.nama_city
-                                etLocation.setText(foundItem.nama_city)
-                                selectedCity = ModalSearchModel(foundItem.id_city, foundItem.nama_city)
-                            }
+                        val foundItem = results.find { it.id_city == iLocation }
+                        if (foundItem != null) {
+                            tvLocation.text = "${foundItem.nama_city} - ${foundItem.kode_city}"
+                            etLocation.setText("${foundItem.nama_city} - ${foundItem.kode_city}")
+                            selectedCity = ModalSearchModel(foundItem.id_city, foundItem.nama_city)
+                        } else {
+                            tvLocation.text = "Not set"
+                            etLocation.setText("")
                         }
-
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
