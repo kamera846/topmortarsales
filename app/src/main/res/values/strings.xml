@@ -32,4 +32,6 @@
     <string name="text_password">Password</string>
     <string name="text_login">Login</string>
     <string name="text_copyright">© 2023 Top Mortar Sales</string>
+    <string name="manage_user">Manage User</string>
+    <string name="manage_city">Manage City</string>
 </resources>

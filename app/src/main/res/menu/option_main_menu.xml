@@ -7,6 +7,12 @@
         android:id="@+id/option_search"
         android:title="@string/search" />
     <item
+        android:id="@+id/option_user"
+        android:title="@string/manage_user" />
+    <item
+        android:id="@+id/option_city"
+        android:title="@string/manage_city" />
+    <item
         android:id="@+id/option_logout"
         android:title="@string/logout" />
 </menu>

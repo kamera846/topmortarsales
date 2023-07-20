@@ -53,6 +53,7 @@ import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
 import kotlinx.coroutines.launch
@@ -202,8 +203,14 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         popupMenu.inflate(R.menu.option_main_menu)
 
         val searchItem = popupMenu.menu.findItem(R.id.option_search)
+        val userItem = popupMenu.menu.findItem(R.id.option_user)
+        val cityItem = popupMenu.menu.findItem(R.id.option_city)
 
         searchItem.isVisible = false
+        if (sessionManager.userKind() == USER_KIND_SALES) {
+            userItem.isVisible = false
+            cityItem.isVisible = false
+        }
 
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
@@ -213,6 +220,14 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
                 }
                 R.id.option_search -> {
                     toggleSearchEvent(SEARCH_OPEN)
+                    true
+                }
+                R.id.option_user -> {
+                    startActivity(Intent(this@MainActivity, ManageUserActivity::class.java))
+                    true
+                }
+                R.id.option_city -> {
+                    startActivity(Intent(this@MainActivity, ManageCityActivity::class.java))
                     true
                 }
                 R.id.option_logout -> {

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ManageUserActivity"
+    android:theme="@style/Theme.TopMortarSales"
+    android:id="@+id/rl_parent">
+
+    <RelativeLayout
+        android:id="@+id/rl_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Title Bar -->
+        <include
+            android:id="@+id/title_bar"
+            layout="@layout/component_title_bar"/>
+
+        <!-- Search Box -->
+        <include
+            android:visibility="gone"
+            android:id="@+id/search_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/component_search_box"/>
+
+    </RelativeLayout>
+
+    <!-- Chat List -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_chat_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:listitem="@layout/item_chat_room"
+        android:layout_below="@id/rl_header"/>
+
+    <RelativeLayout
+        android:visibility="gone"
+        android:id="@+id/rl_loading"
+        android:layout_below="@+id/rl_header"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/txt_loading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="@string/txt_loading"
+            android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+    </RelativeLayout>
+
+    <!-- Floating Action Button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btn_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:contentDescription="@string/fab_description"
+        android:src="@mipmap/ic_add_white" />
+
+</RelativeLayout>

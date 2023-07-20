@@ -15,6 +15,7 @@ const val SEND_MESSAGE = "messages.php"
 const val SEARCH_CONTACT = "contactsSearch.php"
 const val GET_CITY = "city.php"
 const val AUTH = "auth.php"
+const val GET_USERS = "users.php"
 
 // Request Code
 const val ACTIVITY_REQUEST_CODE = "activity_request_code"

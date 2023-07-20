@@ -4,12 +4,14 @@ import com.topmortar.topmortarsales.commons.AUTH
 import com.topmortar.topmortarsales.commons.EDIT_CONTACT
 import com.topmortar.topmortarsales.commons.GET_CITY
 import com.topmortar.topmortarsales.commons.GET_CONTACT
+import com.topmortar.topmortarsales.commons.GET_USERS
 import com.topmortar.topmortarsales.commons.SEARCH_CONTACT
 import com.topmortar.topmortarsales.commons.SEND_MESSAGE
 import com.topmortar.topmortarsales.response.ResponseAuth
 import com.topmortar.topmortarsales.response.ResponseCities
 import com.topmortar.topmortarsales.response.ResponseContactList
 import com.topmortar.topmortarsales.response.ResponseMessage
+import com.topmortar.topmortarsales.response.ResponseUsers
 import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.*
@@ -55,4 +57,7 @@ interface ApiService {
         @Part("username") username: RequestBody,
         @Part("password") password: RequestBody
     ): ResponseAuth
+
+    @GET(GET_USERS)
+    suspend fun getUsers(): ResponseUsers
 }
