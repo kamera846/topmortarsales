@@ -1,10 +1,12 @@
 package com.topmortar.topmortarsales.data
 
+import com.topmortar.topmortarsales.commons.AUTH
 import com.topmortar.topmortarsales.commons.EDIT_CONTACT
 import com.topmortar.topmortarsales.commons.GET_CITY
 import com.topmortar.topmortarsales.commons.GET_CONTACT
 import com.topmortar.topmortarsales.commons.SEARCH_CONTACT
 import com.topmortar.topmortarsales.commons.SEND_MESSAGE
+import com.topmortar.topmortarsales.response.ResponseAuth
 import com.topmortar.topmortarsales.response.ResponseCities
 import com.topmortar.topmortarsales.response.ResponseContactList
 import com.topmortar.topmortarsales.response.ResponseMessage
@@ -46,4 +48,11 @@ interface ApiService {
 
     @GET(GET_CITY)
     suspend fun getCities(): ResponseCities
+
+    @Multipart
+    @POST(AUTH)
+    suspend fun auth(
+        @Part("username") username: RequestBody,
+        @Part("password") password: RequestBody
+    ): ResponseAuth
 }

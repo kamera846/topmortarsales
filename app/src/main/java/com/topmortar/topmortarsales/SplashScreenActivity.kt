@@ -14,15 +14,25 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
 import com.topmortar.topmortarsales.commons.DUMMY_ADMIN_PASSWORD
 import com.topmortar.topmortarsales.commons.DUMMY_ADMIN_USERNAME
 import com.topmortar.topmortarsales.commons.DUMMY_SALES_PASSWORD
 import com.topmortar.topmortarsales.commons.DUMMY_SALES_USERNAME
 import com.topmortar.topmortarsales.commons.LOGGED_IN
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
+import com.topmortar.topmortarsales.data.ApiService
+import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.model.ModalSearchModel
+import kotlinx.coroutines.launch
 
 class SplashScreenActivity : AppCompatActivity() {
 
@@ -181,12 +191,51 @@ class SplashScreenActivity : AppCompatActivity() {
             etPassword.clearFocus()
         }
 
-        if (username == DUMMY_ADMIN_USERNAME && password == DUMMY_ADMIN_PASSWORD) sessionManager.setUserKind(USER_KIND_ADMIN)
-        else if (username == DUMMY_SALES_USERNAME && password == DUMMY_SALES_PASSWORD) sessionManager.setUserKind(USER_KIND_SALES)
-        else return showAlert("Your username or password seems wrong!", 5000)
+        lifecycleScope.launch {
+            try {
 
-        sessionManager.setLoggedIn(LOGGED_IN)
-        navigateToMain()
+                val rbUsername = createPartFromString("${ etUsername.text }")
+                val rbPassword = createPartFromString("${ etPassword.text }")
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.auth(rbUsername, rbPassword)
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        val results = response.results
+                        val data = results[0]
+
+                        if (data.level_user == AUTH_LEVEL_ADMIN ) sessionManager.setUserKind(USER_KIND_ADMIN)
+                        else sessionManager.setUserKind(USER_KIND_SALES)
+
+                        sessionManager.setUserID(data.id_user)
+                        sessionManager.setUserName(data.username)
+                        sessionManager.setUserCityID(data.id_city)
+
+                        sessionManager.setLoggedIn(LOGGED_IN)
+                        navigateToMain()
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        showAlert("Your username or password seems wrong!", 5000)
+
+                    }
+                    else -> {
+
+                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_CONTACT, "Failed process auth")
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(this@SplashScreenActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+
+            }
+        }
 
     }
 

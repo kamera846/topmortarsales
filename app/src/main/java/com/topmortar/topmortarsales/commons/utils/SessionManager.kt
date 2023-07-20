@@ -23,4 +23,31 @@ class SessionManager(context: Context) {
     fun userKind(): String? {
         return sharedPreferences.getString("userKind", "")
     }
+
+    fun setUserID(userID: String) {
+        editor.putString("userID", userID)
+        editor.apply()
+    }
+
+    fun userID(): String? {
+        return sharedPreferences.getString("userID", "")
+    }
+
+    fun setUserName(userName: String) {
+        editor.putString("userName", userName)
+        editor.apply()
+    }
+
+    fun userName(): String? {
+        return sharedPreferences.getString("userName", "")
+    }
+
+    fun setUserCityID(userCityID: String) {
+        editor.putString("userCityID", userCityID)
+        editor.apply()
+    }
+
+    fun userCityID(): String? {
+        return sharedPreferences.getString("userCityID", "")
+    }
 }

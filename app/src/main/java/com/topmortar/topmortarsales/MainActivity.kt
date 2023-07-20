@@ -499,8 +499,13 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
             .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
             .setPositiveButton("Yes") { dialog, _ ->
                 dialog.dismiss()
+
                 sessionManager.setLoggedIn(LOGGED_OUT)
                 sessionManager.setUserKind("")
+                sessionManager.setUserID("")
+                sessionManager.setUserName("")
+                sessionManager.setUserCityID("")
+
                 val intent = Intent(this@MainActivity, SplashScreenActivity::class.java)
                 startActivity(intent)
                 finish()
