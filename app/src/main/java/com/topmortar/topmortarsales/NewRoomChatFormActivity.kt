@@ -20,13 +20,16 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
+import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
@@ -36,6 +39,7 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.modal.SearchModal
+import com.topmortar.topmortarsales.model.CityModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -61,11 +65,13 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
     private lateinit var searchModal: SearchModal
 
     private var isLoaded = false
+    private var isCitiesLoaded = false
     private var activityRequestCode = MAIN_ACTIVITY_REQUEST_CODE
     private val msgMaxLines = 5
     private val msgMaxLength = 200
     private var selectedDate: Calendar = Calendar.getInstance()
     private var selectedCity: ModalSearchModel? = null
+    private var citiesResults: ArrayList<CityModel> = ArrayList()
     private var cities = listOf("Malang", "Gresik", "Sidoarjo", "Blitar", "Surabaya", "Jakarta", "Bandung", "Yogyakarta", "Kediri")
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -103,7 +109,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         loadingState(true)
 
 //        Handler().postDelayed({
-//            handleMessage(this@NewRoomChatFormActivity, TAG_ACTION_MAIN_ACTIVITY, "$phone : $name : $location : $birthday : $owner : $message")
+//            handleMessage(this@NewRoomChatFormActivity, TAG_ACTION_MAIN_ACTIVITY, "$phone : $name : ${selectedCity!!.id} : $birthday : $owner : $message")
 //            loadingState(false)
 //        }, 1000)
 //
@@ -114,13 +120,13 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
                 val rbPhone = createPartFromString(formatPhoneNumber(phone))
                 val rbName = createPartFromString(name)
-//                val rbLocation = createPartFromString(selectedCity!!.id)
+                val rbLocation = createPartFromString(selectedCity!!.id)
                 val rbBirthday = createPartFromString(birthday)
                 val rbOwner = createPartFromString(owner)
                 val rbMessage = createPartFromString(message)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.sendMessage(rbName, rbPhone, rbBirthday, rbOwner, rbMessage)
+                val response = apiService.sendMessage(rbName, rbPhone, rbBirthday, rbOwner, rbMessage, rbLocation)
 
                 if (response.isSuccessful) {
 
@@ -201,13 +207,13 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             etName.setBackgroundResource(R.drawable.et_background_disabled)
             etName.isEnabled = false
         }
-        if (!iOwner.isNullOrEmpty() ) {
+        if (!iOwner.isNullOrEmpty()) {
             etOwner.setText(iOwner)
             etOwner.setTextColor(getColor(R.color.black_500))
             etOwner.setBackgroundResource(R.drawable.et_background_disabled)
             etOwner.isEnabled = false
         }
-        if (!iBirthday.isNullOrEmpty() ) {
+        if (!iBirthday.isNullOrEmpty()) {
             if (iBirthday == "0000-00-00") etBirthday.setText("")
             else {
                 etBirthday.setText(DateFormat.format(iBirthday))
@@ -248,6 +254,9 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
         // Setup Dialog Search
         setupDialogSearch()
+
+        // Get List City
+        getCities()
 
     }
 
@@ -450,18 +459,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
     }
 
-    private fun setupDialogSearch() {
-
-        val items = ArrayList<ModalSearchModel>()
-        items.add(ModalSearchModel("1", "Malang"))
-        items.add(ModalSearchModel("2", "Gresik"))
-        items.add(ModalSearchModel("3", "Sidoarjo"))
-        items.add(ModalSearchModel("4", "Blitar"))
-        items.add(ModalSearchModel("5", "Surabaya"))
-        items.add(ModalSearchModel("6", "Jakarta"))
-        items.add(ModalSearchModel("7", "Bandung"))
-        items.add(ModalSearchModel("8", "Yogyakarta"))
-        items.add(ModalSearchModel("9", "Kediri"))
+    private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
 
         searchModal = SearchModal(this, items)
         searchModal.setCustomDialogListener(this)
@@ -477,6 +475,73 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         val searchKey = etStoreLocated.text.toString()
         if (searchKey.isNotEmpty()) searchModal.setSearchKey(searchKey)
         searchModal.show()
+    }
+
+    private fun getCities() {
+        // Get Cities
+        isCitiesLoaded = false
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.getCities()
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        citiesResults = response.results
+                        val items: ArrayList<ModalSearchModel> = ArrayList()
+
+                        for (i in 0 until citiesResults.size) {
+                            val data = citiesResults[i]
+                            items.add(ModalSearchModel(data.id_city, data.nama_city))
+                        }
+
+                        setupDialogSearch(items)
+                        isCitiesLoaded = true
+//                        searchModal.isLoading(false)
+
+                        val iLocation = intent.getStringExtra(CONST_LOCATION)
+                        if (!iLocation.isNullOrEmpty()) {
+                            if (isCitiesLoaded) {
+                                val foundItem = citiesResults.find { it.id_city == iLocation }
+                                if (foundItem != null) {
+                                    selectedCity = ModalSearchModel(foundItem.id_city, foundItem.nama_city)
+                                    etStoreLocated.setText(foundItem.nama_city)
+                                    etStoreLocated.setTextColor(getColor(R.color.black_500))
+                                    etStoreLocated.setBackgroundResource(R.drawable.et_background_disabled)
+                                    etStoreLocated.isEnabled = false
+                                }
+                            }
+                        }
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        handleMessage(this@NewRoomChatFormActivity, "LIST CITY", "Empty cities data!")
+                        isCitiesLoaded = false
+//                        searchModal.isLoading(true)
+
+                    }
+                    else -> {
+
+                        handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                        isCitiesLoaded = false
+//                        searchModal.isLoading(true)
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                isCitiesLoaded = false
+//                searchModal.isLoading(true)
+
+            }
+
+        }
     }
 
     override fun onDataReceived(data: ModalSearchModel) {

@@ -49,6 +49,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
@@ -167,6 +168,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
             intent.putExtra(CONST_BIRTHDAY, data.tgl_lahir)
             intent.putExtra(CONST_OWNER, data.store_owner)
             intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
+            intent.putExtra(CONST_LOCATION, data.id_city)
+//            intent.putExtra(CONST_LOCATION, "1")
         }
 
         startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
@@ -186,6 +189,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
             intent.putExtra(CONST_BIRTHDAY, data.tgl_lahir)
             intent.putExtra(CONST_OWNER, data.store_owner)
             intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
+            intent.putExtra(CONST_LOCATION, data.id_city)
+//            intent.putExtra(CONST_LOCATION, "1")
         }
 
         startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)

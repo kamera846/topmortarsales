@@ -1,9 +1,11 @@
 package com.topmortar.topmortarsales.data
 
 import com.topmortar.topmortarsales.commons.EDIT_CONTACT
+import com.topmortar.topmortarsales.commons.GET_CITY
 import com.topmortar.topmortarsales.commons.GET_CONTACT
 import com.topmortar.topmortarsales.commons.SEARCH_CONTACT
 import com.topmortar.topmortarsales.commons.SEND_MESSAGE
+import com.topmortar.topmortarsales.response.ResponseCities
 import com.topmortar.topmortarsales.response.ResponseContactList
 import com.topmortar.topmortarsales.response.ResponseMessage
 import okhttp3.RequestBody
@@ -32,6 +34,7 @@ interface ApiService {
         @Part("tgl_lahir") birthday: RequestBody,
         @Part("owner_name") ownerName: RequestBody,
         @Part("message_body") message: RequestBody,
+        @Part("id_city") cityId: RequestBody,
     ): Response<ResponseMessage>
 
     @Multipart
@@ -40,4 +43,6 @@ interface ApiService {
         @Part("key") key: RequestBody
     ): Response<ResponseContactList>
 
+    @GET(GET_CITY)
+    suspend fun getCities(): ResponseCities
 }

@@ -25,8 +25,10 @@ import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -131,6 +133,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         // Setup Dialog Search
         setupDialogSearch()
+
+        // Get List City
+        getCities()
 
     }
 
@@ -505,26 +510,19 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         if (tvOwner.text == "Not set") intent.putExtra(CONST_OWNER, "")
         else intent.putExtra(CONST_OWNER, tvOwner.text)
+
         if (tvBirthday.text == "Not set") intent.putExtra(CONST_BIRTHDAY, "0000-00-00")
         else intent.putExtra(CONST_BIRTHDAY, DateFormat.format("${ tvBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd"))
         intent.putExtra(ACTIVITY_REQUEST_CODE, DETAIL_ACTIVITY_REQUEST_CODE)
+
+        if (tvLocation.text == "Not set") intent.putExtra(CONST_LOCATION, "")
+        else intent.putExtra(CONST_LOCATION, selectedCity!!.id)
 
         startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
 
     }
 
-    private fun setupDialogSearch() {
-
-        val items = ArrayList<ModalSearchModel>()
-        items.add(ModalSearchModel("1", "Malang"))
-        items.add(ModalSearchModel("2", "Gresik"))
-        items.add(ModalSearchModel("3", "Sidoarjo"))
-        items.add(ModalSearchModel("4", "Blitar"))
-        items.add(ModalSearchModel("5", "Surabaya"))
-        items.add(ModalSearchModel("6", "Jakarta"))
-        items.add(ModalSearchModel("7", "Bandung"))
-        items.add(ModalSearchModel("8", "Yogyakarta"))
-        items.add(ModalSearchModel("9", "Kediri"))
+    private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
 
         searchModal = SearchModal(this, items)
         searchModal.setCustomDialogListener(this)
@@ -540,6 +538,64 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val searchKey = etLocation.text.toString()
         if (searchKey.isNotEmpty()) searchModal.setSearchKey(searchKey)
         searchModal.show()
+    }
+
+    private fun getCities() {
+        // Get Cities
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.getCities()
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        val results = response.results
+                        val items: ArrayList<ModalSearchModel> = ArrayList()
+
+                        for (i in 0 until results.size) {
+                            val data = results[i]
+                            items.add(ModalSearchModel(data.id_city, data.nama_city))
+                        }
+
+                        setupDialogSearch(items)
+//                        searchModal.isLoading(false)
+
+                        val iLocation = intent.getStringExtra(CONST_LOCATION)
+                        if (!iLocation.isNullOrEmpty()) {
+                            val foundItem = results.find { it.id_city == iLocation }
+                            if (foundItem != null) {
+                                tvLocation.text = foundItem.nama_city
+                                etLocation.setText(foundItem.nama_city)
+                                selectedCity = ModalSearchModel(foundItem.id_city, foundItem.nama_city)
+                            }
+                        }
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        handleMessage(this@DetailContactActivity, "LIST CITY", "Empty cities data!")
+//                        searchModal.isLoading(true)
+
+                    }
+                    else -> {
+
+                        handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+//                        searchModal.isLoading(true)
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+//                searchModal.isLoading(true)
+
+            }
+
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

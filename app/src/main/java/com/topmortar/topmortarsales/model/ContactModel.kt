@@ -6,4 +6,5 @@ data class ContactModel(
     val nomorhp: String,
     val tgl_lahir: String,
     val store_owner: String,
+    val id_city: String,
 )
