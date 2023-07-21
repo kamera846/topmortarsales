@@ -40,7 +40,7 @@
           android:layout_width="56dp"
           android:layout_height="56dp"
           android:padding="16dp"
-          android:src="@drawable/baseline_close" />
+          android:src="@drawable/close_baseline" />
 
    </LinearLayout>
 

@@ -32,18 +32,14 @@
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:padding="16dp"
-        android:src="@drawable/pencil_black"
-        android:layout_alignParentEnd="true"/>
+        android:src="@drawable/pencil_black" />
 
-    <TextView
+    <ImageView
         android:visibility="gone"
-        android:id="@+id/tv_cancel_edit"
-        android:layout_width="wrap_content"
+        android:id="@+id/ic_close"
+        android:layout_width="56dp"
         android:layout_height="56dp"
-        android:gravity="center_vertical"
-        android:paddingHorizontal="16dp"
-        android:text="Cancel"
-        android:textSize="16sp"
-        android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+        android:padding="16dp"
+        android:src="@drawable/close_black" />
 
 </LinearLayout>

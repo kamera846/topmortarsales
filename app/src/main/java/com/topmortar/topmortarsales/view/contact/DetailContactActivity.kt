@@ -1,9 +1,8 @@
-package com.topmortar.topmortarsales
+package com.topmortar.topmortarsales.view.contact
 
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -17,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.TooltipCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
@@ -29,7 +29,6 @@ import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
-import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.utils.DateFormat
@@ -56,11 +55,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var etOwnerContainer: LinearLayout
     private lateinit var icBack: ImageView
     private lateinit var icEdit: ImageView
+    private lateinit var icClose: ImageView
     private lateinit var tooltipOwner: ImageView
     private lateinit var tooltipBirthday: ImageView
     private lateinit var tooltipLocation: ImageView
     private lateinit var tvTitleBar: TextView
-    private lateinit var tvCancelEdit: TextView
     private lateinit var tvName: TextView
     private lateinit var tvDescription: TextView
     private lateinit var tvPhone: TextView
@@ -122,7 +121,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         tooltipBirthday = findViewById(R.id.tooltip_birthday)
         tooltipLocation = findViewById(R.id.tooltip_location)
         tvTitleBar = findViewById(R.id.tv_title_bar)
-        tvCancelEdit = findViewById(R.id.tv_cancel_edit)
+        icClose = findViewById(R.id.ic_close)
         tvName = findViewById(R.id.tv_name)
         tvDescription = findViewById(R.id.tv_description)
         tvPhone = findViewById(R.id.tv_phone)
@@ -153,7 +152,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         icBack.setOnClickListener { backHandler() }
         icEdit.setOnClickListener { toggleEdit(true) }
-        tvCancelEdit.setOnClickListener { toggleEdit(false) }
+        icClose.setOnClickListener { toggleEdit(false) }
         btnSendMessage.setOnClickListener { navigateAddNewRoom() }
         btnSaveEdit.setOnClickListener { editConfirmation() }
         etBirthdayContainer.setOnClickListener { datePicker.show() }
@@ -304,7 +303,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             etBirthdayContainer.visibility = View.VISIBLE
             etLocationContainer.visibility = View.VISIBLE
             etOwnerContainer.visibility = View.VISIBLE
-            tvCancelEdit.visibility = View.VISIBLE
+            icClose.visibility = View.VISIBLE
             etName.visibility = View.VISIBLE
             btnSaveEdit.visibility = View.VISIBLE
 
@@ -325,7 +324,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             etBirthdayContainer.visibility = View.GONE
             etLocationContainer.visibility = View.GONE
             etOwnerContainer.visibility = View.GONE
-            tvCancelEdit.visibility = View.GONE
+            icClose.visibility = View.GONE
             etName.visibility = View.GONE
             btnSaveEdit.visibility = View.GONE
 

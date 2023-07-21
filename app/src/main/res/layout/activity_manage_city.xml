@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ManageUserActivity"
+    tools:context=".view.user.ManageUserActivity"
     android:theme="@style/Theme.TopMortarSales"
     android:id="@+id/rl_parent">
 

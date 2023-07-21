@@ -1,4 +1,4 @@
-package com.topmortar.topmortarsales
+package com.topmortar.topmortarsales.view
 
 import android.content.Intent
 import android.os.Bundle
@@ -15,11 +15,8 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
-import com.topmortar.topmortarsales.commons.DUMMY_ADMIN_PASSWORD
-import com.topmortar.topmortarsales.commons.DUMMY_ADMIN_USERNAME
-import com.topmortar.topmortarsales.commons.DUMMY_SALES_PASSWORD
-import com.topmortar.topmortarsales.commons.DUMMY_SALES_USERNAME
 import com.topmortar.topmortarsales.commons.LOGGED_IN
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -31,7 +28,6 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
-import com.topmortar.topmortarsales.model.ModalSearchModel
 import kotlinx.coroutines.launch
 
 class SplashScreenActivity : AppCompatActivity() {

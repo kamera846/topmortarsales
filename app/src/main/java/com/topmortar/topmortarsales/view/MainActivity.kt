@@ -1,4 +1,4 @@
-package com.topmortar.topmortarsales
+package com.topmortar.topmortarsales.view
 
 import android.content.Context
 import android.content.Intent
@@ -45,6 +45,7 @@ import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.ContactModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
@@ -55,6 +56,10 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
+import com.topmortar.topmortarsales.view.city.ManageCityActivity
+import com.topmortar.topmortarsales.view.contact.DetailContactActivity
+import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
+import com.topmortar.topmortarsales.view.user.ManageUserActivity
 import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
@@ -258,13 +263,21 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         fadeIn.duration = animationDuration
         val fadeOut = AnimationUtils.loadAnimation(this@MainActivity, R.anim.fade_out)
         fadeOut.duration = animationDuration
-        val slideInFromLeft = AnimationUtils.loadAnimation(this@MainActivity, R.anim.fade_slide_in_from_left)
+        val slideInFromLeft = AnimationUtils.loadAnimation(this@MainActivity,
+            R.anim.fade_slide_in_from_left
+        )
         slideInFromLeft.duration = animationDuration
-        val slideOutToRight = AnimationUtils.loadAnimation(this@MainActivity, R.anim.fade_slide_out_to_right)
+        val slideOutToRight = AnimationUtils.loadAnimation(this@MainActivity,
+            R.anim.fade_slide_out_to_right
+        )
         slideOutToRight.duration = animationDuration
-        val slideInFromRight = AnimationUtils.loadAnimation(this@MainActivity, R.anim.fade_slide_in_from_right)
+        val slideInFromRight = AnimationUtils.loadAnimation(this@MainActivity,
+            R.anim.fade_slide_in_from_right
+        )
         slideInFromRight.duration = animationDuration
-        val slideOutToLeft = AnimationUtils.loadAnimation(this@MainActivity, R.anim.fade_slide_out_to_left)
+        val slideOutToLeft = AnimationUtils.loadAnimation(this@MainActivity,
+            R.anim.fade_slide_out_to_left
+        )
         slideOutToLeft.duration = animationDuration
 
         etSearchBox.setOnFocusChangeListener { _, hasFocus ->

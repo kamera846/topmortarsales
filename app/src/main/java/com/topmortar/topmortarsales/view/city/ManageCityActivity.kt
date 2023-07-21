@@ -1,4 +1,4 @@
-package com.topmortar.topmortarsales
+package com.topmortar.topmortarsales.view.city
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -16,12 +16,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter
+import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.CityRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
-import com.topmortar.topmortarsales.commons.SEARCH_CLOSE
-import com.topmortar.topmortarsales.commons.SEARCH_OPEN
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
