@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.model.ModalSearchModel
 
-class ListSearchModalRecyclerViewAdapter(private val items: ArrayList<ModalSearchModel>, private val itemClickListener: ItemClickListener): RecyclerView.Adapter<ListSearchModalRecyclerViewAdapter.ViewHolder>() {
+class SearchModalRecyclerViewAdapter(private val items: ArrayList<ModalSearchModel>, private val itemClickListener: ItemClickListener): RecyclerView.Adapter<SearchModalRecyclerViewAdapter.ViewHolder>() {
     private var filteredItemList: ArrayList<ModalSearchModel> = ArrayList(items)
     private var context: Context? = null
 
@@ -31,14 +31,14 @@ class ListSearchModalRecyclerViewAdapter(private val items: ArrayList<ModalSearc
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): ListSearchModalRecyclerViewAdapter.ViewHolder {
+    ): SearchModalRecyclerViewAdapter.ViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_search_modal, parent, false)
         context = parent.context
         return ViewHolder(view)
     }
 
     override fun onBindViewHolder(
-        holder: ListSearchModalRecyclerViewAdapter.ViewHolder,
+        holder: SearchModalRecyclerViewAdapter.ViewHolder,
         position: Int
     ) {
         val item = filteredItemList[position]

@@ -15,10 +15,10 @@ import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.adapter.ListSearchModalRecyclerViewAdapter
+import com.topmortar.topmortarsales.adapter.SearchModalRecyclerViewAdapter
 import com.topmortar.topmortarsales.model.ModalSearchModel
 
-class SearchModal(private val context: Context, private val listItem: ArrayList<ModalSearchModel>) : Dialog(context), ListSearchModalRecyclerViewAdapter.ItemClickListener {
+class SearchModal(private val context: Context, private val listItem: ArrayList<ModalSearchModel>) : Dialog(context), SearchModalRecyclerViewAdapter.ItemClickListener {
 
     interface SearchModalListener {
         fun onDataReceived(data: ModalSearchModel)
@@ -106,7 +106,7 @@ class SearchModal(private val context: Context, private val listItem: ArrayList<
     }
 
     private fun setRecyclerView() {
-        val rvAdapter = ListSearchModalRecyclerViewAdapter(listItem, this)
+        val rvAdapter = SearchModalRecyclerViewAdapter(listItem, this)
 
         rvItems.layoutManager = LinearLayoutManager(context)
         rvItems.adapter = rvAdapter

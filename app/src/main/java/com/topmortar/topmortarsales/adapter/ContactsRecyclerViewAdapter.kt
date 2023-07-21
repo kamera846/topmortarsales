@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.model.ContactModel
 
-class ListContactRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<ListContactRecyclerViewAdapter.ChatViewHolder>() {
+class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<ContactsRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
 
     interface ItemClickListener {

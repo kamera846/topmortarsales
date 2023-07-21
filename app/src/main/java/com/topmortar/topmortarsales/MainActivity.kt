@@ -8,7 +8,6 @@ import android.os.Looper
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
-import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
@@ -26,8 +25,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.topmortar.topmortarsales.adapter.ListContactRecyclerViewAdapter
-import com.topmortar.topmortarsales.adapter.ListContactRecyclerViewAdapter.ItemClickListener
+import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter
+import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter.ItemClickListener
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
@@ -470,7 +469,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     }
 
     private fun setRecyclerView(listItem: ArrayList<ContactModel>) {
-        val rvAdapter = ListContactRecyclerViewAdapter(listItem, this@MainActivity)
+        val rvAdapter = ContactsRecyclerViewAdapter(listItem, this@MainActivity)
 
         rvListChat.layoutManager = LinearLayoutManager(this@MainActivity)
         rvListChat.adapter = rvAdapter
