@@ -221,7 +221,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             false
         }
 
-        val tooltipLocationText = "Store Location"
+        val tooltipLocationText = "Customer City"
         tooltipLocation.setOnClickListener {
             TooltipCompat.setTooltipText(tooltipLocation, tooltipLocationText)
         }
@@ -483,9 +483,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         } else if (location.isEmpty() || location == "Not set") {
             etOwner.error = null
             etOwner.requestFocus()
-            etLocation.error = "Choose store location!"
+            etLocation.error = "Choose customer city!"
             etLocation.requestFocus()
-            handleMessage(this@DetailContactActivity, "ERROR EDIT CONTACT", "Choose store location!")
+            handleMessage(this@DetailContactActivity, "ERROR EDIT CONTACT", "Choose customer city!")
             false
         } else if (birthday.isEmpty() || birthday == "Not set") {
             etLocation.error = null

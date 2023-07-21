@@ -126,7 +126,7 @@
 
                 </LinearLayout>
 
-                <!-- City Store Location -->
+                <!-- City Store City -->
                 <LinearLayout
                     android:visibility="visible"
                     android:layout_width="match_parent"
@@ -144,7 +144,7 @@
                             android:id="@+id/tv_store_located"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Store Location"
+                            android:text="Customer City"
                             android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
                             android:textSize="16sp"
                             android:textStyle="bold"/>
@@ -165,7 +165,7 @@
                         android:layout_height="48dp"
                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                         android:textColorHint="@color/black_600"
-                        android:hint="Choose Store Location"
+                        android:hint="Choose Customer City"
                         android:inputType="textCapWords"
                         android:autofillHints="e.g John Doe"
                         android:textSize="14sp"
@@ -256,7 +256,7 @@
                         android:id="@+id/tv_city"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="City Store Location"
+                        android:text="Customer City"
                         android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
                         android:textSize="16sp"
                         android:textStyle="bold"

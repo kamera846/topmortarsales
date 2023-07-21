@@ -11,17 +11,17 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.model.UserModel
+import com.topmortar.topmortarsales.model.CityModel
 
-class UsersRecyclerViewAdapter(private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<UsersRecyclerViewAdapter.ViewHolder>() {
-    private var listItem: ArrayList<UserModel> = ArrayList()
+class CityRecyclerViewAdapter(private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<CityRecyclerViewAdapter.ViewHolder>() {
+    private var listItem: ArrayList<CityModel> = ArrayList()
     private var context: Context? = null
 
     interface ItemClickListener {
-        fun onItemClick(data: UserModel? = null)
+        fun onItemClick(data: CityModel? = null)
     }
 
-    fun setListItem(listItem: ArrayList<UserModel>) {
+    fun setListItem(listItem: ArrayList<CityModel>) {
         this.listItem = listItem
     }
 
@@ -31,11 +31,11 @@ class UsersRecyclerViewAdapter(private val itemClickListener: ItemClickListener)
         private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
 
-        fun bind(item: UserModel) {
+        fun bind(item: CityModel) {
 
-            ivProfile.setImageResource(R.drawable.person_red)
-            tvContactName.text = item.username
-            tvPhoneNumber.text = item.level_user
+            ivProfile.setImageResource(R.drawable.city_red)
+            tvContactName.text = item.nama_city
+            tvPhoneNumber.text = item.kode_city
 
         }
 

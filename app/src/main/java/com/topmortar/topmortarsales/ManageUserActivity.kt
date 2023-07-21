@@ -24,6 +24,7 @@ import com.topmortar.topmortarsales.commons.SEARCH_CLOSE
 import com.topmortar.topmortarsales.commons.SEARCH_OPEN
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
@@ -96,6 +97,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
         icBack.visibility = View.VISIBLE
 //        icSearch.visibility = View.VISIBLE
         titleBar.text = "Manage User"
+        titleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
     }
 
@@ -204,7 +206,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
     }
 
     override fun onItemClick(data: UserModel?) {
-        
+
     }
 
 }
