@@ -48,7 +48,6 @@ import java.util.Calendar
 class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
     private lateinit var icBack: ImageView
-    private lateinit var icSyncNow: ImageView
     private lateinit var tvTitleBar: TextView
     private lateinit var tvMaxMessage: TextView
     private lateinit var btnSubmit: Button
@@ -237,7 +236,6 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
     private fun initVariable() {
 
         icBack = findViewById(R.id.ic_back)
-        icSyncNow = findViewById(R.id.ic_sync_now)
         tvTitleBar = findViewById(R.id.tv_title_bar)
         tvMaxMessage = findViewById(R.id.tv_max_message)
         btnSubmit = findViewById(R.id.btn_submit)
@@ -250,8 +248,6 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         spinnerSearchBox = findViewById(R.id.spinner_searchbox)
 
         // Set Title Bar
-        icBack.visibility = View.VISIBLE
-        icSyncNow.visibility = View.GONE
         tvTitleBar.text = getString(R.string.new_chat_room)
         tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 

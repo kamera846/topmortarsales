@@ -33,6 +33,7 @@ import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.utils.DateFormat
+import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -134,6 +135,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         etLocation = findViewById(R.id.et_location)
         btnSendMessage = findViewById(R.id.btn_send_message)
         btnSaveEdit = findViewById(R.id.btn_save_edit)
+
+        // Setup Title Bar
+        icEdit.visibility = View.VISIBLE
+        tvTitleBar.text = "Detail Contact"
+        tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Setup Date Picker Dialog
         setDatePickerDialog()
