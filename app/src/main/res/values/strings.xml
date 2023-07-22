@@ -9,7 +9,7 @@
     <string name="btn_submit_new_chat_room">Send Now</string>
     <string name="input_message_label">Message</string>
     <string name="input_name_label">Name</string>
-    <string name="input_phon_number_label">Phone Number</string>
+    <string name="input_phon_number_label">Phone Number (WA)</string>
     <string name="input_message_placeholder">Hello!</string>
     <string name="input_name_placeholder">TB BAROKAH MAJU JAYA</string>
     <string name="input_phon_number_placeholder">e.g 628XXXXXXXXX</string>
