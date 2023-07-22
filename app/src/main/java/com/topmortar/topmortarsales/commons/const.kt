@@ -30,6 +30,7 @@ const val TAG_ACTION_MAIN_ACTIVITY = "TAG ACTION MAIN ACTIVITY"
 // Global
 const val TOAST_LONG = Toast.LENGTH_LONG
 const val TOAST_SHORT = Toast.LENGTH_SHORT
+const val EMPTY_FIELD_VALUE = "Not set"
 
 // Props
 const val CONST_CONTACT_ID = "const_contact_id"
@@ -39,6 +40,8 @@ const val CONST_PHONE = "const_phone"
 const val CONST_NAME = "const_name"
 const val CONST_MESSAGE = "const_message"
 const val CONST_BIRTHDAY = "const_birthday"
+const val CONST_MAPS = "const_maps"
+const val CONST_ADDRESS = "const_address"
 
 // Status
 const val LOGGED_IN = true

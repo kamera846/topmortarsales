@@ -3,6 +3,7 @@ package com.topmortar.topmortarsales.view.contact
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -18,13 +19,16 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
+import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -46,31 +50,44 @@ import java.util.Calendar
 class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
     private lateinit var tvPhoneContainer: LinearLayout
-    private lateinit var tvBirthdayContainer: LinearLayout
-    private lateinit var tvLocationContainer: LinearLayout
     private lateinit var etPhoneContainer: LinearLayout
+    private lateinit var tvBirthdayContainer: LinearLayout
     private lateinit var etBirthdayContainer: LinearLayout
+    private lateinit var tvLocationContainer: LinearLayout
     private lateinit var etLocationContainer: LinearLayout
     private lateinit var tvOwnerContainer: LinearLayout
     private lateinit var etOwnerContainer: LinearLayout
+    private lateinit var tvMapsContainer: LinearLayout
+    private lateinit var etMapsContainer: LinearLayout
+
+    private lateinit var addressContainer: LinearLayout
+
     private lateinit var icBack: ImageView
     private lateinit var icEdit: ImageView
     private lateinit var icClose: ImageView
+
     private lateinit var tooltipOwner: ImageView
     private lateinit var tooltipBirthday: ImageView
     private lateinit var tooltipLocation: ImageView
+    private lateinit var tooltipMaps: ImageView
+
     private lateinit var tvTitleBar: TextView
     private lateinit var tvName: TextView
     private lateinit var tvDescription: TextView
     private lateinit var tvPhone: TextView
     private lateinit var tvBirthday: TextView
     private lateinit var tvLocation: TextView
-    private lateinit var etName: EditText
     private lateinit var tvOwner: TextView
+    private lateinit var tvMaps: TextView
+    private lateinit var etName: EditText
     private lateinit var etOwner: EditText
     private lateinit var etPhone: EditText
     private lateinit var etBirthday: EditText
     private lateinit var etLocation: EditText
+    private lateinit var etMaps: EditText
+
+    private lateinit var etAddress: EditText
+
     private lateinit var btnSendMessage: Button
     private lateinit var btnSaveEdit: Button
 
@@ -82,6 +99,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var hasEdited: Boolean = false
 
     private var iLocation: String? = null
+    private var iAddress: String? = null
 
     private lateinit var datePicker: DatePickerDialog
     private lateinit var searchModal: SearchModal
@@ -104,34 +122,46 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun initVariable() {
 
+        tvTitleBar = findViewById(R.id.tv_title_bar)
+
+        icBack = findViewById(R.id.ic_back)
+        icEdit = findViewById(R.id.ic_edit)
+        icClose = findViewById(R.id.ic_close)
+
         tvPhoneContainer = findViewById(R.id.tv_phone_container)
-        tvBirthdayContainer = findViewById(R.id.tv_birthday_container)
-        tvLocationContainer = findViewById(R.id.tv_location_container)
         etPhoneContainer = findViewById(R.id.et_phone_container)
+        tvBirthdayContainer = findViewById(R.id.tv_birthday_container)
         etBirthdayContainer = findViewById(R.id.et_birthday_container)
+        tvLocationContainer = findViewById(R.id.tv_location_container)
         etLocationContainer = findViewById(R.id.et_location_container)
         tvOwnerContainer = findViewById(R.id.tv_owner_container)
         etOwnerContainer = findViewById(R.id.et_owner_container)
-        tvOwner = findViewById(R.id.tv_owner)
-        tvName = findViewById(R.id.tv_name)
-        tvPhone = findViewById(R.id.tv_phone)
-        icBack = findViewById(R.id.ic_back)
-        icEdit = findViewById(R.id.ic_edit)
+        tvMapsContainer = findViewById(R.id.tv_maps_container)
+        etMapsContainer = findViewById(R.id.et_maps_container)
+
+        addressContainer = findViewById(R.id.address_container)
+
         tooltipOwner = findViewById(R.id.tooltip_owner)
-        tooltipBirthday = findViewById(R.id.tooltip_birthday)
         tooltipLocation = findViewById(R.id.tooltip_location)
-        tvTitleBar = findViewById(R.id.tv_title_bar)
-        icClose = findViewById(R.id.ic_close)
+        tooltipMaps = findViewById(R.id.tooltip_maps)
+        tooltipBirthday = findViewById(R.id.tooltip_birthday)
+
         tvName = findViewById(R.id.tv_name)
-        tvDescription = findViewById(R.id.tv_description)
-        tvPhone = findViewById(R.id.tv_phone)
-        tvBirthday = findViewById(R.id.tv_birthday)
-        tvLocation = findViewById(R.id.tv_location)
         etName = findViewById(R.id.et_name)
-        etOwner = findViewById(R.id.et_owner)
+        tvDescription = findViewById(R.id.tv_description)
+
+        tvPhone = findViewById(R.id.tv_phone)
         etPhone = findViewById(R.id.et_phone)
-        etBirthday = findViewById(R.id.et_birthday)
+        tvOwner = findViewById(R.id.tv_owner)
+        etOwner = findViewById(R.id.et_owner)
+        tvLocation = findViewById(R.id.tv_location)
         etLocation = findViewById(R.id.et_location)
+        tvMaps = findViewById(R.id.tv_maps)
+        etMaps = findViewById(R.id.et_maps)
+        tvBirthday = findViewById(R.id.tv_birthday)
+        etBirthday = findViewById(R.id.et_birthday)
+        etAddress = findViewById(R.id.et_address)
+
         btnSendMessage = findViewById(R.id.btn_send_message)
         btnSaveEdit = findViewById(R.id.btn_save_edit)
 
@@ -159,6 +189,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         etBirthday.setOnClickListener { datePicker.show() }
         etLocationContainer.setOnClickListener { showSearchModal() }
         etLocation.setOnClickListener { showSearchModal() }
+        addressContainer.setOnClickListener {
+            if (isEdit) etAddress.requestFocus()
+        }
 
         // Focus Listener
         etName.setOnFocusChangeListener { _, hasFocus ->
@@ -229,6 +262,18 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             false
         }
 
+        val tooltipMapsText = "Maps Coordinates/URL"
+        val tooltipMapsTextOpen = "Click to open coordinates on maps"
+        tooltipMaps.setOnClickListener {
+            if (tvMaps.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsTextOpen)
+            else TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsText)
+        }
+        tooltipMaps.setOnLongClickListener {
+            if (tvMaps.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsTextOpen)
+            else TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsText)
+            false
+        }
+
         val tooltipBirthdayText = "Owner Birthday"
         tooltipBirthday.setOnClickListener {
             TooltipCompat.setTooltipText(tooltipBirthday, tooltipBirthdayText)
@@ -247,6 +292,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val iOwner = intent.getStringExtra(CONST_OWNER)
         val iName = intent.getStringExtra(CONST_NAME)
         val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
+        val iMaps = intent.getStringExtra(CONST_MAPS)
+        iAddress = intent.getStringExtra(CONST_ADDRESS)
         iLocation = intent.getStringExtra(CONST_LOCATION)
         activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
 
@@ -265,23 +312,35 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tvOwner.text = iOwner
             etOwner.setText(iOwner)
         } else {
-            tvOwner.text = "Not set"
+            tvOwner.text = EMPTY_FIELD_VALUE
             etOwner.setText("")
         }
         if (!iLocation.isNullOrEmpty()) {
             tvLocation.text = "Loading..."
             etLocation.setText("Loading...")
         } else {
-            tvLocation.text = "Not set"
+            tvLocation.text = EMPTY_FIELD_VALUE
             etLocation.setText("")
         }
         if (!iBirthday.isNullOrEmpty() ) {
             if (iBirthday == "0000-00-00") {
-                tvBirthday.text = "Not set"
+                tvBirthday.text = EMPTY_FIELD_VALUE
             } else {
                 tvBirthday.text = DateFormat.format(iBirthday)
                 etBirthday.setText(DateFormat.format(iBirthday))
             }
+        }
+        if (!iMaps.isNullOrEmpty()) {
+            tvMaps.text = iMaps
+            etMaps.setText(iMaps)
+        } else {
+            tvMaps.text = EMPTY_FIELD_VALUE
+            etMaps.setText("")
+        }
+        if (!iAddress.isNullOrEmpty()) {
+            etAddress.setText(iAddress)
+        } else {
+            etAddress.setText(EMPTY_FIELD_VALUE)
         }
 
     }
@@ -292,43 +351,74 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         if (isEdit) {
 
-            tvBirthdayContainer.visibility = View.GONE
-            tvLocationContainer.visibility = View.GONE
-            tvOwnerContainer.visibility = View.GONE
+            // Hide Case
+            icEdit.visibility = View.GONE
+
             tvName.visibility = View.GONE
             tvDescription.visibility = View.GONE
-            icEdit.visibility = View.GONE
+
+            tvOwnerContainer.visibility = View.GONE
+            tvLocationContainer.visibility = View.GONE
+            tvMapsContainer.visibility = View.GONE
+            tvBirthdayContainer.visibility = View.GONE
+
             btnSendMessage.visibility = View.GONE
 
-            etBirthdayContainer.visibility = View.VISIBLE
-            etLocationContainer.visibility = View.VISIBLE
-            etOwnerContainer.visibility = View.VISIBLE
+            // Show Case
+            tvTitleBar.text = "Edit Contact"
             icClose.visibility = View.VISIBLE
+
             etName.visibility = View.VISIBLE
+
+            etOwnerContainer.visibility = View.VISIBLE
+            etLocationContainer.visibility = View.VISIBLE
+            etMapsContainer.visibility = View.VISIBLE
+            etBirthdayContainer.visibility = View.VISIBLE
+
+            // Other Columns Handle
+            addressContainer.setBackgroundResource(R.drawable.et_background)
+            etAddress.isEnabled = true
+            if (iAddress.isNullOrEmpty()) etAddress.setText("")
+
+
             btnSaveEdit.visibility = View.VISIBLE
 
-            tvTitleBar.text = "Edit Contact"
             etName.requestFocus()
             etName.setSelection(etName.text.length)
 
         } else {
 
-            tvBirthdayContainer.visibility = View.VISIBLE
-            tvLocationContainer.visibility = View.VISIBLE
-            tvOwnerContainer.visibility = View.VISIBLE
+            // Show Case
+            icEdit.visibility = View.VISIBLE
+
             tvName.visibility = View.VISIBLE
             tvDescription.visibility = View.VISIBLE
-            icEdit.visibility = View.VISIBLE
+
+            tvOwnerContainer.visibility = View.VISIBLE
+            tvLocationContainer.visibility = View.VISIBLE
+            tvMapsContainer.visibility = View.VISIBLE
+            tvBirthdayContainer.visibility = View.VISIBLE
+
             btnSendMessage.visibility = View.VISIBLE
 
-            etBirthdayContainer.visibility = View.GONE
-            etLocationContainer.visibility = View.GONE
-            etOwnerContainer.visibility = View.GONE
+            // Hide Case
+            tvTitleBar.text = "Detail Contact"
             icClose.visibility = View.GONE
+
             etName.visibility = View.GONE
+
+            etOwnerContainer.visibility = View.GONE
+            etLocationContainer.visibility = View.GONE
+            etMapsContainer.visibility = View.GONE
+            etBirthdayContainer.visibility = View.GONE
+
+            // Other Columns Handle
+            addressContainer.setBackgroundResource(R.drawable.background_rounded)
+            etAddress.isEnabled = false
+            if (iAddress.isNullOrEmpty()) etAddress.setText(EMPTY_FIELD_VALUE)
+
             btnSaveEdit.visibility = View.GONE
 
-            tvTitleBar.text = "Detail Contact"
             etName.clearFocus()
 
         }
@@ -357,17 +447,24 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val pOwner = "${ etOwner.text }"
         var pBirthday = "${ etBirthday.text }"
 
-        pBirthday = if (pBirthday.isEmpty() || pBirthday == "Not set") "0000-00-00"
+        pBirthday = if (pBirthday.isEmpty() || pBirthday == EMPTY_FIELD_VALUE) "0000-00-00"
         else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
 
         loadingState(true)
 
-//        Handler().postDelayed({
-//            handleMessage(this@DetailContactActivity, TAG_ACTION_MAIN_ACTIVITY, "$pName : $pOwner : ${selectedCity!!.id} : $pBirthday")
-//            loadingState(false)
-//        }, 1000)
-//
-//        return
+        Handler().postDelayed({
+            tvName.text = "${ etName.text }"
+            tvOwner.text = "${ etOwner.text }"
+            tvBirthday.text = "${ etBirthday.text }"
+            tvMaps.text = "${ etMaps.text }"
+            tvLocation.text = "${ etLocation.text }"
+            iAddress = "${ etAddress.text }"
+            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
+            loadingState(false)
+            toggleEdit(false)
+        }, 1000)
+
+        return
 
         lifecycleScope.launch {
             try {
@@ -390,6 +487,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         tvName.text = "${ etName.text }"
                         tvOwner.text = "${ etOwner.text }"
                         tvBirthday.text = "${ etBirthday.text }"
+//                        tvMaps.text = "${ etMaps.text }"
+//                        iAddress = "${ etAddress.text }"
                         hasEdited = true
 
                         handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
@@ -479,14 +578,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             etOwner.error = "Owner Name cannot be empty!"
             etOwner.requestFocus()
             false
-        } else if (location.isEmpty() || location == "Not set") {
+        } else if (location.isEmpty() || location == EMPTY_FIELD_VALUE) {
             etOwner.error = null
             etOwner.requestFocus()
             etLocation.error = "Choose customer city!"
             etLocation.requestFocus()
             handleMessage(this@DetailContactActivity, "ERROR EDIT CONTACT", "Choose customer city!")
             false
-        } else if (birthday.isEmpty() || birthday == "Not set") {
+        } else if (birthday.isEmpty() || birthday == EMPTY_FIELD_VALUE) {
             etLocation.error = null
             etLocation.clearFocus()
             etBirthday.error = "Choose owner birthday!"
@@ -535,14 +634,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         intent.putExtra(CONST_NAME, tvName.text)
 
-        if (tvOwner.text == "Not set") intent.putExtra(CONST_OWNER, "")
+        if (tvOwner.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_OWNER, "")
         else intent.putExtra(CONST_OWNER, tvOwner.text)
 
-        if (tvBirthday.text == "Not set") intent.putExtra(CONST_BIRTHDAY, "0000-00-00")
+        if (tvBirthday.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_BIRTHDAY, "0000-00-00")
         else intent.putExtra(CONST_BIRTHDAY, DateFormat.format("${ tvBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd"))
         intent.putExtra(ACTIVITY_REQUEST_CODE, DETAIL_ACTIVITY_REQUEST_CODE)
 
-        if (tvLocation.text == "Not set") intent.putExtra(CONST_LOCATION, "")
+        if (tvLocation.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_LOCATION, "")
         else intent.putExtra(CONST_LOCATION, selectedCity!!.id)
 
         startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
@@ -554,10 +653,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         searchModal = SearchModal(this, items)
         searchModal.setCustomDialogListener(this)
         searchModal.searchHint = "Enter city name..."
-        searchModal.setOnDismissListener {
-            etLocation.clearFocus()
-            etOwner.requestFocus()
-        }
+        searchModal.setOnDismissListener { etLocation.clearFocus() }
 
     }
 
@@ -596,7 +692,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             etLocation.setText("${foundItem.nama_city} - ${foundItem.kode_city}")
                             selectedCity = ModalSearchModel(foundItem.id_city, foundItem.nama_city)
                         } else {
-                            tvLocation.text = "Not set"
+                            tvLocation.text = EMPTY_FIELD_VALUE
                             etLocation.setText("")
                         }
                     }
