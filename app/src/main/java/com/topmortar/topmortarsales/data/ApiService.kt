@@ -36,8 +36,8 @@ interface ApiService {
     suspend fun sendMessage(
         @Part("nama") name: RequestBody,
         @Part("nomorhp") phone: RequestBody,
-//        @Part("tgl_lahir") birthday: RequestBody,
-//        @Part("owner_name") ownerName: RequestBody,
+        @Part("owner_name") ownerName: RequestBody,
+        @Part("tgl_lahir") birthday: RequestBody,
 //        @Part("id_city") cityId: RequestBody,
         @Part("coordinates") coordinates: RequestBody,
         @Part("message_body") message: RequestBody,

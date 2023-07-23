@@ -98,24 +98,24 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         val phone = "${ etPhone.text }"
         val name = "${ etName.text }"
 //        val location = "${ etStoreLocated.text }"
-//        var birthday = "${ etBirthday.text }"
-//        val owner = "${ etOwner.text }"
+        var birthday = "${ etBirthday.text }"
+        val owner = "${ etOwner.text }"
         val message = "${ etMessage.text }"
         val coordinates = "${ etCoordinates.text }"
 
-        if (!formValidation(phone = phone, name = name, coordinates = coordinates, message = message)) return
-//
-//        birthday = if (birthday.isEmpty()) "0000-00-00"
-//        else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
+        if (!formValidation(phone = phone, name = name, message = message)) return
+
+        birthday = if (birthday.isEmpty()) "0000-00-00"
+        else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
 
         loadingState(true)
 
-        Handler().postDelayed({
-            handleMessage(this@NewRoomChatFormActivity, "SEND MESSAGE PARAMS", "$phone : $name : $coordinates : $message")
-            loadingState(false)
-        }, 1000)
+//        Handler().postDelayed({
+//            handleMessage(this@NewRoomChatFormActivity, "SEND MESSAGE PARAMS", "$phone : $name : $coordinates : $message")
+//            loadingState(false)
+//        }, 1000)
 
-        return
+//        return
 
         lifecycleScope.launch {
             try {
@@ -123,13 +123,13 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                 val rbPhone = createPartFromString(formatPhoneNumber(phone))
                 val rbName = createPartFromString(name)
 //                val rbLocation = createPartFromString(selectedCity!!.id)
-//                val rbBirthday = createPartFromString(birthday)
-//                val rbOwner = createPartFromString(owner)
+                val rbBirthday = createPartFromString(birthday)
+                val rbOwner = createPartFromString(owner)
                 val rbCoordinates = createPartFromString(coordinates)
                 val rbMessage = createPartFromString(message)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.sendMessage(rbName, rbPhone, rbCoordinates, rbMessage)
+                val response = apiService.sendMessage(rbName, rbPhone, rbOwner, rbBirthday, rbCoordinates, rbMessage)
 
                 if (response.isSuccessful) {
 
@@ -357,7 +357,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
     }
 
-    private fun formValidation(phone: String, name: String, location: String = "", birthday: String = "", owner: String = "", coordinates: String, message: String): Boolean {
+    private fun formValidation(phone: String, name: String, location: String = "", birthday: String = "", owner: String = "", coordinates: String = "", message: String): Boolean {
         return if (phone.isEmpty()) {
             etPhone.error = "Phone number cannot be empty!"
             etPhone.requestFocus()
@@ -371,12 +371,12 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             etName.error = "Name cannot be empty!"
             etName.requestFocus()
             false
-        } else if (coordinates.isEmpty()) {
-            etName.error = null
-            etName.clearFocus()
-            etCoordinates.error = "Coordinates cannot be empty!"
-            etCoordinates.requestFocus()
-            false
+//        } else if (coordinates.isEmpty()) {
+//            etName.error = null
+//            etName.clearFocus()
+//            etCoordinates.error = "Coordinates cannot be empty!"
+//            etCoordinates.requestFocus()
+//            false
 //        } else if (location.isEmpty()) {
 //            etName.error = null
 //            etName.clearFocus()
@@ -396,23 +396,25 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 //            etBirthday.requestFocus()
 //            false
         } else if (message.isEmpty()) {
-            etOwner.error = null
-            etOwner.clearFocus()
+            etName.error = null
+            etName.clearFocus()
             etMessage.error = "Message cannot be empty!"
             etMessage.requestFocus()
             false
         } else {
             etPhone.error = null
             etName.error = null
-            etStoreLocated.error = null
-            etBirthday.error = null
             etOwner.error = null
+            etBirthday.error = null
+            etCoordinates.error = null
             etMessage.error = null
+            etStoreLocated.error = null
             etPhone.clearFocus()
             etName.clearFocus()
             etStoreLocated.clearFocus()
             etBirthday.clearFocus()
             etOwner.clearFocus()
+            etCoordinates.clearFocus()
             etMessage.clearFocus()
             true
         }
