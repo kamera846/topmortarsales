@@ -2,15 +2,18 @@ package com.topmortar.topmortarsales.view.contact
 
 import android.app.DatePickerDialog
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -46,6 +49,7 @@ import com.topmortar.topmortarsales.model.ModalSearchModel
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
+
 @Suppress("DEPRECATION")
 class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
@@ -57,8 +61,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var etLocationContainer: LinearLayout
     private lateinit var tvOwnerContainer: LinearLayout
     private lateinit var etOwnerContainer: LinearLayout
-    private lateinit var tvMapsContainer: LinearLayout
+    private lateinit var tvMapsContainer: RelativeLayout
     private lateinit var etMapsContainer: LinearLayout
+    private lateinit var overlayMaps: View
 
     private lateinit var addressContainer: LinearLayout
 
@@ -100,6 +105,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private var iLocation: String? = null
     private var iAddress: String? = null
+    private var iMapsUrl: String? = null
 
     private lateinit var datePicker: DatePickerDialog
     private lateinit var searchModal: SearchModal
@@ -138,6 +144,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         etOwnerContainer = findViewById(R.id.et_owner_container)
         tvMapsContainer = findViewById(R.id.tv_maps_container)
         etMapsContainer = findViewById(R.id.et_maps_container)
+        overlayMaps = findViewById(R.id.overlay_maps)
 
         addressContainer = findViewById(R.id.address_container)
 
@@ -192,6 +199,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         addressContainer.setOnClickListener {
             if (isEdit) etAddress.requestFocus()
         }
+        tvMapsContainer.setOnClickListener { mapsActionHandler() }
 
         // Focus Listener
         etName.setOnFocusChangeListener { _, hasFocus ->
@@ -212,6 +220,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 etLocation.setSelection(etLocation.length())
             } else etLocation.clearFocus()
         }
+        //////////
 
         // Change Listener
         etBirthday.addTextChangedListener(object : TextWatcher {
@@ -242,6 +251,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
 
         })
+        //////////
 
         // Tooltip Handler
         val tooltipText = "Owner Name"
@@ -282,7 +292,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             TooltipCompat.setTooltipText(tooltipBirthday, tooltipBirthdayText)
             false
         }
-
+        //////////
     }
 
     private fun dataActivityValidation() {
@@ -292,7 +302,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val iOwner = intent.getStringExtra(CONST_OWNER)
         val iName = intent.getStringExtra(CONST_NAME)
         val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
-        val iMaps = intent.getStringExtra(CONST_MAPS)
+        iMapsUrl = intent.getStringExtra(CONST_MAPS)
         iAddress = intent.getStringExtra(CONST_ADDRESS)
         iLocation = intent.getStringExtra(CONST_LOCATION)
         activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
@@ -330,10 +340,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 etBirthday.setText(DateFormat.format(iBirthday))
             }
         }
-        if (!iMaps.isNullOrEmpty()) {
-            tvMaps.text = iMaps
-            etMaps.setText(iMaps)
+        if (!iMapsUrl.isNullOrEmpty()) {
+            tvMaps.text = "Click to open"
+            etMaps.setText(iMapsUrl)
         } else {
+            iMapsUrl = EMPTY_FIELD_VALUE
             tvMaps.text = EMPTY_FIELD_VALUE
             etMaps.setText("")
         }
@@ -456,7 +467,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tvName.text = "${ etName.text }"
             tvOwner.text = "${ etOwner.text }"
             tvBirthday.text = "${ etBirthday.text }"
-            tvMaps.text = "${ etMaps.text }"
+            tvMaps.text = "Click to open"
+            iMapsUrl = "${ etMaps.text }"
             tvLocation.text = "${ etLocation.text }"
             iAddress = "${ etAddress.text }"
             handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
@@ -718,6 +730,27 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             }
 
+        }
+    }
+
+    private fun mapsActionHandler() {
+        if (tvMaps.text != EMPTY_FIELD_VALUE && !isEdit) {
+            val animateDuration = 200L
+
+            val fadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in)
+            fadeIn.duration = animateDuration
+
+            overlayMaps.alpha = 0.4f
+            overlayMaps.visibility = View.VISIBLE
+            overlayMaps.startAnimation(fadeIn)
+
+            Handler().postDelayed({
+                overlayMaps.alpha = 0f
+                overlayMaps.visibility = View.GONE
+
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(iMapsUrl))
+                startActivity(intent)
+            }, animateDuration)
         }
     }
 
