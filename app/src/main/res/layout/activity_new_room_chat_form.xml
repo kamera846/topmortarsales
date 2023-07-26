@@ -4,266 +4,441 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".NewRoomChatFormActivity">
+    tools:context=".view.contact.NewRoomChatFormActivity">
 
     <!-- Title Bar -->
     <include
         android:id="@+id/title_bar"
-        layout="@layout/component_title_bar"/>
+        layout="@layout/component_title_bar_light"/>
 
-    <LinearLayout
-        android:id="@+id/form_input"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-        <!-- Phone Number -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
             <LinearLayout
+                android:id="@+id/form_input"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:orientation="horizontal">
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:padding="16dp">
 
-                <TextView
-                    android:id="@+id/tv_phone_label"
-                    android:layout_width="wrap_content"
+                <!-- Phone Number -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/input_phon_number_label"
-                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
-                    android:textSize="16sp"
-                    android:textStyle="bold"/>
+                    android:layout_marginBottom="16dp"
+                    android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_phone_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/input_phon_number_label"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="*"
+                            android:textColor="@color/primary"/>
+
+                    </LinearLayout>
+
+                    <EditText
+                        android:labelFor="@+id/tv_phone_label"
+                        android:id="@+id/et_phone"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                        android:textColorHint="@color/black_600"
+                        android:hint="@string/input_phon_number_placeholder"
+                        android:inputType="phone"
+                        android:autofillHints="@string/input_phon_number_placeholder"
+                        android:textSize="14sp"
+                        android:background="@drawable/et_background"
+                        android:padding="12dp"
+                        android:outlineProvider="none"/>
+
+                </LinearLayout>
+
+                <!-- Name -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:text="*"
-                    android:textColor="@color/primary"/>
+                    android:layout_marginBottom="16dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_name_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Store Name"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="*"
+                            android:textColor="@color/primary"/>
+
+                    </LinearLayout>
+
+                    <EditText
+                        android:labelFor="@+id/tv_name_label"
+                        android:id="@+id/et_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                        android:textColorHint="@color/black_600"
+                        android:hint="e.g TB BAROKAH MAJU JAYA MLG"
+                        android:inputType="textCapWords"
+                        android:autofillHints="e.g TB BAROKAH MAJU JAYA MLG"
+                        android:textSize="14sp"
+                        android:background="@drawable/et_background"
+                        android:padding="12dp"
+                        android:outlineProvider="none" />
+
+                </LinearLayout>
+
+                <!-- City Store City -->
+                <LinearLayout
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_store_located"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Customer City"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:visibility="gone"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="*"
+                            android:textColor="@color/primary"/>
+
+                    </LinearLayout>
+
+                    <EditText
+                        android:id="@+id/et_store_located"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                        android:textColorHint="@color/black_600"
+                        android:hint="Choose Customer City"
+                        android:inputType="textCapWords"
+                        android:autofillHints="e.g John Doe"
+                        android:textSize="14sp"
+                        android:background="@drawable/et_background"
+                        android:padding="12dp"
+                        android:outlineProvider="none" />
+
+                </LinearLayout>
+
+                <!-- Owner Name -->
+                <LinearLayout
+                    android:visibility="visible"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_owner"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Owner Name"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:visibility="visible"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="*"
+                            android:textColor="@color/primary"/>
+
+                    </LinearLayout>
+
+                    <EditText
+                        android:labelFor="@+id/tv_owner"
+                        android:id="@+id/et_owner"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                        android:textColorHint="@color/black_600"
+                        android:hint="e.g John Doe"
+                        android:inputType="textCapWords"
+                        android:autofillHints="e.g John Doe"
+                        android:textSize="14sp"
+                        android:background="@drawable/et_background"
+                        android:padding="12dp"
+                        android:outlineProvider="none" />
+
+                </LinearLayout>
+
+                <!-- Birthday -->
+                <LinearLayout
+                    android:visibility="visible"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_birthday"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Date of Birth"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:visibility="visible"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="*"
+                            android:textColor="@color/primary"/>
+
+                    </LinearLayout>
+
+                    <EditText
+                        android:id="@+id/et_birthday"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                        android:textColorHint="@color/black_600"
+                        android:hint="Choose Owner Birthday"
+                        android:inputType="textCapWords"
+                        android:autofillHints="e.g John Doe"
+                        android:textSize="14sp"
+                        android:background="@drawable/et_background"
+                        android:padding="12dp"
+                        android:outlineProvider="none" />
+
+                </LinearLayout>
+
+                <!-- Owner City -->
+                <LinearLayout
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_city"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Customer City"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="8dp"/>
+
+                    <AutoCompleteTextView
+                        android:id="@+id/spinner_searchbox"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:textSize="14sp"
+                        android:hint="e.g Sidoarjo"
+                        android:imeOptions="actionDone"
+                        android:singleLine="true"
+                        android:completionThreshold="1"
+                        android:background="@drawable/et_background"
+                        android:padding="12dp"/>
+
+                </LinearLayout>
+
+                <!-- Owner Name -->
+                <LinearLayout
+                    android:visibility="visible"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_maps_url"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Maps URL"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:visibility="visible"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="*"
+                            android:textColor="@color/primary"/>
+
+                    </LinearLayout>
+
+                    <EditText
+                        android:labelFor="@+id/tv_maps_url"
+                        android:id="@+id/et_maps_url"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                        android:textColorHint="@color/black_600"
+                        android:hint="e.g https://goo.gl/maps/CBKN6mU3cjQkuruB8"
+                        android:inputType="textUri"
+                        android:autofillHints="e.g John Doe"
+                        android:textSize="14sp"
+                        android:background="@drawable/et_background"
+                        android:padding="12dp"
+                        android:outlineProvider="none" />
+
+                </LinearLayout>
+
+                <!-- Message -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_message_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/input_message_label"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="*"
+                            android:textColor="@color/primary"/>
+
+                    </LinearLayout>
+
+                    <EditText
+                        android:labelFor="@+id/tv_message_label"
+                        android:id="@+id/et_message"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="48dp"
+                        android:layout_marginBottom="4dp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                        android:textColorHint="@color/black_600"
+                        android:maxLines="3"
+                        android:inputType="textMultiLine"
+                        android:hint="@string/input_message_placeholder"
+                        android:autofillHints="@string/input_message_placeholder"
+                        android:textSize="14sp"
+                        android:maxLength="30"
+                        android:background="@drawable/et_background"
+                        android:padding="12dp"
+                        android:outlineProvider="none"/>
+
+                    <!-- Max Text Length -->
+                    <TextView
+                        android:id="@+id/tv_max_message"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:textColor="@color/primary"
+                        android:text="@string/message_length" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
-            <EditText
-                android:labelFor="@+id/tv_phone_label"
-                android:id="@+id/et_phone"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-                android:textColorHint="@color/black_600"
-                android:hint="@string/input_phon_number_placeholder"
-                android:inputType="phone"
-                android:autofillHints="@string/input_phon_number_placeholder"
-                android:textSize="14sp"
-                android:background="@drawable/et_background"
-                android:padding="12dp"
-                android:outlineProvider="none"/>
-
-        </LinearLayout>
-
-        <!-- Name -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:orientation="vertical">
-
+            <!-- Submit -->
             <LinearLayout
+                android:layout_alignParentBottom="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:orientation="horizontal">
+                android:padding="16dp"
+                android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/tv_name_label"
-                    android:layout_width="wrap_content"
+                <Button
+                    android:id="@+id/btn_submit"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Store Name"
-                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
-                    android:textSize="16sp"
-                    android:textStyle="bold"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:text="*"
-                    android:textColor="@color/primary"/>
+                    android:padding="12dp"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:text="Send Now" />
 
             </LinearLayout>
 
-            <EditText
-                android:labelFor="@+id/tv_name_label"
-                android:id="@+id/et_name"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-                android:textColorHint="@color/black_600"
-                android:hint="e.g TB BAROKAH MAJU JAYA MLG"
-                android:inputType="textCapWords"
-                android:autofillHints="e.g TB BAROKAH MAJU JAYA MLG"
-                android:textSize="14sp"
-                android:background="@drawable/et_background"
-                android:padding="12dp"
-                android:outlineProvider="none" />
-
         </LinearLayout>
 
-        <!-- Owner Name -->
-        <LinearLayout
-            android:visibility="visible"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/tv_owner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Owner Name"
-                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp"/>
-
-            <EditText
-                android:labelFor="@+id/tv_owner"
-                android:id="@+id/et_owner"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-                android:textColorHint="@color/black_600"
-                android:hint="e.g John Doe"
-                android:inputType="textCapWords"
-                android:autofillHints="e.g John Doe"
-                android:textSize="14sp"
-                android:background="@drawable/et_background"
-                android:padding="12dp"
-                android:outlineProvider="none" />
-
-        </LinearLayout>
-
-        <!-- Birthday -->
-        <LinearLayout
-            android:visibility="visible"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/tv_birthday"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Date of Birth"
-                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp"/>
-
-            <EditText
-                android:id="@+id/et_birthday"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-                android:textColorHint="@color/black_600"
-                android:hint="Choose Owner Birthday"
-                android:inputType="textCapWords"
-                android:autofillHints="e.g John Doe"
-                android:textSize="14sp"
-                android:background="@drawable/et_background"
-                android:padding="12dp"
-                android:outlineProvider="none" />
-
-        </LinearLayout>
-
-        <!-- Message -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/tv_message_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/input_message_label"
-                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
-                    android:textSize="16sp"
-                    android:textStyle="bold"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:text="*"
-                    android:textColor="@color/primary"/>
-
-            </LinearLayout>
-
-            <EditText
-                android:labelFor="@+id/tv_message_label"
-                android:id="@+id/et_message"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="48dp"
-                android:layout_marginBottom="4dp"
-                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-                android:textColorHint="@color/black_600"
-                android:maxLines="3"
-                android:inputType="textMultiLine"
-                android:hint="@string/input_message_placeholder"
-                android:autofillHints="@string/input_message_placeholder"
-                android:textSize="14sp"
-                android:maxLength="30"
-                android:background="@drawable/et_background"
-                android:padding="12dp"
-                android:outlineProvider="none"/>
-
-            <!-- Max Text Length -->
-            <TextView
-                android:id="@+id/tv_max_message"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:textColor="@color/primary"
-                android:text="@string/message_length" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-    <!-- Submit -->
-    <LinearLayout
-        android:layout_alignParentBottom="true"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:orientation="vertical">
-
-        <Button
-            android:id="@+id/btn_submit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="12dp"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:text="Send Now" />
-
-    </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>

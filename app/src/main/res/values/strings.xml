@@ -9,7 +9,7 @@
     <string name="btn_submit_new_chat_room">Send Now</string>
     <string name="input_message_label">Message</string>
     <string name="input_name_label">Name</string>
-    <string name="input_phon_number_label">Phone Number</string>
+    <string name="input_phon_number_label">Phone Number (WA)</string>
     <string name="input_message_placeholder">Hello!</string>
     <string name="input_name_placeholder">TB BAROKAH MAJU JAYA</string>
     <string name="input_phon_number_placeholder">e.g 628XXXXXXXXX</string>
@@ -32,4 +32,11 @@
     <string name="text_password">Password</string>
     <string name="text_login">Login</string>
     <string name="text_copyright">© 2023 Top Mortar Sales</string>
+    <string name="manage_user">Manage User</string>
+    <string name="manage_city">Manage City</string>
+    <string-array name="user_level_spinner_options">
+        <item>Choose Level</item>
+        <item>Admin</item>
+        <item>Sales</item>
+    </string-array>
 </resources>

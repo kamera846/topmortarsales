@@ -1,53 +1,117 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_height="wrap_content">
 
     <LinearLayout
+        android:id="@+id/overlay_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:orientation="horizontal">
-
-        <ImageView
-            android:id="@+id/iv_contact_profile"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@mipmap/logo_dark_circle"
-            android:layout_gravity="center_vertical"
-            android:contentDescription="@string/logo_square" />
+        android:background="@drawable/background_item_overlay"
+        android:orientation="vertical"
+        android:alpha="0"
+        android:visibility="gone">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="16dp">
+            android:padding="16dp"
+            android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/tv_contact_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="4dp"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
-                android:text="@string/list_chat_contact_name"/>
+            <ImageView
+                android:visibility="invisible"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@mipmap/logo_dark_circle"
+                android:layout_gravity="center_vertical"
+                android:contentDescription="@string/logo_square" />
 
-            <TextView
-                android:id="@+id/tv_phone_number"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:visibility="invisible"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-                android:text="@string/list_chat_contact_description"/>
-       </LinearLayout>
+                android:orientation="vertical"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                    android:text="@string/list_chat_contact_name"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                    android:text="@string/list_chat_contact_description"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <View
+            android:visibility="invisible"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:theme="@style/Theme.TopMortarSales.BaseLine"/>
 
     </LinearLayout>
 
-    <View
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:theme="@style/Theme.TopMortarSales.BaseLine"/>
-</LinearLayout>
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/iv_contact_profile"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@mipmap/logo_dark_circle"
+                android:layout_gravity="center_vertical"
+                android:contentDescription="@string/logo_square" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="16dp">
+
+                <TextView
+                    android:id="@+id/tv_contact_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="4dp"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                    android:text="@string/list_chat_contact_name"/>
+
+                <TextView
+                    android:id="@+id/tv_phone_number"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                    android:text="@string/list_chat_contact_description"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:theme="@style/Theme.TopMortarSales.BaseLine"/>
+
+    </LinearLayout>
+</RelativeLayout>
