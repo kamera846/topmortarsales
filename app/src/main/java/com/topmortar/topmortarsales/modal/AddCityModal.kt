@@ -1,6 +1,5 @@
 package com.topmortar.topmortarsales.modal
 
-import android.app.Activity
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
@@ -14,12 +13,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
-import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
-import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
-import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -38,9 +33,9 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
     private lateinit var etCityCode: EditText
     private lateinit var btnSubmit: Button
 
-    private var city: CityModel? = null
-    fun setCity(data: CityModel) {
-        this.city = data
+    private var item: CityModel? = null
+    fun setItem(data: CityModel) {
+        this.item = data
     }
 
     private var modalInterface : AddCityModalInterface? = null
@@ -98,6 +93,7 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
     }
 
     private fun loadingState(state: Boolean) {
+
         btnSubmit.setTextColor(ContextCompat.getColor(context, R.color.white))
         btnSubmit.setBackgroundColor(ContextCompat.getColor(context, R.color.primary_200))
 
@@ -113,6 +109,7 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
             btnSubmit.setBackgroundColor(ContextCompat.getColor(context, R.color.primary))
 
         }
+
     }
 
     private fun submitHandler() {
@@ -136,12 +133,17 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
 
                     if (responseBody.status == RESPONSE_STATUS_OK) {
 
+                        etCityName.setText("")
+                        etCityCode.setText("")
+                        loadingState(false)
+                        handleMessage(context, TAG_RESPONSE_CONTACT, "Successfully added data!")
+
                         modalInterface!!.onSubmit(true)
                         this@AddCityModal.dismiss()
 
                     } else {
 
-                        handleMessage(context, TAG_RESPONSE_CONTACT, "Failed added data")
+                        handleMessage(context, TAG_RESPONSE_CONTACT, "Failed added data!")
                         loadingState(false)
 
                     }

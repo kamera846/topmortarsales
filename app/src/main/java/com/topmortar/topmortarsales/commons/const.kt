@@ -17,11 +17,13 @@ const val GET_CITY = "city.php"
 const val ADD_CITY = "city.php"
 const val AUTH = "auth.php"
 const val GET_USERS = "users.php"
+const val ADD_USERS = "users.php"
 
 // Request Code
 const val ACTIVITY_REQUEST_CODE = "activity_request_code"
 const val MAIN_ACTIVITY_REQUEST_CODE = 111
 const val DETAIL_ACTIVITY_REQUEST_CODE = 222
+const val MANAGE_USER_ACTIVITY_REQUEST_CODE = 333
 
 // Tag Log
 const val TAG_RESPONSE_CONTACT = "TAG RESPONSE CONTACT"

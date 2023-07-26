@@ -1,6 +1,7 @@
 package com.topmortar.topmortarsales.data
 
 import com.topmortar.topmortarsales.commons.ADD_CITY
+import com.topmortar.topmortarsales.commons.ADD_USERS
 import com.topmortar.topmortarsales.commons.AUTH
 import com.topmortar.topmortarsales.commons.EDIT_CONTACT
 import com.topmortar.topmortarsales.commons.GET_CITY
@@ -80,4 +81,13 @@ interface ApiService {
 
     @GET(GET_USERS)
     suspend fun getUsers(): ResponseUsers
+
+    @Multipart
+    @POST(ADD_USERS)
+    suspend fun addUser(
+        @Part("level_user") level: RequestBody,
+        @Part("id_city") cityId: RequestBody,
+        @Part("username") username: RequestBody,
+        @Part("password") password: RequestBody
+    ): Response<ResponseMessage>
 }

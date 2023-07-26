@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".view.user.AddUserActivity">
+
+    <!-- Title Bar -->
+    <include
+        android:id="@+id/title_bar"
+        layout="@layout/component_title_bar_light"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/form_input"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <!-- User Level -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_spin_level"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="User Level"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="*"
+                            android:textColor="@color/primary"/>
+
+                    </LinearLayout>
+
+                    <Spinner
+                        android:id="@+id/spin_level"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                        android:textSize="14sp"
+                        android:background="@drawable/et_background"
+                        android:padding="12dp"
+                        android:entries="@array/user_level_spinner_options" />
+
+                </LinearLayout>
+
+                <!-- User City -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_user_city_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="User City"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="*"
+                            android:textColor="@color/primary"/>
+
+                    </LinearLayout>
+
+                    <EditText
+                        android:labelFor="@+id/tv_user_city_label"
+                        android:id="@+id/et_user_city"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                        android:textColorHint="@color/black_600"
+                        android:hint="Choose Customer City"
+                        android:inputType="textCapWords"
+                        android:autofillHints="e.g John Doe"
+                        android:textSize="14sp"
+                        android:background="@drawable/et_background"
+                        android:padding="12dp"
+                        android:outlineProvider="none" />
+
+                </LinearLayout>
+
+                <!-- Username -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_username_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Username"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="*"
+                            android:textColor="@color/primary"/>
+
+                    </LinearLayout>
+
+                    <EditText
+                        android:labelFor="@+id/tv_username_label"
+                        android:id="@+id/et_username"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                        android:textColorHint="@color/black_600"
+                        android:inputType="text"
+                        android:textSize="14sp"
+                        android:background="@drawable/et_background"
+                        android:padding="12dp"
+                        android:outlineProvider="none" />
+
+                </LinearLayout>
+
+                <!-- User Password -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_password_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="User Password"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="*"
+                            android:textColor="@color/primary"/>
+
+                    </LinearLayout>
+
+                    <EditText
+                        android:labelFor="@+id/tv_password_label"
+                        android:id="@+id/et_user_password"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                        android:textColorHint="@color/black_600"
+                        android:inputType="textPassword"
+                        android:textSize="14sp"
+                        android:background="@drawable/et_background"
+                        android:padding="12dp"
+                        android:outlineProvider="none" />
+
+                </LinearLayout>
+
+                <!-- Confirm User Password -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_confirm_password_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Confirm User Password"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="*"
+                            android:textColor="@color/primary"/>
+
+                    </LinearLayout>
+
+                    <EditText
+                        android:labelFor="@+id/tv_confirm_password_label"
+                        android:id="@+id/et_confirm_user_password"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                        android:textColorHint="@color/black_600"
+                        android:inputType="textPassword"
+                        android:textSize="14sp"
+                        android:background="@drawable/et_background"
+                        android:padding="12dp"
+                        android:outlineProvider="none" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Submit -->
+            <LinearLayout
+                android:layout_alignParentBottom="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/btn_submit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:text="Submit" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>

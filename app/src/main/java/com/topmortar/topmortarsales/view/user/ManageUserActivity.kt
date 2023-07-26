@@ -1,6 +1,6 @@
 package com.topmortar.topmortarsales.view.user
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -12,14 +12,17 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.UsersRecyclerViewAdapter
+import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
@@ -29,6 +32,7 @@ import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.UserModel
 import kotlinx.coroutines.launch
 
+@Suppress("DEPRECATION")
 class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemClickListener {
 
     private lateinit var scaleAnimation: Animation
@@ -101,14 +105,8 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
 
     private fun initClickHandler() {
 
-//        btnFab.setOnClickListener { navigateAddNewRoom() }
+        btnFab.setOnClickListener { navigateAddUser() }
         icBack.setOnClickListener { finish() }
-//        icSearch.setOnClickListener { toggleSearchEvent(SEARCH_OPEN) }
-//        icCloseSearch.setOnClickListener { toggleSearchEvent(SEARCH_CLOSE) }
-//        icClearSearch.setOnClickListener { etSearchBox.setText("") }
-//        rlLoading.setOnTouchListener { _, event -> blurSearchBox(event) }
-//        rlParent.setOnTouchListener { _, event -> blurSearchBox(event) }
-//        rvListItem.setOnTouchListener { _, event -> blurSearchBox(event) }
 
     }
 
@@ -203,7 +201,31 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
 
     }
 
+    private fun navigateAddUser() {
+
+        val intent = Intent(this@ManageUserActivity, AddUserActivity::class.java)
+        startActivityForResult(intent, MANAGE_USER_ACTIVITY_REQUEST_CODE)
+
+    }
+
     override fun onItemClick(data: UserModel?) {
+
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == MANAGE_USER_ACTIVITY_REQUEST_CODE) {
+
+            val resultData = data?.getStringExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE")
+
+            if (resultData == SYNC_NOW) {
+
+                getList()
+
+            }
+
+        }
 
     }
 
