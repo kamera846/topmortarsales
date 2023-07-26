@@ -104,6 +104,11 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         userCity = sessionManager.userCityID()!!
         userKind = sessionManager.userKind()!!
 
+        val userId = sessionManager.userID()!!
+        val isLoggedIn = sessionManager.isLoggedIn()
+
+        if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()) return missingDataHandler()
+
         setContentView(R.layout.activity_main)
 
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
@@ -247,7 +252,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
                     true
                 }
                 R.id.option_logout -> {
-                    logoutHandler()
+                    logoutConfirmation()
                     true
                 }
                 else -> false
@@ -532,26 +537,45 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         imm.hideSoftInputFromWindow(etSearchBox.windowToken, 0)
     }
 
-    private fun logoutHandler() {
+    private fun logoutConfirmation() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Logout Confirmation")
             .setMessage("Are you sure you want to log out?")
             .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
             .setPositiveButton("Yes") { dialog, _ ->
+
                 dialog.dismiss()
+                logoutHandler()
 
-                sessionManager.setLoggedIn(LOGGED_OUT)
-                sessionManager.setUserKind("")
-                sessionManager.setUserID("")
-                sessionManager.setUserName("")
-                sessionManager.setUserCityID("")
-
-                val intent = Intent(this@MainActivity, SplashScreenActivity::class.java)
-                startActivity(intent)
-                finish()
             }
         val dialog = builder.create()
         dialog.show()
+    }
+
+    private fun missingDataHandler() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Incomplete Data Detected")
+            .setMessage("An incomplete login data has been detected, please try to log in again!")
+            .setPositiveButton("Yes") { dialog, _ ->
+
+                dialog.dismiss()
+                logoutHandler()
+
+            }
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    private fun logoutHandler() {
+        sessionManager.setLoggedIn(LOGGED_OUT)
+        sessionManager.setUserKind("")
+        sessionManager.setUserID("")
+        sessionManager.setUserName("")
+        sessionManager.setUserCityID("")
+
+        val intent = Intent(this@MainActivity, SplashScreenActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
