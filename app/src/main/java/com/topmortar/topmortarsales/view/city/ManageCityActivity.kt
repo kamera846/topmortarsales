@@ -26,10 +26,12 @@ import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.modal.AddCityModal
 import com.topmortar.topmortarsales.model.CityModel
 import kotlinx.coroutines.launch
 
-class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClickListener {
+class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClickListener,
+    AddCityModal.AddCityModalInterface {
 
     private lateinit var scaleAnimation: Animation
 
@@ -49,14 +51,7 @@ class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClic
 
     // Global
     private lateinit var sessionManager: SessionManager
-    private var doubleBackToExitPressedOnce = false
-
-    // Initialize Search Engine
-    private val searchDelayMillis = 500L
-    private val searchHandler = Handler(Looper.getMainLooper())
-    private var searchRunnable: Runnable? = null
-    private var previousSearchTerm = ""
-    private var isSearchActive = false
+    private lateinit var addCityModal: AddCityModal
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -76,6 +71,9 @@ class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClic
     }
 
     private fun initVariable() {
+
+        addCityModal = AddCityModal(this, lifecycleScope)
+        addCityModal.initializeInterface(this)
 
         rlLoading = findViewById(R.id.rl_loading)
         rlParent = findViewById(R.id.rl_parent)
@@ -100,16 +98,8 @@ class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClic
     }
 
     private fun initClickHandler() {
-
-//        btnFab.setOnClickListener { navigateAddNewRoom() }
         icBack.setOnClickListener { finish() }
-//        icSearch.setOnClickListener { toggleSearchEvent(SEARCH_OPEN) }
-//        icCloseSearch.setOnClickListener { toggleSearchEvent(SEARCH_CLOSE) }
-//        icClearSearch.setOnClickListener { etSearchBox.setText("") }
-//        rlLoading.setOnTouchListener { _, event -> blurSearchBox(event) }
-//        rlParent.setOnTouchListener { _, event -> blurSearchBox(event) }
-//        rvListItem.setOnTouchListener { _, event -> blurSearchBox(event) }
-
+        btnFab.setOnClickListener { addCityModal.show() }
     }
 
     private fun getList() {
@@ -127,7 +117,6 @@ class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClic
 
                         setRecyclerView(response.results)
                         loadingState(false)
-//                        loadingState(true, "Success get data!")
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
@@ -205,6 +194,10 @@ class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClic
 
     override fun onItemClick(data: CityModel?) {
 
+    }
+
+    override fun onSubmit(status: Boolean) {
+        if (status) getList()
     }
 
 }

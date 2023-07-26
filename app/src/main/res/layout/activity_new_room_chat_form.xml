@@ -27,8 +27,7 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:orientation="vertical"
-                android:paddingVertical="32dp"
-                android:paddingHorizontal="16dp">
+                android:padding="16dp">
 
                 <!-- Phone Number -->
                 <LinearLayout

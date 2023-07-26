@@ -25,8 +25,7 @@
                 android:id="@+id/profile_bar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingVertical="32dp"
-                android:paddingHorizontal="16dp"
+                android:padding="16dp"
                 android:orientation="horizontal"
                 android:gravity="center">
 
@@ -94,6 +93,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginHorizontal="32dp"
+                android:layout_marginVertical="16dp"
                 android:theme="@style/Theme.TopMortarSales.BaseLine"/>
 
             <!-- Form Container -->
@@ -102,8 +102,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:paddingVertical="32dp"
-                android:paddingHorizontal="16dp"
+                android:padding="16dp"
                 android:orientation="vertical">
 
                 <!-- Text Phone -->
@@ -426,7 +425,6 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
                     android:orientation="vertical">
 
                     <LinearLayout
@@ -501,90 +499,75 @@
 
                 </LinearLayout>
 
-                <!-- Other Information -->
+                <!-- Separator -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginVertical="32dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_weight="1"
+                        android:layout_marginHorizontal="32dp"
+                        android:theme="@style/Theme.TopMortarSales.BaseLine"/>
+
+                    <TextView
+                        android:id="@+id/tv_other_information"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Other Information"
+                        android:textSize="14sp"
+                        android:theme="@style/Theme.TopMortarSales.TextBaseLine" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_weight="1"
+                        android:layout_marginHorizontal="32dp"
+                        android:theme="@style/Theme.TopMortarSales.BaseLine"/>
+
+                </LinearLayout>
+
+                <!-- Text Address -->
+                <LinearLayout
+                    android:id="@+id/address_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:padding="16dp"
+                    android:background="@drawable/background_rounded"
                     android:orientation="vertical">
 
-                    <!-- Separator -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
+                    <TextView
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
                         android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                        android:text="Address"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="4dp"
+                        android:textStyle="bold"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
 
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_weight="1"
-                            android:layout_marginHorizontal="32dp"
-                            android:theme="@style/Theme.TopMortarSales.BaseLine"/>
-
-                        <TextView
-                            android:id="@+id/tv_other_information"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Other Information"
-                            android:textSize="14sp"
-                            android:theme="@style/Theme.TopMortarSales.TextBaseLine" />
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_weight="1"
-                            android:layout_marginHorizontal="32dp"
-                            android:theme="@style/Theme.TopMortarSales.BaseLine"/>
-
-                    </LinearLayout>
-
-                    <!-- Text Address -->
-                    <LinearLayout
+                    <EditText
+                        android:id="@+id/et_address"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <LinearLayout
-                            android:id="@+id/address_container"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:padding="16dp"
-                            android:background="@drawable/background_rounded"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:gravity="center_vertical"
-                                android:text="Address"
-                                android:textSize="14sp"
-                                android:layout_marginBottom="4dp"
-                                android:textStyle="bold"
-                                android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
-
-                            <EditText
-                                android:id="@+id/et_address"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginEnd="16dp"
-                                android:textSize="16sp"
-                                android:maxLines="5"
-                                android:gravity="center_vertical"
-                                android:textColorHint="@color/black_600"
-                                android:hint="Enter Address"
-                                android:text="Jl. TB Simatupang, RT.9/RW.3, Rambutan, Ciracas, Kota Jakarta Timur, Daerah Khusus Ibukota Jakarta 13830"
-                                android:inputType="textMultiLine"
-                                android:autofillHints="Enter Owner Name"
-                                android:background="@android:color/transparent"
-                                android:textColor="@color/et_color_with_disabled_state"
-                                android:enabled="false"
-                                android:outlineProvider="none"/>
-
-                        </LinearLayout>
-
-                    </LinearLayout>
+                        android:layout_marginEnd="16dp"
+                        android:textSize="16sp"
+                        android:maxLines="5"
+                        android:gravity="center_vertical"
+                        android:textColorHint="@color/black_600"
+                        android:hint="Enter Address"
+                        android:text="Jl. TB Simatupang, RT.9/RW.3, Rambutan, Ciracas, Kota Jakarta Timur, Daerah Khusus Ibukota Jakarta 13830"
+                        android:inputType="textMultiLine"
+                        android:autofillHints="Enter Owner Name"
+                        android:background="@android:color/transparent"
+                        android:textColor="@color/et_color_with_disabled_state"
+                        android:enabled="false"
+                        android:outlineProvider="none"/>
 
                 </LinearLayout>
 

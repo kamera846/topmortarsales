@@ -58,6 +58,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
+import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.view.city.ManageCityActivity
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
@@ -138,6 +139,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         // Set Title Bar
         icMore.visibility = View.VISIBLE
         icSearch.visibility = View.VISIBLE
+        etSearchBox.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Set Floating Action Button
         if (sessionManager.userKind() == USER_KIND_ADMIN) btnFab.visibility = View.GONE

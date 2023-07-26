@@ -1,5 +1,6 @@
 package com.topmortar.topmortarsales.data
 
+import com.topmortar.topmortarsales.commons.ADD_CITY
 import com.topmortar.topmortarsales.commons.AUTH
 import com.topmortar.topmortarsales.commons.EDIT_CONTACT
 import com.topmortar.topmortarsales.commons.GET_CITY
@@ -62,6 +63,13 @@ interface ApiService {
 
     @GET(GET_CITY)
     suspend fun getCities(): ResponseCities
+
+    @Multipart
+    @POST(ADD_CITY)
+    suspend fun addCity(
+        @Part("nama_city") name: RequestBody,
+        @Part("kode_city") code: RequestBody
+    ): Response<ResponseMessage>
 
     @Multipart
     @POST(AUTH)

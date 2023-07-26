@@ -14,6 +14,7 @@ const val EDIT_CONTACT = "contacts.php"
 const val SEND_MESSAGE = "messages.php"
 const val SEARCH_CONTACT = "contactsSearch.php"
 const val GET_CITY = "city.php"
+const val ADD_CITY = "city.php"
 const val AUTH = "auth.php"
 const val GET_USERS = "users.php"
 
