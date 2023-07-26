@@ -35,7 +35,7 @@ class UsersRecyclerViewAdapter(private val itemClickListener: ItemClickListener)
 
             ivProfile.setImageResource(R.drawable.person_red)
             tvContactName.text = item.username
-            tvPhoneNumber.text = item.level_user
+            tvPhoneNumber.text = "${ item.level_user.toLowerCase() } - ${ item.kode_city.toLowerCase() }"
 
         }
 

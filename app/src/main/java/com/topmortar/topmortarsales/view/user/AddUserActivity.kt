@@ -96,7 +96,8 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         val level = selectedLevel
         var city = "${ etUserCity.text }"
-        val username = "${ etUsername.text }"
+        val username = etUsername.text.toString().toLowerCase()
+            .replace(" ", "")
         val password = "${ etPassword.text }"
         val confirmPassword = "${ etConfirmPassword.text }"
 
@@ -298,11 +299,16 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
     private fun setSpinner() {
 
         // Create an ArrayAdapter using the string array and default spinner layout
-        val adapter = ArrayAdapter.createFromResource(
+        val adapter = object : ArrayAdapter<CharSequence>(
             this,
-            R.array.user_level_spinner_options,
-            android.R.layout.simple_spinner_item
-        )
+            android.R.layout.simple_spinner_item,
+            resources.getStringArray(R.array.user_level_spinner_options)
+        ) {
+            override fun isEnabled(position: Int): Boolean {
+                // Disable the first item (position 0)
+                return position != 0
+            }
+        }
 
         // Specify the layout to use when the list of choices appears
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
