@@ -20,17 +20,22 @@ import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
+import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
+import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
+import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.DateFormat
+import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.formatPhoneNumber
@@ -55,9 +60,11 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
     private lateinit var etOwner: EditText
     private lateinit var etBirthday: EditText
     private lateinit var etStoreLocated: EditText
-    private lateinit var etCoordinates: EditText
+    private lateinit var etMapsUrl: EditText
     private lateinit var etMessage: EditText
     private lateinit var spinnerSearchBox: AutoCompleteTextView
+
+    private lateinit var sessionManager: SessionManager
 
     private lateinit var spinnerAdapter: ArrayAdapter<CharSequence>
     private lateinit var datePicker: DatePickerDialog
@@ -74,12 +81,15 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
     private var cities = listOf("Malang", "Gresik", "Sidoarjo", "Blitar", "Surabaya", "Jakarta", "Bandung", "Yogyakarta", "Kediri")
 
     private var iLocation: String? = null
+    private var iMapsUrl: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
+        sessionManager = SessionManager(this)
+
         setContentView(R.layout.activity_new_room_chat_form)
 
         initVariable()
@@ -88,7 +98,9 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         etMessageListener()
 
         Handler().postDelayed({
-            getCities()
+            isLoaded = true
+            isCitiesLoaded = true
+//            getCities()
         }, 500)
 
     }
@@ -97,24 +109,26 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
         val phone = "${ etPhone.text }"
         val name = "${ etName.text }"
-//        val location = "${ etStoreLocated.text }"
         var birthday = "${ etBirthday.text }"
         val owner = "${ etOwner.text }"
+        var cityId = "$iLocation"
+        val mapsUrl = "${ etMapsUrl.text }"
         val message = "${ etMessage.text }"
-        val coordinates = "${ etCoordinates.text }"
 
-        if (!formValidation(phone = phone, name = name, message = message)) return
+        if (!formValidation(phone = phone, name = name, owner = owner, message = message, birthday = birthday, mapsUrl = mapsUrl)) return
 
         birthday = if (birthday.isEmpty()) "0000-00-00"
         else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
 
+        if (iLocation.isNullOrEmpty()) cityId = "0"
+
         loadingState(true)
 
 //        Handler().postDelayed({
-//            handleMessage(this@NewRoomChatFormActivity, "SEND MESSAGE PARAMS", "$phone : $name : $coordinates : $message")
+//            handleMessage(this, "SEND MESSAGE", "$phone : $name : $owner : $birthday : $cityId : $message")
 //            loadingState(false)
 //        }, 1000)
-
+//
 //        return
 
         lifecycleScope.launch {
@@ -123,13 +137,14 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                 val rbPhone = createPartFromString(formatPhoneNumber(phone))
                 val rbName = createPartFromString(name)
 //                val rbLocation = createPartFromString(selectedCity!!.id)
+                val rbLocation = createPartFromString(cityId)
                 val rbBirthday = createPartFromString(birthday)
                 val rbOwner = createPartFromString(owner)
-                val rbCoordinates = createPartFromString(coordinates)
+                val rbMapsUrl = createPartFromString(mapsUrl)
                 val rbMessage = createPartFromString(message)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.sendMessage(rbName, rbPhone, rbOwner, rbBirthday, rbCoordinates, rbMessage)
+                val response = apiService.sendMessage(name = rbName, phone = rbPhone, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, message = rbMessage)
 
                 if (response.isSuccessful) {
 
@@ -192,13 +207,18 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
     private fun dataActivityValidation() {
 
+        val iContactId = intent.getStringExtra(CONST_CONTACT_ID)
         val iOwner = intent.getStringExtra(CONST_OWNER)
         val iPhone = intent.getStringExtra(CONST_PHONE)
         val iName = intent.getStringExtra(CONST_NAME)
         val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
         iLocation = intent.getStringExtra(CONST_LOCATION)
+        iMapsUrl = intent.getStringExtra(CONST_MAPS)
         activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
 
+        if (iContactId.isNullOrEmpty()) {
+            if (sessionManager.userKind() == USER_KIND_SALES) iLocation = sessionManager.userCityID()
+        }
         if (!iPhone.isNullOrEmpty()) {
             etPhone.setText(iPhone)
             etPhone.setTextColor(getColor(R.color.black_500))
@@ -232,6 +252,12 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                 etBirthday.isEnabled = false
             }
         }
+        if (!iMapsUrl.isNullOrEmpty()) {
+            etMapsUrl.setText(iMapsUrl)
+            etMapsUrl.setTextColor(getColor(R.color.black_500))
+            etMapsUrl.setBackgroundResource(R.drawable.et_background_disabled)
+            etMapsUrl.isEnabled = false
+        }
 
     }
 
@@ -248,7 +274,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         etStoreLocated = findViewById(R.id.et_store_located)
         etMessage = findViewById(R.id.et_message)
         spinnerSearchBox = findViewById(R.id.spinner_searchbox)
-        etCoordinates = findViewById(R.id.et_coordinates)
+        etMapsUrl = findViewById(R.id.et_maps_url)
 
         // Set Title Bar
         tvTitleBar.text = getString(R.string.new_chat_room)
@@ -268,7 +294,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
     private fun initClickHandler() {
 
         icBack.setOnClickListener { finish() }
-        btnSubmit.setOnClickListener { sendMessage() }
+        btnSubmit.setOnClickListener { if (isLoaded) sendMessage() }
         etBirthday.setOnClickListener { datePicker.show() }
         etStoreLocated.setOnClickListener { showSearchModal() }
 
@@ -357,7 +383,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
     }
 
-    private fun formValidation(phone: String, name: String, location: String = "", birthday: String = "", owner: String = "", coordinates: String = "", message: String): Boolean {
+    private fun formValidation(phone: String, name: String, location: String = "", birthday: String = "", owner: String = "", mapsUrl: String = "", message: String): Boolean {
         return if (phone.isEmpty()) {
             etPhone.error = "Phone number cannot be empty!"
             etPhone.requestFocus()
@@ -371,33 +397,34 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             etName.error = "Name cannot be empty!"
             etName.requestFocus()
             false
-//        } else if (coordinates.isEmpty()) {
-//            etName.error = null
-//            etName.clearFocus()
-//            etCoordinates.error = "Coordinates cannot be empty!"
-//            etCoordinates.requestFocus()
-//            false
+        } else if (owner.isEmpty()) {
+            etPhone.error = null
+            etPhone.clearFocus()
+            etOwner.error = "Owner name cannot be empty!"
+            etOwner.requestFocus()
+            false
+        } else if (birthday.isEmpty()) {
+            etOwner.error = null
+            etOwner.clearFocus()
+            etBirthday.error = "Choose owner birthday!"
+            etBirthday.requestFocus()
+            handleMessage(this, "ERROR EDIT CONTACT", "Choose owner birthday!")
+            false
+        } else if (mapsUrl.isEmpty()) {
+            etBirthday.error = null
+            etBirthday.clearFocus()
+            etMapsUrl.error = "Maps url cannot be empty!"
+            etMapsUrl.requestFocus()
+            false
 //        } else if (location.isEmpty()) {
-//            etName.error = null
-//            etName.clearFocus()
+//            etMapsUrl.error = null
+//            etMapsUrl.clearFocus()
 //            etStoreLocated.error = "Choose store location!"
 //            etStoreLocated.requestFocus()
 //            false
-//        } else if (owner.isEmpty()) {
-//            etBirthday.error = null
-//            etBirthday.clearFocus()
-//            etOwner.error = "Owner Name cannot be empty!"
-//            etOwner.requestFocus()
-//            false
-//        } else if (birthday.isEmpty()) {
-//            etName.error = null
-//            etName.clearFocus()
-//            etBirthday.error = "Choose owner birthday!"
-//            etBirthday.requestFocus()
-//            false
         } else if (message.isEmpty()) {
-            etName.error = null
-            etName.clearFocus()
+            etMapsUrl.error = null
+            etMapsUrl.clearFocus()
             etMessage.error = "Message cannot be empty!"
             etMessage.requestFocus()
             false
@@ -406,7 +433,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             etName.error = null
             etOwner.error = null
             etBirthday.error = null
-            etCoordinates.error = null
+            etMapsUrl.error = null
             etMessage.error = null
             etStoreLocated.error = null
             etPhone.clearFocus()
@@ -414,7 +441,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             etStoreLocated.clearFocus()
             etBirthday.clearFocus()
             etOwner.clearFocus()
-            etCoordinates.clearFocus()
+            etMapsUrl.clearFocus()
             etMessage.clearFocus()
             true
         }
@@ -518,6 +545,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                             selectedCity = ModalSearchModel(foundItem.id_city, "${foundItem.nama_city} - ${foundItem.kode_city}")
                             etStoreLocated.setText("${foundItem.nama_city} - ${foundItem.kode_city}")
                         } else {
+                            selectedCity = null
                             etStoreLocated.setText("")
                             etStoreLocated.setTextColor(getColor(R.color.black_200))
                             etStoreLocated.setBackgroundResource(R.drawable.et_background)

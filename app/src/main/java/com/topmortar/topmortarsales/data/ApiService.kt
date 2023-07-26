@@ -19,16 +19,19 @@ import retrofit2.http.*
 interface ApiService {
 
     @GET(GET_CONTACT)
+    suspend fun getContacts(@Query("c") cityId: String): ResponseContactList
+    @GET(GET_CONTACT)
     suspend fun getContacts(): ResponseContactList
 
     @Multipart
     @POST(EDIT_CONTACT)
     suspend fun editContact(
         @Part("id") id: RequestBody,
-        @Part("nama") nama: RequestBody,
+        @Part("nama") name: RequestBody,
         @Part("owner_name") ownerName: RequestBody,
         @Part("tgl_lahir") birthday: RequestBody,
         @Part("id_city") cityId: RequestBody,
+        @Part("maps_url") mapsUrl: RequestBody,
     ): Response<ResponseMessage>
 
     @Multipart
@@ -38,14 +41,21 @@ interface ApiService {
         @Part("nomorhp") phone: RequestBody,
         @Part("owner_name") ownerName: RequestBody,
         @Part("tgl_lahir") birthday: RequestBody,
-//        @Part("id_city") cityId: RequestBody,
-        @Part("coordinates") coordinates: RequestBody,
+        @Part("id_city") cityId: RequestBody,
+        @Part("maps_url") mapsUrl: RequestBody,
         @Part("message_body") message: RequestBody,
     ): Response<ResponseMessage>
 
     @Multipart
     @POST(SEARCH_CONTACT)
     suspend fun searchContact(
+        @Part("key") key: RequestBody
+    ): Response<ResponseContactList>
+
+    @Multipart
+    @POST(SEARCH_CONTACT)
+    suspend fun searchContact(
+        @Part("id_city") cityId: RequestBody,
         @Part("key") key: RequestBody
     ): Response<ResponseContactList>
 

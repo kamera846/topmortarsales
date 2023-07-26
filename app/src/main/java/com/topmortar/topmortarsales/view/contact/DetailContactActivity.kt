@@ -38,7 +38,10 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.DateFormat
+import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -52,6 +55,8 @@ import java.util.Calendar
 
 @Suppress("DEPRECATION")
 class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListener {
+
+    private lateinit var sessionManager: SessionManager
 
     private lateinit var tvPhoneContainer: LinearLayout
     private lateinit var etPhoneContainer: LinearLayout
@@ -115,6 +120,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
+        sessionManager = SessionManager(this)
+
         setContentView(R.layout.activity_detail_contact)
 
         initVariable()
@@ -173,9 +180,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         btnSaveEdit = findViewById(R.id.btn_save_edit)
 
         // Setup Title Bar
-        icEdit.visibility = View.VISIBLE
         tvTitleBar.text = "Detail Contact"
         tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
+        if (sessionManager.userKind() == USER_KIND_ADMIN) icEdit.visibility = View.VISIBLE
 
         // Setup Date Picker Dialog
         setDatePickerDialog()
@@ -272,8 +279,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             false
         }
 
-        val tooltipMapsText = "Maps Coordinates/URL"
-        val tooltipMapsTextOpen = "Click to open coordinates on maps"
+        val tooltipMapsText = "Maps URL"
+        val tooltipMapsTextOpen = "Click to open store location on maps apps"
         tooltipMaps.setOnClickListener {
             if (tvMaps.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsTextOpen)
             else TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsText)
@@ -438,7 +445,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun editConfirmation() {
 
-        if (!formValidation("${ etName.text }", "${ etOwner.text }", "${ etBirthday.text }", "${ etLocation.text }")) return
+        if (!formValidation("${ etName.text }", "${ etOwner.text }", "${ etMaps.text }", "${ etLocation.text }", "${ etBirthday.text }", "${ etAddress.text }")) return
 
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Edit Confirmation")
@@ -457,26 +464,27 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val pName = "${ etName.text }"
         val pOwner = "${ etOwner.text }"
         var pBirthday = "${ etBirthday.text }"
+        var pMapsUrl = "${ etMaps.text }"
 
         pBirthday = if (pBirthday.isEmpty() || pBirthday == EMPTY_FIELD_VALUE) "0000-00-00"
         else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
 
         loadingState(true)
-
-        Handler().postDelayed({
-            tvName.text = "${ etName.text }"
-            tvOwner.text = "${ etOwner.text }"
-            tvBirthday.text = "${ etBirthday.text }"
-            tvMaps.text = "Click to open"
-            iMapsUrl = "${ etMaps.text }"
-            tvLocation.text = "${ etLocation.text }"
-            iAddress = "${ etAddress.text }"
-            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
-            loadingState(false)
-            toggleEdit(false)
-        }, 1000)
-
-        return
+//
+//        Handler().postDelayed({
+//            tvName.text = "${ etName.text }"
+//            tvOwner.text = "${ etOwner.text }"
+//            tvBirthday.text = "${ etBirthday.text }"
+//            tvMaps.text = "Click to open"
+//            iMapsUrl = "${ etMaps.text }"
+//            tvLocation.text = "${ etLocation.text }"
+//            iAddress = "${ etAddress.text }"
+//            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
+//            loadingState(false)
+//            toggleEdit(false)
+//        }, 1000)
+//
+//        return
 
         lifecycleScope.launch {
             try {
@@ -485,10 +493,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbName = createPartFromString(pName)
                 val rbOwner = createPartFromString(pOwner)
                 val rbBirthday = createPartFromString(pBirthday)
+                val rbMapsUrl = createPartFromString(pMapsUrl)
                 val rbLocation = createPartFromString(selectedCity!!.id)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.editContact(rbId, rbName, rbOwner, rbBirthday, rbLocation)
+                val response = apiService.editContact(id = rbId, name = rbName, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl)
 
                 if (response.isSuccessful) {
 
@@ -499,8 +508,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         tvName.text = "${ etName.text }"
                         tvOwner.text = "${ etOwner.text }"
                         tvBirthday.text = "${ etBirthday.text }"
-//                        tvMaps.text = "${ etMaps.text }"
-//                        iAddress = "${ etAddress.text }"
+                        tvMaps.text = "Click to open"
+                        iMapsUrl = "${ etMaps.text }"
+                        iAddress = "${ etAddress.text }"
+                        tvLocation.text = "${ etLocation.text }"
                         hasEdited = true
 
                         handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
@@ -579,7 +590,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     }
 
-    private fun formValidation(name: String, owner: String = "", birthday: String = "", location: String = ""): Boolean {
+    private fun formValidation(name: String, owner: String = "", mapsUrl: String = "", location: String = "", birthday: String = "", address: String = ""): Boolean {
         return if (name.isEmpty()) {
             etName.error = "Name cannot be empty!"
             etName.requestFocus()
@@ -587,32 +598,48 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         } else if (owner.isEmpty()) {
             etName.error = null
             etName.clearFocus()
-            etOwner.error = "Owner Name cannot be empty!"
+            etOwner.error = "Owner name cannot be empty!"
             etOwner.requestFocus()
             false
-        } else if (location.isEmpty() || location == EMPTY_FIELD_VALUE) {
+        } else if (mapsUrl.isEmpty()) {
             etOwner.error = null
-            etOwner.requestFocus()
+            etOwner.clearFocus()
+            etMaps.error = "Maps url cannot be empty!"
+            etMaps.requestFocus()
+            false
+        } else if (location.isEmpty() || location == EMPTY_FIELD_VALUE) {
+            etMaps.error = null
+            etMaps.requestFocus()
             etLocation.error = "Choose customer city!"
             etLocation.requestFocus()
-            handleMessage(this@DetailContactActivity, "ERROR EDIT CONTACT", "Choose customer city!")
+            handleMessage(this, "ERROR EDIT CONTACT", "Choose customer city!")
             false
         } else if (birthday.isEmpty() || birthday == EMPTY_FIELD_VALUE) {
             etLocation.error = null
             etLocation.clearFocus()
             etBirthday.error = "Choose owner birthday!"
             etBirthday.requestFocus()
-            handleMessage(this@DetailContactActivity, "ERROR EDIT CONTACT", "Choose owner birthday!")
+            handleMessage(this, "ERROR EDIT CONTACT", "Choose owner birthday!")
+            false
+        } else if (address.isEmpty()) {
+            etBirthday.error = null
+            etBirthday.clearFocus()
+            etAddress.error = "Address cannot be empty!"
+            etAddress.requestFocus()
             false
         } else {
             etName.error = null
             etName.clearFocus()
             etOwner.error = null
             etOwner.clearFocus()
+            etMaps.error = null
+            etMaps.clearFocus()
             etLocation.error = null
             etLocation.clearFocus()
             etBirthday.error = null
             etBirthday.clearFocus()
+            etAddress.error = null
+            etAddress.clearFocus()
             true
         }
     }
@@ -640,11 +667,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         val intent = Intent(this@DetailContactActivity, NewRoomChatFormActivity::class.java)
 
+        intent.putExtra(CONST_CONTACT_ID, contactId)
+        intent.putExtra(CONST_NAME, tvName.text)
+
         // Remove "+" on text phone
         val trimmedInput = tvPhone.text.trim()
         if (trimmedInput.startsWith("+")) intent.putExtra(CONST_PHONE, trimmedInput.substring(1))
-
-        intent.putExtra(CONST_NAME, tvName.text)
 
         if (tvOwner.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_OWNER, "")
         else intent.putExtra(CONST_OWNER, tvOwner.text)
@@ -655,6 +683,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         if (tvLocation.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_LOCATION, "")
         else intent.putExtra(CONST_LOCATION, selectedCity!!.id)
+
+        if (iMapsUrl == EMPTY_FIELD_VALUE) intent.putExtra(CONST_MAPS, "")
+        else intent.putExtra(CONST_MAPS, iMapsUrl)
 
         startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
 

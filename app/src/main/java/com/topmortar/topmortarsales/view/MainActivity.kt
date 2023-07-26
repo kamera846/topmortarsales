@@ -47,9 +47,11 @@ import com.topmortar.topmortarsales.model.ContactModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
+import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
@@ -83,6 +85,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     // Global
     private lateinit var sessionManager: SessionManager
     private var doubleBackToExitPressedOnce = false
+    private lateinit var userCity: String
+    private lateinit var userKind: String
 
     // Initialize Search Engine
     private val searchDelayMillis = 500L
@@ -97,6 +101,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
         supportActionBar?.hide()
         sessionManager = SessionManager(this@MainActivity)
+        userCity = sessionManager.userCityID()!!
+        userKind = sessionManager.userKind()!!
 
         setContentView(R.layout.activity_main)
 
@@ -127,6 +133,9 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         // Set Title Bar
         icMore.visibility = View.VISIBLE
         icSearch.visibility = View.VISIBLE
+
+        // Set Floating Action Button
+        if (sessionManager.userKind() == USER_KIND_ADMIN) btnFab.visibility = View.GONE
 
     }
 
@@ -168,6 +177,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         val intent = Intent(this@MainActivity, NewRoomChatFormActivity::class.java)
 
         if (data != null) {
+            intent.putExtra(CONST_CONTACT_ID, data.id_contact)
             intent.putExtra(CONST_NAME, data.nama)
             intent.putExtra(CONST_PHONE, data.nomorhp)
             intent.putExtra(CONST_BIRTHDAY, data.tgl_lahir)
@@ -188,13 +198,15 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         val intent = Intent(this@MainActivity, DetailContactActivity::class.java)
 
         if (data != null) {
+            intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
             intent.putExtra(CONST_CONTACT_ID, data.id_contact)
             intent.putExtra(CONST_NAME, data.nama)
             intent.putExtra(CONST_PHONE, data.nomorhp)
             intent.putExtra(CONST_BIRTHDAY, data.tgl_lahir)
             intent.putExtra(CONST_OWNER, data.store_owner)
-            intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
             intent.putExtra(CONST_LOCATION, data.id_city)
+            intent.putExtra(CONST_MAPS, data.maps_url)
+            intent.putExtra(CONST_ADDRESS, data.address)
 //            intent.putExtra(CONST_LOCATION, "1")
         }
 
@@ -392,7 +404,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getContacts()
+                val response = if (userKind == USER_KIND_ADMIN) apiService.getContacts() else apiService.getContacts(cityId = userCity)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -434,9 +446,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
             try {
 
                 val searchKey = createPartFromString(key)
+                val searchCity = createPartFromString(userCity)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.searchContact(key = searchKey)
+                val response = if (userKind == USER_KIND_ADMIN) apiService.searchContact(key = searchKey) else apiService.searchContact(cityId = searchCity, key = searchKey)
 
                 if (response.isSuccessful) {
 
@@ -579,8 +592,9 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
     override fun onItemClick(data: ContactModel?) {
 
-        if (sessionManager.userKind() == USER_KIND_ADMIN) navigateDetailContact(data)
-        else navigateAddNewRoom(data)
+//        if (sessionManager.userKind() == USER_KIND_ADMIN) navigateDetailContact(data)
+//        else navigateAddNewRoom(data)
+        navigateDetailContact(data)
 
     }
 
