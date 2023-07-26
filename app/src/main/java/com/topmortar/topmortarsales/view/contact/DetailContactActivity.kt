@@ -465,6 +465,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val pOwner = "${ etOwner.text }"
         var pBirthday = "${ etBirthday.text }"
         var pMapsUrl = "${ etMaps.text }"
+        var pAddress = "${ etAddress.text }"
 
         pBirthday = if (pBirthday.isEmpty() || pBirthday == EMPTY_FIELD_VALUE) "0000-00-00"
         else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
@@ -495,9 +496,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbBirthday = createPartFromString(pBirthday)
                 val rbMapsUrl = createPartFromString(pMapsUrl)
                 val rbLocation = createPartFromString(selectedCity!!.id)
+                val rbAddress = createPartFromString(pAddress)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.editContact(id = rbId, name = rbName, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl)
+                val response = apiService.editContact(id = rbId, name = rbName, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, address = rbAddress)
 
                 if (response.isSuccessful) {
 

@@ -31,7 +31,8 @@ interface ApiService {
         @Part("owner_name") ownerName: RequestBody,
         @Part("tgl_lahir") birthday: RequestBody,
         @Part("id_city") cityId: RequestBody,
-        @Part("maps_url") mapsUrl: RequestBody,
+        @Part("mapsUrl") mapsUrl: RequestBody,
+        @Part("address") address: RequestBody,
     ): Response<ResponseMessage>
 
     @Multipart
@@ -42,7 +43,7 @@ interface ApiService {
         @Part("owner_name") ownerName: RequestBody,
         @Part("tgl_lahir") birthday: RequestBody,
         @Part("id_city") cityId: RequestBody,
-        @Part("maps_url") mapsUrl: RequestBody,
+        @Part("mapsUrl") mapsUrl: RequestBody,
         @Part("message_body") message: RequestBody,
     ): Response<ResponseMessage>
 
