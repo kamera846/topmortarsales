@@ -128,24 +128,28 @@
 
                     <RelativeLayout
                         android:id="@+id/ic_eye_container"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:gravity="center"
                         android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        android:layout_marginHorizontal="12dp">
+                        android:layout_centerVertical="true">
 
                         <ImageView
                             android:id="@+id/ic_eye_close"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:padding="12dp"
                             android:src="@drawable/eye_off_line"
+                            android:contentDescription="Icon Toggle Hide Password"
                             android:visibility="visible" />
 
                         <ImageView
                             android:id="@+id/ic_eye_show"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:padding="12dp"
                             android:src="@drawable/eye_line"
+                            android:contentDescription="Icon Toggle Show Password"
                             android:visibility="gone" />
 
                     </RelativeLayout>
