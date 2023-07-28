@@ -403,13 +403,13 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             etOwner.error = "Owner name cannot be empty!"
             etOwner.requestFocus()
             false
-        } else if (birthday.isEmpty()) {
-            etOwner.error = null
-            etOwner.clearFocus()
-            etBirthday.error = "Choose owner birthday!"
-            etBirthday.requestFocus()
-            handleMessage(this, "ERROR EDIT CONTACT", "Choose owner birthday!")
-            false
+//        } else if (birthday.isEmpty()) {
+//            etOwner.error = null
+//            etOwner.clearFocus()
+//            etBirthday.error = "Choose owner birthday!"
+//            etBirthday.requestFocus()
+//            handleMessage(this, "ERROR EDIT CONTACT", "Choose owner birthday!")
+//            false
         } else if (mapsUrl.isEmpty()) {
             etBirthday.error = null
             etBirthday.clearFocus()
