@@ -37,24 +37,17 @@
             android:id="@+id/card_auth"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="end"
             android:background="@drawable/background_auth"
             android:orientation="vertical"
             android:padding="48dp"
             android:visibility="gone">
 
             <TextView
+                android:id="@+id/tv_title_auth"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Hey,"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                android:text="Login Now."
+                android:text="Hey, \nLogin Now"
+                android:layout_marginBottom="48dp"
                 android:textSize="24sp"
                 android:textStyle="bold"
                 android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
@@ -77,90 +70,324 @@
 
             </LinearLayout>
 
-            <!-- Email Address -->
+            <!-- Input Auth -->
             <LinearLayout
+                android:id="@+id/input_auth"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="24dp"
                 android:orientation="vertical">
 
-                <EditText
-                    android:id="@+id/et_username"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:background="@drawable/et_background"
-                    android:inputType="textEmailAddress"
-                    android:outlineProvider="none"
-                    android:padding="12dp"
-                    android:hint="Enter username"
-                    android:textColorHint="@color/black_600"
-                    android:textSize="16sp"
-                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
-
-            </LinearLayout>
-
-            <!-- Password -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="64dp"
-                android:orientation="vertical">
-
-                <RelativeLayout
+                <!-- Email Address -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/et_background">
+                    android:layout_marginBottom="24dp"
+                    android:orientation="vertical">
 
                     <EditText
-                        android:id="@+id/et_password"
-                        android:layout_toLeftOf="@+id/ic_eye_container"
+                        android:id="@+id/et_username"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
-                        android:autofillHints="johndoe@gmail.com"
-                        android:background="@android:color/transparent"
-                        android:inputType="textPassword"
-                        android:hint="Enter password"
+                        android:background="@drawable/et_background"
+                        android:inputType="textEmailAddress"
                         android:outlineProvider="none"
                         android:padding="12dp"
+                        android:hint="Enter username"
                         android:textColorHint="@color/black_600"
                         android:textSize="16sp"
                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
+                </LinearLayout>
+
+                <!-- Password -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:orientation="vertical">
+
                     <RelativeLayout
-                        android:id="@+id/ic_eye_container"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:gravity="center"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true">
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/et_background">
 
-                        <ImageView
-                            android:id="@+id/ic_eye_close"
+                        <EditText
+                            android:id="@+id/et_password"
+                            android:layout_toLeftOf="@+id/ic_eye_container"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
+                            android:layout_height="48dp"
+                            android:autofillHints="johndoe@gmail.com"
+                            android:background="@android:color/transparent"
+                            android:inputType="textPassword"
+                            android:hint="Enter password"
+                            android:outlineProvider="none"
                             android:padding="12dp"
-                            android:src="@drawable/eye_off_line"
-                            android:contentDescription="Icon Toggle Hide Password"
-                            android:visibility="visible" />
+                            android:textColorHint="@color/black_600"
+                            android:textSize="16sp"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
-                        <ImageView
-                            android:id="@+id/ic_eye_show"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:padding="12dp"
-                            android:src="@drawable/eye_line"
-                            android:contentDescription="Icon Toggle Show Password"
-                            android:visibility="gone" />
+                        <RelativeLayout
+                            android:id="@+id/ic_eye_container"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:gravity="center"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true">
+
+                            <ImageView
+                                android:id="@+id/ic_eye_close"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:padding="12dp"
+                                android:src="@drawable/eye_off_line"
+                                android:contentDescription="Icon Toggle Hide Password"
+                                android:visibility="visible" />
+
+                            <ImageView
+                                android:id="@+id/ic_eye_show"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:padding="12dp"
+                                android:src="@drawable/eye_line"
+                                android:contentDescription="Icon Toggle Show Password"
+                                android:visibility="gone" />
+
+                        </RelativeLayout>
 
                     </RelativeLayout>
 
-                </RelativeLayout>
+                </LinearLayout>
+
+                <!-- Forgot Password -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Forgot your password?"
+                        android:textAlignment="textStart"
+                        android:textSize="16sp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                    <TextView
+                        android:id="@+id/tv_reset_password"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Reset it!"
+                        android:textAlignment="textStart"
+                        android:textSize="16sp"
+                        android:layout_marginStart="4dp"
+                        android:textColor="@color/primary"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
+            <!-- Input Phone Number -->
+            <EditText
+                android:visibility="gone"
+                android:id="@+id/et_phone"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/et_background"
+                android:inputType="phone"
+                android:outlineProvider="none"
+                android:padding="12dp"
+                android:hint="Enter your phone number to get OTP"
+                android:textColorHint="@color/black_600"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+            <!-- Input OTP -->
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/input_otp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/otp_1"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/et_background"
+                    android:inputType="phone"
+                    android:outlineProvider="none"
+                    android:padding="12dp"
+                    android:textAlignment="center"
+                    android:textColorHint="@color/black_600"
+                    android:textSize="16sp"
+                    android:maxLines="1"
+                    android:maxLength="1"
+                    android:layout_margin="2dp"
+                    android:contentDescription="OTP 1"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                <EditText
+                    android:id="@+id/otp_2"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/et_background"
+                    android:inputType="phone"
+                    android:outlineProvider="none"
+                    android:padding="12dp"
+                    android:textAlignment="center"
+                    android:textColorHint="@color/black_600"
+                    android:textSize="16sp"
+                    android:maxLines="1"
+                    android:maxLength="1"
+                    android:layout_margin="2dp"
+                    android:contentDescription="OTP 1"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                <EditText
+                    android:id="@+id/otp_3"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/et_background"
+                    android:inputType="phone"
+                    android:outlineProvider="none"
+                    android:padding="12dp"
+                    android:textAlignment="center"
+                    android:textColorHint="@color/black_600"
+                    android:textSize="16sp"
+                    android:maxLines="1"
+                    android:maxLength="1"
+                    android:layout_margin="2dp"
+                    android:contentDescription="OTP 1"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                <EditText
+                    android:id="@+id/otp_4"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/et_background"
+                    android:inputType="phone"
+                    android:outlineProvider="none"
+                    android:padding="12dp"
+                    android:textAlignment="center"
+                    android:textColorHint="@color/black_600"
+                    android:textSize="16sp"
+                    android:maxLines="1"
+                    android:maxLength="1"
+                    android:layout_margin="2dp"
+                    android:contentDescription="OTP 1"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                <EditText
+                    android:id="@+id/otp_5"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/et_background"
+                    android:inputType="phone"
+                    android:outlineProvider="none"
+                    android:padding="12dp"
+                    android:textAlignment="center"
+                    android:textColorHint="@color/black_600"
+                    android:textSize="16sp"
+                    android:maxLines="1"
+                    android:maxLength="1"
+                    android:layout_margin="2dp"
+                    android:contentDescription="OTP 1"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                <EditText
+                    android:id="@+id/otp_6"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/et_background"
+                    android:inputType="phone"
+                    android:outlineProvider="none"
+                    android:padding="12dp"
+                    android:textAlignment="center"
+                    android:textColorHint="@color/black_600"
+                    android:textSize="16sp"
+                    android:maxLines="1"
+                    android:maxLength="1"
+                    android:layout_margin="2dp"
+                    android:contentDescription="OTP 1"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+            </LinearLayout>
+
+            <!-- Input New Password -->
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/input_new_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Password -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/et_background">
+
+                        <EditText
+                            android:id="@+id/et_new_password"
+                            android:layout_toLeftOf="@+id/ic_eye_container_reset_password"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:autofillHints="johndoe@gmail.com"
+                            android:background="@android:color/transparent"
+                            android:inputType="textPassword"
+                            android:hint="Enter new password"
+                            android:outlineProvider="none"
+                            android:padding="12dp"
+                            android:textColorHint="@color/black_600"
+                            android:textSize="16sp"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                        <RelativeLayout
+                            android:id="@+id/ic_eye_container_reset_password"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:gravity="center"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true">
+
+                            <ImageView
+                                android:id="@+id/ic_eye_close_new_password"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:padding="12dp"
+                                android:src="@drawable/eye_off_line"
+                                android:contentDescription="Icon Toggle Hide Password"
+                                android:visibility="visible" />
+
+                            <ImageView
+                                android:id="@+id/ic_eye_show_new_password"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:padding="12dp"
+                                android:src="@drawable/eye_line"
+                                android:contentDescription="Icon Toggle Show Password"
+                                android:visibility="gone" />
+
+                        </RelativeLayout>
+
+                    </RelativeLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Bottom Action -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="64dp"
                 android:orientation="vertical">
 
                 <Button

@@ -35,6 +35,9 @@ class SplashScreenActivity : AppCompatActivity() {
 
     private lateinit var rlModal: LinearLayout
     private lateinit var cardAlert: LinearLayout
+    private lateinit var inputAuth: LinearLayout
+    private lateinit var inputOtp: LinearLayout
+    private lateinit var inputNewPassword: LinearLayout
     private lateinit var icEyeContainer: RelativeLayout
     private lateinit var btnLogin: Button
     private lateinit var ivLogo: ImageView
@@ -42,12 +45,26 @@ class SplashScreenActivity : AppCompatActivity() {
     private lateinit var icEyeClose: ImageView
     private lateinit var etUsername: EditText
     private lateinit var etPassword: EditText
+    private lateinit var etPhone: EditText
+    private lateinit var etOtp1: EditText
+    private lateinit var etOtp2: EditText
+    private lateinit var etOtp3: EditText
+    private lateinit var etOtp4: EditText
+    private lateinit var etOtp5: EditText
+    private lateinit var etOtp6: EditText
+    private lateinit var etNewPassword: EditText
     private lateinit var tvAlert: TextView
+    private lateinit var tvResetPassword: TextView
+    private lateinit var tvTitleAuth: TextView
 
     private lateinit var sessionManager: SessionManager
 
     private val splashScreenDuration = 2000L
     private var isPasswordShow = false
+    private var currentResetPasswordStep = 0 // Reset Password False
+    private val resetPasswordStep1 = 1 // Input Phone Number
+    private val resetPasswordStep2 = 2 // Input OTP Code
+    private val resetPasswordStep3 = 3 // Input New Password
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -71,16 +88,28 @@ class SplashScreenActivity : AppCompatActivity() {
 
     private fun initVariable() {
 
-        ivLogo = findViewById(R.id.logo)
+        inputAuth = findViewById(R.id.input_auth)
+        inputOtp = findViewById(R.id.input_otp)
+        inputNewPassword = findViewById(R.id.input_new_password)
+
         rlModal = findViewById(R.id.card_auth)
+        cardAlert = findViewById(R.id.card_alert)
+
         btnLogin = findViewById(R.id.btn_login)
+
+        ivLogo = findViewById(R.id.logo)
+
         icEyeContainer = findViewById(R.id.ic_eye_container)
         icEyeShow = findViewById(R.id.ic_eye_show)
         icEyeClose = findViewById(R.id.ic_eye_close)
+
         etUsername = findViewById(R.id.et_username)
         etPassword = findViewById(R.id.et_password)
-        cardAlert = findViewById(R.id.card_alert)
+        etPhone = findViewById(R.id.et_phone)
+
+        tvTitleAuth = findViewById(R.id.tv_title_auth)
         tvAlert = findViewById(R.id.tv_alert)
+        tvResetPassword = findViewById(R.id.tv_reset_password)
 
         // Set default input type ke password
         etPassword.transformationMethod = PasswordTransformationMethod.getInstance()
@@ -92,8 +121,9 @@ class SplashScreenActivity : AppCompatActivity() {
 
     private fun initClickHandler() {
 
-        btnLogin.setOnClickListener { loginHandler() }
+        btnLogin.setOnClickListener { btnLoginHandler() }
         icEyeContainer.setOnClickListener { togglePassword() }
+        tvResetPassword.setOnClickListener { resetPasswordHandler() }
 
     }
 
@@ -244,6 +274,59 @@ class SplashScreenActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    private fun btnLoginHandler() {
+        when (currentResetPasswordStep) {
+            0 -> {
+                loginHandler()
+            }
+            resetPasswordStep1 -> {
+                handleMessage(this, "RESET PASSWORD", "Get OTP Code")
+                resetPasswordHandler()
+            }
+            resetPasswordStep2 -> {
+                handleMessage(this, "RESET PASSWORD", "Verify OTP Code")
+                resetPasswordHandler()
+            }
+            else -> {
+                handleMessage(this, "RESET PASSWORD", "Successfully Reset Password!")
+                resetPasswordHandler()
+            }
+        }
+    }
+
+    private fun resetPasswordHandler() {
+        when (currentResetPasswordStep) {
+            0 -> {
+                inputAuth.visibility = View.GONE
+                etPhone.visibility = View.VISIBLE
+                tvTitleAuth.text = "Reset Password"
+                btnLogin.text = "Get OTP Code"
+                currentResetPasswordStep += 1
+            }
+            resetPasswordStep1 -> {
+                etPhone.visibility = View.GONE
+                inputOtp.visibility = View.VISIBLE
+                tvTitleAuth.text = "Input OTP Code"
+                btnLogin.text = "Verify OTP Code"
+                currentResetPasswordStep += 1
+            }
+            resetPasswordStep2 -> {
+                inputOtp.visibility = View.GONE
+                inputNewPassword.visibility = View.VISIBLE
+                tvTitleAuth.text = "Input New Password"
+                btnLogin.text = "Reset Password Now"
+                currentResetPasswordStep += 1
+            }
+            else -> {
+                inputNewPassword.visibility = View.GONE
+                inputAuth.visibility = View.VISIBLE
+                tvTitleAuth.text = "Hey, \nLogin Now"
+                btnLogin.text = "Login"
+                currentResetPasswordStep = 0
+            }
+        }
     }
 
 }
