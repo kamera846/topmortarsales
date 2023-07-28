@@ -19,6 +19,7 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
 import com.topmortar.topmortarsales.commons.LOGGED_IN
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
@@ -216,6 +217,11 @@ class SplashScreenActivity : AppCompatActivity() {
 
                         sessionManager.setLoggedIn(LOGGED_IN)
                         navigateToMain()
+
+                    }
+                    RESPONSE_STATUS_FAIL -> {
+
+                        showAlert("Your username or password seems wrong!", 5000)
 
                     }
                     RESPONSE_STATUS_EMPTY -> {

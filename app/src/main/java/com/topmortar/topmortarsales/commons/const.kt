@@ -8,6 +8,7 @@ const val BASE_URL = "https://dev-saleswa.topmortarindonesia.com/" // Developmen
 
 const val RESPONSE_STATUS_OK = "ok"
 const val RESPONSE_STATUS_EMPTY = "empty"
+const val RESPONSE_STATUS_FAIL = "fail"
 
 const val GET_CONTACT = "contacts.php"
 const val EDIT_CONTACT = "contacts.php"
