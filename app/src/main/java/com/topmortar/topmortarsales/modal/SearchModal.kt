@@ -11,6 +11,7 @@ import android.view.View
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -33,6 +34,7 @@ class SearchModal(private val context: Context, private val listItem: ArrayList<
     private lateinit var txtLoading: TextView
     private lateinit var rvItems: RecyclerView
     private lateinit var etSearch: EditText
+    private lateinit var icClearSearch: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +43,7 @@ class SearchModal(private val context: Context, private val listItem: ArrayList<
         setLayout()
 
         initVariable()
+        initClickHandler()
         setRecyclerView()
     }
 
@@ -102,7 +105,12 @@ class SearchModal(private val context: Context, private val listItem: ArrayList<
         txtLoading = findViewById(R.id.modal_loading)
         rvItems = findViewById(R.id.rv_items)
         etSearch = findViewById(R.id.et_search_box)
+        icClearSearch = findViewById(R.id.ic_clear_search)
         etSearch.hint = searchHint
+    }
+
+    private fun initClickHandler() {
+        icClearSearch.setOnClickListener { etSearch.setText("") }
     }
 
     private fun setRecyclerView() {
@@ -144,8 +152,9 @@ class SearchModal(private val context: Context, private val listItem: ArrayList<
                 val searchKey = s.toString().trim()
 
                 if (!isLoading) {
-                    if (searchKey.isNotEmpty()) rvAdapter.filter(searchKey)
-                    else rvAdapter.filter(searchKey)
+                    rvAdapter.filter(searchKey)
+                    if (searchKey.isNotEmpty()) icClearSearch.visibility = View.VISIBLE
+                    else icClearSearch.visibility = View.GONE
                 }
             }
 
