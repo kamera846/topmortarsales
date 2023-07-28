@@ -1,16 +1,13 @@
 package com.topmortar.topmortarsales.view.user
 
 import android.annotation.SuppressLint
-import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.text.Editable
-import android.text.InputFilter
 import android.text.TextWatcher
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -20,36 +17,24 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
-import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
-import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
-import com.topmortar.topmortarsales.commons.CONST_LOCATION
-import com.topmortar.topmortarsales.commons.CONST_MAPS
-import com.topmortar.topmortarsales.commons.CONST_NAME
-import com.topmortar.topmortarsales.commons.CONST_OWNER
-import com.topmortar.topmortarsales.commons.CONST_PHONE
-import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
-import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
-import com.topmortar.topmortarsales.commons.USER_KIND_SALES
-import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
-import com.topmortar.topmortarsales.commons.utils.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.handleMessage
+import com.topmortar.topmortarsales.commons.utils.phoneHandler.formatPhoneNumber
+import com.topmortar.topmortarsales.commons.utils.phoneHandler.phoneValidation
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.CityModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import kotlinx.coroutines.launch
-import java.util.Calendar
 
 @SuppressLint("SetTextI18n")
 class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
@@ -60,6 +45,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
     private lateinit var spinLevel: Spinner
     private lateinit var etUserCity: EditText
     private lateinit var etUsername: EditText
+    private lateinit var etPhone: EditText
     private lateinit var etPassword: EditText
     private lateinit var etConfirmPassword: EditText
 
@@ -96,22 +82,23 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         val level = selectedLevel
         var city = "${ etUserCity.text }"
+        val phone = "${ etPhone.text }"
         val username = etUsername.text.toString().toLowerCase()
             .replace(" ", "")
         val password = "${ etPassword.text }"
         val confirmPassword = "${ etConfirmPassword.text }"
 
-        if (!formValidation(level = level, city = city, username = username, password = password, confirmPassword = confirmPassword)) return
+        if (!formValidation(level = level, city = city, phone = phone, username = username, password = password, confirmPassword = confirmPassword)) return
 
         city = if (selectedCity == null) "0" else selectedCity!!.id
 
         loadingState(true)
 
 //        Handler().postDelayed({
-//            handleMessage(this, "Add User", "$level : $city : $username : $password : $confirmPassword")
+//            handleMessage(this, "Add User", "$level : $city : $phone : $username : $password : $confirmPassword")
 //            loadingState(false)
 //        }, 1000)
-//
+
 //        return
 
         lifecycleScope.launch {
@@ -119,11 +106,12 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
                 val rbLevel = createPartFromString(level!!)
                 val rbCityId = createPartFromString(city)
+                val rbPhone = createPartFromString(formatPhoneNumber(phone))
                 val rbUsername = createPartFromString(username)
                 val rbPassword = createPartFromString(password)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.addUser(level = rbLevel, cityId = rbCityId, username = rbUsername, password = rbPassword)
+                val response = apiService.addUser(level = rbLevel, cityId = rbCityId, phone = rbPhone, username = rbUsername, password = rbPassword)
 
                 if (response.isSuccessful) {
 
@@ -172,6 +160,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         btnSubmit = findViewById(R.id.btn_submit)
         spinLevel = findViewById(R.id.spin_level)
         etUserCity = findViewById(R.id.et_user_city)
+        etPhone = findViewById(R.id.et_phone)
         etUsername = findViewById(R.id.et_username)
         etPassword = findViewById(R.id.et_user_password)
         etConfirmPassword = findViewById(R.id.et_confirm_user_password)
@@ -243,13 +232,20 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
     }
 
-    private fun formValidation(level: String? = null, city: String = "", username: String = "", password: String = "", confirmPassword: String = ""): Boolean {
+    private fun formValidation(level: String? = null, city: String = "", phone: String = "", username: String = "", password: String = "", confirmPassword: String = ""): Boolean {
         return if (level == null) {
             handleMessage(this, "ERROR SPINNER", "Choose user level")
             false
         } else if (city.isEmpty()) {
             etUserCity.error = "Choose user city!"
             etUserCity.requestFocus()
+            false
+        } else if (phone.isEmpty()) {
+            etPhone.error = "Phone number cannot be empty!"
+            etPhone.requestFocus()
+            false
+        } else if (!phoneValidation(phone, etPhone)) {
+            etPhone.requestFocus()
             false
         } else if (username.isEmpty()) {
             etUserCity.error = null

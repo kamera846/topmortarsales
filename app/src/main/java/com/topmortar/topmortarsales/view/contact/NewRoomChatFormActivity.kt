@@ -26,7 +26,6 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
-import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -38,8 +37,9 @@ import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
-import com.topmortar.topmortarsales.commons.utils.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.handleMessage
+import com.topmortar.topmortarsales.commons.utils.phoneHandler.formatPhoneNumber
+import com.topmortar.topmortarsales.commons.utils.phoneHandler.phoneValidation
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.modal.SearchModal
@@ -388,7 +388,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             etPhone.error = "Phone number cannot be empty!"
             etPhone.requestFocus()
             false
-        } else if (!phoneValidation(phone)) {
+        } else if (!phoneValidation(phone, etPhone)) {
             etPhone.requestFocus()
             false
         } else if (name.isEmpty()) {
@@ -445,19 +445,6 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             etMessage.clearFocus()
             true
         }
-    }
-
-    private fun phoneValidation(input: String): Boolean {
-        val pattern = Regex("^\\d{10,16}$")
-        val trimmedInput = input.trim()
-
-        return if (!trimmedInput.startsWith("0") && !trimmedInput.startsWith("8") && !trimmedInput.startsWith("62")) {
-            etPhone.error = "Phone number must consist of starting with: 0, 8, 62"
-            false
-        } else if (!pattern.matches(input)) {
-            etPhone.error = "Phone number must be 10 to 16 digits long"
-            false
-        } else true
     }
 
     private fun setDatePickerDialog() {
