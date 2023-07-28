@@ -82,6 +82,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     private lateinit var icCloseSearch: ImageView
     private lateinit var icClearSearch: ImageView
     private lateinit var etSearchBox: EditText
+    private lateinit var tvTitleBarDescription: TextView
 
     // Global
     private lateinit var sessionManager: SessionManager
@@ -132,6 +133,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         btnFab = findViewById(R.id.btn_fab)
         icMore = llTitleBar.findViewById(R.id.ic_more)
         icSearch = llTitleBar.findViewById(R.id.ic_search)
+        tvTitleBarDescription = llTitleBar.findViewById(R.id.tv_title_bar_description)
         icCloseSearch = findViewById(R.id.ic_close_search)
         icClearSearch = findViewById(R.id.ic_clear_search)
         etSearchBox = findViewById(R.id.et_search_box)
@@ -139,6 +141,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         // Set Title Bar
         icMore.visibility = View.VISIBLE
         icSearch.visibility = View.VISIBLE
+        tvTitleBarDescription.visibility = View.VISIBLE
+        tvTitleBarDescription.text = "Hello, ${ sessionManager.userName() }"
         etSearchBox.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Set Floating Action Button
