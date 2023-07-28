@@ -6,23 +6,38 @@ import android.os.Bundle
 import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.CONST_ADDRESS
+import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
+import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_LOCATION
+import com.topmortar.topmortarsales.commons.CONST_MAPS
+import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.CONST_OWNER
+import com.topmortar.topmortarsales.commons.CONST_PHONE
+import com.topmortar.topmortarsales.commons.CONST_USER_ID
+import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
+import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -48,6 +63,8 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
     private lateinit var etPhone: EditText
     private lateinit var etPassword: EditText
     private lateinit var etConfirmPassword: EditText
+    private lateinit var passwordContainer: LinearLayout
+    private lateinit var confirmPasswordContainer: LinearLayout
 
     // Global
     private lateinit var sessionManager: SessionManager
@@ -60,6 +77,13 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
     private var selectedCity: ModalSearchModel? = null
     private var citiesResults: ArrayList<CityModel> = ArrayList()
 
+    private var userID: String? = null
+    private var iUserLevel: String? = null
+    private var iLocation: String? = null
+
+    private val txtSubmit = "SUBMIT"
+    private val txtSave = "SAVE"
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -71,8 +95,17 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         initVariable()
         initClickHandler()
+        dataActivityHandler()
 
         Handler().postDelayed({
+
+            // Setup Spinner
+            setSpinner()
+
+            // Setup Dialog Search
+            setupDialogSearch()
+
+            // Get List of City
             getCities()
         }, 100)
 
@@ -98,12 +131,13 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 //            handleMessage(this, "Add User", "$level : $city : $phone : $username : $password : $confirmPassword")
 //            loadingState(false)
 //        }, 1000)
-
+//
 //        return
 
         lifecycleScope.launch {
             try {
 
+                val rbUserID = createPartFromString(userID!!)
                 val rbLevel = createPartFromString(level!!)
                 val rbCityId = createPartFromString(city)
                 val rbPhone = createPartFromString(formatPhoneNumber(phone))
@@ -111,7 +145,11 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                 val rbPassword = createPartFromString(password)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.addUser(level = rbLevel, cityId = rbCityId, phone = rbPhone, username = rbUsername, password = rbPassword)
+                val response = if (userID == null) {
+                    apiService.addUser(level = rbLevel, cityId = rbCityId, phone = rbPhone, username = rbUsername, password = rbPassword)
+                } else {
+                    apiService.editUser(ID = rbUserID, level = rbLevel, cityId = rbCityId, phone = rbPhone, username = rbUsername)
+                }
 
                 if (response.isSuccessful) {
 
@@ -164,16 +202,12 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         etUsername = findViewById(R.id.et_username)
         etPassword = findViewById(R.id.et_user_password)
         etConfirmPassword = findViewById(R.id.et_confirm_user_password)
+        passwordContainer = findViewById(R.id.password_container)
+        confirmPasswordContainer = findViewById(R.id.confirm_password_container)
 
         // Set Title Bar
         tvTitleBar.text = "Register New User"
         tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
-
-        // Setup Spinner
-        setSpinner()
-
-        // Setup Dialog Search
-        setupDialogSearch()
 
     }
 
@@ -212,6 +246,29 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
     }
 
+    private fun dataActivityHandler() {
+        val iUserID = intent.getStringExtra(CONST_USER_ID)
+        val iPhone = intent.getStringExtra(CONST_PHONE)
+        val iName = intent.getStringExtra(CONST_NAME)
+        iUserLevel = intent.getStringExtra(CONST_USER_LEVEL)
+        iLocation = intent.getStringExtra(CONST_LOCATION)
+
+        if (!iUserID.isNullOrEmpty()) {
+            userID = iUserID
+            // Set Title Bar
+            tvTitleBar.text = "Edit User"
+            // Set Button Submit
+            btnSubmit.text = txtSave
+            // Remove Field Password
+            passwordContainer.visibility = View.GONE
+            confirmPasswordContainer.visibility = View.GONE
+        }
+        if (!iPhone.isNullOrEmpty()) etPhone.setText(iPhone)
+        if (!iName.isNullOrEmpty()) etUsername.setText(iName)
+        if (!iLocation.isNullOrEmpty()) etUserCity.setText("Loading...")
+        else etUserCity.setText("")
+    }
+
     private fun loadingState(state: Boolean) {
 
         btnSubmit.setTextColor(ContextCompat.getColor(this, R.color.white))
@@ -220,12 +277,12 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         if (state) {
 
             btnSubmit.isEnabled = false
-            btnSubmit.text = getString(R.string.txt_sending)
+            btnSubmit.text = getString(R.string.txt_loading)
 
         } else {
 
             btnSubmit.isEnabled = true
-            btnSubmit.text = getString(R.string.btn_submit_new_chat_room)
+            if (userID != null) btnSubmit.text = txtSave else btnSubmit.text = txtSubmit
             btnSubmit.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
 
         }
@@ -253,36 +310,44 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             etUsername.error = "Username cannot be empty!"
             etUsername.requestFocus()
             false
-        } else if (password.isEmpty()) {
-            etUsername.error = null
-            etUsername.clearFocus()
-            etPassword.error = "Password cannot be empty!"
-            etPassword.requestFocus()
-            false
-        } else if (password.length < 8) {
-            etUsername.error = null
-            etUsername.clearFocus()
-            etPassword.error = "Minimum password is 8 characters!"
-            etPassword.requestFocus()
-            false
-        } else if (confirmPassword.isEmpty()) {
-            etPassword.error = null
-            etPassword.clearFocus()
-            etConfirmPassword.error = "Confirm password cannot be empty!"
-            etConfirmPassword.requestFocus()
-            false
-        } else if (confirmPassword.length < 8) {
-            etPassword.error = null
-            etPassword.clearFocus()
-            etConfirmPassword.error = "Minimum password is 8 characters!"
-            etConfirmPassword.requestFocus()
-            false
-        } else if (password != confirmPassword) {
-            etPassword.error = "Passwords do not match"
-            etConfirmPassword.error = "Passwords do not match"
-            etPassword.requestFocus()
-            etConfirmPassword.requestFocus()
-            false
+        } else if (userID == null) {
+            if (password.isEmpty()) {
+                etUsername.error = null
+                etUsername.clearFocus()
+                etPassword.error = "Password cannot be empty!"
+                etPassword.requestFocus()
+                false
+            } else if (password.length < 8) {
+                etUsername.error = null
+                etUsername.clearFocus()
+                etPassword.error = "Minimum password is 8 characters!"
+                etPassword.requestFocus()
+                false
+            } else if (confirmPassword.isEmpty()) {
+                etPassword.error = null
+                etPassword.clearFocus()
+                etConfirmPassword.error = "Confirm password cannot be empty!"
+                etConfirmPassword.requestFocus()
+                false
+            } else if (confirmPassword.length < 8) {
+                etPassword.error = null
+                etPassword.clearFocus()
+                etConfirmPassword.error = "Minimum password is 8 characters!"
+                etConfirmPassword.requestFocus()
+                false
+            } else if (password != confirmPassword) {
+                etPassword.error = "Passwords do not match"
+                etConfirmPassword.error = "Passwords do not match"
+                etPassword.requestFocus()
+                etConfirmPassword.requestFocus()
+                false
+            } else {
+                etPassword.error = null
+                etConfirmPassword.error = null
+                etPassword.clearFocus()
+                etConfirmPassword.clearFocus()
+                return true
+            }
         } else {
             etPassword.error = null
             etConfirmPassword.error = null
@@ -312,6 +377,13 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         // Apply the adapter to the spinner
         spinLevel.adapter = adapter
 
+        var userLevel = 0 // 0 as null, 1 as admin, 2 as sales
+
+        if (iUserLevel == "admin") userLevel = 1
+        else if (iUserLevel == "sales") userLevel = 2
+
+        spinLevel.setSelection(userLevel)
+
         // Handle the selected option
         spinLevel.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: android.view.View?, position: Int, id: Long) {
@@ -326,7 +398,11 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
             override fun onNothingSelected(parent: AdapterView<*>) {
                 // Do nothing here
-                selectedLevel = null
+                selectedLevel = when (iUserLevel) {
+                    "admin" -> "admin"
+                    "sales" -> "sales"
+                    else -> null
+                }
             }
         }
 
@@ -372,6 +448,12 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                         }
 
                         setupDialogSearch(items)
+
+                        val foundItem = citiesResults.find { it.id_city == iLocation }
+                        if (foundItem != null) {
+                            etUserCity.setText("${foundItem.nama_city} - ${foundItem.kode_city}")
+                            selectedCity = ModalSearchModel(foundItem.id_city, foundItem.nama_city)
+                        } else etUserCity.setText("")
 
                         isCitiesLoaded = true
                         isLoaded = true

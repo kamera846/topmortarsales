@@ -19,6 +19,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.UsersRecyclerViewAdapter
+import com.topmortar.topmortarsales.commons.CONST_LOCATION
+import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.CONST_PHONE
+import com.topmortar.topmortarsales.commons.CONST_USER_ID
+import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -201,15 +206,24 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
 
     }
 
-    private fun navigateAddUser() {
+    private fun navigateAddUser(data: UserModel? = null) {
 
         val intent = Intent(this@ManageUserActivity, AddUserActivity::class.java)
+
+        if (data != null) {
+            intent.putExtra(CONST_USER_ID, data.id_user)
+            intent.putExtra(CONST_PHONE, data.phone)
+            intent.putExtra(CONST_NAME, data.username)
+            intent.putExtra(CONST_USER_LEVEL, data.level_user)
+            intent.putExtra(CONST_LOCATION, data.id_city)
+        }
+
         startActivityForResult(intent, MANAGE_USER_ACTIVITY_REQUEST_CODE)
 
     }
 
     override fun onItemClick(data: UserModel?) {
-
+        navigateAddUser(data)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
