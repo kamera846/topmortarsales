@@ -8,6 +8,7 @@ const val BASE_URL = "https://saleswa.topmortarindonesia.com/" // Production
 
 const val RESPONSE_STATUS_OK = "ok"
 const val RESPONSE_STATUS_EMPTY = "empty"
+const val RESPONSE_STATUS_FAIL = "fail"
 
 const val GET_CONTACT = "contacts.php"
 const val EDIT_CONTACT = "contacts.php"
@@ -45,6 +46,8 @@ const val CONST_MESSAGE = "const_message"
 const val CONST_BIRTHDAY = "const_birthday"
 const val CONST_MAPS = "const_maps"
 const val CONST_ADDRESS = "const_address"
+const val CONST_USER_ID = "const_user_id"
+const val CONST_USER_LEVEL = "const_user_level"
 
 // Status
 const val LOGGED_IN = true

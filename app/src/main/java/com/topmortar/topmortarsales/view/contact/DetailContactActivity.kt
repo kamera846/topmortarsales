@@ -45,6 +45,7 @@ import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
+import com.topmortar.topmortarsales.commons.utils.phoneHandler
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.modal.SearchModal
@@ -76,6 +77,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var icEdit: ImageView
     private lateinit var icClose: ImageView
 
+    private lateinit var tooltipPhone: ImageView
     private lateinit var tooltipOwner: ImageView
     private lateinit var tooltipBirthday: ImageView
     private lateinit var tooltipLocation: ImageView
@@ -155,6 +157,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         addressContainer = findViewById(R.id.address_container)
 
+        tooltipPhone = findViewById(R.id.tooltip_phone)
         tooltipOwner = findViewById(R.id.tooltip_owner)
         tooltipLocation = findViewById(R.id.tooltip_location)
         tooltipMaps = findViewById(R.id.tooltip_maps)
@@ -261,23 +264,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         //////////
 
         // Tooltip Handler
-        val tooltipText = "Owner Name"
-        tooltipOwner.setOnClickListener {
-            TooltipCompat.setTooltipText(tooltipOwner, tooltipText)
-        }
-        tooltipOwner.setOnLongClickListener {
-            TooltipCompat.setTooltipText(tooltipOwner, tooltipText)
-            false
-        }
-
-        val tooltipLocationText = "Customer City"
-        tooltipLocation.setOnClickListener {
-            TooltipCompat.setTooltipText(tooltipLocation, tooltipLocationText)
-        }
-        tooltipLocation.setOnLongClickListener {
-            TooltipCompat.setTooltipText(tooltipLocation, tooltipLocationText)
-            false
-        }
+        tooltipHandler(tooltipPhone, "Phone Number (WA)")
+        tooltipHandler(tooltipOwner, "Owner Name")
+        tooltipHandler(tooltipLocation, "Customer City")
+        tooltipHandler(tooltipBirthday, "Owner Birthday")
 
         val tooltipMapsText = "Maps URL"
         val tooltipMapsTextOpen = "Click to open store location on maps apps"
@@ -288,15 +278,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         tooltipMaps.setOnLongClickListener {
             if (tvMaps.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsTextOpen)
             else TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsText)
-            false
-        }
-
-        val tooltipBirthdayText = "Owner Birthday"
-        tooltipBirthday.setOnClickListener {
-            TooltipCompat.setTooltipText(tooltipBirthday, tooltipBirthdayText)
-        }
-        tooltipBirthday.setOnLongClickListener {
-            TooltipCompat.setTooltipText(tooltipBirthday, tooltipBirthdayText)
             false
         }
         //////////
@@ -320,10 +301,16 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         if (!iPhone.isNullOrEmpty() ) {
             tvPhone.text = "+$iPhone"
             etPhone.setText(iPhone)
+        } else {
+            tvPhone.text = EMPTY_FIELD_VALUE
+            etPhone.setText("")
         }
         if (!iName.isNullOrEmpty() ) {
             tvName.text = iName
             etName.setText(iName)
+        } else {
+            tvName.text = EMPTY_FIELD_VALUE
+            etName.setText("")
         }
         if (!iOwner.isNullOrEmpty() ) {
             tvOwner.text = iOwner
@@ -375,6 +362,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tvName.visibility = View.GONE
             tvDescription.visibility = View.GONE
 
+            tvPhoneContainer.visibility = View.GONE
             tvOwnerContainer.visibility = View.GONE
             tvLocationContainer.visibility = View.GONE
             tvMapsContainer.visibility = View.GONE
@@ -388,6 +376,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             etName.visibility = View.VISIBLE
 
+            etPhoneContainer.visibility = View.VISIBLE
             etOwnerContainer.visibility = View.VISIBLE
             etLocationContainer.visibility = View.VISIBLE
             etMapsContainer.visibility = View.VISIBLE
@@ -412,6 +401,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tvName.visibility = View.VISIBLE
             tvDescription.visibility = View.VISIBLE
 
+            tvPhoneContainer.visibility = View.VISIBLE
             tvOwnerContainer.visibility = View.VISIBLE
             tvLocationContainer.visibility = View.VISIBLE
             tvMapsContainer.visibility = View.VISIBLE
@@ -425,6 +415,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             etName.visibility = View.GONE
 
+            etPhoneContainer.visibility = View.GONE
             etOwnerContainer.visibility = View.GONE
             etLocationContainer.visibility = View.GONE
             etMapsContainer.visibility = View.GONE
@@ -445,7 +436,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun editConfirmation() {
 
-        if (!formValidation("${ etName.text }", "${ etOwner.text }", "${ etMaps.text }", "${ etLocation.text }", "${ etBirthday.text }", "${ etAddress.text }")) return
+        if (!formValidation("${ etPhone.text }","${ etName.text }", "${ etOwner.text }", "${ etMaps.text }", "${ etLocation.text }", "${ etBirthday.text }", "${ etAddress.text }")) return
 
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Edit Confirmation")
@@ -461,6 +452,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun saveEdit() {
 
+        val pPhone = "${ etPhone.text }"
         val pName = "${ etName.text }"
         val pOwner = "${ etOwner.text }"
         var pBirthday = "${ etBirthday.text }"
@@ -469,6 +461,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         pBirthday = if (pBirthday.isEmpty() || pBirthday == EMPTY_FIELD_VALUE) "0000-00-00"
         else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
+
+        val pCityID = if (selectedCity != null) selectedCity!!.id else "0"
 
         loadingState(true)
 //
@@ -491,15 +485,16 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             try {
 
                 val rbId = createPartFromString(contactId!!)
+                val rbPhone = createPartFromString(pPhone)
                 val rbName = createPartFromString(pName)
                 val rbOwner = createPartFromString(pOwner)
                 val rbBirthday = createPartFromString(pBirthday)
                 val rbMapsUrl = createPartFromString(pMapsUrl)
-                val rbLocation = createPartFromString(selectedCity!!.id)
+                val rbLocation = createPartFromString(pCityID)
                 val rbAddress = createPartFromString(pAddress)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.editContact(id = rbId, name = rbName, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, address = rbAddress)
+                val response = apiService.editContact(id = rbId, phone = rbPhone, name = rbName, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, address = rbAddress)
 
                 if (response.isSuccessful) {
 
@@ -507,18 +502,31 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                     if (responseBody.status == RESPONSE_STATUS_OK) {
 
+
                         tvName.text = "${ etName.text }"
-                        tvOwner.text = "${ etOwner.text }"
-                        tvBirthday.text = "${ etBirthday.text }"
-                        tvMaps.text = "Click to open"
-                        iMapsUrl = "${ etMaps.text }"
+                        tvPhone.text = "${ etPhone.text }"
                         iAddress = "${ etAddress.text }"
-                        tvLocation.text = "${ etLocation.text }"
-                        hasEdited = true
 
                         handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
                         loadingState(false)
                         toggleEdit(false)
+
+                        if (!etOwner.text.isNullOrEmpty()) tvOwner.text = "${ etOwner.text }"
+                        else tvOwner.text = EMPTY_FIELD_VALUE
+                        if (!etBirthday.text.isNullOrEmpty()) tvBirthday.text = "${ etBirthday.text }"
+                        else tvBirthday.text = EMPTY_FIELD_VALUE
+                        if (!etMaps.text.isNullOrEmpty()) {
+                            tvMaps.text = "Click to open"
+                            iMapsUrl = "${ etMaps.text }"
+                        } else {
+                            tvMaps.text = EMPTY_FIELD_VALUE
+                            iMapsUrl = ""
+                        }
+                        if (selectedCity != null) {
+                            if (selectedCity!!.id != "0") tvLocation.text = "${ etLocation.text }"
+                            else tvLocation.text = EMPTY_FIELD_VALUE
+                        } else tvLocation.text = EMPTY_FIELD_VALUE
+                        hasEdited = true
 
                     } else {
 
@@ -592,43 +600,50 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     }
 
-    private fun formValidation(name: String, owner: String = "", mapsUrl: String = "", location: String = "", birthday: String = "", address: String = ""): Boolean {
+    private fun formValidation(phone: String, name: String, owner: String = "", mapsUrl: String = "", location: String = "", birthday: String = "", address: String = ""): Boolean {
         return if (name.isEmpty()) {
             etName.error = "Name cannot be empty!"
             etName.requestFocus()
             false
-        } else if (owner.isEmpty()) {
-            etName.error = null
-            etName.clearFocus()
-            etOwner.error = "Owner name cannot be empty!"
-            etOwner.requestFocus()
+        } else if (phone.isEmpty()) {
+            etPhone.error = "Phone number cannot be empty!"
+            etPhone.requestFocus()
             false
-        } else if (mapsUrl.isEmpty()) {
-            etOwner.error = null
-            etOwner.clearFocus()
-            etMaps.error = "Maps url cannot be empty!"
-            etMaps.requestFocus()
+        } else if (!phoneHandler.phoneValidation(phone, etPhone)) {
+            etPhone.requestFocus()
             false
-        } else if (location.isEmpty() || location == EMPTY_FIELD_VALUE) {
-            etMaps.error = null
-            etMaps.requestFocus()
-            etLocation.error = "Choose customer city!"
-            etLocation.requestFocus()
-            handleMessage(this, "ERROR EDIT CONTACT", "Choose customer city!")
-            false
-        } else if (birthday.isEmpty() || birthday == EMPTY_FIELD_VALUE) {
-            etLocation.error = null
-            etLocation.clearFocus()
-            etBirthday.error = "Choose owner birthday!"
-            etBirthday.requestFocus()
-            handleMessage(this, "ERROR EDIT CONTACT", "Choose owner birthday!")
-            false
-        } else if (address.isEmpty()) {
-            etBirthday.error = null
-            etBirthday.clearFocus()
-            etAddress.error = "Address cannot be empty!"
-            etAddress.requestFocus()
-            false
+//        } else if (owner.isEmpty()) {
+//            etName.error = null
+//            etName.clearFocus()
+//            etOwner.error = "Owner name cannot be empty!"
+//            etOwner.requestFocus()
+//            false
+//        } else if (mapsUrl.isEmpty()) {
+//            etOwner.error = null
+//            etOwner.clearFocus()
+//            etMaps.error = "Maps url cannot be empty!"
+//            etMaps.requestFocus()
+//            false
+//        } else if (location.isEmpty() || location == EMPTY_FIELD_VALUE) {
+//            etMaps.error = null
+//            etMaps.requestFocus()
+//            etLocation.error = "Choose customer city!"
+//            etLocation.requestFocus()
+//            handleMessage(this, "ERROR EDIT CONTACT", "Choose customer city!")
+//            false
+//        } else if (birthday.isEmpty() || birthday == EMPTY_FIELD_VALUE) {
+//            etLocation.error = null
+//            etLocation.clearFocus()
+//            etBirthday.error = "Choose owner birthday!"
+//            etBirthday.requestFocus()
+//            handleMessage(this, "ERROR EDIT CONTACT", "Choose owner birthday!")
+//            false
+//        } else if (address.isEmpty()) {
+//            etBirthday.error = null
+//            etBirthday.clearFocus()
+//            etAddress.error = "Address cannot be empty!"
+//            etAddress.requestFocus()
+//            false
         } else {
             etName.error = null
             etName.clearFocus()
@@ -670,7 +685,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val intent = Intent(this@DetailContactActivity, NewRoomChatFormActivity::class.java)
 
         intent.putExtra(CONST_CONTACT_ID, contactId)
-        intent.putExtra(CONST_NAME, tvName.text)
+        if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
+        else intent.putExtra(CONST_NAME, tvName.text)
 
         // Remove "+" on text phone
         val trimmedInput = tvPhone.text.trim()
@@ -784,6 +800,16 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(iMapsUrl))
                 startActivity(intent)
             }, animateDuration)
+        }
+    }
+
+    private fun tooltipHandler(content: ImageView, text: String) {
+        content.setOnClickListener {
+            TooltipCompat.setTooltipText(content, text)
+        }
+        content.setOnLongClickListener {
+            TooltipCompat.setTooltipText(content, text)
+            false
         }
     }
 
