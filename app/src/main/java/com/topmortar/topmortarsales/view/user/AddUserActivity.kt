@@ -289,13 +289,13 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             etUserCity.error = "Choose user city!"
             etUserCity.requestFocus()
             false
-        } else if (phone.isEmpty()) {
-            etPhone.error = "Phone number cannot be empty!"
-            etPhone.requestFocus()
-            false
-        } else if (!phoneValidation(phone, etPhone)) {
-            etPhone.requestFocus()
-            false
+//        } else if (phone.isEmpty()) {
+//            etPhone.error = "Phone number cannot be empty!"
+//            etPhone.requestFocus()
+//            false
+//        } else if (!phoneValidation(phone, etPhone)) {
+//            etPhone.requestFocus()
+//            false
         } else if (username.isEmpty()) {
             etUserCity.error = null
             etUserCity.clearFocus()
