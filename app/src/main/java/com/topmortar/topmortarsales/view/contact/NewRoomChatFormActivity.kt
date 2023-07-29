@@ -38,8 +38,8 @@ import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
-import com.topmortar.topmortarsales.commons.utils.phoneHandler.formatPhoneNumber
-import com.topmortar.topmortarsales.commons.utils.phoneHandler.phoneValidation
+import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
+import com.topmortar.topmortarsales.commons.utils.PhoneHandler.phoneValidation
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.modal.SearchModal

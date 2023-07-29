@@ -45,7 +45,7 @@ import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
-import com.topmortar.topmortarsales.commons.utils.phoneHandler
+import com.topmortar.topmortarsales.commons.utils.PhoneHandler
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.modal.SearchModal
@@ -456,8 +456,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val pName = "${ etName.text }"
         val pOwner = "${ etOwner.text }"
         var pBirthday = "${ etBirthday.text }"
-        var pMapsUrl = "${ etMaps.text }"
-        var pAddress = "${ etAddress.text }"
+        val pMapsUrl = "${ etMaps.text }"
+        val pAddress = "${ etAddress.text }"
 
         pBirthday = if (pBirthday.isEmpty() || pBirthday == EMPTY_FIELD_VALUE) "0000-00-00"
         else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
@@ -502,9 +502,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                     if (responseBody.status == RESPONSE_STATUS_OK) {
 
-
                         tvName.text = "${ etName.text }"
-                        tvPhone.text = "${ etPhone.text }"
+                        tvPhone.text = "+" + PhoneHandler.formatPhoneNumber("${ etPhone.text }")
+                        etPhone.setText(PhoneHandler.formatPhoneNumber("${ etPhone.text }"))
                         iAddress = "${ etAddress.text }"
 
                         handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
@@ -609,7 +609,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             etPhone.error = "Phone number cannot be empty!"
             etPhone.requestFocus()
             false
-        } else if (!phoneHandler.phoneValidation(phone, etPhone)) {
+        } else if (!PhoneHandler.phoneValidation(phone, etPhone)) {
             etPhone.requestFocus()
             false
 //        } else if (owner.isEmpty()) {

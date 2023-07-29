@@ -2,7 +2,7 @@ package com.topmortar.topmortarsales.commons.utils
 
 import android.widget.EditText
 
-object phoneHandler {
+object PhoneHandler {
 
     fun formatPhoneNumber(input: String): String {
         val trimmedInput = input.trim()

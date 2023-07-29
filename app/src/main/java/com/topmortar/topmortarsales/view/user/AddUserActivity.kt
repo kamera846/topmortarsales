@@ -34,8 +34,8 @@ import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
-import com.topmortar.topmortarsales.commons.utils.phoneHandler.formatPhoneNumber
-import com.topmortar.topmortarsales.commons.utils.phoneHandler.phoneValidation
+import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
+import com.topmortar.topmortarsales.commons.utils.PhoneHandler.phoneValidation
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.modal.SearchModal
@@ -289,13 +289,13 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             etUserCity.error = "Choose user city!"
             etUserCity.requestFocus()
             false
-//        } else if (phone.isEmpty()) {
-//            etPhone.error = "Phone number cannot be empty!"
-//            etPhone.requestFocus()
-//            false
-//        } else if (!phoneValidation(phone, etPhone)) {
-//            etPhone.requestFocus()
-//            false
+        } else if (phone.isEmpty()) {
+            etPhone.error = "Phone number cannot be empty!"
+            etPhone.requestFocus()
+            false
+        } else if (!phoneValidation(phone, etPhone)) {
+            etPhone.requestFocus()
+            false
         } else if (username.isEmpty()) {
             etUserCity.error = null
             etUserCity.clearFocus()
