@@ -3,8 +3,8 @@ package com.topmortar.topmortarsales.commons
 import android.widget.Toast
 
 // Services
-//const val BASE_URL = "https://saleswa.topmortarindonesia.com/" // Production
-const val BASE_URL = "https://dev-saleswa.topmortarindonesia.com/" // Development
+const val BASE_URL = "https://saleswa.topmortarindonesia.com/" // Production
+//const val BASE_URL = "https://dev-saleswa.topmortarindonesia.com/" // Development
 
 const val RESPONSE_STATUS_OK = "ok"
 const val RESPONSE_STATUS_EMPTY = "empty"
