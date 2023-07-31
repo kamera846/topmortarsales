@@ -88,7 +88,7 @@ interface ApiService {
     suspend fun addUser(
         @Part("level_user") level: RequestBody,
         @Part("id_city") cityId: RequestBody,
-        @Part("nomorhp") phone: RequestBody,
+        @Part("phone_user") phone: RequestBody,
         @Part("username") username: RequestBody,
         @Part("password") password: RequestBody
     ): Response<ResponseMessage>
@@ -99,7 +99,7 @@ interface ApiService {
         @Part("id") ID: RequestBody,
         @Part("level_user") level: RequestBody,
         @Part("id_city") cityId: RequestBody,
-        @Part("nomorhp") phone: RequestBody,
+        @Part("phone_user") phone: RequestBody,
         @Part("username") username: RequestBody
     ): Response<ResponseMessage>
 }

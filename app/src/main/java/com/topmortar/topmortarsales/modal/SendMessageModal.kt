@@ -18,11 +18,11 @@ import androidx.core.content.ContextCompat
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
-import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.updateTxtMaxLength
+import com.topmortar.topmortarsales.commons.utils.PhoneHandler
+import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
-import com.topmortar.topmortarsales.commons.utils.phoneHandler
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.ContactModel
@@ -149,7 +149,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
             try {
                 val data = item!!
 
-                val rbPhone = createPartFromString(phoneHandler.formatPhoneNumber(data.nomorhp))
+                val rbPhone = createPartFromString(PhoneHandler.formatPhoneNumber(data.nomorhp))
                 val rbName = createPartFromString(data.nama)
                 val rbLocation = createPartFromString(data.id_city)
                 val rbBirthday = createPartFromString(data.tgl_lahir)
