@@ -1,12 +1,12 @@
 package com.topmortar.topmortarsales.model
 
 data class ContactModel(
-    val id_contact: String,
-    val nama: String,
-    val nomorhp: String,
-    val tgl_lahir: String,
-    val store_owner: String,
-    val id_city: String,
-    val maps_url: String,
-    val address: String,
+    val id_contact: String = "",
+    val nama: String = "",
+    val nomorhp: String = "",
+    val tgl_lahir: String = "0000-00-00",
+    val store_owner: String = "",
+    val id_city: String = "0",
+    val maps_url: String = "",
+    val address: String = "",
 )
