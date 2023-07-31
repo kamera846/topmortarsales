@@ -49,7 +49,10 @@ import com.topmortar.topmortarsales.commons.utils.phoneHandler
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.modal.SearchModal
+import com.topmortar.topmortarsales.modal.SendMessageModal
+import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -108,6 +111,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var isEdit: Boolean = false
     private var selectedDate: Calendar = Calendar.getInstance()
     private var selectedCity: ModalSearchModel? = null
+    private var itemSendMessage: ContactModel? = null
     private var hasEdited: Boolean = false
 
     private var iLocation: String? = null
@@ -116,6 +120,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private lateinit var datePicker: DatePickerDialog
     private lateinit var searchModal: SearchModal
+    private lateinit var sendMessageModal: SendMessageModal
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -193,6 +198,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         // Setup Dialog Search
         setupDialogSearch()
 
+        // Setup Dialog Send Message
+        setupDialogSendMessage()
+
     }
 
     private fun initClickHandler() {
@@ -200,7 +208,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         icBack.setOnClickListener { backHandler() }
         icEdit.setOnClickListener { toggleEdit(true) }
         icClose.setOnClickListener { toggleEdit(false) }
-        btnSendMessage.setOnClickListener { navigateAddNewRoom() }
+//        btnSendMessage.setOnClickListener { navigateAddNewRoom() }
+        btnSendMessage.setOnClickListener { sendMessageModal.show() }
         btnSaveEdit.setOnClickListener { editConfirmation() }
         etBirthdayContainer.setOnClickListener { datePicker.show() }
         etBirthday.setOnClickListener { datePicker.show() }
@@ -290,10 +299,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val iOwner = intent.getStringExtra(CONST_OWNER)
         val iName = intent.getStringExtra(CONST_NAME)
         val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
+
         iMapsUrl = intent.getStringExtra(CONST_MAPS)
         iAddress = intent.getStringExtra(CONST_ADDRESS)
         iLocation = intent.getStringExtra(CONST_LOCATION)
+
         activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
+
+        itemSendMessage = ContactModel(nama = iName!!, nomorhp = iPhone!!, store_owner = iOwner!!, tgl_lahir = iBirthday!!, maps_url = iMapsUrl!!, id_city = iLocation!!)
+        setupDialogSendMessage(itemSendMessage)
 
         if (!iContactId.isNullOrEmpty() ) {
             contactId = iContactId
@@ -456,8 +470,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val pName = "${ etName.text }"
         val pOwner = "${ etOwner.text }"
         var pBirthday = "${ etBirthday.text }"
-        var pMapsUrl = "${ etMaps.text }"
-        var pAddress = "${ etAddress.text }"
+        val pMapsUrl = "${ etMaps.text }"
+        val pAddress = "${ etAddress.text }"
 
         pBirthday = if (pBirthday.isEmpty() || pBirthday == EMPTY_FIELD_VALUE) "0000-00-00"
         else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
@@ -502,6 +516,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                     if (responseBody.status == RESPONSE_STATUS_OK) {
 
+                        itemSendMessage = ContactModel(
+                            nomorhp = pPhone,
+                            nama = pName,
+                            store_owner = pOwner,
+                            id_city = pCityID,
+                            tgl_lahir = pBirthday,
+                            maps_url = pMapsUrl,
+                        )
+                        setupDialogSendMessage(itemSendMessage)
 
                         tvName.text = "${ etName.text }"
                         tvPhone.text = "${ etPhone.text }"
@@ -718,6 +741,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     }
 
+    private fun setupDialogSendMessage(item: ContactModel? = null) {
+
+        sendMessageModal = SendMessageModal(this, lifecycleScope)
+        if (item != null) sendMessageModal.setItem(item)
+
+    }
+
     private fun showSearchModal() {
         val searchKey = etLocation.text.toString()
         if (searchKey.isNotEmpty()) searchModal.setSearchKey(searchKey)
@@ -831,6 +861,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         backHandler()
     }
 
+    // Interfade Search Modal
     override fun onDataReceived(data: ModalSearchModel) {
         etLocation.setText(data.title)
         selectedCity = data

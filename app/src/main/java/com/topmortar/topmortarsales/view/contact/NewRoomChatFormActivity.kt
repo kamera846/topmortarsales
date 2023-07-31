@@ -33,6 +33,8 @@ import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
+import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
+import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.updateTxtMaxLength
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
@@ -196,7 +198,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                updateTxtMaxLength(etMessage.text.length)
+                updateTxtMaxLength(tvMaxMessage, msgMaxLength, etMessage.text.length)
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -370,16 +372,6 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             btnSubmit.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
 
         }
-
-    }
-
-    private fun updateTxtMaxLength(length: Int) {
-        tvMaxMessage.text = "$length/$msgMaxLength"
-    }
-
-    private fun EditText.setMaxLength(maxLength: Int) {
-
-        filters = arrayOf<InputFilter>(InputFilter.LengthFilter(maxLength))
 
     }
 
