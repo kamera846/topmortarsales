@@ -129,7 +129,6 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         lifecycleScope.launch {
             try {
 
-                val rbUserID = createPartFromString(userID!!)
                 val rbLevel = createPartFromString(level!!)
                 val rbCityId = createPartFromString(city)
                 val rbPhone = createPartFromString(formatPhoneNumber(phone))
@@ -140,6 +139,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                 val response = if (userID == null) {
                     apiService.addUser(level = rbLevel, cityId = rbCityId, phone = rbPhone, username = rbUsername, password = rbPassword)
                 } else {
+                    val rbUserID = createPartFromString(userID!!)
                     apiService.editUser(ID = rbUserID, level = rbLevel, cityId = rbCityId, phone = rbPhone, username = rbUsername)
                 }
 
@@ -159,7 +159,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
                     } else {
 
-                        handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Failed added data!")
+                        handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Failed added data!: ${ responseBody.message }")
                         loadingState(false)
 
                     }
