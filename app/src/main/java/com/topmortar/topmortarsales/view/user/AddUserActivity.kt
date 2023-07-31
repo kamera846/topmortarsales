@@ -159,7 +159,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
                     } else {
 
-                        handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Failed added data!")
+                        handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Failed added data!: ${ responseBody.message }")
                         loadingState(false)
 
                     }
