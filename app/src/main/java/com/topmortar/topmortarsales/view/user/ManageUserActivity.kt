@@ -212,7 +212,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
 
         if (data != null) {
             intent.putExtra(CONST_USER_ID, data.id_user)
-            intent.putExtra(CONST_PHONE, data.nomorhp)
+            intent.putExtra(CONST_PHONE, data.phone_user)
             intent.putExtra(CONST_NAME, data.username)
             intent.putExtra(CONST_USER_LEVEL, data.level_user)
             intent.putExtra(CONST_LOCATION, data.id_city)
