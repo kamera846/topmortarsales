@@ -46,6 +46,7 @@ import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
+import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.modal.SearchModal
@@ -499,7 +500,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             try {
 
                 val rbId = createPartFromString(contactId!!)
-                val rbPhone = createPartFromString(pPhone)
+                val rbPhone = createPartFromString(formatPhoneNumber(pPhone))
                 val rbName = createPartFromString(pName)
                 val rbOwner = createPartFromString(pOwner)
                 val rbBirthday = createPartFromString(pBirthday)
