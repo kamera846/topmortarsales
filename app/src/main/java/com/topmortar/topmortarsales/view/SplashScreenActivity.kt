@@ -37,7 +37,7 @@ class SplashScreenActivity : AppCompatActivity() {
     private lateinit var cardAlert: LinearLayout
     private lateinit var inputAuth: LinearLayout
     private lateinit var inputOtp: LinearLayout
-    private lateinit var inputNewPassword: LinearLayout
+    private lateinit var inputNewPassword: RelativeLayout
     private lateinit var icEyeContainer: RelativeLayout
     private lateinit var btnLogin: Button
     private lateinit var ivLogo: ImageView
@@ -185,6 +185,7 @@ class SplashScreenActivity : AppCompatActivity() {
         rlModal.visibility = View.VISIBLE
 
     }
+
     private fun showAlert(message: String, duration: Long = 2000) {
 
         cardAlert.visibility = View.VISIBLE
@@ -266,7 +267,6 @@ class SplashScreenActivity : AppCompatActivity() {
                     }
                 }
 
-
             } catch (e: Exception) {
 
                 handleMessage(this@SplashScreenActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
@@ -282,50 +282,65 @@ class SplashScreenActivity : AppCompatActivity() {
                 loginHandler()
             }
             resetPasswordStep1 -> {
-                handleMessage(this, "RESET PASSWORD", "Get OTP Code")
+//                handleMessage(this, "RESET PASSWORD", "Get OTP Code")
                 resetPasswordHandler()
             }
             resetPasswordStep2 -> {
-                handleMessage(this, "RESET PASSWORD", "Verify OTP Code")
+//                handleMessage(this, "RESET PASSWORD", "Verify OTP Code")
                 resetPasswordHandler()
             }
             else -> {
-                handleMessage(this, "RESET PASSWORD", "Successfully Reset Password!")
+//                handleMessage(this, "RESET PASSWORD", "Successfully Reset Password!")
                 resetPasswordHandler()
             }
         }
     }
 
-    private fun resetPasswordHandler() {
+    private fun resetPasswordHandler(next: Boolean = true) {
+        if (next) currentResetPasswordStep += 1 else currentResetPasswordStep -= 1
         when (currentResetPasswordStep) {
-            0 -> {
+            1 -> {
                 inputAuth.visibility = View.GONE
+                inputOtp.visibility = View.GONE
+                inputNewPassword.visibility = View.GONE
                 etPhone.visibility = View.VISIBLE
                 tvTitleAuth.text = "Reset Password"
                 btnLogin.text = "Get OTP Code"
-                currentResetPasswordStep += 1
             }
-            resetPasswordStep1 -> {
+            2 -> {
+                inputAuth.visibility = View.GONE
                 etPhone.visibility = View.GONE
+                inputNewPassword.visibility = View.GONE
                 inputOtp.visibility = View.VISIBLE
                 tvTitleAuth.text = "Input OTP Code"
                 btnLogin.text = "Verify OTP Code"
-                currentResetPasswordStep += 1
             }
-            resetPasswordStep2 -> {
+            3 -> {
+                inputAuth.visibility = View.GONE
+                etPhone.visibility = View.GONE
                 inputOtp.visibility = View.GONE
                 inputNewPassword.visibility = View.VISIBLE
                 tvTitleAuth.text = "Input New Password"
                 btnLogin.text = "Reset Password Now"
-                currentResetPasswordStep += 1
             }
             else -> {
                 inputNewPassword.visibility = View.GONE
+                inputOtp.visibility = View.GONE
+                etPhone.visibility = View.GONE
                 inputAuth.visibility = View.VISIBLE
                 tvTitleAuth.text = "Hey, \nLogin Now"
                 btnLogin.text = "Login"
                 currentResetPasswordStep = 0
             }
+        }
+
+    }
+
+    override fun onBackPressed() {
+        if (currentResetPasswordStep > 0) {
+            resetPasswordHandler(next = false)
+        } else {
+            super.onBackPressed()
         }
     }
 

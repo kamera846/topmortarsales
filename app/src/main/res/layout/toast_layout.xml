@@ -13,7 +13,8 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_marginEnd="12dp"
-        android:src="@mipmap/logo_dark_circle" />
+        android:src="@mipmap/logo_dark_circle"
+        android:contentDescription="@string/image_profile_top_mortar"/>
 
     <TextView
         android:id="@+id/toast_message"

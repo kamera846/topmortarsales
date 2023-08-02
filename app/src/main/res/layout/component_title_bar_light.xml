@@ -12,7 +12,8 @@
         android:layout_height="56dp"
         android:padding="12dp"
         android:layout_marginHorizontal="2dp"
-        android:src="@drawable/arrow_back_black" />
+        android:src="@drawable/arrow_back_black"
+        android:contentDescription="@string/icon_back_black"/>
 
     <TextView
         android:id="@+id/tv_title_bar"
@@ -20,7 +21,7 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center_vertical"
-        android:text="Top Mortar Sales"
+        android:text="@string/top_mortar_sales"
         android:paddingHorizontal="16dp"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -32,7 +33,8 @@
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:padding="16dp"
-        android:src="@drawable/pencil_black" />
+        android:src="@drawable/pencil_black"
+        android:contentDescription="@string/icon_pencil_black"/>
 
     <ImageView
         android:visibility="gone"
@@ -40,6 +42,7 @@
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:padding="16dp"
-        android:src="@drawable/close_black" />
+        android:src="@drawable/close_black"
+        android:contentDescription="@string/icon_close_black"/>
 
 </LinearLayout>

@@ -18,7 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:text="List Item"
+            android:text="@string/list_item"
             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
     </LinearLayout>
@@ -35,7 +35,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="16sp"
-            android:text="List Item"
+            android:text="@string/list_item"
             android:background="@android:color/transparent"
             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 

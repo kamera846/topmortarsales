@@ -17,7 +17,8 @@
           android:layout_height="56dp"
           android:padding="12dp"
           android:layout_marginHorizontal="2dp"
-          android:src="@drawable/arrow_back_baseline" />
+          android:src="@drawable/arrow_back_baseline"
+          android:contentDescription="@string/icon_back_baseline"/>
 
       <EditText
           android:id="@+id/et_search_box"
@@ -40,7 +41,8 @@
           android:layout_width="56dp"
           android:layout_height="56dp"
           android:padding="16dp"
-          android:src="@drawable/close_baseline" />
+          android:src="@drawable/close_baseline"
+          android:contentDescription="@string/icon_close_baseline"/>
 
    </LinearLayout>
 
