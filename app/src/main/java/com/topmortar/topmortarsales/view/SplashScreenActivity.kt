@@ -3,8 +3,10 @@ package com.topmortar.topmortarsales.view
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.text.Editable
 import android.text.InputType
 import android.text.TextUtils
+import android.text.TextWatcher
 import android.text.method.PasswordTransformationMethod
 import android.view.View
 import android.widget.Button
@@ -24,6 +26,8 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
+import com.topmortar.topmortarsales.commons.utils.KeyboardHandler
+import com.topmortar.topmortarsales.commons.utils.KeyboardHandler.showKeyboard
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -39,10 +43,14 @@ class SplashScreenActivity : AppCompatActivity() {
     private lateinit var inputOtp: LinearLayout
     private lateinit var inputNewPassword: RelativeLayout
     private lateinit var icEyeContainer: RelativeLayout
+    private lateinit var icEyeNewPasswordContainer: RelativeLayout
     private lateinit var btnLogin: Button
+    private lateinit var icBack: ImageView
     private lateinit var ivLogo: ImageView
     private lateinit var icEyeShow: ImageView
     private lateinit var icEyeClose: ImageView
+    private lateinit var icEyeNewPasswordShow: ImageView
+    private lateinit var icEyeNewPasswordClose: ImageView
     private lateinit var etUsername: EditText
     private lateinit var etPassword: EditText
     private lateinit var etPhone: EditText
@@ -61,22 +69,20 @@ class SplashScreenActivity : AppCompatActivity() {
 
     private val splashScreenDuration = 2000L
     private var isPasswordShow = false
-    private var currentResetPasswordStep = 0 // Reset Password False
-    private val resetPasswordStep1 = 1 // Input Phone Number
-    private val resetPasswordStep2 = 2 // Input OTP Code
-    private val resetPasswordStep3 = 3 // Input New Password
+    private var currentSubmitStep = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
-        sessionManager = SessionManager(this@SplashScreenActivity)
+        sessionManager = SessionManager(this)
 
         setContentView(R.layout.activity_splash_screen)
 
         initVariable()
         initClickHandler()
+        initOtpListener()
 
         Handler().postDelayed({
 
@@ -98,14 +104,26 @@ class SplashScreenActivity : AppCompatActivity() {
         btnLogin = findViewById(R.id.btn_login)
 
         ivLogo = findViewById(R.id.logo)
+        icBack = findViewById(R.id.ic_back)
 
         icEyeContainer = findViewById(R.id.ic_eye_container)
         icEyeShow = findViewById(R.id.ic_eye_show)
         icEyeClose = findViewById(R.id.ic_eye_close)
+        icEyeNewPasswordContainer = findViewById(R.id.ic_eye_container_new_password)
+        icEyeNewPasswordShow = findViewById(R.id.ic_eye_show_new_password)
+        icEyeNewPasswordClose = findViewById(R.id.ic_eye_close_new_password)
 
         etUsername = findViewById(R.id.et_username)
         etPassword = findViewById(R.id.et_password)
         etPhone = findViewById(R.id.et_phone)
+        etNewPassword = findViewById(R.id.et_new_password)
+
+        etOtp1 = findViewById(R.id.otp_1)
+        etOtp2 = findViewById(R.id.otp_2)
+        etOtp3 = findViewById(R.id.otp_3)
+        etOtp4 = findViewById(R.id.otp_4)
+        etOtp5 = findViewById(R.id.otp_5)
+        etOtp6 = findViewById(R.id.otp_6)
 
         tvTitleAuth = findViewById(R.id.tv_title_auth)
         tvAlert = findViewById(R.id.tv_alert)
@@ -114,6 +132,8 @@ class SplashScreenActivity : AppCompatActivity() {
         // Set default input type ke password
         etPassword.transformationMethod = PasswordTransformationMethod.getInstance()
         etPassword.inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
+        etNewPassword.transformationMethod = PasswordTransformationMethod.getInstance()
+        etNewPassword.inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
 
         setPasswordState()
 
@@ -121,9 +141,45 @@ class SplashScreenActivity : AppCompatActivity() {
 
     private fun initClickHandler() {
 
-        btnLogin.setOnClickListener { btnLoginHandler() }
+        btnLogin.setOnClickListener { submitHandler(next = true) }
         icEyeContainer.setOnClickListener { togglePassword() }
-        tvResetPassword.setOnClickListener { resetPasswordHandler() }
+        icEyeNewPasswordContainer.setOnClickListener { togglePassword() }
+        tvResetPassword.setOnClickListener {
+            currentSubmitStep = 0
+            submitHandler(next = true)
+        }
+        icBack.setOnClickListener { if (currentSubmitStep > -1) submitHandler(previous = true) }
+
+    }
+
+    private fun initOtpListener() {
+
+        val listEditText: List<EditText> = listOf(etOtp1, etOtp2, etOtp3, etOtp4, etOtp5, etOtp6)
+
+        for (i in listEditText.indices) {
+
+            val etObject = listEditText[i]
+            etObject.addTextChangedListener(object: TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+                }
+
+                override fun afterTextChanged(s: Editable?) {
+                    if (!etObject.text.isNullOrEmpty()) {
+                        if (i < (listEditText.size - 1)) {
+                            listEditText[i+1].requestFocus()
+                            listEditText[i+1].setSelection(listEditText[i+1].text.length)
+                        } else KeyboardHandler.hideKeyboard(etObject, this@SplashScreenActivity)
+                    }
+                }
+
+            })
+
+        }
 
     }
 
@@ -142,6 +198,10 @@ class SplashScreenActivity : AppCompatActivity() {
             etPassword.inputType = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
             icEyeClose.visibility = View.GONE
             icEyeShow.visibility = View.VISIBLE
+            etNewPassword.transformationMethod = null
+            etNewPassword.inputType = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+            icEyeNewPasswordClose.visibility = View.GONE
+            icEyeNewPasswordShow.visibility = View.VISIBLE
 
         } else {
 
@@ -149,17 +209,21 @@ class SplashScreenActivity : AppCompatActivity() {
             etPassword.inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
             icEyeClose.visibility = View.VISIBLE
             icEyeShow.visibility = View.GONE
+            etNewPassword.transformationMethod = PasswordTransformationMethod.getInstance()
+            etNewPassword.inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
+            icEyeNewPasswordClose.visibility = View.VISIBLE
+            icEyeNewPasswordShow.visibility = View.GONE
 
         }
 
         // Set kursor ke posisi terakhir
         etPassword.setSelection(etPassword.text.length)
-
+        etNewPassword.setSelection(etNewPassword.text.length)
     }
 
     private fun navigateToMain() {
 
-        val intent = Intent(this@SplashScreenActivity, MainActivity::class.java)
+        val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
         finish()
 
@@ -276,69 +340,103 @@ class SplashScreenActivity : AppCompatActivity() {
 
     }
 
-    private fun btnLoginHandler() {
-        when (currentResetPasswordStep) {
+    private fun submitHandler(next: Boolean? = null, previous: Boolean? = null) {
+
+        if (isPasswordShow) togglePassword()
+
+        if (next != null && next == true) currentSubmitStep += 1
+        else if (previous != null && previous == true) currentSubmitStep -= 1
+
+        when (currentSubmitStep) {
             0 -> {
+                currentSubmitStep = -1
                 loginHandler()
             }
-            resetPasswordStep1 -> {
-//                handleMessage(this, "RESET PASSWORD", "Get OTP Code")
-                resetPasswordHandler()
-            }
-            resetPasswordStep2 -> {
-//                handleMessage(this, "RESET PASSWORD", "Verify OTP Code")
-                resetPasswordHandler()
-            }
-            else -> {
-//                handleMessage(this, "RESET PASSWORD", "Successfully Reset Password!")
-                resetPasswordHandler()
-            }
-        }
-    }
-
-    private fun resetPasswordHandler(next: Boolean = true) {
-        if (next) currentResetPasswordStep += 1 else currentResetPasswordStep -= 1
-        when (currentResetPasswordStep) {
             1 -> {
+                clearInput()
+
                 inputAuth.visibility = View.GONE
                 inputOtp.visibility = View.GONE
                 inputNewPassword.visibility = View.GONE
+                icBack.visibility = View.VISIBLE
                 etPhone.visibility = View.VISIBLE
                 tvTitleAuth.text = "Reset Password"
                 btnLogin.text = "Get OTP Code"
+
+                etPhone.requestFocus()
             }
             2 -> {
+                clearInput()
+
                 inputAuth.visibility = View.GONE
                 etPhone.visibility = View.GONE
                 inputNewPassword.visibility = View.GONE
+                icBack.visibility = View.VISIBLE
                 inputOtp.visibility = View.VISIBLE
                 tvTitleAuth.text = "Input OTP Code"
                 btnLogin.text = "Verify OTP Code"
+
+                etOtp1.requestFocus()
+                showKeyboard(etOtp1, this)
             }
             3 -> {
+                clearInput()
+
                 inputAuth.visibility = View.GONE
                 etPhone.visibility = View.GONE
                 inputOtp.visibility = View.GONE
+                icBack.visibility = View.VISIBLE
                 inputNewPassword.visibility = View.VISIBLE
                 tvTitleAuth.text = "Input New Password"
                 btnLogin.text = "Reset Password Now"
+                etNewPassword.requestFocus()
             }
             else -> {
+                clearInput()
+
                 inputNewPassword.visibility = View.GONE
                 inputOtp.visibility = View.GONE
                 etPhone.visibility = View.GONE
+                icBack.visibility = View.GONE
                 inputAuth.visibility = View.VISIBLE
                 tvTitleAuth.text = "Hey, \nLogin Now"
                 btnLogin.text = "Login"
-                currentResetPasswordStep = 0
+                currentSubmitStep = -1
+
+                etUsername.requestFocus()
             }
         }
+
+    }
+
+    private fun clearInput() {
+
+        etUsername.error = null
+        etPassword.error = null
+        etPhone.error = null
+        etNewPassword.error = null
+        etOtp1.error = null
+        etOtp2.error = null
+        etOtp3.error = null
+        etOtp4.error = null
+        etOtp5.error = null
+        etOtp6.error = null
+        etUsername.setText("")
+        etPassword.setText("")
+        etPhone.setText("")
+        etNewPassword.setText("")
+        etOtp1.setText("")
+        etOtp2.setText("")
+        etOtp3.setText("")
+        etOtp4.setText("")
+        etOtp5.setText("")
+        etOtp6.setText("")
 
     }
 
     override fun onBackPressed() {
-        if (currentResetPasswordStep > 0) {
-            resetPasswordHandler(next = false)
+        if (currentSubmitStep > -1) {
+            submitHandler(previous = true)
         } else {
             super.onBackPressed()
         }

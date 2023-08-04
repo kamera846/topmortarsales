@@ -48,7 +48,7 @@
     <string name="otp_4">OTP 4</string>
     <string name="otp_5">OTP 5</string>
     <string name="otp_6">OTP 6</string>
-    <string name="enter_new_password">Enter new password</string>
+    <string name="enter_new_password">Enter your new password</string>
     <string name="icon_toggle_hide_new_password">Icon Toggle Hide New Password</string>
     <string name="icon_toggle_show_new_password">Icon Toggle Show New Password</string>
     <string name="fab_user_description">Navigate to create new user account</string>

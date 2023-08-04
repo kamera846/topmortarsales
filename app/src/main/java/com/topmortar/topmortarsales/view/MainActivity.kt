@@ -58,6 +58,8 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
+import com.topmortar.topmortarsales.commons.utils.KeyboardHandler.hideKeyboard
+import com.topmortar.topmortarsales.commons.utils.KeyboardHandler.showKeyboard
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.view.city.ManageCityActivity
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
@@ -305,8 +307,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
         etSearchBox.setOnFocusChangeListener { _, hasFocus ->
             run {
-                if (hasFocus) showKeyboard()
-                else hideKeyboard()
+                if (hasFocus) showKeyboard(etSearchBox, this@MainActivity)
+                else hideKeyboard(etSearchBox, this@MainActivity)
             }
         }
 
@@ -531,16 +533,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
             }
         })
 
-    }
-
-    private fun showKeyboard() {
-        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.showSoftInput(etSearchBox, InputMethodManager.SHOW_IMPLICIT)
-    }
-
-    private fun hideKeyboard() {
-        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(etSearchBox.windowToken, 0)
     }
 
     private fun logoutConfirmation() {
