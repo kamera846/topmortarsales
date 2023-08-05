@@ -8,6 +8,7 @@ import android.os.Looper
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
+import android.view.Gravity
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
@@ -22,9 +23,12 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager2.widget.ViewPager2
 import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter
 import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter.ItemClickListener
 import com.topmortar.topmortarsales.commons.CONST_NAME
@@ -45,6 +49,7 @@ import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.ContactModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.navigation.NavigationView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
@@ -68,7 +73,8 @@ import com.topmortar.topmortarsales.view.user.ManageUserActivity
 import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
-class MainActivity : AppCompatActivity(), ItemClickListener {
+class MainActivity : AppCompatActivity(), ItemClickListener,
+    NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var scaleAnimation: Animation
 
@@ -80,11 +86,15 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     private lateinit var llSearchBox: LinearLayout
     private lateinit var btnFab: FloatingActionButton
     private lateinit var icMore: ImageView
+    private lateinit var icToggleNav: ImageView
     private lateinit var icSearch: ImageView
     private lateinit var icCloseSearch: ImageView
     private lateinit var icClearSearch: ImageView
     private lateinit var etSearchBox: EditText
     private lateinit var tvTitleBarDescription: TextView
+
+    private lateinit var drawerLayout: DrawerLayout
+    private lateinit var navView: NavigationView
 
     // Global
     private lateinit var sessionManager: SessionManager
@@ -134,14 +144,19 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         llSearchBox = findViewById(R.id.search_box)
         btnFab = findViewById(R.id.btn_fab)
         icMore = llTitleBar.findViewById(R.id.ic_more)
+        icToggleNav = llTitleBar.findViewById(R.id.ic_toggle_nav)
         icSearch = llTitleBar.findViewById(R.id.ic_search)
         tvTitleBarDescription = llTitleBar.findViewById(R.id.tv_title_bar_description)
         icCloseSearch = findViewById(R.id.ic_close_search)
         icClearSearch = findViewById(R.id.ic_clear_search)
         etSearchBox = findViewById(R.id.et_search_box)
 
+        drawerLayout = findViewById(R.id.drawer_layout)
+        navView = findViewById(R.id.nav_view)
+
         // Set Title Bar
-        icMore.visibility = View.VISIBLE
+//        icMore.visibility = View.VISIBLE
+        icToggleNav.visibility = View.VISIBLE
         icSearch.visibility = View.VISIBLE
         tvTitleBarDescription.visibility = View.VISIBLE
         tvTitleBarDescription.text = "Hello, ${ sessionManager.userName() }"
@@ -150,6 +165,9 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         // Set Floating Action Button
         if (sessionManager.userKind() == USER_KIND_ADMIN) btnFab.visibility = View.GONE
 
+        // Set Navigation View
+        navView.setNavigationItemSelectedListener(this)
+
     }
 
     private fun initClickHandler() {
@@ -157,6 +175,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         btnFab.setOnClickListener { navigateAddNewRoom() }
         icMore.setOnClickListener { showPopupMenu() }
         icSearch.setOnClickListener { toggleSearchEvent(SEARCH_OPEN) }
+        icToggleNav.setOnClickListener { toggleNavView() }
         icCloseSearch.setOnClickListener { toggleSearchEvent(SEARCH_CLOSE) }
         icClearSearch.setOnClickListener { etSearchBox.setText("") }
         rlLoading.setOnTouchListener { _, event -> blurSearchBox(event) }
@@ -593,22 +612,29 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
     }
 
+    private fun toggleNavView() {
+        if (!drawerLayout.isDrawerOpen(GravityCompat.END)) drawerLayout.openDrawer(GravityCompat.END)
+    }
+
     override fun onBackPressed() {
-        if (isSearchActive) toggleSearchEvent(SEARCH_CLOSE)
+        if (drawerLayout.isDrawerOpen(GravityCompat.END)) drawerLayout.closeDrawer(GravityCompat.END)
         else {
+            if (isSearchActive) toggleSearchEvent(SEARCH_CLOSE)
+            else {
 
-            if (doubleBackToExitPressedOnce) {
-                super.onBackPressed()
-                return
+                if (doubleBackToExitPressedOnce) {
+                    super.onBackPressed()
+                    return
+                }
+
+                this@MainActivity.doubleBackToExitPressedOnce = true
+                handleMessage(this@MainActivity, TAG_ACTION_MAIN_ACTIVITY, "Tekan sekali lagi untuk keluar!", TOAST_SHORT)
+
+                Handler(Looper.getMainLooper()).postDelayed({
+                    doubleBackToExitPressedOnce = false
+                }, 2000)
+
             }
-
-            this@MainActivity.doubleBackToExitPressedOnce = true
-            handleMessage(this@MainActivity, TAG_ACTION_MAIN_ACTIVITY, "Tekan sekali lagi untuk keluar!", TOAST_SHORT)
-
-            Handler(Looper.getMainLooper()).postDelayed({
-                doubleBackToExitPressedOnce = false
-            }, 2000)
-
         }
     }
 
@@ -626,6 +652,18 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         // Check apps for update
         AppUpdateHelper.checkForUpdates(this)
 
+    }
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when(item.itemId) {
+            R.id.nav_sync -> getContacts()
+            R.id.nav_profile -> handleMessage(this, "SELECTED NAV MENU", "My Profile")
+            R.id.nav_manage_city -> startActivity(Intent(this@MainActivity, ManageUserActivity::class.java))
+            R.id.nav_manage_user -> startActivity(Intent(this@MainActivity, ManageCityActivity::class.java))
+            R.id.nav_logout -> logoutConfirmation()
+        }
+        drawerLayout.closeDrawer(GravityCompat.END)
+        return true
     }
 
 }
