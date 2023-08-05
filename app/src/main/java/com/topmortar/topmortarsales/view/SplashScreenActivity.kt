@@ -345,7 +345,10 @@ class SplashScreenActivity : AppCompatActivity() {
         if (isPasswordShow) togglePassword()
 
         if (next != null && next == true) currentSubmitStep += 1
-        else if (previous != null && previous == true) currentSubmitStep -= 1
+        else if (previous != null && previous == true) {
+            currentSubmitStep -= 1
+            if (currentSubmitStep == 0) currentSubmitStep = -1
+        }
 
         when (currentSubmitStep) {
             0 -> {
