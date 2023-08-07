@@ -7,8 +7,11 @@ import com.topmortar.topmortarsales.commons.EDIT_CONTACT
 import com.topmortar.topmortarsales.commons.GET_CITY
 import com.topmortar.topmortarsales.commons.GET_CONTACT
 import com.topmortar.topmortarsales.commons.GET_USERS
+import com.topmortar.topmortarsales.commons.REQUEST_OTP
 import com.topmortar.topmortarsales.commons.SEARCH_CONTACT
 import com.topmortar.topmortarsales.commons.SEND_MESSAGE
+import com.topmortar.topmortarsales.commons.UPDATE_PASSWORD
+import com.topmortar.topmortarsales.commons.VERIFY_OTP
 import com.topmortar.topmortarsales.response.ResponseAuth
 import com.topmortar.topmortarsales.response.ResponseCities
 import com.topmortar.topmortarsales.response.ResponseContactList
@@ -101,5 +104,24 @@ interface ApiService {
         @Part("id_city") cityId: RequestBody,
         @Part("phone_user") phone: RequestBody,
         @Part("username") username: RequestBody
+    ): Response<ResponseMessage>
+
+    @Multipart
+    @POST(REQUEST_OTP)
+    suspend fun requestOtp(
+        @Part("phone_user") phone: RequestBody
+    ): Response<ResponseMessage>
+
+    @Multipart
+    @POST(VERIFY_OTP)
+    suspend fun verifyOtp(
+        @Part("otp") otp: RequestBody
+    ): Response<ResponseMessage>
+
+    @Multipart
+    @POST(UPDATE_PASSWORD)
+    suspend fun updatePassword(
+        @Part("id_user") userID: RequestBody,
+        @Part("password") password: RequestBody,
     ): Response<ResponseMessage>
 }

@@ -15,7 +15,9 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
@@ -23,17 +25,22 @@ import com.topmortar.topmortarsales.commons.LOGGED_IN
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.KeyboardHandler
 import com.topmortar.topmortarsales.commons.utils.KeyboardHandler.showKeyboard
+import com.topmortar.topmortarsales.commons.utils.PhoneHandler
+import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import kotlinx.coroutines.launch
+import okhttp3.RequestBody
 
 class SplashScreenActivity : AppCompatActivity() {
 
@@ -64,12 +71,14 @@ class SplashScreenActivity : AppCompatActivity() {
     private lateinit var tvAlert: TextView
     private lateinit var tvResetPassword: TextView
     private lateinit var tvTitleAuth: TextView
+    private lateinit var listOtpInput: List<EditText>
 
     private lateinit var sessionManager: SessionManager
 
     private val splashScreenDuration = 2000L
     private var isPasswordShow = false
-    private var currentSubmitStep = -1
+    private var currentSubmitStep = 0
+    private var idUserResetPassword: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -135,30 +144,31 @@ class SplashScreenActivity : AppCompatActivity() {
         etNewPassword.transformationMethod = PasswordTransformationMethod.getInstance()
         etNewPassword.inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
 
+        // Set list of otp
+        listOtpInput = listOf(etOtp1, etOtp2, etOtp3, etOtp4, etOtp5, etOtp6)
+
         setPasswordState()
 
     }
 
     private fun initClickHandler() {
 
-        btnLogin.setOnClickListener { submitHandler(next = true) }
+        btnLogin.setOnClickListener { submitHandler(submit = true) }
         icEyeContainer.setOnClickListener { togglePassword() }
         icEyeNewPasswordContainer.setOnClickListener { togglePassword() }
         tvResetPassword.setOnClickListener {
-            currentSubmitStep = 0
+            currentSubmitStep = 1
             submitHandler(next = true)
         }
-        icBack.setOnClickListener { if (currentSubmitStep > -1) submitHandler(previous = true) }
+        icBack.setOnClickListener { if (currentSubmitStep > 0) submitHandler(previous = true) }
 
     }
 
     private fun initOtpListener() {
 
-        val listEditText: List<EditText> = listOf(etOtp1, etOtp2, etOtp3, etOtp4, etOtp5, etOtp6)
+        for (i in listOtpInput.indices) {
 
-        for (i in listEditText.indices) {
-
-            val etObject = listEditText[i]
+            val etObject = listOtpInput[i]
             etObject.addTextChangedListener(object: TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
@@ -166,15 +176,21 @@ class SplashScreenActivity : AppCompatActivity() {
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
 
+                    if (!etObject.text.isNullOrEmpty()) {
+                        if (i < (listOtpInput.size - 1)) {
+                            listOtpInput[i+1].requestFocus()
+                            listOtpInput[i+1].setSelection(listOtpInput[i+1].text.length)
+                        } else KeyboardHandler.hideKeyboard(etObject, this@SplashScreenActivity)
+                    } else {
+                        if ( i > 0) {
+                            listOtpInput[i-1].requestFocus()
+                            listOtpInput[i-1].setSelection(listOtpInput[i-1].text.length)
+                        }
+                    }
+
                 }
 
                 override fun afterTextChanged(s: Editable?) {
-                    if (!etObject.text.isNullOrEmpty()) {
-                        if (i < (listEditText.size - 1)) {
-                            listEditText[i+1].requestFocus()
-                            listEditText[i+1].setSelection(listEditText[i+1].text.length)
-                        } else KeyboardHandler.hideKeyboard(etObject, this@SplashScreenActivity)
-                    }
                 }
 
             })
@@ -264,6 +280,21 @@ class SplashScreenActivity : AppCompatActivity() {
 
     }
 
+    private fun showResetConfirmation() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Cancel Reset Password")
+            .setMessage("Are you sure you want to cancel \"Reset Password\" process?")
+            .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+            .setPositiveButton("Yes") { dialog, _ ->
+
+                currentSubmitStep += 1
+                submitHandler(next = true)
+
+            }
+        val dialog = builder.create()
+        dialog.show()
+    }
+
     private fun loginHandler() {
 
         val username = "${ etUsername.text }"
@@ -287,6 +318,8 @@ class SplashScreenActivity : AppCompatActivity() {
             etUsername.clearFocus()
             etPassword.clearFocus()
         }
+
+        loadingState(true)
 
         lifecycleScope.launch {
             try {
@@ -312,21 +345,25 @@ class SplashScreenActivity : AppCompatActivity() {
 
                         sessionManager.setLoggedIn(LOGGED_IN)
                         navigateToMain()
+                        loadingState(false)
 
                     }
                     RESPONSE_STATUS_FAIL -> {
 
                         showAlert("Your username or password seems wrong!", 5000)
+                        loadingState(false)
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
                         showAlert("Your username or password seems wrong!", 5000)
+                        loadingState(false)
 
                     }
                     else -> {
 
                         handleMessage(this@SplashScreenActivity, TAG_RESPONSE_CONTACT, "Failed process auth")
+                        loadingState(false)
 
                     }
                 }
@@ -334,65 +371,299 @@ class SplashScreenActivity : AppCompatActivity() {
             } catch (e: Exception) {
 
                 handleMessage(this@SplashScreenActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                loadingState(false)
 
             }
         }
 
     }
 
-    private fun submitHandler(next: Boolean? = null, previous: Boolean? = null) {
+    private fun requestOtpHandler() {
+
+        val phoneUser = "${ etPhone.text }"
+
+        if (phoneUser.isEmpty()) {
+            etPhone.error = "Phone number cannot be empty!"
+            etPhone.requestFocus()
+            return
+        } else if (!PhoneHandler.phoneValidation(phoneUser, etPhone)) {
+            etPhone.requestFocus()
+            return
+        } else {
+            etPhone.error = null
+            etPhone.clearFocus()
+        }
+
+        loadingState(true)
+
+//        Handler().postDelayed({
+//            currentSubmitStep += 1
+//            submitHandler(next = true)
+//            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Success creating new OTP code!")
+//            loadingState(false)
+//        }, 1000)
+//        return
+
+        lifecycleScope.launch {
+            try {
+
+                val rbPhone = createPartFromString(formatPhoneNumber(phoneUser))
+                val apiService = HttpClient.create()
+                val response = apiService.requestOtp(rbPhone)
+
+                if (response.isSuccessful) {
+
+                    val responseBody = response.body()!!
+
+                    if (responseBody.status == RESPONSE_STATUS_OK) {
+
+                        currentSubmitStep += 1
+                        submitHandler(next = true)
+                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "${ responseBody.message }")
+                        loadingState(false)
+
+                    } else {
+
+                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed create otp code!: ${ responseBody.message }")
+                        loadingState(false)
+
+                    }
+
+                } else {
+
+                    handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed create otp code! Error: " + response.message())
+                    loadingState(false)
+
+                }
+
+            } catch (e: Exception) {
+
+                handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                loadingState(false)
+
+            }
+        }
+
+    }
+
+    private fun verifyOtpHandler() {
+
+        var isReady = true
+        var otpCode = ""
+
+        for (i in listOtpInput.indices) {
+            val otpObject = listOtpInput[i]
+            val otpInput = "${ otpObject.text }"
+
+            otpObject.error = null
+
+            if (otpInput.isEmpty()) {
+                otpObject.error = "Otp ${ i + 1 } cannot be empty"
+                otpObject.requestFocus()
+                isReady = false
+                break
+            }
+
+            otpCode += otpInput
+
+        }
+
+        if (otpCode.isEmpty()) {
+            isReady = false
+            handleMessage(this, "EMPTY OTP CODE", "Otp code cannot be empty!")
+        }
+
+        if (!isReady) return
+
+        loadingState(true)
+
+//        Handler().postDelayed({
+//            currentSubmitStep += 1
+//            submitHandler(next = true)
+//            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "$otpCode")
+////            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "OTP code verified, please insert your new password!")
+//            loadingState(false)
+//        }, 1000)
+//        return
+
+        lifecycleScope.launch {
+            try {
+
+                val rbOtp = createPartFromString(otpCode)
+                val apiService = HttpClient.create()
+                val response = apiService.verifyOtp(rbOtp)
+
+                if (response.isSuccessful) {
+
+                    val responseBody = response.body()!!
+
+                    if (responseBody.status == RESPONSE_STATUS_OK) {
+
+                        idUserResetPassword = responseBody.user_id
+                        currentSubmitStep += 1
+                        submitHandler(next = true)
+                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "${ responseBody.message }")
+                        loadingState(false)
+
+                    } else {
+
+                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed verify otp!: ${ responseBody.message }")
+                        loadingState(false)
+
+                    }
+
+                } else {
+
+                    handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed verify otp! Error: " + response.message())
+                    loadingState(false)
+
+                }
+
+            } catch (e: Exception) {
+                handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                loadingState(false)
+            }
+        }
+
+    }
+    private fun resetPasswordHandler() {
+        val userID = "$idUserResetPassword"
+        val password = "${ etNewPassword.text }"
+
+        if (userID.isNullOrEmpty()) {
+            handleMessage(this, "USER RESET PASSWORD", "Cannot find user to reset password, please try input your password!")
+        } else if (password.isEmpty()) {
+            etNewPassword.error = "Your new password cannot be empty!"
+            etNewPassword.requestFocus()
+            return
+        } else if (password.length < 8) {
+            etUsername.clearFocus()
+            etPassword.requestFocus()
+            etPassword.error = "Minimum password is 8 characters!"
+            return
+        } else {
+            etNewPassword.error = null
+            etNewPassword.clearFocus()
+        }
+
+        loadingState(true)
+
+//        Handler().postDelayed({
+//            currentSubmitStep += 1
+//            submitHandler(next = true)
+////            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Success change password. Please login again!")
+//            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "$password : $userID")
+//            loadingState(false)
+//        }, 1000)
+//        return
+
+        lifecycleScope.launch {
+            try {
+
+                val rbUserID = createPartFromString(userID)
+                val rbPassword = createPartFromString(password)
+                val apiService = HttpClient.create()
+                val response = apiService.updatePassword(rbUserID, rbPassword)
+
+                if (response.isSuccessful) {
+
+                    val responseBody = response.body()!!
+
+                    if (responseBody.status == RESPONSE_STATUS_OK) {
+
+                        idUserResetPassword = null
+                        currentSubmitStep += 1
+                        submitHandler(next = true)
+                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "${ responseBody.message }")
+                        loadingState(false)
+
+                    } else {
+
+                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed reset password!: ${ responseBody.message }")
+                        loadingState(false)
+
+                    }
+
+                } else {
+
+                    handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed reset password! Error: " + response.message())
+                    loadingState(false)
+
+                }
+
+            } catch (e: Exception) {
+                handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                loadingState(false)
+            }
+        }
+
+    }
+
+    private fun submitHandler(next: Boolean? = null, previous: Boolean? = null, submit: Boolean? = null) {
 
         if (isPasswordShow) togglePassword()
 
-        if (next != null && next == true) currentSubmitStep += 1
-        else if (previous != null && previous == true) {
+//        if (next != null && next == true) currentSubmitStep += 1
+        if (previous != null && previous == true) {
             currentSubmitStep -= 1
             if (currentSubmitStep == 0) currentSubmitStep = -1
         }
 
         when (currentSubmitStep) {
-            0 -> {
-                currentSubmitStep = -1
-                loginHandler()
-            }
+            0 -> if (submit != null && submit == true) loginHandler()
             1 -> {
-                clearInput()
 
-                inputAuth.visibility = View.GONE
-                inputOtp.visibility = View.GONE
-                inputNewPassword.visibility = View.GONE
-                icBack.visibility = View.VISIBLE
-                etPhone.visibility = View.VISIBLE
-                tvTitleAuth.text = "Reset Password"
-                btnLogin.text = "Get OTP Code"
+                if (submit != null && submit == true) requestOtpHandler()
+                else {
+                    clearInput()
 
-                etPhone.requestFocus()
+                    inputAuth.visibility = View.GONE
+                    inputOtp.visibility = View.GONE
+                    inputNewPassword.visibility = View.GONE
+                    icBack.visibility = View.VISIBLE
+                    etPhone.visibility = View.VISIBLE
+                    tvTitleAuth.text = "Reset Password"
+                    btnLogin.text = "Get OTP Code"
+
+                    etPhone.requestFocus()
+                }
+
             }
             2 -> {
-                clearInput()
 
-                inputAuth.visibility = View.GONE
-                etPhone.visibility = View.GONE
-                inputNewPassword.visibility = View.GONE
-                icBack.visibility = View.VISIBLE
-                inputOtp.visibility = View.VISIBLE
-                tvTitleAuth.text = "Input OTP Code"
-                btnLogin.text = "Verify OTP Code"
+                if (submit != null && submit == true) verifyOtpHandler()
+                else {
+                    clearInput()
 
-                etOtp1.requestFocus()
-                showKeyboard(etOtp1, this)
+                    inputAuth.visibility = View.GONE
+                    etPhone.visibility = View.GONE
+                    inputNewPassword.visibility = View.GONE
+                    icBack.visibility = View.VISIBLE
+                    inputOtp.visibility = View.VISIBLE
+                    tvTitleAuth.text = "Input OTP Code"
+                    btnLogin.text = "Verify OTP Code"
+
+                    etOtp1.requestFocus()
+                    showKeyboard(etOtp1, this)
+                }
+
             }
             3 -> {
-                clearInput()
 
-                inputAuth.visibility = View.GONE
-                etPhone.visibility = View.GONE
-                inputOtp.visibility = View.GONE
-                icBack.visibility = View.VISIBLE
-                inputNewPassword.visibility = View.VISIBLE
-                tvTitleAuth.text = "Input New Password"
-                btnLogin.text = "Reset Password Now"
-                etNewPassword.requestFocus()
+                if (submit != null && submit == true) resetPasswordHandler()
+                else {
+                    clearInput()
+
+                    inputAuth.visibility = View.GONE
+                    etPhone.visibility = View.GONE
+                    inputOtp.visibility = View.GONE
+                    icBack.visibility = View.GONE
+                    inputNewPassword.visibility = View.VISIBLE
+                    tvTitleAuth.text = "Input New Password"
+                    btnLogin.text = "Reset Password Now"
+                    etNewPassword.requestFocus()
+                }
+
             }
             else -> {
                 clearInput()
@@ -404,7 +675,8 @@ class SplashScreenActivity : AppCompatActivity() {
                 inputAuth.visibility = View.VISIBLE
                 tvTitleAuth.text = "Hey, \nLogin Now"
                 btnLogin.text = "Login"
-                currentSubmitStep = -1
+                currentSubmitStep = 0
+                idUserResetPassword = null
 
                 etUsername.requestFocus()
             }
@@ -437,9 +709,36 @@ class SplashScreenActivity : AppCompatActivity() {
 
     }
 
+    private fun loadingState(state: Boolean) {
+
+        btnLogin.setTextColor(ContextCompat.getColor(this, R.color.white))
+        btnLogin.setBackgroundColor(ContextCompat.getColor(this, R.color.primary_200))
+
+        if (state) {
+
+            btnLogin.isEnabled = false
+            btnLogin.text = getString(R.string.txt_loading)
+
+        } else {
+
+            btnLogin.isEnabled = true
+            when (currentSubmitStep) {
+                0 -> btnLogin.text = "Login"
+                1 -> btnLogin.text = "Get OTP Code"
+                2 -> btnLogin.text = "Verify OTP Code"
+                3 -> btnLogin.text = "Reset Password Now"
+                else -> btnLogin.text = "Login"
+            }
+            btnLogin.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
+
+        }
+
+    }
+
     override fun onBackPressed() {
-        if (currentSubmitStep > -1) {
-            submitHandler(previous = true)
+        if (currentSubmitStep > 0) {
+            if (currentSubmitStep > 2) showResetConfirmation()
+            else submitHandler(previous = true)
         } else {
             super.onBackPressed()
         }
