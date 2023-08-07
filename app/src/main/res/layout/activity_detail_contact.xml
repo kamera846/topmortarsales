@@ -17,7 +17,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <!-- Profile Container -->
@@ -37,13 +37,15 @@
                     <ImageView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:src="@drawable/circular_border_black" />
+                        android:src="@drawable/circular_border_black"
+                        android:contentDescription="@string/image_background_profile_top_mortar" />
 
                     <ImageView
                         android:id="@+id/iv_profile"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:src="@mipmap/logo_dark_circle"/>
+                        android:src="@mipmap/logo_dark_circle"
+                        android:contentDescription="@string/image_profile_top_mortar" />
 
                 </FrameLayout>
 
@@ -56,7 +58,7 @@
                         android:id="@+id/tv_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Store Name"
+                        android:text="@string/store_name"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
@@ -68,7 +70,7 @@
                         android:layout_height="48dp"
                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                         android:textColorHint="@color/black_600"
-                        android:hint="Enter Store Name"
+                        android:hint="@string/enter_store_name"
                         android:inputType="textCapWords"
                         android:autofillHints="Input Name"
                         android:textSize="14sp"
@@ -80,7 +82,7 @@
                         android:id="@+id/tv_description"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Top Mortar Customer"
+                        android:text="@string/top_mortar_customer"
                         android:textSize="14sp"
                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
@@ -125,7 +127,8 @@
                             android:layout_width="58dp"
                             android:layout_height="58dp"
                             android:padding="16dp"
-                            android:src="@drawable/phone_black" />
+                            android:src="@drawable/phone_black"
+                            android:contentDescription="@string/icon_phone_black"/>
 
                         <TextView
                             android:id="@+id/tv_phone"
@@ -133,7 +136,7 @@
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:gravity="center_vertical"
-                            android:text="+628000000000"
+                            android:text="@string/phone_dummy"
                             android:textSize="16sp"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
@@ -142,7 +145,8 @@
                             android:layout_width="58dp"
                             android:layout_height="58dp"
                             android:padding="18dp"
-                            android:src="@drawable/circle_info_black" />
+                            android:src="@drawable/circle_info_black"
+                            android:contentDescription="@string/icon_tooltip_information"/>
 
                     </LinearLayout>
 
@@ -160,7 +164,8 @@
                             android:layout_width="58dp"
                             android:layout_height="58dp"
                             android:padding="16dp"
-                            android:src="@drawable/phone_black" />
+                            android:src="@drawable/phone_black"
+                            android:contentDescription="@string/icon_phone_black"/>
 
                         <EditText
                             android:id="@+id/et_phone"
@@ -170,9 +175,9 @@
                             android:gravity="center_vertical"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                             android:textColorHint="@color/black_600"
-                            android:hint="@string/input_phon_number_placeholder"
+                            android:hint="@string/input_phone_number_placeholder"
                             android:inputType="phone"
-                            android:autofillHints="@string/input_phon_number_placeholder"
+                            android:autofillHints="@string/input_phone_number_placeholder"
                             android:textSize="16sp"
                             android:background="@android:color/transparent"
                             android:outlineProvider="none"/>
@@ -201,7 +206,8 @@
                             android:layout_width="58dp"
                             android:layout_height="58dp"
                             android:padding="16dp"
-                            android:src="@drawable/person_black" />
+                            android:src="@drawable/person_black"
+                            android:contentDescription="@string/icon_person_black"/>
 
                         <TextView
                             android:id="@+id/tv_owner"
@@ -209,7 +215,7 @@
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:gravity="center_vertical"
-                            android:text="Owner Name"
+                            android:text="@string/owner_name"
                             android:textSize="16sp"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
@@ -218,7 +224,8 @@
                             android:layout_width="58dp"
                             android:layout_height="58dp"
                             android:padding="18dp"
-                            android:src="@drawable/circle_info_black" />
+                            android:src="@drawable/circle_info_black"
+                            android:contentDescription="@string/icon_tooltip_information"/>
 
                     </LinearLayout>
 
@@ -236,7 +243,8 @@
                             android:layout_width="58dp"
                             android:layout_height="58dp"
                             android:padding="16dp"
-                            android:src="@drawable/person_black" />
+                            android:src="@drawable/person_black"
+                            android:contentDescription="@string/icon_person_black"/>
 
                         <EditText
                             android:id="@+id/et_owner"
@@ -247,7 +255,7 @@
                             android:gravity="center_vertical"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                             android:textColorHint="@color/black_600"
-                            android:hint="Enter Owner Name"
+                            android:hint="@string/enter_owner_name"
                             android:inputType="textCapWords"
                             android:autofillHints="Enter Owner Name"
                             android:textSize="16sp"
@@ -287,7 +295,8 @@
                             android:layout_width="58dp"
                             android:layout_height="58dp"
                             android:padding="16dp"
-                            android:src="@drawable/location_black" />
+                            android:src="@drawable/location_black"
+                            android:contentDescription="@string/icon_location_black"/>
 
                         <TextView
                             android:layout_toEndOf="@+id/ic_maps"
@@ -296,7 +305,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
-                            android:text="Maps Coordinates"
+                            android:text="@string/maps_coordinates"
                             android:maxLines="2"
                             android:ellipsize="end"
                             android:textSize="16sp"
@@ -308,7 +317,8 @@
                             android:layout_width="58dp"
                             android:layout_height="58dp"
                             android:padding="18dp"
-                            android:src="@drawable/circle_info_black" />
+                            android:src="@drawable/circle_info_black"
+                            android:contentDescription="@string/icon_tooltip_information"/>
 
                     </RelativeLayout>
 
@@ -327,7 +337,8 @@
                             android:layout_width="58dp"
                             android:layout_height="58dp"
                             android:padding="16dp"
-                            android:src="@drawable/location_black" />
+                            android:src="@drawable/location_black"
+                            android:contentDescription="@string/icon_location_black"/>
 
                         <EditText
                             android:id="@+id/et_maps"
@@ -338,7 +349,7 @@
                             android:gravity="center_vertical"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                             android:textColorHint="@color/black_600"
-                            android:hint="Enter Maps Coordinates/URL"
+                            android:hint="@string/enter_maps_coordinates_url"
                             android:inputType="textCapWords"
                             android:autofillHints="Enter Owner Name"
                             android:textSize="16sp"
@@ -370,7 +381,8 @@
                             android:layout_width="58dp"
                             android:layout_height="58dp"
                             android:padding="16dp"
-                            android:src="@drawable/city_black" />
+                            android:src="@drawable/city_black"
+                            android:contentDescription="@string/icon_city_black"/>
 
                         <TextView
                             android:id="@+id/tv_location"
@@ -378,7 +390,7 @@
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:gravity="center_vertical"
-                            android:text="Sidoarjo"
+                            android:text="@string/dummy_city"
                             android:textSize="16sp"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
@@ -387,7 +399,8 @@
                             android:layout_width="58dp"
                             android:layout_height="58dp"
                             android:padding="18dp"
-                            android:src="@drawable/circle_info_black" />
+                            android:src="@drawable/circle_info_black"
+                            android:contentDescription="@string/icon_tooltip_information"/>
 
                     </LinearLayout>
 
@@ -406,7 +419,8 @@
                             android:layout_width="58dp"
                             android:layout_height="58dp"
                             android:padding="16dp"
-                            android:src="@drawable/city_black" />
+                            android:src="@drawable/city_black"
+                            android:contentDescription="@string/icon_city_black"/>
 
                         <EditText
                             android:id="@+id/et_location"
@@ -417,7 +431,7 @@
                             android:gravity="center_vertical"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                             android:textColorHint="@color/black_600"
-                            android:hint="Choose Customer City"
+                            android:hint="@string/choose_customer_city"
                             android:inputType="textCapWords"
                             android:autofillHints="Choose Owner Birthday"
                             android:textSize="16sp"
@@ -448,7 +462,8 @@
                             android:layout_width="58dp"
                             android:layout_height="58dp"
                             android:padding="16dp"
-                            android:src="@drawable/date_black" />
+                            android:src="@drawable/date_black"
+                            android:contentDescription="@string/icon_date_black"/>
 
                         <TextView
                             android:id="@+id/tv_birthday"
@@ -456,7 +471,7 @@
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:gravity="center_vertical"
-                            android:text="05 Juli 2023"
+                            android:text="@string/dummy_date"
                             android:textSize="16sp"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
@@ -465,7 +480,8 @@
                             android:layout_width="58dp"
                             android:layout_height="58dp"
                             android:padding="18dp"
-                            android:src="@drawable/circle_info_black" />
+                            android:src="@drawable/circle_info_black"
+                            android:contentDescription="@string/icon_tooltip_information"/>
 
                     </LinearLayout>
 
@@ -484,7 +500,8 @@
                             android:layout_width="58dp"
                             android:layout_height="58dp"
                             android:padding="16dp"
-                            android:src="@drawable/date_black" />
+                            android:src="@drawable/date_black"
+                            android:contentDescription="@string/icon_date_black"/>
 
                         <EditText
                             android:id="@+id/et_birthday"
@@ -495,7 +512,7 @@
                             android:gravity="center_vertical"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                             android:textColorHint="@color/black_600"
-                            android:hint="Choose Owner Birthday"
+                            android:hint="@string/choose_owner_birthday"
                             android:inputType="textCapWords"
                             android:autofillHints="Choose Owner Birthday"
                             android:textSize="16sp"
@@ -525,7 +542,7 @@
                         android:id="@+id/tv_other_information"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Other Information"
+                        android:text="@string/other_information"
                         android:textSize="14sp"
                         android:theme="@style/Theme.TopMortarSales.TextBaseLine" />
 
@@ -552,7 +569,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
-                        android:text="Address"
+                        android:text="@string/address"
                         android:textSize="14sp"
                         android:layout_marginBottom="4dp"
                         android:textStyle="bold"
@@ -567,8 +584,8 @@
                         android:maxLines="5"
                         android:gravity="center_vertical"
                         android:textColorHint="@color/black_600"
-                        android:hint="Enter Address"
-                        android:text="Jl. TB Simatupang, RT.9/RW.3, Rambutan, Ciracas, Kota Jakarta Timur, Daerah Khusus Ibukota Jakarta 13830"
+                        android:hint="@string/enter_address"
+                        android:text="@string/dummy_address"
                         android:inputType="textMultiLine"
                         android:autofillHints="Enter Owner Name"
                         android:background="@android:color/transparent"
@@ -582,7 +599,6 @@
 
             <!-- Bottom Action -->
             <LinearLayout
-                android:layout_alignParentBottom="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="16dp"
@@ -595,7 +611,7 @@
                     android:padding="12dp"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:text="Send Message" />
+                    android:text="@string/send_message" />
 
                 <Button
                     android:visibility="gone"
@@ -605,7 +621,7 @@
                     android:padding="12dp"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:text="Save" />
+                    android:text="@string/save" />
 
             </LinearLayout>
 

@@ -275,7 +275,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         etBirthday = findViewById(R.id.et_birthday)
         etStoreLocated = findViewById(R.id.et_store_located)
         etMessage = findViewById(R.id.et_message)
-        spinnerSearchBox = findViewById(R.id.spinner_searchbox)
+        spinnerSearchBox = findViewById(R.id.spinner_search_box)
         etMapsUrl = findViewById(R.id.et_maps_url)
 
         // Set Title Bar

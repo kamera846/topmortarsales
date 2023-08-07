@@ -18,7 +18,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <LinearLayout
@@ -46,7 +46,7 @@
                             android:id="@+id/tv_spin_level"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="User Level"
+                            android:text="@string/user_level_label"
                             android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
                             android:textSize="16sp"
                             android:textStyle="bold"/>
@@ -55,7 +55,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
-                            android:text="*"
+                            android:text="@string/required_sign"
                             android:textColor="@color/primary"/>
 
                     </LinearLayout>
@@ -89,7 +89,7 @@
                             android:id="@+id/tv_user_city_label"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="User City"
+                            android:text="@string/user_city_label"
                             android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
                             android:textSize="16sp"
                             android:textStyle="bold"/>
@@ -98,7 +98,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
-                            android:text="*"
+                            android:text="@string/required_sign"
                             android:textColor="@color/primary"/>
 
                     </LinearLayout>
@@ -110,7 +110,7 @@
                         android:layout_height="48dp"
                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                         android:textColorHint="@color/black_600"
-                        android:hint="Choose Customer City"
+                        android:hint="@string/choose_customer_city"
                         android:inputType="textCapWords"
                         android:autofillHints="e.g John Doe"
                         android:textSize="14sp"
@@ -138,7 +138,7 @@
                             android:id="@+id/tv_phone_label"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/input_phon_number_label"
+                            android:text="@string/input_phone_number_label"
                             android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
                             android:textSize="16sp"
                             android:textStyle="bold"/>
@@ -147,7 +147,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
-                            android:text="*"
+                            android:text="@string/required_sign"
                             android:textColor="@color/primary"/>
 
                     </LinearLayout>
@@ -161,7 +161,8 @@
                         android:textColorHint="@color/black_600"
                         android:inputType="phone"
                         android:textSize="14sp"
-                        android:hint="@string/input_phon_number_placeholder"
+                        android:hint="@string/input_phone_number_placeholder"
+                        android:autofillHints="@string/input_phone_number_placeholder"
                         android:background="@drawable/et_background"
                         android:padding="12dp"
                         android:outlineProvider="none" />
@@ -185,7 +186,7 @@
                             android:id="@+id/tv_username_label"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Username"
+                            android:text="@string/username_label"
                             android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
                             android:textSize="16sp"
                             android:textStyle="bold"/>
@@ -194,7 +195,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
-                            android:text="*"
+                            android:text="@string/required_sign"
                             android:textColor="@color/primary"/>
 
                     </LinearLayout>
@@ -208,7 +209,8 @@
                         android:textColorHint="@color/black_600"
                         android:inputType="text"
                         android:textSize="14sp"
-                        android:hint="Use lowercase character e.g salesmalang"
+                        android:hint="@string/use_lowercase_character_e_g"
+                        android:autofillHints="@string/use_lowercase_character_e_g"
                         android:background="@drawable/et_background"
                         android:padding="12dp"
                         android:outlineProvider="none" />
@@ -230,10 +232,11 @@
                         android:orientation="horizontal">
 
                         <TextView
+                            android:labelFor="@id/et_user_password"
                             android:id="@+id/tv_password_label"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="User Password"
+                            android:text="@string/user_password_label"
                             android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
                             android:textSize="16sp"
                             android:textStyle="bold"/>
@@ -242,13 +245,12 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
-                            android:text="*"
+                            android:text="@string/required_sign"
                             android:textColor="@color/primary"/>
 
                     </LinearLayout>
 
                     <EditText
-                        android:labelFor="@+id/tv_password_label"
                         android:id="@+id/et_user_password"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
@@ -258,6 +260,7 @@
                         android:textSize="14sp"
                         android:background="@drawable/et_background"
                         android:padding="12dp"
+                        android:autofillHints="@string/enter_password"
                         android:outlineProvider="none" />
 
                 </LinearLayout>
@@ -277,10 +280,11 @@
                         android:orientation="horizontal">
 
                         <TextView
+                            android:labelFor="@id/et_confirm_user_password"
                             android:id="@+id/tv_confirm_password_label"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Confirm User Password"
+                            android:text="@string/confirm_user_password_label"
                             android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
                             android:textSize="16sp"
                             android:textStyle="bold"/>
@@ -289,13 +293,12 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
-                            android:text="*"
+                            android:text="@string/required_sign"
                             android:textColor="@color/primary"/>
 
                     </LinearLayout>
 
                     <EditText
-                        android:labelFor="@+id/tv_confirm_password_label"
                         android:id="@+id/et_confirm_user_password"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
@@ -305,6 +308,7 @@
                         android:textSize="14sp"
                         android:background="@drawable/et_background"
                         android:padding="12dp"
+                        android:autofillHints="@string/enter_password"
                         android:outlineProvider="none" />
 
                 </LinearLayout>
@@ -313,7 +317,6 @@
 
             <!-- Submit -->
             <LinearLayout
-                android:layout_alignParentBottom="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="16dp"
@@ -326,7 +329,7 @@
                     android:padding="12dp"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:text="Submit" />
+                    android:text="@string/submit" />
 
             </LinearLayout>
 

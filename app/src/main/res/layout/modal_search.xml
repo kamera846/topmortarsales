@@ -19,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            android:text="Select City Option"
+            android:text="@string/select_city_option"
             android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
             android:textSize="18sp"
             android:textStyle="bold"/>
@@ -39,9 +39,9 @@
                 android:layout_weight="1"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                 android:textColorHint="@color/black_600"
-                android:hint="Enter key..."
+                android:hint="@string/enter_key"
+                android:autofillHints="@string/enter_key"
                 android:inputType="textCapWords"
-                android:autofillHints="Enter key..."
                 android:textSize="14sp"
                 android:padding="12dp"
                 android:background="@android:color/transparent"
@@ -54,7 +54,8 @@
                 android:layout_height="44dp"
                 android:padding="12dp"
                 android:background="@android:color/transparent"
-                android:src="@drawable/close_baseline" />
+                android:src="@drawable/close_baseline"
+                android:contentDescription="@string/icon_close_baseline"/>
 
         </LinearLayout>
 

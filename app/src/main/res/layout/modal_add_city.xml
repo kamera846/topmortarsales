@@ -32,7 +32,7 @@
                     android:id="@+id/tv_city_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="City Name"
+                    android:text="@string/city_name"
                     android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
                     android:textSize="16sp"
                     android:textStyle="bold"/>
@@ -41,7 +41,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
-                    android:text="*"
+                    android:text="@string/required_sign"
                     android:textColor="@color/primary"/>
 
             </LinearLayout>
@@ -53,9 +53,9 @@
                 android:layout_height="48dp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                 android:textColorHint="@color/black_600"
-                android:hint="e.g Sidoarjo"
+                android:hint="@string/et_hint_city"
+                android:autofillHints="@string/et_hint_city"
                 android:inputType="textCapWords"
-                android:autofillHints="e.g Sidoarjo"
                 android:textSize="14sp"
                 android:background="@drawable/et_background"
                 android:padding="12dp"
@@ -79,7 +79,7 @@
                     android:id="@+id/tv_city_code"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="City Code"
+                    android:text="@string/city_code"
                     android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
                     android:textSize="16sp"
                     android:textStyle="bold"/>
@@ -88,7 +88,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
-                    android:text="*"
+                    android:text="@string/required_sign"
                     android:textColor="@color/primary"/>
 
             </LinearLayout>
@@ -100,7 +100,7 @@
                 android:layout_height="48dp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                 android:textColorHint="@color/black_600"
-                android:hint="e.g SDA"
+                android:hint="@string/dummy_city_code"
                 android:inputType="textCapCharacters"
                 android:autofillHints="Enter City Name"
                 android:textSize="14sp"
@@ -128,7 +128,7 @@
             android:padding="12dp"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:text="Submit" />
+            android:text="@string/submit" />
 
         <Button
             android:visibility="gone"
@@ -138,7 +138,7 @@
             android:padding="12dp"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:text="Save" />
+            android:text="@string/save" />
 
     </LinearLayout>
 

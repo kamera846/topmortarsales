@@ -19,7 +19,7 @@
             android:padding="12dp"
             android:layout_marginHorizontal="2dp"
             android:src="@drawable/arrow_back_white"
-            android:contentDescription="Icon Back White"/>
+            android:contentDescription="@string/icon_back_white"/>
 
         <LinearLayout
             android:layout_width="0dp"
@@ -45,7 +45,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
-                android:text="Hello, superadmin"
+                android:text="@string/dummy_welcome_message"
                 android:textSize="14sp"
                 android:textColor="@color/white" />
 
@@ -59,7 +59,7 @@
             android:padding="16dp"
             android:src="@mipmap/ic_search_white"
             android:layout_gravity="center_vertical"
-            android:contentDescription="Icon Search White" />
+            android:contentDescription="@string/icon_search_white" />
 
         <ImageView
             android:visibility="gone"
@@ -69,7 +69,7 @@
             android:padding="16dp"
             android:src="@mipmap/ic_sync_white"
             android:layout_gravity="center_vertical"
-            android:contentDescription="Icon Sync White" />
+            android:contentDescription="@string/icon_sync_white" />
 
         <ImageView
             android:visibility="gone"
@@ -79,7 +79,7 @@
             android:padding="16dp"
             android:src="@mipmap/ic_more_white"
             android:layout_gravity="center_vertical"
-            android:contentDescription="Icon More White" />
+            android:contentDescription="@string/icon_more_white" />
 
     </LinearLayout>
 

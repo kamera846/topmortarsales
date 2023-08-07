@@ -18,7 +18,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <LinearLayout
@@ -46,7 +46,7 @@
                             android:id="@+id/tv_phone_label"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/input_phon_number_label"
+                            android:text="@string/input_phone_number_label"
                             android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
                             android:textSize="16sp"
                             android:textStyle="bold"/>
@@ -55,7 +55,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
-                            android:text="*"
+                            android:text="@string/required_sign"
                             android:textColor="@color/primary"/>
 
                     </LinearLayout>
@@ -67,9 +67,9 @@
                         android:layout_height="48dp"
                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                         android:textColorHint="@color/black_600"
-                        android:hint="@string/input_phon_number_placeholder"
+                        android:hint="@string/input_phone_number_placeholder"
                         android:inputType="phone"
-                        android:autofillHints="@string/input_phon_number_placeholder"
+                        android:autofillHints="@string/input_phone_number_placeholder"
                         android:textSize="14sp"
                         android:background="@drawable/et_background"
                         android:padding="12dp"
@@ -94,7 +94,7 @@
                             android:id="@+id/tv_name_label"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Store Name"
+                            android:text="@string/store_name"
                             android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
                             android:textSize="16sp"
                             android:textStyle="bold"/>
@@ -103,7 +103,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
-                            android:text="*"
+                            android:text="@string/required_sign"
                             android:textColor="@color/primary"/>
 
                     </LinearLayout>
@@ -115,7 +115,7 @@
                         android:layout_height="48dp"
                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                         android:textColorHint="@color/black_600"
-                        android:hint="e.g TB BAROKAH MAJU JAYA MLG"
+                        android:hint="@string/et_hint_store_name"
                         android:inputType="textCapWords"
                         android:autofillHints="e.g TB BAROKAH MAJU JAYA MLG"
                         android:textSize="14sp"
@@ -143,7 +143,7 @@
                             android:id="@+id/tv_store_located"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Customer City"
+                            android:text="@string/customer_city"
                             android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
                             android:textSize="16sp"
                             android:textStyle="bold"/>
@@ -153,7 +153,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
-                            android:text="*"
+                            android:text="@string/required_sign"
                             android:textColor="@color/primary"/>
 
                     </LinearLayout>
@@ -164,7 +164,7 @@
                         android:layout_height="48dp"
                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                         android:textColorHint="@color/black_600"
-                        android:hint="Choose Customer City"
+                        android:hint="@string/choose_customer_city"
                         android:inputType="textCapWords"
                         android:autofillHints="e.g John Doe"
                         android:textSize="14sp"
@@ -192,7 +192,7 @@
                             android:id="@+id/tv_owner"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Owner Name"
+                            android:text="@string/owner_name"
                             android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
                             android:textSize="16sp"
                             android:textStyle="bold"/>
@@ -202,7 +202,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
-                            android:text="*"
+                            android:text="@string/required_sign"
                             android:textColor="@color/primary"/>
 
                     </LinearLayout>
@@ -214,7 +214,7 @@
                         android:layout_height="48dp"
                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                         android:textColorHint="@color/black_600"
-                        android:hint="e.g John Doe"
+                        android:hint="@string/e_g_john_doe"
                         android:inputType="textCapWords"
                         android:autofillHints="e.g John Doe"
                         android:textSize="14sp"
@@ -242,7 +242,7 @@
                             android:id="@+id/tv_birthday"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Date of Birth"
+                            android:text="@string/date_of_birth"
                             android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
                             android:textSize="16sp"
                             android:textStyle="bold"/>
@@ -252,7 +252,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
-                            android:text="*"
+                            android:text="@string/required_sign"
                             android:textColor="@color/primary"/>
 
                     </LinearLayout>
@@ -263,7 +263,7 @@
                         android:layout_height="48dp"
                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                         android:textColorHint="@color/black_600"
-                        android:hint="Choose Owner Birthday"
+                        android:hint="@string/choose_owner_birthday"
                         android:inputType="textCapWords"
                         android:autofillHints="e.g John Doe"
                         android:textSize="14sp"
@@ -285,18 +285,18 @@
                         android:id="@+id/tv_city"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Customer City"
+                        android:text="@string/customer_city"
                         android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="8dp"/>
 
                     <AutoCompleteTextView
-                        android:id="@+id/spinner_searchbox"
+                        android:id="@+id/spinner_search_box"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
                         android:textSize="14sp"
-                        android:hint="e.g Sidoarjo"
+                        android:hint="@string/et_hint_city"
                         android:imeOptions="actionDone"
                         android:singleLine="true"
                         android:completionThreshold="1"
@@ -323,7 +323,7 @@
                             android:id="@+id/tv_maps_url"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Maps URL"
+                            android:text="@string/maps_url"
                             android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
                             android:textSize="16sp"
                             android:textStyle="bold"/>
@@ -333,7 +333,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
-                            android:text="*"
+                            android:text="@string/required_sign"
                             android:textColor="@color/primary"/>
 
                     </LinearLayout>
@@ -345,7 +345,7 @@
                         android:layout_height="48dp"
                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                         android:textColorHint="@color/black_600"
-                        android:hint="e.g https://goo.gl/maps/CBKN6mU3cjQkuruB8"
+                        android:hint="@string/et_hint_maps_url"
                         android:inputType="textUri"
                         android:autofillHints="e.g John Doe"
                         android:textSize="14sp"
@@ -381,7 +381,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
-                            android:text="*"
+                            android:text="@string/required_sign"
                             android:textColor="@color/primary"/>
 
                     </LinearLayout>
@@ -420,7 +420,6 @@
 
             <!-- Submit -->
             <LinearLayout
-                android:layout_alignParentBottom="true"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="16dp"
@@ -433,7 +432,7 @@
                     android:padding="12dp"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:text="Send Now" />
+                    android:text="@string/send_now" />
 
             </LinearLayout>
 
