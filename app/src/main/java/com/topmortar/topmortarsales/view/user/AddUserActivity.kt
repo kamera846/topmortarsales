@@ -149,7 +149,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
                     if (responseBody.status == RESPONSE_STATUS_OK) {
 
-                        handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Successfully added data!")
+                        handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Successfully ${ if (userID == null) "added" else "edit" } data!")
                         loadingState(false)
 
                         val resultIntent = Intent()
@@ -159,14 +159,14 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
                     } else {
 
-                        handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Failed added data!: ${ responseBody.message }")
+                        handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Failed ${ if (userID == null) "added" else "edit" } data!: ${ responseBody.message }")
                         loadingState(false)
 
                     }
 
                 } else {
 
-                    handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Failed added data! Error: " + response.message())
+                    handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Failed ${ if (userID == null) "added" else "edit" } data! Error: " + response.message())
                     loadingState(false)
 
                 }

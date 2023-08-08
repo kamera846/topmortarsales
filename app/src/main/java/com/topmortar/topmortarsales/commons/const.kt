@@ -19,6 +19,9 @@ const val ADD_CITY = "city.php"
 const val AUTH = "auth.php"
 const val GET_USERS = "users.php"
 const val ADD_USERS = "users.php"
+const val REQUEST_OTP = "reqOtp.php"
+const val VERIFY_OTP = "verifyOtp.php"
+const val UPDATE_PASSWORD = "updatePassword.php"
 
 // Request Code
 const val ACTIVITY_REQUEST_CODE = "activity_request_code"
