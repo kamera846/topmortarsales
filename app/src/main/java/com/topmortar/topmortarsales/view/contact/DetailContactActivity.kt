@@ -384,11 +384,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
 
         // Other columns handle
-
-        // Status
-        setupStatusSpinner()
         if (!iAddress.isNullOrEmpty()) etAddress.setText(iAddress)
         else etAddress.setText(EMPTY_FIELD_VALUE)
+
+        // Column status
+        setupStatusSpinner()
 
     }
 
