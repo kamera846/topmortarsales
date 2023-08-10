@@ -341,6 +341,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
                         sessionManager.setUserID(data.id_user)
                         sessionManager.setUserName(data.username)
+                        sessionManager.setFullName(data.full_name)
                         sessionManager.setUserCityID(data.id_city)
 
                         sessionManager.setLoggedIn(LOGGED_IN)
@@ -603,11 +604,13 @@ class SplashScreenActivity : AppCompatActivity() {
 
         if (isPasswordShow) togglePassword()
 
-//        if (next != null && next == true) currentSubmitStep += 1
         if (previous != null && previous == true) {
             currentSubmitStep -= 1
             if (currentSubmitStep == 0) currentSubmitStep = -1
         }
+
+        // Hide alert
+        cardAlert.visibility = View.GONE
 
         when (currentSubmitStep) {
             0 -> if (submit != null && submit == true) loginHandler()

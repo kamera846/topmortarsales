@@ -145,7 +145,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         icMore.visibility = View.VISIBLE
         icSearch.visibility = View.VISIBLE
         tvTitleBarDescription.visibility = View.VISIBLE
-        tvTitleBarDescription.text = "Hello, ${ sessionManager.userName() }"
+        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Hello, $it" else "Hello, ${ sessionManager.userName() }"}
         etSearchBox.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Set Floating Action Button
@@ -579,6 +579,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         sessionManager.setUserKind("")
         sessionManager.setUserID("")
         sessionManager.setUserName("")
+        sessionManager.setFullName("")
         sessionManager.setUserCityID("")
 
         val intent = Intent(this@MainActivity, SplashScreenActivity::class.java)
