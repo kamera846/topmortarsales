@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -11,6 +11,7 @@
         layout="@layout/component_title_bar_light"/>
 
     <ScrollView
+        android:layout_below="@+id/title_bar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true">
@@ -18,6 +19,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingBottom="100dp"
             android:orientation="vertical">
 
             <!-- Profile Container -->
@@ -555,6 +557,67 @@
 
                 </LinearLayout>
 
+                <!-- Text Status -->
+                <LinearLayout
+                    android:id="@+id/status_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/background_rounded"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:text="@string/status"
+                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginTop="16dp"
+                            android:layout_marginBottom="4dp"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
+
+                        <TextView
+                            android:visibility="visible"
+                            android:id="@+id/tv_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:text="@string/active"
+                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginBottom="16dp"
+                            android:textSize="14sp"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                        <Spinner
+                            android:visibility="gone"
+                            android:id="@+id/spin_status"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginBottom="16dp"/>
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:visibility="visible"
+                        android:id="@+id/tooltip_status"
+                        android:layout_width="46dp"
+                        android:layout_height="46dp"
+                        android:padding="16dp"
+                        android:src="@drawable/status_active"
+                        android:contentDescription="@string/icon_tooltip_information"/>
+
+                </LinearLayout>
+
                 <!-- Text Address -->
                 <LinearLayout
                     android:id="@+id/address_container"
@@ -597,36 +660,38 @@
 
             </LinearLayout>
 
-            <!-- Bottom Action -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:orientation="vertical">
-
-                <Button
-                    android:id="@+id/btn_send_message"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="12dp"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:text="@string/send_message" />
-
-                <Button
-                    android:visibility="gone"
-                    android:id="@+id/btn_save_edit"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="12dp"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:text="@string/save" />
-
-            </LinearLayout>
-
         </LinearLayout>
 
     </ScrollView>
 
-</LinearLayout>
+    <!-- Bottom Action -->
+    <LinearLayout
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:background="@android:color/transparent"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/btn_send_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:text="@string/send_message" />
+
+        <Button
+            android:visibility="gone"
+            android:id="@+id/btn_save_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:text="@string/save" />
+
+    </LinearLayout>
+
+</RelativeLayout>

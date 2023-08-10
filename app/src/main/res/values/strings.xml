@@ -111,6 +111,9 @@
     <string name="dummy_city_code">e.g SDA</string>
     <string name="select_city_option">Select City Option</string>
     <string name="enter_key">Enter key…</string>
+    <string name="status">Status</string>
+    <string name="active">Active</string>
+    <string name="full_name">Full Name</string>
     <string-array name="user_level_spinner_options">
         <item>Choose Level</item>
         <item>Admin</item>

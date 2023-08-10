@@ -9,11 +9,14 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.view.animation.AnimationUtils
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -30,11 +33,16 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
+import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.STATUS_CONTACT_ACTIVE
+import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BLACKLIST
+import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
+import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
@@ -56,6 +64,7 @@ import com.topmortar.topmortarsales.model.ModalSearchModel
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import java.util.Locale
 
 
 @Suppress("DEPRECATION")
@@ -75,6 +84,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var etMapsContainer: LinearLayout
     private lateinit var overlayMaps: View
 
+    private lateinit var statusContainer: LinearLayout
     private lateinit var addressContainer: LinearLayout
 
     private lateinit var icBack: ImageView
@@ -86,6 +96,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var tooltipBirthday: ImageView
     private lateinit var tooltipLocation: ImageView
     private lateinit var tooltipMaps: ImageView
+
+    private lateinit var tooltipStatus: ImageView
 
     private lateinit var tvTitleBar: TextView
     private lateinit var tvName: TextView
@@ -102,6 +114,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var etLocation: EditText
     private lateinit var etMaps: EditText
 
+    private lateinit var tvStatus: TextView
+    private lateinit var spinStatus: Spinner
     private lateinit var etAddress: EditText
 
     private lateinit var btnSendMessage: Button
@@ -115,7 +129,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var itemSendMessage: ContactModel? = null
     private var hasEdited: Boolean = false
 
+    private var statusItem: List<String> = listOf("Choose Customer Status", "Data", "Passive", "Active", "Blacklist")
+    private var selectedStatus: String = ""
+
     private var iLocation: String? = null
+    private var iStatus: String? = null
     private var iAddress: String? = null
     private var iMapsUrl: String? = null
 
@@ -161,6 +179,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         etMapsContainer = findViewById(R.id.et_maps_container)
         overlayMaps = findViewById(R.id.overlay_maps)
 
+        statusContainer = findViewById(R.id.status_container)
         addressContainer = findViewById(R.id.address_container)
 
         tooltipPhone = findViewById(R.id.tooltip_phone)
@@ -168,6 +187,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         tooltipLocation = findViewById(R.id.tooltip_location)
         tooltipMaps = findViewById(R.id.tooltip_maps)
         tooltipBirthday = findViewById(R.id.tooltip_birthday)
+
+        tooltipStatus = findViewById(R.id.tooltip_status)
 
         tvName = findViewById(R.id.tv_name)
         etName = findViewById(R.id.et_name)
@@ -183,6 +204,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         etMaps = findViewById(R.id.et_maps)
         tvBirthday = findViewById(R.id.tv_birthday)
         etBirthday = findViewById(R.id.et_birthday)
+
+        tvStatus = findViewById(R.id.tv_status)
+        spinStatus = findViewById(R.id.spin_status)
         etAddress = findViewById(R.id.et_address)
 
         btnSendMessage = findViewById(R.id.btn_send_message)
@@ -302,6 +326,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
 
         iMapsUrl = intent.getStringExtra(CONST_MAPS)
+        iStatus = intent.getStringExtra(CONST_STATUS)
         iAddress = intent.getStringExtra(CONST_ADDRESS)
         iLocation = intent.getStringExtra(CONST_LOCATION)
 
@@ -357,11 +382,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tvMaps.text = EMPTY_FIELD_VALUE
             etMaps.setText("")
         }
-        if (!iAddress.isNullOrEmpty()) {
-            etAddress.setText(iAddress)
-        } else {
-            etAddress.setText(EMPTY_FIELD_VALUE)
-        }
+
+        // Other columns handle
+        if (!iAddress.isNullOrEmpty()) etAddress.setText(iAddress)
+        else etAddress.setText(EMPTY_FIELD_VALUE)
+
+        // Column status
+        setupStatusSpinner()
 
     }
 
@@ -402,6 +429,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             etAddress.isEnabled = true
             if (iAddress.isNullOrEmpty()) etAddress.setText("")
 
+            statusContainer.setBackgroundResource(R.drawable.et_background)
+            tooltipStatus.visibility = View.GONE
+            tvStatus.visibility = View.GONE
+            spinStatus.visibility = View.VISIBLE
+//            if (iStatus.isNullOrEmpty()) {
+//            }
+
 
             btnSaveEdit.visibility = View.VISIBLE
 
@@ -441,6 +475,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             etAddress.isEnabled = false
             if (iAddress.isNullOrEmpty()) etAddress.setText(EMPTY_FIELD_VALUE)
 
+            statusContainer.setBackgroundResource(R.drawable.background_rounded)
+            if (!iStatus.isNullOrEmpty()) tooltipStatus.visibility = View.VISIBLE
+            tvStatus.visibility = View.VISIBLE
+            spinStatus.visibility = View.GONE
+//            if (iStatus.isNullOrEmpty()) {
+//            }
+
             btnSaveEdit.visibility = View.GONE
 
             etName.clearFocus()
@@ -473,6 +514,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         var pBirthday = "${ etBirthday.text }"
         val pMapsUrl = "${ etMaps.text }"
         val pAddress = "${ etAddress.text }"
+        val pStatus = if (selectedStatus.isNullOrEmpty()) "" else selectedStatus.toLowerCase()
 
         pBirthday = if (pBirthday.isEmpty() || pBirthday == EMPTY_FIELD_VALUE) "0000-00-00"
         else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
@@ -480,18 +522,47 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val pCityID = if (selectedCity != null) selectedCity!!.id else "0"
 
         loadingState(true)
-//
+
 //        Handler().postDelayed({
+//            itemSendMessage = ContactModel(
+//                nomorhp = pPhone,
+//                nama = pName,
+//                store_owner = pOwner,
+//                id_city = pCityID,
+//                tgl_lahir = pBirthday,
+//                maps_url = pMapsUrl,
+//            )
+//            setupDialogSendMessage(itemSendMessage)
+//
 //            tvName.text = "${ etName.text }"
-//            tvOwner.text = "${ etOwner.text }"
-//            tvBirthday.text = "${ etBirthday.text }"
-//            tvMaps.text = "Click to open"
-//            iMapsUrl = "${ etMaps.text }"
-//            tvLocation.text = "${ etLocation.text }"
+//            tvPhone.text = "+" + formatPhoneNumber("${ etPhone.text }")
+//            etPhone.setText(formatPhoneNumber("${ etPhone.text }"))
 //            iAddress = "${ etAddress.text }"
+//
 //            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
 //            loadingState(false)
 //            toggleEdit(false)
+//
+//            if (!etOwner.text.isNullOrEmpty()) tvOwner.text = "${ etOwner.text }"
+//            else tvOwner.text = EMPTY_FIELD_VALUE
+//            if (!etBirthday.text.isNullOrEmpty()) tvBirthday.text = "${ etBirthday.text }"
+//            else tvBirthday.text = EMPTY_FIELD_VALUE
+//            if (!etMaps.text.isNullOrEmpty()) {
+//                tvMaps.text = "Click to open"
+//                iMapsUrl = "${ etMaps.text }"
+//            } else {
+//                tvMaps.text = EMPTY_FIELD_VALUE
+//                iMapsUrl = ""
+//            }
+//            if (selectedCity != null) {
+//                if (selectedCity!!.id != "0") tvLocation.text = "${ etLocation.text }"
+//                else tvLocation.text = EMPTY_FIELD_VALUE
+//            } else tvLocation.text = EMPTY_FIELD_VALUE
+//
+//            iStatus = if (!pStatus.isNullOrEmpty()) pStatus else null
+//            setupStatus(iStatus)
+//
+//            hasEdited = true
 //        }, 1000)
 //
 //        return
@@ -507,9 +578,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbMapsUrl = createPartFromString(pMapsUrl)
                 val rbLocation = createPartFromString(pCityID)
                 val rbAddress = createPartFromString(pAddress)
+                val rbStatus = createPartFromString(pStatus)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.editContact(id = rbId, phone = rbPhone, name = rbName, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, address = rbAddress)
+                val response = apiService.editContact(id = rbId, phone = rbPhone, name = rbName, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, address = rbAddress, status = rbStatus)
 
                 if (response.isSuccessful) {
 
@@ -528,8 +600,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         setupDialogSendMessage(itemSendMessage)
 
                         tvName.text = "${ etName.text }"
-                        tvPhone.text = "+" + PhoneHandler.formatPhoneNumber("${ etPhone.text }")
-                        etPhone.setText(PhoneHandler.formatPhoneNumber("${ etPhone.text }"))
+                        tvPhone.text = "+" + formatPhoneNumber("${ etPhone.text }")
+                        etPhone.setText(formatPhoneNumber("${ etPhone.text }"))
                         iAddress = "${ etAddress.text }"
 
                         handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
@@ -551,6 +623,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             if (selectedCity!!.id != "0") tvLocation.text = "${ etLocation.text }"
                             else tvLocation.text = EMPTY_FIELD_VALUE
                         } else tvLocation.text = EMPTY_FIELD_VALUE
+
+                        iStatus = if (!pStatus.isNullOrEmpty()) pStatus else null
+                        setupStatus(iStatus)
+
                         hasEdited = true
 
                     } else {
@@ -843,6 +919,59 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             TooltipCompat.setTooltipText(content, text)
             false
         }
+    }
+
+    private fun setupStatus(status: String? = null) {
+        tooltipStatus.visibility = View.VISIBLE
+        when (status) {
+            STATUS_CONTACT_DATA -> {
+                tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_data))
+                tooltipHandler(tooltipStatus, "Customer Status Data")
+                tvStatus.text = "Data"
+                spinStatus.setSelection(1)
+            }
+            STATUS_CONTACT_PASSIVE -> {
+                tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_passive))
+                tooltipHandler(tooltipStatus, "Customer Status Passive")
+                tvStatus.text = "Passive"
+                spinStatus.setSelection(2)
+            }
+            STATUS_CONTACT_ACTIVE -> {
+                tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_active))
+                tooltipHandler(tooltipStatus, "Customer Status Active")
+                tvStatus.text = "Active"
+                spinStatus.setSelection(3)
+            }
+            STATUS_CONTACT_BLACKLIST -> {
+                tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_blacklist))
+                tooltipHandler(tooltipStatus, "Customer Status Blacklist")
+                tvStatus.text = "Blacklist"
+                spinStatus.setSelection(4)
+            }
+            else -> {
+                tooltipStatus.visibility = View.GONE
+                tvStatus.text = EMPTY_FIELD_VALUE
+                spinStatus.setSelection(0)
+            }
+        }
+    }
+
+    private fun setupStatusSpinner() {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, statusItem)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        spinStatus.adapter = adapter
+        spinStatus.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedStatus = statusItem[position]
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+        }
+
+        setupStatus(iStatus)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

@@ -2,9 +2,11 @@ package com.topmortar.topmortarsales.view.user
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
 import android.text.Editable
+import android.text.Html
 import android.text.TextWatcher
 import android.view.View
 import android.widget.AdapterView
@@ -19,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_PHONE
@@ -30,6 +33,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -42,6 +46,7 @@ import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.CityModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import kotlinx.coroutines.launch
+import org.w3c.dom.Text
 
 @SuppressLint("SetTextI18n")
 class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
@@ -52,6 +57,8 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
     private lateinit var spinLevel: Spinner
     private lateinit var etUserCity: EditText
     private lateinit var etUsername: EditText
+    private lateinit var tvUsernameGenerated: TextView
+    private lateinit var etFullName: EditText
     private lateinit var etPhone: EditText
     private lateinit var etPassword: EditText
     private lateinit var etConfirmPassword: EditText
@@ -108,12 +115,12 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         val level = selectedLevel
         var city = "${ etUserCity.text }"
         val phone = "${ etPhone.text }"
-        val username = etUsername.text.toString().toLowerCase()
-            .replace(" ", "")
+        val username = "${ etUsername.text }".trim().replace(" ", "").toLowerCase()
+        val fullName = "${ etFullName.text }"
         val password = "${ etPassword.text }"
         val confirmPassword = "${ etConfirmPassword.text }"
 
-        if (!formValidation(level = level, city = city, phone = phone, username = username, password = password, confirmPassword = confirmPassword)) return
+        if (!formValidation(level = level, city = city, phone = phone, username = username, fullName = fullName, password = password, confirmPassword = confirmPassword)) return
 
         city = if (selectedCity == null) "0" else selectedCity!!.id
 
@@ -133,14 +140,15 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                 val rbCityId = createPartFromString(city)
                 val rbPhone = createPartFromString(formatPhoneNumber(phone))
                 val rbUsername = createPartFromString(username)
+                val rbFullName = createPartFromString(fullName)
                 val rbPassword = createPartFromString(password)
 
                 val apiService: ApiService = HttpClient.create()
                 val response = if (userID == null) {
-                    apiService.addUser(level = rbLevel, cityId = rbCityId, phone = rbPhone, username = rbUsername, password = rbPassword)
+                    apiService.addUser(level = rbLevel, cityId = rbCityId, phone = rbPhone, username = rbUsername, fullName = rbFullName, password = rbPassword)
                 } else {
                     val rbUserID = createPartFromString(userID!!)
-                    apiService.editUser(ID = rbUserID, level = rbLevel, cityId = rbCityId, phone = rbPhone, username = rbUsername)
+                    apiService.editUser(ID = rbUserID, level = rbLevel, cityId = rbCityId, phone = rbPhone, username = rbUsername, fullName = rbFullName)
                 }
 
                 if (response.isSuccessful) {
@@ -192,6 +200,8 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         etUserCity = findViewById(R.id.et_user_city)
         etPhone = findViewById(R.id.et_phone)
         etUsername = findViewById(R.id.et_username)
+        tvUsernameGenerated = findViewById(R.id.tv_username_generated)
+        etFullName = findViewById(R.id.et_full_name)
         etPassword = findViewById(R.id.et_user_password)
         etConfirmPassword = findViewById(R.id.et_confirm_user_password)
         passwordContainer = findViewById(R.id.password_container)
@@ -200,6 +210,29 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         // Set Title Bar
         tvTitleBar.text = "Register New User"
         tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
+
+        // Text View Generated Username
+        val usernameGeneratedDescription = "The username will be generated as:"
+        etUsername.addTextChangedListener(object: TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                val currentText = s.toString().trim()
+
+                if (currentText.isNotEmpty()) {
+                    tvUsernameGenerated.visibility = View.VISIBLE
+                    tvUsernameGenerated.text = "$usernameGeneratedDescription <b><i>${currentText.replace(" ", "").toLowerCase()}</i></b>"
+                    tvUsernameGenerated.text = Html.fromHtml("${ tvUsernameGenerated.text }", Html.FROM_HTML_MODE_COMPACT)
+                } else tvUsernameGenerated.visibility = View.GONE
+            }
+
+        })
 
     }
 
@@ -242,6 +275,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         val iUserID = intent.getStringExtra(CONST_USER_ID)
         val iPhone = intent.getStringExtra(CONST_PHONE)
         val iName = intent.getStringExtra(CONST_NAME)
+        val iFullName = intent.getStringExtra(CONST_FULL_NAME)
         iUserLevel = intent.getStringExtra(CONST_USER_LEVEL)
         iLocation = intent.getStringExtra(CONST_LOCATION)
 
@@ -256,7 +290,15 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             confirmPasswordContainer.visibility = View.GONE
         }
         if (!iPhone.isNullOrEmpty()) etPhone.setText(iPhone)
-        if (!iName.isNullOrEmpty()) etUsername.setText(iName)
+        if (!iName.isNullOrEmpty()) {
+            etUsername.setText(iName)
+            etUsername.setTextColor(getColor(R.color.black_500))
+            etUsername.setBackgroundResource(R.drawable.et_background_disabled)
+            etUsername.isEnabled = false
+            tvUsernameGenerated.text = "Username cannot be edited."
+            tvUsernameGenerated.setTypeface(null, Typeface.ITALIC)
+        }
+        if (!iFullName.isNullOrEmpty()) etFullName.setText(iFullName)
         if (!iLocation.isNullOrEmpty()) etUserCity.setText("Loading...")
         else etUserCity.setText("")
     }
@@ -281,7 +323,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
     }
 
-    private fun formValidation(level: String? = null, city: String = "", phone: String = "", username: String = "", password: String = "", confirmPassword: String = ""): Boolean {
+    private fun formValidation(level: String? = null, city: String = "", phone: String = "", username: String = "", fullName: String = "", password: String = "", confirmPassword: String = ""): Boolean {
         return if (level == null) {
             handleMessage(this, "ERROR SPINNER", "Choose user level")
             false
@@ -301,6 +343,12 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             etUserCity.clearFocus()
             etUsername.error = "Username cannot be empty!"
             etUsername.requestFocus()
+            false
+        } else if (fullName.isEmpty()) {
+            etUsername.error = null
+            etUsername.clearFocus()
+            etFullName.error = "Full Name cannot be empty!"
+            etFullName.requestFocus()
             false
         } else if (userID == null) {
             if (password.isEmpty()) {

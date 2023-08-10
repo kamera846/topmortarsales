@@ -53,6 +53,7 @@ import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_OWNER
+import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
@@ -144,7 +145,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         icMore.visibility = View.VISIBLE
         icSearch.visibility = View.VISIBLE
         tvTitleBarDescription.visibility = View.VISIBLE
-        tvTitleBarDescription.text = "Hello, ${ sessionManager.userName() }"
+        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Hello, $it" else "Hello, ${ sessionManager.userName() }"}
         etSearchBox.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Set Floating Action Button
@@ -220,6 +221,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
             intent.putExtra(CONST_LOCATION, data.id_city)
             intent.putExtra(CONST_MAPS, data.maps_url)
             intent.putExtra(CONST_ADDRESS, data.address)
+            intent.putExtra(CONST_STATUS, data.store_status)
 //            intent.putExtra(CONST_LOCATION, "1")
         }
 
@@ -508,6 +510,14 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     }
 
     private fun setRecyclerView(listItem: ArrayList<ContactModel>) {
+
+//        val itemStatus = listOf("", "data", "passive", "active", "blacklist")
+//        var indexItem = 0
+//        for (item in listItem) {
+//            item.store_status = itemStatus[indexItem]
+//            indexItem.let { if (it == 4) indexItem = 0 else indexItem++}
+//        }
+
         val rvAdapter = ContactsRecyclerViewAdapter(listItem, this@MainActivity)
 
         rvListChat.layoutManager = LinearLayoutManager(this@MainActivity)
@@ -569,6 +579,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         sessionManager.setUserKind("")
         sessionManager.setUserID("")
         sessionManager.setUserName("")
+        sessionManager.setFullName("")
         sessionManager.setUserCityID("")
 
         val intent = Intent(this@MainActivity, SplashScreenActivity::class.java)

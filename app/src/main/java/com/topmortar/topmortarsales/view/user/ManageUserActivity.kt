@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.UsersRecyclerViewAdapter
+import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_PHONE
@@ -216,6 +217,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
             intent.putExtra(CONST_NAME, data.username)
             intent.putExtra(CONST_USER_LEVEL, data.level_user)
             intent.putExtra(CONST_LOCATION, data.id_city)
+            intent.putExtra(CONST_FULL_NAME, data.full_name)
         }
 
         startActivityForResult(intent, MANAGE_USER_ACTIVITY_REQUEST_CODE)
