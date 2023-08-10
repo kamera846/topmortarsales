@@ -523,49 +523,49 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         loadingState(true)
 
-        Handler().postDelayed({
-            itemSendMessage = ContactModel(
-                nomorhp = pPhone,
-                nama = pName,
-                store_owner = pOwner,
-                id_city = pCityID,
-                tgl_lahir = pBirthday,
-                maps_url = pMapsUrl,
-            )
-            setupDialogSendMessage(itemSendMessage)
-
-            tvName.text = "${ etName.text }"
-            tvPhone.text = "+" + formatPhoneNumber("${ etPhone.text }")
-            etPhone.setText(formatPhoneNumber("${ etPhone.text }"))
-            iAddress = "${ etAddress.text }"
-
-            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
-            loadingState(false)
-            toggleEdit(false)
-
-            if (!etOwner.text.isNullOrEmpty()) tvOwner.text = "${ etOwner.text }"
-            else tvOwner.text = EMPTY_FIELD_VALUE
-            if (!etBirthday.text.isNullOrEmpty()) tvBirthday.text = "${ etBirthday.text }"
-            else tvBirthday.text = EMPTY_FIELD_VALUE
-            if (!etMaps.text.isNullOrEmpty()) {
-                tvMaps.text = "Click to open"
-                iMapsUrl = "${ etMaps.text }"
-            } else {
-                tvMaps.text = EMPTY_FIELD_VALUE
-                iMapsUrl = ""
-            }
-            if (selectedCity != null) {
-                if (selectedCity!!.id != "0") tvLocation.text = "${ etLocation.text }"
-                else tvLocation.text = EMPTY_FIELD_VALUE
-            } else tvLocation.text = EMPTY_FIELD_VALUE
-
-            iStatus = if (!pStatus.isNullOrEmpty()) pStatus else null
-            setupStatus(iStatus)
-
-            hasEdited = true
-        }, 1000)
-
-        return
+//        Handler().postDelayed({
+//            itemSendMessage = ContactModel(
+//                nomorhp = pPhone,
+//                nama = pName,
+//                store_owner = pOwner,
+//                id_city = pCityID,
+//                tgl_lahir = pBirthday,
+//                maps_url = pMapsUrl,
+//            )
+//            setupDialogSendMessage(itemSendMessage)
+//
+//            tvName.text = "${ etName.text }"
+//            tvPhone.text = "+" + formatPhoneNumber("${ etPhone.text }")
+//            etPhone.setText(formatPhoneNumber("${ etPhone.text }"))
+//            iAddress = "${ etAddress.text }"
+//
+//            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
+//            loadingState(false)
+//            toggleEdit(false)
+//
+//            if (!etOwner.text.isNullOrEmpty()) tvOwner.text = "${ etOwner.text }"
+//            else tvOwner.text = EMPTY_FIELD_VALUE
+//            if (!etBirthday.text.isNullOrEmpty()) tvBirthday.text = "${ etBirthday.text }"
+//            else tvBirthday.text = EMPTY_FIELD_VALUE
+//            if (!etMaps.text.isNullOrEmpty()) {
+//                tvMaps.text = "Click to open"
+//                iMapsUrl = "${ etMaps.text }"
+//            } else {
+//                tvMaps.text = EMPTY_FIELD_VALUE
+//                iMapsUrl = ""
+//            }
+//            if (selectedCity != null) {
+//                if (selectedCity!!.id != "0") tvLocation.text = "${ etLocation.text }"
+//                else tvLocation.text = EMPTY_FIELD_VALUE
+//            } else tvLocation.text = EMPTY_FIELD_VALUE
+//
+//            iStatus = if (!pStatus.isNullOrEmpty()) pStatus else null
+//            setupStatus(iStatus)
+//
+//            hasEdited = true
+//        }, 1000)
+//
+//        return
 
         lifecycleScope.launch {
             try {
@@ -578,9 +578,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbMapsUrl = createPartFromString(pMapsUrl)
                 val rbLocation = createPartFromString(pCityID)
                 val rbAddress = createPartFromString(pAddress)
+                val rbStatus = createPartFromString(pStatus)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.editContact(id = rbId, phone = rbPhone, name = rbName, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, address = rbAddress)
+                val response = apiService.editContact(id = rbId, phone = rbPhone, name = rbName, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, address = rbAddress, status = rbStatus)
 
                 if (response.isSuccessful) {
 
@@ -622,6 +623,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             if (selectedCity!!.id != "0") tvLocation.text = "${ etLocation.text }"
                             else tvLocation.text = EMPTY_FIELD_VALUE
                         } else tvLocation.text = EMPTY_FIELD_VALUE
+
+                        iStatus = if (!pStatus.isNullOrEmpty()) pStatus else null
+                        setupStatus(iStatus)
+
                         hasEdited = true
 
                     } else {

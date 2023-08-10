@@ -39,6 +39,7 @@ interface ApiService {
         @Part("id_city") cityId: RequestBody,
         @Part("mapsUrl") mapsUrl: RequestBody,
         @Part("address") address: RequestBody,
+        @Part("status") status: RequestBody,
     ): Response<ResponseMessage>
 
     @Multipart

@@ -9,5 +9,5 @@ data class ContactModel(
     val id_city: String = "0",
     val maps_url: String = "",
     val address: String = "",
-    var status: String = "",
+    var store_status: String = "",
 )

@@ -37,7 +37,7 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
 
             tvContactName.text = chatItem.nama
             tvPhoneNumber.text = if (chatItem.nomorhp != "") "+${ chatItem.nomorhp }" else ""
-            setupStatus(chatItem.status)
+            setupStatus(chatItem.store_status)
 
         }
 

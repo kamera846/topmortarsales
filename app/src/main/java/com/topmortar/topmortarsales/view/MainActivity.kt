@@ -221,7 +221,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
             intent.putExtra(CONST_LOCATION, data.id_city)
             intent.putExtra(CONST_MAPS, data.maps_url)
             intent.putExtra(CONST_ADDRESS, data.address)
-            intent.putExtra(CONST_STATUS, data.status)
+            intent.putExtra(CONST_STATUS, data.store_status)
 //            intent.putExtra(CONST_LOCATION, "1")
         }
 
@@ -511,12 +511,12 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
     private fun setRecyclerView(listItem: ArrayList<ContactModel>) {
 
-        val itemStatus = listOf("", "data", "passive", "active", "blacklist")
-        var indexItem = 0
-        for (item in listItem) {
-            item.status = itemStatus[indexItem]
-            indexItem.let { if (it == 4) indexItem = 0 else indexItem++}
-        }
+//        val itemStatus = listOf("", "data", "passive", "active", "blacklist")
+//        var indexItem = 0
+//        for (item in listItem) {
+//            item.store_status = itemStatus[indexItem]
+//            indexItem.let { if (it == 4) indexItem = 0 else indexItem++}
+//        }
 
         val rvAdapter = ContactsRecyclerViewAdapter(listItem, this@MainActivity)
 
