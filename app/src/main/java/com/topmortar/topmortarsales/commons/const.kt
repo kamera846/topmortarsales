@@ -52,6 +52,7 @@ const val CONST_STATUS = "const_status"
 const val CONST_ADDRESS = "const_address"
 const val CONST_USER_ID = "const_user_id"
 const val CONST_USER_LEVEL = "const_user_level"
+const val CONST_FULL_NAME = "const_full_name"
 
 // Status
 const val LOGGED_IN = true

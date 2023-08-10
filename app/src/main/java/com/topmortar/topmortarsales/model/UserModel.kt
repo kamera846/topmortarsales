@@ -8,5 +8,6 @@ data class UserModel(
     val level_user: String = "",
     val id_city: String = "",
     val nama_city: String = "",
-    val kode_city: String = ""
+    val kode_city: String = "",
+    val full_name: String = ""
 )

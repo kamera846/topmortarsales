@@ -94,6 +94,7 @@ interface ApiService {
         @Part("id_city") cityId: RequestBody,
         @Part("phone_user") phone: RequestBody,
         @Part("username") username: RequestBody,
+        @Part("full_name") fullName: RequestBody,
         @Part("password") password: RequestBody
     ): Response<ResponseMessage>
 
@@ -104,7 +105,8 @@ interface ApiService {
         @Part("level_user") level: RequestBody,
         @Part("id_city") cityId: RequestBody,
         @Part("phone_user") phone: RequestBody,
-        @Part("username") username: RequestBody
+        @Part("username") username: RequestBody,
+        @Part("full_name") fullName: RequestBody
     ): Response<ResponseMessage>
 
     @Multipart
