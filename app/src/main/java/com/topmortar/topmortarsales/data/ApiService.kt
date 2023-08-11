@@ -25,6 +25,7 @@ interface ApiService {
 
     @GET(GET_CONTACT)
     suspend fun getContacts(@Query("c") cityId: String): ResponseContactList
+
     @GET(GET_CONTACT)
     suspend fun getContacts(): ResponseContactList
 
@@ -86,6 +87,9 @@ interface ApiService {
 
     @GET(GET_USERS)
     suspend fun getUsers(): ResponseUsers
+
+    @GET(GET_USERS)
+    suspend fun detailUser(@Query("id") userId: String): ResponseUsers
 
     @Multipart
     @POST(ADD_USERS)
