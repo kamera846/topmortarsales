@@ -8,6 +8,7 @@ import android.os.Looper
 import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
+import android.util.Log
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
@@ -92,6 +93,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     private var doubleBackToExitPressedOnce = false
     private lateinit var userCity: String
     private lateinit var userKind: String
+    private var userId: String = ""
 
     // Initialize Search Engine
     private val searchDelayMillis = 500L
@@ -109,7 +111,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         userCity = sessionManager.userCityID()!!
         userKind = sessionManager.userKind()!!
 
-        val userId = sessionManager.userID()!!
+        userId = sessionManager.userID()!!
         val isLoggedIn = sessionManager.isLoggedIn()
 
         if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()) return missingDataHandler()
@@ -247,6 +249,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
             when (item.itemId) {
                 R.id.option_sync_now -> {
                     getContacts()
+                    getUserLoggedIn()
                     true
                 }
                 R.id.option_search -> {
@@ -453,6 +456,40 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
     }
 
+    private fun getUserLoggedIn() {
+
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.detailUser(userId = userId)
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        val data = response.results[0]
+
+                        sessionManager.setUserID(data.id_user)
+                        sessionManager.setUserName(data.username)
+                        sessionManager.setFullName(data.full_name)
+                        sessionManager.setUserCityID(data.id_city)
+
+                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Hello, $it" else "Hello, ${ sessionManager.userName() }"}
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> missingDataHandler()
+                    else -> Log.d("TAG USER LOGGED IN", "Failed get data!")
+                }
+
+
+            } catch (e: Exception) {
+                Log.d("TAG USER LOGGED IN", "Failed run service. Exception " + e.message)
+            }
+
+        }
+
+    }
+
     private fun searchContact(key: String) {
 
         loadingState(true)
@@ -636,6 +673,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         super.onResume()
         // Check apps for update
         AppUpdateHelper.checkForUpdates(this)
+        getUserLoggedIn()
 
     }
 
