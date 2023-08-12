@@ -201,19 +201,29 @@
 
             </LinearLayout>
 
-            <!-- Input Phone Number -->
+            <!-- Input Username Reset Password -->
             <EditText
                 android:visibility="gone"
-                android:id="@+id/et_phone"
+                android:id="@+id/et_username_forgot"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:background="@drawable/et_background"
-                android:inputType="phone"
+                android:inputType="text"
                 android:outlineProvider="none"
+                android:layout_marginBottom="12dp"
                 android:padding="12dp"
-                android:hint="@string/enter_your_phone_number_to_get_otp"
+                android:hint="@string/enter_username"
                 android:autofillHints="@string/enter_your_phone_number_to_get_otp"
                 android:textColorHint="@color/black_600"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+            <TextView
+                android:visibility="gone"
+                android:id="@+id/tv_username_forgot"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/description_username_forgot"
                 android:textSize="16sp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
