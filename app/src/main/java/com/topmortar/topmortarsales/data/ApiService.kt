@@ -116,7 +116,7 @@ interface ApiService {
     @Multipart
     @POST(REQUEST_OTP)
     suspend fun requestOtp(
-        @Part("phone_user") phone: RequestBody
+        @Part("username") username: RequestBody
     ): Response<ResponseMessage>
 
     @Multipart
