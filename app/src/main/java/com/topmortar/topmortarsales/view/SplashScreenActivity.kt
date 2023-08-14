@@ -386,7 +386,7 @@ class SplashScreenActivity : AppCompatActivity() {
         val usernameForgot = "${ etUsernameForgot.text }".trim().replace(" ", "").toLowerCase()
 
         if (usernameForgot.isEmpty()) {
-            etUsernameForgot.error = "Username number cannot be empty!"
+            etUsernameForgot.error = "Username cannot be empty!"
             etUsernameForgot.requestFocus()
             return
         } else {
