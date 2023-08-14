@@ -129,7 +129,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var itemSendMessage: ContactModel? = null
     private var hasEdited: Boolean = false
 
-    private var statusItem: List<String> = listOf("Choose Customer Status", "Data", "Passive", "Active", "Blacklist")
+    private var statusItem: List<String> = listOf("Choose Customer Status", "Data - Being visited by sales", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited")
     private var selectedStatus: String = ""
 
     private var iLocation: String? = null
@@ -514,7 +514,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         var pBirthday = "${ etBirthday.text }"
         val pMapsUrl = "${ etMaps.text }"
         val pAddress = "${ etAddress.text }"
-        val pStatus = if (selectedStatus.isNullOrEmpty()) "" else selectedStatus.toLowerCase()
+        val pStatus = if (selectedStatus.isNullOrEmpty()) "" else selectedStatus.substringBefore(" - ").toLowerCase()
 
         pBirthday = if (pBirthday.isEmpty() || pBirthday == EMPTY_FIELD_VALUE) "0000-00-00"
         else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
@@ -926,26 +926,26 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         when (status) {
             STATUS_CONTACT_DATA -> {
                 tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_data))
-                tooltipHandler(tooltipStatus, "Customer Status Data")
-                tvStatus.text = "Data"
+                tooltipHandler(tooltipStatus, "Customer Status is Data")
+                tvStatus.text = statusItem[1]
                 spinStatus.setSelection(1)
             }
             STATUS_CONTACT_PASSIVE -> {
                 tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_passive))
-                tooltipHandler(tooltipStatus, "Customer Status Passive")
-                tvStatus.text = "Passive"
+                tooltipHandler(tooltipStatus, "Customer Status is Passive")
+                tvStatus.text = statusItem[2]
                 spinStatus.setSelection(2)
             }
             STATUS_CONTACT_ACTIVE -> {
                 tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_active))
-                tooltipHandler(tooltipStatus, "Customer Status Active")
-                tvStatus.text = "Active"
+                tooltipHandler(tooltipStatus, "Customer Status is Active")
+                tvStatus.text = statusItem[3]
                 spinStatus.setSelection(3)
             }
             STATUS_CONTACT_BLACKLIST -> {
                 tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_blacklist))
-                tooltipHandler(tooltipStatus, "Customer Status Blacklist")
-                tvStatus.text = "Blacklist"
+                tooltipHandler(tooltipStatus, "Customer Status is Blacklist")
+                tvStatus.text = statusItem[4]
                 spinStatus.setSelection(4)
             }
             else -> {
