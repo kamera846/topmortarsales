@@ -9,6 +9,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.view.animation.AnimationUtils
+import android.webkit.URLUtil.isValidUrl
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -541,7 +542,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 //            etPhone.setText(formatPhoneNumber("${ etPhone.text }"))
 //            iAddress = "${ etAddress.text }"
 //
-//            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
+//            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "- $contactId \n " +
+//                    "- $pPhone \n " +
+//                    "- $pName \n " +
+//                    "- $pOwner \n " +
+//                    "- $pBirthday \n " +
+//                    "- $pMapsUrl \n " +
+//                    "- $pCityID \n " +
+//                    "- $pAddress \n " +
+//                    "- $pStatus")
 //            loadingState(false)
 //            toggleEdit(false)
 //
@@ -724,6 +733,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             false
         } else if (!PhoneHandler.phoneValidation(phone, etPhone)) {
             etPhone.requestFocus()
+            false
+        } else if (mapsUrl.isNotEmpty() && !isValidUrl(mapsUrl)) {
+            etMaps.error = "Please enter a valid URL!"
+            etMaps.requestFocus()
             false
 //        } else if (owner.isEmpty()) {
 //            etName.error = null
@@ -975,7 +988,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         spinStatus.adapter = adapter
         spinStatus.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                selectedStatus = statusItem[position]
+                selectedStatus = if (position != 0) statusItem[position]
+                else ""
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
