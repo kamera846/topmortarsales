@@ -116,6 +116,8 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         var cityId = "$iLocation"
         val mapsUrl = "${ etMapsUrl.text }"
         val message = "${ etMessage.text }"
+        val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
+        val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
 
         if (!formValidation(phone = phone, name = name, owner = owner, message = message, birthday = birthday, mapsUrl = mapsUrl)) return
 
@@ -144,9 +146,11 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                 val rbOwner = createPartFromString(owner)
                 val rbMapsUrl = createPartFromString(mapsUrl)
                 val rbMessage = createPartFromString(message)
+                val rbUserId = createPartFromString(userId)
+                val rbCurrentName = createPartFromString(currentName)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.sendMessage(name = rbName, phone = rbPhone, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, message = rbMessage)
+                val response = apiService.sendMessage(name = rbName, phone = rbPhone, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, userId = rbUserId, currentName = rbCurrentName, message = rbMessage)
 
                 if (response.isSuccessful) {
 

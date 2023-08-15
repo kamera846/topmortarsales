@@ -52,6 +52,8 @@ interface ApiService {
         @Part("tgl_lahir") birthday: RequestBody,
         @Part("id_city") cityId: RequestBody,
         @Part("mapsUrl") mapsUrl: RequestBody,
+        @Part("id_user") userId: RequestBody,
+        @Part("full_name") currentName: RequestBody,
         @Part("message_body") message: RequestBody,
     ): Response<ResponseMessage>
 
