@@ -16,8 +16,11 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.updateTxtMaxLength
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
@@ -182,25 +185,34 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
                     val responseBody = response.body()!!
 
-                    if (responseBody.status == RESPONSE_STATUS_OK) {
+                    when (responseBody.status) {
+                        RESPONSE_STATUS_OK -> {
 
-                        etMessage.setText("")
-                        loadingState(false)
-                        handleMessage(context, TAG_RESPONSE_CONTACT, "Successfully send message!")
+                            etMessage.setText("")
+                            loadingState(false)
+                            handleMessage(context, TAG_RESPONSE_CONTACT, "Successfully send message!")
 
-                        if (modalInterface != null) modalInterface!!.onSubmit(true)
-                        this@SendMessageModal.dismiss()
+                            if (modalInterface != null) modalInterface!!.onSubmit(true)
+                            this@SendMessageModal.dismiss()
 
-                    } else {
+                        }
+                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                        handleMessage(context, TAG_RESPONSE_CONTACT, "Failed to send!")
-                        loadingState(false)
+                            handleMessage(context, TAG_RESPONSE_MESSAGE, "Failed to send!: ${ responseBody.message }")
+                            loadingState(false)
 
+                        }
+                        else -> {
+
+                            handleMessage(context, TAG_RESPONSE_CONTACT, "Failed to send!")
+                            loadingState(false)
+
+                        }
                     }
 
                 } else {
 
-                    handleMessage(context, TAG_RESPONSE_CONTACT, "Failed to send! Message: " + response.message())
+                    handleMessage(context, TAG_RESPONSE_CONTACT, "Failed to send! Error: " + response.message())
                     loadingState(false)
 
                 }

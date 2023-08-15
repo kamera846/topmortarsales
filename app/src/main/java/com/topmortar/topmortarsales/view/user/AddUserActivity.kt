@@ -29,6 +29,8 @@ import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
@@ -155,21 +157,30 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
                     val responseBody = response.body()!!
 
-                    if (responseBody.status == RESPONSE_STATUS_OK) {
+                    when (responseBody.status) {
+                        RESPONSE_STATUS_OK -> {
 
-                        handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Successfully ${ if (userID == null) "added" else "edit" } data!")
-                        loadingState(false)
+                            handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Successfully ${ if (userID == null) "added" else "edit" } data!")
+                            loadingState(false)
 
-                        val resultIntent = Intent()
-                        resultIntent.putExtra("$activityRequestCode", SYNC_NOW)
-                        setResult(RESULT_OK, resultIntent)
-                        finish()
+                            val resultIntent = Intent()
+                            resultIntent.putExtra("$activityRequestCode", SYNC_NOW)
+                            setResult(RESULT_OK, resultIntent)
+                            finish()
 
-                    } else {
+                        }
+                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                        handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Failed ${ if (userID == null) "added" else "edit" } data!: ${ responseBody.message }")
-                        loadingState(false)
+                            handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Failed to ${ if (userID == null) "added" else "edit" }! Message: ${ responseBody.message }")
+                            loadingState(false)
 
+                        }
+                        else -> {
+
+                            handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Failed ${ if (userID == null) "added" else "edit" } data!: ${ responseBody.message }")
+                            loadingState(false)
+
+                        }
                     }
 
                 } else {

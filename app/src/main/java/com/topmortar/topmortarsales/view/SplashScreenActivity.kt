@@ -24,6 +24,7 @@ import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
 import com.topmortar.topmortarsales.commons.LOGGED_IN
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
@@ -351,9 +352,9 @@ class SplashScreenActivity : AppCompatActivity() {
                         loadingState(false)
 
                     }
-                    RESPONSE_STATUS_FAIL -> {
+                    RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                        showAlert("Your username or password seems wrong!", 5000)
+                        showAlert("${ response.message }", 5000)
                         loadingState(false)
 
                     }
@@ -365,7 +366,7 @@ class SplashScreenActivity : AppCompatActivity() {
                     }
                     else -> {
 
-                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_CONTACT, "Failed process auth")
+                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_CONTACT, response.message.let { if (!it.isNullOrEmpty()) it else "Failed process auth" })
                         loadingState(false)
 
                     }
@@ -569,19 +570,31 @@ class SplashScreenActivity : AppCompatActivity() {
 
                     val responseBody = response.body()!!
 
-                    if (responseBody.status == RESPONSE_STATUS_OK) {
+                    when (responseBody.status) {
+                        RESPONSE_STATUS_OK -> {
 
-                        idUserResetPassword = null
-                        currentSubmitStep += 1
-                        submitHandler(next = true)
-                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "${ responseBody.message }")
-                        loadingState(false)
+                            idUserResetPassword = null
+                            currentSubmitStep += 1
+                            submitHandler(next = true)
+                            handleMessage(
+                                this@SplashScreenActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "${responseBody.message}"
+                            )
+                            loadingState(false)
+                        }
+                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                    } else {
+                            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed reset password! Message: ${ responseBody.message }")
+                            loadingState(false)
 
-                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed reset password!: ${ responseBody.message }")
-                        loadingState(false)
+                        }
+                        else -> {
 
+                            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed reset password!: ${ responseBody.message }")
+                            loadingState(false)
+
+                        }
                     }
 
                 } else {
