@@ -21,6 +21,7 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.updateTxtMaxLength
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
+import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -38,6 +39,8 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
     private lateinit var tvMaxMessage: TextView
     private lateinit var etMessage: EditText
     private lateinit var btnSend: Button
+
+    private lateinit var sessionManager: SessionManager
 
     private val msgMaxLines = 5
     private val msgMaxLength = 200
@@ -57,6 +60,9 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        sessionManager = SessionManager(context)
+
         setContentView(R.layout.modal_send_message)
 
         setLayout()
@@ -148,6 +154,8 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
         lifecycleScope.launch {
             try {
                 val data = item!!
+                val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
+                val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
 
                 val rbPhone = createPartFromString(PhoneHandler.formatPhoneNumber(data.nomorhp))
                 val rbName = createPartFromString(data.nama)
@@ -156,6 +164,8 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
                 val rbOwner = createPartFromString(data.store_owner)
                 val rbMapsUrl = createPartFromString(data.maps_url)
                 val rbMessage = createPartFromString("${ etMessage.text }")
+                val rbUserId = createPartFromString(userId)
+                val rbCurrentName = createPartFromString(currentName)
 
 //                handleMessage(context, "SEND MESSAGE PARAM", "${ data.nomorhp } : ${ data.nama } : ${ data.id_city } : ${ data.tgl_lahir } : ${ data.store_owner } : ${ data.maps_url } : ${ etMessage.text }")
 
@@ -166,7 +176,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 //                return@launch
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.sendMessage(name = rbName, phone = rbPhone, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, message = rbMessage)
+                val response = apiService.sendMessage(name = rbName, phone = rbPhone, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, currentName = rbCurrentName, userId = rbUserId, message = rbMessage)
 
                 if (response.isSuccessful) {
 
