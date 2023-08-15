@@ -38,6 +38,8 @@ import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_ACTIVE
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BLACKLIST
@@ -587,54 +589,64 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                     val responseBody = response.body()!!
 
-                    if (responseBody.status == RESPONSE_STATUS_OK) {
+                    when (responseBody.status) {
+                        RESPONSE_STATUS_OK -> {
 
-                        itemSendMessage = ContactModel(
-                            nomorhp = pPhone,
-                            nama = pName,
-                            store_owner = pOwner,
-                            id_city = pCityID,
-                            tgl_lahir = pBirthday,
-                            maps_url = pMapsUrl,
-                        )
-                        setupDialogSendMessage(itemSendMessage)
+                            itemSendMessage = ContactModel(
+                                nomorhp = pPhone,
+                                nama = pName,
+                                store_owner = pOwner,
+                                id_city = pCityID,
+                                tgl_lahir = pBirthday,
+                                maps_url = pMapsUrl,
+                            )
+                            setupDialogSendMessage(itemSendMessage)
 
-                        tvName.text = "${ etName.text }"
-                        tvPhone.text = "+" + formatPhoneNumber("${ etPhone.text }")
-                        etPhone.setText(formatPhoneNumber("${ etPhone.text }"))
-                        iAddress = "${ etAddress.text }"
+                            tvName.text = "${ etName.text }"
+                            tvPhone.text = "+" + formatPhoneNumber("${ etPhone.text }")
+                            etPhone.setText(formatPhoneNumber("${ etPhone.text }"))
+                            iAddress = "${ etAddress.text }"
 
-                        handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
-                        loadingState(false)
-                        toggleEdit(false)
+                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
+                            loadingState(false)
+                            toggleEdit(false)
 
-                        if (!etOwner.text.isNullOrEmpty()) tvOwner.text = "${ etOwner.text }"
-                        else tvOwner.text = EMPTY_FIELD_VALUE
-                        if (!etBirthday.text.isNullOrEmpty()) tvBirthday.text = "${ etBirthday.text }"
-                        else tvBirthday.text = EMPTY_FIELD_VALUE
-                        if (!etMaps.text.isNullOrEmpty()) {
-                            tvMaps.text = "Click to open"
-                            iMapsUrl = "${ etMaps.text }"
-                        } else {
-                            tvMaps.text = EMPTY_FIELD_VALUE
-                            iMapsUrl = ""
+                            if (!etOwner.text.isNullOrEmpty()) tvOwner.text = "${ etOwner.text }"
+                            else tvOwner.text = EMPTY_FIELD_VALUE
+                            if (!etBirthday.text.isNullOrEmpty()) tvBirthday.text = "${ etBirthday.text }"
+                            else tvBirthday.text = EMPTY_FIELD_VALUE
+                            if (!etMaps.text.isNullOrEmpty()) {
+                                tvMaps.text = "Click to open"
+                                iMapsUrl = "${ etMaps.text }"
+                            } else {
+                                tvMaps.text = EMPTY_FIELD_VALUE
+                                iMapsUrl = ""
+                            }
+                            if (selectedCity != null) {
+                                if (selectedCity!!.id != "0") tvLocation.text = "${ etLocation.text }"
+                                else tvLocation.text = EMPTY_FIELD_VALUE
+                            } else tvLocation.text = EMPTY_FIELD_VALUE
+
+                            iStatus = if (!pStatus.isNullOrEmpty()) pStatus else null
+                            setupStatus(iStatus)
+
+                            hasEdited = true
+
                         }
-                        if (selectedCity != null) {
-                            if (selectedCity!!.id != "0") tvLocation.text = "${ etLocation.text }"
-                            else tvLocation.text = EMPTY_FIELD_VALUE
-                        } else tvLocation.text = EMPTY_FIELD_VALUE
+                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                        iStatus = if (!pStatus.isNullOrEmpty()) pStatus else null
-                        setupStatus(iStatus)
+                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed to edit! Message: ${ responseBody.message }")
+                            loadingState(false)
+                            toggleEdit(false)
 
-                        hasEdited = true
+                        }
+                        else -> {
 
-                    } else {
+                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed to edit data!")
+                            loadingState(false)
+                            toggleEdit(false)
 
-                        handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed to edit data!")
-                        loadingState(false)
-                        toggleEdit(false)
-
+                        }
                     }
 
                 } else {
