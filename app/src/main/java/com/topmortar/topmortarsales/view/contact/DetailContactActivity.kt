@@ -64,6 +64,8 @@ import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.modal.SendMessageModal
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
+import com.topmortar.topmortarsales.view.MainActivity
+import com.topmortar.topmortarsales.view.invoice.DetailInvoiceActivity
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -123,14 +125,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private lateinit var btnSendMessage: Button
     private lateinit var btnSaveEdit: Button
+    private lateinit var btnInvoice: Button
 
     private var activityRequestCode = MAIN_ACTIVITY_REQUEST_CODE
     private var contactId: String? = null
     private var isEdit: Boolean = false
+    private var hasEdited: Boolean = false
     private var selectedDate: Calendar = Calendar.getInstance()
     private var selectedCity: ModalSearchModel? = null
     private var itemSendMessage: ContactModel? = null
-    private var hasEdited: Boolean = false
 
     private var statusItem: List<String> = listOf("Choose Customer Status", "Data - Being visited by sales", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited")
     private var selectedStatus: String = ""
@@ -214,11 +217,16 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         btnSendMessage = findViewById(R.id.btn_send_message)
         btnSaveEdit = findViewById(R.id.btn_save_edit)
+        btnInvoice = findViewById(R.id.btn_invoice)
 
         // Setup Title Bar
         tvTitleBar.text = "Detail Contact"
         tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
         if (sessionManager.userKind() == USER_KIND_ADMIN) icEdit.visibility = View.VISIBLE
+
+        // Setup Button
+        if (sessionManager.userKind() != USER_KIND_SALES) btnInvoice.visibility = View.VISIBLE
+        else btnInvoice.visibility = View.GONE
 
         // Setup Date Picker Dialog
         setDatePickerDialog()
@@ -239,6 +247,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 //        btnSendMessage.setOnClickListener { navigateAddNewRoom() }
         btnSendMessage.setOnClickListener { sendMessageModal.show() }
         btnSaveEdit.setOnClickListener { editConfirmation() }
+        btnInvoice.setOnClickListener { navigateToDetailInvoice() }
         etBirthdayContainer.setOnClickListener { datePicker.show() }
         etBirthday.setOnClickListener { datePicker.show() }
         etLocationContainer.setOnClickListener { showSearchModal() }
@@ -414,6 +423,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tvBirthdayContainer.visibility = View.GONE
 
             btnSendMessage.visibility = View.GONE
+            btnInvoice.visibility = View.GONE
 
             // Show Case
             tvTitleBar.text = "Edit Contact"
@@ -460,6 +470,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tvBirthdayContainer.visibility = View.VISIBLE
 
             btnSendMessage.visibility = View.VISIBLE
+            if (sessionManager.userKind() != USER_KIND_SALES) btnInvoice.visibility = View.VISIBLE
+            else btnInvoice.visibility = View.GONE
 
             // Hide Case
             tvTitleBar.text = "Detail Contact"
@@ -830,6 +842,18 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         if (iMapsUrl == EMPTY_FIELD_VALUE) intent.putExtra(CONST_MAPS, "")
         else intent.putExtra(CONST_MAPS, iMapsUrl)
+
+        startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+
+    }
+
+    private fun navigateToDetailInvoice() {
+
+        val intent = Intent(this@DetailContactActivity, DetailInvoiceActivity::class.java)
+
+        intent.putExtra(CONST_CONTACT_ID, contactId)
+        if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
+        else intent.putExtra(CONST_NAME, tvName.text)
 
         startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
 

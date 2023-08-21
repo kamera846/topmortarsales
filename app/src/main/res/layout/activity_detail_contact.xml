@@ -670,13 +670,29 @@
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:orientation="vertical">
+        android:paddingVertical="16dp"
+        android:paddingHorizontal="8dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:visibility="gone"
+            android:id="@+id/btn_invoice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="8dp"
+            android:backgroundTint="@color/black_600"
+            android:padding="12dp"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:text="@string/invoice" />
 
         <Button
             android:id="@+id/btn_send_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="8dp"
             android:padding="12dp"
             android:textSize="18sp"
             android:textStyle="bold"
@@ -687,6 +703,8 @@
             android:id="@+id/btn_save_edit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="8dp"
             android:padding="12dp"
             android:textSize="18sp"
             android:textStyle="bold"

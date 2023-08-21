@@ -71,8 +71,10 @@ const val STATUS_CONTACT_BLACKLIST = "blacklist"
 // User Kind
 const val USER_KIND_ADMIN = "user_kind_admin"
 const val USER_KIND_SALES = "user_kind_sales"
+const val USER_KIND_COURIER = "user_kind_courier"
 const val AUTH_LEVEL_ADMIN = "admin"
 const val AUTH_LEVEL_SALES = "sales"
+const val AUTH_LEVEL_COURIER = "courier"
 
 // DUMMY
 const val DUMMY_ADMIN_USERNAME = "topmortar"

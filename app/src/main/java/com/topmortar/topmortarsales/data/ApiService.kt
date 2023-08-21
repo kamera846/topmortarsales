@@ -15,6 +15,7 @@ import com.topmortar.topmortarsales.commons.VERIFY_OTP
 import com.topmortar.topmortarsales.response.ResponseAuth
 import com.topmortar.topmortarsales.response.ResponseCities
 import com.topmortar.topmortarsales.response.ResponseContactList
+import com.topmortar.topmortarsales.response.ResponseInvoices
 import com.topmortar.topmortarsales.response.ResponseMessage
 import com.topmortar.topmortarsales.response.ResponseUsers
 import okhttp3.RequestBody
@@ -133,4 +134,7 @@ interface ApiService {
         @Part("id_user") userID: RequestBody,
         @Part("password") password: RequestBody,
     ): Response<ResponseMessage>
+
+    @GET(GET_USERS)
+    suspend fun getInvoices(): ResponseInvoices
 }
