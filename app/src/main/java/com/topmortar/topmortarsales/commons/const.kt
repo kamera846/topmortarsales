@@ -9,6 +9,7 @@ const val BASE_URL = "https://dev-saleswa.topmortarindonesia.com/" // Developmen
 const val RESPONSE_STATUS_OK = "ok"
 const val RESPONSE_STATUS_EMPTY = "empty"
 const val RESPONSE_STATUS_FAIL = "fail"
+const val RESPONSE_STATUS_FAILED = "failed"
 
 const val GET_CONTACT = "contacts.php"
 const val EDIT_CONTACT = "contacts.php"
@@ -18,6 +19,7 @@ const val GET_CITY = "city.php"
 const val ADD_CITY = "city.php"
 const val AUTH = "auth.php"
 const val GET_USERS = "users.php"
+const val DETAIL_USER = "users.php"
 const val ADD_USERS = "users.php"
 const val REQUEST_OTP = "reqOtp.php"
 const val VERIFY_OTP = "verifyOtp.php"
@@ -48,9 +50,11 @@ const val CONST_NAME = "const_name"
 const val CONST_MESSAGE = "const_message"
 const val CONST_BIRTHDAY = "const_birthday"
 const val CONST_MAPS = "const_maps"
+const val CONST_STATUS = "const_status"
 const val CONST_ADDRESS = "const_address"
 const val CONST_USER_ID = "const_user_id"
 const val CONST_USER_LEVEL = "const_user_level"
+const val CONST_FULL_NAME = "const_full_name"
 
 // Status
 const val LOGGED_IN = true
@@ -59,6 +63,10 @@ const val SEARCH_OPEN = "search_open"
 const val SEARCH_CLOSE = "search_close"
 const val SEARCH_CLEAR = "search_clear"
 const val SYNC_NOW = "sync_now"
+const val STATUS_CONTACT_DATA = "data"
+const val STATUS_CONTACT_PASSIVE = "passive"
+const val STATUS_CONTACT_ACTIVE = "active"
+const val STATUS_CONTACT_BLACKLIST = "blacklist"
 
 // User Kind
 const val USER_KIND_ADMIN = "user_kind_admin"

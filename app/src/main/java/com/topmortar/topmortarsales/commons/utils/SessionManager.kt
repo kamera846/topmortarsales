@@ -42,6 +42,15 @@ class SessionManager(context: Context) {
         return sharedPreferences.getString("userName", "")
     }
 
+    fun setFullName(fullName: String) {
+        editor.putString("fullName", fullName)
+        editor.apply()
+    }
+
+    fun fullName(): String? {
+        return sharedPreferences.getString("fullName", "")
+    }
+
     fun setUserCityID(userCityID: String) {
         editor.putString("userCityID", userCityID)
         editor.apply()

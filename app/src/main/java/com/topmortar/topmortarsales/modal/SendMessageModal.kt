@@ -16,11 +16,15 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.updateTxtMaxLength
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
+import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -38,6 +42,8 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
     private lateinit var tvMaxMessage: TextView
     private lateinit var etMessage: EditText
     private lateinit var btnSend: Button
+
+    private lateinit var sessionManager: SessionManager
 
     private val msgMaxLines = 5
     private val msgMaxLength = 200
@@ -57,6 +63,9 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        sessionManager = SessionManager(context)
+
         setContentView(R.layout.modal_send_message)
 
         setLayout()
@@ -148,6 +157,8 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
         lifecycleScope.launch {
             try {
                 val data = item!!
+                val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
+                val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
 
                 val rbPhone = createPartFromString(PhoneHandler.formatPhoneNumber(data.nomorhp))
                 val rbName = createPartFromString(data.nama)
@@ -156,6 +167,8 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
                 val rbOwner = createPartFromString(data.store_owner)
                 val rbMapsUrl = createPartFromString(data.maps_url)
                 val rbMessage = createPartFromString("${ etMessage.text }")
+                val rbUserId = createPartFromString(userId)
+                val rbCurrentName = createPartFromString(currentName)
 
 //                handleMessage(context, "SEND MESSAGE PARAM", "${ data.nomorhp } : ${ data.nama } : ${ data.id_city } : ${ data.tgl_lahir } : ${ data.store_owner } : ${ data.maps_url } : ${ etMessage.text }")
 
@@ -166,31 +179,40 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 //                return@launch
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.sendMessage(name = rbName, phone = rbPhone, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, message = rbMessage)
+                val response = apiService.sendMessage(name = rbName, phone = rbPhone, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, currentName = rbCurrentName, userId = rbUserId, message = rbMessage)
 
                 if (response.isSuccessful) {
 
                     val responseBody = response.body()!!
 
-                    if (responseBody.status == RESPONSE_STATUS_OK) {
+                    when (responseBody.status) {
+                        RESPONSE_STATUS_OK -> {
 
-                        etMessage.setText("")
-                        loadingState(false)
-                        handleMessage(context, TAG_RESPONSE_CONTACT, "Successfully send message!")
+                            etMessage.setText("")
+                            loadingState(false)
+                            handleMessage(context, TAG_RESPONSE_CONTACT, "Successfully send message!")
 
-                        if (modalInterface != null) modalInterface!!.onSubmit(true)
-                        this@SendMessageModal.dismiss()
+                            if (modalInterface != null) modalInterface!!.onSubmit(true)
+                            this@SendMessageModal.dismiss()
 
-                    } else {
+                        }
+                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                        handleMessage(context, TAG_RESPONSE_CONTACT, "Failed to send!")
-                        loadingState(false)
+                            handleMessage(context, TAG_RESPONSE_MESSAGE, "Failed to send!: ${ responseBody.message }")
+                            loadingState(false)
 
+                        }
+                        else -> {
+
+                            handleMessage(context, TAG_RESPONSE_CONTACT, "Failed to send!")
+                            loadingState(false)
+
+                        }
                     }
 
                 } else {
 
-                    handleMessage(context, TAG_RESPONSE_CONTACT, "Failed to send! Message: " + response.message())
+                    handleMessage(context, TAG_RESPONSE_CONTACT, "Failed to send! Error: " + response.message())
                     loadingState(false)
 
                 }

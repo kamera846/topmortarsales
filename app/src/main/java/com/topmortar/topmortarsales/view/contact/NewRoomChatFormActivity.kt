@@ -28,6 +28,8 @@ import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
@@ -116,6 +118,8 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         var cityId = "$iLocation"
         val mapsUrl = "${ etMapsUrl.text }"
         val message = "${ etMessage.text }"
+        val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
+        val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
 
         if (!formValidation(phone = phone, name = name, owner = owner, message = message, birthday = birthday, mapsUrl = mapsUrl)) return
 
@@ -144,34 +148,45 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                 val rbOwner = createPartFromString(owner)
                 val rbMapsUrl = createPartFromString(mapsUrl)
                 val rbMessage = createPartFromString(message)
+                val rbUserId = createPartFromString(userId)
+                val rbCurrentName = createPartFromString(currentName)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.sendMessage(name = rbName, phone = rbPhone, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, message = rbMessage)
+                val response = apiService.sendMessage(name = rbName, phone = rbPhone, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, userId = rbUserId, currentName = rbCurrentName, message = rbMessage)
 
                 if (response.isSuccessful) {
 
                     val responseBody = response.body()!!
 
-                    if (responseBody.status == RESPONSE_STATUS_OK) {
+                    when (responseBody.status) {
+                        RESPONSE_STATUS_OK -> {
 
-                        handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Successfully added data!")
-                        loadingState(false)
+                            handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Successfully added data!")
+                            loadingState(false)
 
-                        val resultIntent = Intent()
-                        resultIntent.putExtra("$activityRequestCode", SYNC_NOW)
-                        setResult(RESULT_OK, resultIntent)
-                        finish()
+                            val resultIntent = Intent()
+                            resultIntent.putExtra("$activityRequestCode", SYNC_NOW)
+                            setResult(RESULT_OK, resultIntent)
+                            finish()
 
-                    } else {
+                        }
+                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                        handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Failed to send message!")
-                        loadingState(false)
+                            handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Failed to send! Message: ${ responseBody.message }")
+                            loadingState(false)
 
+                        }
+                        else -> {
+
+                            handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Failed to send!")
+                            loadingState(false)
+
+                        }
                     }
 
                 } else {
 
-                    handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Failed to send message! Error: " + response.message())
+                    handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Failed to send! Error: " + response.message())
                     loadingState(false)
 
                 }

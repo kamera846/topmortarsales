@@ -9,6 +9,7 @@ import android.text.Editable
 import android.text.TextUtils
 import android.text.TextWatcher
 import android.view.Gravity
+import android.util.Log
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
@@ -58,6 +59,7 @@ import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_OWNER
+import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
@@ -101,6 +103,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener,
     private var doubleBackToExitPressedOnce = false
     private lateinit var userCity: String
     private lateinit var userKind: String
+    private var userId: String = ""
 
     // Initialize Search Engine
     private val searchDelayMillis = 500L
@@ -118,7 +121,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener,
         userCity = sessionManager.userCityID()!!
         userKind = sessionManager.userKind()!!
 
-        val userId = sessionManager.userID()!!
+        userId = sessionManager.userID()!!
         val isLoggedIn = sessionManager.isLoggedIn()
 
         if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()) return missingDataHandler()
@@ -158,8 +161,9 @@ class MainActivity : AppCompatActivity(), ItemClickListener,
 //        icMore.visibility = View.VISIBLE
         icToggleNav.visibility = View.VISIBLE
         icSearch.visibility = View.VISIBLE
-        tvTitleBarDescription.visibility = View.VISIBLE
-        tvTitleBarDescription.text = "Hello, ${ sessionManager.userName() }"
+//        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Hello, $it" else "Hello, ${ sessionManager.userName() }"}
+        tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Hello, $it" else ""}
+        tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
         etSearchBox.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Set Floating Action Button
@@ -239,6 +243,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener,
             intent.putExtra(CONST_LOCATION, data.id_city)
             intent.putExtra(CONST_MAPS, data.maps_url)
             intent.putExtra(CONST_ADDRESS, data.address)
+            intent.putExtra(CONST_STATUS, data.store_status)
 //            intent.putExtra(CONST_LOCATION, "1")
         }
 
@@ -264,6 +269,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener,
             when (item.itemId) {
                 R.id.option_sync_now -> {
                     getContacts()
+                    getUserLoggedIn()
                     true
                 }
                 R.id.option_search -> {
@@ -470,6 +476,42 @@ class MainActivity : AppCompatActivity(), ItemClickListener,
 
     }
 
+    private fun getUserLoggedIn() {
+
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.detailUser(userId = userId)
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        val data = response.results[0]
+
+                        sessionManager.setUserID(data.id_user)
+                        sessionManager.setUserName(data.username)
+                        sessionManager.setFullName(data.full_name)
+                        sessionManager.setUserCityID(data.id_city)
+
+//                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Hello, $it" else "Hello, ${ sessionManager.userName() }"}
+                        tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Hello, $it" else ""}
+                        tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> missingDataHandler()
+                    else -> Log.d("TAG USER LOGGED IN", "Failed get data!")
+                }
+
+
+            } catch (e: Exception) {
+                Log.d("TAG USER LOGGED IN", "Failed run service. Exception " + e.message)
+            }
+
+        }
+
+    }
+
     private fun searchContact(key: String) {
 
         loadingState(true)
@@ -527,6 +569,14 @@ class MainActivity : AppCompatActivity(), ItemClickListener,
     }
 
     private fun setRecyclerView(listItem: ArrayList<ContactModel>) {
+
+//        val itemStatus = listOf("", "data", "passive", "active", "blacklist")
+//        var indexItem = 0
+//        for (item in listItem) {
+//            item.store_status = itemStatus[indexItem]
+//            indexItem.let { if (it == 4) indexItem = 0 else indexItem++}
+//        }
+
         val rvAdapter = ContactsRecyclerViewAdapter(listItem, this@MainActivity)
 
         rvListChat.layoutManager = LinearLayoutManager(this@MainActivity)
@@ -588,6 +638,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener,
         sessionManager.setUserKind("")
         sessionManager.setUserID("")
         sessionManager.setUserName("")
+        sessionManager.setFullName("")
         sessionManager.setUserCityID("")
 
         val intent = Intent(this@MainActivity, SplashScreenActivity::class.java)
@@ -651,6 +702,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener,
         super.onResume()
         // Check apps for update
         AppUpdateHelper.checkForUpdates(this)
+        getUserLoggedIn()
 
     }
 

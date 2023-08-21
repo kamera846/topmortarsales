@@ -24,6 +24,7 @@ import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
 import com.topmortar.topmortarsales.commons.LOGGED_IN
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
@@ -60,7 +61,8 @@ class SplashScreenActivity : AppCompatActivity() {
     private lateinit var icEyeNewPasswordClose: ImageView
     private lateinit var etUsername: EditText
     private lateinit var etPassword: EditText
-    private lateinit var etPhone: EditText
+    private lateinit var etUsernameForgot: EditText
+    private lateinit var tvUsernameForgot: TextView
     private lateinit var etOtp1: EditText
     private lateinit var etOtp2: EditText
     private lateinit var etOtp3: EditText
@@ -124,7 +126,8 @@ class SplashScreenActivity : AppCompatActivity() {
 
         etUsername = findViewById(R.id.et_username)
         etPassword = findViewById(R.id.et_password)
-        etPhone = findViewById(R.id.et_phone)
+        etUsernameForgot = findViewById(R.id.et_username_forgot)
+        tvUsernameForgot = findViewById(R.id.tv_username_forgot)
         etNewPassword = findViewById(R.id.et_new_password)
 
         etOtp1 = findViewById(R.id.otp_1)
@@ -341,6 +344,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
                         sessionManager.setUserID(data.id_user)
                         sessionManager.setUserName(data.username)
+                        sessionManager.setFullName(data.full_name)
                         sessionManager.setUserCityID(data.id_city)
 
                         sessionManager.setLoggedIn(LOGGED_IN)
@@ -348,9 +352,9 @@ class SplashScreenActivity : AppCompatActivity() {
                         loadingState(false)
 
                     }
-                    RESPONSE_STATUS_FAIL -> {
+                    RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                        showAlert("Your username or password seems wrong!", 5000)
+                        showAlert("${ response.message }", 5000)
                         loadingState(false)
 
                     }
@@ -362,7 +366,7 @@ class SplashScreenActivity : AppCompatActivity() {
                     }
                     else -> {
 
-                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_CONTACT, "Failed process auth")
+                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_CONTACT, response.message.let { if (!it.isNullOrEmpty()) it else "Failed process auth" })
                         loadingState(false)
 
                     }
@@ -380,18 +384,15 @@ class SplashScreenActivity : AppCompatActivity() {
 
     private fun requestOtpHandler() {
 
-        val phoneUser = "${ etPhone.text }"
+        val usernameForgot = "${ etUsernameForgot.text }".trim().replace(" ", "").toLowerCase()
 
-        if (phoneUser.isEmpty()) {
-            etPhone.error = "Phone number cannot be empty!"
-            etPhone.requestFocus()
-            return
-        } else if (!PhoneHandler.phoneValidation(phoneUser, etPhone)) {
-            etPhone.requestFocus()
+        if (usernameForgot.isEmpty()) {
+            etUsernameForgot.error = "Username cannot be empty!"
+            etUsernameForgot.requestFocus()
             return
         } else {
-            etPhone.error = null
-            etPhone.clearFocus()
+            etUsernameForgot.error = null
+            etUsernameForgot.clearFocus()
         }
 
         loadingState(true)
@@ -407,9 +408,9 @@ class SplashScreenActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val rbPhone = createPartFromString(formatPhoneNumber(phoneUser))
+                val rbUsername = createPartFromString(usernameForgot)
                 val apiService = HttpClient.create()
-                val response = apiService.requestOtp(rbPhone)
+                val response = apiService.requestOtp(rbUsername)
 
                 if (response.isSuccessful) {
 
@@ -569,19 +570,31 @@ class SplashScreenActivity : AppCompatActivity() {
 
                     val responseBody = response.body()!!
 
-                    if (responseBody.status == RESPONSE_STATUS_OK) {
+                    when (responseBody.status) {
+                        RESPONSE_STATUS_OK -> {
 
-                        idUserResetPassword = null
-                        currentSubmitStep += 1
-                        submitHandler(next = true)
-                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "${ responseBody.message }")
-                        loadingState(false)
+                            idUserResetPassword = null
+                            currentSubmitStep += 1
+                            submitHandler(next = true)
+                            handleMessage(
+                                this@SplashScreenActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "${responseBody.message}"
+                            )
+                            loadingState(false)
+                        }
+                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                    } else {
+                            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed reset password! Message: ${ responseBody.message }")
+                            loadingState(false)
 
-                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed reset password!: ${ responseBody.message }")
-                        loadingState(false)
+                        }
+                        else -> {
 
+                            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed reset password!: ${ responseBody.message }")
+                            loadingState(false)
+
+                        }
                     }
 
                 } else {
@@ -603,11 +616,13 @@ class SplashScreenActivity : AppCompatActivity() {
 
         if (isPasswordShow) togglePassword()
 
-//        if (next != null && next == true) currentSubmitStep += 1
         if (previous != null && previous == true) {
             currentSubmitStep -= 1
             if (currentSubmitStep == 0) currentSubmitStep = -1
         }
+
+        // Hide alert
+        cardAlert.visibility = View.GONE
 
         when (currentSubmitStep) {
             0 -> if (submit != null && submit == true) loginHandler()
@@ -621,11 +636,12 @@ class SplashScreenActivity : AppCompatActivity() {
                     inputOtp.visibility = View.GONE
                     inputNewPassword.visibility = View.GONE
                     icBack.visibility = View.VISIBLE
-                    etPhone.visibility = View.VISIBLE
+                    etUsernameForgot.visibility = View.VISIBLE
+                    tvUsernameForgot.visibility = View.VISIBLE
                     tvTitleAuth.text = "Reset Password"
                     btnLogin.text = "Get OTP Code"
 
-                    etPhone.requestFocus()
+                    etUsernameForgot.requestFocus()
                 }
 
             }
@@ -636,7 +652,8 @@ class SplashScreenActivity : AppCompatActivity() {
                     clearInput()
 
                     inputAuth.visibility = View.GONE
-                    etPhone.visibility = View.GONE
+                    etUsernameForgot.visibility = View.GONE
+                    tvUsernameForgot.visibility = View.GONE
                     inputNewPassword.visibility = View.GONE
                     icBack.visibility = View.VISIBLE
                     inputOtp.visibility = View.VISIBLE
@@ -655,7 +672,8 @@ class SplashScreenActivity : AppCompatActivity() {
                     clearInput()
 
                     inputAuth.visibility = View.GONE
-                    etPhone.visibility = View.GONE
+                    etUsernameForgot.visibility = View.GONE
+                    tvUsernameForgot.visibility = View.GONE
                     inputOtp.visibility = View.GONE
                     icBack.visibility = View.GONE
                     inputNewPassword.visibility = View.VISIBLE
@@ -670,7 +688,8 @@ class SplashScreenActivity : AppCompatActivity() {
 
                 inputNewPassword.visibility = View.GONE
                 inputOtp.visibility = View.GONE
-                etPhone.visibility = View.GONE
+                etUsernameForgot.visibility = View.GONE
+                tvUsernameForgot.visibility = View.GONE
                 icBack.visibility = View.GONE
                 inputAuth.visibility = View.VISIBLE
                 tvTitleAuth.text = "Hey, \nLogin Now"
@@ -688,7 +707,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
         etUsername.error = null
         etPassword.error = null
-        etPhone.error = null
+        etUsernameForgot.error = null
         etNewPassword.error = null
         etOtp1.error = null
         etOtp2.error = null
@@ -698,7 +717,7 @@ class SplashScreenActivity : AppCompatActivity() {
         etOtp6.error = null
         etUsername.setText("")
         etPassword.setText("")
-        etPhone.setText("")
+        etUsernameForgot.setText("")
         etNewPassword.setText("")
         etOtp1.setText("")
         etOtp2.setText("")

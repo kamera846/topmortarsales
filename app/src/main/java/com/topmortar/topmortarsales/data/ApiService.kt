@@ -25,6 +25,7 @@ interface ApiService {
 
     @GET(GET_CONTACT)
     suspend fun getContacts(@Query("c") cityId: String): ResponseContactList
+
     @GET(GET_CONTACT)
     suspend fun getContacts(): ResponseContactList
 
@@ -39,6 +40,7 @@ interface ApiService {
         @Part("id_city") cityId: RequestBody,
         @Part("mapsUrl") mapsUrl: RequestBody,
         @Part("address") address: RequestBody,
+        @Part("status") status: RequestBody,
     ): Response<ResponseMessage>
 
     @Multipart
@@ -50,6 +52,8 @@ interface ApiService {
         @Part("tgl_lahir") birthday: RequestBody,
         @Part("id_city") cityId: RequestBody,
         @Part("mapsUrl") mapsUrl: RequestBody,
+        @Part("id_user") userId: RequestBody,
+        @Part("full_name") currentName: RequestBody,
         @Part("message_body") message: RequestBody,
     ): Response<ResponseMessage>
 
@@ -86,6 +90,9 @@ interface ApiService {
     @GET(GET_USERS)
     suspend fun getUsers(): ResponseUsers
 
+    @GET(GET_USERS)
+    suspend fun detailUser(@Query("id") userId: String): ResponseUsers
+
     @Multipart
     @POST(ADD_USERS)
     suspend fun addUser(
@@ -93,6 +100,7 @@ interface ApiService {
         @Part("id_city") cityId: RequestBody,
         @Part("phone_user") phone: RequestBody,
         @Part("username") username: RequestBody,
+        @Part("full_name") fullName: RequestBody,
         @Part("password") password: RequestBody
     ): Response<ResponseMessage>
 
@@ -103,13 +111,14 @@ interface ApiService {
         @Part("level_user") level: RequestBody,
         @Part("id_city") cityId: RequestBody,
         @Part("phone_user") phone: RequestBody,
-        @Part("username") username: RequestBody
+        @Part("username") username: RequestBody,
+        @Part("full_name") fullName: RequestBody
     ): Response<ResponseMessage>
 
     @Multipart
     @POST(REQUEST_OTP)
     suspend fun requestOtp(
-        @Part("phone_user") phone: RequestBody
+        @Part("username") username: RequestBody
     ): Response<ResponseMessage>
 
     @Multipart

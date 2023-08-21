@@ -13,8 +13,11 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -131,21 +134,30 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
 
                     val responseBody = response.body()!!
 
-                    if (responseBody.status == RESPONSE_STATUS_OK) {
+                    when (responseBody.status) {
+                        RESPONSE_STATUS_OK -> {
 
-                        etCityName.setText("")
-                        etCityCode.setText("")
-                        loadingState(false)
-                        handleMessage(context, TAG_RESPONSE_CONTACT, "Successfully added data!")
+                            etCityName.setText("")
+                            etCityCode.setText("")
+                            loadingState(false)
+                            handleMessage(context, TAG_RESPONSE_CONTACT, "Successfully added data!")
 
-                        modalInterface!!.onSubmit(true)
-                        this@AddCityModal.dismiss()
+                            modalInterface!!.onSubmit(true)
+                            this@AddCityModal.dismiss()
 
-                    } else {
+                        }
+                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                        handleMessage(context, TAG_RESPONSE_CONTACT, "Failed added data!")
-                        loadingState(false)
+                            handleMessage(context, TAG_RESPONSE_MESSAGE, "Failed to add! Message: ${ responseBody.message }")
+                            loadingState(false)
 
+                        }
+                        else -> {
+
+                            handleMessage(context, TAG_RESPONSE_CONTACT, "Failed added data!")
+                            loadingState(false)
+
+                        }
                     }
 
                 } else {
