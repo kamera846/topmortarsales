@@ -28,14 +28,19 @@ class InvoiceRecyclerViewAdapter(private val itemClickListener: ItemClickListene
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         private val ivProfile: ImageView = itemView.findViewById(R.id.iv_contact_profile)
+        private val ivUpload: ImageView = itemView.findViewById(R.id.iv_upload)
+        private val ivPrinter: ImageView = itemView.findViewById(R.id.iv_printer)
         private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
 
         fun bind(item: InvoiceModel) {
 
-            ivProfile.setImageResource(R.drawable.person_red)
-            tvContactName.text = item.full_name
-            tvPhoneNumber.text = "${ item.level_user.toLowerCase() } - ${ item.kode_city.toLowerCase() }"
+            ivUpload.visibility = View.VISIBLE
+            ivPrinter.visibility = View.VISIBLE
+
+            ivProfile.setImageResource(R.drawable.file_list_red)
+            tvContactName.text = "Top Mortar Acian Putih"
+            tvPhoneNumber.text = "Qty: 10"
 
         }
 

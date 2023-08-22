@@ -125,7 +125,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private lateinit var btnSendMessage: Button
     private lateinit var btnSaveEdit: Button
-    private lateinit var btnInvoice: Button
+    private lateinit var btnInvoice: LinearLayout
 
     private var activityRequestCode = MAIN_ACTIVITY_REQUEST_CODE
     private var contactId: String? = null

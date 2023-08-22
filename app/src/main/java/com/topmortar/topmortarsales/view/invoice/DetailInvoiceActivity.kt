@@ -101,7 +101,7 @@ class DetailInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.It
         // Set Title Bar
         icBack.visibility = View.VISIBLE
 //        icSearch.visibility = View.VISIBLE
-        titleBar.text = "List customer invoice"
+        titleBar.text = "Surat Jalan"
         titleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
     }
@@ -117,9 +117,11 @@ class DetailInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.It
         val iName = intent.getStringExtra(CONST_NAME)
 
         if (!iName.isNullOrEmpty()) {
-            titleBarDescription.text = iName
+            titleBar.text = iName
+            titleBarDescription.text = "List surat jalan pada toko ini"
             titleBarDescription.visibility = View.VISIBLE
         } else {
+            titleBar.text = "Surat Jalan"
             titleBarDescription.text = ""
             titleBarDescription.visibility = View.GONE
         }
