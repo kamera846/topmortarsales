@@ -120,5 +120,6 @@
         <item>Choose Level</item>
         <item>Admin</item>
         <item>Sales</item>
+        <item>Courier</item>
     </string-array>
 </resources>
