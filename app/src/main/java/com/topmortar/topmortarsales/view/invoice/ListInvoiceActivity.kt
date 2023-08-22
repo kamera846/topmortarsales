@@ -20,7 +20,6 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.InvoiceRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_NAME
-import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -35,7 +34,7 @@ import com.topmortar.topmortarsales.model.InvoiceModel
 import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
-class DetailInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.ItemClickListener {
+class ListInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.ItemClickListener {
 
     private lateinit var scaleAnimation: Animation
 
@@ -56,6 +55,7 @@ class DetailInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.It
     // Global
     private lateinit var sessionManager: SessionManager
     private var doubleBackToExitPressedOnce = false
+    private var contactId: String? = null
 
     // Initialize Search Engine
     private val searchDelayMillis = 500L
@@ -114,6 +114,7 @@ class DetailInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.It
 
     private fun dataActivityValidation() {
 
+        contactId = intent.getStringExtra(CONST_CONTACT_ID)
         val iName = intent.getStringExtra(CONST_NAME)
 
         if (!iName.isNullOrEmpty()) {
@@ -136,7 +137,7 @@ class DetailInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.It
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getInvoices()
+                val response = apiService.getInvoices(processNumber = "2", contactId = contactId!!)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -148,12 +149,12 @@ class DetailInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.It
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        loadingState(true, "Contact data is empty!")
+                        loadingState(true, "Data surat jalan kosong!")
 
                     }
                     else -> {
 
-                        handleMessage(this@DetailInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                        handleMessage(this@ListInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed get data")
                         loadingState(true, getString(R.string.failed_request))
 
                     }
@@ -161,7 +162,7 @@ class DetailInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.It
 
             } catch (e: Exception) {
 
-                handleMessage(this@DetailInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@ListInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
 
             }
@@ -171,11 +172,11 @@ class DetailInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.It
     }
 
     private fun setRecyclerView(listItem: ArrayList<InvoiceModel>) {
-        val rvAdapter = InvoiceRecyclerViewAdapter(this@DetailInvoiceActivity)
+        val rvAdapter = InvoiceRecyclerViewAdapter(this@ListInvoiceActivity)
         rvAdapter.setListItem(listItem)
 
         rvListItem.apply {
-            layoutManager = LinearLayoutManager(this@DetailInvoiceActivity)
+            layoutManager = LinearLayoutManager(this@ListInvoiceActivity)
             adapter = rvAdapter
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 private var lastScrollPosition = 0

@@ -6,6 +6,7 @@ import com.topmortar.topmortarsales.commons.AUTH
 import com.topmortar.topmortarsales.commons.EDIT_CONTACT
 import com.topmortar.topmortarsales.commons.GET_CITY
 import com.topmortar.topmortarsales.commons.GET_CONTACT
+import com.topmortar.topmortarsales.commons.GET_COURIER_STORE
 import com.topmortar.topmortarsales.commons.GET_USERS
 import com.topmortar.topmortarsales.commons.REQUEST_OTP
 import com.topmortar.topmortarsales.commons.SEARCH_CONTACT
@@ -135,6 +136,15 @@ interface ApiService {
         @Part("password") password: RequestBody,
     ): Response<ResponseMessage>
 
-    @GET(GET_USERS)
-    suspend fun getInvoices(): ResponseInvoices
+    @GET(GET_COURIER_STORE)
+    suspend fun getCourierStore(
+        @Query("p") processNumber: String,
+        @Query("cr") courierId: String
+    ): ResponseContactList
+
+    @GET(GET_COURIER_STORE)
+    suspend fun getInvoices(
+        @Query("p") processNumber: String,
+        @Query("str") contactId: String
+    ): ResponseInvoices
 }

@@ -11,6 +11,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.InvoiceModel
 
 class InvoiceRecyclerViewAdapter(private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<InvoiceRecyclerViewAdapter.ViewHolder>() {
@@ -39,8 +40,8 @@ class InvoiceRecyclerViewAdapter(private val itemClickListener: ItemClickListene
             ivPrinter.visibility = View.VISIBLE
 
             ivProfile.setImageResource(R.drawable.file_list_red)
-            tvContactName.text = "Top Mortar Acian Putih"
-            tvPhoneNumber.text = "Qty: 10"
+            tvContactName.text = item.no_surat_jalan
+            tvPhoneNumber.text = "${ item.order_number } - ${ DateFormat.format(item.dalivery_date) }"
 
         }
 

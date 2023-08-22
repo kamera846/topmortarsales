@@ -1,13 +1,14 @@
 package com.topmortar.topmortarsales.model
 
 data class InvoiceModel(
-    val id_user: String = "",
-    val phone_user: String = "",
-    val username: String = "",
-    val password: String = "",
-    val level_user: String = "",
-    val id_city: String = "",
-    val nama_city: String = "",
-    val kode_city: String = "",
-    val full_name: String = ""
+    var id_surat_jalan : String = "",
+    var no_surat_jalan : String = "",
+    var id_contact : String = "",
+    var dalivery_date : String = "",
+    var order_number : String = "",
+    var ship_to_name : String = "",
+    var ship_to_address : String = "",
+    var ship_to_phone : String = "",
+    var id_courier : String = "",
+    var details : ArrayList<DetailInvoiceModel> = ArrayList(),
 )

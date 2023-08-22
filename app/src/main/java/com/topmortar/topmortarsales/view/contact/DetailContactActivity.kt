@@ -64,12 +64,9 @@ import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.modal.SendMessageModal
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
-import com.topmortar.topmortarsales.view.MainActivity
-import com.topmortar.topmortarsales.view.invoice.DetailInvoiceActivity
-import kotlinx.coroutines.coroutineScope
+import com.topmortar.topmortarsales.view.invoice.ListInvoiceActivity
 import kotlinx.coroutines.launch
 import java.util.Calendar
-import java.util.Locale
 
 
 @Suppress("DEPRECATION")
@@ -849,7 +846,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun navigateToDetailInvoice() {
 
-        val intent = Intent(this@DetailContactActivity, DetailInvoiceActivity::class.java)
+        val intent = Intent(this@DetailContactActivity, ListInvoiceActivity::class.java)
 
         intent.putExtra(CONST_CONTACT_ID, contactId)
         if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
