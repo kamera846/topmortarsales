@@ -31,6 +31,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
 
     private lateinit var icBack: ImageView
+    private lateinit var icSyncNow: ImageView
     private lateinit var tvTitleBar: TextView
 
     private lateinit var container: RelativeLayout
@@ -70,6 +71,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
     private fun initVariable() {
 
         icBack = findViewById(R.id.ic_back)
+        icSyncNow = findViewById(R.id.ic_sync_now)
         tvTitleBar = findViewById(R.id.tv_title_bar)
 
         container = findViewById(R.id.container)
@@ -91,6 +93,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
         txtLoading = findViewById(R.id.txt_loading)
 
         // Setup Title Bar
+        icSyncNow.visibility = View.VISIBLE
         tvTitleBar.text = "Detail Surat Jalan"
         tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
@@ -98,6 +101,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
     private fun initClickHandler() {
         icBack.setOnClickListener { backHandler() }
+        icSyncNow.setOnClickListener { getDetail() }
         btnPrint.setOnClickListener { printNow() }
     }
 

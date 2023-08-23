@@ -153,7 +153,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         etSearchBox.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Set Floating Action Button
-        if (sessionManager.userKind() == USER_KIND_ADMIN) btnFab.visibility = View.GONE
+        if (sessionManager.userKind() == USER_KIND_SALES) btnFab.visibility = View.VISIBLE
 
     }
 

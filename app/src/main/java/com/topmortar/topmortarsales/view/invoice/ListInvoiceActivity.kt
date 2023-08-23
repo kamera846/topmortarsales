@@ -49,6 +49,7 @@ class ListInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.Item
     private lateinit var llSearchBox: LinearLayout
     private lateinit var icBack: ImageView
     private lateinit var icSearch: ImageView
+    private lateinit var icSyncNow: ImageView
     private lateinit var icCloseSearch: ImageView
     private lateinit var icClearSearch: ImageView
     private lateinit var etSearchBox: EditText
@@ -93,6 +94,7 @@ class ListInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.Item
         llSearchBox = findViewById(R.id.search_box)
         icBack = llTitleBar.findViewById(R.id.ic_back)
         icSearch = llTitleBar.findViewById(R.id.ic_search)
+        icSyncNow = llTitleBar.findViewById(R.id.ic_sync_now)
         titleBar = llTitleBar.findViewById(R.id.tv_title_bar)
         titleBarDescription = llTitleBar.findViewById(R.id.tv_title_bar_description)
         icCloseSearch = findViewById(R.id.ic_close_search)
@@ -101,7 +103,7 @@ class ListInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.Item
 
         // Set Title Bar
         icBack.visibility = View.VISIBLE
-//        icSearch.visibility = View.VISIBLE
+        icSyncNow.visibility = View.VISIBLE
         titleBar.text = "Surat Jalan"
         titleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
@@ -110,6 +112,7 @@ class ListInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.Item
     private fun initClickHandler() {
 
         icBack.setOnClickListener { finish() }
+        icSyncNow.setOnClickListener { getList() }
 
     }
 
