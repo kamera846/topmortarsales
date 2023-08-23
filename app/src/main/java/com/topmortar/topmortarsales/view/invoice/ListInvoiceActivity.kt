@@ -71,7 +71,7 @@ class ListInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.Item
         supportActionBar?.hide()
         sessionManager = SessionManager(this)
 
-        setContentView(R.layout.activity_detail_invoice)
+        setContentView(R.layout.activity_list_invoice)
 
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
 
@@ -219,12 +219,13 @@ class ListInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.Item
 
     }
 
-    private fun navigateAddUser(data: InvoiceModel? = null) {
-
+    private fun navigateDetailInvoice(data: InvoiceModel? = null) {
+        val intent = Intent(this@ListInvoiceActivity, DetailInvoiceActivity::class.java)
+        startActivity(intent)
     }
 
     override fun onItemClick(data: InvoiceModel?) {
-//        navigateAddUser(data)
+        navigateDetailInvoice(data)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

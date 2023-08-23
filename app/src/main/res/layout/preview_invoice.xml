@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:contentDescription="@string/logo_horizontal"
+            android:src="@drawable/logo_retina"/>
+
+        <TextView
+            android:id="@+id/tv_reference_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:textSize="16sp"
+            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+            android:text="DO-63027648"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+            android:text="Distributor Indonesia"/>
+
+        <TextView
+            android:id="@+id/tv_delivery_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:textSize="16sp"
+            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+            android:text="15-08-2023 11:31:03"/>
+
+        <!-- Shipped to -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Shipped to:"/>
+
+            <TextView
+                android:id="@+id/tv_ship_to_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Naura Jaya"/>
+
+            <TextView
+                android:id="@+id/tv_ship_to_address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="@string/dummy_address"/>
+
+            <TextView
+                android:id="@+id/tv_ship_to_phone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="@string/phone_dummy"/>
+
+        </LinearLayout>
+
+        <!-- Delivery -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Delivery Order"/>
+
+            <TextView
+                android:id="@+id/tv_delivery_order_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Delivery Date: 15-08-2023 11:31:03"/>
+
+            <TextView
+                android:id="@+id/tv_delivery_order_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Order Number: QUO-3592"/>
+
+        </LinearLayout>
+
+        <!-- Order List -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tv_order_list"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Daftar Pesanan:"/>
+
+            <TextView
+                android:id="@+id/tv_qty"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Qty"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_order_list"
+                android:layout_below="@+id/tv_order_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:listitem="@layout/item_invoice_order"/>
+
+        </RelativeLayout>
+
+        <!-- Description -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="48dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Delivery Order"/>
+
+            <TextView
+                android:id="@+id/tv_courier"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Kurir: Kurir Promo 4"/>
+
+            <TextView
+                android:id="@+id/tv_vehicle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Kendaraan: Truk MMI"/>
+
+            <TextView
+                android:id="@+id/tv_vehicle_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:layout_marginBottom="24dp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="No. Polisi: B 9782 CDR"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Received By:"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

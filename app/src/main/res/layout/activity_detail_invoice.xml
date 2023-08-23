@@ -3,54 +3,67 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.user.ManageUserActivity"
-    android:theme="@style/Theme.TopMortarSales"
-    android:id="@+id/rl_parent">
+    android:orientation="vertical"
+    tools:context=".view.contact.DetailContactActivity">
 
-    <RelativeLayout
-        android:id="@+id/rl_header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <include
+        android:id="@+id/title_bar"
+        layout="@layout/component_title_bar_light"/>
 
-        <!-- Title Bar -->
-        <include
-            android:id="@+id/title_bar"
-            layout="@layout/component_title_bar"/>
-
-        <!-- Search Box -->
-        <include
-            android:visibility="gone"
-            android:id="@+id/search_box"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            layout="@layout/component_search_box"/>
-
-    </RelativeLayout>
-
-    <!-- Chat List -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_chat_list"
+    <ScrollView
+        android:id="@+id/preview_invoice_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:listitem="@layout/item_chat_room"
-        android:layout_below="@id/rl_header"/>
+        android:layout_above="@+id/bottom_action"
+        android:layout_below="@+id/title_bar"
+        android:paddingHorizontal="16dp">
 
-    <RelativeLayout
-        android:visibility="gone"
-        android:id="@+id/rl_loading"
-        android:layout_below="@+id/rl_header"
-        android:padding="16dp"
+        <include
+            layout="@layout/preview_invoice"/>
+
+    </ScrollView>
+
+    <!-- Bottom Action -->
+    <LinearLayout
+        android:id="@+id/bottom_action"
+        android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:paddingVertical="16dp"
+        android:paddingHorizontal="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
-        <TextView
-            android:id="@+id/txt_loading"
+        <Button
+            android:id="@+id/btn_print_invoice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="8dp"
+            android:padding="12dp"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:text="Print Now" />
+
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/btn_upload_invoice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:text="@string/txt_loading"
-            android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+            android:layout_marginHorizontal="8dp"
+            android:padding="12dp"
+            android:gravity="center"
+            android:background="@drawable/circular_border_black"
+            android:orientation="horizontal">
 
-    </RelativeLayout>
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="Invoice Image Button"
+                android:src="@drawable/file_list_black" />
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </RelativeLayout>

@@ -36,12 +36,13 @@ class InvoiceRecyclerViewAdapter(private val itemClickListener: ItemClickListene
 
         fun bind(item: InvoiceModel) {
 
-            ivUpload.visibility = View.VISIBLE
-            ivPrinter.visibility = View.VISIBLE
+//            ivUpload.visibility = View.VISIBLE
+//            ivPrinter.visibility = View.VISIBLE
 
             ivProfile.setImageResource(R.drawable.file_list_red)
             tvContactName.text = item.no_surat_jalan
-            tvPhoneNumber.text = "${ item.order_number } - ${ DateFormat.format(item.dalivery_date) }"
+//            tvPhoneNumber.text = "${ item.order_number } - ${ DateFormat.format(item.dalivery_date) }"
+            tvPhoneNumber.text = DateFormat.format(dateString = item.dalivery_date, input = "yyyy-MM-dd hh:mm:ss", format = "dd MMMM yyyy hh.mm")
 
         }
 
