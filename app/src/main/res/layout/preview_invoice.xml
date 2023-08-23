@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/preview_invoice_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
@@ -8,6 +9,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingHorizontal="16dp"
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
@@ -25,7 +27,7 @@
             android:layout_marginBottom="24dp"
             android:textSize="16sp"
             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-            android:text="DO-63027648"/>
+            android:text="Not Set"/>
 
         <TextView
             android:layout_width="wrap_content"
@@ -41,7 +43,7 @@
             android:layout_marginBottom="24dp"
             android:textSize="16sp"
             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-            android:text="15-08-2023 11:31:03"/>
+            android:text="Not Set"/>
 
         <!-- Shipped to -->
         <LinearLayout
@@ -63,7 +65,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-                android:text="Naura Jaya"/>
+                android:text="Not Set"/>
 
             <TextView
                 android:id="@+id/tv_ship_to_address"
@@ -71,7 +73,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-                android:text="@string/dummy_address"/>
+                android:text="Not Set"/>
 
             <TextView
                 android:id="@+id/tv_ship_to_phone"
@@ -79,7 +81,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-                android:text="@string/phone_dummy"/>
+                android:text="Not Set"/>
 
         </LinearLayout>
 
@@ -103,7 +105,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-                android:text="Delivery Date: 15-08-2023 11:31:03"/>
+                android:text="Not Set"/>
 
             <TextView
                 android:id="@+id/tv_delivery_order_number"
@@ -111,7 +113,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-                android:text="Order Number: QUO-3592"/>
+                android:text="Not Set"/>
 
         </LinearLayout>
 
@@ -158,36 +160,40 @@
             android:orientation="vertical">
 
             <TextView
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-                android:text="Delivery Order"/>
+                android:text="Description"/>
 
             <TextView
+                android:visibility="gone"
                 android:id="@+id/tv_courier"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-                android:text="Kurir: Kurir Promo 4"/>
+                android:text="Kurir: Not Set"/>
 
             <TextView
+                android:visibility="gone"
                 android:id="@+id/tv_vehicle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-                android:text="Kendaraan: Truk MMI"/>
+                android:text="Kendaraan: Not Set"/>
 
             <TextView
+                android:visibility="gone"
                 android:id="@+id/tv_vehicle_number"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
                 android:layout_marginBottom="24dp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-                android:text="No. Polisi: B 9782 CDR"/>
+                android:text="No. Polisi: Not Set"/>
 
             <TextView
                 android:layout_width="match_parent"

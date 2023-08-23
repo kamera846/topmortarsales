@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-            android:text="PRD-44231918"/>
+            android:text="Not Set"/>
 
         <TextView
             android:id="@+id/tv_qty_number"
@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-            android:text="10"/>
+            android:text="Not Set"/>
 
     </RelativeLayout>
 
@@ -38,14 +38,15 @@
         android:layout_height="wrap_content"
         android:textSize="16sp"
         android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-        android:text="Top Mortar Thinbed"/>
+        android:text="Not Set"/>
 
     <TextView
+        android:visibility="gone"
         android:id="@+id/tv_product_serial_number"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="16sp"
         android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-        android:text="Serial Number: 44816"/>
+        android:text="Serial Number: Not Set"/>
 
 </LinearLayout>

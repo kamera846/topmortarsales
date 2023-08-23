@@ -4,66 +4,88 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".view.contact.DetailContactActivity">
+    tools:context=".view.invoice.DetailInvoiceActivity">
 
     <include
         android:id="@+id/title_bar"
         layout="@layout/component_title_bar_light"/>
 
-    <ScrollView
-        android:id="@+id/preview_invoice_layout"
+    <RelativeLayout
+        android:visibility="visible"
+        android:id="@+id/container"
+        android:layout_below="@+id/title_bar"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/bottom_action"
-        android:layout_below="@+id/title_bar"
-        android:paddingHorizontal="16dp">
+        android:orientation="vertical">
 
-        <include
-            layout="@layout/preview_invoice"/>
+<!--        <ScrollView-->
+<!--            android:layout_above="@+id/bottom_action"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="match_parent"-->
+<!--            android:paddingHorizontal="16dp">-->
 
-    </ScrollView>
+            <include
+                android:layout_above="@+id/bottom_action"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                layout="@layout/preview_invoice"/>
 
-    <!-- Bottom Action -->
-    <LinearLayout
-        android:id="@+id/bottom_action"
-        android:layout_alignParentBottom="true"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingVertical="16dp"
-        android:paddingHorizontal="8dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+<!--        </ScrollView>-->
 
-        <Button
-            android:id="@+id/btn_print_invoice"
+        <!-- Bottom Action -->
+        <LinearLayout
+            android:id="@+id/bottom_action"
+            android:layout_alignParentBottom="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginHorizontal="8dp"
-            android:padding="12dp"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:text="Print Now" />
-
-        <LinearLayout
-            android:visibility="gone"
-            android:id="@+id/btn_upload_invoice"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="8dp"
-            android:padding="12dp"
-            android:gravity="center"
-            android:background="@drawable/circular_border_black"
+            android:paddingVertical="16dp"
+            android:paddingHorizontal="8dp"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="Invoice Image Button"
-                android:src="@drawable/file_list_black" />
+            <Button
+                android:id="@+id/btn_print_invoice"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginHorizontal="8dp"
+                android:padding="12dp"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:text="Print Now" />
+
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/btn_upload_invoice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:padding="12dp"
+                android:gravity="center"
+                android:background="@drawable/circular_border_black"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Invoice Image Button"
+                    android:src="@drawable/file_list_black" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
-    </LinearLayout>
+    </RelativeLayout>
+
+    <TextView
+        android:visibility="gone"
+        android:id="@+id/txt_loading"
+        android:layout_below="@+id/title_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:padding="16dp"
+        android:text="@string/txt_loading"
+        android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
 </RelativeLayout>

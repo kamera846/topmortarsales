@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.InvoiceRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -220,8 +221,11 @@ class ListInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.Item
     }
 
     private fun navigateDetailInvoice(data: InvoiceModel? = null) {
+
         val intent = Intent(this@ListInvoiceActivity, DetailInvoiceActivity::class.java)
+        intent.putExtra(CONST_INVOICE_ID, data?.id_surat_jalan)
         startActivity(intent)
+
     }
 
     override fun onItemClick(data: InvoiceModel?) {

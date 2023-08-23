@@ -147,4 +147,10 @@ interface ApiService {
         @Query("p") processNumber: String,
         @Query("str") contactId: String
     ): ResponseInvoices
+
+    @GET(GET_COURIER_STORE)
+    suspend fun getInvoicesDetail(
+        @Query("p") processNumber: String,
+        @Query("sj") invoiceId: String
+    ): ResponseInvoices
 }
