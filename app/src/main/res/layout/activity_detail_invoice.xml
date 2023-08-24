@@ -18,19 +18,11 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-<!--        <ScrollView-->
-<!--            android:layout_above="@+id/bottom_action"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="match_parent"-->
-<!--            android:paddingHorizontal="16dp">-->
-
-            <include
-                android:layout_above="@+id/bottom_action"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                layout="@layout/preview_invoice"/>
-
-<!--        </ScrollView>-->
+        <include
+            android:layout_above="@+id/bottom_action"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            layout="@layout/preview_invoice"/>
 
         <!-- Bottom Action -->
         <LinearLayout

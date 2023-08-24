@@ -48,6 +48,8 @@ class DetailInvoiceActivity : AppCompatActivity() {
     private lateinit var tvCourier: TextView
     private lateinit var tvVehicle: TextView
     private lateinit var tvVehicleNumber: TextView
+    private lateinit var tvReceivedBy: TextView
+    private lateinit var tvReceivedDate: TextView
 
     private lateinit var btnPrint: Button
     private lateinit var txtLoading: TextView
@@ -88,6 +90,8 @@ class DetailInvoiceActivity : AppCompatActivity() {
         tvCourier = previewInvoiceLayout.findViewById(R.id.tv_courier)
         tvVehicle = previewInvoiceLayout.findViewById(R.id.tv_vehicle)
         tvVehicleNumber = previewInvoiceLayout.findViewById(R.id.tv_vehicle_number)
+        tvReceivedBy = previewInvoiceLayout.findViewById(R.id.tv_received_by)
+        tvReceivedDate = previewInvoiceLayout.findViewById(R.id.tv_received_date)
 
         btnPrint = findViewById(R.id.btn_print_invoice)
         txtLoading = findViewById(R.id.txt_loading)
@@ -139,6 +143,14 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         tvShipToPhone.text = "${ data.ship_to_phone }"
                         tvDeliveryOrderDate.text = "Delivery Date: ${ data.dalivery_date }"
                         tvDeliveryOrderNumber.text = "Order Number: ${ data.order_number }"
+                        tvCourier.text = "Kurir: ${ data.courier_name }"
+                        tvVehicle.text = "Kendaraan: ${ data.nama_kendaraan }"
+//                        if (isClosing) {
+//                            tvReceivedBy.visibility = View.VISIBLE
+//                            tvReceivedDate.visibility = View.VISIBLE
+//                            tvReceivedBy.text = "${ data.ship_to_name }"
+//                            tvReceivedDate.text = "${ data.dalivery_date }"
+//                        }
 
                         setRecyclerView(response.results[0].details)
                         loadingState(false)

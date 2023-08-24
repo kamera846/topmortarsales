@@ -37,6 +37,13 @@
             android:text="Distributor Indonesia"/>
 
         <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+            android:text="PT TOP MORTAR"/>
+
+        <TextView
             android:id="@+id/tv_delivery_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -156,11 +163,10 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="48dp"
+            android:layout_marginBottom="24dp"
             android:orientation="vertical">
 
             <TextView
-                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
@@ -168,7 +174,6 @@
                 android:text="Description"/>
 
             <TextView
-                android:visibility="gone"
                 android:id="@+id/tv_courier"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -177,7 +182,6 @@
                 android:text="Kurir: Not Set"/>
 
             <TextView
-                android:visibility="gone"
                 android:id="@+id/tv_vehicle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -186,14 +190,20 @@
                 android:text="Kendaraan: Not Set"/>
 
             <TextView
-                android:visibility="gone"
                 android:id="@+id/tv_vehicle_number"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
-                android:layout_marginBottom="24dp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                 android:text="No. Polisi: Not Set"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="48dp"
+            android:orientation="vertical">
 
             <TextView
                 android:layout_width="match_parent"
@@ -201,6 +211,26 @@
                 android:textSize="16sp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                 android:text="Received By:"/>
+
+            <TextView
+                android:visibility="gone"
+                android:id="@+id/tv_received_by"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textAlignment="textEnd"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="NOT SET"/>
+
+            <TextView
+                android:visibility="gone"
+                android:id="@+id/tv_received_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="textEnd"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="NOT SET"/>
 
         </LinearLayout>
 

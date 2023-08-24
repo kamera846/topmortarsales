@@ -10,5 +10,8 @@ data class InvoiceModel(
     var ship_to_address : String = "",
     var ship_to_phone : String = "",
     var id_courier : String = "",
+    var courier_name : String = "",
+    var nama_kendaraan : String = "",
+    var nopol_kendaraan : String = "",
     var details : ArrayList<DetailInvoiceModel> = ArrayList(),
 )
