@@ -44,11 +44,24 @@
                 android:padding="12dp"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:text="Print Now" />
+                android:text="Print" />
+
+            <Button
+                android:id="@+id/btn_closing"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:padding="12dp"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/black_200"
+                android:backgroundTint="@color/light"
+                android:drawableLeft="@drawable/button_img_camera_lens_black"
+                android:text="Closing" />
 
             <LinearLayout
                 android:visibility="gone"
-                android:id="@+id/btn_upload_invoice"
+                android:id="@+id/lnr_closing"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="8dp"
@@ -61,11 +74,17 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:contentDescription="Invoice Image Button"
-                    android:src="@drawable/file_list_black" />
+                    android:src="@drawable/camera_lens_black" />
 
             </LinearLayout>
 
         </LinearLayout>
+
+<!--        <ImageView-->
+<!--            android:id="@+id/img_preview"-->
+<!--            android:layout_above="@id/bottom_action"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"/>-->
 
     </RelativeLayout>
 

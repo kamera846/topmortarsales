@@ -1,14 +1,27 @@
 package com.topmortar.topmortarsales.view.invoice
 
+import android.Manifest
+import android.app.Activity
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.os.Handler
+import android.provider.MediaStore
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,6 +38,11 @@ import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.DetailInvoiceModel
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class DetailInvoiceActivity : AppCompatActivity() {
 
@@ -52,9 +70,17 @@ class DetailInvoiceActivity : AppCompatActivity() {
     private lateinit var tvReceivedDate: TextView
 
     private lateinit var btnPrint: Button
+    private lateinit var btnClosing: Button
+    private lateinit var lnrClosing: LinearLayout
+//    private lateinit var imgPreview: ImageView
     private lateinit var txtLoading: TextView
 
     private var invoiceId: String? = null
+
+    private var cameraPermissionLauncher: ActivityResultLauncher<String>? = null
+    private var imagePicker: ActivityResultLauncher<Intent>? = null
+    private var selectedUri: Uri? = null
+    private var currentPhotoUri: Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,6 +120,9 @@ class DetailInvoiceActivity : AppCompatActivity() {
         tvReceivedDate = previewInvoiceLayout.findViewById(R.id.tv_received_date)
 
         btnPrint = findViewById(R.id.btn_print_invoice)
+        btnClosing = findViewById(R.id.btn_closing)
+        lnrClosing = findViewById(R.id.lnr_closing)
+//        imgPreview = findViewById(R.id.img_preview)
         txtLoading = findViewById(R.id.txt_loading)
 
         // Setup Title Bar
@@ -101,12 +130,43 @@ class DetailInvoiceActivity : AppCompatActivity() {
         tvTitleBar.text = "Detail Surat Jalan"
         tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
+        // Setup Image Picker
+        cameraPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                chooseFile()
+            } else {
+                handleMessage(this@DetailInvoiceActivity, "CAMERA ACCESS DENIED", "Permission camera denied")
+            }
+        }
+        imagePicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data: Intent? = result.data
+                if (data == null || data.data == null) {
+                    selectedUri = currentPhotoUri
+//                    handleMessage(this@DetailInvoiceActivity, "IMAGE CONTENT", "$selectedUri")
+//                    Handler().postDelayed({
+//                        currentPhotoUri?.let {
+//                            val contentResolver = contentResolver
+//                            contentResolver.delete(it, null, null)
+//                        }
+//                    }, 2000)
+                } else {
+                    selectedUri = data.data
+//                    handleMessage(this@DetailInvoiceActivity, "IMAGE CONTENT", "$selectedUri")
+                }
+//                imgPreview.setImageURI(selectedUri)
+//                imgPreview.setOnClickListener { handleMessage(this@DetailInvoiceActivity, "IMAGE CONTENT", "$selectedUri") }
+            }
+        }
+
     }
 
     private fun initClickHandler() {
         icBack.setOnClickListener { backHandler() }
         icSyncNow.setOnClickListener { getDetail() }
         btnPrint.setOnClickListener { printNow() }
+        btnClosing.setOnClickListener { chooseFile() }
+        lnrClosing.setOnClickListener { chooseFile() }
     }
 
     private fun dataActivityValidation() {
@@ -145,6 +205,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         tvDeliveryOrderNumber.text = "Order Number: ${ data.order_number }"
                         tvCourier.text = "Kurir: ${ data.courier_name }"
                         tvVehicle.text = "Kendaraan: ${ data.nama_kendaraan }"
+                        tvVehicleNumber.text = "No. Polisi: ${ data.nopol_kendaraan }"
 //                        if (isClosing) {
 //                            tvReceivedBy.visibility = View.VISIBLE
 //                            tvReceivedDate.visibility = View.VISIBLE
@@ -231,6 +292,37 @@ class DetailInvoiceActivity : AppCompatActivity() {
     }
 
     private fun printNow() {}
+
+    private fun chooseFile() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+
+            // Create a file to store the captured image
+            val photoFile: File? = createImageFile()
+
+            if (photoFile != null) {
+                val photoUri: Uri = FileProvider.getUriForFile(this, "com.topmortar.topmortarsales.fileprovider", photoFile)
+                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+                currentPhotoUri = photoUri
+            }
+
+            val chooserIntent = Intent.createChooser(galleryIntent, "Select Image")
+            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(cameraIntent))
+
+            imagePicker!!.launch(chooserIntent)
+        } else {
+            cameraPermissionLauncher!!.launch(Manifest.permission.CAMERA)
+        }
+    }
+
+    @Throws(IOException::class)
+    private fun createImageFile(): File? {
+        // Create an image file name
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val storageDir: File? = getExternalFilesDir("Invoices")
+        return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
+    }
 
     private fun backHandler() {
         finish()
