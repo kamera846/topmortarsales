@@ -13,6 +13,7 @@ import com.topmortar.topmortarsales.commons.SEARCH_CONTACT
 import com.topmortar.topmortarsales.commons.SEND_MESSAGE
 import com.topmortar.topmortarsales.commons.UPDATE_PASSWORD
 import com.topmortar.topmortarsales.commons.VERIFY_OTP
+import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.response.ResponseAuth
 import com.topmortar.topmortarsales.response.ResponseCities
 import com.topmortar.topmortarsales.response.ResponseContactList
@@ -152,5 +153,12 @@ interface ApiService {
     suspend fun getInvoicesDetail(
         @Query("p") processNumber: String,
         @Query("sj") invoiceId: String
+    ): ResponseInvoices
+
+    @Multipart
+    @POST(GET_COURIER_STORE)
+    suspend fun printInvoice(
+        @Part("command") command: RequestBody = createPartFromString("print"),
+        @Part("id_surat_jalan") invoiceId: RequestBody
     ): ResponseInvoices
 }

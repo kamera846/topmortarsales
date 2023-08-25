@@ -2,6 +2,8 @@ package com.topmortar.topmortarsales.view.invoice
 
 import android.Manifest
 import android.app.Activity
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -17,9 +19,12 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
@@ -28,11 +33,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.InvoiceOrderRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
+import com.topmortar.topmortarsales.commons.REQUEST_BLUETOOTH_PERMISSIONS
+import com.topmortar.topmortarsales.commons.REQUEST_ENABLE_BLUETOOTH
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
+import com.topmortar.topmortarsales.commons.TOAST_LONG
+import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.utils.BluetoothPrinterManager
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
+import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
@@ -81,6 +92,8 @@ class DetailInvoiceActivity : AppCompatActivity() {
     private var imagePicker: ActivityResultLauncher<Intent>? = null
     private var selectedUri: Uri? = null
     private var currentPhotoUri: Uri? = null
+    private lateinit var bluetoothAdapter: BluetoothAdapter
+    private var printerManager = BluetoothPrinterManager()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -129,6 +142,10 @@ class DetailInvoiceActivity : AppCompatActivity() {
         icSyncNow.visibility = View.VISIBLE
         tvTitleBar.text = "Detail Surat Jalan"
         tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
+
+        // Setup Printer
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        printerManager.setContext(this)
 
         // Setup Image Picker
         cameraPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -291,7 +308,21 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
     }
 
-    private fun printNow() {}
+    private fun printingState(state: Boolean) {
+
+        if (state) {
+
+            btnPrint.text = "Printing..."
+            btnPrint.isEnabled = false
+
+        } else {
+
+            btnPrint.text = "Print"
+            btnPrint.isEnabled = true
+
+        }
+
+    }
 
     private fun chooseFile() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
@@ -328,7 +359,181 @@ class DetailInvoiceActivity : AppCompatActivity() {
         finish()
     }
 
+    private fun printNow() {
+
+        if (hasBluetoothPermissions()) {
+            if (bluetoothAdapter.isEnabled) {
+                if (checkPermission()) {
+                    val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter.bondedDevices
+                    showPrinterSelectionDialog(pairedDevices)
+                }
+            } else {
+                val enableBluetoothIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BLUETOOTH)
+            }
+        } else requestBluetoothPermissions()
+
+    }
+
+    private fun showPrinterSelectionDialog(devices: Set<BluetoothDevice>?) {
+        if (checkPermission()) {
+            val deviceList = devices?.toList() ?: emptyList()
+            val deviceNames = deviceList.map { it.name }.toTypedArray()
+
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Select printer device")
+            builder.setItems(deviceNames) { _, which ->
+                val selectedDevice = deviceList[which]
+                executePrinter(selectedDevice)
+                Toast.makeText(this, "Try to connect with: ${ selectedDevice.name }", TOAST_SHORT).show()
+            }
+            builder.show()
+        }
+    }
+
+    private fun checkPermission(): Boolean {
+        return ActivityCompat.checkSelfPermission(
+            this,
+            Manifest.permission.BLUETOOTH
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun hasBluetoothPermissions(): Boolean {
+        return (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) == PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED
+                && ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED)
+    }
+
+    private fun requestBluetoothPermissions() {
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.BLUETOOTH_ADMIN,
+                Manifest.permission.BLUETOOTH_SCAN,
+                Manifest.permission.BLUETOOTH_CONNECT,
+            ), REQUEST_BLUETOOTH_PERMISSIONS
+        )
+    }
+
+    private fun executePrinter(device: BluetoothDevice) {
+
+        // Enter new line in the beginning
+        val gap = 1
+        val starterBytes = ArrayList<ByteArray>()
+        starterBytes.add(printerManager.textEnter(gap))
+        printerManager.connectToDevice(device, starterBytes)
+
+        printingState(true)
+
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.printInvoice(invoiceId = createPartFromString(invoiceId!!))
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        val data = response.results[0]
+                        val orders = data.details
+
+                        val txtReferenceNumber = "${ data.no_surat_jalan }"
+                        val txtDeliveryDate = "${ data.dalivery_date }"
+                        val txtShipToName = "${ data.ship_to_name }"
+                        val txtShipToAddress = "${ data.ship_to_address }"
+                        val txtShipToPhone = "${ data.ship_to_phone }"
+                        val txtDeliveryOrderDate = "Delivery Date: ${ data.dalivery_date }"
+                        val txtDeliveryOrderNumber = "Order Number: ${ data.order_number }"
+                        val txtCourier = "Kurir: ${ data.courier_name }"
+                        val txtVehicle = "Kendaraan: ${ data.nama_kendaraan }"
+                        val txtVehicleNumber = "No. Polisi: ${ data.nopol_kendaraan }"
+
+                        val bytes = ArrayList<ByteArray>()
+                        bytes.add(printerManager.textCenter(txtReferenceNumber))
+                        bytes.add(printerManager.textEnter(gap))
+                        bytes.add(printerManager.textCenter("Distributor Indonesia"))
+                        bytes.add(printerManager.textCenter("PT TOP MORTAR"))
+                        bytes.add(printerManager.textCenter(txtDeliveryDate))
+                        bytes.add(printerManager.textEnter(gap))
+                        bytes.add(printerManager.textLeft("Shipped to:"))
+                        bytes.add(printerManager.textLeft(txtShipToName))
+                        bytes.add(printerManager.textLeft(txtShipToAddress))
+                        bytes.add(printerManager.textLeft(txtShipToPhone))
+                        bytes.add(printerManager.textEnter(gap))
+                        bytes.add(printerManager.textLeft("Delivery Order"))
+                        bytes.add(printerManager.textLeft(txtDeliveryOrderDate))
+                        bytes.add(printerManager.textLeft(txtDeliveryOrderNumber))
+                        bytes.add(printerManager.textEnter(gap))
+                        bytes.add(printerManager.textBetween("Daftar Pesanan", "Qty"))
+                        orders.forEach {
+                            bytes.add(printerManager.textBetween(it.id_produk, it.qty_produk))
+                            bytes.add(printerManager.textLeft(it.nama_produk))
+                            bytes.add(printerManager.textEnter(gap))
+                        }
+                        bytes.add(printerManager.textLeft("Description"))
+                        bytes.add(printerManager.textLeft(txtCourier))
+                        bytes.add(printerManager.textLeft(txtVehicle))
+                        bytes.add(printerManager.textLeft(txtVehicleNumber))
+                        bytes.add(printerManager.textEnter(gap))
+                        bytes.add(printerManager.textLeft("Received By:"))
+                        bytes.add(printerManager.textEnter(gap*4))
+
+                        Handler().postDelayed({
+                            printerManager.connectToDevice(device, bytes)
+                            Handler().postDelayed({
+                                printingState(false)
+                            }, 1000)
+                        }, 1000)
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        handleMessage(this@DetailInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed to print: Detail surat jalan kosong!")
+                        printingState(false)
+
+                    }
+                    else -> {
+
+                        handleMessage(this@DetailInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed to print")
+                        printingState(false)
+
+                    }
+                }
+
+            } catch (e: Exception) {
+
+                handleMessage(this@DetailInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                printingState(false)
+
+            }
+
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == REQUEST_BLUETOOTH_PERMISSIONS) {
+            if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+                printNow()
+                return
+            }
+        }
+        Toast.makeText(this, "Request permission denied", TOAST_SHORT).show()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_ENABLE_BLUETOOTH) {
+            if (resultCode == Activity.RESULT_OK) printNow()
+            else Toast.makeText(this, "Bluetooth still inactive", TOAST_SHORT).show()
+        }
+    }
+
     override fun onBackPressed() {
         backHandler()
     }
+
+
 }

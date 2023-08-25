@@ -42,7 +42,7 @@
         </provider>
 
         <activity
-            android:name=".view.SplashScreenActivity"
+            android:name=".view.TestPrintActivity"
             android:exported="false" />
         <activity
             android:name=".view.invoice.DetailInvoiceActivity"
@@ -69,7 +69,7 @@
             android:name=".view.MainActivity"
             android:exported="false" />
         <activity
-            android:name=".view.TestPrintActivity"
+            android:name=".view.SplashScreenActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
