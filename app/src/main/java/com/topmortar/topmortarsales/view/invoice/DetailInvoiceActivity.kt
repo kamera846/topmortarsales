@@ -158,18 +158,18 @@ class DetailInvoiceActivity : AppCompatActivity() {
         imagePicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val data: Intent? = result.data
-                if (data == null || data.data == null) {
-                    selectedUri = currentPhotoUri
-//                    handleMessage(this@DetailInvoiceActivity, "IMAGE CONTENT", "$selectedUri")
-//                    Handler().postDelayed({
-//                        currentPhotoUri?.let {
-//                            val contentResolver = contentResolver
-//                            contentResolver.delete(it, null, null)
-//                        }
-//                    }, 2000)
+                selectedUri = if (data == null || data.data == null) {
+                    currentPhotoUri
+            //                    handleMessage(this@DetailInvoiceActivity, "IMAGE CONTENT", "$selectedUri")
+            //                    Handler().postDelayed({
+            //                        currentPhotoUri?.let {
+            //                            val contentResolver = contentResolver
+            //                            contentResolver.delete(it, null, null)
+            //                        }
+            //                    }, 2000)
                 } else {
-                    selectedUri = data.data
-//                    handleMessage(this@DetailInvoiceActivity, "IMAGE CONTENT", "$selectedUri")
+                    data.data
+            //                    handleMessage(this@DetailInvoiceActivity, "IMAGE CONTENT", "$selectedUri")
                 }
 //                imgPreview.setImageURI(selectedUri)
 //                imgPreview.setOnClickListener { handleMessage(this@DetailInvoiceActivity, "IMAGE CONTENT", "$selectedUri") }
@@ -219,7 +219,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         tvShipToAddress.text = "${ data.ship_to_address }"
                         tvShipToPhone.text = "${ data.ship_to_phone }"
                         tvDeliveryOrderDate.text = "Delivery Date: ${ data.dalivery_date }"
-                        tvDeliveryOrderNumber.text = "Order Number: ${ data.order_number }"
+//                        tvDeliveryOrderNumber.text = "Order Number: ${ data.order_number }"
                         tvCourier.text = "Kurir: ${ data.courier_name }"
                         tvVehicle.text = "Kendaraan: ${ data.nama_kendaraan }"
                         tvVehicleNumber.text = "No. Polisi: ${ data.nopol_kendaraan }"
@@ -464,7 +464,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         bytes.add(printerManager.textEnter(gap))
                         bytes.add(printerManager.textLeft("Delivery Order"))
                         bytes.add(printerManager.textLeft(txtDeliveryOrderDate))
-                        bytes.add(printerManager.textLeft(txtDeliveryOrderNumber))
+//                        bytes.add(printerManager.textLeft(txtDeliveryOrderNumber))
                         bytes.add(printerManager.textEnter(gap))
                         bytes.add(printerManager.textBetween("Daftar Pesanan", "Qty"))
                         orders.forEach {
