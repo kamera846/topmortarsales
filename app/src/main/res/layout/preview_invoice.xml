@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/preview_invoice_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingHorizontal="16dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:contentDescription="@string/logo_horizontal"
+            android:src="@drawable/logo_retina"/>
+
+        <TextView
+            android:id="@+id/tv_reference_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:textSize="16sp"
+            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+            android:text="Not Set"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+            android:text="Distributor Indonesia"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+            android:text="PT TOP MORTAR"/>
+
+        <TextView
+            android:id="@+id/tv_delivery_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:textSize="16sp"
+            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+            android:text="Not Set"/>
+
+        <!-- Shipped to -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Shipped to:"/>
+
+            <TextView
+                android:id="@+id/tv_ship_to_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Not Set"/>
+
+            <TextView
+                android:id="@+id/tv_ship_to_address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Not Set"/>
+
+            <TextView
+                android:id="@+id/tv_ship_to_phone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Not Set"/>
+
+        </LinearLayout>
+
+        <!-- Delivery -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Delivery Order"/>
+
+            <TextView
+                android:id="@+id/tv_delivery_order_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Not Set"/>
+
+            <TextView
+                android:id="@+id/tv_delivery_order_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Not Set"/>
+
+        </LinearLayout>
+
+        <!-- Order List -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tv_order_list"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Daftar Pesanan:"/>
+
+            <TextView
+                android:id="@+id/tv_qty"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentTop="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Qty"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_order_list"
+                android:layout_below="@+id/tv_order_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:listitem="@layout/item_invoice_order"/>
+
+        </RelativeLayout>
+
+        <!-- Description -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Description"/>
+
+            <TextView
+                android:id="@+id/tv_courier"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Kurir: Not Set"/>
+
+            <TextView
+                android:id="@+id/tv_vehicle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Kendaraan: Not Set"/>
+
+            <TextView
+                android:id="@+id/tv_vehicle_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="No. Polisi: Not Set"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="48dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="Received By:"/>
+
+            <TextView
+                android:visibility="gone"
+                android:id="@+id/tv_received_by"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textAlignment="textEnd"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="NOT SET"/>
+
+            <TextView
+                android:visibility="gone"
+                android:id="@+id/tv_received_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAlignment="textEnd"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:text="NOT SET"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

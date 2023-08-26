@@ -670,23 +670,48 @@
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:orientation="vertical">
+        android:paddingVertical="16dp"
+        android:paddingHorizontal="8dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/btn_send_message"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="8dp"
             android:padding="12dp"
             android:textSize="18sp"
             android:textStyle="bold"
             android:text="@string/send_message" />
+
+        <LinearLayout
+            android:visibility="visible"
+            android:id="@+id/btn_invoice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:padding="12dp"
+            android:gravity="center"
+            android:background="@drawable/circular_border_black"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:contentDescription="Invoice Image Button"
+                android:src="@drawable/file_list_black" />
+
+        </LinearLayout>
 
         <Button
             android:visibility="gone"
             android:id="@+id/btn_save_edit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginHorizontal="8dp"
             android:padding="12dp"
             android:textSize="18sp"
             android:textStyle="bold"

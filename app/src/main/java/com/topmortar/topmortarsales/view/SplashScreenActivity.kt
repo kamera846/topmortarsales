@@ -21,6 +21,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.LOGGED_IN
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
@@ -30,6 +32,7 @@ import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.KeyboardHandler
 import com.topmortar.topmortarsales.commons.utils.KeyboardHandler.showKeyboard
@@ -339,8 +342,11 @@ class SplashScreenActivity : AppCompatActivity() {
                         val results = response.results
                         val data = results[0]
 
-                        if (data.level_user == AUTH_LEVEL_ADMIN ) sessionManager.setUserKind(USER_KIND_ADMIN)
-                        else sessionManager.setUserKind(USER_KIND_SALES)
+                        when (data.level_user) {
+                            AUTH_LEVEL_ADMIN -> sessionManager.setUserKind(USER_KIND_ADMIN)
+                            AUTH_LEVEL_COURIER -> sessionManager.setUserKind(USER_KIND_COURIER)
+                            else -> sessionManager.setUserKind(USER_KIND_SALES)
+                        }
 
                         sessionManager.setUserID(data.id_user)
                         sessionManager.setUserName(data.username)

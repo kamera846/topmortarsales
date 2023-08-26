@@ -57,6 +57,7 @@ import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
@@ -152,7 +153,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         etSearchBox.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Set Floating Action Button
-        if (sessionManager.userKind() == USER_KIND_ADMIN) btnFab.visibility = View.GONE
+        if (sessionManager.userKind() == USER_KIND_SALES) btnFab.visibility = View.VISIBLE
 
     }
 
@@ -423,7 +424,12 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = if (userKind == USER_KIND_ADMIN) apiService.getContacts() else apiService.getContacts(cityId = userCity)
+                var response = apiService.getContacts()
+                when (userKind) {
+                    USER_KIND_ADMIN -> response = apiService.getContacts()
+                    USER_KIND_COURIER -> response = apiService.getCourierStore(processNumber = "1", courierId = userId)
+                    else -> response = apiService.getContacts(cityId = userCity)
+                }
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {

@@ -6,15 +6,18 @@ import com.topmortar.topmortarsales.commons.AUTH
 import com.topmortar.topmortarsales.commons.EDIT_CONTACT
 import com.topmortar.topmortarsales.commons.GET_CITY
 import com.topmortar.topmortarsales.commons.GET_CONTACT
+import com.topmortar.topmortarsales.commons.GET_COURIER_STORE
 import com.topmortar.topmortarsales.commons.GET_USERS
 import com.topmortar.topmortarsales.commons.REQUEST_OTP
 import com.topmortar.topmortarsales.commons.SEARCH_CONTACT
 import com.topmortar.topmortarsales.commons.SEND_MESSAGE
 import com.topmortar.topmortarsales.commons.UPDATE_PASSWORD
 import com.topmortar.topmortarsales.commons.VERIFY_OTP
+import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.response.ResponseAuth
 import com.topmortar.topmortarsales.response.ResponseCities
 import com.topmortar.topmortarsales.response.ResponseContactList
+import com.topmortar.topmortarsales.response.ResponseInvoices
 import com.topmortar.topmortarsales.response.ResponseMessage
 import com.topmortar.topmortarsales.response.ResponseUsers
 import okhttp3.RequestBody
@@ -133,4 +136,29 @@ interface ApiService {
         @Part("id_user") userID: RequestBody,
         @Part("password") password: RequestBody,
     ): Response<ResponseMessage>
+
+    @GET(GET_COURIER_STORE)
+    suspend fun getCourierStore(
+        @Query("p") processNumber: String,
+        @Query("cr") courierId: String
+    ): ResponseContactList
+
+    @GET(GET_COURIER_STORE)
+    suspend fun getInvoices(
+        @Query("p") processNumber: String,
+        @Query("str") contactId: String
+    ): ResponseInvoices
+
+    @GET(GET_COURIER_STORE)
+    suspend fun getInvoicesDetail(
+        @Query("p") processNumber: String,
+        @Query("sj") invoiceId: String
+    ): ResponseInvoices
+
+    @Multipart
+    @POST(GET_COURIER_STORE)
+    suspend fun printInvoice(
+        @Part("command") command: RequestBody = createPartFromString("print"),
+        @Part("id_surat_jalan") invoiceId: RequestBody
+    ): ResponseInvoices
 }

@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.MainActivity"
+    tools:context=".view.user.ManageUserActivity"
     android:theme="@style/Theme.TopMortarSales"
     android:id="@+id/rl_parent">
 
@@ -52,18 +52,5 @@
             android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
     </RelativeLayout>
-
-    <!-- Floating Action Button -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:visibility="gone"
-        android:id="@+id/btn_fab"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="16dp"
-        android:contentDescription="@string/fab_description"
-        android:src="@mipmap/ic_add_white" />
 
 </RelativeLayout>

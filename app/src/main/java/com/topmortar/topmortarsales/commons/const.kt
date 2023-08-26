@@ -24,12 +24,15 @@ const val ADD_USERS = "users.php"
 const val REQUEST_OTP = "reqOtp.php"
 const val VERIFY_OTP = "verifyOtp.php"
 const val UPDATE_PASSWORD = "updatePassword.php"
+const val GET_COURIER_STORE = "suratjalan.php"
 
 // Request Code
 const val ACTIVITY_REQUEST_CODE = "activity_request_code"
 const val MAIN_ACTIVITY_REQUEST_CODE = 111
 const val DETAIL_ACTIVITY_REQUEST_CODE = 222
 const val MANAGE_USER_ACTIVITY_REQUEST_CODE = 333
+const val REQUEST_ENABLE_BLUETOOTH = 444
+const val REQUEST_BLUETOOTH_PERMISSIONS = 555
 
 // Tag Log
 const val TAG_RESPONSE_CONTACT = "TAG RESPONSE CONTACT"
@@ -43,6 +46,9 @@ const val EMPTY_FIELD_VALUE = "Not set"
 
 // Props
 const val CONST_CONTACT_ID = "const_contact_id"
+const val CONST_USER_ID = "const_user_id"
+const val CONST_INVOICE_ID = "const_invoice_id"
+
 const val CONST_OWNER = "const_owner"
 const val CONST_LOCATION = "const_location"
 const val CONST_PHONE = "const_phone"
@@ -52,7 +58,6 @@ const val CONST_BIRTHDAY = "const_birthday"
 const val CONST_MAPS = "const_maps"
 const val CONST_STATUS = "const_status"
 const val CONST_ADDRESS = "const_address"
-const val CONST_USER_ID = "const_user_id"
 const val CONST_USER_LEVEL = "const_user_level"
 const val CONST_FULL_NAME = "const_full_name"
 
@@ -71,8 +76,10 @@ const val STATUS_CONTACT_BLACKLIST = "blacklist"
 // User Kind
 const val USER_KIND_ADMIN = "user_kind_admin"
 const val USER_KIND_SALES = "user_kind_sales"
+const val USER_KIND_COURIER = "user_kind_courier"
 const val AUTH_LEVEL_ADMIN = "admin"
 const val AUTH_LEVEL_SALES = "sales"
+const val AUTH_LEVEL_COURIER = "courier"
 
 // DUMMY
 const val DUMMY_ADMIN_USERNAME = "topmortar"
