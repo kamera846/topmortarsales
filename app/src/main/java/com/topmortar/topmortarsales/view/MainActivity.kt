@@ -146,7 +146,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
         // Set Title Bar
         icMore.visibility = View.VISIBLE
-        icSearch.visibility = View.VISIBLE
 //        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Hello, $it" else "Hello, ${ sessionManager.userName() }"}
         tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Hello, $it" else ""}
         tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
@@ -154,6 +153,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
         // Set Floating Action Button
         if (sessionManager.userKind() == USER_KIND_SALES) btnFab.visibility = View.VISIBLE
+        if (sessionManager.userKind() != USER_KIND_COURIER) icSearch.visibility = View.VISIBLE
 
     }
 
