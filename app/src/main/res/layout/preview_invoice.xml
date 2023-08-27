@@ -115,6 +115,7 @@
                 android:text="Not Set"/>
 
             <TextView
+                android:visibility="gone"
                 android:id="@+id/tv_delivery_order_number"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

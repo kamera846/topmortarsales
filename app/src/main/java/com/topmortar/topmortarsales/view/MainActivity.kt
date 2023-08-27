@@ -242,7 +242,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         val cityItem = popupMenu.menu.findItem(R.id.option_city)
 
         searchItem.isVisible = false
-        if (sessionManager.userKind() == USER_KIND_SALES) {
+        if (sessionManager.userKind() != USER_KIND_ADMIN) {
             userItem.isVisible = false
             cityItem.isVisible = false
         }
