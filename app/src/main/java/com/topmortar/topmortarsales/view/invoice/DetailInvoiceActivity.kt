@@ -468,8 +468,9 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         bytes.add(printerManager.textEnter(gap))
                         bytes.add(printerManager.textBetween("Daftar Pesanan", "Qty"))
                         orders.forEach {
-                            bytes.add(printerManager.textBetween(it.id_produk, it.qty_produk))
-                            bytes.add(printerManager.textLeft(it.nama_produk))
+//                            bytes.add(printerManager.textBetween(it.id_produk, it.qty_produk))
+//                            bytes.add(printerManager.textLeft(it.nama_produk))
+                            bytes.add(printerManager.textBetween(it.nama_produk, it.qty_produk))
                             bytes.add(printerManager.textEnter(gap))
                         }
                         bytes.add(printerManager.textLeft("Description"))
@@ -519,8 +520,8 @@ class DetailInvoiceActivity : AppCompatActivity() {
                 printNow()
                 return
             }
+            Toast.makeText(this, "Request permission denied", TOAST_SHORT).show()
         }
-        Toast.makeText(this, "Request permission denied", TOAST_SHORT).show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
