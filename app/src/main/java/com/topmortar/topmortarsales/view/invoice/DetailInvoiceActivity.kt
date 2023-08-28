@@ -40,6 +40,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.utils.BluetoothPrinterManager
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
@@ -82,6 +83,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
     private lateinit var btnPrint: Button
     private lateinit var btnClosing: Button
+    private lateinit var btnBottomAction: LinearLayout
     private lateinit var lnrClosing: LinearLayout
 //    private lateinit var imgPreview: ImageView
     private lateinit var txtLoading: TextView
@@ -134,6 +136,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
         btnPrint = findViewById(R.id.btn_print_invoice)
         btnClosing = findViewById(R.id.btn_closing)
+        btnBottomAction = findViewById(R.id.bottom_action)
         lnrClosing = findViewById(R.id.lnr_closing)
 //        imgPreview = findViewById(R.id.img_preview)
         txtLoading = findViewById(R.id.txt_loading)
@@ -144,8 +147,11 @@ class DetailInvoiceActivity : AppCompatActivity() {
         tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Setup Printer
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-        printerManager.setContext(this)
+        if (sessionManager.userKind() == USER_KIND_COURIER) {
+            btnBottomAction.visibility = View.VISIBLE
+            bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+            printerManager.setContext(this)
+        }
 
         // Setup Image Picker
         cameraPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -471,6 +477,9 @@ class DetailInvoiceActivity : AppCompatActivity() {
 //                            bytes.add(printerManager.textBetween(it.id_produk, it.qty_produk))
 //                            bytes.add(printerManager.textLeft(it.nama_produk))
                             bytes.add(printerManager.textBetween(it.nama_produk, it.qty_produk))
+                            if (it.is_bonus == "1") {
+                                bytes.add(printerManager.textLeft("Free"))
+                            }
                             bytes.add(printerManager.textEnter(gap))
                         }
                         bytes.add(printerManager.textLeft("Description"))

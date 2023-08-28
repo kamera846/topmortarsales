@@ -26,6 +26,7 @@
 
         <!-- Bottom Action -->
         <LinearLayout
+            android:visibility="gone"
             android:id="@+id/bottom_action"
             android:layout_alignParentBottom="true"
             android:layout_width="match_parent"
