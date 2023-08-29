@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -58,12 +59,19 @@ class BluetoothPrinterManager {
                         }
                         outputStream.flush()
 
-                        // Tambahkan kode untuk menangani respons atau tindakan setelah mencetak
                     } catch (e: Exception) {
-                        // Tangani jika terjadi kesalahan pada saat menghubungkan atau mencetak
+//                        handleMessage(context!!, "FAILED CONNECT PRINTER", "Failed to connect ${ device.name }. Please try again!")
+//                        Log.e("FAILED CONNECT PRINTER", "Stacktrace: ${ e.stackTrace }")
+//                        Log.e("FAILED CONNECT PRINTER", "Error Message: ${ e.message }")
+
                     }
+
                 }
+
             }
+
         }
+
     }
+
 }

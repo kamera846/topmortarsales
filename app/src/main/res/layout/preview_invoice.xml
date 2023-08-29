@@ -222,6 +222,7 @@
                 android:textStyle="bold"
                 android:textAlignment="textEnd"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                android:textColor="@color/primary"
                 android:text="NOT SET"/>
 
             <TextView

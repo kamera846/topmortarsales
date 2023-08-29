@@ -81,12 +81,6 @@
 
         </LinearLayout>
 
-<!--        <ImageView-->
-<!--            android:id="@+id/img_preview"-->
-<!--            android:layout_above="@id/bottom_action"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"/>-->
-
     </RelativeLayout>
 
     <TextView
