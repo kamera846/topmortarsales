@@ -8,7 +8,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.os.Handler
 import android.provider.MediaStore
 import android.view.View
@@ -40,7 +39,6 @@ import com.topmortar.topmortarsales.commons.REQUEST_ENABLE_BLUETOOTH
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
-import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.utils.BluetoothPrinterManager
@@ -196,7 +194,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
         val iInvoiceId = intent.getStringExtra(CONST_INVOICE_ID)
 
         if (!iInvoiceId.isNullOrEmpty() ) {
-            invoiceId = iInvoiceId
+            invoiceId = iInvoiceId.toString()
         }
 
         getDetail()
@@ -220,7 +218,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         isClosing = data.is_closing == "1"
 
                         tvReferenceNumber.text = "${ data.no_surat_jalan }"
-                        tvDeliveryDate.text = "${ data.dalivery_date }"
+//                        tvDeliveryDate.text = "${ data.dalivery_date }"
                         tvShipToName.text = "${ data.ship_to_name }"
                         tvShipToAddress.text = "${ data.ship_to_address }"
                         tvShipToPhone.text = "${ data.ship_to_phone }"
@@ -236,7 +234,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                             btnBottomAction.visibility = View.GONE
                         }
 
-                        setRecyclerView(response.results[0].details)
+                        setRecyclerView(response.results[0].details.let { if (it.isNullOrEmpty()) arrayListOf() else it })
                         loadingState(false)
 
                     }
@@ -442,10 +440,10 @@ class DetailInvoiceActivity : AppCompatActivity() {
                     RESPONSE_STATUS_OK -> {
 
                         val data = response.results[0]
-                        val orders = data.details
+                        val orders = data.details.let { if (it.isNullOrEmpty()) arrayListOf() else it }
 
                         val txtReferenceNumber = "${ data.no_surat_jalan }"
-                        val txtDeliveryDate = "${ data.dalivery_date }"
+//                        val txtDeliveryDate = "${ data.dalivery_date }"
                         val txtShipToName = "${ data.ship_to_name }"
                         val txtShipToAddress = "${ data.ship_to_address }"
                         val txtShipToPhone = "${ data.ship_to_phone }"
@@ -455,12 +453,12 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         val txtVehicleNumber = "No. Polisi: ${ data.nopol_kendaraan }"
 
                         val bytes = ArrayList<ByteArray>()
-                        bytes.add(printerManager.textEnter(gap*10))
+                        bytes.add(printerManager.textEnter(gap*8))
                         bytes.add(printerManager.textCenter(txtReferenceNumber))
                         bytes.add(printerManager.textEnter(gap))
                         bytes.add(printerManager.textCenter("Distributor Indonesia"))
                         bytes.add(printerManager.textCenter("PT TOP MORTAR"))
-                        bytes.add(printerManager.textCenter(txtDeliveryDate))
+//                        bytes.add(printerManager.textCenter(txtDeliveryDate))
                         bytes.add(printerManager.textEnter(gap))
                         bytes.add(printerManager.textLeft("Shipped to:"))
                         bytes.add(printerManager.textLeft(txtShipToName))
@@ -484,6 +482,8 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         bytes.add(printerManager.textLeft(txtVehicleNumber))
                         bytes.add(printerManager.textEnter(gap))
                         bytes.add(printerManager.textLeft("Received By:"))
+                        bytes.add(printerManager.textEnter(gap*8))
+                        bytes.add(printerManager.textCenterBoldUnderline(txtShipToName))
                         bytes.add(printerManager.textEnter(gap*4))
 
                         Handler().postDelayed({
