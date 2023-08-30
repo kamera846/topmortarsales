@@ -221,10 +221,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
         if (sessionManager.userKind() == USER_KIND_ADMIN) icEdit.visibility = View.VISIBLE
 
-        // Setup Button
-        if (sessionManager.userKind() != USER_KIND_SALES) btnInvoice.visibility = View.VISIBLE
-        else btnInvoice.visibility = View.GONE
-
         // Setup Date Picker Dialog
         setDatePickerDialog()
 
@@ -336,6 +332,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         iMapsUrl = intent.getStringExtra(CONST_MAPS)
         iStatus = intent.getStringExtra(CONST_STATUS)
+        if (!iStatus.isNullOrEmpty()) {
+            tooltipStatus.visibility = View.VISIBLE
+            if (iStatus != STATUS_CONTACT_BLACKLIST && sessionManager.userKind() != USER_KIND_SALES) btnInvoice.visibility = View.VISIBLE
+            else btnInvoice.visibility = View.GONE
+        }
         iAddress = intent.getStringExtra(CONST_ADDRESS)
         iLocation = intent.getStringExtra(CONST_LOCATION)
 
@@ -443,8 +444,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tooltipStatus.visibility = View.GONE
             tvStatus.visibility = View.GONE
             spinStatus.visibility = View.VISIBLE
-//            if (iStatus.isNullOrEmpty()) {
-//            }
 
 
             btnSaveEdit.visibility = View.VISIBLE
@@ -467,8 +466,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tvBirthdayContainer.visibility = View.VISIBLE
 
             btnSendMessage.visibility = View.VISIBLE
-            if (sessionManager.userKind() != USER_KIND_SALES) btnInvoice.visibility = View.VISIBLE
-            else btnInvoice.visibility = View.GONE
 
             // Hide Case
             tvTitleBar.text = "Detail Contact"
@@ -488,11 +485,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             if (iAddress.isNullOrEmpty()) etAddress.setText(EMPTY_FIELD_VALUE)
 
             statusContainer.setBackgroundResource(R.drawable.background_rounded)
-            if (!iStatus.isNullOrEmpty()) tooltipStatus.visibility = View.VISIBLE
+            if (!iStatus.isNullOrEmpty()) {
+                tooltipStatus.visibility = View.VISIBLE
+                if (iStatus != STATUS_CONTACT_BLACKLIST && sessionManager.userKind() != USER_KIND_SALES) btnInvoice.visibility = View.VISIBLE
+                else btnInvoice.visibility = View.GONE
+            }
             tvStatus.visibility = View.VISIBLE
             spinStatus.visibility = View.GONE
-//            if (iStatus.isNullOrEmpty()) {
-//            }
 
             btnSaveEdit.visibility = View.GONE
 
@@ -534,58 +533,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val pCityID = if (selectedCity != null) selectedCity!!.id else "0"
 
         loadingState(true)
-
-//        Handler().postDelayed({
-//            itemSendMessage = ContactModel(
-//                nomorhp = pPhone,
-//                nama = pName,
-//                store_owner = pOwner,
-//                id_city = pCityID,
-//                tgl_lahir = pBirthday,
-//                maps_url = pMapsUrl,
-//            )
-//            setupDialogSendMessage(itemSendMessage)
-//
-//            tvName.text = "${ etName.text }"
-//            tvPhone.text = "+" + formatPhoneNumber("${ etPhone.text }")
-//            etPhone.setText(formatPhoneNumber("${ etPhone.text }"))
-//            iAddress = "${ etAddress.text }"
-//
-//            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "- $contactId \n " +
-//                    "- $pPhone \n " +
-//                    "- $pName \n " +
-//                    "- $pOwner \n " +
-//                    "- $pBirthday \n " +
-//                    "- $pMapsUrl \n " +
-//                    "- $pCityID \n " +
-//                    "- $pAddress \n " +
-//                    "- $pStatus")
-//            loadingState(false)
-//            toggleEdit(false)
-//
-//            if (!etOwner.text.isNullOrEmpty()) tvOwner.text = "${ etOwner.text }"
-//            else tvOwner.text = EMPTY_FIELD_VALUE
-//            if (!etBirthday.text.isNullOrEmpty()) tvBirthday.text = "${ etBirthday.text }"
-//            else tvBirthday.text = EMPTY_FIELD_VALUE
-//            if (!etMaps.text.isNullOrEmpty()) {
-//                tvMaps.text = "Click to open"
-//                iMapsUrl = "${ etMaps.text }"
-//            } else {
-//                tvMaps.text = EMPTY_FIELD_VALUE
-//                iMapsUrl = ""
-//            }
-//            if (selectedCity != null) {
-//                if (selectedCity!!.id != "0") tvLocation.text = "${ etLocation.text }"
-//                else tvLocation.text = EMPTY_FIELD_VALUE
-//            } else tvLocation.text = EMPTY_FIELD_VALUE
-//
-//            iStatus = if (!pStatus.isNullOrEmpty()) pStatus else null
-//            setupStatus(iStatus)
-//
-//            hasEdited = true
-//        }, 1000)
-//
-//        return
 
         lifecycleScope.launch {
             try {
@@ -646,6 +593,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             } else tvLocation.text = EMPTY_FIELD_VALUE
 
                             iStatus = if (!pStatus.isNullOrEmpty()) pStatus else null
+                            if (!iStatus.isNullOrEmpty() && iStatus != STATUS_CONTACT_BLACKLIST && sessionManager.userKind() != USER_KIND_SALES) {
+                                btnInvoice.visibility = View.VISIBLE
+                            } else btnInvoice.visibility = View.GONE
                             setupStatus(iStatus)
 
                             hasEdited = true
