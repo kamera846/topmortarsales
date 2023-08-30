@@ -33,6 +33,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.InvoiceOrderRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
+import com.topmortar.topmortarsales.commons.CONST_URI
+import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
 import com.topmortar.topmortarsales.commons.REQUEST_BLUETOOTH_PERMISSIONS
 import com.topmortar.topmortarsales.commons.REQUEST_ENABLE_BLUETOOTH
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -40,6 +42,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.utils.BluetoothPrinterManager
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
@@ -82,11 +85,12 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
     private lateinit var btnPrint: Button
     private lateinit var btnClosing: Button
+    private lateinit var btnBottomAction: LinearLayout
     private lateinit var lnrClosing: LinearLayout
-//    private lateinit var imgPreview: ImageView
     private lateinit var txtLoading: TextView
 
     private var invoiceId: String? = null
+    private var isClosing: Boolean = false
 
     private var cameraPermissionLauncher: ActivityResultLauncher<String>? = null
     private var imagePicker: ActivityResultLauncher<Intent>? = null
@@ -134,8 +138,8 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
         btnPrint = findViewById(R.id.btn_print_invoice)
         btnClosing = findViewById(R.id.btn_closing)
+        btnBottomAction = findViewById(R.id.bottom_action)
         lnrClosing = findViewById(R.id.lnr_closing)
-//        imgPreview = findViewById(R.id.img_preview)
         txtLoading = findViewById(R.id.txt_loading)
 
         // Setup Title Bar
@@ -144,8 +148,11 @@ class DetailInvoiceActivity : AppCompatActivity() {
         tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Setup Printer
-        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-        printerManager.setContext(this)
+        if (sessionManager.userKind() == USER_KIND_COURIER) {
+            btnBottomAction.visibility = View.VISIBLE
+            bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+            printerManager.setContext(this)
+        }
 
         // Setup Image Picker
         cameraPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -158,23 +165,21 @@ class DetailInvoiceActivity : AppCompatActivity() {
         imagePicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val data: Intent? = result.data
-                selectedUri = if (data == null || data.data == null) {
-                    currentPhotoUri
-            //                    handleMessage(this@DetailInvoiceActivity, "IMAGE CONTENT", "$selectedUri")
-            //                    Handler().postDelayed({
-            //                        currentPhotoUri?.let {
-            //                            val contentResolver = contentResolver
-            //                            contentResolver.delete(it, null, null)
-            //                        }
-            //                    }, 2000)
-                } else {
-                    data.data
-            //                    handleMessage(this@DetailInvoiceActivity, "IMAGE CONTENT", "$selectedUri")
-                }
-//                imgPreview.setImageURI(selectedUri)
-//                imgPreview.setOnClickListener { handleMessage(this@DetailInvoiceActivity, "IMAGE CONTENT", "$selectedUri") }
+                selectedUri = if (data == null || data.data == null) currentPhotoUri else data.data
+                navigateToPreviewClosing()
             }
         }
+
+    }
+
+    private fun navigateToPreviewClosing() {
+        val uriList = ArrayList<Uri>()
+        selectedUri?.let { uriList.add(it) }
+
+        val intent = Intent(this, PreviewClosingActivity::class.java)
+        intent.putExtra(CONST_INVOICE_ID, invoiceId)
+        intent.putParcelableArrayListExtra(CONST_URI, uriList)
+        startActivityForResult(intent, IMG_PREVIEW_STATE)
 
     }
 
@@ -212,6 +217,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                     RESPONSE_STATUS_OK -> {
 
                         val data = response.results[0]
+                        isClosing = data.is_closing == "1"
 
                         tvReferenceNumber.text = "${ data.no_surat_jalan }"
                         tvDeliveryDate.text = "${ data.dalivery_date }"
@@ -219,20 +225,19 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         tvShipToAddress.text = "${ data.ship_to_address }"
                         tvShipToPhone.text = "${ data.ship_to_phone }"
                         tvDeliveryOrderDate.text = "Delivery Date: ${ data.dalivery_date }"
-//                        tvDeliveryOrderNumber.text = "Order Number: ${ data.order_number }"
                         tvCourier.text = "Kurir: ${ data.courier_name }"
                         tvVehicle.text = "Kendaraan: ${ data.nama_kendaraan }"
                         tvVehicleNumber.text = "No. Polisi: ${ data.nopol_kendaraan }"
-//                        if (isClosing) {
-//                            tvReceivedBy.visibility = View.VISIBLE
-//                            tvReceivedDate.visibility = View.VISIBLE
-//                            tvReceivedBy.text = "${ data.ship_to_name }"
-//                            tvReceivedDate.text = "${ data.dalivery_date }"
-//                        }
+                        if (isClosing) {
+                            tvReceivedBy.visibility = View.VISIBLE
+                            tvReceivedDate.visibility = View.VISIBLE
+                            tvReceivedBy.text = "${ data.ship_to_name }"
+                            tvReceivedDate.text = "Already closed at ${ data.date_closing }"
+                            btnBottomAction.visibility = View.GONE
+                        }
 
                         setRecyclerView(response.results[0].details)
                         loadingState(false)
-//                        loadingState(true, "Success get data!")
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
@@ -445,12 +450,12 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         val txtShipToAddress = "${ data.ship_to_address }"
                         val txtShipToPhone = "${ data.ship_to_phone }"
                         val txtDeliveryOrderDate = "Delivery Date: ${ data.dalivery_date }"
-                        val txtDeliveryOrderNumber = "Order Number: ${ data.order_number }"
                         val txtCourier = "Kurir: ${ data.courier_name }"
                         val txtVehicle = "Kendaraan: ${ data.nama_kendaraan }"
                         val txtVehicleNumber = "No. Polisi: ${ data.nopol_kendaraan }"
 
                         val bytes = ArrayList<ByteArray>()
+                        bytes.add(printerManager.textEnter(gap*10))
                         bytes.add(printerManager.textCenter(txtReferenceNumber))
                         bytes.add(printerManager.textEnter(gap))
                         bytes.add(printerManager.textCenter("Distributor Indonesia"))
@@ -464,13 +469,13 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         bytes.add(printerManager.textEnter(gap))
                         bytes.add(printerManager.textLeft("Delivery Order"))
                         bytes.add(printerManager.textLeft(txtDeliveryOrderDate))
-//                        bytes.add(printerManager.textLeft(txtDeliveryOrderNumber))
                         bytes.add(printerManager.textEnter(gap))
                         bytes.add(printerManager.textBetween("Daftar Pesanan", "Qty"))
                         orders.forEach {
-//                            bytes.add(printerManager.textBetween(it.id_produk, it.qty_produk))
-//                            bytes.add(printerManager.textLeft(it.nama_produk))
                             bytes.add(printerManager.textBetween(it.nama_produk, it.qty_produk))
+                            if (it.is_bonus == "1") {
+                                bytes.add(printerManager.textLeft("Free"))
+                            }
                             bytes.add(printerManager.textEnter(gap))
                         }
                         bytes.add(printerManager.textLeft("Description"))
@@ -527,8 +532,18 @@ class DetailInvoiceActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_ENABLE_BLUETOOTH) {
-            if (resultCode == Activity.RESULT_OK) printNow()
+            if (resultCode == RESULT_OK) printNow()
             else Toast.makeText(this, "Bluetooth still inactive", TOAST_SHORT).show()
+        } else if (requestCode == IMG_PREVIEW_STATE || "$requestCode" == "$IMG_PREVIEW_STATE") {
+            val resultData = data?.getIntExtra("$IMG_PREVIEW_STATE", 0)
+            if (resultData == RESULT_OK ) {
+                getDetail()
+            }
+            // Remove image temp
+            currentPhotoUri?.let {
+                val contentResolver = contentResolver
+                contentResolver.delete(it, null, null)
+            }
         }
     }
 

@@ -7,6 +7,7 @@ const val BASE_URL = "https://saleswa.topmortarindonesia.com/" // Production
 //const val BASE_URL = "https://dev-saleswa.topmortarindonesia.com/" // Development
 
 const val RESPONSE_STATUS_OK = "ok"
+const val RESPONSE_STATUS_SUCCESS = "success"
 const val RESPONSE_STATUS_EMPTY = "empty"
 const val RESPONSE_STATUS_FAIL = "fail"
 const val RESPONSE_STATUS_FAILED = "failed"
@@ -33,6 +34,7 @@ const val DETAIL_ACTIVITY_REQUEST_CODE = 222
 const val MANAGE_USER_ACTIVITY_REQUEST_CODE = 333
 const val REQUEST_ENABLE_BLUETOOTH = 444
 const val REQUEST_BLUETOOTH_PERMISSIONS = 555
+const val IMG_PREVIEW_STATE = 666
 
 // Tag Log
 const val TAG_RESPONSE_CONTACT = "TAG RESPONSE CONTACT"
@@ -60,6 +62,7 @@ const val CONST_STATUS = "const_status"
 const val CONST_ADDRESS = "const_address"
 const val CONST_USER_LEVEL = "const_user_level"
 const val CONST_FULL_NAME = "const_full_name"
+const val CONST_URI = "const_uri"
 
 // Status
 const val LOGGED_IN = true

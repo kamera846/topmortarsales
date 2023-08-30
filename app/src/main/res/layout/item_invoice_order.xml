@@ -50,6 +50,6 @@
         android:layout_height="wrap_content"
         android:textSize="16sp"
         android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-        android:text="Serial Number: Not Set"/>
+        android:text="Free"/>
 
 </LinearLayout>

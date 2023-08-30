@@ -20,6 +20,7 @@ import com.topmortar.topmortarsales.response.ResponseContactList
 import com.topmortar.topmortarsales.response.ResponseInvoices
 import com.topmortar.topmortarsales.response.ResponseMessage
 import com.topmortar.topmortarsales.response.ResponseUsers
+import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.*
@@ -160,5 +161,13 @@ interface ApiService {
     suspend fun printInvoice(
         @Part("command") command: RequestBody = createPartFromString("print"),
         @Part("id_surat_jalan") invoiceId: RequestBody
+    ): ResponseInvoices
+
+    @Multipart
+    @POST(GET_COURIER_STORE)
+    suspend fun closingInvoice(
+        @Part("command") command: RequestBody = createPartFromString("closing"),
+        @Part("id_surat_jalan") invoiceId: RequestBody,
+        @Part image: MultipartBody.Part,
     ): ResponseInvoices
 }
