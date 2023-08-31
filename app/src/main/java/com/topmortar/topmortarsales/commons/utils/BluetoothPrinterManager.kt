@@ -32,6 +32,15 @@ class BluetoothPrinterManager {
         val spacesBeforeCenter = (48 - text.length) / 2
         return (" ".repeat(spacesBeforeCenter) + text + "\n").toByteArray()
     }
+    fun textCenterBoldUnderline(text: String): ByteArray {
+        val spacesBeforeCenter = (48 - text.length) / 2
+        val boldCommand = byteArrayOf(0x1B, 0x45, 0x01) // ESC E n (n = 1: Bold)
+        val resetBoldCommand = byteArrayOf(0x1B, 0x45, 0x00) // ESC E n (n = 0: Reset Bold)
+        val underlineCommand = byteArrayOf(0x1B, 0x2D, 0x01) // ESC - n (n = 1: Underline)
+        val resetUnderlineCommand = byteArrayOf(0x1B, 0x2D, 0x00) // ESC - n (n = 0: Underline)
+        val text = (" ".repeat(spacesBeforeCenter) + text + "\n").toByteArray()
+        return boldCommand + underlineCommand + text + resetBoldCommand + resetUnderlineCommand
+    }
     fun textBetween(textLeft: String, textRight: String): ByteArray {
         val spacesBeforeRightAligned = 48 - textLeft.length - textRight.length
         return (textLeft + " ".repeat(spacesBeforeRightAligned) + textRight + "\n").toByteArray()
