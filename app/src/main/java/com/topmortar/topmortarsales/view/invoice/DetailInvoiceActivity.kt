@@ -453,6 +453,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         val txtVehicleNumber = "No. Polisi: ${ data.nopol_kendaraan }"
 
                         val bytes = ArrayList<ByteArray>()
+                        bytes.add(printerManager.textLeft("~"))
                         bytes.add(printerManager.textEnter(gap*8))
                         bytes.add(printerManager.textCenter(txtReferenceNumber))
                         bytes.add(printerManager.textEnter(gap))
@@ -484,7 +485,9 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         bytes.add(printerManager.textLeft("Received By:"))
                         bytes.add(printerManager.textEnter(gap*8))
                         bytes.add(printerManager.textCenterBoldUnderline(txtShipToName))
-                        bytes.add(printerManager.textEnter(gap*4))
+                        bytes.add(printerManager.textEnter(gap*2))
+                        bytes.add(printerManager.textLeft("~"))
+                        bytes.add(printerManager.textEnter(gap*2))
 
                         Handler().postDelayed({
                             printerManager.connectToDevice(device, bytes)
