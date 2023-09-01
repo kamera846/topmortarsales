@@ -1,6 +1,7 @@
 package com.topmortar.topmortarsales.commons.utils
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.content.Context
@@ -48,14 +49,20 @@ class BluetoothPrinterManager {
     fun textEnter(repeat: Int): ByteArray {
         return ("\n".repeat(repeat)).toByteArray()
     }
+    fun resetFormat(): ByteArray {
+        val resetBoldCommand = byteArrayOf(0x1B, 0x45, 0x00) // ESC E n (n = 0: Reset Bold)
+        val resetUnderlineCommand = byteArrayOf(0x1B, 0x2D, 0x00) // ESC - n (n = 0: Underline)
+        return resetBoldCommand + resetUnderlineCommand
+    }
 
+    @SuppressLint("MissingPermission")
     fun connectToDevice(device: BluetoothDevice, data: ArrayList<ByteArray>) {
         GlobalScope.launch(Dispatchers.IO) {
-            if (ActivityCompat.checkSelfPermission(
-                    context!!,
-                    Manifest.permission.BLUETOOTH_CONNECT
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
+//            if (ActivityCompat.checkSelfPermission(
+//                    context!!,
+//                    Manifest.permission.BLUETOOTH_CONNECT
+//                ) == PackageManager.PERMISSION_GRANTED
+//            ) {
                 val socket: BluetoothSocket? =
                     device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"))
                 socket?.use { bluetoothSocket ->
@@ -75,7 +82,7 @@ class BluetoothPrinterManager {
 
                     }
 
-                }
+//                }
 
             }
 

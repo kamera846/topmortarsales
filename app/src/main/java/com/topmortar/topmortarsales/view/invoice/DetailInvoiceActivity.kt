@@ -425,6 +425,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
         // Enter new line in the beginning
         val gap = 1
         val starterBytes = ArrayList<ByteArray>()
+        starterBytes.add(printerManager.resetFormat())
         starterBytes.add(printerManager.textEnter(gap))
         printerManager.connectToDevice(device, starterBytes)
 
@@ -527,8 +528,18 @@ class DetailInvoiceActivity : AppCompatActivity() {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
                 printNow()
                 return
+            } else {
+                if (bluetoothAdapter.isEnabled) {
+                    if (checkPermission()) {
+                        val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter.bondedDevices
+                        showPrinterSelectionDialog(pairedDevices)
+                    }
+                } else {
+                    val enableBluetoothIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                    startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BLUETOOTH)
+                }
             }
-            Toast.makeText(this, "Request permission denied", TOAST_SHORT).show()
+//            Toast.makeText(this, "Request permission denied", TOAST_SHORT).show()
         }
     }
 
