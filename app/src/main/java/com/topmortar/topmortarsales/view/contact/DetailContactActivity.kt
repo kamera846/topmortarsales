@@ -334,8 +334,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         iStatus = intent.getStringExtra(CONST_STATUS)
         if (!iStatus.isNullOrEmpty()) {
             tooltipStatus.visibility = View.VISIBLE
-            if (iStatus != STATUS_CONTACT_BLACKLIST && sessionManager.userKind() != USER_KIND_SALES) btnInvoice.visibility = View.VISIBLE
-            else btnInvoice.visibility = View.GONE
+            if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) btnInvoice.visibility = View.GONE
+            else btnInvoice.visibility = View.VISIBLE
         }
         iAddress = intent.getStringExtra(CONST_ADDRESS)
         iLocation = intent.getStringExtra(CONST_LOCATION)
@@ -487,8 +487,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             statusContainer.setBackgroundResource(R.drawable.background_rounded)
             if (!iStatus.isNullOrEmpty()) {
                 tooltipStatus.visibility = View.VISIBLE
-                if (iStatus != STATUS_CONTACT_BLACKLIST && sessionManager.userKind() != USER_KIND_SALES) btnInvoice.visibility = View.VISIBLE
-                else btnInvoice.visibility = View.GONE
+                if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) btnInvoice.visibility = View.GONE
+                else btnInvoice.visibility = View.VISIBLE
             }
             tvStatus.visibility = View.VISIBLE
             spinStatus.visibility = View.GONE
@@ -593,9 +593,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             } else tvLocation.text = EMPTY_FIELD_VALUE
 
                             iStatus = if (!pStatus.isNullOrEmpty()) pStatus else null
-                            if (!iStatus.isNullOrEmpty() && iStatus != STATUS_CONTACT_BLACKLIST && sessionManager.userKind() != USER_KIND_SALES) {
-                                btnInvoice.visibility = View.VISIBLE
-                            } else btnInvoice.visibility = View.GONE
+                            if (!iStatus.isNullOrEmpty()) {
+                                if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) {
+                                    btnInvoice.visibility = View.GONE
+                                } else btnInvoice.visibility = View.VISIBLE
+                            }
                             setupStatus(iStatus)
 
                             hasEdited = true
