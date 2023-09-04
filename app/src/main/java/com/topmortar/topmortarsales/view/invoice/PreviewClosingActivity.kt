@@ -20,6 +20,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_SUCCESS
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.utils.CompressImageUtil.compressImage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -40,6 +41,7 @@ class PreviewClosingActivity : AppCompatActivity() {
     private lateinit var btnUpload: Button
 
     private lateinit var sessionManager: SessionManager
+    private var imgUri: Uri? = null
 
     private var isLoading: Boolean = false
     private var invoiceId: String? = null
@@ -160,23 +162,29 @@ class PreviewClosingActivity : AppCompatActivity() {
         if (!invoiceId.isNullOrEmpty()) {
             this.invoiceId = invoiceId
         }
-        val imgUri = intent.getParcelableArrayListExtra<Uri>(CONST_URI)
-        if (!imgUri.isNullOrEmpty()) {
+
+        val imgUris = intent.getParcelableArrayListExtra<Uri>(CONST_URI)
+
+        if (!imgUris.isNullOrEmpty()) {
+
+            imgPreview.setImageURI(imgUris[0])
+            imgUri = compressImage(this@PreviewClosingActivity, imgUris[0], 50)
+
             val contentResolver = contentResolver
-            val inputStream = contentResolver.openInputStream(imgUri[0])
+            val inputStream = contentResolver.openInputStream(imgUri!!)
             val byteArray = inputStream?.readBytes()
 
             if (byteArray != null) {
                 val requestFile: RequestBody = RequestBody.create("image/*".toMediaTypeOrNull(), byteArray)
                 imagePart = MultipartBody.Part.createFormData("pic", "image.jpg", requestFile)
-                imgPreview.setImageURI(imgUri[0])
+//                imgPreview.setImageURI(imgUri)
             } else handleMessage(this, TAG_RESPONSE_CONTACT, "Image not located")
+
         }
 
     }
 
     private fun loadingState(state: Boolean) {
-
         if (state) {
             isLoading = true
             btnUpload.text = "Loading..."
@@ -192,17 +200,20 @@ class PreviewClosingActivity : AppCompatActivity() {
     private fun onBackHandler() {
         if (!isLoading) {
             finish()
+
         } else {
             val builder = AlertDialog.Builder(this)
             builder.setMessage("Wait a moment. The closing progress is still ongoing.")
                 .setPositiveButton("Ok") { dialog, _ -> dialog.dismiss() }
             val dialog = builder.create()
             dialog.show()
+
         }
+
     }
 
     override fun onBackPressed() {
-//        super.onBackPressed()
         onBackHandler()
+
     }
 }
