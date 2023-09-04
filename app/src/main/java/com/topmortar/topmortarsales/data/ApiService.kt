@@ -6,8 +6,9 @@ import com.topmortar.topmortarsales.commons.AUTH
 import com.topmortar.topmortarsales.commons.EDIT_CONTACT
 import com.topmortar.topmortarsales.commons.GET_CITY
 import com.topmortar.topmortarsales.commons.GET_CONTACT
-import com.topmortar.topmortarsales.commons.GET_COURIER_STORE
+import com.topmortar.topmortarsales.commons.SURAT_JALAN
 import com.topmortar.topmortarsales.commons.GET_USERS
+import com.topmortar.topmortarsales.commons.INVOICE
 import com.topmortar.topmortarsales.commons.REQUEST_OTP
 import com.topmortar.topmortarsales.commons.SEARCH_CONTACT
 import com.topmortar.topmortarsales.commons.SEND_MESSAGE
@@ -138,36 +139,42 @@ interface ApiService {
         @Part("password") password: RequestBody,
     ): Response<ResponseMessage>
 
-    @GET(GET_COURIER_STORE)
+    @GET(SURAT_JALAN)
     suspend fun getCourierStore(
         @Query("p") processNumber: String,
         @Query("cr") courierId: String
     ): ResponseContactList
 
-    @GET(GET_COURIER_STORE)
+    @GET(SURAT_JALAN)
     suspend fun getInvoices(
         @Query("p") processNumber: String,
         @Query("str") contactId: String
     ): ResponseInvoices
 
-    @GET(GET_COURIER_STORE)
+    @GET(SURAT_JALAN)
     suspend fun getInvoicesDetail(
         @Query("p") processNumber: String,
         @Query("sj") invoiceId: String
     ): ResponseInvoices
 
     @Multipart
-    @POST(GET_COURIER_STORE)
+    @POST(SURAT_JALAN)
     suspend fun printInvoice(
         @Part("command") command: RequestBody = createPartFromString("print"),
         @Part("id_surat_jalan") invoiceId: RequestBody
     ): ResponseInvoices
 
     @Multipart
-    @POST(GET_COURIER_STORE)
+    @POST(SURAT_JALAN)
     suspend fun closingInvoice(
         @Part("command") command: RequestBody = createPartFromString("closing"),
         @Part("id_surat_jalan") invoiceId: RequestBody,
         @Part image: MultipartBody.Part,
+    ): ResponseInvoices
+
+    @Multipart
+    @POST(INVOICE)
+    suspend fun addInvoice(
+        @Part("id_surat_jalan") invoiceId: RequestBody
     ): ResponseInvoices
 }
