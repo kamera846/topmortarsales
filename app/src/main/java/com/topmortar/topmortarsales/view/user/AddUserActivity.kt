@@ -21,6 +21,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_NAME
@@ -430,8 +433,11 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         var userLevel = 0 // 0 as null, 1 as admin, 2 as sales
 
-        if (iUserLevel == "admin") userLevel = 1
-        else if (iUserLevel == "sales") userLevel = 2
+        when (iUserLevel) {
+            AUTH_LEVEL_ADMIN -> userLevel = 1
+            AUTH_LEVEL_SALES -> userLevel = 2
+            AUTH_LEVEL_COURIER -> userLevel = 3
+        }
 
         spinLevel.setSelection(userLevel)
 
@@ -441,8 +447,9 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                 // Get the selected item value (e.g., "admin" or "sales")
                 selectedLevel = when (position) {
                     0 -> null
-                    1 -> "admin"
-                    2 -> "sales"
+                    1 -> AUTH_LEVEL_ADMIN
+                    2 -> AUTH_LEVEL_SALES
+                    3 -> AUTH_LEVEL_COURIER
                     else -> null
                 }
             }
@@ -450,8 +457,9 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             override fun onNothingSelected(parent: AdapterView<*>) {
                 // Do nothing here
                 selectedLevel = when (iUserLevel) {
-                    "admin" -> "admin"
-                    "sales" -> "sales"
+                    AUTH_LEVEL_ADMIN -> AUTH_LEVEL_ADMIN
+                    AUTH_LEVEL_SALES -> AUTH_LEVEL_SALES
+                    AUTH_LEVEL_COURIER -> AUTH_LEVEL_COURIER
                     else -> null
                 }
             }

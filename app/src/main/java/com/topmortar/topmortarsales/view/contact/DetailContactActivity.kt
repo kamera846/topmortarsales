@@ -64,10 +64,9 @@ import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.modal.SendMessageModal
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
-import kotlinx.coroutines.coroutineScope
+import com.topmortar.topmortarsales.view.invoice.ListInvoiceActivity
 import kotlinx.coroutines.launch
 import java.util.Calendar
-import java.util.Locale
 
 
 @Suppress("DEPRECATION")
@@ -123,14 +122,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private lateinit var btnSendMessage: Button
     private lateinit var btnSaveEdit: Button
+    private lateinit var btnInvoice: LinearLayout
 
     private var activityRequestCode = MAIN_ACTIVITY_REQUEST_CODE
     private var contactId: String? = null
     private var isEdit: Boolean = false
+    private var hasEdited: Boolean = false
     private var selectedDate: Calendar = Calendar.getInstance()
     private var selectedCity: ModalSearchModel? = null
     private var itemSendMessage: ContactModel? = null
-    private var hasEdited: Boolean = false
 
     private var statusItem: List<String> = listOf("Choose Customer Status", "Data - Being visited by sales", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited")
     private var selectedStatus: String = ""
@@ -214,6 +214,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         btnSendMessage = findViewById(R.id.btn_send_message)
         btnSaveEdit = findViewById(R.id.btn_save_edit)
+        btnInvoice = findViewById(R.id.btn_invoice)
 
         // Setup Title Bar
         tvTitleBar.text = "Detail Contact"
@@ -239,6 +240,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 //        btnSendMessage.setOnClickListener { navigateAddNewRoom() }
         btnSendMessage.setOnClickListener { sendMessageModal.show() }
         btnSaveEdit.setOnClickListener { editConfirmation() }
+        btnInvoice.setOnClickListener { navigateToDetailInvoice() }
         etBirthdayContainer.setOnClickListener { datePicker.show() }
         etBirthday.setOnClickListener { datePicker.show() }
         etLocationContainer.setOnClickListener { showSearchModal() }
@@ -330,6 +332,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         iMapsUrl = intent.getStringExtra(CONST_MAPS)
         iStatus = intent.getStringExtra(CONST_STATUS)
+        if (!iStatus.isNullOrEmpty()) {
+            tooltipStatus.visibility = View.VISIBLE
+            if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) btnInvoice.visibility = View.GONE
+            else btnInvoice.visibility = View.VISIBLE
+        }
         iAddress = intent.getStringExtra(CONST_ADDRESS)
         iLocation = intent.getStringExtra(CONST_LOCATION)
 
@@ -414,6 +421,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tvBirthdayContainer.visibility = View.GONE
 
             btnSendMessage.visibility = View.GONE
+            btnInvoice.visibility = View.GONE
 
             // Show Case
             tvTitleBar.text = "Edit Contact"
@@ -436,8 +444,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tooltipStatus.visibility = View.GONE
             tvStatus.visibility = View.GONE
             spinStatus.visibility = View.VISIBLE
-//            if (iStatus.isNullOrEmpty()) {
-//            }
 
 
             btnSaveEdit.visibility = View.VISIBLE
@@ -479,11 +485,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             if (iAddress.isNullOrEmpty()) etAddress.setText(EMPTY_FIELD_VALUE)
 
             statusContainer.setBackgroundResource(R.drawable.background_rounded)
-            if (!iStatus.isNullOrEmpty()) tooltipStatus.visibility = View.VISIBLE
+            if (!iStatus.isNullOrEmpty()) {
+                tooltipStatus.visibility = View.VISIBLE
+                if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) btnInvoice.visibility = View.GONE
+                else btnInvoice.visibility = View.VISIBLE
+            }
             tvStatus.visibility = View.VISIBLE
             spinStatus.visibility = View.GONE
-//            if (iStatus.isNullOrEmpty()) {
-//            }
 
             btnSaveEdit.visibility = View.GONE
 
@@ -525,58 +533,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val pCityID = if (selectedCity != null) selectedCity!!.id else "0"
 
         loadingState(true)
-
-//        Handler().postDelayed({
-//            itemSendMessage = ContactModel(
-//                nomorhp = pPhone,
-//                nama = pName,
-//                store_owner = pOwner,
-//                id_city = pCityID,
-//                tgl_lahir = pBirthday,
-//                maps_url = pMapsUrl,
-//            )
-//            setupDialogSendMessage(itemSendMessage)
-//
-//            tvName.text = "${ etName.text }"
-//            tvPhone.text = "+" + formatPhoneNumber("${ etPhone.text }")
-//            etPhone.setText(formatPhoneNumber("${ etPhone.text }"))
-//            iAddress = "${ etAddress.text }"
-//
-//            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "- $contactId \n " +
-//                    "- $pPhone \n " +
-//                    "- $pName \n " +
-//                    "- $pOwner \n " +
-//                    "- $pBirthday \n " +
-//                    "- $pMapsUrl \n " +
-//                    "- $pCityID \n " +
-//                    "- $pAddress \n " +
-//                    "- $pStatus")
-//            loadingState(false)
-//            toggleEdit(false)
-//
-//            if (!etOwner.text.isNullOrEmpty()) tvOwner.text = "${ etOwner.text }"
-//            else tvOwner.text = EMPTY_FIELD_VALUE
-//            if (!etBirthday.text.isNullOrEmpty()) tvBirthday.text = "${ etBirthday.text }"
-//            else tvBirthday.text = EMPTY_FIELD_VALUE
-//            if (!etMaps.text.isNullOrEmpty()) {
-//                tvMaps.text = "Click to open"
-//                iMapsUrl = "${ etMaps.text }"
-//            } else {
-//                tvMaps.text = EMPTY_FIELD_VALUE
-//                iMapsUrl = ""
-//            }
-//            if (selectedCity != null) {
-//                if (selectedCity!!.id != "0") tvLocation.text = "${ etLocation.text }"
-//                else tvLocation.text = EMPTY_FIELD_VALUE
-//            } else tvLocation.text = EMPTY_FIELD_VALUE
-//
-//            iStatus = if (!pStatus.isNullOrEmpty()) pStatus else null
-//            setupStatus(iStatus)
-//
-//            hasEdited = true
-//        }, 1000)
-//
-//        return
 
         lifecycleScope.launch {
             try {
@@ -637,6 +593,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             } else tvLocation.text = EMPTY_FIELD_VALUE
 
                             iStatus = if (!pStatus.isNullOrEmpty()) pStatus else null
+                            if (!iStatus.isNullOrEmpty()) {
+                                if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) {
+                                    btnInvoice.visibility = View.GONE
+                                } else btnInvoice.visibility = View.VISIBLE
+                            }
                             setupStatus(iStatus)
 
                             hasEdited = true
@@ -830,6 +791,18 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         if (iMapsUrl == EMPTY_FIELD_VALUE) intent.putExtra(CONST_MAPS, "")
         else intent.putExtra(CONST_MAPS, iMapsUrl)
+
+        startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+
+    }
+
+    private fun navigateToDetailInvoice() {
+
+        val intent = Intent(this@DetailContactActivity, ListInvoiceActivity::class.java)
+
+        intent.putExtra(CONST_CONTACT_ID, contactId)
+        if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
+        else intent.putExtra(CONST_NAME, tvName.text)
 
         startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
 

@@ -38,6 +38,15 @@
 
     <ImageView
         android:visibility="gone"
+        android:id="@+id/ic_sync_now"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:padding="16dp"
+        android:src="@drawable/sync_now_black"
+        android:contentDescription="@string/icon_pencil_black"/>
+
+    <ImageView
+        android:visibility="gone"
         android:id="@+id/ic_close"
         android:layout_width="56dp"
         android:layout_height="56dp"
