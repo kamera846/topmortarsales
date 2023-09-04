@@ -441,11 +441,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener,
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response: ResponseContactList
-                when (userKind) {
-                    USER_KIND_ADMIN -> response = apiService.getContacts()
-                    USER_KIND_COURIER -> response = apiService.getCourierStore(processNumber = "1", courierId = userId)
-                    else -> response = apiService.getContacts(cityId = userCity)
+                val response: ResponseContactList = when (userKind) {
+                    USER_KIND_ADMIN -> apiService.getContacts()
+                    USER_KIND_COURIER -> apiService.getCourierStore(processNumber = "1", courierId = userId)
+                    else -> apiService.getContacts(cityId = userCity)
                 }
 
                 when (response.status) {
