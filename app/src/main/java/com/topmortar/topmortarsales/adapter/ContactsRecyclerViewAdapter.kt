@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_ACTIVE
+import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BID
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BLACKLIST
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
@@ -59,6 +60,10 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
                 STATUS_CONTACT_BLACKLIST -> {
                     tooltipStatus.setImageDrawable(context?.let { getDrawable(it, R.drawable.status_blacklist) })
                     tooltipHandler(tooltipStatus, "Customer Status Blacklist")
+                }
+                STATUS_CONTACT_BID -> {
+                    tooltipStatus.setImageDrawable(context?.let { getDrawable(it, R.drawable.status_bid) })
+                    tooltipHandler(tooltipStatus, "Customer Status Bargained")
                 }
                 else -> {
                     tooltipStatus.visibility = View.GONE

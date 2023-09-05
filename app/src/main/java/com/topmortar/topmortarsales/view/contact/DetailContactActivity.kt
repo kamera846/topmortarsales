@@ -43,6 +43,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_ACTIVE
+import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BID
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BLACKLIST
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
@@ -132,7 +133,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var selectedCity: ModalSearchModel? = null
     private var itemSendMessage: ContactModel? = null
 
-    private var statusItem: List<String> = listOf("Choose Customer Status", "Data - Being visited by sales", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited")
+    private var statusItem: List<String> = listOf("Choose Customer Status", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
     private var selectedStatus: String = ""
 
     private var iLocation: String? = null
@@ -921,8 +922,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun setupStatus(status: String? = null) {
         tooltipStatus.visibility = View.VISIBLE
-        when (status) {
-            STATUS_CONTACT_DATA -> {
+        when (status) {STATUS_CONTACT_DATA -> {
                 tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_data))
                 tooltipHandler(tooltipStatus, "Customer Status is Data")
                 tvStatus.text = statusItem[1]
@@ -945,6 +945,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 tooltipHandler(tooltipStatus, "Customer Status is Blacklist")
                 tvStatus.text = statusItem[4]
                 spinStatus.setSelection(4)
+            }
+            STATUS_CONTACT_BID -> {
+                tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_bid))
+                tooltipHandler(tooltipStatus, "Customer Status is Bargained")
+                tvStatus.text = statusItem[5]
+                spinStatus.setSelection(5)
             }
             else -> {
                 tooltipStatus.visibility = View.GONE
