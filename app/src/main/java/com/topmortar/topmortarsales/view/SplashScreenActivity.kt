@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.LOGGED_IN
@@ -32,6 +33,7 @@ import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.KeyboardHandler
@@ -43,6 +45,7 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.view.tukang.ListTukangActivity
 import kotlinx.coroutines.launch
 import okhttp3.RequestBody
 
@@ -250,6 +253,13 @@ class SplashScreenActivity : AppCompatActivity() {
         finish()
 
     }
+    private fun navigateToListTukang() {
+
+        val intent = Intent(this, ListTukangActivity::class.java)
+        startActivity(intent)
+        finish()
+
+    }
 
     private fun checkSession() {
 
@@ -259,7 +269,12 @@ class SplashScreenActivity : AppCompatActivity() {
         val userKind = sessionManager.userKind()!!
 
         if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()) showCardLogin()
-        else navigateToMain()
+        else {
+            when (userKind) {
+                USER_KIND_BA -> navigateToListTukang()
+                else -> navigateToMain()
+            }
+        }
 
     }
 
@@ -345,6 +360,7 @@ class SplashScreenActivity : AppCompatActivity() {
                         when (data.level_user) {
                             AUTH_LEVEL_ADMIN -> sessionManager.setUserKind(USER_KIND_ADMIN)
                             AUTH_LEVEL_COURIER -> sessionManager.setUserKind(USER_KIND_COURIER)
+                            AUTH_LEVEL_BA -> sessionManager.setUserKind(USER_KIND_BA)
                             else -> sessionManager.setUserKind(USER_KIND_SALES)
                         }
 
@@ -354,7 +370,12 @@ class SplashScreenActivity : AppCompatActivity() {
                         sessionManager.setUserCityID(data.id_city)
 
                         sessionManager.setLoggedIn(LOGGED_IN)
-                        navigateToMain()
+
+                        when (data.level_user) {
+                            AUTH_LEVEL_BA -> navigateToListTukang()
+                            else -> navigateToMain()
+                        }
+
                         loadingState(false)
 
                     }

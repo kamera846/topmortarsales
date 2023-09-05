@@ -123,5 +123,6 @@
         <item>Admin</item>
         <item>Sales</item>
         <item>Courier</item>
+        <item>Brand Ambassador</item>
     </string-array>
 </resources>

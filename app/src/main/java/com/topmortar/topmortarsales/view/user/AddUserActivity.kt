@@ -22,6 +22,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
@@ -431,12 +432,13 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         // Apply the adapter to the spinner
         spinLevel.adapter = adapter
 
-        var userLevel = 0 // 0 as null, 1 as admin, 2 as sales
+        var userLevel = 0 // 0 as null, 1 as admin, 2 as sales, and others
 
         when (iUserLevel) {
             AUTH_LEVEL_ADMIN -> userLevel = 1
             AUTH_LEVEL_SALES -> userLevel = 2
             AUTH_LEVEL_COURIER -> userLevel = 3
+            AUTH_LEVEL_BA -> userLevel = 4
         }
 
         spinLevel.setSelection(userLevel)
@@ -450,6 +452,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                     1 -> AUTH_LEVEL_ADMIN
                     2 -> AUTH_LEVEL_SALES
                     3 -> AUTH_LEVEL_COURIER
+                    4 -> AUTH_LEVEL_BA
                     else -> null
                 }
             }
@@ -460,6 +463,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                     AUTH_LEVEL_ADMIN -> AUTH_LEVEL_ADMIN
                     AUTH_LEVEL_SALES -> AUTH_LEVEL_SALES
                     AUTH_LEVEL_COURIER -> AUTH_LEVEL_COURIER
+                    AUTH_LEVEL_BA -> AUTH_LEVEL_BA
                     else -> null
                 }
             }
