@@ -57,6 +57,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".view.skill.ManageSkillActivity"
+            android:exported="false" />
+        <activity
             android:name=".view.tukang.AddTukangActivity"
             android:exported="false" />
         <activity

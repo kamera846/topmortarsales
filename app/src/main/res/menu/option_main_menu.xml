@@ -13,6 +13,9 @@
         android:id="@+id/option_city"
         android:title="@string/manage_city" />
     <item
+        android:id="@+id/option_skill"
+        android:title="@string/manage_skill" />
+    <item
         android:id="@+id/option_logout"
         android:title="@string/logout" />
 </menu>
