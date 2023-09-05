@@ -26,8 +26,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter
-import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter.ItemClickListener
+import com.topmortar.topmortarsales.adapter.TukangRecyclerViewAdapter
+import com.topmortar.topmortarsales.adapter.TukangRecyclerViewAdapter.ItemClickListener
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
@@ -65,6 +65,7 @@ import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.view.SplashScreenActivity
 import com.topmortar.topmortarsales.view.city.ManageCityActivity
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
+import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
 import com.topmortar.topmortarsales.view.user.ManageUserActivity
 import kotlinx.coroutines.launch
 
@@ -122,8 +123,8 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
 
         initVariable()
         initClickHandler()
-//        loadingState(true)
-//        getContacts()
+        loadingState(true)
+        getContacts()
 
     }
 
@@ -265,6 +266,10 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
                 }
                 R.id.option_city -> {
                     startActivity(Intent(this@ListTukangActivity, ManageCityActivity::class.java))
+                    true
+                }
+                R.id.option_skill -> {
+                    startActivity(Intent(this@ListTukangActivity, ManageSkillActivity::class.java))
                     true
                 }
                 R.id.option_logout -> {
@@ -565,7 +570,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
 //            indexItem.let { if (it == 4) indexItem = 0 else indexItem++}
 //        }
 
-        val rvAdapter = ContactsRecyclerViewAdapter(listItem, this@ListTukangActivity)
+        val rvAdapter = TukangRecyclerViewAdapter(listItem, this@ListTukangActivity)
 
         rvListChat.layoutManager = LinearLayoutManager(this@ListTukangActivity)
         rvListChat.adapter = rvAdapter
