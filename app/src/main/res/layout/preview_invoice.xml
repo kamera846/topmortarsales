@@ -41,7 +41,7 @@
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-            android:text="PT TOP MORTAR"/>
+            android:text="PT. TOP MORTAR INDONESIA"/>
 
         <TextView
             android:visibility="gone"
@@ -116,7 +116,6 @@
                 android:text="Not Set"/>
 
             <TextView
-                android:visibility="gone"
                 android:id="@+id/tv_delivery_order_number"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

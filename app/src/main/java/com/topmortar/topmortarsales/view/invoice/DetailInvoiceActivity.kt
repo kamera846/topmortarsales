@@ -215,7 +215,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                     RESPONSE_STATUS_OK -> {
 
                         val data = response.results[0]
-                        isClosing = data.is_closing == "1"
+//                        isClosing = data.is_closing == "1"
 
                         tvReferenceNumber.text = "${ data.no_surat_jalan }"
 //                        tvDeliveryDate.text = "${ data.dalivery_date }"
@@ -223,6 +223,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         tvShipToAddress.text = "${ data.ship_to_address }"
                         tvShipToPhone.text = "${ data.ship_to_phone }"
                         tvDeliveryOrderDate.text = "Delivery Date: ${ data.dalivery_date }"
+                        tvDeliveryOrderNumber.text = "Printed Date: ${ data.date_printed }"
                         tvCourier.text = "Kurir: ${ data.courier_name }"
                         tvVehicle.text = "Kendaraan: ${ data.nama_kendaraan }"
                         tvVehicleNumber.text = "No. Polisi: ${ data.nopol_kendaraan }"
@@ -449,6 +450,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         val txtShipToAddress = "${ data.ship_to_address }"
                         val txtShipToPhone = "${ data.ship_to_phone }"
                         val txtDeliveryOrderDate = "Delivery Date: ${ data.dalivery_date }"
+                        val txtPrintedDate = "Printed Date: ${ data.date_printed }"
                         val txtCourier = "Kurir: ${ data.courier_name }"
                         val txtVehicle = "Kendaraan: ${ data.nama_kendaraan }"
                         val txtVehicleNumber = "No. Polisi: ${ data.nopol_kendaraan }"
@@ -459,7 +461,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         bytes.add(printerManager.textCenter(txtReferenceNumber))
                         bytes.add(printerManager.textEnter(gap))
                         bytes.add(printerManager.textCenter("Distributor Indonesia"))
-                        bytes.add(printerManager.textCenter("PT TOP MORTAR"))
+                        bytes.add(printerManager.textCenter("PT. TOP MORTAR INDONESIA"))
 //                        bytes.add(printerManager.textCenter(txtDeliveryDate))
                         bytes.add(printerManager.textEnter(gap))
                         bytes.add(printerManager.textLeft("Shipped to:"))
@@ -469,6 +471,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         bytes.add(printerManager.textEnter(gap))
                         bytes.add(printerManager.textLeft("Delivery Order"))
                         bytes.add(printerManager.textLeft(txtDeliveryOrderDate))
+                        bytes.add(printerManager.textLeft(txtPrintedDate))
                         bytes.add(printerManager.textEnter(gap))
                         bytes.add(printerManager.textBetween("Daftar Pesanan", "Qty"))
                         orders.forEach {
