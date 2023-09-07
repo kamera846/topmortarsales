@@ -6,6 +6,13 @@ import android.widget.Toast
 const val BASE_URL = "https://saleswa.topmortarindonesia.com/" // Production
 //const val BASE_URL = "https://dev-saleswa.topmortarindonesia.com/" // Development
 
+// Ping Host
+//const val PING_HOST = "saleswa.topmortarindonesia.com" // Production
+const val PING_HOST = "dev-saleswa.topmortarindonesia.com" // Development
+
+const val PING_NORMAL = 0
+const val PING_MEDIUM = 2
+
 const val RESPONSE_STATUS_OK = "ok"
 const val RESPONSE_STATUS_SUCCESS = "success"
 const val RESPONSE_STATUS_EMPTY = "empty"

@@ -53,12 +53,13 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.DateFormat
+import com.topmortar.topmortarsales.commons.utils.PhoneHandler
+import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
+import com.topmortar.topmortarsales.commons.utils.PingUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
-import com.topmortar.topmortarsales.commons.utils.PhoneHandler
-import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.modal.SearchModal
@@ -68,10 +69,13 @@ import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.invoice.ListInvoiceActivity
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import java.util.Timer
+import java.util.TimerTask
 
 
 @Suppress("DEPRECATION")
-class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListener {
+class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListener,
+    PingUtility.PingResultInterface {
 
     private lateinit var sessionManager: SessionManager
 
@@ -823,6 +827,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         sendMessageModal = SendMessageModal(this, lifecycleScope)
         if (item != null) sendMessageModal.setItem(item)
 
+
+        // Setup Indicator
+        setupNetworkIndicator()
+
     }
 
     private fun showSearchModal() {
@@ -979,6 +987,22 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         setupStatus(iStatus)
     }
 
+    private fun setupNetworkIndicator() {
+        val indicatorImageView = findViewById<View>(R.id.indicatorView) // Ganti dengan ID tampilan indikator Anda
+        indicatorImageView.visibility = View.VISIBLE
+        val pingIntervalMillis = 2000L // Ganti dengan interval yang Anda inginkan (dalam milidetik)
+
+        val pingTimer = Timer()
+        pingTimer.scheduleAtFixedRate(object : TimerTask() {
+            override fun run() {
+                val pingTask = PingUtility(indicatorImageView)
+                pingTask.setInterface(this@DetailContactActivity)
+                pingTask.execute()
+            }
+        }, 0, pingIntervalMillis)
+
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -1001,6 +1025,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     override fun onDataReceived(data: ModalSearchModel) {
         etLocation.setText(data.title)
         selectedCity = data
+    }
+
+    override fun onPingResult(pingResult: Int?) {
+        sendMessageModal.setPingStatus(pingResult)
     }
 
 }
