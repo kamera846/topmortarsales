@@ -26,12 +26,12 @@ import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
-import com.topmortar.topmortarsales.modal.AddCityModal
+import com.topmortar.topmortarsales.modal.AddSkillModal
 import com.topmortar.topmortarsales.model.CityModel
 import kotlinx.coroutines.launch
 
 class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemClickListener,
-    AddCityModal.AddCityModalInterface {
+    AddSkillModal.AddSkillModalInterface {
 
     private lateinit var scaleAnimation: Animation
 
@@ -51,7 +51,7 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
 
     // Global
     private lateinit var sessionManager: SessionManager
-    private lateinit var addCityModal: AddCityModal
+    private lateinit var addCityModal: AddSkillModal
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -72,7 +72,7 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
 
     private fun initVariable() {
 
-        addCityModal = AddCityModal(this, lifecycleScope)
+        addCityModal = AddSkillModal(this, lifecycleScope)
         addCityModal.initializeInterface(this)
 
         rlLoading = findViewById(R.id.rl_loading)
@@ -121,7 +121,7 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        loadingState(true, "Contact data is empty!")
+                        loadingState(true,  "Skill data is empty!")
 
                     }
                     else -> {

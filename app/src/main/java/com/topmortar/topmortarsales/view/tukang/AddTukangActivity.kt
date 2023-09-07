@@ -293,7 +293,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         etMapsUrl = findViewById(R.id.et_maps_url)
 
         // Set Title Bar
-        tvTitleBar.text = getString(R.string.new_chat_room)
+        tvTitleBar.text = "Add New Tukang"
         tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Setup Date Picker Dialog

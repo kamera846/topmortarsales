@@ -64,7 +64,6 @@ import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.view.SplashScreenActivity
 import com.topmortar.topmortarsales.view.city.ManageCityActivity
-import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
 import com.topmortar.topmortarsales.view.user.ManageUserActivity
 import kotlinx.coroutines.launch
@@ -147,6 +146,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
 
         // Set Title Bar
         icMore.visibility = View.VISIBLE
+        etSearchBox.hint = "Search tukang…"
 //        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Hello, $it" else "Hello, ${ sessionManager.userName() }"}
         titleBar.text = "List Tukang"
         tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Hello, $it" else ""}
@@ -215,7 +215,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
 
         toggleSearchEvent(SEARCH_CLOSE)
 
-        val intent = Intent(this@ListTukangActivity, DetailContactActivity::class.java)
+        val intent = Intent(this@ListTukangActivity, DetailTukangActivity::class.java)
 
         if (data != null) {
             intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
@@ -446,7 +446,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        loadingState(true, "Contact data is empty!")
+                        loadingState(true, "Data tukang is empty!")
 
                     }
                     else -> {
@@ -531,7 +531,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
                         }
                         RESPONSE_STATUS_EMPTY -> {
 
-                            loadingState(true, "Contact data is empty!")
+                            loadingState(true, "Data tukang is empty!")
 
                         }
                         else -> {
