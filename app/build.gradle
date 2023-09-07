@@ -8,7 +8,7 @@ android {
     compileSdk 33
 
     defaultConfig {
-        archivesBaseName "Top Mortar Sales"
+//        archivesBaseName "Top Mortar Sales"
         applicationId "com.topmortar.topmortarsales"
         minSdk 24
         targetSdk 33
@@ -30,7 +30,7 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
-            archivesBaseName "Top Mortar Sales"
+//            archivesBaseName "Top Mortar Sales"
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -67,5 +67,8 @@ dependencies {
 
     // For Check App Version
     implementation 'com.google.android.play:core:1.10.3'
+
+    // Bluetooth Print
+    implementation 'com.github.DantSu:ESCPOS-ThermalPrinter-Android:3.2.0'
 
 }

@@ -1,4 +1,4 @@
-package com.topmortar.topmortarsales.view.contact
+package com.topmortar.topmortarsales.view.tukang
 
 import android.app.DatePickerDialog
 import android.content.Intent
@@ -65,13 +65,14 @@ import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.modal.SendMessageModal
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
+import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
 import com.topmortar.topmortarsales.view.invoice.ListInvoiceActivity
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
 
 @Suppress("DEPRECATION")
-class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListener {
+class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
     private lateinit var sessionManager: SessionManager
 
@@ -152,7 +153,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         supportActionBar?.hide()
         sessionManager = SessionManager(this)
 
-        setContentView(R.layout.activity_detail_contact)
+        setContentView(R.layout.activity_detail_tukang)
 
         initVariable()
         initClickHandler()
@@ -218,7 +219,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         btnInvoice = findViewById(R.id.btn_invoice)
 
         // Setup Title Bar
-        tvTitleBar.text = "Detail Contact"
+        tvTitleBar.text = "Detail Tukang"
         tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
         if (sessionManager.userKind() == USER_KIND_ADMIN) icEdit.visibility = View.VISIBLE
 
@@ -239,7 +240,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         icEdit.setOnClickListener { toggleEdit(true) }
         icClose.setOnClickListener { toggleEdit(false) }
 //        btnSendMessage.setOnClickListener { navigateAddNewRoom() }
-        btnSendMessage.setOnClickListener { sendMessageModal.show() }
+//        btnSendMessage.setOnClickListener { sendMessageModal.show() }
         btnSaveEdit.setOnClickListener { editConfirmation() }
         btnInvoice.setOnClickListener { navigateToDetailInvoice() }
         etBirthdayContainer.setOnClickListener { datePicker.show() }
@@ -335,8 +336,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         iStatus = intent.getStringExtra(CONST_STATUS)
         if (!iStatus.isNullOrEmpty()) {
             tooltipStatus.visibility = View.VISIBLE
-            if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) btnInvoice.visibility = View.GONE
-            else btnInvoice.visibility = View.VISIBLE
+//            if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) btnInvoice.visibility = View.GONE
+//            else btnInvoice.visibility = View.VISIBLE
         }
         iAddress = intent.getStringExtra(CONST_ADDRESS)
         iLocation = intent.getStringExtra(CONST_LOCATION)
@@ -422,10 +423,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tvBirthdayContainer.visibility = View.GONE
 
             btnSendMessage.visibility = View.GONE
-            btnInvoice.visibility = View.GONE
+//            btnInvoice.visibility = View.GONE
 
             // Show Case
-            tvTitleBar.text = "Edit Contact"
+            tvTitleBar.text = "Edit Tukang"
             icClose.visibility = View.VISIBLE
 
             etName.visibility = View.VISIBLE
@@ -488,8 +489,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             statusContainer.setBackgroundResource(R.drawable.background_rounded)
             if (!iStatus.isNullOrEmpty()) {
                 tooltipStatus.visibility = View.VISIBLE
-                if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) btnInvoice.visibility = View.GONE
-                else btnInvoice.visibility = View.VISIBLE
+//                if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) btnInvoice.visibility = View.GONE
+//                else btnInvoice.visibility = View.VISIBLE
             }
             tvStatus.visibility = View.VISIBLE
             spinStatus.visibility = View.GONE
@@ -573,7 +574,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             etPhone.setText(formatPhoneNumber("${ etPhone.text }"))
                             iAddress = "${ etAddress.text }"
 
-                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
+                            handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
                             loadingState(false)
                             toggleEdit(false)
 
@@ -594,11 +595,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             } else tvLocation.text = EMPTY_FIELD_VALUE
 
                             iStatus = if (!pStatus.isNullOrEmpty()) pStatus else null
-                            if (!iStatus.isNullOrEmpty()) {
-                                if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) {
-                                    btnInvoice.visibility = View.GONE
-                                } else btnInvoice.visibility = View.VISIBLE
-                            }
+//                            if (!iStatus.isNullOrEmpty()) {
+//                                if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) {
+//                                    btnInvoice.visibility = View.GONE
+//                                } else btnInvoice.visibility = View.VISIBLE
+//                            }
                             setupStatus(iStatus)
 
                             hasEdited = true
@@ -606,14 +607,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed to edit! Message: ${ responseBody.message }")
+                            handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Failed to edit! Message: ${ responseBody.message }")
                             loadingState(false)
                             toggleEdit(false)
 
                         }
                         else -> {
 
-                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed to edit data!")
+                            handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Failed to edit data!")
                             loadingState(false)
                             toggleEdit(false)
 
@@ -622,7 +623,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 } else {
 
-                    handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed to edit data! Error: " + response.message())
+                    handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Failed to edit data! Error: " + response.message())
                     loadingState(false)
                     toggleEdit(false)
 
@@ -631,7 +632,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             } catch (e: Exception) {
 
-                handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
                 toggleEdit(false)
 
@@ -770,7 +771,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun navigateAddNewRoom() {
 
-        val intent = Intent(this@DetailContactActivity, NewRoomChatFormActivity::class.java)
+        val intent = Intent(this@DetailTukangActivity, NewRoomChatFormActivity::class.java)
 
         intent.putExtra(CONST_CONTACT_ID, contactId)
         if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
@@ -799,7 +800,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun navigateToDetailInvoice() {
 
-        val intent = Intent(this@DetailContactActivity, ListInvoiceActivity::class.java)
+        val intent = Intent(this@DetailTukangActivity, ListInvoiceActivity::class.java)
 
         intent.putExtra(CONST_CONTACT_ID, contactId)
         if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
@@ -866,13 +867,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        handleMessage(this@DetailContactActivity, "LIST CITY", "Empty cities data!")
+                        handleMessage(this@DetailTukangActivity, "LIST CITY", "Empty cities data!")
 //                        searchModal.isLoading(true)
 
                     }
                     else -> {
 
-                        handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                        handleMessage(this@DetailTukangActivity, TAG_RESPONSE_CONTACT, "Failed get data")
 //                        searchModal.isLoading(true)
 
                     }
@@ -881,7 +882,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             } catch (e: Exception) {
 
-                handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@DetailTukangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
 //                searchModal.isLoading(true)
 
             }
@@ -923,11 +924,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private fun setupStatus(status: String? = null) {
         tooltipStatus.visibility = View.VISIBLE
         when (status) {STATUS_CONTACT_DATA -> {
-                tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_data))
-                tooltipHandler(tooltipStatus, "Customer Status is Data")
-                tvStatus.text = statusItem[1]
-                spinStatus.setSelection(1)
-            }
+            tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_data))
+            tooltipHandler(tooltipStatus, "Customer Status is Data")
+            tvStatus.text = statusItem[1]
+            spinStatus.setSelection(1)
+        }
             STATUS_CONTACT_PASSIVE -> {
                 tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_passive))
                 tooltipHandler(tooltipStatus, "Customer Status is Passive")

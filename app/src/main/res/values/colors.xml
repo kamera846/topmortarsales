@@ -24,4 +24,5 @@
     <color name="status_passive">@color/black_600</color>
     <color name="status_active">#36AE7C</color>
     <color name="status_blacklist">#EB5353</color>
+    <color name="status_bid">#187498</color>
 </resources>

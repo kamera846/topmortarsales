@@ -118,10 +118,12 @@
     <string name="invoice">Invoice</string>
     <string name="icon_upload">Icon Upload</string>
     <string name="icon_printer">Icon Printer</string>
+    <string name="manage_skill">Manage Skill</string>
     <string-array name="user_level_spinner_options">
         <item>Choose Level</item>
         <item>Admin</item>
         <item>Sales</item>
         <item>Courier</item>
+        <item>Brand Ambassador</item>
     </string-array>
 </resources>

@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.provider.MediaStore
+import android.util.DisplayMetrics
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Button
@@ -29,6 +30,9 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.dantsu.escposprinter.EscPosPrinter
+import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
+import com.dantsu.escposprinter.textparser.PrinterTextParserImg
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.InvoiceOrderRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
@@ -223,6 +227,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         tvShipToAddress.text = "${ data.ship_to_address }"
                         tvShipToPhone.text = "${ data.ship_to_phone }"
                         tvDeliveryOrderDate.text = "Delivery Date: ${ data.dalivery_date }"
+                        tvDeliveryOrderNumber.text = "Printed Date: " + isClosing.let { if (it) data.date_printed else "-" }
                         tvCourier.text = "Kurir: ${ data.courier_name }"
                         tvVehicle.text = "Kendaraan: ${ data.nama_kendaraan }"
                         tvVehicleNumber.text = "No. Polisi: ${ data.nopol_kendaraan }"
@@ -449,6 +454,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         val txtShipToAddress = "${ data.ship_to_address }"
                         val txtShipToPhone = "${ data.ship_to_phone }"
                         val txtDeliveryOrderDate = "Delivery Date: ${ data.dalivery_date }"
+                        val txtPrintedDate = "Printed Date: ${ data.date_printed }"
                         val txtCourier = "Kurir: ${ data.courier_name }"
                         val txtVehicle = "Kendaraan: ${ data.nama_kendaraan }"
                         val txtVehicleNumber = "No. Polisi: ${ data.nopol_kendaraan }"
@@ -459,7 +465,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         bytes.add(printerManager.textCenter(txtReferenceNumber))
                         bytes.add(printerManager.textEnter(gap))
                         bytes.add(printerManager.textCenter("Distributor Indonesia"))
-                        bytes.add(printerManager.textCenter("PT TOP MORTAR"))
+                        bytes.add(printerManager.textCenter("PT. TOP MORTAR INDONESIA"))
 //                        bytes.add(printerManager.textCenter(txtDeliveryDate))
                         bytes.add(printerManager.textEnter(gap))
                         bytes.add(printerManager.textLeft("Shipped to:"))
@@ -469,6 +475,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         bytes.add(printerManager.textEnter(gap))
                         bytes.add(printerManager.textLeft("Delivery Order"))
                         bytes.add(printerManager.textLeft(txtDeliveryOrderDate))
+                        bytes.add(printerManager.textLeft(txtPrintedDate))
                         bytes.add(printerManager.textEnter(gap))
                         bytes.add(printerManager.textBetween("Daftar Pesanan", "Qty"))
                         orders.forEach {
@@ -520,6 +527,39 @@ class DetailInvoiceActivity : AppCompatActivity() {
             }
 
         }
+    }
+
+    // Testing
+    private fun printEscPos() {
+        val printer = EscPosPrinter(BluetoothPrintersConnections.selectFirstPaired(), 203, 48f, 32)
+        printer.printFormattedText(
+            "[C]<img>" + PrinterTextParserImg.bitmapToHexadecimalString(printer, this.applicationContext.resources.getDrawableForDensity(R.drawable.logo_top_mortar, DisplayMetrics.DENSITY_MEDIUM))+"</img>\n" +
+            "[L]\n" +
+            "[C]<u><font size='big'>ORDER N°045</font></u>\n" +
+            "[L]\n" +
+            "[C]================================\n" +
+            "[L]\n" +
+            "[L]<b>BEAUTIFUL SHIRT</b>[R]9.99e\n" +
+            "[L]  + Size : S\n" +
+            "[L]\n" +
+            "[L]<b>AWESOME HAT</b>[R]24.99e\n" +
+            "[L]  + Size : 57/58\n" +
+            "[L]\n" +
+            "[C]--------------------------------\n" +
+            "[R]TOTAL PRICE :[R]34.98e\n" +
+            "[R]TAX :[R]4.23e\n" +
+            "[L]\n" +
+            "[C]================================\n" +
+            "[L]\n" +
+            "[L]<font size='tall'>Customer :</font>\n" +
+            "[L]Raymond DUPONT\n" +
+            "[L]5 rue des girafes\n" +
+            "[L]31547 PERPETES\n" +
+            "[L]Tel : +33801201456\n" +
+            "[L]\n" +
+            "[C]<barcode type='ean13' height='10'>831254784551</barcode>\n" +
+            "[C]<qrcode size='20'>https://dantsu.com/</qrcode>"
+        )
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {

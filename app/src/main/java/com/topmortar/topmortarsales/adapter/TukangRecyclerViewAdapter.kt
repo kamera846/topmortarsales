@@ -21,7 +21,7 @@ import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
 import com.topmortar.topmortarsales.model.ContactModel
 
-class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<ContactsRecyclerViewAdapter.ChatViewHolder>() {
+class TukangRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<TukangRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
 
     interface ItemClickListener {
@@ -30,12 +30,14 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
 
     inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
-        val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
+        private val ivProfile: ImageView = itemView.findViewById(R.id.iv_contact_profile)
+        private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
+        private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
         val tooltipStatus: ImageView = itemView.findViewById(R.id.tooltip_status)
 
         fun bind(chatItem: ContactModel) {
 
+            ivProfile.setImageResource(R.drawable.person_red)
             tvContactName.text = chatItem.nama
             tvPhoneNumber.text = if (chatItem.nomorhp != "") "+${ chatItem.nomorhp }" else ""
             setupStatus(chatItem.store_status)

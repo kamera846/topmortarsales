@@ -1,6 +1,5 @@
-package com.topmortar.topmortarsales.view
+package com.topmortar.topmortarsales.view.tukang
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -14,7 +13,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -26,10 +24,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter
-import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter.ItemClickListener
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.adapter.TukangRecyclerViewAdapter
+import com.topmortar.topmortarsales.adapter.TukangRecyclerViewAdapter.ItemClickListener
+import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.CONST_ADDRESS
+import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
+import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_LOCATION
+import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
+import com.topmortar.topmortarsales.commons.CONST_STATUS
+import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -40,39 +49,27 @@ import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
+import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
+import com.topmortar.topmortarsales.commons.utils.KeyboardHandler.hideKeyboard
+import com.topmortar.topmortarsales.commons.utils.KeyboardHandler.showKeyboard
+import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.ContactModel
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
-import com.topmortar.topmortarsales.commons.CONST_ADDRESS
-import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
-import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
-import com.topmortar.topmortarsales.commons.CONST_LOCATION
-import com.topmortar.topmortarsales.commons.CONST_MAPS
-import com.topmortar.topmortarsales.commons.CONST_OWNER
-import com.topmortar.topmortarsales.commons.CONST_STATUS
-import com.topmortar.topmortarsales.commons.LOGGED_OUT
-import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
-import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
-import com.topmortar.topmortarsales.commons.USER_KIND_SALES
-import com.topmortar.topmortarsales.commons.utils.SessionManager
-import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
-import com.topmortar.topmortarsales.commons.utils.KeyboardHandler.hideKeyboard
-import com.topmortar.topmortarsales.commons.utils.KeyboardHandler.showKeyboard
-import com.topmortar.topmortarsales.commons.utils.convertDpToPx
+import com.topmortar.topmortarsales.view.SplashScreenActivity
 import com.topmortar.topmortarsales.view.city.ManageCityActivity
-import com.topmortar.topmortarsales.view.contact.DetailContactActivity
-import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
 import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
 import com.topmortar.topmortarsales.view.user.ManageUserActivity
 import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
-class MainActivity : AppCompatActivity(), ItemClickListener {
+class ListTukangActivity : AppCompatActivity(), ItemClickListener {
 
     private lateinit var scaleAnimation: Animation
 
@@ -83,6 +80,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     private lateinit var llTitleBar: LinearLayout
     private lateinit var llSearchBox: LinearLayout
     private lateinit var btnFab: FloatingActionButton
+    private lateinit var titleBar: TextView
     private lateinit var icMore: ImageView
     private lateinit var icSearch: ImageView
     private lateinit var icCloseSearch: ImageView
@@ -109,7 +107,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
-        sessionManager = SessionManager(this@MainActivity)
+        sessionManager = SessionManager(this@ListTukangActivity)
         userCity = sessionManager.userCityID()!!
         userKind = sessionManager.userKind()!!
 
@@ -118,7 +116,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
         if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()) return missingDataHandler()
 
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_list_tukang)
 
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
 
@@ -138,6 +136,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         llTitleBar = findViewById(R.id.title_bar)
         llSearchBox = findViewById(R.id.search_box)
         btnFab = findViewById(R.id.btn_fab)
+        titleBar = llTitleBar.findViewById(R.id.tv_title_bar)
         icMore = llTitleBar.findViewById(R.id.ic_more)
         icSearch = llTitleBar.findViewById(R.id.ic_search)
         tvTitleBarDescription = llTitleBar.findViewById(R.id.tv_title_bar_description)
@@ -147,7 +146,9 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
         // Set Title Bar
         icMore.visibility = View.VISIBLE
+        etSearchBox.hint = "Search tukang…"
 //        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Hello, $it" else "Hello, ${ sessionManager.userName() }"}
+        titleBar.text = "List Tukang"
         tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Hello, $it" else ""}
         tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
         etSearchBox.setPadding(0, 0, convertDpToPx(16, this), 0)
@@ -160,7 +161,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
     private fun initClickHandler() {
 
-        btnFab.setOnClickListener { navigateAddNewRoom() }
+        btnFab.setOnClickListener { navigateAddTukang() }
         icMore.setOnClickListener { showPopupMenu() }
         icSearch.setOnClickListener { toggleSearchEvent(SEARCH_OPEN) }
         icCloseSearch.setOnClickListener { toggleSearchEvent(SEARCH_CLOSE) }
@@ -189,11 +190,11 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
     }
 
-    private fun navigateAddNewRoom(data: ContactModel? = null) {
+    private fun navigateAddTukang(data: ContactModel? = null) {
 
         toggleSearchEvent(SEARCH_CLOSE)
 
-        val intent = Intent(this@MainActivity, NewRoomChatFormActivity::class.java)
+        val intent = Intent(this@ListTukangActivity, AddTukangActivity::class.java)
 
         if (data != null) {
             intent.putExtra(CONST_CONTACT_ID, data.id_contact)
@@ -214,7 +215,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
         toggleSearchEvent(SEARCH_CLOSE)
 
-        val intent = Intent(this@MainActivity, DetailContactActivity::class.java)
+        val intent = Intent(this@ListTukangActivity, DetailTukangActivity::class.java)
 
         if (data != null) {
             intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
@@ -235,19 +236,17 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     }
 
     private fun showPopupMenu() {
-        val popupMenu = PopupMenu(this@MainActivity, icMore)
+        val popupMenu = PopupMenu(this@ListTukangActivity, icMore)
         popupMenu.inflate(R.menu.option_main_menu)
 
         val searchItem = popupMenu.menu.findItem(R.id.option_search)
         val userItem = popupMenu.menu.findItem(R.id.option_user)
         val cityItem = popupMenu.menu.findItem(R.id.option_city)
-        val skillItem = popupMenu.menu.findItem(R.id.option_skill)
 
         searchItem.isVisible = false
         if (sessionManager.userKind() != USER_KIND_ADMIN) {
             userItem.isVisible = false
             cityItem.isVisible = false
-            skillItem.isVisible = false
         }
 
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
@@ -262,15 +261,15 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
                     true
                 }
                 R.id.option_user -> {
-                    startActivity(Intent(this@MainActivity, ManageUserActivity::class.java))
+                    startActivity(Intent(this@ListTukangActivity, ManageUserActivity::class.java))
                     true
                 }
                 R.id.option_city -> {
-                    startActivity(Intent(this@MainActivity, ManageCityActivity::class.java))
+                    startActivity(Intent(this@ListTukangActivity, ManageCityActivity::class.java))
                     true
                 }
                 R.id.option_skill -> {
-                    startActivity(Intent(this@MainActivity, ManageSkillActivity::class.java))
+                    startActivity(Intent(this@ListTukangActivity, ManageSkillActivity::class.java))
                     true
                 }
                 R.id.option_logout -> {
@@ -298,31 +297,31 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
         val animationDuration = 200L
 
-        val fadeIn = AnimationUtils.loadAnimation(this@MainActivity, R.anim.fade_in)
+        val fadeIn = AnimationUtils.loadAnimation(this@ListTukangActivity, R.anim.fade_in)
         fadeIn.duration = animationDuration
-        val fadeOut = AnimationUtils.loadAnimation(this@MainActivity, R.anim.fade_out)
+        val fadeOut = AnimationUtils.loadAnimation(this@ListTukangActivity, R.anim.fade_out)
         fadeOut.duration = animationDuration
-        val slideInFromLeft = AnimationUtils.loadAnimation(this@MainActivity,
+        val slideInFromLeft = AnimationUtils.loadAnimation(this@ListTukangActivity,
             R.anim.fade_slide_in_from_left
         )
         slideInFromLeft.duration = animationDuration
-        val slideOutToRight = AnimationUtils.loadAnimation(this@MainActivity,
+        val slideOutToRight = AnimationUtils.loadAnimation(this@ListTukangActivity,
             R.anim.fade_slide_out_to_right
         )
         slideOutToRight.duration = animationDuration
-        val slideInFromRight = AnimationUtils.loadAnimation(this@MainActivity,
+        val slideInFromRight = AnimationUtils.loadAnimation(this@ListTukangActivity,
             R.anim.fade_slide_in_from_right
         )
         slideInFromRight.duration = animationDuration
-        val slideOutToLeft = AnimationUtils.loadAnimation(this@MainActivity,
+        val slideOutToLeft = AnimationUtils.loadAnimation(this@ListTukangActivity,
             R.anim.fade_slide_out_to_left
         )
         slideOutToLeft.duration = animationDuration
 
         etSearchBox.setOnFocusChangeListener { _, hasFocus ->
             run {
-                if (hasFocus) showKeyboard(etSearchBox, this@MainActivity)
-                else hideKeyboard(etSearchBox, this@MainActivity)
+                if (hasFocus) showKeyboard(etSearchBox, this@ListTukangActivity)
+                else hideKeyboard(etSearchBox, this@ListTukangActivity)
             }
         }
 
@@ -447,12 +446,12 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        loadingState(true, "Contact data is empty!")
+                        loadingState(true, "Data tukang is empty!")
 
                     }
                     else -> {
 
-                        handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                        handleMessage(this@ListTukangActivity, TAG_RESPONSE_CONTACT, "Failed get data")
                         loadingState(true, getString(R.string.failed_request))
 
                     }
@@ -461,7 +460,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
             } catch (e: Exception) {
 
-                handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@ListTukangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
 
             }
@@ -532,12 +531,12 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
                         }
                         RESPONSE_STATUS_EMPTY -> {
 
-                            loadingState(true, "Contact data is empty!")
+                            loadingState(true, "Data tukang is empty!")
 
                         }
                         else -> {
 
-                            handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                            handleMessage(this@ListTukangActivity, TAG_RESPONSE_CONTACT, "Failed get data")
                             loadingState(true, getString(R.string.failed_request))
 
                         }
@@ -545,7 +544,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
                 } else {
 
-                    handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed get data! Message: " + response.message())
+                    handleMessage(this@ListTukangActivity, TAG_RESPONSE_CONTACT, "Failed get data! Message: " + response.message())
                     loadingState(true, getString(R.string.failed_request))
 
                 }
@@ -553,7 +552,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
             } catch (e: Exception) {
 
-                handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@ListTukangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
 
             }
@@ -571,9 +570,9 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 //            indexItem.let { if (it == 4) indexItem = 0 else indexItem++}
 //        }
 
-        val rvAdapter = ContactsRecyclerViewAdapter(listItem, this@MainActivity)
+        val rvAdapter = TukangRecyclerViewAdapter(listItem, this@ListTukangActivity)
 
-        rvListChat.layoutManager = LinearLayoutManager(this@MainActivity)
+        rvListChat.layoutManager = LinearLayoutManager(this@ListTukangActivity)
         rvListChat.adapter = rvAdapter
         rvListChat.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             private var lastScrollPosition = 0
@@ -635,7 +634,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         sessionManager.setFullName("")
         sessionManager.setUserCityID("")
 
-        val intent = Intent(this@MainActivity, SplashScreenActivity::class.java)
+        val intent = Intent(this@ListTukangActivity, SplashScreenActivity::class.java)
         startActivity(intent)
         finish()
     }
@@ -666,8 +665,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
                 return
             }
 
-            this@MainActivity.doubleBackToExitPressedOnce = true
-            handleMessage(this@MainActivity, TAG_ACTION_MAIN_ACTIVITY, "Tekan sekali lagi untuk keluar!", TOAST_SHORT)
+            this@ListTukangActivity.doubleBackToExitPressedOnce = true
+            handleMessage(this@ListTukangActivity, TAG_ACTION_MAIN_ACTIVITY, "Tekan sekali lagi untuk keluar!", TOAST_SHORT)
 
             Handler(Looper.getMainLooper()).postDelayed({
                 doubleBackToExitPressedOnce = false
