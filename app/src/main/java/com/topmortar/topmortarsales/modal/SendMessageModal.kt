@@ -14,8 +14,10 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.PING_NORMAL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -45,6 +47,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
     private lateinit var sessionManager: SessionManager
 
+    private var pingStatus: Int? = null
     private val msgMaxLines = 5
     private val msgMaxLength = 200
 
@@ -59,6 +62,10 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
     }
     interface SendMessageModalInterface {
         fun onSubmit(status: Boolean)
+    }
+
+    fun setPingStatus(pingStatus: Int? = null) {
+        this.pingStatus = pingStatus
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -151,6 +158,14 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
     private fun submitHandler() {
 
         if (!formValidation( "${ etMessage.text }")) return
+
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Unstable Connection!")
+            .setMessage("Wait until the signal indicator turns green and try again.")
+            .setPositiveButton("Ok") { dialog, _ -> dialog.dismiss() }
+        val dialog = builder.create()
+
+        if (pingStatus != PING_NORMAL) return dialog.show()
 
         loadingState(true)
 
