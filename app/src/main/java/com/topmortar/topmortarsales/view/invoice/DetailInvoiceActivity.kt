@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.provider.MediaStore
+import android.util.DisplayMetrics
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Button
@@ -29,6 +30,9 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.dantsu.escposprinter.EscPosPrinter
+import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
+import com.dantsu.escposprinter.textparser.PrinterTextParserImg
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.InvoiceOrderRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
@@ -523,6 +527,39 @@ class DetailInvoiceActivity : AppCompatActivity() {
             }
 
         }
+    }
+
+    // Testing
+    private fun printEscPos() {
+        val printer = EscPosPrinter(BluetoothPrintersConnections.selectFirstPaired(), 203, 48f, 32)
+        printer.printFormattedText(
+            "[C]<img>" + PrinterTextParserImg.bitmapToHexadecimalString(printer, this.applicationContext.resources.getDrawableForDensity(R.drawable.logo_top_mortar, DisplayMetrics.DENSITY_MEDIUM))+"</img>\n" +
+            "[L]\n" +
+            "[C]<u><font size='big'>ORDER N°045</font></u>\n" +
+            "[L]\n" +
+            "[C]================================\n" +
+            "[L]\n" +
+            "[L]<b>BEAUTIFUL SHIRT</b>[R]9.99e\n" +
+            "[L]  + Size : S\n" +
+            "[L]\n" +
+            "[L]<b>AWESOME HAT</b>[R]24.99e\n" +
+            "[L]  + Size : 57/58\n" +
+            "[L]\n" +
+            "[C]--------------------------------\n" +
+            "[R]TOTAL PRICE :[R]34.98e\n" +
+            "[R]TAX :[R]4.23e\n" +
+            "[L]\n" +
+            "[C]================================\n" +
+            "[L]\n" +
+            "[L]<font size='tall'>Customer :</font>\n" +
+            "[L]Raymond DUPONT\n" +
+            "[L]5 rue des girafes\n" +
+            "[L]31547 PERPETES\n" +
+            "[L]Tel : +33801201456\n" +
+            "[L]\n" +
+            "[C]<barcode type='ean13' height='10'>831254784551</barcode>\n" +
+            "[C]<qrcode size='20'>https://dantsu.com/</qrcode>"
+        )
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
