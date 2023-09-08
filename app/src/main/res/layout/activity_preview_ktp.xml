@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center">
+
+    <include
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        layout="@layout/component_title_bar_light"/>
+
+    <com.github.chrisbanes.photoview.PhotoView
+        android:id="@+id/photoView"
+        android:layout_alignParentStart="true"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <TextView
+        android:visibility="gone"
+        android:id="@+id/tv_empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:padding="16dp"
+        android:gravity="center"
+        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+        android:text="Failed to load image."/>
+
+    <LinearLayout
+        android:id="@+id/footer"
+        android:layout_alignParentBottom="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/black_200"
+        android:alpha="0.8"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+            android:text="Ketuk gambar untuk merubah rotasi, \n Cubit untuk zoom in/out."/>
+
+    </LinearLayout>
+
+</RelativeLayout>

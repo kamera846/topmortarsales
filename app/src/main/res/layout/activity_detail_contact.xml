@@ -604,6 +604,22 @@
                             android:outlineProvider="none"/>
 
                     </LinearLayout>
+                    <TextView
+                        android:visibility="gone"
+                        android:id="@+id/tv_selected_ktp"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginHorizontal="16dp"
+                        android:gravity="center_vertical"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                        android:textColorHint="@color/black_600"
+                        android:inputType="textCapWords"
+                        android:autofillHints="Choose Owner Birthday"
+                        android:textSize="16sp"
+                        android:text="Selected file: "
+                        android:background="@android:color/transparent"
+                        android:outlineProvider="none"/>
 
                 </LinearLayout>
 
