@@ -29,6 +29,7 @@ import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
@@ -83,6 +84,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var etPhoneContainer: LinearLayout
     private lateinit var tvBirthdayContainer: LinearLayout
     private lateinit var etBirthdayContainer: LinearLayout
+    private lateinit var tvKtpContainer: LinearLayout
+    private lateinit var etKtpContainer: LinearLayout
     private lateinit var tvLocationContainer: LinearLayout
     private lateinit var etLocationContainer: LinearLayout
     private lateinit var tvOwnerContainer: LinearLayout
@@ -101,6 +104,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var tooltipPhone: ImageView
     private lateinit var tooltipOwner: ImageView
     private lateinit var tooltipBirthday: ImageView
+    private lateinit var tooltipKtp: ImageView
     private lateinit var tooltipLocation: ImageView
     private lateinit var tooltipMaps: ImageView
 
@@ -111,6 +115,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var tvDescription: TextView
     private lateinit var tvPhone: TextView
     private lateinit var tvBirthday: TextView
+    private lateinit var tvKtp: TextView
     private lateinit var tvLocation: TextView
     private lateinit var tvOwner: TextView
     private lateinit var tvMaps: TextView
@@ -118,6 +123,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var etOwner: EditText
     private lateinit var etPhone: EditText
     private lateinit var etBirthday: EditText
+    private lateinit var etKtp: EditText
     private lateinit var etLocation: EditText
     private lateinit var etMaps: EditText
 
@@ -179,6 +185,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         etPhoneContainer = findViewById(R.id.et_phone_container)
         tvBirthdayContainer = findViewById(R.id.tv_birthday_container)
         etBirthdayContainer = findViewById(R.id.et_birthday_container)
+        tvKtpContainer = findViewById(R.id.tv_ktp_container)
+        etKtpContainer = findViewById(R.id.et_ktp_container)
         tvLocationContainer = findViewById(R.id.tv_location_container)
         etLocationContainer = findViewById(R.id.et_location_container)
         tvOwnerContainer = findViewById(R.id.tv_owner_container)
@@ -195,6 +203,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         tooltipLocation = findViewById(R.id.tooltip_location)
         tooltipMaps = findViewById(R.id.tooltip_maps)
         tooltipBirthday = findViewById(R.id.tooltip_birthday)
+        tooltipKtp = findViewById(R.id.tooltip_ktp)
 
         tooltipStatus = findViewById(R.id.tooltip_status)
 
@@ -212,6 +221,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         etMaps = findViewById(R.id.et_maps)
         tvBirthday = findViewById(R.id.tv_birthday)
         etBirthday = findViewById(R.id.et_birthday)
+        tvKtp = findViewById(R.id.tv_ktp)
+        etKtp = findViewById(R.id.et_ktp)
 
         tvStatus = findViewById(R.id.tv_status)
         spinStatus = findViewById(R.id.spin_status)
@@ -324,6 +335,17 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             else TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsText)
             false
         }
+        val tooltipKtpText = "Ktp File"
+        val tooltipKtpTextOpen = "Click to open KTP and see the details"
+        tooltipKtp.setOnClickListener {
+            if (tvKtp.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(tooltipKtp, tooltipKtpTextOpen)
+            else TooltipCompat.setTooltipText(tooltipKtp, tooltipKtpText)
+        }
+        tooltipKtp.setOnLongClickListener {
+            if (tvKtp.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(tooltipKtp, tooltipKtpTextOpen)
+            else TooltipCompat.setTooltipText(tooltipKtp, tooltipKtpText)
+            false
+        }
         //////////
     }
 
@@ -334,6 +356,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val iOwner = intent.getStringExtra(CONST_OWNER)
         val iName = intent.getStringExtra(CONST_NAME)
         val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
+        val iKtp = intent.getStringExtra(CONST_KTP)
 
         iMapsUrl = intent.getStringExtra(CONST_MAPS)
         iStatus = intent.getStringExtra(CONST_STATUS)
@@ -397,6 +420,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tvMaps.text = EMPTY_FIELD_VALUE
             etMaps.setText("")
         }
+        if (!iKtp.isNullOrEmpty()) {
+            tvKtp.text = "Click to open preview KTP"
+            etKtp.setText("")
+        } else {
+            tvKtp.text = EMPTY_FIELD_VALUE
+            etKtp.setText("")
+        }
 
         // Other columns handle
         if (!iAddress.isNullOrEmpty()) etAddress.setText(iAddress)
@@ -424,6 +454,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tvLocationContainer.visibility = View.GONE
             tvMapsContainer.visibility = View.GONE
             tvBirthdayContainer.visibility = View.GONE
+            tvKtpContainer.visibility = View.GONE
 
             btnSendMessage.visibility = View.GONE
             btnInvoice.visibility = View.GONE
@@ -439,6 +470,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             etLocationContainer.visibility = View.VISIBLE
             etMapsContainer.visibility = View.VISIBLE
             etBirthdayContainer.visibility = View.VISIBLE
+            etKtpContainer.visibility = View.VISIBLE
 
             // Other Columns Handle
             addressContainer.setBackgroundResource(R.drawable.et_background)
@@ -469,6 +501,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tvLocationContainer.visibility = View.VISIBLE
             tvMapsContainer.visibility = View.VISIBLE
             tvBirthdayContainer.visibility = View.VISIBLE
+            tvKtpContainer.visibility = View.VISIBLE
 
             btnSendMessage.visibility = View.VISIBLE
 
@@ -483,6 +516,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             etLocationContainer.visibility = View.GONE
             etMapsContainer.visibility = View.GONE
             etBirthdayContainer.visibility = View.GONE
+            etKtpContainer.visibility = View.GONE
 
             // Other Columns Handle
             addressContainer.setBackgroundResource(R.drawable.background_rounded)
