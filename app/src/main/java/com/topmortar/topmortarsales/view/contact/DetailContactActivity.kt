@@ -281,7 +281,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         // Setup Title Bar
         tvTitleBar.text = "Detail Contact"
         tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
-        if (sessionManager.userKind() == USER_KIND_ADMIN) icEdit.visibility = View.VISIBLE
+
+        // Admin Access
+        if (sessionManager.userKind() == USER_KIND_ADMIN) {
+            icEdit.visibility = View.VISIBLE
+            tvKtpContainer.visibility = View.VISIBLE
+        }
 
         // Setup Date Picker Dialog
         setDatePickerDialog()
@@ -292,7 +297,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         // Setup Dialog Send Message
         setupDialogSendMessage()
 
-        // Setup Image Picker
+        // Setup KTP Image Picker
         cameraPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
                 chooseFile()
