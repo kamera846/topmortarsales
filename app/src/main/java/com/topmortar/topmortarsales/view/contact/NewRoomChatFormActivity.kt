@@ -8,17 +8,23 @@ import android.os.Handler
 import android.text.Editable
 import android.text.InputFilter
 import android.text.TextWatcher
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
@@ -26,11 +32,17 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
+import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_15
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_30
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_45
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_60
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_CASH
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
@@ -66,6 +78,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
     private lateinit var etStoreLocated: EditText
     private lateinit var etMapsUrl: EditText
     private lateinit var etMessage: EditText
+    private lateinit var spinTermin: Spinner
     private lateinit var spinnerSearchBox: AutoCompleteTextView
 
     private lateinit var sessionManager: SessionManager
@@ -81,11 +94,13 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
     private val msgMaxLength = 200
     private var selectedDate: Calendar = Calendar.getInstance()
     private var selectedCity: ModalSearchModel? = null
+    private var selectedTermin: String? = null
     private var citiesResults: ArrayList<CityModel> = ArrayList()
     private var cities = listOf("Malang", "Gresik", "Sidoarjo", "Blitar", "Surabaya", "Jakarta", "Bandung", "Yogyakarta", "Kediri")
 
     private var iLocation: String? = null
     private var iMapsUrl: String? = null
+    private var iTermin: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -104,6 +119,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         Handler().postDelayed({
             isLoaded = true
             isCitiesLoaded = true
+            setSpinnerTermin()
 //            getCities()
         }, 500)
 
@@ -118,10 +134,11 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         var cityId = "$iLocation"
         val mapsUrl = "${ etMapsUrl.text }"
         val message = "${ etMessage.text }"
+        val termin = selectedTermin
         val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
         val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
 
-        if (!formValidation(phone = phone, name = name, owner = owner, message = message, birthday = birthday, mapsUrl = mapsUrl)) return
+        if (!formValidation(phone = phone, name = name, owner = owner, message = message, birthday = birthday, termin = termin, mapsUrl = mapsUrl)) return
 
         birthday = if (birthday.isEmpty()) "0000-00-00"
         else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
@@ -131,10 +148,10 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         loadingState(true)
 
 //        Handler().postDelayed({
-//            handleMessage(this, "SEND MESSAGE", "$phone : $name : $owner : $birthday : $cityId : $message")
+//            handleMessage(this, "SEND MESSAGE", "$phone : $name : $owner : $birthday : $cityId : $termin : $message")
 //            loadingState(false)
 //        }, 1000)
-//
+
 //        return
 
         lifecycleScope.launch {
@@ -150,9 +167,10 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                 val rbMessage = createPartFromString(message)
                 val rbUserId = createPartFromString(userId)
                 val rbCurrentName = createPartFromString(currentName)
+                val rbTermin = createPartFromString(termin!!)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.sendMessage(name = rbName, phone = rbPhone, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, userId = rbUserId, currentName = rbCurrentName, message = rbMessage)
+                val response = apiService.sendMessage(name = rbName, phone = rbPhone, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, userId = rbUserId, currentName = rbCurrentName, termin = rbTermin, message = rbMessage)
 
                 if (response.isSuccessful) {
 
@@ -231,6 +249,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
         iLocation = intent.getStringExtra(CONST_LOCATION)
         iMapsUrl = intent.getStringExtra(CONST_MAPS)
+        iTermin = intent.getStringExtra(CONST_TERMIN)
         activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
 
         if (iContactId.isNullOrEmpty()) {
@@ -290,6 +309,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         etBirthday = findViewById(R.id.et_birthday)
         etStoreLocated = findViewById(R.id.et_store_located)
         etMessage = findViewById(R.id.et_message)
+        spinTermin = findViewById(R.id.spin_termin)
         spinnerSearchBox = findViewById(R.id.spinner_search_box)
         etMapsUrl = findViewById(R.id.et_maps_url)
 
@@ -390,7 +410,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
     }
 
-    private fun formValidation(phone: String, name: String, location: String = "", birthday: String = "", owner: String = "", mapsUrl: String = "", message: String): Boolean {
+    private fun formValidation(phone: String, name: String, location: String = "", birthday: String = "", owner: String = "", termin: String? = "", mapsUrl: String = "", message: String): Boolean {
         return if (phone.isEmpty()) {
             etPhone.error = "Phone number cannot be empty!"
             etPhone.requestFocus()
@@ -429,6 +449,9 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 //            etStoreLocated.error = "Choose store location!"
 //            etStoreLocated.requestFocus()
 //            false
+        } else if (termin == null) {
+            handleMessage(this, "ERROR SPINNER", "Choose termin payment")
+            false
         } else if (message.isEmpty()) {
             etMapsUrl.error = null
             etMapsUrl.clearFocus()
@@ -577,6 +600,67 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             }
 
         }
+    }
+
+    private fun setSpinnerTermin() {
+
+        // Create an ArrayAdapter using the string array and default spinner layout
+        val adapter = object : ArrayAdapter<CharSequence>(
+            this,
+            android.R.layout.simple_spinner_item,
+            resources.getStringArray(R.array.termin_spinner_options)
+        ) {
+            override fun isEnabled(position: Int): Boolean {
+                // Disable the first item (position 0)
+                return position != 0
+            }
+        }
+
+        // Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        // Apply the adapter to the spinner
+        spinTermin.adapter = adapter
+
+        val terminItem = when (iTermin) {
+            STATUS_TERMIN_CASH -> 1
+            STATUS_TERMIN_15 -> 2
+            STATUS_TERMIN_30 -> 3
+            STATUS_TERMIN_45 -> 4
+            STATUS_TERMIN_60 -> 5
+            else -> 0
+        }
+
+        spinTermin.setSelection(terminItem)
+
+        // Handle the selected option
+        spinTermin.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: android.view.View?, position: Int, id: Long) {
+                // Get the selected item value (e.g., "admin" or "sales")
+                selectedTermin = when (position) {
+                    0 -> null
+                    1 -> STATUS_TERMIN_CASH
+                    2 -> STATUS_TERMIN_15
+                    3 -> STATUS_TERMIN_30
+                    4 -> STATUS_TERMIN_45
+                    5 -> STATUS_TERMIN_60
+                    else -> null
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                // Do nothing here
+                selectedTermin = when (iTermin) {
+                    STATUS_TERMIN_CASH -> STATUS_TERMIN_CASH
+                    STATUS_TERMIN_15 -> STATUS_TERMIN_15
+                    STATUS_TERMIN_30 -> STATUS_TERMIN_30
+                    STATUS_TERMIN_45 -> STATUS_TERMIN_45
+                    STATUS_TERMIN_60 -> STATUS_TERMIN_60
+                    else -> null
+                }
+            }
+        }
+
     }
 
     override fun onDataReceived(data: ModalSearchModel) {

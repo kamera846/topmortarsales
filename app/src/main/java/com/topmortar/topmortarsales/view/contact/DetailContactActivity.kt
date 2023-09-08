@@ -739,6 +739,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 id_city = pCityID,
                                 tgl_lahir = pBirthday,
                                 maps_url = pMapsUrl,
+                                termin_payment = pTermin,
                             )
                             setupDialogSendMessage(itemSendMessage)
 

@@ -149,9 +149,10 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                 val rbMessage = createPartFromString(message)
                 val rbUserId = createPartFromString(userId)
                 val rbCurrentName = createPartFromString(currentName)
+                val rbTermin = createPartFromString("15")
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.sendMessage(name = rbName, phone = rbPhone, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, userId = rbUserId, currentName = rbCurrentName, message = rbMessage)
+                val response = apiService.sendMessage(name = rbName, phone = rbPhone, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, userId = rbUserId, currentName = rbCurrentName, termin = rbTermin, message = rbMessage)
 
                 if (response.isSuccessful) {
 

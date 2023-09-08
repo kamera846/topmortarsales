@@ -184,6 +184,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
                 val rbMessage = createPartFromString("${ etMessage.text }")
                 val rbUserId = createPartFromString(userId)
                 val rbCurrentName = createPartFromString(currentName)
+                val rbTermin = createPartFromString(data.termin_payment)
 
 //                handleMessage(context, "SEND MESSAGE PARAM", "${ data.nomorhp } : ${ data.nama } : ${ data.id_city } : ${ data.tgl_lahir } : ${ data.store_owner } : ${ data.maps_url } : ${ etMessage.text }")
 
@@ -194,7 +195,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 //                return@launch
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.sendMessage(name = rbName, phone = rbPhone, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, currentName = rbCurrentName, userId = rbUserId, message = rbMessage)
+                val response = apiService.sendMessage(name = rbName, phone = rbPhone, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, currentName = rbCurrentName, userId = rbUserId, termin = rbTermin, message = rbMessage)
 
                 if (response.isSuccessful) {
 
