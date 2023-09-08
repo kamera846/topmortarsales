@@ -48,6 +48,7 @@ import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.CONST_STATUS
+import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.CONST_URI
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
@@ -62,6 +63,11 @@ import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BID
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BLACKLIST
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_15
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_30
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_45
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_60
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_CASH
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
@@ -119,6 +125,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var overlayMaps: View
 
     private lateinit var statusContainer: LinearLayout
+    private lateinit var terminContainer: LinearLayout
     private lateinit var addressContainer: LinearLayout
 
     private lateinit var icBack: ImageView
@@ -153,7 +160,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var etMaps: EditText
 
     private lateinit var tvStatus: TextView
+    private lateinit var tvTermin: TextView
     private lateinit var spinStatus: Spinner
+    private lateinit var spinTermin: Spinner
     private lateinit var etAddress: EditText
 
     private lateinit var btnSendMessage: Button
@@ -169,7 +178,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var itemSendMessage: ContactModel? = null
 
     private var statusItem: List<String> = listOf("Choose Customer Status", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
+    private var terminItem: List<String> = listOf("Choose Termin Payment", "Cash", "15 Hari", "30 Hari", "45 Hari", "60 Hari")
     private var selectedStatus: String = ""
+    private var selectedTermin: String = ""
     private var cameraPermissionLauncher: ActivityResultLauncher<String>? = null
     private var imagePicker: ActivityResultLauncher<Intent>? = null
     private var selectedUri: Uri? = null
@@ -177,6 +188,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private var iLocation: String? = null
     private var iStatus: String? = null
+    private var iTermin: String? = null
     private var iAddress: String? = null
     private var iMapsUrl: String? = null
     private var iKtp: String? = null
@@ -226,6 +238,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         overlayMaps = findViewById(R.id.overlay_maps)
 
         statusContainer = findViewById(R.id.status_container)
+        terminContainer = findViewById(R.id.termin_container)
         addressContainer = findViewById(R.id.address_container)
 
         tooltipPhone = findViewById(R.id.tooltip_phone)
@@ -257,6 +270,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         tvStatus = findViewById(R.id.tv_status)
         spinStatus = findViewById(R.id.spin_status)
+        tvTermin = findViewById(R.id.tv_termin)
+        spinTermin = findViewById(R.id.spin_termin)
         etAddress = findViewById(R.id.et_address)
 
         btnSendMessage = findViewById(R.id.btn_send_message)
@@ -431,6 +446,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         iKtp = intent.getStringExtra(CONST_KTP)
         iMapsUrl = intent.getStringExtra(CONST_MAPS)
         iStatus = intent.getStringExtra(CONST_STATUS)
+        iTermin = intent.getStringExtra(CONST_TERMIN)
         if (!iStatus.isNullOrEmpty()) {
             tooltipStatus.visibility = View.VISIBLE
             if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) btnInvoice.visibility = View.GONE
@@ -504,8 +520,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         if (!iAddress.isNullOrEmpty()) etAddress.setText(iAddress)
         else etAddress.setText(EMPTY_FIELD_VALUE)
 
-        // Column status
+        // Set Spinner
         setupStatusSpinner()
+        setupTerminSpinner()
 
     }
 
@@ -555,6 +572,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tooltipStatus.visibility = View.GONE
             tvStatus.visibility = View.GONE
             spinStatus.visibility = View.VISIBLE
+            terminContainer.setBackgroundResource(R.drawable.et_background)
+            tvTermin.visibility = View.GONE
+            spinTermin.visibility = View.VISIBLE
 
 
             btnSaveEdit.visibility = View.VISIBLE
@@ -607,6 +627,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
             tvStatus.visibility = View.VISIBLE
             spinStatus.visibility = View.GONE
+            terminContainer.setBackgroundResource(R.drawable.background_rounded)
+            tvTermin.visibility = View.VISIBLE
+            spinTermin.visibility = View.GONE
 
             btnSaveEdit.visibility = View.GONE
 
@@ -641,6 +664,16 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val pMapsUrl = "${ etMaps.text }"
         val pAddress = "${ etAddress.text }"
         val pStatus = if (selectedStatus.isNullOrEmpty()) "" else selectedStatus.substringBefore(" - ").toLowerCase()
+        val pTermin = if (selectedTermin.isNullOrEmpty()) "" else {
+            when (selectedTermin) {
+                terminItem[1] -> STATUS_TERMIN_CASH
+                terminItem[2] -> STATUS_TERMIN_15
+                terminItem[3] -> STATUS_TERMIN_30
+                terminItem[4] -> STATUS_TERMIN_45
+                terminItem[5] -> STATUS_TERMIN_60
+                else -> ""
+            }
+        }
 
         var imagePart: MultipartBody.Part? = null
 
@@ -675,6 +708,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbLocation = createPartFromString(pCityID)
                 val rbAddress = createPartFromString(pAddress)
                 val rbStatus = createPartFromString(pStatus)
+                val rbTermin = createPartFromString(pTermin)
 
                 val apiService: ApiService = HttpClient.create()
                 val response = apiService.editContact(
@@ -687,6 +721,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     mapsUrl = rbMapsUrl,
                     address = rbAddress,
                     status = rbStatus,
+                    termin = rbTermin,
                     ktp = imagePart?.let { imagePart }
                 )
 
@@ -739,6 +774,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 } else btnInvoice.visibility = View.VISIBLE
                             }
                             setupStatus(iStatus)
+
+                            iTermin = if (!pTermin.isNullOrEmpty()) pTermin else null
+                            setupTermin(iTermin)
 
                             getDetailContact()
 
@@ -1176,6 +1214,35 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
     }
 
+    private fun setupTermin(termin: String? = null) {
+        when (termin) {
+            STATUS_TERMIN_CASH -> {
+                tvTermin.text = terminItem[1]
+                spinTermin.setSelection(1)
+            }
+            STATUS_TERMIN_15 -> {
+                tvTermin.text = terminItem[2]
+                spinTermin.setSelection(2)
+            }
+            STATUS_TERMIN_30 -> {
+                tvTermin.text = terminItem[3]
+                spinTermin.setSelection(3)
+            }
+            STATUS_TERMIN_45 -> {
+                tvTermin.text = terminItem[4]
+                spinTermin.setSelection(4)
+            }
+            STATUS_TERMIN_60 -> {
+                tvTermin.text = terminItem[5]
+                spinTermin.setSelection(5)
+            }
+            else -> {
+                tvTermin.text = EMPTY_FIELD_VALUE
+                spinTermin.setSelection(0)
+            }
+        }
+    }
+
     private fun setupStatusSpinner() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, statusItem)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -1193,6 +1260,25 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
 
         setupStatus(iStatus)
+    }
+
+    private fun setupTerminSpinner() {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, terminItem)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        spinTermin.adapter = adapter
+        spinTermin.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedTermin = if (position != 0) terminItem[position]
+                else ""
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+        }
+
+        setupTermin(iTermin)
     }
 
     private fun setupNetworkIndicator() {

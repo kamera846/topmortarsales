@@ -49,6 +49,7 @@ interface ApiService {
         @Part("mapsUrl") mapsUrl: RequestBody,
         @Part("address") address: RequestBody,
         @Part("status") status: RequestBody,
+        @Part("termin_payment") termin: RequestBody,
         @Part ktp: MultipartBody.Part? = null,
     ): Response<ResponseMessage>
 
