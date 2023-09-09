@@ -10,4 +10,6 @@ data class ContactModel(
     val maps_url: String = "",
     val address: String = "",
     var store_status: String = "",
+    var ktp_owner: String = "",
+    var termin_payment: String = "",
 )

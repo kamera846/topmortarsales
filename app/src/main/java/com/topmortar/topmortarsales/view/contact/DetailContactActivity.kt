@@ -1,10 +1,16 @@
 package com.topmortar.topmortarsales.view.contact
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.DatePickerDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
+import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -19,24 +25,34 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.TooltipCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.BASE_URL
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
+import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.CONST_STATUS
+import com.topmortar.topmortarsales.commons.CONST_TERMIN
+import com.topmortar.topmortarsales.commons.CONST_URI
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
+import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
@@ -47,11 +63,19 @@ import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BID
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BLACKLIST
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_15
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_30
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_45
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_60
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_COD
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_COD_TF
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_COD_TUNAI
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
+import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
@@ -67,8 +91,17 @@ import com.topmortar.topmortarsales.modal.SendMessageModal
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.invoice.ListInvoiceActivity
+import com.topmortar.topmortarsales.view.invoice.PreviewClosingActivity
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import java.io.File
+import java.io.IOException
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 import java.util.Timer
 import java.util.TimerTask
 
@@ -83,6 +116,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var etPhoneContainer: LinearLayout
     private lateinit var tvBirthdayContainer: LinearLayout
     private lateinit var etBirthdayContainer: LinearLayout
+    private lateinit var tvKtpContainer: LinearLayout
+    private lateinit var etKtpContainer: LinearLayout
     private lateinit var tvLocationContainer: LinearLayout
     private lateinit var etLocationContainer: LinearLayout
     private lateinit var tvOwnerContainer: LinearLayout
@@ -92,6 +127,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var overlayMaps: View
 
     private lateinit var statusContainer: LinearLayout
+    private lateinit var terminContainer: LinearLayout
     private lateinit var addressContainer: LinearLayout
 
     private lateinit var icBack: ImageView
@@ -101,6 +137,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var tooltipPhone: ImageView
     private lateinit var tooltipOwner: ImageView
     private lateinit var tooltipBirthday: ImageView
+    private lateinit var tooltipKtp: ImageView
     private lateinit var tooltipLocation: ImageView
     private lateinit var tooltipMaps: ImageView
 
@@ -111,6 +148,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var tvDescription: TextView
     private lateinit var tvPhone: TextView
     private lateinit var tvBirthday: TextView
+    private lateinit var tvKtp: TextView
+    private lateinit var tvSelectedKtp: TextView
     private lateinit var tvLocation: TextView
     private lateinit var tvOwner: TextView
     private lateinit var tvMaps: TextView
@@ -118,11 +157,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var etOwner: EditText
     private lateinit var etPhone: EditText
     private lateinit var etBirthday: EditText
+    private lateinit var etKtp: EditText
     private lateinit var etLocation: EditText
     private lateinit var etMaps: EditText
 
     private lateinit var tvStatus: TextView
+    private lateinit var tvTermin: TextView
     private lateinit var spinStatus: Spinner
+    private lateinit var spinTermin: Spinner
     private lateinit var etAddress: EditText
 
     private lateinit var btnSendMessage: Button
@@ -138,12 +180,20 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var itemSendMessage: ContactModel? = null
 
     private var statusItem: List<String> = listOf("Choose Customer Status", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
+    private var terminItem: List<String> = listOf("Choose Termin Payment", "COD", "COD + Transfer", "COD + Tunai", "30 Hari + Transfer", "45 Hari", "60 Hari")
     private var selectedStatus: String = ""
+    private var selectedTermin: String = ""
+    private var cameraPermissionLauncher: ActivityResultLauncher<String>? = null
+    private var imagePicker: ActivityResultLauncher<Intent>? = null
+    private var selectedUri: Uri? = null
+    private var currentPhotoUri: Uri? = null
 
     private var iLocation: String? = null
     private var iStatus: String? = null
+    private var iTermin: String? = null
     private var iAddress: String? = null
     private var iMapsUrl: String? = null
+    private var iKtp: String? = null
 
     private lateinit var datePicker: DatePickerDialog
     private lateinit var searchModal: SearchModal
@@ -179,6 +229,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         etPhoneContainer = findViewById(R.id.et_phone_container)
         tvBirthdayContainer = findViewById(R.id.tv_birthday_container)
         etBirthdayContainer = findViewById(R.id.et_birthday_container)
+        tvKtpContainer = findViewById(R.id.tv_ktp_container)
+        etKtpContainer = findViewById(R.id.et_ktp_container)
         tvLocationContainer = findViewById(R.id.tv_location_container)
         etLocationContainer = findViewById(R.id.et_location_container)
         tvOwnerContainer = findViewById(R.id.tv_owner_container)
@@ -188,6 +240,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         overlayMaps = findViewById(R.id.overlay_maps)
 
         statusContainer = findViewById(R.id.status_container)
+        terminContainer = findViewById(R.id.termin_container)
         addressContainer = findViewById(R.id.address_container)
 
         tooltipPhone = findViewById(R.id.tooltip_phone)
@@ -195,6 +248,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         tooltipLocation = findViewById(R.id.tooltip_location)
         tooltipMaps = findViewById(R.id.tooltip_maps)
         tooltipBirthday = findViewById(R.id.tooltip_birthday)
+        tooltipKtp = findViewById(R.id.tooltip_ktp)
 
         tooltipStatus = findViewById(R.id.tooltip_status)
 
@@ -212,9 +266,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         etMaps = findViewById(R.id.et_maps)
         tvBirthday = findViewById(R.id.tv_birthday)
         etBirthday = findViewById(R.id.et_birthday)
+        tvKtp = findViewById(R.id.tv_ktp)
+        tvSelectedKtp = findViewById(R.id.tv_selected_ktp)
+        etKtp = findViewById(R.id.et_ktp)
 
         tvStatus = findViewById(R.id.tv_status)
         spinStatus = findViewById(R.id.spin_status)
+        tvTermin = findViewById(R.id.tv_termin)
+        spinTermin = findViewById(R.id.spin_termin)
         etAddress = findViewById(R.id.et_address)
 
         btnSendMessage = findViewById(R.id.btn_send_message)
@@ -224,7 +283,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         // Setup Title Bar
         tvTitleBar.text = "Detail Contact"
         tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
-        if (sessionManager.userKind() == USER_KIND_ADMIN) icEdit.visibility = View.VISIBLE
+
+        // Admin Access
+        if (sessionManager.userKind() == USER_KIND_ADMIN) {
+            icEdit.visibility = View.VISIBLE
+            tvKtpContainer.visibility = View.VISIBLE
+        }
 
         // Setup Date Picker Dialog
         setDatePickerDialog()
@@ -234,6 +298,25 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         // Setup Dialog Send Message
         setupDialogSendMessage()
+
+        // Setup KTP Image Picker
+        cameraPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                chooseFile()
+            } else {
+                handleMessage(this@DetailContactActivity, "CAMERA ACCESS DENIED", "Permission camera denied")
+            }
+            etKtp.clearFocus()
+        }
+        imagePicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data: Intent? = result.data
+                selectedUri = if (data == null || data.data == null) currentPhotoUri else data.data
+                tvSelectedKtp.text = "Selected file: " + selectedUri?.let { getFileNameFromUri(it) }
+//                navigateToPreviewKtp()
+            }
+            etKtp.clearFocus()
+        }
 
     }
 
@@ -254,6 +337,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             if (isEdit) etAddress.requestFocus()
         }
         tvMapsContainer.setOnClickListener { mapsActionHandler() }
+        tvKtpContainer.setOnClickListener { previewKtp() }
 
         // Focus Listener
         etName.setOnFocusChangeListener { _, hasFocus ->
@@ -273,6 +357,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 showSearchModal()
                 etLocation.setSelection(etLocation.length())
             } else etLocation.clearFocus()
+        }
+        etKtp.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                chooseFile()
+                etKtp.setSelection(etKtp.length())
+            } else etKtp.clearFocus()
         }
         //////////
 
@@ -305,6 +395,20 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
 
         })
+        etKtp.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                if (isEdit) chooseFile()
+            }
+
+        })
         //////////
 
         // Tooltip Handler
@@ -324,6 +428,17 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             else TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsText)
             false
         }
+        val tooltipKtpText = "Ktp File"
+        val tooltipKtpTextOpen = "Click to open KTP and see the details"
+        tooltipKtp.setOnClickListener {
+            if (tvKtp.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(tooltipKtp, tooltipKtpTextOpen)
+            else TooltipCompat.setTooltipText(tooltipKtp, tooltipKtpText)
+        }
+        tooltipKtp.setOnLongClickListener {
+            if (tvKtp.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(tooltipKtp, tooltipKtpTextOpen)
+            else TooltipCompat.setTooltipText(tooltipKtp, tooltipKtpText)
+            false
+        }
         //////////
     }
 
@@ -335,8 +450,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val iName = intent.getStringExtra(CONST_NAME)
         val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
 
+        iKtp = intent.getStringExtra(CONST_KTP)
         iMapsUrl = intent.getStringExtra(CONST_MAPS)
         iStatus = intent.getStringExtra(CONST_STATUS)
+        iTermin = intent.getStringExtra(CONST_TERMIN)
         if (!iStatus.isNullOrEmpty()) {
             tooltipStatus.visibility = View.VISIBLE
             if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) btnInvoice.visibility = View.GONE
@@ -397,13 +514,22 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tvMaps.text = EMPTY_FIELD_VALUE
             etMaps.setText("")
         }
+        if (!iKtp.isNullOrEmpty()) {
+            tvKtp.text = "Click to open preview KTP"
+            etKtp.setText("")
+        } else {
+            iKtp = EMPTY_FIELD_VALUE
+            tvKtp.text = EMPTY_FIELD_VALUE
+            etKtp.setText("")
+        }
 
         // Other columns handle
         if (!iAddress.isNullOrEmpty()) etAddress.setText(iAddress)
         else etAddress.setText(EMPTY_FIELD_VALUE)
 
-        // Column status
+        // Set Spinner
         setupStatusSpinner()
+        setupTerminSpinner()
 
     }
 
@@ -424,6 +550,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tvLocationContainer.visibility = View.GONE
             tvMapsContainer.visibility = View.GONE
             tvBirthdayContainer.visibility = View.GONE
+            tvKtpContainer.visibility = View.GONE
 
             btnSendMessage.visibility = View.GONE
             btnInvoice.visibility = View.GONE
@@ -439,6 +566,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             etLocationContainer.visibility = View.VISIBLE
             etMapsContainer.visibility = View.VISIBLE
             etBirthdayContainer.visibility = View.VISIBLE
+            etKtpContainer.visibility = View.VISIBLE
+            tvSelectedKtp.visibility = View.VISIBLE
+            tvSelectedKtp.text = "Selected file: "
 
             // Other Columns Handle
             addressContainer.setBackgroundResource(R.drawable.et_background)
@@ -449,6 +579,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tooltipStatus.visibility = View.GONE
             tvStatus.visibility = View.GONE
             spinStatus.visibility = View.VISIBLE
+            terminContainer.setBackgroundResource(R.drawable.et_background)
+            tvTermin.visibility = View.GONE
+            spinTermin.visibility = View.VISIBLE
 
 
             btnSaveEdit.visibility = View.VISIBLE
@@ -469,6 +602,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tvLocationContainer.visibility = View.VISIBLE
             tvMapsContainer.visibility = View.VISIBLE
             tvBirthdayContainer.visibility = View.VISIBLE
+            tvKtpContainer.visibility = View.VISIBLE
 
             btnSendMessage.visibility = View.VISIBLE
 
@@ -483,6 +617,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             etLocationContainer.visibility = View.GONE
             etMapsContainer.visibility = View.GONE
             etBirthdayContainer.visibility = View.GONE
+            etKtpContainer.visibility = View.GONE
+            tvSelectedKtp.visibility = View.GONE
+            selectedUri = null
 
             // Other Columns Handle
             addressContainer.setBackgroundResource(R.drawable.background_rounded)
@@ -497,6 +634,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
             tvStatus.visibility = View.VISIBLE
             spinStatus.visibility = View.GONE
+            terminContainer.setBackgroundResource(R.drawable.background_rounded)
+            tvTermin.visibility = View.VISIBLE
+            spinTermin.visibility = View.GONE
 
             btnSaveEdit.visibility = View.GONE
 
@@ -531,6 +671,31 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val pMapsUrl = "${ etMaps.text }"
         val pAddress = "${ etAddress.text }"
         val pStatus = if (selectedStatus.isNullOrEmpty()) "" else selectedStatus.substringBefore(" - ").toLowerCase()
+        val pTermin = if (selectedTermin.isNullOrEmpty()) "" else {
+            when (selectedTermin) {
+                terminItem[1] -> STATUS_TERMIN_COD
+                terminItem[2] -> STATUS_TERMIN_COD_TF
+                terminItem[3] -> STATUS_TERMIN_COD_TUNAI
+                terminItem[4] -> STATUS_TERMIN_30
+                terminItem[5] -> STATUS_TERMIN_45
+                terminItem[6] -> STATUS_TERMIN_60
+                else -> ""
+            }
+        }
+
+        var imagePart: MultipartBody.Part? = null
+
+        if (iKtp.isNullOrEmpty() && selectedUri != null || !iKtp.isNullOrEmpty() && selectedUri != null) {
+            val imgUri = CompressImageUtil.compressImage(this@DetailContactActivity, selectedUri!!, 50)
+            val contentResolver = contentResolver
+            val inputStream = contentResolver.openInputStream(imgUri!!)
+            val byteArray = inputStream?.readBytes()
+
+            if (byteArray != null) {
+                val requestFile: RequestBody = RequestBody.create("image/*".toMediaTypeOrNull(), byteArray)
+                imagePart = MultipartBody.Part.createFormData("pic", "image.jpg", requestFile)
+            } else handleMessage(this, TAG_RESPONSE_CONTACT, "Image not located")
+        }
 
         pBirthday = if (pBirthday.isEmpty() || pBirthday == EMPTY_FIELD_VALUE) "0000-00-00"
         else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
@@ -551,9 +716,22 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbLocation = createPartFromString(pCityID)
                 val rbAddress = createPartFromString(pAddress)
                 val rbStatus = createPartFromString(pStatus)
+                val rbTermin = createPartFromString(pTermin)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.editContact(id = rbId, phone = rbPhone, name = rbName, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, address = rbAddress, status = rbStatus)
+                val response = apiService.editContact(
+                    id = rbId,
+                    phone = rbPhone,
+                    name = rbName,
+                    ownerName = rbOwner,
+                    birthday = rbBirthday,
+                    cityId = rbLocation,
+                    mapsUrl = rbMapsUrl,
+                    address = rbAddress,
+                    status = rbStatus,
+                    termin = rbTermin,
+                    ktp = imagePart?.let { imagePart }
+                )
 
                 if (response.isSuccessful) {
 
@@ -569,6 +747,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 id_city = pCityID,
                                 tgl_lahir = pBirthday,
                                 maps_url = pMapsUrl,
+                                termin_payment = pTermin,
                             )
                             setupDialogSendMessage(itemSendMessage)
 
@@ -605,7 +784,16 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             }
                             setupStatus(iStatus)
 
-                            hasEdited = true
+                            iTermin = if (!pTermin.isNullOrEmpty()) pTermin else null
+                            setupTermin(iTermin)
+
+                            // Remove image temp
+                            currentPhotoUri?.let {
+                                val contentResolver = contentResolver
+                                contentResolver.delete(it, null, null)
+                            }
+
+                            getDetailContact()
 
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
@@ -643,6 +831,68 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         }
 
+    }
+
+    private fun getDetailContact() {
+        loadingState(true)
+
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = contactId?.let { apiService.getContactDetail(contactId = it) }
+
+                if (response!!.isSuccessful) {
+
+                    val responseBody = response.body()!!
+
+                    when (responseBody.status) {
+                        RESPONSE_STATUS_OK -> {
+
+                            val data = responseBody.results[0]
+                            if (!data.ktp_owner.isNullOrEmpty()) {
+                                tvKtp.text = "Click to open preview KTP"
+                                iKtp = data.ktp_owner
+                            }
+
+                            hasEdited = true
+                            loadingState(false)
+
+                        }
+                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+
+                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed to get contact! Message: Response status $RESPONSE_STATUS_FAIL or $RESPONSE_STATUS_FAILED")
+                            loadingState(false)
+                            toggleEdit(false)
+
+                        }
+                        else -> {
+
+                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed to get contact!")
+                            loadingState(false)
+                            toggleEdit(false)
+
+                        }
+                    }
+
+                } else {
+
+                    handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed to get contact! Error: " + response.message())
+                    loadingState(false)
+                    toggleEdit(false)
+
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                loadingState(false)
+                toggleEdit(false)
+
+            }
+
+        }
     }
 
     private fun setDatePickerDialog() {
@@ -918,6 +1168,18 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
     }
 
+    private fun previewKtp() {
+        if (!iKtp.isNullOrEmpty() && iKtp != EMPTY_FIELD_VALUE && !isEdit) {
+
+//            val imageUrl = "https://cdn.popmama.com/content-images/community/20221018/community-6151307037af4cffa62490fdc39e65b7.jpg"
+            val imageUrl = BASE_URL + "img/" + iKtp
+            val intent = Intent(this, PreviewKtpActivity::class.java)
+            intent.putExtra(CONST_KTP, imageUrl)
+            startActivity(intent)
+
+        }
+    }
+
     private fun tooltipHandler(content: ImageView, text: String) {
         content.setOnClickListener {
             TooltipCompat.setTooltipText(content, text)
@@ -968,6 +1230,39 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
     }
 
+    private fun setupTermin(termin: String? = null) {
+        when (termin) {
+            STATUS_TERMIN_COD -> {
+                tvTermin.text = terminItem[1]
+                spinTermin.setSelection(1)
+            }
+            STATUS_TERMIN_COD_TF -> {
+                tvTermin.text = terminItem[2]
+                spinTermin.setSelection(2)
+            }
+            STATUS_TERMIN_COD_TUNAI -> {
+                tvTermin.text = terminItem[3]
+                spinTermin.setSelection(3)
+            }
+            STATUS_TERMIN_30 -> {
+                tvTermin.text = terminItem[4]
+                spinTermin.setSelection(4)
+            }
+            STATUS_TERMIN_45 -> {
+                tvTermin.text = terminItem[5]
+                spinTermin.setSelection(5)
+            }
+            STATUS_TERMIN_60 -> {
+                tvTermin.text = terminItem[6]
+                spinTermin.setSelection(6)
+            }
+            else -> {
+                tvTermin.text = EMPTY_FIELD_VALUE
+                spinTermin.setSelection(0)
+            }
+        }
+    }
+
     private fun setupStatusSpinner() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, statusItem)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -987,6 +1282,25 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         setupStatus(iStatus)
     }
 
+    private fun setupTerminSpinner() {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, terminItem)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        spinTermin.adapter = adapter
+        spinTermin.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedTermin = if (position != 0) terminItem[position]
+                else ""
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+        }
+
+        setupTermin(iTermin)
+    }
+
     private fun setupNetworkIndicator() {
         val indicatorImageView = findViewById<View>(R.id.indicatorView) // Ganti dengan ID tampilan indikator Anda
         indicatorImageView.visibility = View.VISIBLE
@@ -1001,6 +1315,61 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
         }, 0, pingIntervalMillis)
 
+    }
+
+    private fun chooseFile() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+
+            // Create a file to store the captured image
+            val photoFile: File? = createImageFile()
+
+            if (photoFile != null) {
+                val photoUri: Uri = FileProvider.getUriForFile(this, "com.topmortar.topmortarsales.fileprovider", photoFile)
+                cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
+                currentPhotoUri = photoUri
+            }
+
+            val chooserIntent = Intent.createChooser(galleryIntent, "Select Image")
+            chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(cameraIntent))
+
+            imagePicker!!.launch(chooserIntent)
+        } else {
+            cameraPermissionLauncher!!.launch(Manifest.permission.CAMERA)
+        }
+    }
+
+    @Throws(IOException::class)
+    private fun createImageFile(): File? {
+        // Create an image file name
+        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val storageDir: File? = getExternalFilesDir("Invoices")
+        return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
+    }
+
+    private fun navigateToPreviewKtp() {
+        val uriList = ArrayList<Uri>()
+        selectedUri?.let { uriList.add(it) }
+
+        val intent = Intent(this, PreviewClosingActivity::class.java)
+        intent.putExtra(CONST_CONTACT_ID, contactId)
+        intent.putParcelableArrayListExtra(CONST_URI, uriList)
+        startActivityForResult(intent, IMG_PREVIEW_STATE)
+
+    }
+
+    @SuppressLint("Range")
+    private fun getFileNameFromUri(uri: Uri): String? {
+        var fileName: String? = null
+        val cursor = contentResolver.query(uri, null, null, null, null)
+        cursor?.use {
+            if (it.moveToFirst()) {
+                val displayName = it.getString(it.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+                fileName = displayName
+            }
+        }
+        return fileName
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

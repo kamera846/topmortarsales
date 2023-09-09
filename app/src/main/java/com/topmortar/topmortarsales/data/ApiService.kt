@@ -34,6 +34,9 @@ interface ApiService {
     @GET(GET_CONTACT)
     suspend fun getContacts(): ResponseContactList
 
+    @GET(GET_CONTACT)
+    suspend fun getContactDetail(@Query("id") contactId: String): Response<ResponseContactList>
+
     @Multipart
     @POST(EDIT_CONTACT)
     suspend fun editContact(
@@ -46,6 +49,8 @@ interface ApiService {
         @Part("mapsUrl") mapsUrl: RequestBody,
         @Part("address") address: RequestBody,
         @Part("status") status: RequestBody,
+        @Part("termin_payment") termin: RequestBody,
+        @Part ktp: MultipartBody.Part? = null,
     ): Response<ResponseMessage>
 
     @Multipart
@@ -59,6 +64,7 @@ interface ApiService {
         @Part("mapsUrl") mapsUrl: RequestBody,
         @Part("id_user") userId: RequestBody,
         @Part("full_name") currentName: RequestBody,
+        @Part("termin_payment") termin: RequestBody,
         @Part("message_body") message: RequestBody,
     ): Response<ResponseMessage>
 
