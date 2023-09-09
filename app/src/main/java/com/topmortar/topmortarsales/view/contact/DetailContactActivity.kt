@@ -67,7 +67,9 @@ import com.topmortar.topmortarsales.commons.STATUS_TERMIN_15
 import com.topmortar.topmortarsales.commons.STATUS_TERMIN_30
 import com.topmortar.topmortarsales.commons.STATUS_TERMIN_45
 import com.topmortar.topmortarsales.commons.STATUS_TERMIN_60
-import com.topmortar.topmortarsales.commons.STATUS_TERMIN_CASH
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_COD
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_COD_TF
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_COD_TUNAI
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
@@ -178,7 +180,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var itemSendMessage: ContactModel? = null
 
     private var statusItem: List<String> = listOf("Choose Customer Status", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
-    private var terminItem: List<String> = listOf("Choose Termin Payment", "Cash", "15 Hari", "30 Hari", "45 Hari", "60 Hari")
+    private var terminItem: List<String> = listOf("Choose Termin Payment", "COD", "COD + Transfer", "COD + Tunai", "30 Hari + Transfer", "45 Hari", "60 Hari")
     private var selectedStatus: String = ""
     private var selectedTermin: String = ""
     private var cameraPermissionLauncher: ActivityResultLauncher<String>? = null
@@ -671,11 +673,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val pStatus = if (selectedStatus.isNullOrEmpty()) "" else selectedStatus.substringBefore(" - ").toLowerCase()
         val pTermin = if (selectedTermin.isNullOrEmpty()) "" else {
             when (selectedTermin) {
-                terminItem[1] -> STATUS_TERMIN_CASH
-                terminItem[2] -> STATUS_TERMIN_15
-                terminItem[3] -> STATUS_TERMIN_30
-                terminItem[4] -> STATUS_TERMIN_45
-                terminItem[5] -> STATUS_TERMIN_60
+                terminItem[1] -> STATUS_TERMIN_COD
+                terminItem[2] -> STATUS_TERMIN_COD_TF
+                terminItem[3] -> STATUS_TERMIN_COD_TUNAI
+                terminItem[4] -> STATUS_TERMIN_30
+                terminItem[5] -> STATUS_TERMIN_45
+                terminItem[6] -> STATUS_TERMIN_60
                 else -> ""
             }
         }
@@ -1222,25 +1225,29 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun setupTermin(termin: String? = null) {
         when (termin) {
-            STATUS_TERMIN_CASH -> {
+            STATUS_TERMIN_COD -> {
                 tvTermin.text = terminItem[1]
                 spinTermin.setSelection(1)
             }
-            STATUS_TERMIN_15 -> {
+            STATUS_TERMIN_COD_TF -> {
                 tvTermin.text = terminItem[2]
                 spinTermin.setSelection(2)
             }
-            STATUS_TERMIN_30 -> {
+            STATUS_TERMIN_COD_TUNAI -> {
                 tvTermin.text = terminItem[3]
                 spinTermin.setSelection(3)
             }
-            STATUS_TERMIN_45 -> {
+            STATUS_TERMIN_30 -> {
                 tvTermin.text = terminItem[4]
                 spinTermin.setSelection(4)
             }
-            STATUS_TERMIN_60 -> {
+            STATUS_TERMIN_45 -> {
                 tvTermin.text = terminItem[5]
                 spinTermin.setSelection(5)
+            }
+            STATUS_TERMIN_60 -> {
+                tvTermin.text = terminItem[6]
+                spinTermin.setSelection(6)
             }
             else -> {
                 tvTermin.text = EMPTY_FIELD_VALUE

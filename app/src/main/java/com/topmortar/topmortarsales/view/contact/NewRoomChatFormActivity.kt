@@ -42,7 +42,9 @@ import com.topmortar.topmortarsales.commons.STATUS_TERMIN_15
 import com.topmortar.topmortarsales.commons.STATUS_TERMIN_30
 import com.topmortar.topmortarsales.commons.STATUS_TERMIN_45
 import com.topmortar.topmortarsales.commons.STATUS_TERMIN_60
-import com.topmortar.topmortarsales.commons.STATUS_TERMIN_CASH
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_COD
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_COD_TF
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_COD_TUNAI
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
@@ -623,11 +625,12 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         spinTermin.adapter = adapter
 
         val terminItem = when (iTermin) {
-            STATUS_TERMIN_CASH -> 1
-            STATUS_TERMIN_15 -> 2
-            STATUS_TERMIN_30 -> 3
-            STATUS_TERMIN_45 -> 4
-            STATUS_TERMIN_60 -> 5
+            STATUS_TERMIN_COD -> 1
+            STATUS_TERMIN_COD_TF -> 2
+            STATUS_TERMIN_COD_TUNAI -> 3
+            STATUS_TERMIN_30 -> 4
+            STATUS_TERMIN_45 -> 5
+            STATUS_TERMIN_60 -> 6
             else -> 0
         }
 
@@ -639,11 +642,12 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                 // Get the selected item value (e.g., "admin" or "sales")
                 selectedTermin = when (position) {
                     0 -> null
-                    1 -> STATUS_TERMIN_CASH
-                    2 -> STATUS_TERMIN_15
-                    3 -> STATUS_TERMIN_30
-                    4 -> STATUS_TERMIN_45
-                    5 -> STATUS_TERMIN_60
+                    1 -> STATUS_TERMIN_COD
+                    2 -> STATUS_TERMIN_COD_TF
+                    3 -> STATUS_TERMIN_COD_TUNAI
+                    4 -> STATUS_TERMIN_30
+                    5 -> STATUS_TERMIN_45
+                    6 -> STATUS_TERMIN_60
                     else -> null
                 }
             }
@@ -651,8 +655,9 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             override fun onNothingSelected(parent: AdapterView<*>) {
                 // Do nothing here
                 selectedTermin = when (iTermin) {
-                    STATUS_TERMIN_CASH -> STATUS_TERMIN_CASH
-                    STATUS_TERMIN_15 -> STATUS_TERMIN_15
+                    STATUS_TERMIN_COD -> STATUS_TERMIN_COD
+                    STATUS_TERMIN_COD_TF -> STATUS_TERMIN_COD_TF
+                    STATUS_TERMIN_COD_TUNAI -> STATUS_TERMIN_COD_TUNAI
                     STATUS_TERMIN_30 -> STATUS_TERMIN_30
                     STATUS_TERMIN_45 -> STATUS_TERMIN_45
                     STATUS_TERMIN_60 -> STATUS_TERMIN_60
