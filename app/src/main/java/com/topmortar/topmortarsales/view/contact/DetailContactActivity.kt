@@ -693,7 +693,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             if (byteArray != null) {
                 val requestFile: RequestBody = RequestBody.create("image/*".toMediaTypeOrNull(), byteArray)
-                imagePart = MultipartBody.Part.createFormData("pic", "image.jpg", requestFile)
+                imagePart = MultipartBody.Part.createFormData("ktp", "image.jpg", requestFile)
             } else handleMessage(this, TAG_RESPONSE_CONTACT, "Image not located")
         }
 
