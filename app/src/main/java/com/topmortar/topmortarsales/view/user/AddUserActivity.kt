@@ -432,13 +432,12 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         // Apply the adapter to the spinner
         spinLevel.adapter = adapter
 
-        var userLevel = 0 // 0 as null, 1 as admin, 2 as sales, and others
-
-        when (iUserLevel) {
-            AUTH_LEVEL_ADMIN -> userLevel = 1
-            AUTH_LEVEL_SALES -> userLevel = 2
-            AUTH_LEVEL_COURIER -> userLevel = 3
-            AUTH_LEVEL_BA -> userLevel = 4
+        val userLevel = when (iUserLevel) {
+            AUTH_LEVEL_ADMIN ->  1
+            AUTH_LEVEL_SALES ->  2
+            AUTH_LEVEL_COURIER ->  3
+            AUTH_LEVEL_BA ->  4
+            else -> 0
         }
 
         spinLevel.setSelection(userLevel)
