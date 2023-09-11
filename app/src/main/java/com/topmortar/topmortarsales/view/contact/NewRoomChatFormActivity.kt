@@ -316,7 +316,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         etMapsUrl = findViewById(R.id.et_maps_url)
 
         // Set Title Bar
-        tvTitleBar.text = getString(R.string.new_chat_room)
+        tvTitleBar.text = "New Contact"
         tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Setup Date Picker Dialog
