@@ -477,7 +477,7 @@
                     android:padding="12dp"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:text="@string/send_now" />
+                    android:text="Save Contact" />
 
             </LinearLayout>
 

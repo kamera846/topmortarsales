@@ -180,7 +180,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var itemSendMessage: ContactModel? = null
 
     private var statusItem: List<String> = listOf("Choose Customer Status", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
-    private var terminItem: List<String> = listOf("Choose Termin Payment", "COD", "COD + Transfer", "COD + Tunai", "30 Hari + Transfer", "45 Hari", "60 Hari")
+    private var terminItem: List<String> = listOf("Choose Termin Payment", "COD", "COD + Transfer", "COD + Tunai", "30 Hari", "45 Hari", "60 Hari")
     private var selectedStatus: String = ""
     private var selectedTermin: String = ""
     private var cameraPermissionLauncher: ActivityResultLauncher<String>? = null
