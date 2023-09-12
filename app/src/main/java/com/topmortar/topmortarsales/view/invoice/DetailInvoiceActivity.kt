@@ -6,6 +6,10 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -393,6 +397,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
             builder.setItems(deviceNames) { _, which ->
                 val selectedDevice = deviceList[which]
                 executePrinter(selectedDevice)
+//                printEscPos()
                 Toast.makeText(this, "Try to connect with: ${ selectedDevice.name }", TOAST_SHORT).show()
             }
             builder.show()
@@ -531,35 +536,61 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
     // Testing
     private fun printEscPos() {
-        val printer = EscPosPrinter(BluetoothPrintersConnections.selectFirstPaired(), 203, 48f, 32)
+
+        val printersConnections = BluetoothPrintersConnections.selectFirstPaired()
+        val printer = EscPosPrinter(printersConnections, 203, 70f, 48)
+
+        // Change the desired width and height for your image (in pixels)
+        val desiredWidth = 200*3 // Adjust this to your desired width
+        val desiredHeight = 103*3 // Adjust this to your desired height
+
+        val drawable = this.applicationContext.resources.getDrawableForDensity(
+            R.drawable.logo_top_mortar,
+            DisplayMetrics.DENSITY_MEDIUM
+        )
+
+        // Scale the drawable to the desired dimensions
+        val scaledDrawable = scaleDrawable(drawable!!, desiredWidth, desiredHeight)
+
+        // Convert the scaled drawable to hexadecimal string and print it
+        val imageHexadecimal = PrinterTextParserImg.bitmapToHexadecimalString(printer, scaledDrawable)
+
         printer.printFormattedText(
-            "[C]<img>" + PrinterTextParserImg.bitmapToHexadecimalString(printer, this.applicationContext.resources.getDrawableForDensity(R.drawable.logo_top_mortar, DisplayMetrics.DENSITY_MEDIUM))+"</img>\n" +
+            "[C]<img>$imageHexadecimal</img>\n" +
             "[L]\n" +
             "[C]<u><font size='big'>ORDER N°045</font></u>\n" +
             "[L]\n" +
-            "[C]================================\n" +
+            "[C]" + "=".repeat(48) + "\n" +
             "[L]\n" +
             "[L]<b>BEAUTIFUL SHIRT</b>[R]9.99e\n" +
             "[L]  + Size : S\n" +
-            "[L]\n" +
-            "[L]<b>AWESOME HAT</b>[R]24.99e\n" +
-            "[L]  + Size : 57/58\n" +
-            "[L]\n" +
-            "[C]--------------------------------\n" +
-            "[R]TOTAL PRICE :[R]34.98e\n" +
-            "[R]TAX :[R]4.23e\n" +
-            "[L]\n" +
-            "[C]================================\n" +
-            "[L]\n" +
-            "[L]<font size='tall'>Customer :</font>\n" +
-            "[L]Raymond DUPONT\n" +
-            "[L]5 rue des girafes\n" +
-            "[L]31547 PERPETES\n" +
-            "[L]Tel : +33801201456\n" +
-            "[L]\n" +
-            "[C]<barcode type='ean13' height='10'>831254784551</barcode>\n" +
-            "[C]<qrcode size='20'>https://dantsu.com/</qrcode>"
+            "[L]\n"
+//            "[L]<b>AWESOME HAT</b>[R]24.99e\n" +
+//            "[L]  + Size : 57/58\n" +
+//            "[L]\n" +
+//            "[C]--------------------------------\n" +
+//            "[R]TOTAL PRICE :[R]34.98e\n" +
+//            "[R]TAX :[R]4.23e\n" +
+//            "[L]\n" +
+//            "[C]================================\n" +
+//            "[L]\n" +
+//            "[L]<font size='tall'>Customer :</font>\n" +
+//            "[L]Raymond DUPONT\n" +
+//            "[L]5 rue des girafes\n" +
+//            "[L]31547 PERPETES\n" +
+//            "[L]Tel : +33801201456\n" +
+//            "[L]\n" +
+//            "[C]<barcode type='ean13' height='10'>831254784551</barcode>\n" +
+//            "[C]<qrcode size='20'>https://dantsu.com/</qrcode>"
         )
+    }
+
+    private fun scaleDrawable(drawable: Drawable, width: Int, height: Int): Drawable {
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, width, height)
+        drawable.draw(canvas)
+        return BitmapDrawable(this.applicationContext.resources, bitmap)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {

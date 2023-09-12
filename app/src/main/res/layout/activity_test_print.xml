@@ -5,12 +5,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
+    android:orientation="vertical"
     tools:context=".view.TestPrintActivity">
 
     <Button
         android:id="@+id/btn_print"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Print Now"/>
+        android:text="Print Text"/>
+
+    <Button
+        android:id="@+id/btn_print_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Print Image"/>
+
+    <Button
+        android:id="@+id/btn_piar_unpair"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 
 </LinearLayout>
