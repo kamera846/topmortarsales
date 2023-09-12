@@ -103,7 +103,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         Handler().postDelayed({
             isLoaded = true
             isCitiesLoaded = true
-//            getCities()
+            getCities()
         }, 500)
 
     }
@@ -114,7 +114,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         val name = "${ etName.text }"
         var birthday = "${ etBirthday.text }"
         val owner = "${ etOwner.text }"
-        var cityId = "$iLocation"
+        var cityId = "${ selectedCity!!.id }"
         val mapsUrl = "${ etMapsUrl.text }"
         val message = "${ etMessage.text }"
         val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
