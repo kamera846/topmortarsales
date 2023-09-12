@@ -64,7 +64,7 @@ interface ApiService {
         @Part("mapsUrl") mapsUrl: RequestBody,
         @Part("id_user") userId: RequestBody,
         @Part("full_name") currentName: RequestBody,
-        @Part("termin_payment") termin: RequestBody,
+        @Part("termin_payment") termin: RequestBody? = null,
         @Part("message_body") message: RequestBody,
     ): Response<ResponseMessage>
 

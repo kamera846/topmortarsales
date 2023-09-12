@@ -6,7 +6,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.text.Editable
-import android.text.InputFilter
 import android.text.TextWatcher
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -21,10 +20,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
-import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
-import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
-import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
-import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
@@ -38,7 +33,6 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
-import com.topmortar.topmortarsales.commons.STATUS_TERMIN_15
 import com.topmortar.topmortarsales.commons.STATUS_TERMIN_30
 import com.topmortar.topmortarsales.commons.STATUS_TERMIN_45
 import com.topmortar.topmortarsales.commons.STATUS_TERMIN_60
@@ -136,7 +130,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         var cityId = "$iLocation"
         val mapsUrl = "${ etMapsUrl.text }"
         val message = "${ etMessage.text }"
-        val termin = selectedTermin
+        val termin = null
         val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
         val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
 
@@ -169,10 +163,21 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                 val rbMessage = createPartFromString(message)
                 val rbUserId = createPartFromString(userId)
                 val rbCurrentName = createPartFromString(currentName)
-                val rbTermin = createPartFromString(termin!!)
+//                val rbTermin = createPartFromString(termin!!)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.sendMessage(name = rbName, phone = rbPhone, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, userId = rbUserId, currentName = rbCurrentName, termin = rbTermin, message = rbMessage)
+                val response = apiService.sendMessage(
+                    name = rbName,
+                    phone = rbPhone,
+                    ownerName = rbOwner,
+                    birthday = rbBirthday,
+                    cityId = rbLocation,
+                    mapsUrl = rbMapsUrl,
+                    userId = rbUserId,
+                    currentName = rbCurrentName,
+                    termin = termin,
+                    message = rbMessage
+                )
 
                 if (response.isSuccessful) {
 
@@ -451,9 +456,9 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 //            etStoreLocated.error = "Choose store location!"
 //            etStoreLocated.requestFocus()
 //            false
-        } else if (termin == null) {
-            handleMessage(this, "ERROR SPINNER", "Choose termin payment")
-            false
+//        } else if (termin == null) {
+//            handleMessage(this, "ERROR SPINNER", "Choose termin payment")
+//            false
         } else if (message.isEmpty()) {
             etMapsUrl.error = null
             etMapsUrl.clearFocus()
