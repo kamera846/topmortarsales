@@ -12,6 +12,7 @@ import com.topmortar.topmortarsales.commons.INVOICE
 import com.topmortar.topmortarsales.commons.REQUEST_OTP
 import com.topmortar.topmortarsales.commons.SEARCH_CONTACT
 import com.topmortar.topmortarsales.commons.SEND_MESSAGE
+import com.topmortar.topmortarsales.commons.SKILL
 import com.topmortar.topmortarsales.commons.UPDATE_PASSWORD
 import com.topmortar.topmortarsales.commons.VERIFY_OTP
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -20,6 +21,7 @@ import com.topmortar.topmortarsales.response.ResponseCities
 import com.topmortar.topmortarsales.response.ResponseContactList
 import com.topmortar.topmortarsales.response.ResponseInvoices
 import com.topmortar.topmortarsales.response.ResponseMessage
+import com.topmortar.topmortarsales.response.ResponseSkills
 import com.topmortar.topmortarsales.response.ResponseUsers
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -182,5 +184,15 @@ interface ApiService {
     @POST(INVOICE)
     suspend fun addInvoice(
         @Part("id_surat_jalan") invoiceId: RequestBody
-    ): ResponseInvoices
+     ): ResponseInvoices
+
+    @GET(SKILL)
+    suspend fun getSkills(): ResponseSkills
+
+    @Multipart
+    @POST(SKILL)
+    suspend fun addSkill(
+        @Part("nama_skill") name: RequestBody,
+        @Part("kode_skill") code: RequestBody
+    ): Response<ResponseMessage>
 }

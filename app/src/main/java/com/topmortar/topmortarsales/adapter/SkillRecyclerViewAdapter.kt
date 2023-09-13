@@ -11,17 +11,17 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.model.CityModel
+import com.topmortar.topmortarsales.model.SkillModel
 
 class SkillRecyclerViewAdapter(private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<SkillRecyclerViewAdapter.ViewHolder>() {
-    private var listItem: ArrayList<CityModel> = ArrayList()
+    private var listItem: ArrayList<SkillModel> = ArrayList()
     private var context: Context? = null
 
     interface ItemClickListener {
-        fun onItemClick(data: CityModel? = null)
+        fun onItemClick(data: SkillModel? = null)
     }
 
-    fun setListItem(listItem: ArrayList<CityModel>) {
+    fun setListItem(listItem: ArrayList<SkillModel>) {
         this.listItem = listItem
     }
 
@@ -31,11 +31,11 @@ class SkillRecyclerViewAdapter(private val itemClickListener: ItemClickListener)
         private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
 
-        fun bind(item: CityModel) {
+        fun bind(item: SkillModel) {
 
             ivProfile.setImageResource(R.drawable.star_red)
-            tvContactName.text = item.nama_city
-            tvPhoneNumber.text = item.kode_city
+            tvContactName.text = item.nama_skill
+            tvPhoneNumber.text = item.kode_skill
 
         }
 

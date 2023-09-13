@@ -22,7 +22,7 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
-import com.topmortar.topmortarsales.model.CityModel
+import com.topmortar.topmortarsales.model.SkillModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -38,8 +38,8 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
     private lateinit var etCityCode: EditText
     private lateinit var btnSubmit: Button
 
-    private var item: CityModel? = null
-    fun setItem(data: CityModel) {
+    private var item: SkillModel? = null
+    fun setItem(data: SkillModel) {
         this.item = data
     }
 

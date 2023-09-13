@@ -27,7 +27,7 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.modal.AddSkillModal
-import com.topmortar.topmortarsales.model.CityModel
+import com.topmortar.topmortarsales.model.SkillModel
 import kotlinx.coroutines.launch
 
 class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemClickListener,
@@ -110,7 +110,7 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getCities()
+                val response = apiService.getSkills()
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -144,7 +144,7 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
 
     }
 
-    private fun setRecyclerView(listItem: ArrayList<CityModel>) {
+    private fun setRecyclerView(listItem: ArrayList<SkillModel>) {
         val rvAdapter = SkillRecyclerViewAdapter(this@ManageSkillActivity)
         rvAdapter.setListItem(listItem)
 
@@ -192,7 +192,7 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
 
     }
 
-    override fun onItemClick(data: CityModel?) {
+    override fun onItemClick(data: SkillModel?) {
 
     }
 

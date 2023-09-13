@@ -248,10 +248,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         val skillItem = popupMenu.menu.findItem(R.id.option_skill)
 
         searchItem.isVisible = false
-        skillItem.isVisible = false
         if (sessionManager.userKind() != USER_KIND_ADMIN) {
             userItem.isVisible = false
             cityItem.isVisible = false
+            skillItem.isVisible = false
         }
 
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
