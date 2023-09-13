@@ -210,4 +210,18 @@ interface ApiService {
         @Part("termin_payment") termin: RequestBody? = null,
         @Part("message_body") message: RequestBody,
     ): Response<ResponseMessage>
+
+    @Multipart
+    @POST(EDIT_CONTACT)
+    suspend fun editTukang(
+        @Part("id") id: RequestBody,
+        @Part("nomorhp") phone: RequestBody,
+        @Part("nama") name: RequestBody,
+        @Part("owner_name") ownerName: RequestBody,
+        @Part("tgl_lahir") birthday: RequestBody,
+        @Part("id_city") cityId: RequestBody,
+        @Part("mapsUrl") mapsUrl: RequestBody,
+        @Part("address") address: RequestBody,
+        @Part("status") status: RequestBody,
+    ): Response<ResponseMessage>
 }

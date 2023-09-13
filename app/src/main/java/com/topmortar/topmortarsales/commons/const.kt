@@ -61,6 +61,7 @@ const val CONST_INVOICE_ID = "const_invoice_id"
 
 const val CONST_OWNER = "const_owner"
 const val CONST_LOCATION = "const_location"
+const val CONST_SKILL = "const_skill"
 const val CONST_PHONE = "const_phone"
 const val CONST_NAME = "const_name"
 const val CONST_BIRTHDAY = "const_birthday"
