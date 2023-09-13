@@ -101,8 +101,8 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         etMessageListener()
 
         Handler().postDelayed({
-            isLoaded = true
-            isCitiesLoaded = true
+//            isLoaded = true
+//            isCitiesLoaded = true
             getSkills()
         }, 500)
 
@@ -501,9 +501,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         searchModal.searchHint = "Enter skill name..."
         searchModal.setOnDismissListener {
             etSkill.clearFocus()
-            etOwner.requestFocus()
         }
-
     }
 
     private fun showSearchModal() {
