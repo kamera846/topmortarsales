@@ -717,7 +717,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                 val rbOwner = createPartFromString(pOwner)
                 val rbBirthday = createPartFromString(pBirthday)
                 val rbMapsUrl = createPartFromString(pMapsUrl)
-                val rbLocation = createPartFromString(pCityID)
+                val rbLocation = createPartFromString(pCityID!!)
                 val rbAddress = createPartFromString(pAddress)
                 val rbStatus = createPartFromString(pStatus)
                 val rbTermin = createPartFromString(pTermin)

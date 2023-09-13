@@ -190,7 +190,7 @@
                         android:orientation="horizontal">
 
                         <TextView
-                            android:id="@+id/tv_store_located"
+                            android:id="@+id/tv_skill"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Skill"
@@ -209,7 +209,7 @@
                     </LinearLayout>
 
                     <EditText
-                        android:id="@+id/et_store_located"
+                        android:id="@+id/et_skill"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription"

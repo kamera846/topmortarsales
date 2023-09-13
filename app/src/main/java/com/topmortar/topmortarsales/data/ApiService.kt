@@ -195,4 +195,19 @@ interface ApiService {
         @Part("nama_skill") name: RequestBody,
         @Part("kode_skill") code: RequestBody
     ): Response<ResponseMessage>
+
+    @Multipart
+    @POST(SEND_MESSAGE)
+    suspend fun sendMessageTukang(
+        @Part("nama") name: RequestBody,
+        @Part("nomorhp") phone: RequestBody,
+        @Part("owner_name") ownerName: RequestBody,
+        @Part("tgl_lahir") birthday: RequestBody,
+        @Part("id_skill") idSkill: RequestBody,
+        @Part("mapsUrl") mapsUrl: RequestBody,
+        @Part("id_user") userId: RequestBody,
+        @Part("full_name") currentName: RequestBody,
+        @Part("termin_payment") termin: RequestBody? = null,
+        @Part("message_body") message: RequestBody,
+    ): Response<ResponseMessage>
 }
