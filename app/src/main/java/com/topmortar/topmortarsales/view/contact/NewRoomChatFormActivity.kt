@@ -115,7 +115,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         Handler().postDelayed({
             isLoaded = true
             isCitiesLoaded = true
-            setSpinnerTermin()
+//            setSpinnerTermin()
 //            getCities()
         }, 500)
 
@@ -130,7 +130,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         var cityId = "$iLocation"
         val mapsUrl = "${ etMapsUrl.text }"
         val message = "${ etMessage.text }"
-        val termin = null
+        val termin = "-1"
         val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
         val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
 
@@ -163,7 +163,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                 val rbMessage = createPartFromString(message)
                 val rbUserId = createPartFromString(userId)
                 val rbCurrentName = createPartFromString(currentName)
-//                val rbTermin = createPartFromString(termin!!)
+                val rbTermin = createPartFromString(termin)
 
                 val apiService: ApiService = HttpClient.create()
                 val response = apiService.sendMessage(
@@ -175,7 +175,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                     mapsUrl = rbMapsUrl,
                     userId = rbUserId,
                     currentName = rbCurrentName,
-                    termin = termin,
+                    termin = rbTermin,
                     message = rbMessage
                 )
 

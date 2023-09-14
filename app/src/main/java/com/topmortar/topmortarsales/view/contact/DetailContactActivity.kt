@@ -671,7 +671,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val pMapsUrl = "${ etMaps.text }"
         val pAddress = "${ etAddress.text }"
         val pStatus = if (selectedStatus.isNullOrEmpty()) "" else selectedStatus.substringBefore(" - ").toLowerCase()
-        val pTermin = if (selectedTermin.isNullOrEmpty()) "" else {
+        val pTermin = if (selectedTermin.isNullOrEmpty()) "-1" else {
             when (selectedTermin) {
                 terminItem[1] -> STATUS_TERMIN_COD
                 terminItem[2] -> STATUS_TERMIN_COD_TF
@@ -679,7 +679,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 terminItem[4] -> STATUS_TERMIN_30
                 terminItem[5] -> STATUS_TERMIN_45
                 terminItem[6] -> STATUS_TERMIN_60
-                else -> ""
+                else -> "-1"
             }
         }
 
