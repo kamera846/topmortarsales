@@ -22,7 +22,7 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
-import com.topmortar.topmortarsales.model.CityModel
+import com.topmortar.topmortarsales.model.SkillModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -32,14 +32,14 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
     private lateinit var icBack: ImageView
     private lateinit var icClose: ImageView
     private lateinit var tvTitleBar: TextView
-    private lateinit var tvCityName: TextView
-    private lateinit var tvCityCode: TextView
-    private lateinit var etCityName: EditText
-    private lateinit var etCityCode: EditText
+    private lateinit var tvSkillName: TextView
+    private lateinit var tvSkillCode: TextView
+    private lateinit var etSkillName: EditText
+    private lateinit var etSkillCode: EditText
     private lateinit var btnSubmit: Button
 
-    private var item: CityModel? = null
-    fun setItem(data: CityModel) {
+    private var item: SkillModel? = null
+    fun setItem(data: SkillModel) {
         this.item = data
     }
 
@@ -82,20 +82,20 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
         icClose = titleBar.findViewById(R.id.ic_close)
         tvTitleBar = titleBar.findViewById(R.id.tv_title_bar)
 
-        tvCityName = findViewById(R.id.tv_city_name)
-        tvCityCode = findViewById(R.id.tv_city_code)
-        etCityName = findViewById(R.id.et_city_name)
-        etCityCode = findViewById(R.id.et_city_code)
+        tvSkillName = findViewById(R.id.tv_city_name)
+        tvSkillCode = findViewById(R.id.tv_city_code)
+        etSkillName = findViewById(R.id.et_city_name)
+        etSkillCode = findViewById(R.id.et_city_code)
         btnSubmit = findViewById(R.id.btn_submit)
 
         // Set Title Bar
         icBack.visibility = View.GONE
         icClose.visibility = View.VISIBLE
         tvTitleBar.text = "Add New Skill"
-        tvCityName.text = "Skill Name"
-        tvCityCode.text = "Skill Code"
-        etCityName.hint = "e.g Tukang Batu"
-        etCityCode.hint = "e.g TB"
+        tvSkillName.text = "Skill Name"
+        tvSkillCode.text = "Skill Code"
+        etSkillName.hint = "e.g Tukang Batu"
+        etSkillCode.hint = "e.g TB"
     }
 
     private fun initClickHandler() {
@@ -125,21 +125,21 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
 
     private fun submitHandler() {
 
-        if (!formValidation("${ etCityName.text }", "${ etCityCode.text }")) return
+        if (!formValidation("${ etSkillName.text }", "${ etSkillCode.text }")) return
 
         loadingState(true)
 
         lifecycleScope.launch {
             try {
 
-                val cityName = createPartFromString("${ etCityName.text }")
-                val cityCode = createPartFromString("${ etCityCode.text }")
+                val skillName = createPartFromString("${ etSkillName.text }")
+                val skillCode = createPartFromString("${ etSkillCode.text }")
 
-                handleMessage(context, "SUBMIT SKILL", "Name: $cityName, Code: $cityCode")
-                return@launch
+//                handleMessage(context, "SUBMIT SKILL", "Name: $skillName, Code: $skillCode")
+//                return@launch
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.addCity(name = cityName, code = cityCode)
+                val response = apiService.addSkill(name = skillName, code = skillCode)
 
                 if (response.isSuccessful) {
 
@@ -148,8 +148,8 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
                     when (responseBody.status) {
                         RESPONSE_STATUS_OK -> {
 
-                            etCityName.setText("")
-                            etCityCode.setText("")
+                            etSkillName.setText("")
+                            etSkillCode.setText("")
                             loadingState(false)
                             handleMessage(context, TAG_RESPONSE_CONTACT, "Successfully added data!")
 
@@ -192,20 +192,20 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
 
     private fun formValidation(name: String, code: String): Boolean {
         return if (name.isEmpty()) {
-            etCityName.error = "City name cannot be empty!"
-            etCityName.requestFocus()
+            etSkillName.error = "Skill name cannot be empty!"
+            etSkillName.requestFocus()
             false
         } else if (code.isEmpty()) {
-            etCityName.error = null
-            etCityName.clearFocus()
-            etCityCode.error = "Code cannot be empty!"
-            etCityCode.requestFocus()
+            etSkillName.error = null
+            etSkillName.clearFocus()
+            etSkillCode.error = "Code cannot be empty!"
+            etSkillCode.requestFocus()
             false
         } else {
-            etCityName.error = null
-            etCityName.clearFocus()
-            etCityCode.error = null
-            etCityCode.clearFocus()
+            etSkillName.error = null
+            etSkillName.clearFocus()
+            etSkillCode.error = null
+            etSkillCode.clearFocus()
             true
         }
     }

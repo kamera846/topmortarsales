@@ -46,7 +46,7 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.modal.SearchModal
-import com.topmortar.topmortarsales.model.CityModel
+import com.topmortar.topmortarsales.model.SkillModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -62,7 +62,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
     private lateinit var etName: EditText
     private lateinit var etOwner: EditText
     private lateinit var etBirthday: EditText
-    private lateinit var etStoreLocated: EditText
+    private lateinit var etSkill: EditText
     private lateinit var etMapsUrl: EditText
     private lateinit var etMessage: EditText
     private lateinit var spinnerSearchBox: AutoCompleteTextView
@@ -79,8 +79,8 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
     private val msgMaxLines = 5
     private val msgMaxLength = 200
     private var selectedDate: Calendar = Calendar.getInstance()
-    private var selectedCity: ModalSearchModel? = null
-    private var citiesResults: ArrayList<CityModel> = ArrayList()
+    private var selectedSkill: ModalSearchModel? = null
+    private var skillResults: ArrayList<SkillModel> = ArrayList()
     private var cities = listOf("Malang", "Gresik", "Sidoarjo", "Blitar", "Surabaya", "Jakarta", "Bandung", "Yogyakarta", "Kediri")
 
     private var iLocation: String? = null
@@ -101,9 +101,9 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         etMessageListener()
 
         Handler().postDelayed({
-            isLoaded = true
-            isCitiesLoaded = true
-//            getCities()
+//            isLoaded = true
+//            isCitiesLoaded = true
+            getSkills()
         }, 500)
 
     }
@@ -114,7 +114,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         val name = "${ etName.text }"
         var birthday = "${ etBirthday.text }"
         val owner = "${ etOwner.text }"
-        var cityId = "$iLocation"
+        var skillID = "${ selectedSkill!!.id }"
         val mapsUrl = "${ etMapsUrl.text }"
         val message = "${ etMessage.text }"
         val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
@@ -125,12 +125,13 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         birthday = if (birthday.isEmpty()) "0000-00-00"
         else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
 
-        if (iLocation.isNullOrEmpty()) cityId = "0"
+//        if (skillID.isEmpty()) skillID = "0"
+        skillID = if (selectedSkill != null) "${ selectedSkill!!.id }" else "0"
 
         loadingState(true)
 
         Handler().postDelayed({
-            handleMessage(this, "Submit -> ", "$phone : $name : $owner : $birthday : $cityId : $message")
+            handleMessage(this, "Submit -> ", "$phone : $name : $owner : $birthday : $skillID : $message")
             loadingState(false)
         }, 1000)
 
@@ -141,8 +142,8 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
                 val rbPhone = createPartFromString(formatPhoneNumber(phone))
                 val rbName = createPartFromString(name)
-//                val rbLocation = createPartFromString(selectedCity!!.id)
-                val rbLocation = createPartFromString(cityId)
+//                val rbLocation = createPartFromString(selectedSkill!!.id)
+                val rbLocation = createPartFromString(skillID)
                 val rbBirthday = createPartFromString(birthday)
                 val rbOwner = createPartFromString(owner)
                 val rbMapsUrl = createPartFromString(mapsUrl)
@@ -152,7 +153,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                 val rbTermin = createPartFromString("15")
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.sendMessage(name = rbName, phone = rbPhone, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, userId = rbUserId, currentName = rbCurrentName, termin = rbTermin, message = rbMessage)
+                val response = apiService.sendMessageTukang(name = rbName, phone = rbPhone, ownerName = rbOwner, birthday = rbBirthday, idSkill = rbLocation, mapsUrl = rbMapsUrl, userId = rbUserId, currentName = rbCurrentName, termin = rbTermin, message = rbMessage)
 
                 if (response.isSuccessful) {
 
@@ -255,10 +256,10 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             etOwner.isEnabled = false
         }
         if (!iLocation.isNullOrEmpty()) {
-            etStoreLocated.setText("Loading...")
-            etStoreLocated.setTextColor(getColor(R.color.black_500))
-            etStoreLocated.setBackgroundResource(R.drawable.et_background_disabled)
-            etStoreLocated.isEnabled = false
+            etSkill.setText("Loading...")
+            etSkill.setTextColor(getColor(R.color.black_500))
+            etSkill.setBackgroundResource(R.drawable.et_background_disabled)
+            etSkill.isEnabled = false
         }
         if (!iBirthday.isNullOrEmpty()) {
             if (iBirthday == "0000-00-00") etBirthday.setText("")
@@ -288,7 +289,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         etName = findViewById(R.id.et_name)
         etOwner = findViewById(R.id.et_owner)
         etBirthday = findViewById(R.id.et_birthday)
-        etStoreLocated = findViewById(R.id.et_store_located)
+        etSkill = findViewById(R.id.et_skill)
         etMessage = findViewById(R.id.et_message)
         spinnerSearchBox = findViewById(R.id.spinner_search_box)
         etMapsUrl = findViewById(R.id.et_maps_url)
@@ -313,7 +314,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         icBack.setOnClickListener { finish() }
         btnSubmit.setOnClickListener { if (isLoaded) sendMessage() }
         etBirthday.setOnClickListener { datePicker.show() }
-        etStoreLocated.setOnClickListener { showSearchModal() }
+        etSkill.setOnClickListener { showSearchModal() }
 
         // Focus Listener
         etName.setOnFocusChangeListener { _, hasFocus ->
@@ -328,11 +329,11 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                 etBirthday.setSelection(etBirthday.length())
             } else etBirthday.clearFocus()
         }
-        etStoreLocated.setOnFocusChangeListener { _, hasFocus ->
+        etSkill.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 showSearchModal()
-                etStoreLocated.setSelection(etStoreLocated.length())
-            } else etStoreLocated.clearFocus()
+                etSkill.setSelection(etSkill.length())
+            } else etSkill.clearFocus()
         }
 
         // Change Listener
@@ -350,7 +351,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             }
 
         })
-        etStoreLocated.addTextChangedListener (object : TextWatcher {
+        etSkill.addTextChangedListener (object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
             }
@@ -361,7 +362,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
             override fun afterTextChanged(s: Editable?) {
                 if (isLoaded) {
-                    if (s.toString().isNotEmpty()) etStoreLocated.error = null
+                    if (s.toString().isNotEmpty()) etSkill.error = null
                     showSearchModal()
                 }
             }
@@ -426,8 +427,8 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 //        } else if (location.isEmpty()) {
 //            etMapsUrl.error = null
 //            etMapsUrl.clearFocus()
-//            etStoreLocated.error = "Choose store location!"
-//            etStoreLocated.requestFocus()
+//            etSkill.error = "Choose store location!"
+//            etSkill.requestFocus()
 //            false
         } else if (message.isEmpty()) {
             etMapsUrl.error = null
@@ -442,10 +443,10 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             etBirthday.error = null
             etMapsUrl.error = null
             etMessage.error = null
-            etStoreLocated.error = null
+            etSkill.error = null
             etPhone.clearFocus()
             etName.clearFocus()
-            etStoreLocated.clearFocus()
+            etSkill.clearFocus()
             etBirthday.clearFocus()
             etOwner.clearFocus()
             etMapsUrl.clearFocus()
@@ -497,21 +498,19 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         searchModal = SearchModal(this, items)
         searchModal.setCustomDialogListener(this)
-        searchModal.searchHint = "Enter city name..."
+        searchModal.searchHint = "Enter skill name..."
         searchModal.setOnDismissListener {
-            etStoreLocated.clearFocus()
-            etOwner.requestFocus()
+            etSkill.clearFocus()
         }
-
     }
 
     private fun showSearchModal() {
-        val searchKey = etStoreLocated.text.toString()
+        val searchKey = etSkill.text.toString()
         if (searchKey.isNotEmpty()) searchModal.setSearchKey(searchKey)
         searchModal.show()
     }
 
-    private fun getCities() {
+    private fun getSkills() {
         // Get Cities
         isCitiesLoaded = false
 
@@ -519,31 +518,31 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getCities()
+                val response = apiService.getSkills()
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        citiesResults = response.results
+                        skillResults = response.results
                         val items: ArrayList<ModalSearchModel> = ArrayList()
 
-                        for (i in 0 until citiesResults.size) {
-                            val data = citiesResults[i]
-                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                        for (i in 0 until skillResults.size) {
+                            val data = skillResults[i]
+                            items.add(ModalSearchModel(data.id_skill, "${data.nama_skill} - ${data.kode_skill}"))
                         }
 
                         setupDialogSearch(items)
 
-                        val foundItem = citiesResults.find { it.id_city == iLocation }
+                        val foundItem = skillResults.find { it.id_skill == iLocation }
                         if (foundItem != null) {
-                            selectedCity = ModalSearchModel(foundItem.id_city, "${foundItem.nama_city} - ${foundItem.kode_city}")
-                            etStoreLocated.setText("${foundItem.nama_city} - ${foundItem.kode_city}")
+                            selectedSkill = ModalSearchModel(foundItem.id_skill, "${foundItem.nama_skill} - ${foundItem.kode_skill}")
+                            etSkill.setText("${foundItem.nama_skill} - ${foundItem.kode_skill}")
                         } else {
-                            selectedCity = null
-                            etStoreLocated.setText("")
-                            etStoreLocated.setTextColor(getColor(R.color.black_200))
-                            etStoreLocated.setBackgroundResource(R.drawable.et_background)
-                            etStoreLocated.isEnabled = true
+                            selectedSkill = null
+                            etSkill.setText("")
+                            etSkill.setTextColor(getColor(R.color.black_200))
+                            etSkill.setBackgroundResource(R.drawable.et_background)
+                            etSkill.isEnabled = true
                         }
 
                         isCitiesLoaded = true
@@ -580,8 +579,8 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
     }
 
     override fun onDataReceived(data: ModalSearchModel) {
-        etStoreLocated.setText(data.title)
-        selectedCity = data
+        etSkill.setText(data.title)
+        selectedSkill = data
     }
 
 }

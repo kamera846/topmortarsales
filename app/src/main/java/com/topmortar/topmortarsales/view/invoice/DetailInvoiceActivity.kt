@@ -6,6 +6,10 @@ import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -53,6 +57,7 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.DetailInvoiceModel
+import com.topmortar.topmortarsales.model.InvoiceModel
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
@@ -393,6 +398,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
             builder.setItems(deviceNames) { _, which ->
                 val selectedDevice = deviceList[which]
                 executePrinter(selectedDevice)
+//                printEscPos()
                 Toast.makeText(this, "Try to connect with: ${ selectedDevice.name }", TOAST_SHORT).show()
             }
             builder.show()
@@ -446,63 +452,64 @@ class DetailInvoiceActivity : AppCompatActivity() {
                     RESPONSE_STATUS_OK -> {
 
                         val data = response.results[0]
-                        val orders = data.details.let { if (it.isNullOrEmpty()) arrayListOf() else it }
+                        printEscPos(data)
+//                        val orders = data.details.let { if (it.isNullOrEmpty()) arrayListOf() else it }
 
-                        val txtReferenceNumber = "${ data.no_surat_jalan }"
-//                        val txtDeliveryDate = "${ data.dalivery_date }"
-                        val txtShipToName = "${ data.ship_to_name }"
-                        val txtShipToAddress = "${ data.ship_to_address }"
-                        val txtShipToPhone = "${ data.ship_to_phone }"
-                        val txtDeliveryOrderDate = "Delivery Date: ${ data.dalivery_date }"
-                        val txtPrintedDate = "Printed Date: ${ data.date_printed }"
-                        val txtCourier = "Kurir: ${ data.courier_name }"
-                        val txtVehicle = "Kendaraan: ${ data.nama_kendaraan }"
-                        val txtVehicleNumber = "No. Polisi: ${ data.nopol_kendaraan }"
-
-                        val bytes = ArrayList<ByteArray>()
-                        bytes.add(printerManager.textLeft("~"))
-                        bytes.add(printerManager.textEnter(gap*8))
-                        bytes.add(printerManager.textCenter(txtReferenceNumber))
-                        bytes.add(printerManager.textEnter(gap))
-                        bytes.add(printerManager.textCenter("Distributor Indonesia"))
-                        bytes.add(printerManager.textCenter("PT. TOP MORTAR INDONESIA"))
-//                        bytes.add(printerManager.textCenter(txtDeliveryDate))
-                        bytes.add(printerManager.textEnter(gap))
-                        bytes.add(printerManager.textLeft("Shipped to:"))
-                        bytes.add(printerManager.textLeft(txtShipToName))
-                        bytes.add(printerManager.textLeft(txtShipToAddress))
-                        bytes.add(printerManager.textLeft(txtShipToPhone))
-                        bytes.add(printerManager.textEnter(gap))
-                        bytes.add(printerManager.textLeft("Delivery Order"))
-                        bytes.add(printerManager.textLeft(txtDeliveryOrderDate))
-                        bytes.add(printerManager.textLeft(txtPrintedDate))
-                        bytes.add(printerManager.textEnter(gap))
-                        bytes.add(printerManager.textBetween("Daftar Pesanan", "Qty"))
-                        orders.forEach {
-                            bytes.add(printerManager.textBetween(it.nama_produk, it.qty_produk))
-                            if (it.is_bonus == "1") {
-                                bytes.add(printerManager.textLeft("Free"))
-                            }
-                            bytes.add(printerManager.textEnter(gap))
-                        }
-                        bytes.add(printerManager.textLeft("Description"))
-                        bytes.add(printerManager.textLeft(txtCourier))
-                        bytes.add(printerManager.textLeft(txtVehicle))
-                        bytes.add(printerManager.textLeft(txtVehicleNumber))
-                        bytes.add(printerManager.textEnter(gap))
-                        bytes.add(printerManager.textLeft("Received By:"))
-                        bytes.add(printerManager.textEnter(gap*8))
-                        bytes.add(printerManager.textCenterBoldUnderline(txtShipToName))
-                        bytes.add(printerManager.textEnter(gap*2))
-                        bytes.add(printerManager.textLeft("~"))
-                        bytes.add(printerManager.textEnter(gap*2))
-
-                        Handler().postDelayed({
-                            printerManager.connectToDevice(device, bytes)
-                            Handler().postDelayed({
-                                printingState(false)
-                            }, 1000)
-                        }, 1000)
+//                        val txtReferenceNumber = "${ data.no_surat_jalan }"
+////                        val txtDeliveryDate = "${ data.dalivery_date }"
+//                        val txtShipToName = "${ data.ship_to_name }"
+//                        val txtShipToAddress = "${ data.ship_to_address }"
+//                        val txtShipToPhone = "${ data.ship_to_phone }"
+//                        val txtDeliveryOrderDate = "Delivery Date: ${ data.dalivery_date }"
+//                        val txtPrintedDate = "Printed Date: ${ data.date_printed }"
+//                        val txtCourier = "Kurir: ${ data.courier_name }"
+//                        val txtVehicle = "Kendaraan: ${ data.nama_kendaraan }"
+//                        val txtVehicleNumber = "No. Polisi: ${ data.nopol_kendaraan }"
+//
+//                        val bytes = ArrayList<ByteArray>()
+//                        bytes.add(printerManager.textLeft("~"))
+//                        bytes.add(printerManager.textEnter(gap*8))
+//                        bytes.add(printerManager.textCenter(txtReferenceNumber))
+//                        bytes.add(printerManager.textEnter(gap))
+//                        bytes.add(printerManager.textCenter("Distributor Indonesia"))
+//                        bytes.add(printerManager.textCenter("PT. TOP MORTAR INDONESIA"))
+////                        bytes.add(printerManager.textCenter(txtDeliveryDate))
+//                        bytes.add(printerManager.textEnter(gap))
+//                        bytes.add(printerManager.textLeft("Shipped to:"))
+//                        bytes.add(printerManager.textLeft(txtShipToName))
+//                        bytes.add(printerManager.textLeft(txtShipToAddress))
+//                        bytes.add(printerManager.textLeft(txtShipToPhone))
+//                        bytes.add(printerManager.textEnter(gap))
+//                        bytes.add(printerManager.textLeft("Delivery Order"))
+//                        bytes.add(printerManager.textLeft(txtDeliveryOrderDate))
+//                        bytes.add(printerManager.textLeft(txtPrintedDate))
+//                        bytes.add(printerManager.textEnter(gap))
+//                        bytes.add(printerManager.textBetween("Daftar Pesanan", "Qty"))
+//                        orders.forEach {
+//                            bytes.add(printerManager.textBetween(it.nama_produk, it.qty_produk))
+//                            if (it.is_bonus == "1") {
+//                                bytes.add(printerManager.textLeft("Free"))
+//                            }
+//                            bytes.add(printerManager.textEnter(gap))
+//                        }
+//                        bytes.add(printerManager.textLeft("Description"))
+//                        bytes.add(printerManager.textLeft(txtCourier))
+//                        bytes.add(printerManager.textLeft(txtVehicle))
+//                        bytes.add(printerManager.textLeft(txtVehicleNumber))
+//                        bytes.add(printerManager.textEnter(gap))
+//                        bytes.add(printerManager.textLeft("Received By:"))
+//                        bytes.add(printerManager.textEnter(gap*8))
+//                        bytes.add(printerManager.textCenterBoldUnderline(txtShipToName))
+//                        bytes.add(printerManager.textEnter(gap*2))
+//                        bytes.add(printerManager.textLeft("~"))
+//                        bytes.add(printerManager.textEnter(gap*2))
+//
+//                        Handler().postDelayed({
+//                            printerManager.connectToDevice(device, bytes)
+//                            Handler().postDelayed({
+//                                printingState(false)
+//                            }, 1000)
+//                        }, 1000)
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
@@ -530,36 +537,77 @@ class DetailInvoiceActivity : AppCompatActivity() {
     }
 
     // Testing
-    private fun printEscPos() {
-        val printer = EscPosPrinter(BluetoothPrintersConnections.selectFirstPaired(), 203, 48f, 32)
-        printer.printFormattedText(
-            "[C]<img>" + PrinterTextParserImg.bitmapToHexadecimalString(printer, this.applicationContext.resources.getDrawableForDensity(R.drawable.logo_top_mortar, DisplayMetrics.DENSITY_MEDIUM))+"</img>\n" +
-            "[L]\n" +
-            "[C]<u><font size='big'>ORDER N°045</font></u>\n" +
-            "[L]\n" +
-            "[C]================================\n" +
-            "[L]\n" +
-            "[L]<b>BEAUTIFUL SHIRT</b>[R]9.99e\n" +
-            "[L]  + Size : S\n" +
-            "[L]\n" +
-            "[L]<b>AWESOME HAT</b>[R]24.99e\n" +
-            "[L]  + Size : 57/58\n" +
-            "[L]\n" +
-            "[C]--------------------------------\n" +
-            "[R]TOTAL PRICE :[R]34.98e\n" +
-            "[R]TAX :[R]4.23e\n" +
-            "[L]\n" +
-            "[C]================================\n" +
-            "[L]\n" +
-            "[L]<font size='tall'>Customer :</font>\n" +
-            "[L]Raymond DUPONT\n" +
-            "[L]5 rue des girafes\n" +
-            "[L]31547 PERPETES\n" +
-            "[L]Tel : +33801201456\n" +
-            "[L]\n" +
-            "[C]<barcode type='ean13' height='10'>831254784551</barcode>\n" +
-            "[C]<qrcode size='20'>https://dantsu.com/</qrcode>"
+    private fun printEscPos(data: InvoiceModel) {
+
+        val printersConnections = BluetoothPrintersConnections.selectFirstPaired()
+        val printer = EscPosPrinter(printersConnections, 203, 70f, 48)
+
+        // Change the desired width and height for your image (in pixels)
+        val desiredWidth = 200*2 // Adjust this to your desired width
+        val desiredHeight = 103*2 // Adjust this to your desired height
+
+        val drawable = this.applicationContext.resources.getDrawableForDensity(
+            R.drawable.logo_top_mortar,
+            DisplayMetrics.DENSITY_MEDIUM
         )
+
+        // Scale the drawable to the desired dimensions
+        val scaledDrawable = scaleDrawable(drawable!!, desiredWidth, desiredHeight)
+
+        // Convert the scaled drawable to hexadecimal string and print it
+        val imageHexadecimal = PrinterTextParserImg.bitmapToHexadecimalString(printer, scaledDrawable)
+
+        // Data to Printed
+        val txtReferenceNumber = "${ data.no_surat_jalan }"
+        val txtShipToName = "${ data.ship_to_name }"
+        val txtShipToAddress = "${ data.ship_to_address }"
+        val txtShipToPhone = "${ data.ship_to_phone }"
+        val txtDeliveryOrderDate = "Delivery Date: ${ data.dalivery_date }"
+        val txtPrintedDate = "Printed Date: ${ data.date_printed }"
+        val txtCourier = "Kurir: ${ data.courier_name }"
+        val txtVehicle = "Kendaraan: ${ data.nama_kendaraan }"
+        val txtVehicleNumber = "No. Polisi: ${ data.nopol_kendaraan }"
+
+        val orders = data.details.let { if (it.isNullOrEmpty()) arrayListOf() else it }
+        var textOrders = ""
+
+        orders.forEach {
+            textOrders += "[L]${ it.nama_produk }[R]${ it.qty_produk }\n"
+            if (it.is_bonus == "1") {
+                textOrders += "[L]Free\n"
+            }
+            textOrders += "[L]\n"
+        }
+
+        printer.printFormattedText(
+            "[C]<img>$imageHexadecimal</img>\n\n" +
+            "[C]$txtReferenceNumber\n\n" +
+            "[C]Distributor Indonesia\n" +
+            "[C]PT. TOP MORTAR INDONESIA\n" +
+            "[L]Shipped to:\n" +
+            "[L]$txtShipToName\n" +
+            "[L]$txtShipToAddress\n" +
+            "[L]$txtShipToPhone\n\n" +
+            "[L]Delivery Order\n" +
+            "[L]$txtDeliveryOrderDate\n" +
+            "[L]$txtPrintedDate\n\n" +
+            "[L]Daftar Pesanan[R]Qty\n" + textOrders +
+            "[L]Description\n" +
+            "[L]$txtCourier\n" +
+            "[L]$txtVehicle\n" +
+            "[L]$txtVehicleNumber\n\n" +
+            "[L]Received By:\n\n\n\n\n\n\n\n" +
+            "[C]<b><u>$txtShipToName</u></b>\n" +
+            "[L]\n"
+        )
+    }
+
+    private fun scaleDrawable(drawable: Drawable, width: Int, height: Int): Drawable {
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, width, height)
+        drawable.draw(canvas)
+        return BitmapDrawable(this.applicationContext.resources, bitmap)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {

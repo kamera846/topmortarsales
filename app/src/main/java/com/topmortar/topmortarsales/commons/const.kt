@@ -33,6 +33,7 @@ const val VERIFY_OTP = "verifyOtp.php"
 const val UPDATE_PASSWORD = "updatePassword.php"
 const val SURAT_JALAN = "suratjalan.php"
 const val INVOICE = "invoice.php"
+const val SKILL = "skill.php"
 
 // Request Code
 const val ACTIVITY_REQUEST_CODE = "activity_request_code"
@@ -60,6 +61,7 @@ const val CONST_INVOICE_ID = "const_invoice_id"
 
 const val CONST_OWNER = "const_owner"
 const val CONST_LOCATION = "const_location"
+const val CONST_SKILL = "const_skill"
 const val CONST_PHONE = "const_phone"
 const val CONST_NAME = "const_name"
 const val CONST_BIRTHDAY = "const_birthday"

@@ -128,7 +128,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         if (!formValidation(level = level, city = city, phone = phone, username = username, fullName = fullName, password = password, confirmPassword = confirmPassword)) return
 
-        city = if (selectedCity == null) "0" else selectedCity!!.id
+        city = if (selectedCity == null) "0" else selectedCity!!.id!!
 
         loadingState(true)
 
