@@ -80,8 +80,8 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.modal.SearchModal
-import com.topmortar.topmortarsales.modal.SendMessageModal
-import com.topmortar.topmortarsales.model.ContactModel
+import com.topmortar.topmortarsales.modal.SendMessageTukangModal
+import com.topmortar.topmortarsales.model.TukangModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
 import com.topmortar.topmortarsales.view.contact.PreviewKtpActivity
@@ -178,7 +178,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
     private var selectedDate: Calendar = Calendar.getInstance()
     private var selectedCity: ModalSearchModel? = null
     private var selectedSkill: ModalSearchModel? = null
-    private var itemSendMessage: ContactModel? = null
+    private var itemSendMessage: TukangModel? = null
 
     private var statusItem: List<String> = listOf("Choose Customer Status", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
     private var selectedStatus: String = ""
@@ -197,7 +197,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
     private lateinit var datePicker: DatePickerDialog
     private lateinit var searchModal: SearchModal
     private lateinit var searchModalSkill: SearchModal
-    private lateinit var sendMessageModal: SendMessageModal
+    private lateinit var sendMessageModal: SendMessageTukangModal
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -457,7 +457,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
         activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
 
-        itemSendMessage = ContactModel(nama = iName!!, nomorhp = iPhone!!, store_owner = iOwner!!, tgl_lahir = iBirthday!!, maps_url = iMapsUrl!!, id_city = iLocation!!)
+        itemSendMessage = TukangModel(nama = iName!!, nomorhp = iPhone!!, store_owner = iOwner!!, tgl_lahir = iBirthday!!, maps_url = iMapsUrl!!, id_city = iLocation!!)
         setupDialogSendMessage(itemSendMessage)
 
         if (!iContactId.isNullOrEmpty() ) {
@@ -708,11 +708,12 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                     when (responseBody.status) {
                         RESPONSE_STATUS_OK -> {
 
-                            itemSendMessage = ContactModel(
+                            itemSendMessage = TukangModel(
                                 nomorhp = pPhone,
                                 nama = pName,
-                                store_owner = pOwner,
+//                                store_owner = pOwner,
                                 id_city = pCityID,
+                                id_skill = pSkillID,
                                 tgl_lahir = pBirthday,
                                 maps_url = pMapsUrl
                             )
@@ -950,9 +951,9 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
     }
 
-    private fun setupDialogSendMessage(item: ContactModel? = null) {
+    private fun setupDialogSendMessage(item: TukangModel? = null) {
 
-        sendMessageModal = SendMessageModal(this, lifecycleScope)
+        sendMessageModal = SendMessageTukangModal(this, lifecycleScope)
         if (item != null) sendMessageModal.setItem(item)
 
 

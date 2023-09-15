@@ -35,6 +35,7 @@ const val SURAT_JALAN = "suratjalan.php"
 const val INVOICE = "invoice.php"
 const val SKILL = "skill.php"
 const val TUKANG = "tukang.php"
+const val TUKANG_MESSAGE = "tukangMessage.php"
 
 // Request Code
 const val ACTIVITY_REQUEST_CODE = "activity_request_code"

@@ -14,6 +14,7 @@ import com.topmortar.topmortarsales.commons.SEARCH_CONTACT
 import com.topmortar.topmortarsales.commons.SEND_MESSAGE
 import com.topmortar.topmortarsales.commons.SKILL
 import com.topmortar.topmortarsales.commons.TUKANG
+import com.topmortar.topmortarsales.commons.TUKANG_MESSAGE
 import com.topmortar.topmortarsales.commons.UPDATE_PASSWORD
 import com.topmortar.topmortarsales.commons.VERIFY_OTP
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -232,16 +233,17 @@ interface ApiService {
     suspend fun getTukang(): ResponseTukangList
 
     @Multipart
-    @POST(SEND_MESSAGE)
+    @POST(TUKANG_MESSAGE)
     suspend fun sendMessageTukang(
         @Part("nama") name: RequestBody,
         @Part("nomorhp") phone: RequestBody,
-        @Part("owner_name") ownerName: RequestBody,
+//        @Part("owner_name") ownerName: RequestBody,
         @Part("tgl_lahir") birthday: RequestBody,
         @Part("id_city") cityId: RequestBody,
+        @Part("id_skill") skillId: RequestBody,
         @Part("mapsUrl") mapsUrl: RequestBody,
-        @Part("id_user") userId: RequestBody,
-        @Part("full_name") currentName: RequestBody,
+//        @Part("id_user") userId: RequestBody,
+//        @Part("full_name") currentName: RequestBody,
         @Part("message_body") message: RequestBody,
     ): Response<ResponseMessage>
 }
