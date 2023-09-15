@@ -214,19 +214,34 @@ interface ApiService {
     ): Response<ResponseMessage>
 
     @Multipart
-    @POST(EDIT_CONTACT)
+    @POST(TUKANG)
     suspend fun editTukang(
         @Part("id") id: RequestBody,
         @Part("nomorhp") phone: RequestBody,
         @Part("nama") name: RequestBody,
-        @Part("owner_name") ownerName: RequestBody,
+//        @Part("owner_name") ownerName: RequestBody,
         @Part("tgl_lahir") birthday: RequestBody,
         @Part("id_city") cityId: RequestBody,
         @Part("mapsUrl") mapsUrl: RequestBody,
         @Part("address") address: RequestBody,
         @Part("status") status: RequestBody,
+        @Part("id_skill") skillId: RequestBody,
     ): Response<ResponseMessage>
 
     @GET(TUKANG)
     suspend fun getTukang(): ResponseTukangList
+
+    @Multipart
+    @POST(SEND_MESSAGE)
+    suspend fun sendMessageTukang(
+        @Part("nama") name: RequestBody,
+        @Part("nomorhp") phone: RequestBody,
+        @Part("owner_name") ownerName: RequestBody,
+        @Part("tgl_lahir") birthday: RequestBody,
+        @Part("id_city") cityId: RequestBody,
+        @Part("mapsUrl") mapsUrl: RequestBody,
+        @Part("id_user") userId: RequestBody,
+        @Part("full_name") currentName: RequestBody,
+        @Part("message_body") message: RequestBody,
+    ): Response<ResponseMessage>
 }
