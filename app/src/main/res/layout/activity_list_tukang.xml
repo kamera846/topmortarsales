@@ -17,17 +17,9 @@
             android:id="@+id/title_bar"
             layout="@layout/component_title_bar"/>
 
-        <!-- Search Box -->
-        <include
-            android:visibility="gone"
-            android:id="@+id/search_box"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            layout="@layout/component_search_box"/>
-
     </RelativeLayout>
 
-    <!-- Chat List -->
+    <!-- List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_chat_list"
         android:layout_width="match_parent"

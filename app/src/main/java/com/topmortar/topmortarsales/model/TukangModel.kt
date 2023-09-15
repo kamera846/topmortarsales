@@ -1,0 +1,13 @@
+package com.topmortar.topmortarsales.model
+
+data class TukangModel(
+    val id_contact: String = "",
+    val nama: String = "",
+    val nomorhp: String = "",
+    val tgl_lahir: String = "0000-00-00",
+    val store_owner: String = "",
+    val id_city: String = "0",
+    val maps_url: String = "",
+    val address: String = "",
+    var store_status: String = ""
+)

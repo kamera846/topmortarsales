@@ -13,6 +13,7 @@ import com.topmortar.topmortarsales.commons.REQUEST_OTP
 import com.topmortar.topmortarsales.commons.SEARCH_CONTACT
 import com.topmortar.topmortarsales.commons.SEND_MESSAGE
 import com.topmortar.topmortarsales.commons.SKILL
+import com.topmortar.topmortarsales.commons.TUKANG
 import com.topmortar.topmortarsales.commons.UPDATE_PASSWORD
 import com.topmortar.topmortarsales.commons.VERIFY_OTP
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -22,6 +23,7 @@ import com.topmortar.topmortarsales.response.ResponseContactList
 import com.topmortar.topmortarsales.response.ResponseInvoices
 import com.topmortar.topmortarsales.response.ResponseMessage
 import com.topmortar.topmortarsales.response.ResponseSkills
+import com.topmortar.topmortarsales.response.ResponseTukangList
 import com.topmortar.topmortarsales.response.ResponseUsers
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -224,4 +226,7 @@ interface ApiService {
         @Part("address") address: RequestBody,
         @Part("status") status: RequestBody,
     ): Response<ResponseMessage>
+
+    @GET(TUKANG)
+    suspend fun getTukang(): ResponseTukangList
 }
