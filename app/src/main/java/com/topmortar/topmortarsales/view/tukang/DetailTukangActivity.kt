@@ -297,6 +297,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             tvKtpContainer.visibility = View.GONE
         }
 
+        btnInvoice.visibility = View.GONE
         skillContainer.visibility = View.VISIBLE
         terminContainer.visibility = View.GONE
 
@@ -320,7 +321,6 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 //        btnSendMessage.setOnClickListener { navigateAddNewRoom() }
         btnSendMessage.setOnClickListener { sendMessageModal.show() }
         btnSaveEdit.setOnClickListener { editConfirmation() }
-        btnInvoice.setOnClickListener { navigateToDetailInvoice() }
         etBirthdayContainer.setOnClickListener { datePicker.show() }
         etBirthday.setOnClickListener { datePicker.show() }
         etLocationContainer.setOnClickListener { showSearchModal() }
@@ -450,8 +450,6 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         iStatus = intent.getStringExtra(CONST_STATUS)
         if (!iStatus.isNullOrEmpty()) {
             tooltipStatus.visibility = View.VISIBLE
-            if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) btnInvoice.visibility = View.GONE
-            else btnInvoice.visibility = View.VISIBLE
         }
         iAddress = intent.getStringExtra(CONST_ADDRESS)
         iLocation = intent.getStringExtra(CONST_LOCATION)
@@ -547,7 +545,6 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 //            tvKtpContainer.visibility = View.GONE
 
             btnSendMessage.visibility = View.GONE
-            btnInvoice.visibility = View.GONE
 
             // Show Case
             tvTitleBar.text = "Edit Contact"
@@ -623,8 +620,6 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             statusContainer.setBackgroundResource(R.drawable.background_rounded)
             if (!iStatus.isNullOrEmpty()) {
                 tooltipStatus.visibility = View.VISIBLE
-                if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) btnInvoice.visibility = View.GONE
-                else btnInvoice.visibility = View.VISIBLE
             }
             tvStatus.visibility = View.VISIBLE
             spinStatus.visibility = View.GONE
@@ -747,11 +742,6 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                             } else tvLocation.text = EMPTY_FIELD_VALUE
 
                             iStatus = if (!pStatus.isNullOrEmpty()) pStatus else null
-                            if (!iStatus.isNullOrEmpty()) {
-                                if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) {
-                                    btnInvoice.visibility = View.GONE
-                                } else btnInvoice.visibility = View.VISIBLE
-                            }
                             setupStatus(iStatus)
 
                             // Remove image temp

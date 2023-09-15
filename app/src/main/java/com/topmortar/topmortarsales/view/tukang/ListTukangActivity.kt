@@ -32,6 +32,7 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
+import com.topmortar.topmortarsales.commons.CONST_SKILL
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
@@ -152,13 +153,15 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         val intent = Intent(this@ListTukangActivity, AddTukangActivity::class.java)
 
         if (data != null) {
-            intent.putExtra(CONST_CONTACT_ID, data.id_contact)
+            intent.putExtra(CONST_CONTACT_ID, data.id_tukang)
             intent.putExtra(CONST_NAME, data.nama)
             intent.putExtra(CONST_PHONE, data.nomorhp)
             intent.putExtra(CONST_BIRTHDAY, data.tgl_lahir)
             intent.putExtra(CONST_OWNER, data.store_owner)
             intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
             intent.putExtra(CONST_LOCATION, data.id_city)
+            intent.putExtra(CONST_STATUS, data.tukang_status)
+            intent.putExtra(CONST_SKILL, data.id_skill)
 //            intent.putExtra(CONST_LOCATION, "1")
         }
 
@@ -172,7 +175,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
 
         if (data != null) {
             intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
-            intent.putExtra(CONST_CONTACT_ID, data.id_contact)
+            intent.putExtra(CONST_CONTACT_ID, data.id_tukang)
             intent.putExtra(CONST_NAME, data.nama)
             intent.putExtra(CONST_PHONE, data.nomorhp)
             intent.putExtra(CONST_BIRTHDAY, data.tgl_lahir)
@@ -180,7 +183,8 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
             intent.putExtra(CONST_LOCATION, data.id_city)
             intent.putExtra(CONST_MAPS, data.maps_url)
             intent.putExtra(CONST_ADDRESS, data.address)
-            intent.putExtra(CONST_STATUS, data.store_status)
+            intent.putExtra(CONST_STATUS, data.tukang_status)
+            intent.putExtra(CONST_SKILL, data.id_skill)
 //            intent.putExtra(CONST_LOCATION, "1")
         }
 
