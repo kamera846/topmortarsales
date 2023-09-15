@@ -114,6 +114,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         val name = "${ etName.text }"
         var birthday = "${ etBirthday.text }"
         val owner = "${ etOwner.text }"
+        val cityID = "0"
         var skillID = "${ selectedSkill!!.id }"
         val mapsUrl = "${ etMapsUrl.text }"
         val message = "${ etMessage.text }"
@@ -130,12 +131,12 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         loadingState(true)
 
-        Handler().postDelayed({
-            handleMessage(this, "Submit -> ", "$phone : $name : $owner : $birthday : $skillID : $message")
-            loadingState(false)
-        }, 1000)
-
-        return
+//        Handler().postDelayed({
+//            handleMessage(this, "Submit -> ", "$phone : $name : $owner : $birthday : $skillID : $message")
+//            loadingState(false)
+//        }, 1000)
+//
+//        return
 
         lifecycleScope.launch {
             try {
@@ -143,7 +144,8 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                 val rbPhone = createPartFromString(formatPhoneNumber(phone))
                 val rbName = createPartFromString(name)
 //                val rbLocation = createPartFromString(selectedSkill!!.id)
-                val rbLocation = createPartFromString(skillID)
+                val rbLocation = createPartFromString(cityID)
+                val rbSkill = createPartFromString(skillID)
                 val rbBirthday = createPartFromString(birthday)
                 val rbOwner = createPartFromString(owner)
                 val rbMapsUrl = createPartFromString(mapsUrl)
@@ -153,7 +155,14 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                 val rbTermin = createPartFromString("15")
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.sendMessageTukang(name = rbName, phone = rbPhone, ownerName = rbOwner, birthday = rbBirthday, idSkill = rbLocation, mapsUrl = rbMapsUrl, userId = rbUserId, currentName = rbCurrentName, termin = rbTermin, message = rbMessage)
+                val response = apiService.sendMessageTukang(
+                    name = rbName,
+                    phone = rbPhone,
+                    birthday = rbBirthday,
+                    cityId = rbLocation,
+                    skillId = rbSkill,
+                    mapsUrl = rbMapsUrl,
+                    message = rbMessage)
 
                 if (response.isSuccessful) {
 
