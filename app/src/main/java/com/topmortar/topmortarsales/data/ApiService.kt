@@ -229,10 +229,20 @@ interface ApiService {
     ): Response<ResponseMessage>
 
     @GET(TUKANG)
-    suspend fun getTukang(): ResponseTukangList
-
-    @GET(TUKANG)
     suspend fun getTukang(@Query("c") cityId: String): ResponseTukangList
+
+    @Multipart
+    @POST(TUKANG)
+    suspend fun insertTukang(
+        @Part("nama") name: RequestBody,
+        @Part("nomorhp") phone: RequestBody,
+        @Part("nama_lengkap") namaLengkap: RequestBody,
+        @Part("tgl_lahir") birthday: RequestBody,
+        @Part("id_city") cityId: RequestBody,
+        @Part("id_skill") skillId: RequestBody,
+        @Part("mapsUrl") mapsUrl: RequestBody,
+        @Part("full_name") currentName: RequestBody
+    ): Response<ResponseMessage>
 
     @Multipart
     @POST(TUKANG_MESSAGE)
@@ -244,7 +254,6 @@ interface ApiService {
         @Part("id_city") cityId: RequestBody,
         @Part("id_skill") skillId: RequestBody,
         @Part("mapsUrl") mapsUrl: RequestBody,
-//        @Part("id_user") userId: RequestBody,
         @Part("full_name") currentName: RequestBody,
         @Part("message_body") message: RequestBody,
     ): Response<ResponseMessage>
