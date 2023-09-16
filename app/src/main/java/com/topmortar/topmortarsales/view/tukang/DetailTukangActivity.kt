@@ -951,6 +951,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
         searchModalSkill = SearchModal(this, items)
         searchModalSkill.setCustomDialogListener(this)
+        searchModalSkill.label = "Select Skill Option"
         searchModalSkill.searchHint = "Enter skill name..."
         searchModalSkill.setOnDismissListener { etSkill.clearFocus() }
 

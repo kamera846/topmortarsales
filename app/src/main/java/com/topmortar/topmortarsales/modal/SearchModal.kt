@@ -29,10 +29,12 @@ class SearchModal(private val context: Context, private val listItem: ArrayList<
     private var isLoading = false
     private var loadingListener: ((Boolean) -> Unit)? = null
     private var searchKeyListener: ((String) -> Unit)? = null
+    var label = "Select City Option"
     var searchHint = "Enter title..."
 
     private lateinit var txtLoading: TextView
     private lateinit var rvItems: RecyclerView
+    private lateinit var tvSearch: TextView
     private lateinit var etSearch: EditText
     private lateinit var icClearSearch: ImageView
 
@@ -104,8 +106,10 @@ class SearchModal(private val context: Context, private val listItem: ArrayList<
     private fun initVariable() {
         txtLoading = findViewById(R.id.modal_loading)
         rvItems = findViewById(R.id.rv_items)
+        tvSearch = findViewById(R.id.tv_search_label)
         etSearch = findViewById(R.id.et_search_box)
         icClearSearch = findViewById(R.id.ic_clear_search)
+        tvSearch.setText(label)
         etSearch.hint = searchHint
     }
 
