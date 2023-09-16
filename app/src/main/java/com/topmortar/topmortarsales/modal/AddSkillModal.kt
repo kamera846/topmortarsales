@@ -2,6 +2,7 @@ package com.topmortar.topmortarsales.modal
 
 import android.app.Dialog
 import android.content.Context
+import android.content.DialogInterface
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.View
@@ -38,9 +39,21 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
     private lateinit var etSkillCode: EditText
     private lateinit var btnSubmit: Button
 
+    private var skillID: String? = "0"
     private var item: SkillModel? = null
+    private var isEdit: Boolean = false
     fun setItem(data: SkillModel) {
         this.item = data
+        skillID = data.id_skill
+        etSkillName.setText(data.nama_skill)
+        etSkillCode.setText(data.kode_skill)
+    }
+    fun setTitle(title: String) {
+        tvTitleBar.text = title
+    }
+    fun setEditCase(isEdit: Boolean) {
+        this.isEdit = isEdit
+        btnSubmit.text = "SAVE"
     }
 
     private var modalInterface : AddSkillModalInterface? = null
@@ -139,7 +152,10 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
 //                return@launch
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.addSkill(name = skillName, code = skillCode)
+                val response = isEdit.let {
+                    if (it) apiService.editSkill(id = createPartFromString("$skillID"), name = skillName, code = skillCode)
+                    else apiService.addSkill(name = skillName, code = skillCode)
+                }
 
                 if (response.isSuccessful) {
 
@@ -148,10 +164,13 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
                     when (responseBody.status) {
                         RESPONSE_STATUS_OK -> {
 
+                            handleMessage(context, TAG_RESPONSE_CONTACT, if (isEdit) "Successfully edit data" else "Successfully added data!")
+
+                            tvTitleBar.text = "Add New Skill"
                             etSkillName.setText("")
                             etSkillCode.setText("")
+                            isEdit = false
                             loadingState(false)
-                            handleMessage(context, TAG_RESPONSE_CONTACT, "Successfully added data!")
 
                             modalInterface!!.onSubmit(true)
                             this@AddSkillModal.dismiss()

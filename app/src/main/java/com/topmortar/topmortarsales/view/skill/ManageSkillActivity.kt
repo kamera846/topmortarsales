@@ -99,7 +99,11 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
 
     private fun initClickHandler() {
         icBack.setOnClickListener { finish() }
-        btnFab.setOnClickListener { addCityModal.show() }
+        btnFab.setOnClickListener {
+            addCityModal = AddSkillModal(this, lifecycleScope)
+            addCityModal.initializeInterface(this)
+            addCityModal.show()
+        }
     }
 
     private fun getList() {
@@ -193,7 +197,12 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
     }
 
     override fun onItemClick(data: SkillModel?) {
-
+        addCityModal.show()
+//        Handler().postDelayed({
+            addCityModal.setEditCase(true)
+            addCityModal.setItem(data!!)
+            addCityModal.setTitle("Edit Skill")
+//        }, 500)
     }
 
     override fun onSubmit(status: Boolean) {
