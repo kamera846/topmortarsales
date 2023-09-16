@@ -521,6 +521,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         searchModal = SearchModal(this, items)
         searchModal.setCustomDialogListener(this)
+        searchModal.label = "Select Skill Option"
         searchModal.searchHint = "Enter skill name..."
         searchModal.setOnDismissListener {
             etSkill.clearFocus()
@@ -575,7 +576,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        handleMessage(this@AddTukangActivity, "LIST CITY", "Empty cities data!")
+                        handleMessage(this@AddTukangActivity, "LIST CITY", "Empty skill data!")
                         isCitiesLoaded = false
 //                        searchModal.isLoading(true)
 
