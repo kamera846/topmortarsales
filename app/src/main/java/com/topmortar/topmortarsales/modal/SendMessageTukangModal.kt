@@ -180,7 +180,7 @@ class SendMessageTukangModal(private val context: Context, private val lifecycle
                 val rbLocation = createPartFromString(data.id_city)
                 val rbSkill = createPartFromString(data.id_skill)
                 val rbBirthday = createPartFromString(data.tgl_lahir)
-                val rbOwner = createPartFromString(data.store_owner)
+                val rbOwner = createPartFromString(data.nama_lengkap)
                 val rbMapsUrl = createPartFromString(data.maps_url)
                 val rbMessage = createPartFromString("${ etMessage.text }")
                 val rbUserId = createPartFromString(userId)
@@ -198,12 +198,12 @@ class SendMessageTukangModal(private val context: Context, private val lifecycle
                 val response = apiService.sendMessageTukang(
                     name = rbName,
                     phone = rbPhone,
-//                    ownerName = rbOwner,
+                    namaLengkap = rbOwner,
                     birthday = rbBirthday,
                     cityId = rbLocation,
                     skillId = rbSkill,
                     mapsUrl = rbMapsUrl,
-//                    currentName = rbCurrentName,
+                    currentName = rbCurrentName,
 //                    userId = rbUserId,
                     message = rbMessage)
 

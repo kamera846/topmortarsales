@@ -14,6 +14,7 @@ import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.webkit.URLUtil.isValidUrl
 import android.widget.AdapterView
@@ -33,6 +34,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.TooltipCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.view.marginRight
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
@@ -297,6 +299,9 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             tvKtpContainer.visibility = View.GONE
         }
 
+        etName.hint = "Enter Tukang Name"
+        etOwner.hint = "Enter Tukang Full Name"
+        etBirthday.hint = "Choose Tukang Birthday"
         btnInvoice.visibility = View.GONE
         skillContainer.visibility = View.VISIBLE
         terminContainer.visibility = View.GONE
@@ -407,13 +412,13 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
         // Tooltip Handler
         tooltipHandler(tooltipPhone, "Phone Number (WA)")
-        tooltipHandler(tooltipOwner, "Owner Name")
+        tooltipHandler(tooltipOwner, "Tukang Full Name")
         tooltipHandler(tooltipLocation, "Tukang City")
         tooltipHandler(tooltipSkill, "Tukang Skill")
-        tooltipHandler(tooltipBirthday, "Owner Birthday")
+        tooltipHandler(tooltipBirthday, "Tukang Birthday")
 
         val tooltipMapsText = "Maps URL"
-        val tooltipMapsTextOpen = "Click to open store location on maps apps"
+        val tooltipMapsTextOpen = "Click to open tukang location on maps apps"
         tooltipMaps.setOnClickListener {
             if (tvMaps.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsTextOpen)
             else TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsText)
@@ -457,7 +462,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
         activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
 
-        itemSendMessage = TukangModel(nama = iName!!, nomorhp = iPhone!!, store_owner = iOwner!!, tgl_lahir = iBirthday!!, maps_url = iMapsUrl!!, id_city = iLocation!!)
+        itemSendMessage = TukangModel(nama = iName!!, nomorhp = iPhone!!, nama_lengkap = iOwner!!, tgl_lahir = iBirthday!!, maps_url = iMapsUrl!!, id_city = iLocation!!)
         setupDialogSendMessage(itemSendMessage)
 
         if (!iContactId.isNullOrEmpty() ) {
@@ -692,7 +697,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                     id = rbId,
                     phone = rbPhone,
                     name = rbName,
-//                    ownerName = rbOwner,
+                    namaLengkap = rbOwner,
                     birthday = rbBirthday,
                     cityId = rbLocation,
                     mapsUrl = rbMapsUrl,
@@ -711,7 +716,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                             itemSendMessage = TukangModel(
                                 nomorhp = pPhone,
                                 nama = pName,
-//                                store_owner = pOwner,
+                                nama_lengkap = pOwner,
                                 id_city = pCityID,
                                 id_skill = pSkillID,
                                 tgl_lahir = pBirthday,
@@ -1179,6 +1184,9 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
     private fun setupNetworkIndicator() {
         val indicatorImageView = findViewById<View>(R.id.indicatorView) // Ganti dengan ID tampilan indikator Anda
         indicatorImageView.visibility = View.VISIBLE
+        val layoutParams = indicatorImageView.layoutParams as ViewGroup.MarginLayoutParams
+        layoutParams.marginEnd = 0
+        layoutParams.marginStart = 16
         val pingIntervalMillis = 2000L // Ganti dengan interval yang Anda inginkan (dalam milidetik)
 
         val pingTimer = Timer()

@@ -205,7 +205,7 @@ interface ApiService {
         @Part("id") id: RequestBody,
         @Part("nomorhp") phone: RequestBody,
         @Part("nama") name: RequestBody,
-//        @Part("owner_name") ownerName: RequestBody,
+        @Part("nama_lengkap") namaLengkap: RequestBody,
         @Part("tgl_lahir") birthday: RequestBody,
         @Part("id_city") cityId: RequestBody,
         @Part("mapsUrl") mapsUrl: RequestBody,
@@ -217,18 +217,21 @@ interface ApiService {
     @GET(TUKANG)
     suspend fun getTukang(): ResponseTukangList
 
+    @GET(TUKANG)
+    suspend fun getTukang(@Query("c") cityId: String): ResponseTukangList
+
     @Multipart
     @POST(TUKANG_MESSAGE)
     suspend fun sendMessageTukang(
         @Part("nama") name: RequestBody,
         @Part("nomorhp") phone: RequestBody,
-//        @Part("owner_name") ownerName: RequestBody,
+        @Part("nama_lengkap") namaLengkap: RequestBody,
         @Part("tgl_lahir") birthday: RequestBody,
         @Part("id_city") cityId: RequestBody,
         @Part("id_skill") skillId: RequestBody,
         @Part("mapsUrl") mapsUrl: RequestBody,
 //        @Part("id_user") userId: RequestBody,
-//        @Part("full_name") currentName: RequestBody,
+        @Part("full_name") currentName: RequestBody,
         @Part("message_body") message: RequestBody,
     ): Response<ResponseMessage>
 }

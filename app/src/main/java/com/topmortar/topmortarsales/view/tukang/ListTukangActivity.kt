@@ -157,7 +157,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
             intent.putExtra(CONST_NAME, data.nama)
             intent.putExtra(CONST_PHONE, data.nomorhp)
             intent.putExtra(CONST_BIRTHDAY, data.tgl_lahir)
-            intent.putExtra(CONST_OWNER, data.store_owner)
+            intent.putExtra(CONST_OWNER, data.nama_lengkap)
             intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
             intent.putExtra(CONST_LOCATION, data.id_city)
             intent.putExtra(CONST_STATUS, data.tukang_status)
@@ -179,7 +179,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
             intent.putExtra(CONST_NAME, data.nama)
             intent.putExtra(CONST_PHONE, data.nomorhp)
             intent.putExtra(CONST_BIRTHDAY, data.tgl_lahir)
-            intent.putExtra(CONST_OWNER, data.store_owner)
+            intent.putExtra(CONST_OWNER, data.nama_lengkap)
             intent.putExtra(CONST_LOCATION, data.id_city)
             intent.putExtra(CONST_MAPS, data.maps_url)
             intent.putExtra(CONST_ADDRESS, data.address)
@@ -243,7 +243,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getTukang()
+                val response = apiService.getTukang(cityId = userCity)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
