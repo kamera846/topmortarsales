@@ -428,7 +428,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         } else {
 
             btnSubmit.isEnabled = true
-            btnSubmit.text = getString(R.string.btn_submit_new_chat_room)
+            btnSubmit.text = if (etMessage.text.isNullOrEmpty()) "Save Contact" else "Save & Send Message"
             btnSubmit.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
 
         }

@@ -3,6 +3,7 @@ package com.topmortar.topmortarsales.view.tukang
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.text.Editable
@@ -46,8 +47,8 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.modal.SearchModal
-import com.topmortar.topmortarsales.model.SkillModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
+import com.topmortar.topmortarsales.model.SkillModel
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -74,7 +75,6 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
     private lateinit var searchModal: SearchModal
 
     private var isLoaded = false
-    private var isCitiesLoaded = false
     private var activityRequestCode = MAIN_ACTIVITY_REQUEST_CODE
     private val msgMaxLines = 5
     private val msgMaxLength = 200
@@ -97,12 +97,10 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         initVariable()
         initClickHandler()
-        dataActivityValidation()
+//        dataActivityValidation()
         etMessageListener()
 
         Handler().postDelayed({
-//            isLoaded = true
-//            isCitiesLoaded = true
             getSkills()
         }, 500)
 
@@ -407,7 +405,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         } else {
 
             btnSubmit.isEnabled = true
-            btnSubmit.text = getString(R.string.btn_submit_new_chat_room)
+            btnSubmit.text = if (etMessage.text.isNullOrEmpty()) "Save Contact" else "Save & Send Message"
             btnSubmit.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
 
         }
@@ -536,7 +534,8 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
     private fun getSkills() {
         // Get Cities
-        isCitiesLoaded = false
+        etSkill.setText("Loading...")
+        etSkill.isEnabled = false
 
         lifecycleScope.launch {
             try {
@@ -564,28 +563,22 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                         } else {
                             selectedSkill = null
                             etSkill.setText("")
-                            etSkill.setTextColor(getColor(R.color.black_200))
-                            etSkill.setBackgroundResource(R.drawable.et_background)
-                            etSkill.isEnabled = true
                         }
 
-                        isCitiesLoaded = true
+                        etSkill.isEnabled = true
                         isLoaded = true
-//                        searchModal.isLoading(false)
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
                         handleMessage(this@AddTukangActivity, "LIST CITY", "Empty skill data!")
-                        isCitiesLoaded = false
-//                        searchModal.isLoading(true)
+                        etSkill.isEnabled = true
 
                     }
                     else -> {
 
                         handleMessage(this@AddTukangActivity, TAG_RESPONSE_CONTACT, "Failed get data")
-                        isCitiesLoaded = false
-//                        searchModal.isLoading(true)
+                        etSkill.isEnabled = true
 
                     }
                 }
@@ -594,8 +587,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             } catch (e: Exception) {
 
                 handleMessage(this@AddTukangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
-                isCitiesLoaded = false
-//                searchModal.isLoading(true)
+                etSkill.isEnabled = true
 
             }
 
@@ -603,6 +595,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
     }
 
     override fun onDataReceived(data: ModalSearchModel) {
+
         etSkill.setText(data.title)
         selectedSkill = data
     }
