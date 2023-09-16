@@ -166,18 +166,34 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                 val rbTermin = createPartFromString(termin)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.sendMessage(
-                    name = rbName,
-                    phone = rbPhone,
-                    ownerName = rbOwner,
-                    birthday = rbBirthday,
-                    cityId = rbLocation,
-                    mapsUrl = rbMapsUrl,
-                    userId = rbUserId,
-                    currentName = rbCurrentName,
-                    termin = rbTermin,
-                    message = rbMessage
-                )
+                val response = message.let {
+                    if (it.isNullOrEmpty()) {
+                        apiService.insertContact(
+                            name = rbName,
+                            phone = rbPhone,
+                            ownerName = rbOwner,
+                            birthday = rbBirthday,
+                            cityId = rbLocation,
+                            mapsUrl = rbMapsUrl,
+                            userId = rbUserId,
+                            currentName = rbCurrentName,
+                            termin = rbTermin
+                        )
+                    } else {
+                        apiService.sendMessage(
+                            name = rbName,
+                            phone = rbPhone,
+                            ownerName = rbOwner,
+                            birthday = rbBirthday,
+                            cityId = rbLocation,
+                            mapsUrl = rbMapsUrl,
+                            userId = rbUserId,
+                            currentName = rbCurrentName,
+                            termin = rbTermin,
+                            message = rbMessage
+                        )
+                    }
+                }
 
                 if (response.isSuccessful) {
 
@@ -186,7 +202,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                     when (responseBody.status) {
                         RESPONSE_STATUS_OK -> {
 
-                            handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Successfully added data!")
+                            handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, message.let { if (!it.isNullOrEmpty()) "Successfully saved & sent message!" else "Successfully saved contact!" })
                             loadingState(false)
 
                             val resultIntent = Intent()
@@ -242,6 +258,8 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             }
 
             override fun afterTextChanged(s: Editable?) {
+                if (s.toString().isNullOrEmpty()) btnSubmit.text = "Save Contact"
+                else btnSubmit.text = "Save & Send Message"
             }
         })
 
@@ -459,12 +477,12 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 //        } else if (termin == null) {
 //            handleMessage(this, "ERROR SPINNER", "Choose termin payment")
 //            false
-        } else if (message.isEmpty()) {
-            etMapsUrl.error = null
-            etMapsUrl.clearFocus()
-            etMessage.error = "Message cannot be empty!"
-            etMessage.requestFocus()
-            false
+//        } else if (message.isEmpty()) {
+//            etMapsUrl.error = null
+//            etMapsUrl.clearFocus()
+//            etMessage.error = "Message cannot be empty!"
+//            etMessage.requestFocus()
+//            false
         } else {
             etPhone.error = null
             etName.error = null

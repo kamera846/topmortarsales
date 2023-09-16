@@ -5,7 +5,7 @@ import com.topmortar.topmortarsales.commons.ADD_USERS
 import com.topmortar.topmortarsales.commons.AUTH
 import com.topmortar.topmortarsales.commons.EDIT_CONTACT
 import com.topmortar.topmortarsales.commons.GET_CITY
-import com.topmortar.topmortarsales.commons.GET_CONTACT
+import com.topmortar.topmortarsales.commons.CONTACT
 import com.topmortar.topmortarsales.commons.SURAT_JALAN
 import com.topmortar.topmortarsales.commons.GET_USERS
 import com.topmortar.topmortarsales.commons.INVOICE
@@ -33,13 +33,13 @@ import retrofit2.http.*
 
 interface ApiService {
 
-    @GET(GET_CONTACT)
+    @GET(CONTACT)
     suspend fun getContacts(@Query("c") cityId: String): ResponseContactList
 
-    @GET(GET_CONTACT)
+    @GET(CONTACT)
     suspend fun getContacts(): ResponseContactList
 
-    @GET(GET_CONTACT)
+    @GET(CONTACT)
     suspend fun getContactDetail(@Query("id") contactId: String): Response<ResponseContactList>
 
     @Multipart
@@ -56,6 +56,20 @@ interface ApiService {
         @Part("status") status: RequestBody,
         @Part("termin_payment") termin: RequestBody,
         @Part ktp: MultipartBody.Part? = null,
+    ): Response<ResponseMessage>
+
+    @Multipart
+    @POST(SEND_MESSAGE)
+    suspend fun insertContact(
+        @Part("nama") name: RequestBody,
+        @Part("nomorhp") phone: RequestBody,
+        @Part("owner_name") ownerName: RequestBody,
+        @Part("tgl_lahir") birthday: RequestBody,
+        @Part("id_city") cityId: RequestBody,
+        @Part("mapsUrl") mapsUrl: RequestBody,
+        @Part("id_user") userId: RequestBody,
+        @Part("full_name") currentName: RequestBody,
+        @Part("termin_payment") termin: RequestBody
     ): Response<ResponseMessage>
 
     @Multipart

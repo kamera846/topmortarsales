@@ -19,7 +19,7 @@ const val RESPONSE_STATUS_EMPTY = "empty"
 const val RESPONSE_STATUS_FAIL = "fail"
 const val RESPONSE_STATUS_FAILED = "failed"
 
-const val GET_CONTACT = "contacts.php"
+const val CONTACT = "contacts.php"
 const val EDIT_CONTACT = "contacts.php"
 const val SEND_MESSAGE = "messages.php"
 const val SEARCH_CONTACT = "contactsSearch.php"
