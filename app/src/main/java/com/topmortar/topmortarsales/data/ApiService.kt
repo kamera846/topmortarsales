@@ -214,6 +214,14 @@ interface ApiService {
     ): Response<ResponseMessage>
 
     @Multipart
+    @POST(SKILL)
+    suspend fun editSkill(
+        @Part("id") id: RequestBody,
+        @Part("nama_skill") name: RequestBody,
+        @Part("kode_skill") code: RequestBody
+    ): Response<ResponseMessage>
+
+    @Multipart
     @POST(TUKANG)
     suspend fun editTukang(
         @Part("id") id: RequestBody,
