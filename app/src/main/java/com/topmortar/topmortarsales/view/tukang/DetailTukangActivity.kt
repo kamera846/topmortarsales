@@ -14,6 +14,7 @@ import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.webkit.URLUtil.isValidUrl
 import android.widget.AdapterView
@@ -33,6 +34,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.TooltipCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.view.marginRight
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
@@ -80,8 +82,8 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.modal.SearchModal
-import com.topmortar.topmortarsales.modal.SendMessageModal
-import com.topmortar.topmortarsales.model.ContactModel
+import com.topmortar.topmortarsales.modal.SendMessageTukangModal
+import com.topmortar.topmortarsales.model.TukangModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
 import com.topmortar.topmortarsales.view.contact.PreviewKtpActivity
@@ -144,8 +146,8 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
     private lateinit var tvDescription: TextView
     private lateinit var tvPhone: TextView
     private lateinit var tvBirthday: TextView
-    private lateinit var tvKtp: TextView
-    private lateinit var tvSelectedKtp: TextView
+//    private lateinit var tvKtp: TextView
+//    private lateinit var tvSelectedKtp: TextView
     private lateinit var tvLocation: TextView
     private lateinit var tvSkill: TextView
     private lateinit var tvOwner: TextView
@@ -178,14 +180,14 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
     private var selectedDate: Calendar = Calendar.getInstance()
     private var selectedCity: ModalSearchModel? = null
     private var selectedSkill: ModalSearchModel? = null
-    private var itemSendMessage: ContactModel? = null
+    private var itemSendMessage: TukangModel? = null
 
     private var statusItem: List<String> = listOf("Choose Customer Status", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
     private var selectedStatus: String = ""
-    private var cameraPermissionLauncher: ActivityResultLauncher<String>? = null
-    private var imagePicker: ActivityResultLauncher<Intent>? = null
-    private var selectedUri: Uri? = null
-    private var currentPhotoUri: Uri? = null
+//    private var cameraPermissionLauncher: ActivityResultLauncher<String>? = null
+//    private var imagePicker: ActivityResultLauncher<Intent>? = null
+//    private var selectedUri: Uri? = null
+//    private var currentPhotoUri: Uri? = null
 
     private var iLocation: String? = null
     private var iSkill: String? = null
@@ -197,7 +199,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
     private lateinit var datePicker: DatePickerDialog
     private lateinit var searchModal: SearchModal
     private lateinit var searchModalSkill: SearchModal
-    private lateinit var sendMessageModal: SendMessageModal
+    private lateinit var sendMessageModal: SendMessageTukangModal
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -272,8 +274,8 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         etMaps = findViewById(R.id.et_maps)
         tvBirthday = findViewById(R.id.tv_birthday)
         etBirthday = findViewById(R.id.et_birthday)
-        tvKtp = findViewById(R.id.tv_ktp)
-        tvSelectedKtp = findViewById(R.id.tv_selected_ktp)
+//        tvKtp = findViewById(R.id.tv_ktp)
+//        tvSelectedKtp = findViewById(R.id.tv_selected_ktp)
 //        etKtp = findViewById(R.id.et_ktp)
 
         tvStatus = findViewById(R.id.tv_status)
@@ -297,6 +299,10 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             tvKtpContainer.visibility = View.GONE
         }
 
+        etName.hint = "Enter Tukang Name"
+        etOwner.hint = "Enter Tukang Full Name"
+        etBirthday.hint = "Choose Tukang Birthday"
+        btnInvoice.visibility = View.GONE
         skillContainer.visibility = View.VISIBLE
         terminContainer.visibility = View.GONE
 
@@ -320,7 +326,6 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 //        btnSendMessage.setOnClickListener { navigateAddNewRoom() }
         btnSendMessage.setOnClickListener { sendMessageModal.show() }
         btnSaveEdit.setOnClickListener { editConfirmation() }
-        btnInvoice.setOnClickListener { navigateToDetailInvoice() }
         etBirthdayContainer.setOnClickListener { datePicker.show() }
         etBirthday.setOnClickListener { datePicker.show() }
         etLocationContainer.setOnClickListener { showSearchModal() }
@@ -407,13 +412,13 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
         // Tooltip Handler
         tooltipHandler(tooltipPhone, "Phone Number (WA)")
-        tooltipHandler(tooltipOwner, "Owner Name")
+        tooltipHandler(tooltipOwner, "Tukang Full Name")
         tooltipHandler(tooltipLocation, "Tukang City")
         tooltipHandler(tooltipSkill, "Tukang Skill")
-        tooltipHandler(tooltipBirthday, "Owner Birthday")
+        tooltipHandler(tooltipBirthday, "Tukang Birthday")
 
         val tooltipMapsText = "Maps URL"
-        val tooltipMapsTextOpen = "Click to open store location on maps apps"
+        val tooltipMapsTextOpen = "Click to open tukang location on maps apps"
         tooltipMaps.setOnClickListener {
             if (tvMaps.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsTextOpen)
             else TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsText)
@@ -423,17 +428,17 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             else TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsText)
             false
         }
-        val tooltipKtpText = "Ktp File"
-        val tooltipKtpTextOpen = "Click to open KTP and see the details"
-        tooltipKtp.setOnClickListener {
-            if (tvKtp.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(tooltipKtp, tooltipKtpTextOpen)
-            else TooltipCompat.setTooltipText(tooltipKtp, tooltipKtpText)
-        }
-        tooltipKtp.setOnLongClickListener {
-            if (tvKtp.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(tooltipKtp, tooltipKtpTextOpen)
-            else TooltipCompat.setTooltipText(tooltipKtp, tooltipKtpText)
-            false
-        }
+//        val tooltipKtpText = "Ktp File"
+//        val tooltipKtpTextOpen = "Click to open KTP and see the details"
+//        tooltipKtp.setOnClickListener {
+//            if (tvKtp.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(tooltipKtp, tooltipKtpTextOpen)
+//            else TooltipCompat.setTooltipText(tooltipKtp, tooltipKtpText)
+//        }
+//        tooltipKtp.setOnLongClickListener {
+//            if (tvKtp.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(tooltipKtp, tooltipKtpTextOpen)
+//            else TooltipCompat.setTooltipText(tooltipKtp, tooltipKtpText)
+//            false
+//        }
         //////////
     }
 
@@ -450,8 +455,6 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         iStatus = intent.getStringExtra(CONST_STATUS)
         if (!iStatus.isNullOrEmpty()) {
             tooltipStatus.visibility = View.VISIBLE
-            if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) btnInvoice.visibility = View.GONE
-            else btnInvoice.visibility = View.VISIBLE
         }
         iAddress = intent.getStringExtra(CONST_ADDRESS)
         iLocation = intent.getStringExtra(CONST_LOCATION)
@@ -459,7 +462,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
         activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
 
-        itemSendMessage = ContactModel(nama = iName!!, nomorhp = iPhone!!, store_owner = iOwner!!, tgl_lahir = iBirthday!!, maps_url = iMapsUrl!!, id_city = iLocation!!)
+        itemSendMessage = TukangModel(nama = iName!!, nomorhp = iPhone!!, nama_lengkap = iOwner!!, tgl_lahir = iBirthday!!, maps_url = iMapsUrl!!, id_city = iLocation!!)
         setupDialogSendMessage(itemSendMessage)
 
         if (!iContactId.isNullOrEmpty() ) {
@@ -547,7 +550,6 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 //            tvKtpContainer.visibility = View.GONE
 
             btnSendMessage.visibility = View.GONE
-            btnInvoice.visibility = View.GONE
 
             // Show Case
             tvTitleBar.text = "Edit Contact"
@@ -562,8 +564,8 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             etMapsContainer.visibility = View.VISIBLE
             etBirthdayContainer.visibility = View.VISIBLE
 //            etKtpContainer.visibility = View.VISIBLE
-            tvSelectedKtp.visibility = View.VISIBLE
-            tvSelectedKtp.text = "Selected file: "
+//            tvSelectedKtp.visibility = View.VISIBLE
+//            tvSelectedKtp.text = "Selected file: "
 
             // Other Columns Handle
             addressContainer.setBackgroundResource(R.drawable.et_background)
@@ -612,8 +614,8 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             etMapsContainer.visibility = View.GONE
             etBirthdayContainer.visibility = View.GONE
 //            etKtpContainer.visibility = View.GONE
-            tvSelectedKtp.visibility = View.GONE
-            selectedUri = null
+//            tvSelectedKtp.visibility = View.GONE
+//            selectedUri = null
 
             // Other Columns Handle
             addressContainer.setBackgroundResource(R.drawable.background_rounded)
@@ -623,8 +625,6 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             statusContainer.setBackgroundResource(R.drawable.background_rounded)
             if (!iStatus.isNullOrEmpty()) {
                 tooltipStatus.visibility = View.VISIBLE
-                if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) btnInvoice.visibility = View.GONE
-                else btnInvoice.visibility = View.VISIBLE
             }
             tvStatus.visibility = View.VISIBLE
             spinStatus.visibility = View.GONE
@@ -671,12 +671,12 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
         loadingState(true)
 
-        Handler().postDelayed({
-            Toast.makeText(this, "$pPhone : $pName : $pOwner : $pBirthday : $pMapsUrl : $pAddress : $pStatus : $pCityID : $pSkillID", TOAST_SHORT).show()
-            loadingState(false)
-        }, 2000)
-
-        return
+//        Handler().postDelayed({
+//            Toast.makeText(this, "$pPhone : $pName : $pOwner : $pBirthday : $pMapsUrl : $pAddress : $pStatus : $pCityID : $pSkillID", TOAST_SHORT).show()
+//            loadingState(false)
+//        }, 2000)
+//
+//        return
 
         lifecycleScope.launch {
             try {
@@ -690,18 +690,20 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                 val rbLocation = createPartFromString(pCityID!!)
                 val rbAddress = createPartFromString(pAddress)
                 val rbStatus = createPartFromString(pStatus)
+                val rbSkill = createPartFromString(pSkillID!!)
 
                 val apiService: ApiService = HttpClient.create()
                 val response = apiService.editTukang(
                     id = rbId,
                     phone = rbPhone,
                     name = rbName,
-                    ownerName = rbOwner,
+                    namaLengkap = rbOwner,
                     birthday = rbBirthday,
                     cityId = rbLocation,
                     mapsUrl = rbMapsUrl,
                     address = rbAddress,
-                    status = rbStatus
+                    status = rbStatus,
+                    skillId = rbSkill
                 )
 
                 if (response.isSuccessful) {
@@ -711,11 +713,12 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                     when (responseBody.status) {
                         RESPONSE_STATUS_OK -> {
 
-                            itemSendMessage = ContactModel(
+                            itemSendMessage = TukangModel(
                                 nomorhp = pPhone,
                                 nama = pName,
-                                store_owner = pOwner,
+                                nama_lengkap = pOwner,
                                 id_city = pCityID,
+                                id_skill = pSkillID,
                                 tgl_lahir = pBirthday,
                                 maps_url = pMapsUrl
                             )
@@ -745,22 +748,16 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                                 if (selectedCity!!.id != "0") tvLocation.text = "${ etLocation.text }"
                                 else tvLocation.text = EMPTY_FIELD_VALUE
                             } else tvLocation.text = EMPTY_FIELD_VALUE
+                            if (selectedSkill != null) {
+                                if (selectedSkill!!.id != "0") tvSkill.text = "${ etSkill.text }"
+                                else tvSkill.text = EMPTY_FIELD_VALUE
+                            } else tvSkill.text = EMPTY_FIELD_VALUE
 
                             iStatus = if (!pStatus.isNullOrEmpty()) pStatus else null
-                            if (!iStatus.isNullOrEmpty()) {
-                                if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) {
-                                    btnInvoice.visibility = View.GONE
-                                } else btnInvoice.visibility = View.VISIBLE
-                            }
                             setupStatus(iStatus)
 
-                            // Remove image temp
-                            currentPhotoUri?.let {
-                                val contentResolver = contentResolver
-                                contentResolver.delete(it, null, null)
-                            }
-
-                            getDetailContact()
+                            hasEdited = true
+                            loadingState(false)
 
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
@@ -798,68 +795,6 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
         }
 
-    }
-
-    private fun getDetailContact() {
-        loadingState(true)
-
-        lifecycleScope.launch {
-            try {
-
-                val apiService: ApiService = HttpClient.create()
-                val response = contactId?.let { apiService.getContactDetail(contactId = it) }
-
-                if (response!!.isSuccessful) {
-
-                    val responseBody = response.body()!!
-
-                    when (responseBody.status) {
-                        RESPONSE_STATUS_OK -> {
-
-                            val data = responseBody.results[0]
-                            if (!data.ktp_owner.isNullOrEmpty()) {
-                                tvKtp.text = "Click to open preview KTP"
-                                iKtp = data.ktp_owner
-                            }
-
-                            hasEdited = true
-                            loadingState(false)
-
-                        }
-                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
-
-                            handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Failed to get contact! Message: Response status $RESPONSE_STATUS_FAIL or $RESPONSE_STATUS_FAILED")
-                            loadingState(false)
-                            toggleEdit(false)
-
-                        }
-                        else -> {
-
-                            handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Failed to get contact!")
-                            loadingState(false)
-                            toggleEdit(false)
-
-                        }
-                    }
-
-                } else {
-
-                    handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Failed to get contact! Error: " + response.message())
-                    loadingState(false)
-                    toggleEdit(false)
-
-                }
-
-
-            } catch (e: Exception) {
-
-                handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
-                loadingState(false)
-                toggleEdit(false)
-
-            }
-
-        }
     }
 
     private fun setDatePickerDialog() {
@@ -1021,9 +956,9 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
     }
 
-    private fun setupDialogSendMessage(item: ContactModel? = null) {
+    private fun setupDialogSendMessage(item: TukangModel? = null) {
 
-        sendMessageModal = SendMessageModal(this, lifecycleScope)
+        sendMessageModal = SendMessageTukangModal(this, lifecycleScope)
         if (item != null) sendMessageModal.setItem(item)
 
 
@@ -1249,6 +1184,9 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
     private fun setupNetworkIndicator() {
         val indicatorImageView = findViewById<View>(R.id.indicatorView) // Ganti dengan ID tampilan indikator Anda
         indicatorImageView.visibility = View.VISIBLE
+        val layoutParams = indicatorImageView.layoutParams as ViewGroup.MarginLayoutParams
+        layoutParams.marginEnd = 0
+        layoutParams.marginStart = 16
         val pingIntervalMillis = 2000L // Ganti dengan interval yang Anda inginkan (dalam milidetik)
 
         val pingTimer = Timer()

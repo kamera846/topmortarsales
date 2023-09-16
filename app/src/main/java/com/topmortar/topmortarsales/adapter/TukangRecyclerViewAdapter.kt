@@ -19,13 +19,13 @@ import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BID
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BLACKLIST
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
-import com.topmortar.topmortarsales.model.ContactModel
+import com.topmortar.topmortarsales.model.TukangModel
 
-class TukangRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<TukangRecyclerViewAdapter.ChatViewHolder>() {
+class TukangRecyclerViewAdapter(private val chatList: ArrayList<TukangModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<TukangRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
 
     interface ItemClickListener {
-        fun onItemClick(data: ContactModel? = null)
+        fun onItemClick(data: TukangModel? = null)
     }
 
     inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -35,12 +35,12 @@ class TukangRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>, p
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
         val tooltipStatus: ImageView = itemView.findViewById(R.id.tooltip_status)
 
-        fun bind(chatItem: ContactModel) {
+        fun bind(chatItem: TukangModel) {
 
             ivProfile.setImageResource(R.drawable.person_red)
-            tvContactName.text = chatItem.nama
-            tvPhoneNumber.text = if (chatItem.nomorhp != "") "+${ chatItem.nomorhp }" else ""
-            setupStatus(chatItem.store_status)
+            tvContactName.text = "${chatItem.nama}"
+            tvPhoneNumber.text = if (chatItem.nomorhp != "") "+${ chatItem.nomorhp } (${chatItem.kode_skill})" else ""
+            setupStatus(chatItem.tukang_status)
 
         }
 
@@ -49,23 +49,19 @@ class TukangRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>, p
             when (status) {
                 STATUS_CONTACT_DATA -> {
                     tooltipStatus.setImageDrawable(context?.let { getDrawable(it, R.drawable.status_data) })
-                    tooltipHandler(tooltipStatus, "Customer Status Data")
+                    tooltipHandler(tooltipStatus, "Tukang Status Data")
                 }
                 STATUS_CONTACT_PASSIVE -> {
                     tooltipStatus.setImageDrawable(context?.let { getDrawable(it, R.drawable.status_passive) })
-                    tooltipHandler(tooltipStatus, "Customer Status Passive")
+                    tooltipHandler(tooltipStatus, "Tukang Status Passive")
                 }
                 STATUS_CONTACT_ACTIVE -> {
                     tooltipStatus.setImageDrawable(context?.let { getDrawable(it, R.drawable.status_active) })
-                    tooltipHandler(tooltipStatus, "Customer Status Active")
+                    tooltipHandler(tooltipStatus, "Tukang Status Active")
                 }
                 STATUS_CONTACT_BLACKLIST -> {
                     tooltipStatus.setImageDrawable(context?.let { getDrawable(it, R.drawable.status_blacklist) })
-                    tooltipHandler(tooltipStatus, "Customer Status Blacklist")
-                }
-                STATUS_CONTACT_BID -> {
-                    tooltipStatus.setImageDrawable(context?.let { getDrawable(it, R.drawable.status_bid) })
-                    tooltipHandler(tooltipStatus, "Customer Status Bargained")
+                    tooltipHandler(tooltipStatus, "Tukang Status Blacklist")
                 }
                 else -> {
                     tooltipStatus.visibility = View.GONE

@@ -13,6 +13,8 @@ import com.topmortar.topmortarsales.commons.REQUEST_OTP
 import com.topmortar.topmortarsales.commons.SEARCH_CONTACT
 import com.topmortar.topmortarsales.commons.SEND_MESSAGE
 import com.topmortar.topmortarsales.commons.SKILL
+import com.topmortar.topmortarsales.commons.TUKANG
+import com.topmortar.topmortarsales.commons.TUKANG_MESSAGE
 import com.topmortar.topmortarsales.commons.UPDATE_PASSWORD
 import com.topmortar.topmortarsales.commons.VERIFY_OTP
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -22,6 +24,7 @@ import com.topmortar.topmortarsales.response.ResponseContactList
 import com.topmortar.topmortarsales.response.ResponseInvoices
 import com.topmortar.topmortarsales.response.ResponseMessage
 import com.topmortar.topmortarsales.response.ResponseSkills
+import com.topmortar.topmortarsales.response.ResponseTukangList
 import com.topmortar.topmortarsales.response.ResponseUsers
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -197,31 +200,38 @@ interface ApiService {
     ): Response<ResponseMessage>
 
     @Multipart
-    @POST(SEND_MESSAGE)
-    suspend fun sendMessageTukang(
-        @Part("nama") name: RequestBody,
-        @Part("nomorhp") phone: RequestBody,
-        @Part("owner_name") ownerName: RequestBody,
-        @Part("tgl_lahir") birthday: RequestBody,
-        @Part("id_skill") idSkill: RequestBody,
-        @Part("mapsUrl") mapsUrl: RequestBody,
-        @Part("id_user") userId: RequestBody,
-        @Part("full_name") currentName: RequestBody,
-        @Part("termin_payment") termin: RequestBody? = null,
-        @Part("message_body") message: RequestBody,
-    ): Response<ResponseMessage>
-
-    @Multipart
-    @POST(EDIT_CONTACT)
+    @POST(TUKANG)
     suspend fun editTukang(
         @Part("id") id: RequestBody,
         @Part("nomorhp") phone: RequestBody,
         @Part("nama") name: RequestBody,
-        @Part("owner_name") ownerName: RequestBody,
+        @Part("nama_lengkap") namaLengkap: RequestBody,
         @Part("tgl_lahir") birthday: RequestBody,
         @Part("id_city") cityId: RequestBody,
         @Part("mapsUrl") mapsUrl: RequestBody,
         @Part("address") address: RequestBody,
         @Part("status") status: RequestBody,
+        @Part("id_skill") skillId: RequestBody,
+    ): Response<ResponseMessage>
+
+    @GET(TUKANG)
+    suspend fun getTukang(): ResponseTukangList
+
+    @GET(TUKANG)
+    suspend fun getTukang(@Query("c") cityId: String): ResponseTukangList
+
+    @Multipart
+    @POST(TUKANG_MESSAGE)
+    suspend fun sendMessageTukang(
+        @Part("nama") name: RequestBody,
+        @Part("nomorhp") phone: RequestBody,
+        @Part("nama_lengkap") namaLengkap: RequestBody,
+        @Part("tgl_lahir") birthday: RequestBody,
+        @Part("id_city") cityId: RequestBody,
+        @Part("id_skill") skillId: RequestBody,
+        @Part("mapsUrl") mapsUrl: RequestBody,
+//        @Part("id_user") userId: RequestBody,
+        @Part("full_name") currentName: RequestBody,
+        @Part("message_body") message: RequestBody,
     ): Response<ResponseMessage>
 }

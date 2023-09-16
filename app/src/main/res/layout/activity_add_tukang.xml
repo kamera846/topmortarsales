@@ -432,7 +432,7 @@
                     android:padding="12dp"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:text="Submit" />
+                    android:text="Save Contact" />
 
             </LinearLayout>
 

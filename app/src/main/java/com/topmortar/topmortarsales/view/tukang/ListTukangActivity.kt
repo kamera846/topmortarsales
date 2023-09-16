@@ -4,16 +4,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.text.Editable
-import android.text.TextUtils
-import android.text.TextWatcher
 import android.util.Log
 import android.view.MenuItem
-import android.view.MotionEvent
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.PopupMenu
@@ -37,31 +32,23 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
+import com.topmortar.topmortarsales.commons.CONST_SKILL
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
-import com.topmortar.topmortarsales.commons.SEARCH_CLEAR
-import com.topmortar.topmortarsales.commons.SEARCH_CLOSE
-import com.topmortar.topmortarsales.commons.SEARCH_OPEN
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
-import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
-import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
-import com.topmortar.topmortarsales.commons.utils.KeyboardHandler.hideKeyboard
-import com.topmortar.topmortarsales.commons.utils.KeyboardHandler.showKeyboard
 import com.topmortar.topmortarsales.commons.utils.SessionManager
-import com.topmortar.topmortarsales.commons.utils.convertDpToPx
-import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
-import com.topmortar.topmortarsales.model.ContactModel
+import com.topmortar.topmortarsales.model.TukangModel
 import com.topmortar.topmortarsales.view.SplashScreenActivity
 import com.topmortar.topmortarsales.view.city.ManageCityActivity
 import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
@@ -78,14 +65,9 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
     private lateinit var txtLoading: TextView
     private lateinit var rvListChat: RecyclerView
     private lateinit var llTitleBar: LinearLayout
-    private lateinit var llSearchBox: LinearLayout
     private lateinit var btnFab: FloatingActionButton
     private lateinit var titleBar: TextView
     private lateinit var icMore: ImageView
-    private lateinit var icSearch: ImageView
-    private lateinit var icCloseSearch: ImageView
-    private lateinit var icClearSearch: ImageView
-    private lateinit var etSearchBox: EditText
     private lateinit var tvTitleBarDescription: TextView
 
     // Global
@@ -94,13 +76,6 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
     private lateinit var userCity: String
     private lateinit var userKind: String
     private var userId: String = ""
-
-    // Initialize Search Engine
-    private val searchDelayMillis = 500L
-    private val searchHandler = Handler(Looper.getMainLooper())
-    private var searchRunnable: Runnable? = null
-    private var previousSearchTerm = ""
-    private var isSearchActive = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -123,7 +98,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         initVariable()
         initClickHandler()
         loadingState(true)
-        getContacts()
+        getTukang()
 
     }
 
@@ -134,28 +109,17 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         txtLoading = findViewById(R.id.txt_loading)
         rvListChat = findViewById(R.id.rv_chat_list)
         llTitleBar = findViewById(R.id.title_bar)
-        llSearchBox = findViewById(R.id.search_box)
         btnFab = findViewById(R.id.btn_fab)
         titleBar = llTitleBar.findViewById(R.id.tv_title_bar)
         icMore = llTitleBar.findViewById(R.id.ic_more)
-        icSearch = llTitleBar.findViewById(R.id.ic_search)
         tvTitleBarDescription = llTitleBar.findViewById(R.id.tv_title_bar_description)
-        icCloseSearch = findViewById(R.id.ic_close_search)
-        icClearSearch = findViewById(R.id.ic_clear_search)
-        etSearchBox = findViewById(R.id.et_search_box)
 
         // Set Title Bar
         icMore.visibility = View.VISIBLE
-        etSearchBox.hint = "Search tukang…"
-//        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Hello, $it" else "Hello, ${ sessionManager.userName() }"}
         titleBar.text = "List Tukang"
         tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Hello, $it" else ""}
         tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
-        etSearchBox.setPadding(0, 0, convertDpToPx(16, this), 0)
 
-        // Set Floating Action Button
-        if (sessionManager.userKind() == USER_KIND_SALES) btnFab.visibility = View.VISIBLE
-        if (sessionManager.userKind() != USER_KIND_COURIER) icSearch.visibility = View.VISIBLE
 
     }
 
@@ -163,12 +127,6 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
 
         btnFab.setOnClickListener { navigateAddTukang() }
         icMore.setOnClickListener { showPopupMenu() }
-        icSearch.setOnClickListener { toggleSearchEvent(SEARCH_OPEN) }
-        icCloseSearch.setOnClickListener { toggleSearchEvent(SEARCH_CLOSE) }
-        icClearSearch.setOnClickListener { etSearchBox.setText("") }
-        rlLoading.setOnTouchListener { _, event -> blurSearchBox(event) }
-//        rlParent.setOnTouchListener { _, event -> blurSearchBox(event) }
-        rvListChat.setOnTouchListener { _, event -> blurSearchBox(event) }
 
     }
 
@@ -190,20 +148,20 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
 
     }
 
-    private fun navigateAddTukang(data: ContactModel? = null) {
-
-        toggleSearchEvent(SEARCH_CLOSE)
+    private fun navigateAddTukang(data: TukangModel? = null) {
 
         val intent = Intent(this@ListTukangActivity, AddTukangActivity::class.java)
 
         if (data != null) {
-            intent.putExtra(CONST_CONTACT_ID, data.id_contact)
+            intent.putExtra(CONST_CONTACT_ID, data.id_tukang)
             intent.putExtra(CONST_NAME, data.nama)
             intent.putExtra(CONST_PHONE, data.nomorhp)
             intent.putExtra(CONST_BIRTHDAY, data.tgl_lahir)
-            intent.putExtra(CONST_OWNER, data.store_owner)
+            intent.putExtra(CONST_OWNER, data.nama_lengkap)
             intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
             intent.putExtra(CONST_LOCATION, data.id_city)
+            intent.putExtra(CONST_STATUS, data.tukang_status)
+            intent.putExtra(CONST_SKILL, data.id_skill)
 //            intent.putExtra(CONST_LOCATION, "1")
         }
 
@@ -211,23 +169,22 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
 
     }
 
-    private fun navigateDetailContact(data: ContactModel? = null) {
-
-        toggleSearchEvent(SEARCH_CLOSE)
+    private fun navigateDetailContact(data: TukangModel? = null) {
 
         val intent = Intent(this@ListTukangActivity, DetailTukangActivity::class.java)
 
         if (data != null) {
             intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
-            intent.putExtra(CONST_CONTACT_ID, data.id_contact)
+            intent.putExtra(CONST_CONTACT_ID, data.id_tukang)
             intent.putExtra(CONST_NAME, data.nama)
             intent.putExtra(CONST_PHONE, data.nomorhp)
             intent.putExtra(CONST_BIRTHDAY, data.tgl_lahir)
-            intent.putExtra(CONST_OWNER, data.store_owner)
+            intent.putExtra(CONST_OWNER, data.nama_lengkap)
             intent.putExtra(CONST_LOCATION, data.id_city)
             intent.putExtra(CONST_MAPS, data.maps_url)
             intent.putExtra(CONST_ADDRESS, data.address)
-            intent.putExtra(CONST_STATUS, data.store_status)
+            intent.putExtra(CONST_STATUS, data.tukang_status)
+            intent.putExtra(CONST_SKILL, data.id_skill)
 //            intent.putExtra(CONST_LOCATION, "1")
         }
 
@@ -252,12 +209,8 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
                 R.id.option_sync_now -> {
-                    getContacts()
+                    getTukang()
                     getUserLoggedIn()
-                    true
-                }
-                R.id.option_search -> {
-                    toggleSearchEvent(SEARCH_OPEN)
                     true
                 }
                 R.id.option_user -> {
@@ -282,147 +235,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         popupMenu.show()
     }
 
-    private fun blurSearchBox(event: MotionEvent): Boolean {
-
-        if (isSearchActive && TextUtils.isEmpty(etSearchBox.text)) {
-            if (event.action == MotionEvent.ACTION_DOWN || event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_SCROLL || event.action == MotionEvent.ACTION_MOVE) {
-                toggleSearchEvent(SEARCH_CLOSE)
-                return true
-            }
-        }
-        return false
-    }
-
-    private fun toggleSearchEvent(state: String) {
-
-        val animationDuration = 200L
-
-        val fadeIn = AnimationUtils.loadAnimation(this@ListTukangActivity, R.anim.fade_in)
-        fadeIn.duration = animationDuration
-        val fadeOut = AnimationUtils.loadAnimation(this@ListTukangActivity, R.anim.fade_out)
-        fadeOut.duration = animationDuration
-        val slideInFromLeft = AnimationUtils.loadAnimation(this@ListTukangActivity,
-            R.anim.fade_slide_in_from_left
-        )
-        slideInFromLeft.duration = animationDuration
-        val slideOutToRight = AnimationUtils.loadAnimation(this@ListTukangActivity,
-            R.anim.fade_slide_out_to_right
-        )
-        slideOutToRight.duration = animationDuration
-        val slideInFromRight = AnimationUtils.loadAnimation(this@ListTukangActivity,
-            R.anim.fade_slide_in_from_right
-        )
-        slideInFromRight.duration = animationDuration
-        val slideOutToLeft = AnimationUtils.loadAnimation(this@ListTukangActivity,
-            R.anim.fade_slide_out_to_left
-        )
-        slideOutToLeft.duration = animationDuration
-
-        etSearchBox.setOnFocusChangeListener { _, hasFocus ->
-            run {
-                if (hasFocus) showKeyboard(etSearchBox, this@ListTukangActivity)
-                else hideKeyboard(etSearchBox, this@ListTukangActivity)
-            }
-        }
-
-        if (state == SEARCH_OPEN && !isSearchActive) {
-
-            llSearchBox.visibility = View.VISIBLE
-
-            llSearchBox.startAnimation(slideInFromLeft)
-            llTitleBar.startAnimation(slideOutToRight)
-
-            Handler().postDelayed({
-                llTitleBar.visibility = View.GONE
-                etSearchBox.requestFocus()
-                isSearchActive = true
-            }, animationDuration)
-
-            etSearchBox.addTextChangedListener(object: TextWatcher {
-                override fun beforeTextChanged(
-                    s: CharSequence?,
-                    start: Int,
-                    count: Int,
-                    after: Int
-                ) {}
-
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
-                    val searchTerm = s.toString()
-
-                    if (searchTerm != previousSearchTerm) {
-                        previousSearchTerm = searchTerm
-
-                        searchRunnable?.let { searchHandler.removeCallbacks(it) }
-
-                        searchRunnable = Runnable {
-
-                            toggleSearchEvent(SEARCH_CLEAR)
-                            searchContact(searchTerm)
-                        }
-
-                        searchRunnable?.let { searchHandler.postDelayed(it, searchDelayMillis) }
-
-                    }
-
-                }
-
-                override fun afterTextChanged(s: Editable?) {}
-
-            })
-
-        }
-
-        if (state == SEARCH_CLOSE && isSearchActive) {
-
-            llTitleBar.visibility = View.VISIBLE
-
-            llTitleBar.startAnimation(slideInFromRight)
-            llSearchBox.startAnimation(slideOutToLeft)
-
-            Handler().postDelayed({
-                llSearchBox.visibility = View.GONE
-                etSearchBox.clearFocus()
-                isSearchActive = false
-            }, animationDuration)
-
-            if (etSearchBox.text.toString() != "") etSearchBox.setText("")
-
-        }
-
-        if (state == SEARCH_CLEAR) {
-
-            if (TextUtils.isEmpty(etSearchBox.text)) {
-
-                if (icClearSearch.visibility == View.VISIBLE) {
-
-                    icClearSearch.startAnimation(fadeOut)
-                    Handler().postDelayed({
-                        icClearSearch.visibility = View.GONE
-                    }, animationDuration)
-
-                }
-
-            } else {
-
-                if (icClearSearch.visibility == View.GONE) {
-
-                    etSearchBox.clearFocus()
-
-                    icClearSearch.startAnimation(fadeIn)
-                    Handler().postDelayed({
-                        icClearSearch.visibility = View.VISIBLE
-                    }, animationDuration)
-
-                }
-
-            }
-
-        }
-
-    }
-
-    private fun getContacts() {
+    private fun getTukang() {
 
         loadingState(true)
 
@@ -430,12 +243,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                var response = apiService.getContacts()
-                when (userKind) {
-                    USER_KIND_ADMIN -> response = apiService.getContacts()
-                    USER_KIND_COURIER -> response = apiService.getCourierStore(processNumber = "1", courierId = userId)
-                    else -> response = apiService.getContacts(cityId = userCity)
-                }
+                val response = apiService.getTukang(cityId = userCity)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -505,70 +313,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
 
     }
 
-    private fun searchContact(key: String) {
-
-        loadingState(true)
-
-        lifecycleScope.launch {
-            try {
-
-                val searchKey = createPartFromString(key)
-                val searchCity = createPartFromString(userCity)
-
-                val apiService: ApiService = HttpClient.create()
-                val response = if (userKind == USER_KIND_ADMIN) apiService.searchContact(key = searchKey) else apiService.searchContact(cityId = searchCity, key = searchKey)
-
-                if (response.isSuccessful) {
-
-                    val responseBody = response.body()!!
-
-                    when (responseBody.status) {
-                        RESPONSE_STATUS_OK -> {
-
-                            setRecyclerView(responseBody.results)
-                            loadingState(false)
-
-                        }
-                        RESPONSE_STATUS_EMPTY -> {
-
-                            loadingState(true, "Data tukang is empty!")
-
-                        }
-                        else -> {
-
-                            handleMessage(this@ListTukangActivity, TAG_RESPONSE_CONTACT, "Failed get data")
-                            loadingState(true, getString(R.string.failed_request))
-
-                        }
-                    }
-
-                } else {
-
-                    handleMessage(this@ListTukangActivity, TAG_RESPONSE_CONTACT, "Failed get data! Message: " + response.message())
-                    loadingState(true, getString(R.string.failed_request))
-
-                }
-
-
-            } catch (e: Exception) {
-
-                handleMessage(this@ListTukangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
-                loadingState(true, getString(R.string.failed_request))
-
-            }
-
-        }
-
-    }
-
-    private fun setRecyclerView(listItem: ArrayList<ContactModel>) {
-
-//        val itemStatus = listOf("", "data", "passive", "active", "blacklist")
-//        var indexItem = 0
-//        for (item in listItem) {
-//            item.store_status = itemStatus[indexItem]
-//            indexItem.let { if (it == 4) indexItem = 0 else indexItem++}
-//        }
+    private fun setRecyclerView(listItem: ArrayList<TukangModel>) {
 
         val rvAdapter = TukangRecyclerViewAdapter(listItem, this@ListTukangActivity)
 
@@ -648,7 +393,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
 
             if (resultData == SYNC_NOW) {
 
-                getContacts()
+                getTukang()
 
             }
 
@@ -657,28 +402,21 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
     }
 
     override fun onBackPressed() {
-        if (isSearchActive) toggleSearchEvent(SEARCH_CLOSE)
-        else {
-
-            if (doubleBackToExitPressedOnce) {
-                super.onBackPressed()
-                return
-            }
-
-            this@ListTukangActivity.doubleBackToExitPressedOnce = true
-            handleMessage(this@ListTukangActivity, TAG_ACTION_MAIN_ACTIVITY, "Tekan sekali lagi untuk keluar!", TOAST_SHORT)
-
-            Handler(Looper.getMainLooper()).postDelayed({
-                doubleBackToExitPressedOnce = false
-            }, 2000)
-
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed()
+            return
         }
+
+        this@ListTukangActivity.doubleBackToExitPressedOnce = true
+        handleMessage(this@ListTukangActivity, TAG_ACTION_MAIN_ACTIVITY, "Tekan sekali lagi untuk keluar!", TOAST_SHORT)
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            doubleBackToExitPressedOnce = false
+        }, 2000)
     }
 
-    override fun onItemClick(data: ContactModel?) {
+    override fun onItemClick(data: TukangModel?) {
 
-//        if (sessionManager.userKind() == USER_KIND_ADMIN) navigateDetailContact(data)
-//        else navigateAddNewRoom(data)
         navigateDetailContact(data)
 
     }

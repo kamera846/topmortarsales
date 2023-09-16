@@ -114,28 +114,26 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         val name = "${ etName.text }"
         var birthday = "${ etBirthday.text }"
         val owner = "${ etOwner.text }"
-        var skillID = "${ selectedSkill!!.id }"
+        val cityID = if (sessionManager.userCityID() != null) "${ sessionManager.userCityID()!! }" else "0"
+        val skillID = if (selectedSkill != null) "${ selectedSkill!!.id }" else "0"
         val mapsUrl = "${ etMapsUrl.text }"
         val message = "${ etMessage.text }"
         val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
         val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
 
-        if (!formValidation(phone = phone, name = name, owner = owner, message = message, birthday = birthday, mapsUrl = mapsUrl)) return
+        if (!formValidation(phone = phone, name = name, owner = owner, skill = skillID, message = message, birthday = birthday, mapsUrl = mapsUrl)) return
 
         birthday = if (birthday.isEmpty()) "0000-00-00"
         else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
 
-//        if (skillID.isEmpty()) skillID = "0"
-        skillID = if (selectedSkill != null) "${ selectedSkill!!.id }" else "0"
-
         loadingState(true)
 
-        Handler().postDelayed({
-            handleMessage(this, "Submit -> ", "$phone : $name : $owner : $birthday : $skillID : $message")
-            loadingState(false)
-        }, 1000)
-
-        return
+//        Handler().postDelayed({
+//            handleMessage(this, "Submit -> ", "$phone : $name : $owner : $birthday : $skillID : $message")
+//            loadingState(false)
+//        }, 1000)
+//
+//        return
 
         lifecycleScope.launch {
             try {
@@ -143,7 +141,8 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                 val rbPhone = createPartFromString(formatPhoneNumber(phone))
                 val rbName = createPartFromString(name)
 //                val rbLocation = createPartFromString(selectedSkill!!.id)
-                val rbLocation = createPartFromString(skillID)
+                val rbLocation = createPartFromString(cityID)
+                val rbSkill = createPartFromString(skillID)
                 val rbBirthday = createPartFromString(birthday)
                 val rbOwner = createPartFromString(owner)
                 val rbMapsUrl = createPartFromString(mapsUrl)
@@ -153,7 +152,16 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                 val rbTermin = createPartFromString("15")
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.sendMessageTukang(name = rbName, phone = rbPhone, ownerName = rbOwner, birthday = rbBirthday, idSkill = rbLocation, mapsUrl = rbMapsUrl, userId = rbUserId, currentName = rbCurrentName, termin = rbTermin, message = rbMessage)
+                val response = apiService.sendMessageTukang(
+                    name = rbName,
+                    namaLengkap = rbOwner,
+                    phone = rbPhone,
+                    birthday = rbBirthday,
+                    cityId = rbLocation,
+                    skillId = rbSkill,
+                    mapsUrl = rbMapsUrl,
+                    currentName = rbCurrentName,
+                    message = rbMessage)
 
                 if (response.isSuccessful) {
 
@@ -391,7 +399,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
     }
 
-    private fun formValidation(phone: String, name: String, location: String = "", birthday: String = "", owner: String = "", mapsUrl: String = "", message: String): Boolean {
+    private fun formValidation(phone: String, name: String, skill: String = "", birthday: String = "", owner: String = "", mapsUrl: String = "", message: String): Boolean {
         return if (phone.isEmpty()) {
             etPhone.error = "Phone number cannot be empty!"
             etPhone.requestFocus()
@@ -408,7 +416,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         } else if (owner.isEmpty()) {
             etPhone.error = null
             etPhone.clearFocus()
-            etOwner.error = "Owner name cannot be empty!"
+            etOwner.error = "Full Name cannot be empty!"
             etOwner.requestFocus()
             false
 //        } else if (birthday.isEmpty()) {
@@ -424,12 +432,12 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             etMapsUrl.error = "Maps url cannot be empty!"
             etMapsUrl.requestFocus()
             false
-//        } else if (location.isEmpty()) {
-//            etMapsUrl.error = null
-//            etMapsUrl.clearFocus()
-//            etSkill.error = "Choose store location!"
-//            etSkill.requestFocus()
-//            false
+        } else if (skill.isEmpty()) {
+            etMapsUrl.error = null
+            etMapsUrl.clearFocus()
+            etSkill.error = "Choose skill tukang!"
+            etSkill.requestFocus()
+            false
         } else if (message.isEmpty()) {
             etMapsUrl.error = null
             etMapsUrl.clearFocus()

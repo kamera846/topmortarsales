@@ -14,6 +14,7 @@ import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.webkit.URLUtil.isValidUrl
 import android.widget.AdapterView
@@ -1304,6 +1305,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private fun setupNetworkIndicator() {
         val indicatorImageView = findViewById<View>(R.id.indicatorView) // Ganti dengan ID tampilan indikator Anda
         indicatorImageView.visibility = View.VISIBLE
+        if (sessionManager.userKind() == USER_KIND_ADMIN) {
+            val layoutParams = indicatorImageView.layoutParams as ViewGroup.MarginLayoutParams
+            layoutParams.marginEnd = 0
+            layoutParams.marginStart = 16
+        }
         val pingIntervalMillis = 2000L // Ganti dengan interval yang Anda inginkan (dalam milidetik)
 
         val pingTimer = Timer()
