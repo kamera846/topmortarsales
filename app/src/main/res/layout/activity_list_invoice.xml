@@ -27,13 +27,47 @@
 
     </RelativeLayout>
 
+    <LinearLayout
+        android:visibility="gone"
+        android:layout_below="@+id/rl_header"
+        android:id="@+id/ll_filter"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
+        android:background="@color/light"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+            android:text="Filter by: "/>
+
+        <TextView
+            android:id="@+id/tv_filter"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+            android:textStyle="bold"
+            android:text="None"/>
+
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginLeft="16dp"
+            android:src="@drawable/up_down_black"/>
+
+    </LinearLayout>
+
     <!-- Chat List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_chat_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:listitem="@layout/item_chat_room"
-        android:layout_below="@id/rl_header"/>
+        android:layout_below="@id/ll_filter"/>
 
     <RelativeLayout
         android:visibility="gone"
