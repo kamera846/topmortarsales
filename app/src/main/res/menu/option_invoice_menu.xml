@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/option_sync_now"
+        android:title="@string/sync_now" />
+    <item
+        android:id="@+id/option_surat_jalan"
+        android:title="Surat Jalan" />
+    <item
+        android:id="@+id/option_invoices"
+        android:title="Invoices" />
+</menu>

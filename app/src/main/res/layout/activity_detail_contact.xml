@@ -190,6 +190,7 @@
 
                 <!-- Text Owner Name -->
                 <LinearLayout
+                    android:id="@+id/owner_section"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
