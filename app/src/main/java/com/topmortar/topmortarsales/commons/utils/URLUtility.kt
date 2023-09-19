@@ -26,7 +26,7 @@ class URLUtility(private val context: Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun getDistance(mapsUrl: String): Double {
+    fun getDistance(mapsUrl: String): Double? {
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
         return if (location != null) {
@@ -41,8 +41,8 @@ class URLUtility(private val context: Context) {
 
                 return calculateDistance(currentLatitude, currentLongitude, urlLatitude, urlLongitude)
 
-            } else 0.0
-        } else 0.0
+            } else null
+        } else null
     }
 
     private fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {

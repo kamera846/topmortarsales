@@ -14,6 +14,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.provider.MediaStore
+import android.provider.Settings
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -37,12 +38,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dantsu.escposprinter.EscPosPrinter
 import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
 import com.dantsu.escposprinter.textparser.PrinterTextParserImg
+import com.google.android.material.snackbar.Snackbar
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.InvoiceOrderRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_URI
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
+import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.REQUEST_BLUETOOTH_PERMISSIONS
 import com.topmortar.topmortarsales.commons.REQUEST_ENABLE_BLUETOOTH
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -53,6 +56,7 @@ import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.utils.BluetoothPrinterManager
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -61,6 +65,7 @@ import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.DetailInvoiceModel
 import com.topmortar.topmortarsales.model.InvoiceModel
+import com.topmortar.topmortarsales.view.TestMapsDistanceActivity
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
@@ -71,6 +76,7 @@ import java.util.Locale
 class DetailInvoiceActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
+    private lateinit var urlUtility: URLUtility
 
     private lateinit var icBack: ImageView
     private lateinit var icSyncNow: ImageView
@@ -104,6 +110,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
     private var isClosing: Boolean = false
 
     private var detailContact: ContactModel? = null
+    private var originalMapsUrl = ""
 
     private var cameraPermissionLauncher: ActivityResultLauncher<String>? = null
     private var imagePicker: ActivityResultLauncher<Intent>? = null
@@ -172,7 +179,10 @@ class DetailInvoiceActivity : AppCompatActivity() {
             if (isGranted) {
                 chooseFile()
             } else {
-                handleMessage(this@DetailInvoiceActivity, "CAMERA ACCESS DENIED", "Permission camera denied")
+                if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
+                    val message = "Camera permissions are required for this feature. Please grant the permissions."
+                    showPermissionDeniedSnackbar(message) { cameraPermissionLauncher!!.launch(Manifest.permission.CAMERA) }
+                } else showPermissionDeniedDialog("Camera permissions are required for this feature. Please enable them in the app settings.")
             }
         }
         imagePicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -200,8 +210,8 @@ class DetailInvoiceActivity : AppCompatActivity() {
         icBack.setOnClickListener { backHandler() }
         icSyncNow.setOnClickListener { getDetail() }
         btnPrint.setOnClickListener { printNow() }
-        btnClosing.setOnClickListener { chooseFile() }
-        lnrClosing.setOnClickListener { chooseFile() }
+        btnClosing.setOnClickListener { getMapsUrl() }
+        lnrClosing.setOnClickListener { getMapsUrl() }
     }
 
     private fun dataActivityValidation() {
@@ -305,7 +315,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
                         setRecyclerView(response.results[0].details.let { if (it.isNullOrEmpty()) arrayListOf() else it })
 
-                        Toast.makeText(this@DetailInvoiceActivity, "${detailContact!!.maps_url}", TOAST_SHORT).show()
+//                        Toast.makeText(this@DetailInvoiceActivity, "${detailContact!!.maps_url}", TOAST_SHORT).show()
                         loadingState(false)
 
                     }
@@ -396,6 +406,47 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
         }
 
+    }
+
+    private fun getMapsUrl() {
+        val mapsUrl = detailContact!!.maps_url
+
+        urlUtility = URLUtility(this)
+        urlUtility.fetchOriginalUrl(mapsUrl) { originalUrl ->
+            if (originalUrl.isNotEmpty()) {
+
+                originalMapsUrl = originalUrl
+//                Toast.makeText(this, "$originalUrl", TOAST_SHORT).show()
+                getDistance()
+
+            } else {
+
+                println("Failed to retrieve the original URL")
+                Toast.makeText(this, "Failed to retrieve the original URL", TOAST_SHORT).show()
+
+            }
+        }
+    }
+
+    private fun getDistance() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && originalMapsUrl.isNotEmpty()) {
+            val distance = urlUtility.getDistance(originalMapsUrl)
+            if (distance != null) {
+                val shortDistance = "%.1f".format(distance).toDouble()
+
+                Toast.makeText(this, "Your distance: $shortDistance", TOAST_SHORT).show()
+
+                if (distance > 0.2) {
+
+                    val builder = AlertDialog.Builder(this)
+                    builder.setTitle("Warning!")
+                        .setMessage("You're too far away. Try to get closer to the store")
+                        .setPositiveButton("Ok") { dialog, _ -> dialog.dismiss() }
+                    builder.show()
+
+                } else chooseFile()
+            } else Toast.makeText(this@DetailInvoiceActivity, "Failed to get the distance", TOAST_SHORT).show()
+        } else ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
     }
 
     private fun chooseFile() {
@@ -673,23 +724,57 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
         if (requestCode == REQUEST_BLUETOOTH_PERMISSIONS) {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
                 printNow()
                 return
             } else {
-                if (bluetoothAdapter.isEnabled) {
-                    if (checkPermission()) {
-                        val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter.bondedDevices
-                        showPrinterSelectionDialog(pairedDevices)
-                    }
-                } else {
-                    val enableBluetoothIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                    startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BLUETOOTH)
-                }
+                if (shouldShowRequestPermissionRationale(Manifest.permission.BLUETOOTH) ||
+                    shouldShowRequestPermissionRationale(Manifest.permission.BLUETOOTH_ADMIN) ||
+                    shouldShowRequestPermissionRationale(Manifest.permission.BLUETOOTH_SCAN) ||
+                    shouldShowRequestPermissionRationale(Manifest.permission.BLUETOOTH_CONNECT)
+                ) {
+                    val message = "Bluetooth permissions are required for this feature. Please grant the permissions."
+                    showPermissionDeniedSnackbar(message) { requestBluetoothPermissions() }
+                } else showPermissionDeniedDialog("Bluetooth permissions are required for this feature. Please enable them in the app settings.")
             }
-//            Toast.makeText(this, "Request permission denied", TOAST_SHORT).show()
+        } else if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                getDistance()
+            } else {
+                if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    val message = "Location permissions are required for this feature. Please grant the permissions."
+                    showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE) }
+                } else showPermissionDeniedDialog("Location permissions are required for this feature. Please enable them in the app settings.")
+            }
         }
+
+    }
+
+    private fun showPermissionDeniedSnackbar(message: String, unit: () -> Unit) {
+        Snackbar.make(
+            findViewById(android.R.id.content), // Replace with your root view
+            message,
+            Snackbar.LENGTH_LONG
+        )
+            .setAction("Try Again") { unit() }
+            .show()
+    }
+
+    private fun showPermissionDeniedDialog(message: String) {
+        AlertDialog.Builder(this)
+            .setTitle("Permission Required")
+            .setMessage(message)
+            .setPositiveButton("App Settings") { _, _ -> openAppSettings() }
+            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+            .show()
+    }
+
+    private fun openAppSettings() {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+        intent.data = Uri.fromParts("package", packageName, null)
+        startActivity(intent)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

@@ -64,10 +64,12 @@ class TestMapsDistanceActivity : AppCompatActivity() {
     private fun getDistance() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             val distance = urlUtility.getDistance(originalUrl!!)
-            val shortDistance = "%.1f".format(distance).toDouble()
+            if (distance != null) {
+                val shortDistance = "%.1f".format(distance).toDouble()
 
-            if (distance > 0.2) txtDistance.text = "$shortDistance Maaf, jarak anda telah melebihi 200 meter."
-            else txtDistance.text = "$shortDistance Jarak anda sudah lebih dekat dari 200 meter."
+                if (distance > 0.2) txtDistance.text = "$shortDistance Maaf, jarak anda telah melebihi 200 meter."
+                else txtDistance.text = "$shortDistance Jarak anda sudah lebih dekat dari 200 meter."
+            } else txtDistance.text = "Failed to get distance"
         } else ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
     }
 
