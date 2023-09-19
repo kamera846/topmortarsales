@@ -132,8 +132,9 @@ class ListInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.Item
         // Set Title Bar
         icBack.visibility = View.VISIBLE
 
-        if (sessionManager.userKind() == USER_KIND_ADMIN) icOption.visibility = View.VISIBLE
-        else icSyncNow.visibility = View.VISIBLE
+//        if (sessionManager.userKind() == USER_KIND_ADMIN) icOption.visibility = View.VISIBLE
+//        else icSyncNow.visibility = View.VISIBLE
+        icSyncNow.visibility = View.VISIBLE
 
         // Get the current theme mode (light or dark)
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
