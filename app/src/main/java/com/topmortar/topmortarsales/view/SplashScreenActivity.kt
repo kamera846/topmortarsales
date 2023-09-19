@@ -248,7 +248,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
     private fun navigateToMain() {
 
-        val intent = Intent(this, MainActivity::class.java)
+        val intent = Intent(this, TestMapsDistanceActivity::class.java)
         startActivity(intent)
         finish()
 
