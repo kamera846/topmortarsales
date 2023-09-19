@@ -338,6 +338,7 @@ class ListInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.Item
 
         val intent = Intent(this@ListInvoiceActivity, DetailInvoiceActivity::class.java)
         intent.putExtra(CONST_INVOICE_ID, data?.id_surat_jalan)
+        intent.putExtra(CONST_CONTACT_ID, contactId)
         startActivity(intent)
 
     }

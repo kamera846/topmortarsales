@@ -39,6 +39,7 @@ import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnection
 import com.dantsu.escposprinter.textparser.PrinterTextParserImg
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.InvoiceOrderRecyclerViewAdapter
+import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_URI
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
@@ -47,6 +48,7 @@ import com.topmortar.topmortarsales.commons.REQUEST_ENABLE_BLUETOOTH
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.utils.BluetoothPrinterManager
@@ -56,6 +58,7 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.DetailInvoiceModel
 import com.topmortar.topmortarsales.model.InvoiceModel
 import kotlinx.coroutines.launch
@@ -97,7 +100,10 @@ class DetailInvoiceActivity : AppCompatActivity() {
     private lateinit var txtLoading: TextView
 
     private var invoiceId: String? = null
+    private var contactId: String? = null
     private var isClosing: Boolean = false
+
+    private var detailContact: ContactModel? = null
 
     private var cameraPermissionLauncher: ActivityResultLauncher<String>? = null
     private var imagePicker: ActivityResultLauncher<Intent>? = null
@@ -201,9 +207,13 @@ class DetailInvoiceActivity : AppCompatActivity() {
     private fun dataActivityValidation() {
 
         val iInvoiceId = intent.getStringExtra(CONST_INVOICE_ID)
+        val iContactId = intent.getStringExtra(CONST_CONTACT_ID)
 
         if (!iInvoiceId.isNullOrEmpty() ) {
             invoiceId = iInvoiceId.toString()
+        }
+        if (!iContactId.isNullOrEmpty() ) {
+            contactId = iContactId.toString()
         }
 
         getDetail()
@@ -211,6 +221,55 @@ class DetailInvoiceActivity : AppCompatActivity() {
     }
 
     private fun getDetail() {
+
+        loadingState(true)
+
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.getContactDetail(contactId = contactId!!)
+
+                if (response.isSuccessful) {
+                    val responseBody = response.body()!!
+                    when (responseBody.status) {
+                        RESPONSE_STATUS_OK -> {
+
+                            detailContact = responseBody.results[0]
+                            getDetailInvoice()
+
+                        }
+                        RESPONSE_STATUS_EMPTY -> {
+
+                            loadingState(true, "Detail surat jalan kosong!")
+
+                        }
+                        else -> {
+
+                            handleMessage(this@DetailInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                            loadingState(true, getString(R.string.failed_request))
+
+                        }
+                    }
+                } else {
+
+                    handleMessage(this@DetailInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed to get detail! Error: " + response.message())
+                    loadingState(false)
+
+                }
+
+            } catch (e: Exception) {
+
+                handleMessage(this@DetailInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                loadingState(true, getString(R.string.failed_request))
+
+            }
+
+        }
+
+    }
+
+    private fun getDetailInvoice() {
 
         loadingState(true)
 
@@ -245,6 +304,8 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         }
 
                         setRecyclerView(response.results[0].details.let { if (it.isNullOrEmpty()) arrayListOf() else it })
+
+                        Toast.makeText(this@DetailInvoiceActivity, "${detailContact!!.maps_url}", TOAST_SHORT).show()
                         loadingState(false)
 
                     }
