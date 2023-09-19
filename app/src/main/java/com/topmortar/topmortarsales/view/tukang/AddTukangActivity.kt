@@ -154,7 +154,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                     if (it.isNullOrEmpty()) {
                         apiService.insertTukang(
                             name = rbName,
-                            namaLengkap = rbOwner,
+//                            namaLengkap = rbOwner,
                             phone = rbPhone,
                             birthday = rbBirthday,
                             cityId = rbLocation,
@@ -164,7 +164,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                     } else {
                         apiService.sendMessageTukang(
                             name = rbName,
-                            namaLengkap = rbOwner,
+//                            namaLengkap = rbOwner,
                             phone = rbPhone,
                             birthday = rbBirthday,
                             cityId = rbLocation,
@@ -426,12 +426,12 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             etName.error = "Name cannot be empty!"
             etName.requestFocus()
             false
-        } else if (owner.isEmpty()) {
-            etPhone.error = null
-            etPhone.clearFocus()
-            etOwner.error = "Full Name cannot be empty!"
-            etOwner.requestFocus()
-            false
+//        } else if (owner.isEmpty()) {
+//            etPhone.error = null
+//            etPhone.clearFocus()
+//            etOwner.error = "Full Name cannot be empty!"
+//            etOwner.requestFocus()
+//            false
 //        } else if (birthday.isEmpty()) {
 //            etOwner.error = null
 //            etOwner.clearFocus()

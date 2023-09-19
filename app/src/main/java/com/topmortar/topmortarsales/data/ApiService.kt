@@ -227,7 +227,7 @@ interface ApiService {
         @Part("id") id: RequestBody,
         @Part("nomorhp") phone: RequestBody,
         @Part("nama") name: RequestBody,
-        @Part("nama_lengkap") namaLengkap: RequestBody,
+//        @Part("nama_lengkap") namaLengkap: RequestBody,
         @Part("tgl_lahir") birthday: RequestBody,
         @Part("id_city") cityId: RequestBody,
         @Part("mapsUrl") mapsUrl: RequestBody,
@@ -244,7 +244,7 @@ interface ApiService {
     suspend fun insertTukang(
         @Part("nama") name: RequestBody,
         @Part("nomorhp") phone: RequestBody,
-        @Part("nama_lengkap") namaLengkap: RequestBody,
+//        @Part("nama_lengkap") namaLengkap: RequestBody,
         @Part("tgl_lahir") birthday: RequestBody,
         @Part("id_city") cityId: RequestBody,
         @Part("id_skill") skillId: RequestBody,
@@ -257,7 +257,7 @@ interface ApiService {
     suspend fun sendMessageTukang(
         @Part("nama") name: RequestBody,
         @Part("nomorhp") phone: RequestBody,
-        @Part("nama_lengkap") namaLengkap: RequestBody,
+//        @Part("nama_lengkap") namaLengkap: RequestBody,
         @Part("tgl_lahir") birthday: RequestBody,
         @Part("id_city") cityId: RequestBody,
         @Part("id_skill") skillId: RequestBody,

@@ -198,7 +198,7 @@ class SendMessageTukangModal(private val context: Context, private val lifecycle
                 val response = apiService.sendMessageTukang(
                     name = rbName,
                     phone = rbPhone,
-                    namaLengkap = rbOwner,
+//                    namaLengkap = rbOwner,
                     birthday = rbBirthday,
                     cityId = rbLocation,
                     skillId = rbSkill,

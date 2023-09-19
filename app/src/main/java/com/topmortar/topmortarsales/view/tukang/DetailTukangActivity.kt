@@ -117,6 +117,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
     private lateinit var skillContainer: LinearLayout
     private lateinit var tvSkillContainer: LinearLayout
     private lateinit var etSkillContainer: LinearLayout
+    private lateinit var ownerSection: LinearLayout
     private lateinit var tvOwnerContainer: LinearLayout
     private lateinit var etOwnerContainer: LinearLayout
     private lateinit var tvMapsContainer: RelativeLayout
@@ -238,6 +239,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         skillContainer = findViewById(R.id.skill_container)
         tvSkillContainer = findViewById(R.id.tv_skill_container)
         etSkillContainer = findViewById(R.id.et_skill_container)
+        ownerSection = findViewById(R.id.owner_section)
         tvOwnerContainer = findViewById(R.id.tv_owner_container)
         etOwnerContainer = findViewById(R.id.et_owner_container)
         tvMapsContainer = findViewById(R.id.tv_maps_container)
@@ -305,6 +307,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         btnInvoice.visibility = View.GONE
         skillContainer.visibility = View.VISIBLE
         terminContainer.visibility = View.GONE
+        ownerSection.visibility = View.GONE
 
         // Setup Date Picker Dialog
         setDatePickerDialog()
@@ -697,7 +700,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                     id = rbId,
                     phone = rbPhone,
                     name = rbName,
-                    namaLengkap = rbOwner,
+//                    namaLengkap = rbOwner,
                     birthday = rbBirthday,
                     cityId = rbLocation,
                     mapsUrl = rbMapsUrl,
