@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.InvoiceRecyclerViewAdapter
+import com.topmortar.topmortarsales.adapter.SuratJalanRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_NAME
@@ -30,16 +31,19 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.model.InvoiceModel
 import com.topmortar.topmortarsales.model.SuratJalanModel
 import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
-class ListSuratJalanActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.ItemClickListener {
+class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapter.ItemClickListener,
+    InvoiceRecyclerViewAdapter.ItemClickListener {
 
     private lateinit var scaleAnimation: Animation
 
@@ -63,6 +67,7 @@ class ListSuratJalanActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.I
 
     // Global
     private lateinit var sessionManager: SessionManager
+    private lateinit var apiService: ApiService
     private var isListActive: String = LIST_SURAT_JALAN
     private var isFilterInvoice: String = FILTER_NONE
     private var doubleBackToExitPressedOnce = false
@@ -122,12 +127,15 @@ class ListSuratJalanActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.I
         icClearSearch = findViewById(R.id.ic_clear_search)
         etSearchBox = findViewById(R.id.et_search_box)
 
+
+        apiService = HttpClient.create()
+
         // Set Title Bar
         icBack.visibility = View.VISIBLE
 
-//        if (sessionManager.userKind() == USER_KIND_ADMIN) icOption.visibility = View.VISIBLE
-//        else icSyncNow.visibility = View.VISIBLE
-        icSyncNow.visibility = View.VISIBLE
+        if (sessionManager.userKind() == USER_KIND_ADMIN) icOption.visibility = View.VISIBLE
+        else icSyncNow.visibility = View.VISIBLE
+//        icSyncNow.visibility = View.VISIBLE
 
         // Get the current theme mode (light or dark)
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
@@ -159,23 +167,12 @@ class ListSuratJalanActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.I
     }
 
     private fun getList() {
-        llFilter.visibility = View.GONE
-        titleBarDescription.visibility = View.VISIBLE
-
-        if (isListActive == LIST_SURAT_JALAN) {
-            titleBar.text = if (!iName.isNullOrEmpty()) iName else "Surat Jalan"
-            titleBarDescription.text = "Daftar surat jalan pada toko ini"
-        } else if (isListActive == LIST_INVOICE) {
-            titleBar.text = if (!iName.isNullOrEmpty()) iName else "Invoice"
-            titleBarDescription.text = "Daftar invoice pada toko ini"
-        }
 
         loadingState(true)
 
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
                 val response = apiService.getSuratJalan(processNumber = "2", contactId = contactId!!)
 
                 when (response.status) {
@@ -184,13 +181,51 @@ class ListSuratJalanActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.I
                         setRecyclerView(response.results)
                         loadingState(false)
 
-                        if (isListActive == LIST_INVOICE) {
-                            llFilter.visibility = View.VISIBLE
-                            when (isFilterInvoice) {
-                                FILTER_PAID -> tvFilter.text = "Paid"
-                                FILTER_UNPAID -> tvFilter.text = "Unpaid"
-                                else -> tvFilter.text = "None"
-                            }
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        loadingState(true, "Data surat jalan kosong!")
+
+                    }
+                    else -> {
+
+                        handleMessage(this@ListSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                        loadingState(true, getString(R.string.failed_request))
+
+                    }
+                }
+
+            } catch (e: Exception) {
+
+                handleMessage(this@ListSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                loadingState(true, getString(R.string.failed_request))
+
+            }
+
+        }
+
+    }
+
+    private fun getListInvoice() {
+
+        loadingState(true)
+
+        lifecycleScope.launch {
+            try {
+
+                val response = apiService.getInvoices(contactId = contactId!!)
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        setRecyclerViewInvoice(response.results)
+                        loadingState(false)
+
+                        llFilter.visibility = View.VISIBLE
+                        when (isFilterInvoice) {
+                            FILTER_PAID -> tvFilter.text = "Paid"
+                            FILTER_UNPAID -> tvFilter.text = "Unpaid"
+                            else -> tvFilter.text = "None"
                         }
 
                     }
@@ -219,6 +254,36 @@ class ListSuratJalanActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.I
     }
 
     private fun setRecyclerView(listItem: ArrayList<SuratJalanModel>) {
+        val rvAdapter = SuratJalanRecyclerViewAdapter(this@ListSuratJalanActivity)
+        rvAdapter.setListItem(listItem)
+
+        rvListItem.apply {
+            layoutManager = LinearLayoutManager(this@ListSuratJalanActivity)
+            adapter = rvAdapter
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                private var lastScrollPosition = 0
+
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    if (dy < 0) {
+                        // Scrolled up
+                        val firstVisibleItemPosition =
+                            (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                        if (lastScrollPosition != firstVisibleItemPosition) {
+                            recyclerView.findViewHolderForAdapterPosition(firstVisibleItemPosition)?.itemView?.startAnimation(
+                                AnimationUtils.loadAnimation(
+                                    recyclerView.context,
+                                    R.anim.rv_item_fade_slide_down
+                                )
+                            )
+                            lastScrollPosition = firstVisibleItemPosition
+                        }
+                    } else lastScrollPosition = -1
+                }
+            })
+        }
+    }
+
+    private fun setRecyclerViewInvoice(listItem: ArrayList<InvoiceModel>) {
         val rvAdapter = InvoiceRecyclerViewAdapter(this@ListSuratJalanActivity)
         rvAdapter.setListItem(listItem)
 
@@ -256,15 +321,15 @@ class ListSuratJalanActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.I
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
                 R.id.option_sync_now -> {
-                    getList()
+                    toggleList()
                     true
                 }
                 R.id.option_surat_jalan -> {
-                    toggleList(LIST_SURAT_JALAN)
+                    if (isListActive != LIST_SURAT_JALAN) toggleList(LIST_SURAT_JALAN)
                     true
                 }
                 R.id.option_invoices -> {
-                    toggleList(LIST_INVOICE)
+                    if (isListActive != LIST_INVOICE) toggleList(LIST_INVOICE)
                     true
                 }
                 else -> false
@@ -295,17 +360,27 @@ class ListSuratJalanActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.I
         popupMenu.show()
     }
 
-    private fun toggleList(list: String) {
-        if (list != isListActive) {
-            isListActive = list
+    private fun toggleList(list: String? = null) {
+        if (list != null) isListActive = list
+
+        llFilter.visibility = View.GONE
+        titleBarDescription.visibility = View.VISIBLE
+
+        if (isListActive == LIST_SURAT_JALAN) {
+            titleBar.text = if (!iName.isNullOrEmpty()) iName else "Surat Jalan"
+            titleBarDescription.text = "Daftar surat jalan pada toko ini"
             getList()
+        } else if (isListActive == LIST_INVOICE) {
+            titleBar.text = if (!iName.isNullOrEmpty()) iName else "Invoice"
+            titleBarDescription.text = "Daftar invoice pada toko ini"
+            getListInvoice()
         }
     }
 
     private fun toggleFilter(filter: String) {
         if (filter != isFilterInvoice) {
             isFilterInvoice = filter
-            getList()
+            toggleList()
         }
     }
 
@@ -353,6 +428,10 @@ class ListSuratJalanActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.I
             }
 
         }
+
+    }
+
+    override fun onItemInvoiceClick(data: InvoiceModel?) {
 
     }
 

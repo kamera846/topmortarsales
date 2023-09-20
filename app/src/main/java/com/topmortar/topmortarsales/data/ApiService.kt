@@ -21,6 +21,7 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.response.ResponseAuth
 import com.topmortar.topmortarsales.response.ResponseCities
 import com.topmortar.topmortarsales.response.ResponseContactList
+import com.topmortar.topmortarsales.response.ResponseInvoice
 import com.topmortar.topmortarsales.response.ResponseSuratJalan
 import com.topmortar.topmortarsales.response.ResponseMessage
 import com.topmortar.topmortarsales.response.ResponseSkills
@@ -179,7 +180,7 @@ interface ApiService {
     @GET(INVOICE)
     suspend fun getInvoices(
         @Query("id_contact") contactId: String
-    ): ResponseSuratJalan
+    ): ResponseInvoice
 
     @GET(SURAT_JALAN)
     suspend fun getSuratJalanDetail(
@@ -206,7 +207,7 @@ interface ApiService {
     @POST(INVOICE)
     suspend fun addInvoice(
         @Part("id_surat_jalan") invoiceId: RequestBody
-     ): ResponseSuratJalan
+     ): ResponseInvoice
 
     @GET(SKILL)
     suspend fun getSkills(): ResponseSkills
