@@ -12,17 +12,17 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.utils.DateFormat
-import com.topmortar.topmortarsales.model.InvoiceModel
+import com.topmortar.topmortarsales.model.SuratJalanModel
 
 class InvoiceRecyclerViewAdapter(private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<InvoiceRecyclerViewAdapter.ViewHolder>() {
-    private var listItem: ArrayList<InvoiceModel> = ArrayList()
+    private var listItem: ArrayList<SuratJalanModel> = ArrayList()
     private var context: Context? = null
 
     interface ItemClickListener {
-        fun onItemClick(data: InvoiceModel? = null)
+        fun onItemClick(data: SuratJalanModel? = null)
     }
 
-    fun setListItem(listItem: ArrayList<InvoiceModel>) {
+    fun setListItem(listItem: ArrayList<SuratJalanModel>) {
         this.listItem = listItem
     }
 
@@ -34,7 +34,7 @@ class InvoiceRecyclerViewAdapter(private val itemClickListener: ItemClickListene
         private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
 
-        fun bind(item: InvoiceModel) {
+        fun bind(item: SuratJalanModel) {
 
 //            ivUpload.visibility = View.VISIBLE
 //            ivPrinter.visibility = View.VISIBLE

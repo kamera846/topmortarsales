@@ -1,6 +1,6 @@
 package com.topmortar.topmortarsales.model
 
-data class InvoiceModel(
+data class SuratJalanModel(
     var id_surat_jalan : String = "",
     var no_surat_jalan : String = "",
     var id_contact : String = "",
@@ -18,5 +18,5 @@ data class InvoiceModel(
     var courier_name : String = "",
     var nama_kendaraan : String = "",
     var nopol_kendaraan : String = "",
-    var details : ArrayList<DetailInvoiceModel> = ArrayList(),
+    var details : ArrayList<DetailSuratJalanModel> = ArrayList(),
 )

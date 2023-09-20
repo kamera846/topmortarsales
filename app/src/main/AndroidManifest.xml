@@ -73,7 +73,7 @@
             android:name=".view.tukang.ListTukangActivity"
             android:exported="false" />
         <activity
-            android:name=".view.invoice.PreviewClosingActivity"
+            android:name=".view.suratJalan.PreviewClosingActivity"
             android:exported="false" />
 
         <provider
@@ -90,10 +90,10 @@
             android:name=".view.TestPrintActivity"
             android:exported="false" />
         <activity
-            android:name=".view.invoice.DetailInvoiceActivity"
+            android:name=".view.suratJalan.DetailSuratJalanActivity"
             android:exported="false" />
         <activity
-            android:name=".view.invoice.ListInvoiceActivity"
+            android:name=".view.suratJalan.ListSuratJalanActivity"
             android:exported="false" />
         <activity
             android:name=".view.user.AddUserActivity"

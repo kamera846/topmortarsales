@@ -26,7 +26,6 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.Spinner
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -41,7 +40,6 @@ import com.topmortar.topmortarsales.commons.BASE_URL
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
-import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
@@ -64,7 +62,6 @@ import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BID
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BLACKLIST
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
-import com.topmortar.topmortarsales.commons.STATUS_TERMIN_15
 import com.topmortar.topmortarsales.commons.STATUS_TERMIN_30
 import com.topmortar.topmortarsales.commons.STATUS_TERMIN_45
 import com.topmortar.topmortarsales.commons.STATUS_TERMIN_60
@@ -91,8 +88,8 @@ import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.modal.SendMessageModal
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
-import com.topmortar.topmortarsales.view.invoice.ListInvoiceActivity
-import com.topmortar.topmortarsales.view.invoice.PreviewClosingActivity
+import com.topmortar.topmortarsales.view.suratJalan.ListSuratJalanActivity
+import com.topmortar.topmortarsales.view.suratJalan.PreviewClosingActivity
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -1054,7 +1051,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun navigateToDetailInvoice() {
 
-        val intent = Intent(this@DetailContactActivity, ListInvoiceActivity::class.java)
+        val intent = Intent(this@DetailContactActivity, ListSuratJalanActivity::class.java)
 
         intent.putExtra(CONST_CONTACT_ID, contactId)
         if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")

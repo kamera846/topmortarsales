@@ -1,4 +1,4 @@
-package com.topmortar.topmortarsales.view.invoice
+package com.topmortar.topmortarsales.view.suratJalan
 
 import android.content.Intent
 import android.content.res.Configuration
@@ -16,7 +16,6 @@ import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.RelativeLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -29,24 +28,18 @@ import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
-import com.topmortar.topmortarsales.commons.SEARCH_OPEN
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
-import com.topmortar.topmortarsales.commons.TOAST_SHORT
-import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
-import com.topmortar.topmortarsales.model.InvoiceModel
-import com.topmortar.topmortarsales.view.city.ManageCityActivity
-import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
-import com.topmortar.topmortarsales.view.user.ManageUserActivity
+import com.topmortar.topmortarsales.model.SuratJalanModel
 import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
-class ListInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.ItemClickListener {
+class ListSuratJalanActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.ItemClickListener {
 
     private lateinit var scaleAnimation: Animation
 
@@ -183,7 +176,7 @@ class ListInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.Item
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getInvoices(processNumber = "2", contactId = contactId!!)
+                val response = apiService.getSuratJalan(processNumber = "2", contactId = contactId!!)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -208,7 +201,7 @@ class ListInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.Item
                     }
                     else -> {
 
-                        handleMessage(this@ListInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                        handleMessage(this@ListSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed get data")
                         loadingState(true, getString(R.string.failed_request))
 
                     }
@@ -216,7 +209,7 @@ class ListInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.Item
 
             } catch (e: Exception) {
 
-                handleMessage(this@ListInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@ListSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
 
             }
@@ -225,12 +218,12 @@ class ListInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.Item
 
     }
 
-    private fun setRecyclerView(listItem: ArrayList<InvoiceModel>) {
-        val rvAdapter = InvoiceRecyclerViewAdapter(this@ListInvoiceActivity)
+    private fun setRecyclerView(listItem: ArrayList<SuratJalanModel>) {
+        val rvAdapter = InvoiceRecyclerViewAdapter(this@ListSuratJalanActivity)
         rvAdapter.setListItem(listItem)
 
         rvListItem.apply {
-            layoutManager = LinearLayoutManager(this@ListInvoiceActivity)
+            layoutManager = LinearLayoutManager(this@ListSuratJalanActivity)
             adapter = rvAdapter
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 private var lastScrollPosition = 0
@@ -257,7 +250,7 @@ class ListInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.Item
 
     private fun showPopupMenu() {
 
-        val popupMenu = PopupMenu(this@ListInvoiceActivity, icOption)
+        val popupMenu = PopupMenu(this@ListSuratJalanActivity, icOption)
         popupMenu.inflate(R.menu.option_invoice_menu)
 
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
@@ -334,15 +327,15 @@ class ListInvoiceActivity : AppCompatActivity(), InvoiceRecyclerViewAdapter.Item
 
     }
 
-    private fun navigateDetailInvoice(data: InvoiceModel? = null) {
+    private fun navigateDetailInvoice(data: SuratJalanModel? = null) {
 
-        val intent = Intent(this@ListInvoiceActivity, DetailInvoiceActivity::class.java)
+        val intent = Intent(this@ListSuratJalanActivity, DetailSuratJalanActivity::class.java)
         intent.putExtra(CONST_INVOICE_ID, data?.id_surat_jalan)
         startActivity(intent)
 
     }
 
-    override fun onItemClick(data: InvoiceModel?) {
+    override fun onItemClick(data: SuratJalanModel?) {
         navigateDetailInvoice(data)
     }
 
