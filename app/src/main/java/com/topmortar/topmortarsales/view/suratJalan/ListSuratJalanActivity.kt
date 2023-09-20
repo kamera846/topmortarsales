@@ -25,6 +25,7 @@ import com.topmortar.topmortarsales.adapter.InvoiceRecyclerViewAdapter
 import com.topmortar.topmortarsales.adapter.SuratJalanRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
+import com.topmortar.topmortarsales.commons.CONST_INVOICE_NUMBER
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -37,6 +38,7 @@ import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.invoice.DetailInvoiceActivity
 import com.topmortar.topmortarsales.model.InvoiceModel
 import com.topmortar.topmortarsales.model.SuratJalanModel
 import kotlinx.coroutines.launch
@@ -402,7 +404,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
     }
 
-    private fun navigateDetailInvoice(data: SuratJalanModel? = null) {
+    private fun navigateDetailSuratJalan(data: SuratJalanModel? = null) {
 
         val intent = Intent(this@ListSuratJalanActivity, DetailSuratJalanActivity::class.java)
         intent.putExtra(CONST_INVOICE_ID, data?.id_surat_jalan)
@@ -410,8 +412,12 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
     }
 
-    override fun onItemClick(data: SuratJalanModel?) {
-        navigateDetailInvoice(data)
+    private fun navigateDetailInvoice(data: InvoiceModel? = null) {
+
+        val intent = Intent(this@ListSuratJalanActivity, DetailInvoiceActivity::class.java)
+        intent.putExtra(CONST_INVOICE_NUMBER, data?.no_invoice)
+        startActivity(intent)
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -431,8 +437,11 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
     }
 
+    override fun onItemClick(data: SuratJalanModel?) {
+        navigateDetailSuratJalan(data)
+    }
     override fun onItemInvoiceClick(data: InvoiceModel?) {
-
+        navigateDetailInvoice(data)
     }
 
 }

@@ -60,6 +60,7 @@ const val EMPTY_FIELD_VALUE = "Not set"
 const val CONST_CONTACT_ID = "const_contact_id"
 const val CONST_USER_ID = "const_user_id"
 const val CONST_INVOICE_ID = "const_invoice_id"
+const val CONST_INVOICE_NUMBER = "const_invoice_id"
 
 const val CONST_OWNER = "const_owner"
 const val CONST_LOCATION = "const_location"
