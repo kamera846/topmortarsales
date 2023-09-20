@@ -105,7 +105,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
         initVariable()
         initClickHandler()
         dataActivityValidation()
-        getList()
+        toggleList()
 
     }
 
@@ -155,7 +155,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
     private fun initClickHandler() {
 
         icBack.setOnClickListener { finish() }
-        icSyncNow.setOnClickListener { getList() }
+        icSyncNow.setOnClickListener { toggleList() }
         icOption.setOnClickListener { showPopupMenu() }
         llFilter.setOnClickListener { showDropdownMenu() }
 
@@ -429,7 +429,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
             if (resultData == SYNC_NOW) {
 
-                getList()
+                toggleList()
 
             }
 
