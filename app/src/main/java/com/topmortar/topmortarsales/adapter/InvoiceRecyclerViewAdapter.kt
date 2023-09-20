@@ -13,6 +13,7 @@ import androidx.appcompat.widget.TooltipCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.INVOICE_PAID
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.InvoiceModel
 
@@ -43,12 +44,12 @@ class InvoiceRecyclerViewAdapter(private val itemClickListener: ItemClickListene
             tvContactName.text = item.no_invoice
             tvPhoneNumber.text = DateFormat.format(dateString = item.date_invoice!!, input = "yyyy-MM-dd hh:mm:ss", format = "dd MMMM yyyy hh.mm")
             when (item.status_invoice) {
-                "waiting" -> {
-                    tooltipStatus.setImageDrawable(context?.let { ContextCompat.getDrawable(it, R.drawable.status_data) })
-                    tooltipHandler(tooltipStatus, "Unpaid invoice")
-                } else -> {
+                INVOICE_PAID -> {
                     tooltipStatus.setImageDrawable(context?.let { ContextCompat.getDrawable(it, R.drawable.status_active) })
                     tooltipHandler(tooltipStatus, "Invoice has been paid")
+                } else -> {
+                    tooltipStatus.setImageDrawable(context?.let { ContextCompat.getDrawable(it, R.drawable.status_data) })
+                    tooltipHandler(tooltipStatus, "Unpaid invoice")
                 }
             }
 
