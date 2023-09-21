@@ -15,7 +15,7 @@
         android:orientation="horizontal">
 
         <EditText
-            android:id="@+id/inputMapsUrl"
+            android:id="@+id/inputSearchPlace"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -25,15 +25,15 @@
             android:inputType="text"
             android:textSize="14sp"
             android:background="@drawable/et_background"
-            android:text="https://maps.app.goo.gl/7dQxDP2NcvLPvAKZ6"
-            android:hint="Enter maps url"/>
+            android:text=""
+            android:hint="Enter place name..."/>
 
         <Button
-            android:id="@+id/btnFindLocation"
+            android:id="@+id/btnSearchPlace"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="0dp"
-            android:text="Find"/>
+            android:text="Search"/>
 
     </LinearLayout>
 
