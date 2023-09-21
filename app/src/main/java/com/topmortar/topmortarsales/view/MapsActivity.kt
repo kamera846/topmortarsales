@@ -4,16 +4,23 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.IntentSender
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationListener
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.View
 import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -24,19 +31,28 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
+import com.google.android.libraries.places.api.net.FetchPlaceResponse
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
 import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.android.material.snackbar.Snackbar
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.adapter.PlaceAdapter
 import com.topmortar.topmortarsales.commons.CONNECTION_FAILURE_RESOLUTION_REQUEST
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.utils.URLUtility
+import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.databinding.ActivityMapsBinding
 import java.io.IOException
 import java.util.Locale
@@ -48,7 +64,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var placesClient: PlacesClient
 
-    private val zoomLevel = 16f
+    private val zoomLevel = 18f
     private var selectedLocation: LatLng? = null
     private var currentLatLng: LatLng? = null
 
@@ -57,9 +73,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var mGoogleApiClient: GoogleApiClient? = null
     private lateinit var mLocationRequest: LocationRequest
 
+    private lateinit var icBack: ImageView
+    private lateinit var etSearch: EditText
+    private lateinit var icClear: ImageView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        supportActionBar?.hide()
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -68,14 +89,43 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         mapFragment.getMapAsync(this)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
         if (!Places.isInitialized()) {
             Places.initialize(applicationContext, getString(R.string.maps_key))
         }
         placesClient = Places.createClient(this)
 
+        icBack = findViewById(R.id.ic_close_search)
+        etSearch = findViewById(R.id.et_search_box)
+        icClear = findViewById(R.id.ic_clear_search)
+
+        icBack.visibility = View.GONE
+        icClear.setOnClickListener { etSearch.setText("") }
+
+        val padding16 = convertDpToPx(16, this)
+        etSearch.setPadding(padding16, padding16, padding16, padding16)
+        etSearch.addTextChangedListener(object: TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                if (!s.isNullOrEmpty()) icClear.visibility = View.VISIBLE
+                else icClear.visibility = View.GONE
+                searchLocation()
+            }
+
+        })
+
+        binding.btnGetDistance.visibility = View.GONE
+        binding.btnGetLatLng.visibility = View.VISIBLE
+
         onCalculate()
-//        onFindLocation()
+        onGetLatLng()
         searchLocation()
+//        onFindLocation()
     }
 
     private fun onFindLocation() {
@@ -121,11 +171,22 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     }
 
+    private fun onGetLatLng() {
+        binding.btnGetLatLng.setOnClickListener {
+
+            if (selectedLocation != null) {
+
+                Toast.makeText(this@MapsActivity, "Coordinate: ${ selectedLocation!!.latitude },${ selectedLocation!!.longitude }", TOAST_LONG).show()
+
+            } else Toast.makeText(this, "Not selected location", Toast.LENGTH_SHORT).show()
+
+        }
+    }
 
     private fun onCalculate() {
 
-        val confirmLocationButton = findViewById<Button>(R.id.confirmLocationButton)
-        confirmLocationButton.setOnClickListener {
+        val btnGetDistance = findViewById<Button>(R.id.btnGetDistance)
+        btnGetDistance.setOnClickListener {
 
             if (selectedLocation != null) {
 
@@ -170,7 +231,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 .title(placeName)
         )
 
-        if (moveCamera) mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel))
+        if (moveCamera) {
+            val durationMs = 2000 // 1 second
+            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel)
+
+            mMap.animateCamera(cameraUpdate, durationMs, null)
+        }
+        binding.recyclerView.visibility = View.GONE
 
     }
 
@@ -200,10 +267,19 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             mMap.uiSettings.isZoomControlsEnabled = true
             mMap.uiSettings.isTiltGesturesEnabled = true
             mMap.uiSettings.isMyLocationButtonEnabled = true
+            mMap.setPadding(0,0,0, convertDpToPx(64, this))
+
+            val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+            if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style_dark))
 
             initMaps()
 
             mMap.setOnMapLongClickListener { latLng -> setPin(latLng, getPlaceNameFromLatLng(latLng), moveCamera = false) }
+            Snackbar.make(
+                findViewById(android.R.id.content), // Replace with your root view
+                "Press and hold on the map to mark a location",
+                Snackbar.LENGTH_LONG
+            ).show()
 
         } else {
             ActivityCompat.requestPermissions(
@@ -241,30 +317,60 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         } else {
 
-            binding.btnSearchPlace.setOnClickListener {
+            val location = "${ etSearch.text }"
 
-                val location = "${binding.inputSearchPlace.text.trim()}"
-                var addressList: List<Address>? = null
-                if (location.isNullOrEmpty()) Toast.makeText(this, "Failed to find location", Toast.LENGTH_SHORT).show()
-                else {
+            if (!location.isNullOrEmpty()) {
+                val request = FindAutocompletePredictionsRequest.builder()
+                    .setQuery(location)
+                    .build()
 
-                    val geoCoder = Geocoder(this)
+                placesClient.findAutocompletePredictions(request)
+                    .addOnSuccessListener { response: FindAutocompletePredictionsResponse ->
 
-                    try {
-                        addressList = geoCoder.getFromLocationName(location, 1)
-                        val name = addressList!![0].getAddressLine(0)
+                        val predictions = response.autocompletePredictions
+                        val placeIds = predictions.map { prediction: AutocompletePrediction -> prediction.placeId }
+                        val placeNames = predictions.map { prediction: AutocompletePrediction -> prediction.getPrimaryText(null).toString() }
+                        val placeAddress = predictions.map { prediction: AutocompletePrediction -> prediction.getSecondaryText(null).toString() }
+//                        val placeDistance = predictions.map { prediction: AutocompletePrediction -> prediction.distanceMeters.toString() }
 
-                    } catch (e: IOException) {
-                        e.printStackTrace()
+                        if (placeNames.isNotEmpty()) {
+                            val placeAdapter = PlaceAdapter(placeNames, placeAddress) { position ->
+
+                                val fields = listOf(Place.Field.LAT_LNG)
+                                val request = FetchPlaceRequest.builder(placeIds[position], fields).build()
+
+                                placesClient.fetchPlace(request)
+                                    .addOnSuccessListener { response: FetchPlaceResponse ->
+
+                                        val place = response.place
+                                        val latLng = place.latLng
+
+                                        if (latLng != null) setPin(latLng, placeNames[position])
+                                        else {
+                                            Toast.makeText(this, "Failed direct to coordinate", TOAST_SHORT).show()
+                                            binding.recyclerView.visibility = View.GONE
+                                        }
+
+                                    }
+                                    .addOnFailureListener { _: Exception ->
+                                        Toast.makeText(this, "Failure direct to location", TOAST_SHORT).show()
+                                        binding.recyclerView.visibility = View.GONE
+                                    }
+                            }
+
+                            binding.recyclerView.apply {
+                                layoutManager = LinearLayoutManager(this@MapsActivity)
+                                adapter = placeAdapter
+                                this.visibility = View.VISIBLE
+                            }
+                        } else binding.recyclerView.visibility = View.GONE
+
                     }
-
-                    val address = addressList!![0]
-                    val latLng = LatLng(address.latitude, address.longitude)
-
-                    setPin(latLng, getPlaceNameFromLatLng(latLng))
-
-                }
-            }
+                    .addOnFailureListener {
+                        Toast.makeText(this, "Failed to find place", TOAST_SHORT).show()
+                        binding.recyclerView.visibility = View.GONE
+                    }
+            } else binding.recyclerView.visibility = View.GONE
 
         }
     }

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:layout_marginBottom="8dp"
+    android:layout_marginHorizontal="16dp">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/placeNameTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Asrikaton"
+            android:ellipsize="end"
+            android:textSize="16sp"
+            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+        <TextView
+            android:id="@+id/placeAddressTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Jl Anggrek"
+            android:ellipsize="end"
+            android:textSize="14sp"
+            android:alpha="0.7"
+            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:visibility="gone"
+        android:id="@+id/placeDistanceTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="3m"
+        android:layout_marginStart="8dp"
+        android:textSize="14sp"
+        android:alpha="0.7"
+        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+</LinearLayout>
