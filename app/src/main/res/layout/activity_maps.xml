@@ -7,6 +7,36 @@
     android:orientation="vertical"
     tools:context=".view.MapsActivity">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="8dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/inputMapsUrl"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="8dp"
+            android:layout_marginEnd="8dp"
+            android:inputType="text"
+            android:textSize="14sp"
+            android:background="@drawable/et_background"
+            android:text="https://maps.app.goo.gl/7dQxDP2NcvLPvAKZ6"
+            android:hint="Enter maps url"/>
+
+        <Button
+            android:id="@+id/btnFindLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="0dp"
+            android:text="Find"/>
+
+    </LinearLayout>
+
     <fragment
         android:id="@+id/map"
         android:layout_width="match_parent"
@@ -18,7 +48,7 @@
         android:id="@+id/confirmLocationButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Konfirmasi Lokasi"
+        android:text="Calculate Distance"
         android:layout_gravity="center"
         android:layout_margin="8dp"/>
 

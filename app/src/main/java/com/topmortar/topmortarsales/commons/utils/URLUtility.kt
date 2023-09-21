@@ -11,6 +11,7 @@ import android.os.AsyncTask
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.android.gms.maps.model.LatLng
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.regex.Pattern
@@ -45,7 +46,20 @@ class URLUtility(private val context: Context) {
         } else null
     }
 
-    private fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+    @SuppressLint("MissingPermission")
+    fun getLatLng(mapsUrl: String): LatLng? {
+        val regex = Pattern.compile("@(-?\\d+\\.\\d+),(-?\\d+\\.\\d+)")
+        val matcher = regex.matcher(mapsUrl)
+        return if (matcher.find() && matcher.groupCount() == 2) {
+            val urlLatitude = matcher.group(1).toDouble()
+            val urlLongitude = matcher.group(2).toDouble()
+
+            LatLng(urlLatitude, urlLongitude)
+
+        } else null
+    }
+
+    fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
         val radius = 6371 // Earth's radius in kilometers
         val dLat = Math.toRadians(lat2 - lat1)
         val dLon = Math.toRadians(lon2 - lon1)

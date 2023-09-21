@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
@@ -21,6 +22,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.databinding.ActivityMapsBinding
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -31,6 +33,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private val locationPermissionCode = 1
     private var selectedLocation: LatLng? = null
+    private var currentLatLng: LatLng? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,56 +41,81 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        // Di dalam onCreate
+        onSelectedLocation()
+        onFindLocation()
+    }
+
+    private fun onFindLocation() {
+        binding.btnFindLocation.setOnClickListener {
+            val mapsUrl = "${ binding.inputMapsUrl.text }"
+            val urlUtility = URLUtility(this)
+
+            urlUtility.fetchOriginalUrl(mapsUrl) { originalUrl ->
+                if (originalUrl.isNotEmpty()) {
+                    val latLng = urlUtility.getLatLng(originalUrl)
+                    if (latLng != null) initMaps(latLng)
+                    else Toast.makeText(this, "Failed to find coordinate", TOAST_SHORT).show()
+                } else Toast.makeText(this, "Failed to process the URL", TOAST_SHORT).show()
+            }
+
+        }
+    }
+
+    private fun onSelectedLocation() {
         val confirmLocationButton = findViewById<Button>(R.id.confirmLocationButton)
         confirmLocationButton.setOnClickListener {
             if (selectedLocation != null) {
-                // Lakukan apa yang diperlukan dengan lokasi yang dipilih
-                Toast.makeText(this@MapsActivity, "Lat: ${selectedLocation!!.latitude} \nLong: ${selectedLocation!!.longitude}", TOAST_LONG).show()
+                val urlUtility = URLUtility(this)
+                val distance = urlUtility.calculateDistance(currentLatLng!!.latitude, currentLatLng!!.longitude, selectedLocation!!.latitude, selectedLocation!!.longitude)
+                val shortDistance = "%.3f".format(distance).toDouble()
+
+                val message: String = if (distance > 0.2) "$shortDistance Maaf, jarak anda telah melebihi 200 meter."
+                else "$shortDistance Jarak anda sudah lebih dekat dari 200 meter."
+
+                Toast.makeText(this@MapsActivity, message, TOAST_LONG).show()
             } else {
-                // Jika pengguna belum memilih lokasi, beri pesan kesalahan atau tampilkan peringatan.
                 Toast.makeText(this, "Pilih lokasi terlebih dahulu", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     @SuppressLint("MissingPermission")
-    private fun initMaps() {
-        // Mendapatkan lokasi perangkat saat ini
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location: Location? ->
-                if (location != null) {
-                    val currentLatLng = LatLng(location.latitude, location.longitude)
-                    mMap.addMarker(
-                        MarkerOptions()
-                            .position(currentLatLng)
-                            .title("Lokasi Saya")
-                    )
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLatLng))
+    private fun initMaps(latLng: LatLng? = null) {
+        if (latLng != null) {
+            selectedLocation = latLng
+            mMap.clear() // Hapus marker sebelumnya
+            mMap.addMarker(
+                MarkerOptions()
+                    .position(selectedLocation!!)
+                    .title("Selected Location")
+            )
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedLocation!!, mMap.maxZoomLevel))
+        } else {
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location: Location? ->
+                    if (location != null) {
+                        currentLatLng = LatLng(location.latitude, location.longitude)
+                        selectedLocation = currentLatLng
+                        mMap.addMarker(
+                            MarkerOptions()
+                                .position(currentLatLng!!)
+                                .title("My Current Location")
+                        )
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLatLng!!, mMap.maxZoomLevel))
+                    }
                 }
-            }
+        }
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
-        // Memeriksa izin lokasi
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -98,18 +126,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
             initMaps()
 
-            // Tambahkan listener klik pada peta untuk memilih lokasi
             mMap.setOnMapClickListener { latLng ->
                 selectedLocation = latLng
                 mMap.clear() // Hapus marker sebelumnya
                 mMap.addMarker(
                     MarkerOptions()
                         .position(selectedLocation!!)
-                        .title("Lokasi Dipilih")
+                        .title("Selected Location")
                 )
             }
         } else {
-            // Jika izin lokasi tidak diberikan, munculkan permintaan izin kepada pengguna
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
@@ -118,7 +144,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    // Metode untuk menangani hasil permintaan izin
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
