@@ -61,6 +61,7 @@ const val EMPTY_FIELD_VALUE = "Not set"
 const val CONST_CONTACT_ID = "const_contact_id"
 const val CONST_USER_ID = "const_user_id"
 const val CONST_INVOICE_ID = "const_invoice_id"
+const val CONST_INVOICE_NUMBER = "const_invoice_id"
 
 const val CONST_OWNER = "const_owner"
 const val CONST_LOCATION = "const_location"
@@ -76,6 +77,7 @@ const val CONST_ADDRESS = "const_address"
 const val CONST_USER_LEVEL = "const_user_level"
 const val CONST_FULL_NAME = "const_full_name"
 const val CONST_URI = "const_uri"
+const val CONST_STATUS_INVOICE = "const_status_invoice"
 
 // Status
 const val LOGGED_IN = true
@@ -96,6 +98,7 @@ const val STATUS_TERMIN_15 = "15"
 const val STATUS_TERMIN_30 = "30"
 const val STATUS_TERMIN_45 = "45"
 const val STATUS_TERMIN_60 = "60"
+const val INVOICE_PAID = "paid"
 
 // User Kind
 const val USER_KIND_ADMIN = "user_kind_admin"

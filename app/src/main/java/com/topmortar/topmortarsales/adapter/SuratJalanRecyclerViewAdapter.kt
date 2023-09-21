@@ -9,57 +9,41 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.appcompat.widget.TooltipCompat
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.commons.INVOICE_PAID
 import com.topmortar.topmortarsales.commons.utils.DateFormat
-import com.topmortar.topmortarsales.model.InvoiceModel
+import com.topmortar.topmortarsales.model.SuratJalanModel
 
-class InvoiceRecyclerViewAdapter(private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<InvoiceRecyclerViewAdapter.ViewHolder>() {
-    private var listItem: ArrayList<InvoiceModel> = ArrayList()
+class SuratJalanRecyclerViewAdapter(private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<SuratJalanRecyclerViewAdapter.ViewHolder>() {
+    private var listItem: ArrayList<SuratJalanModel> = ArrayList()
     private var context: Context? = null
 
     interface ItemClickListener {
-        fun onItemInvoiceClick(data: InvoiceModel? = null)
+        fun onItemClick(data: SuratJalanModel? = null)
     }
 
-    fun setListItem(listItem: ArrayList<InvoiceModel>) {
+    fun setListItem(listItem: ArrayList<SuratJalanModel>) {
         this.listItem = listItem
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         private val ivProfile: ImageView = itemView.findViewById(R.id.iv_contact_profile)
-        private val tooltipStatus: ImageView = itemView.findViewById(R.id.tooltip_status)
+        private val ivUpload: ImageView = itemView.findViewById(R.id.iv_upload)
+        private val ivPrinter: ImageView = itemView.findViewById(R.id.iv_printer)
         private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
 
-        fun bind(item: InvoiceModel) {
+        fun bind(item: SuratJalanModel) {
 
-            tooltipStatus.visibility = View.VISIBLE
+//            ivUpload.visibility = View.VISIBLE
+//            ivPrinter.visibility = View.VISIBLE
 
-            ivProfile.setImageResource(R.drawable.invoice_red)
-            tvContactName.text = item.no_invoice
-            tvPhoneNumber.text = DateFormat.format(dateString = item.date_invoice!!, input = "yyyy-MM-dd hh:mm:ss", format = "dd MMMM yyyy hh.mm")
-            when (item.status_invoice) {
-                INVOICE_PAID -> {
-                    tooltipStatus.setImageDrawable(context?.let { ContextCompat.getDrawable(it, R.drawable.status_active) })
-                    tooltipHandler(tooltipStatus, "Invoice has been paid")
-                } else -> {
-                    tooltipStatus.setImageDrawable(context?.let { ContextCompat.getDrawable(it, R.drawable.status_data) })
-                    tooltipHandler(tooltipStatus, "Unpaid invoice")
-                }
-            }
+            ivProfile.setImageResource(R.drawable.file_list_red)
+            tvContactName.text = item.no_surat_jalan
+//            tvPhoneNumber.text = "${ item.order_number } - ${ DateFormat.format(item.delivery_date) }"
+            tvPhoneNumber.text = DateFormat.format(dateString = item.dalivery_date, input = "yyyy-MM-dd hh:mm:ss", format = "dd MMMM yyyy hh.mm")
 
-        }
-
-        private fun tooltipHandler(content: ImageView, text: String) {
-            content.setOnLongClickListener {
-                TooltipCompat.setTooltipText(content, text)
-                false
-            }
         }
 
     }
@@ -99,7 +83,7 @@ class InvoiceRecyclerViewAdapter(private val itemClickListener: ItemClickListene
                 }, animateDuration)
 
                 val data = listItem[position]
-                itemClickListener.onItemInvoiceClick(data)
+                itemClickListener.onItemClick(data)
 
             }
 

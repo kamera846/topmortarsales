@@ -44,4 +44,10 @@
         <item name="android:textColor">@color/black_600</item>
     </style>
 
+    <!-- Card view theme. -->
+    <style name="Theme.TopMortarSales.CardView" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="android:background">@color/black_200</item>
+        <item name="android:outlineSpotShadowColor" tools:targetApi="P">@color/white</item>
+    </style>
+
 </resources>

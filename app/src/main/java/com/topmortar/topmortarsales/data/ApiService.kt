@@ -21,7 +21,8 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.response.ResponseAuth
 import com.topmortar.topmortarsales.response.ResponseCities
 import com.topmortar.topmortarsales.response.ResponseContactList
-import com.topmortar.topmortarsales.response.ResponseInvoices
+import com.topmortar.topmortarsales.response.ResponseInvoice
+import com.topmortar.topmortarsales.response.ResponseSuratJalan
 import com.topmortar.topmortarsales.response.ResponseMessage
 import com.topmortar.topmortarsales.response.ResponseSkills
 import com.topmortar.topmortarsales.response.ResponseTukangList
@@ -171,23 +172,28 @@ interface ApiService {
     ): ResponseContactList
 
     @GET(SURAT_JALAN)
-    suspend fun getInvoices(
+    suspend fun getSuratJalan(
         @Query("p") processNumber: String,
         @Query("str") contactId: String
-    ): ResponseInvoices
+    ): ResponseSuratJalan
+
+    @GET(INVOICE)
+    suspend fun getInvoices(
+        @Query("id_contact") contactId: String
+    ): ResponseInvoice
 
     @GET(SURAT_JALAN)
-    suspend fun getInvoicesDetail(
+    suspend fun getSuratJalanDetail(
         @Query("p") processNumber: String,
         @Query("sj") invoiceId: String
-    ): ResponseInvoices
+    ): ResponseSuratJalan
 
     @Multipart
     @POST(SURAT_JALAN)
     suspend fun printInvoice(
         @Part("command") command: RequestBody = createPartFromString("print"),
         @Part("id_surat_jalan") invoiceId: RequestBody
-    ): ResponseInvoices
+    ): ResponseSuratJalan
 
     @Multipart
     @POST(SURAT_JALAN)
@@ -195,13 +201,13 @@ interface ApiService {
         @Part("command") command: RequestBody = createPartFromString("closing"),
         @Part("id_surat_jalan") invoiceId: RequestBody,
         @Part image: MultipartBody.Part,
-    ): ResponseInvoices
+    ): ResponseSuratJalan
 
     @Multipart
     @POST(INVOICE)
     suspend fun addInvoice(
         @Part("id_surat_jalan") invoiceId: RequestBody
-     ): ResponseInvoices
+     ): ResponseInvoice
 
     @GET(SKILL)
     suspend fun getSkills(): ResponseSkills

@@ -1,6 +1,6 @@
 package com.topmortar.topmortarsales.model
 
-data class DetailInvoiceModel(
+data class DetailSuratJalanModel(
     var id_detail_surat_jalan : String = "",
     var id_surat_jalan : String = "",
     var id_produk : String = "",
