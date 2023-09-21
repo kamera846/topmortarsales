@@ -135,4 +135,5 @@
         <item>45 Hari</item>
         <item>60 Hari</item>
     </string-array>
+    <string name="title_activity_maps">MapsActivity</string>
 </resources>
