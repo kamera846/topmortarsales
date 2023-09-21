@@ -1,4 +1,4 @@
-package com.topmortar.topmortarsales.view.invoice
+package com.topmortar.topmortarsales.view.suratJalan
 
 import android.Manifest
 import android.app.Activity
@@ -63,8 +63,8 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.ContactModel
-import com.topmortar.topmortarsales.model.DetailInvoiceModel
-import com.topmortar.topmortarsales.model.InvoiceModel
+import com.topmortar.topmortarsales.model.DetailSuratJalanModel
+import com.topmortar.topmortarsales.model.SuratJalanModel
 import com.topmortar.topmortarsales.view.TestMapsDistanceActivity
 import kotlinx.coroutines.launch
 import java.io.File
@@ -73,7 +73,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class DetailInvoiceActivity : AppCompatActivity() {
+class DetailSuratJalanActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var urlUtility: URLUtility
@@ -125,7 +125,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
         supportActionBar?.hide()
         sessionManager = SessionManager(this)
 
-        setContentView(R.layout.activity_detail_invoice)
+        setContentView(R.layout.activity_detail_surat_jalan)
 
         initVariable()
         initClickHandler()
@@ -210,8 +210,10 @@ class DetailInvoiceActivity : AppCompatActivity() {
         icBack.setOnClickListener { backHandler() }
         icSyncNow.setOnClickListener { getDetail() }
         btnPrint.setOnClickListener { printNow() }
-        btnClosing.setOnClickListener { getMapsUrl() }
-        lnrClosing.setOnClickListener { getMapsUrl() }
+        btnClosing.setOnClickListener { chooseFile() }
+        lnrClosing.setOnClickListener { chooseFile() }
+//        btnClosing.setOnClickListener { getMapsUrl() }
+//        lnrClosing.setOnClickListener { getMapsUrl() }
     }
 
     private fun dataActivityValidation() {
@@ -256,21 +258,21 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         }
                         else -> {
 
-                            handleMessage(this@DetailInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                            handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed get data")
                             loadingState(true, getString(R.string.failed_request))
 
                         }
                     }
                 } else {
 
-                    handleMessage(this@DetailInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed to get detail! Error: " + response.message())
+                    handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed to get detail! Error: " + response.message())
                     loadingState(false)
 
                 }
 
             } catch (e: Exception) {
 
-                handleMessage(this@DetailInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
 
             }
@@ -287,7 +289,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getInvoicesDetail(processNumber = "3", invoiceId = invoiceId!!)
+                val response = apiService.getSuratJalanDetail(processNumber = "3", invoiceId = invoiceId!!)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -315,7 +317,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
                         setRecyclerView(response.results[0].details.let { if (it.isNullOrEmpty()) arrayListOf() else it })
 
-//                        Toast.makeText(this@DetailInvoiceActivity, "${detailContact!!.maps_url}", TOAST_SHORT).show()
+//                        Toast.makeText(this@DetailSuratJalanActivity, "${detailContact!!.maps_url}", TOAST_SHORT).show()
                         loadingState(false)
 
                     }
@@ -326,7 +328,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                     }
                     else -> {
 
-                        handleMessage(this@DetailInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                        handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed get data")
                         loadingState(true, getString(R.string.failed_request))
 
                     }
@@ -334,7 +336,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                handleMessage(this@DetailInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
 
             }
@@ -344,12 +346,12 @@ class DetailInvoiceActivity : AppCompatActivity() {
     }
 
 
-    private fun setRecyclerView(listItem: ArrayList<DetailInvoiceModel>) {
+    private fun setRecyclerView(listItem: ArrayList<DetailSuratJalanModel>) {
         val rvAdapter = InvoiceOrderRecyclerViewAdapter()
         rvAdapter.setListItem(listItem)
 
         rvOrderList.apply {
-            layoutManager = LinearLayoutManager(this@DetailInvoiceActivity)
+            layoutManager = LinearLayoutManager(this@DetailSuratJalanActivity)
             adapter = rvAdapter
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 private var lastScrollPosition = 0
@@ -445,7 +447,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                     builder.show()
 
                 } else chooseFile()
-            } else Toast.makeText(this@DetailInvoiceActivity, "Failed to get the distance", TOAST_SHORT).show()
+            } else Toast.makeText(this@DetailSuratJalanActivity, "Failed to get the distance", TOAST_SHORT).show()
         } else ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
     }
 
@@ -626,13 +628,13 @@ class DetailInvoiceActivity : AppCompatActivity() {
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        handleMessage(this@DetailInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed to print: Detail surat jalan kosong!")
+                        handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed to print: Detail surat jalan kosong!")
                         printingState(false)
 
                     }
                     else -> {
 
-                        handleMessage(this@DetailInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed to print")
+                        handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed to print")
                         printingState(false)
 
                     }
@@ -640,7 +642,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                handleMessage(this@DetailInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 printingState(false)
 
             }
@@ -649,7 +651,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
     }
 
     // Testing
-    private fun printEscPos(data: InvoiceModel) {
+    private fun printEscPos(data: SuratJalanModel) {
 
         val printersConnections = BluetoothPrintersConnections.selectFirstPaired()
         val printer = EscPosPrinter(printersConnections, 203, 70f, 48)
