@@ -136,4 +136,5 @@
         <item>60 Hari</item>
     </string-array>
     <string name="title_activity_maps">MapsActivity</string>
+    <string name="maps_key">AIzaSyDLMtfb0qTk0lNWo22mn8hblqCl5OnDELA</string>
 </resources>
