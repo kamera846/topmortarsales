@@ -146,7 +146,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 val mapsUrlPattern1 = Regex("https://goo\\.gl/maps/\\w+")
                 val mapsUrlPattern2 = Regex("https://maps\\.app\\.goo\\.gl/\\w+")
 
-                if (mapsUrlPattern1.matches(iMaps) || mapsUrlPattern2.matches(iMaps)) onFindLocation(iMaps)
+                if (mapsUrlPattern1.matches(iMaps) || mapsUrlPattern2.matches(iMaps)) return onFindLocation(iMaps)
                 else Toast.makeText(this, "Failed to process maps url", TOAST_SHORT).show()
             } else {
 
@@ -159,13 +159,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         val latLng = LatLng(latitude, longitude)
                         etSearch.setText(getPlaceNameFromLatLng(latLng))
                         binding.recyclerView.visibility = View.GONE
-//                        setPin(latLng, getPlaceNameFromLatLng(latLng))
-                        initMaps(latLng)
-                        Toast.makeText(this, "$latitude,$longitude", TOAST_SHORT).show()
+                        return initMaps(latLng)
                     } else Toast.makeText(this, "Failed navigate to coordinate", TOAST_SHORT).show()
                 } else Toast.makeText(this, "Failed to process coordinate", TOAST_SHORT).show()
 
             }
+
+            initMaps()
 
         } else initMaps()
 

@@ -1199,9 +1199,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val intent = Intent(this@DetailContactActivity, MapsActivity::class.java)
                 intent.putExtra(CONST_MAPS, iMapsUrl)
                 startActivity(intent)
-
-//                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(iMapsUrl))
-//                startActivity(intent)
             }, animateDuration)
         }
     }

@@ -40,7 +40,9 @@ import com.topmortar.topmortarsales.commons.CONST_SKILL
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
+import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
@@ -68,6 +70,7 @@ import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.modal.SendMessageTukangModal
 import com.topmortar.topmortarsales.model.TukangModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
+import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.suratJalan.ListSuratJalanActivity
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -306,6 +309,8 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         btnSaveEdit.setOnClickListener { editConfirmation() }
         etBirthdayContainer.setOnClickListener { datePicker.show() }
         etBirthday.setOnClickListener { datePicker.show() }
+        etMapsContainer.setOnClickListener { getCoordinate() }
+        etMaps.setOnClickListener { getCoordinate() }
         etLocationContainer.setOnClickListener { showSearchModal() }
         etLocation.setOnClickListener { showSearchModal() }
         etSkillContainer.setOnClickListener { showSearchModalSkill() }
@@ -328,6 +333,12 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                 datePicker.show()
                 etBirthday.setSelection(etBirthday.length())
             } else etBirthday.clearFocus()
+        }
+        etMaps.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                getCoordinate()
+                etMaps.setSelection(etMaps.length())
+            } else etMaps.clearFocus()
         }
         etLocation.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
@@ -505,6 +516,15 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         // Set Spinner
         setupStatusSpinner()
 
+    }
+
+    private fun getCoordinate() {
+        val data = "${ etMaps.text }"
+
+        val intent = Intent(this, MapsActivity::class.java)
+        intent.putExtra(CONST_MAPS, data)
+        intent.putExtra(GET_COORDINATE, true)
+        startActivityForResult(intent, REQUEST_EDIT_CONTACT_COORDINATE)
     }
 
     private fun toggleEdit(value: Boolean? = null) {
@@ -830,10 +850,10 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         } else if (!PhoneHandler.phoneValidation(phone, etPhone)) {
             etPhone.requestFocus()
             false
-        } else if (mapsUrl.isNotEmpty() && !isValidUrl(mapsUrl)) {
-            etMaps.error = "Please enter a valid URL!"
-            etMaps.requestFocus()
-            false
+//        } else if (mapsUrl.isNotEmpty() && !isValidUrl(mapsUrl)) {
+//            etMaps.error = "Please enter a valid URL!"
+//            etMaps.requestFocus()
+//            false
 //        } else if (owner.isEmpty()) {
 //            etName.error = null
 //            etName.clearFocus()
@@ -1091,7 +1111,8 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                 overlayMaps.alpha = 0f
                 overlayMaps.visibility = View.GONE
 
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(iMapsUrl))
+                val intent = Intent(this@DetailTukangActivity, MapsActivity::class.java)
+                intent.putExtra(CONST_MAPS, iMapsUrl)
                 startActivity(intent)
             }, animateDuration)
         }
@@ -1188,6 +1209,11 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
             if (resultData == SYNC_NOW) hasEdited = true
 
+        } else if (requestCode == REQUEST_EDIT_CONTACT_COORDINATE) {
+            val latitude = data?.getDoubleExtra("latitude", 0.0)
+            val longitude = data?.getDoubleExtra("longitude", 0.0)
+            if (latitude != null && longitude != null) etMaps.setText("$latitude,$longitude")
+            etMaps.clearFocus()
         }
 
     }
