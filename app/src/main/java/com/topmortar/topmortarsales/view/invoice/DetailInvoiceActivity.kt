@@ -9,10 +9,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.InvoicePaymentRecyclerViewAdapter
+import com.topmortar.topmortarsales.commons.CONST_DATE_INVOICE
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_NUMBER
 import com.topmortar.topmortarsales.commons.CONST_STATUS_INVOICE
+import com.topmortar.topmortarsales.commons.CONST_TOTAL_INVOICE
 import com.topmortar.topmortarsales.commons.INVOICE_PAID
 import com.topmortar.topmortarsales.commons.utils.CurrencyFormat
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.changeStatusBarColor
 import com.topmortar.topmortarsales.model.InvoicePaymentModel
@@ -28,7 +31,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
         supportActionBar?.hide()
         sessionManager = SessionManager(this)
-        changeStatusBarColor(this, R.color.primary_200)
+//        changeStatusBarColor(this, R.color.primary_200)
 
         setContentView(R.layout.activity_detail_invoice)
 
@@ -79,6 +82,14 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
         val iInvoiceNumber = intent.getStringExtra(CONST_INVOICE_NUMBER)
         val iStatusInvoice = intent.getStringExtra(CONST_STATUS_INVOICE)
+        val iTotalInvoice = intent.getStringExtra(CONST_TOTAL_INVOICE)
+        val iDateInvoice = intent.getStringExtra(CONST_DATE_INVOICE)
+
+        if (!iDateInvoice.isNullOrEmpty()) tvDateInvoice.text = DateFormat.format(dateString = iDateInvoice, input = "yyyy-MM-dd hh:mm:ss", format = "dd MMMM yyyy, hh:mm")
+        else tvDateInvoice.text = "Status"
+
+        if (!iTotalInvoice.isNullOrEmpty()) tvTotalInvoice.text = CurrencyFormat.format(iTotalInvoice.toDouble())
+        else tvTotalInvoice.text = CurrencyFormat.format(0.0)
 
         if (!iInvoiceNumber.isNullOrEmpty()) {
             invoiceNumber = iInvoiceNumber.toString()
@@ -106,13 +117,12 @@ class DetailInvoiceActivity : AppCompatActivity() {
         tvTitleBar = findViewById(R.id.tv_title_bar)
         tvTotalInvoice = findViewById(R.id.tv_total_invoice)
         tvStatus = findViewById(R.id.tv_status)
+        tvDateInvoice = findViewById(R.id.tv_date_invoce)
         rvPayments = findViewById(R.id.rv_payments)
 
         icBack.setImageDrawable(getDrawable(R.drawable.arrow_back_white))
         tvTitleBar.text = "Detail Invoice"
         tvTitleBar.setTextColor(getColor(R.color.white))
-
-        tvTotalInvoice.text = CurrencyFormat.format(2890000.0)
 
     }
 
@@ -126,6 +136,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
     private lateinit var tvTitleBar: TextView
     private lateinit var tvTotalInvoice: TextView
     private lateinit var tvStatus: TextView
+    private lateinit var tvDateInvoice: TextView
     private lateinit var rvPayments: RecyclerView
 
     private var invoiceNumber = ""

@@ -24,10 +24,12 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.InvoiceRecyclerViewAdapter
 import com.topmortar.topmortarsales.adapter.SuratJalanRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_DATE_INVOICE
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_NUMBER
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_STATUS_INVOICE
+import com.topmortar.topmortarsales.commons.CONST_TOTAL_INVOICE
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -419,6 +421,8 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
         val intent = Intent(this@ListSuratJalanActivity, DetailInvoiceActivity::class.java)
         intent.putExtra(CONST_INVOICE_NUMBER, data?.no_invoice)
         intent.putExtra(CONST_STATUS_INVOICE, data?.status_invoice)
+        intent.putExtra(CONST_TOTAL_INVOICE, data?.total_invoice)
+        intent.putExtra(CONST_DATE_INVOICE, data?.date_invoice)
         startActivity(intent)
 
     }

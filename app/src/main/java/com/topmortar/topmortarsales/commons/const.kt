@@ -80,6 +80,8 @@ const val CONST_USER_LEVEL = "const_user_level"
 const val CONST_FULL_NAME = "const_full_name"
 const val CONST_URI = "const_uri"
 const val CONST_STATUS_INVOICE = "const_status_invoice"
+const val CONST_TOTAL_INVOICE = "const_total_invoice"
+const val CONST_DATE_INVOICE = "const_date_invoice"
 
 // Status
 const val LOGGED_IN = true

@@ -13,7 +13,7 @@
         android:paddingTop="90dp"
         android:paddingBottom="150dp"
         android:gravity="center"
-        android:background="@color/primary_200"
+        android:background="@color/primary"
         android:orientation="vertical">
 
         <TextView
@@ -64,6 +64,7 @@
             android:orientation="horizontal">
 
             <TextView
+                android:id="@+id/tv_date_invoce"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
