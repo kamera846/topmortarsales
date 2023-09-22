@@ -1,15 +1,21 @@
 package com.topmortar.topmortarsales.view.suratJalan
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -38,11 +44,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dantsu.escposprinter.EscPosPrinter
 import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
 import com.dantsu.escposprinter.textparser.PrinterTextParserImg
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.snackbar.Snackbar
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.InvoiceOrderRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
+import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_URI
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
@@ -52,9 +60,11 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.utils.BluetoothPrinterManager
+import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
@@ -65,6 +75,7 @@ import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.DetailSuratJalanModel
 import com.topmortar.topmortarsales.model.SuratJalanModel
+import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.TestMapsDistanceActivity
 import kotlinx.coroutines.launch
 import java.io.File
@@ -77,6 +88,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
     private lateinit var urlUtility: URLUtility
+    private lateinit var customUtility: CustomUtility
 
     private lateinit var icBack: ImageView
     private lateinit var icSyncNow: ImageView
@@ -126,6 +138,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
 
         setContentView(R.layout.activity_detail_surat_jalan)
+
+        customUtility = CustomUtility(this@DetailSuratJalanActivity)
 
         initVariable()
         initClickHandler()
@@ -181,8 +195,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
             } else {
                 if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
                     val message = "Camera permissions are required for this feature. Please grant the permissions."
-                    showPermissionDeniedSnackbar(message) { cameraPermissionLauncher!!.launch(Manifest.permission.CAMERA) }
-                } else showPermissionDeniedDialog("Camera permissions are required for this feature. Please enable them in the app settings.")
+                    customUtility.showPermissionDeniedSnackbar(message) { cameraPermissionLauncher!!.launch(Manifest.permission.CAMERA) }
+                } else customUtility.showPermissionDeniedDialog("Camera permissions are required for this feature. Please enable them in the app settings.")
             }
         }
         imagePicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -210,10 +224,10 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         icBack.setOnClickListener { backHandler() }
         icSyncNow.setOnClickListener { getDetail() }
         btnPrint.setOnClickListener { printNow() }
-        btnClosing.setOnClickListener { chooseFile() }
-        lnrClosing.setOnClickListener { chooseFile() }
-//        btnClosing.setOnClickListener { getMapsUrl() }
-//        lnrClosing.setOnClickListener { getMapsUrl() }
+//        btnClosing.setOnClickListener { chooseFile() }
+//        lnrClosing.setOnClickListener { chooseFile() }
+        btnClosing.setOnClickListener { getMapsUrl() }
+        lnrClosing.setOnClickListener { getMapsUrl() }
     }
 
     private fun dataActivityValidation() {
@@ -410,45 +424,87 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
     }
 
+    @SuppressLint("MissingPermission")
     private fun getMapsUrl() {
+
         val mapsUrl = detailContact!!.maps_url
+        val urlUtility = URLUtility(this)
 
-        urlUtility = URLUtility(this)
-        urlUtility.fetchOriginalUrl(mapsUrl) { originalUrl ->
-            if (originalUrl.isNotEmpty()) {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-                originalMapsUrl = originalUrl
-//                Toast.makeText(this, "$originalUrl", TOAST_SHORT).show()
-                getDistance()
+            if (urlUtility.isLocationEnabled(this)) {
+
+                urlUtility.requestLocationUpdate()
+
+                if (!urlUtility.isUrl(mapsUrl)) {
+                    val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
+                    val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+
+                    if (location != null) {
+
+                        // Courier Location
+                        val currentLatitude = location.latitude
+                        val currentLongitude = location.longitude
+
+                        // Store Location
+                        val coordinate = mapsUrl.split(",")
+                        val latitude = coordinate[0].toDoubleOrNull()
+                        val longitude = coordinate[1].toDoubleOrNull()
+
+                        if (latitude != null && longitude != null) {
+
+                            // Calculate Distance
+                            val urlUtility = URLUtility(this)
+                            val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
+                            val shortDistance = "%.3f".format(distance).toDouble()
+
+                            if (distance > 0.2) {
+                                val builder = AlertDialog.Builder(this)
+                                builder.setTitle("Warning!")
+                                    .setMessage("Your distance is ${shortDistance}km too far away from the store. Try to get closer to the store")
+                                    .setPositiveButton("Ok") { dialog, _ -> dialog.dismiss() }
+                                    .setNegativeButton("Open Maps") { dialog, _ ->
+                                        val intent = Intent(this@DetailSuratJalanActivity, MapsActivity::class.java)
+                                        intent.putExtra(CONST_MAPS, mapsUrl)
+                                        startActivity(intent)
+                                        dialog.dismiss()
+                                    }
+                                builder.show()
+                            } else chooseFile()
+
+                        } else Toast.makeText(this, "Failed to process coordinate", TOAST_SHORT).show()
+
+                    } else Toast.makeText(this, "can't access location, refresh and try again", TOAST_SHORT).show()
+
+                } else {
+                    val message = "Cannot closing for now, please chat admin to update the coordinate"
+                    val actionTitle = "Chat Now"
+                    customUtility.showPermissionDeniedSnackbar(message, actionTitle) { navigateChatAdmin() }
+                }
 
             } else {
-
-                println("Failed to retrieve the original URL")
-                Toast.makeText(this, "Failed to retrieve the original URL", TOAST_SHORT).show()
-
+                val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                startActivity(enableLocationIntent)
             }
-        }
+
+        } else ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+
     }
 
-    private fun getDistance() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && originalMapsUrl.isNotEmpty()) {
-            val distance = urlUtility.getDistance(originalMapsUrl)
-            if (distance != null) {
-                val shortDistance = "%.1f".format(distance).toDouble()
+    private fun navigateChatAdmin() {
+        val phoneNumber = getString(R.string.topmortar_wa_number)
+        val message = "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada toko *${ detailContact!!.nama }*"
 
-                Toast.makeText(this, "Your distance: $shortDistance", TOAST_SHORT).show()
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")
 
-                if (distance > 0.2) {
+        try {
+            startActivity(intent)
+            finishAffinity()
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(this, "Failed direct to whatsapp", TOAST_SHORT).show()
+        }
 
-                    val builder = AlertDialog.Builder(this)
-                    builder.setTitle("Warning!")
-                        .setMessage("You're too far away. Try to get closer to the store")
-                        .setPositiveButton("Ok") { dialog, _ -> dialog.dismiss() }
-                    builder.show()
-
-                } else chooseFile()
-            } else Toast.makeText(this@DetailSuratJalanActivity, "Failed to get the distance", TOAST_SHORT).show()
-        } else ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
     }
 
     private fun chooseFile() {
@@ -738,45 +794,21 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                     shouldShowRequestPermissionRationale(Manifest.permission.BLUETOOTH_CONNECT)
                 ) {
                     val message = "Bluetooth permissions are required for this feature. Please grant the permissions."
-                    showPermissionDeniedSnackbar(message) { requestBluetoothPermissions() }
-                } else showPermissionDeniedDialog("Bluetooth permissions are required for this feature. Please enable them in the app settings.")
+                    customUtility.showPermissionDeniedSnackbar(message) { requestBluetoothPermissions() }
+                } else customUtility.showPermissionDeniedDialog("Bluetooth permissions are required for this feature. Please enable them in the app settings.")
             }
         } else if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                getDistance()
+//                getDistance()
+                getMapsUrl()
             } else {
                 if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
                     val message = "Location permissions are required for this feature. Please grant the permissions."
-                    showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE) }
-                } else showPermissionDeniedDialog("Location permissions are required for this feature. Please enable them in the app settings.")
+                    customUtility.showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE) }
+                } else customUtility.showPermissionDeniedDialog("Location permissions are required for this feature. Please enable them in the app settings.")
             }
         }
 
-    }
-
-    private fun showPermissionDeniedSnackbar(message: String, unit: () -> Unit) {
-        Snackbar.make(
-            findViewById(android.R.id.content), // Replace with your root view
-            message,
-            Snackbar.LENGTH_LONG
-        )
-            .setAction("Try Again") { unit() }
-            .show()
-    }
-
-    private fun showPermissionDeniedDialog(message: String) {
-        AlertDialog.Builder(this)
-            .setTitle("Permission Required")
-            .setMessage(message)
-            .setPositiveButton("App Settings") { _, _ -> openAppSettings() }
-            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
-            .show()
-    }
-
-    private fun openAppSettings() {
-        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-        intent.data = Uri.fromParts("package", packageName, null)
-        startActivity(intent)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

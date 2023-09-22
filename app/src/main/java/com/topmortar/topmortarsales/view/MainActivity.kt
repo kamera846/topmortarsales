@@ -198,8 +198,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     }
 
     private fun navigateChatAdmin() {
-        val phoneNumber = "+6287826210888"
-        val message = "#Customer Service\nHalo admin, tolong bantu saya [KETIK PESAN ANDA]"
+        val phoneNumber = getString(R.string.topmortar_wa_number)
+        val message = "*#Courier Service*\nHalo admin, tolong bantu saya [KETIK PESAN ANDA]"
 
         val intent = Intent(Intent.ACTION_VIEW)
         intent.data = Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")

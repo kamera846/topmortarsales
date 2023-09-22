@@ -6,8 +6,10 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
+import android.location.LocationListener
 import android.location.LocationManager
 import android.os.AsyncTask
+import android.os.Bundle
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -21,6 +23,38 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 
 class URLUtility(private val context: Context) {
+
+    @SuppressLint("MissingPermission")
+    fun requestLocationUpdate() {
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        // Define a LocationListener to handle location updates
+        val locationListener = object : LocationListener {
+            override fun onLocationChanged(location: Location) {
+                // Handle the newly received location here
+                locationManager.removeUpdates(this) // Stop listening for updates once you have a location
+            }
+
+            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+        }
+
+        // Request location updates
+        locationManager.requestLocationUpdates(
+            LocationManager.GPS_PROVIDER, // Use the provider you need (GPS or NETWORK)
+            0, // Minimum time interval between updates in milliseconds
+            0f, // Minimum distance between updates in meters
+            locationListener
+        )
+    }
+
+    fun isLocationEnabled(context: Context): Boolean {
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        // Periksa apakah GPS atau jaringan lokasi telah diaktifkan
+        val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        val isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+
+        return isGpsEnabled || isNetworkEnabled
+    }
 
     fun isUrl(stringToCheck: String): Boolean {
         val urlPattern = Pattern.compile(

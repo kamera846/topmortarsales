@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.provider.MediaStore
 import android.provider.OpenableColumns
+import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -32,6 +33,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.TooltipCompat
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
@@ -54,7 +56,9 @@ import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
+import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.REQUEST_BLUETOOTH_PERMISSIONS
 import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
@@ -78,11 +82,13 @@ import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
+import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.PingUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -214,6 +220,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         initVariable()
         initClickHandler()
         dataActivityValidation()
+        checkLocationPermission()
 
         // Get List City
         getCities()
@@ -479,11 +486,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         iMapsUrl = intent.getStringExtra(CONST_MAPS)
         iStatus = intent.getStringExtra(CONST_STATUS)
         iTermin = intent.getStringExtra(CONST_TERMIN)
-        if (!iStatus.isNullOrEmpty()) {
+//        if (!iStatus.isNullOrEmpty()) {
             tooltipStatus.visibility = View.VISIBLE
             if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) btnInvoice.visibility = View.GONE
             else btnInvoice.visibility = View.VISIBLE
-        }
+//        }
         iAddress = intent.getStringExtra(CONST_ADDRESS)
         iLocation = intent.getStringExtra(CONST_LOCATION)
 
@@ -558,13 +565,30 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     }
 
+    private fun checkLocationPermission() {
+        val urlUtility = URLUtility(this)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+            if (urlUtility.isLocationEnabled(this)) {
+
+                val urlUtility = URLUtility(this)
+                urlUtility.requestLocationUpdate()
+
+            } else {
+                val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                startActivity(enableLocationIntent)
+            }
+        } else ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+    }
+
     private fun getCoordinate() {
         val data = "${ etMaps.text }"
 
-        val intent = Intent(this, MapsActivity::class.java)
-        intent.putExtra(CONST_MAPS, data)
-        intent.putExtra(GET_COORDINATE, true)
-        startActivityForResult(intent, REQUEST_EDIT_CONTACT_COORDINATE)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            val intent = Intent(this, MapsActivity::class.java)
+            intent.putExtra(CONST_MAPS, data)
+            intent.putExtra(GET_COORDINATE, true)
+            startActivityForResult(intent, REQUEST_EDIT_CONTACT_COORDINATE)
+        } else checkLocationPermission()
     }
 
     private fun toggleEdit(value: Boolean? = null) {
@@ -661,11 +685,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             if (iAddress.isNullOrEmpty()) etAddress.setText(EMPTY_FIELD_VALUE)
 
             statusContainer.setBackgroundResource(R.drawable.background_rounded)
-            if (!iStatus.isNullOrEmpty()) {
+//            if (!iStatus.isNullOrEmpty()) {
                 tooltipStatus.visibility = View.VISIBLE
                 if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) btnInvoice.visibility = View.GONE
                 else btnInvoice.visibility = View.VISIBLE
-            }
+//            }
             tvStatus.visibility = View.VISIBLE
             spinStatus.visibility = View.GONE
             terminContainer.setBackgroundResource(R.drawable.background_rounded)
@@ -811,11 +835,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             } else tvLocation.text = EMPTY_FIELD_VALUE
 
                             iStatus = if (!pStatus.isNullOrEmpty()) pStatus else null
-                            if (!iStatus.isNullOrEmpty()) {
+//                            if (!iStatus.isNullOrEmpty()) {
                                 if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) {
                                     btnInvoice.visibility = View.GONE
                                 } else btnInvoice.visibility = View.VISIBLE
-                            }
+//                            }
                             setupStatus(iStatus)
 
                             iTermin = if (!pTermin.isNullOrEmpty()) pTermin else null
@@ -1196,9 +1220,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 overlayMaps.alpha = 0f
                 overlayMaps.visibility = View.GONE
 
-                val intent = Intent(this@DetailContactActivity, MapsActivity::class.java)
-                intent.putExtra(CONST_MAPS, iMapsUrl)
-                startActivity(intent)
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    val intent = Intent(this@DetailContactActivity, MapsActivity::class.java)
+                    intent.putExtra(CONST_MAPS, iMapsUrl)
+                    startActivity(intent)
+                } else checkLocationPermission()
             }, animateDuration)
         }
     }
@@ -1206,7 +1232,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private fun previewKtp() {
         if (!iKtp.isNullOrEmpty() && iKtp != EMPTY_FIELD_VALUE && !isEdit) {
 
-//            val imageUrl = "https://cdn.popmama.com/content-images/community/20221018/community-6151307037af4cffa62490fdc39e65b7.jpg"
             val imageUrl = BASE_URL + "img/" + iKtp
             val intent = Intent(this, PreviewKtpActivity::class.java)
             intent.putExtra(CONST_KTP, imageUrl)
@@ -1443,6 +1468,22 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     override fun onPingResult(pingResult: Int?) {
         sendMessageModal.setPingStatus(pingResult)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) checkLocationPermission()
+            else {
+                val customUtility = CustomUtility(this)
+                if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    val message = "Location permissions are required for this apps. Please grant the permissions."
+                    customUtility.showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE) }
+                } else customUtility.showPermissionDeniedDialog("Location permissions are required for this apps. Please enable them in the app settings.")
+            }
+        }
+
     }
 
 }
