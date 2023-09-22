@@ -9,6 +9,7 @@ import com.topmortar.topmortarsales.commons.CONTACT
 import com.topmortar.topmortarsales.commons.SURAT_JALAN
 import com.topmortar.topmortarsales.commons.GET_USERS
 import com.topmortar.topmortarsales.commons.INVOICE
+import com.topmortar.topmortarsales.commons.PAYMENT
 import com.topmortar.topmortarsales.commons.REQUEST_OTP
 import com.topmortar.topmortarsales.commons.SEARCH_CONTACT
 import com.topmortar.topmortarsales.commons.SEND_MESSAGE
@@ -24,6 +25,7 @@ import com.topmortar.topmortarsales.response.ResponseContactList
 import com.topmortar.topmortarsales.response.ResponseInvoice
 import com.topmortar.topmortarsales.response.ResponseSuratJalan
 import com.topmortar.topmortarsales.response.ResponseMessage
+import com.topmortar.topmortarsales.response.ResponsePayment
 import com.topmortar.topmortarsales.response.ResponseSkills
 import com.topmortar.topmortarsales.response.ResponseTukangList
 import com.topmortar.topmortarsales.response.ResponseUsers
@@ -181,6 +183,11 @@ interface ApiService {
     suspend fun getInvoices(
         @Query("id_contact") contactId: String
     ): ResponseInvoice
+
+    @GET(PAYMENT)
+    suspend fun getPayment(
+        @Query("id_invoice") idInvoice: String
+    ): ResponsePayment
 
     @GET(SURAT_JALAN)
     suspend fun getSuratJalanDetail(

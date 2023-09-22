@@ -2,23 +2,33 @@ package com.topmortar.topmortarsales.view.invoice
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.InvoicePaymentRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_DATE_INVOICE
+import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_NUMBER
 import com.topmortar.topmortarsales.commons.CONST_STATUS_INVOICE
 import com.topmortar.topmortarsales.commons.CONST_TOTAL_INVOICE
 import com.topmortar.topmortarsales.commons.INVOICE_PAID
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.utils.CurrencyFormat
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.changeStatusBarColor
+import com.topmortar.topmortarsales.commons.utils.handleMessage
+import com.topmortar.topmortarsales.data.ApiService
+import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.InvoicePaymentModel
+import kotlinx.coroutines.launch
 
 class DetailInvoiceActivity : AppCompatActivity() {
 
@@ -35,18 +45,72 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_detail_invoice)
 
+        apiService = HttpClient.create()
+
         initVariable()
         initClickHandler()
         dataActivityValidation()
     }
 
-    private fun setRecyclerView() {
-        val listItem: ArrayList<InvoicePaymentModel> = arrayListOf()
-        listItem.add(InvoicePaymentModel(date = "2023-09-20 20:36:00", price = "390000", debt = "0"))
-        listItem.add(InvoicePaymentModel(date = "2023-09-19 09:17:00", price = "1000000", debt = "390000"))
-        listItem.add(InvoicePaymentModel(date = "2023-09-18 14:20:00", price = "300000", debt = "1390000"))
-        listItem.add(InvoicePaymentModel(date = "2023-09-15 11:05:00", price = "700000", debt = "1690000"))
-        listItem.add(InvoicePaymentModel(date = "2023-09-10 16:40:00", price = "500000", debt = "2390000"))
+    private fun loadingState(state: Boolean, message: String = getString(R.string.txt_loading)) {
+
+        tvLoading.text = message
+
+        if (state) {
+
+            tvLoading.visibility = View.VISIBLE
+            rvPayments.visibility = View.GONE
+
+        } else {
+
+            tvLoading.visibility = View.GONE
+            rvPayments.visibility = View.VISIBLE
+
+        }
+
+    }
+
+    private fun getList() {
+
+        loadingState(true)
+
+        lifecycleScope.launch {
+            try {
+
+                val response = apiService.getPayment(iInvoiceID)
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        setRecyclerView(response.results)
+                        loadingState(false)
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        loadingState(true, "There is no payment history yet")
+
+                    }
+                    else -> {
+
+                        handleMessage(this@DetailInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                        loadingState(true, getString(R.string.failed_request))
+
+                    }
+                }
+
+            } catch (e: Exception) {
+
+                handleMessage(this@DetailInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                loadingState(true, getString(R.string.failed_request))
+
+            }
+
+        }
+
+    }
+
+    private fun setRecyclerView(listItem: ArrayList<InvoicePaymentModel>) {
 
         val rvAdapter = InvoicePaymentRecyclerViewAdapter()
         rvAdapter.setListItem(listItem)
@@ -80,6 +144,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
     private fun dataActivityValidation() {
 
+        iInvoiceID = intent.getStringExtra(CONST_INVOICE_ID)!!
         val iInvoiceNumber = intent.getStringExtra(CONST_INVOICE_NUMBER)
         val iStatusInvoice = intent.getStringExtra(CONST_STATUS_INVOICE)
         val iTotalInvoice = intent.getStringExtra(CONST_TOTAL_INVOICE)
@@ -107,7 +172,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
             }
         }
 
-        setRecyclerView()
+        getList()
 
     }
 
@@ -118,6 +183,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
         tvTotalInvoice = findViewById(R.id.tv_total_invoice)
         tvStatus = findViewById(R.id.tv_status)
         tvDateInvoice = findViewById(R.id.tv_date_invoce)
+        tvLoading = findViewById(R.id.text_loading)
         rvPayments = findViewById(R.id.rv_payments)
 
         icBack.setImageDrawable(getDrawable(R.drawable.arrow_back_white))
@@ -137,8 +203,12 @@ class DetailInvoiceActivity : AppCompatActivity() {
     private lateinit var tvTotalInvoice: TextView
     private lateinit var tvStatus: TextView
     private lateinit var tvDateInvoice: TextView
+    private lateinit var tvLoading: TextView
     private lateinit var rvPayments: RecyclerView
 
     private var invoiceNumber = ""
+    private var iInvoiceID = ""
+
+    private lateinit var apiService: ApiService
 
 }

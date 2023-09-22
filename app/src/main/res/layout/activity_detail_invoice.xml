@@ -121,6 +121,17 @@
                 android:layout_marginHorizontal="16dp"
                 tools:listitem="@layout/item_invoice_payment"/>
 
+            <TextView
+                android:visibility="gone"
+                android:id="@+id/text_loading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="There is no payment history yet"
+                android:paddingHorizontal="16dp"
+                android:paddingBottom="16dp"
+                android:textAlignment="center"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
