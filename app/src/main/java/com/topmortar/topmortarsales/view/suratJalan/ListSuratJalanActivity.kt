@@ -39,7 +39,7 @@ import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
-import com.topmortar.topmortarsales.invoice.DetailInvoiceActivity
+import com.topmortar.topmortarsales.view.invoice.DetailInvoiceActivity
 import com.topmortar.topmortarsales.model.InvoiceModel
 import com.topmortar.topmortarsales.model.SuratJalanModel
 import kotlinx.coroutines.launch
