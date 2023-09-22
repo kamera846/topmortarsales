@@ -22,6 +22,14 @@ import kotlin.math.sqrt
 
 class URLUtility(private val context: Context) {
 
+    fun isUrl(stringToCheck: String): Boolean {
+        val urlPattern = Pattern.compile(
+            "^((http|https|ftp)://)?([a-zA-Z0-9.-]+(\\.[a-zA-Z]{2,4})+)(:[0-9]+)?(/.*)?$"
+        )
+        val matcher = urlPattern.matcher(stringToCheck)
+        return matcher.matches()
+    }
+
     fun fetchOriginalUrl(shortenedUrl: String, onComplete: (String) -> Unit) {
         FetchOriginalUrlTask(onComplete).execute(shortenedUrl)
     }

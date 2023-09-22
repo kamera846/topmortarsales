@@ -26,6 +26,7 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -51,8 +52,10 @@ import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.CONST_URI
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
+import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
@@ -71,6 +74,7 @@ import com.topmortar.topmortarsales.commons.STATUS_TERMIN_COD_TUNAI
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
@@ -88,6 +92,7 @@ import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.modal.SendMessageModal
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
+import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.suratJalan.ListSuratJalanActivity
 import com.topmortar.topmortarsales.view.suratJalan.PreviewClosingActivity
 import kotlinx.coroutines.launch
@@ -329,6 +334,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         btnInvoice.setOnClickListener { navigateToDetailInvoice() }
         etBirthdayContainer.setOnClickListener { datePicker.show() }
         etBirthday.setOnClickListener { datePicker.show() }
+        etMapsContainer.setOnClickListener { getCoordinate() }
+        etMaps.setOnClickListener { getCoordinate() }
         etLocationContainer.setOnClickListener { showSearchModal() }
         etLocation.setOnClickListener { showSearchModal() }
         addressContainer.setOnClickListener {
@@ -349,6 +356,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 datePicker.show()
                 etBirthday.setSelection(etBirthday.length())
             } else etBirthday.clearFocus()
+        }
+        etMaps.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                getCoordinate()
+                etMaps.setSelection(etMaps.length())
+            } else etMaps.clearFocus()
         }
         etLocation.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
@@ -379,6 +392,20 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
 
         })
+//        etMaps.addTextChangedListener(object : TextWatcher {
+//            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+//
+//            }
+//
+//            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+//
+//            }
+//
+//            override fun afterTextChanged(s: Editable?) {
+//                if (isEdit) getCoordinate()
+//            }
+//
+//        })
         etLocation.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
@@ -529,6 +556,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         setupStatusSpinner()
         setupTerminSpinner()
 
+    }
+
+    private fun getCoordinate() {
+        val data = "${ etMaps.text }"
+
+        val intent = Intent(this, MapsActivity::class.java)
+        intent.putExtra(CONST_MAPS, data)
+        intent.putExtra(GET_COORDINATE, true)
+        startActivityForResult(intent, REQUEST_EDIT_CONTACT_COORDINATE)
     }
 
     private fun toggleEdit(value: Boolean? = null) {
@@ -948,10 +984,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         } else if (!PhoneHandler.phoneValidation(phone, etPhone)) {
             etPhone.requestFocus()
             false
-        } else if (mapsUrl.isNotEmpty() && !isValidUrl(mapsUrl)) {
-            etMaps.error = "Please enter a valid URL!"
-            etMaps.requestFocus()
-            false
+//        } else if (mapsUrl.isNotEmpty() && !isValidUrl(mapsUrl)) {
+//            etMaps.error = "Please enter a valid URL!"
+//            etMaps.requestFocus()
+//            false
 //        } else if (owner.isEmpty()) {
 //            etName.error = null
 //            etName.clearFocus()
@@ -1160,8 +1196,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 overlayMaps.alpha = 0f
                 overlayMaps.visibility = View.GONE
 
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(iMapsUrl))
+                val intent = Intent(this@DetailContactActivity, MapsActivity::class.java)
+                intent.putExtra(CONST_MAPS, iMapsUrl)
                 startActivity(intent)
+
+//                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(iMapsUrl))
+//                startActivity(intent)
             }, animateDuration)
         }
     }
@@ -1384,6 +1424,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             if (resultData == SYNC_NOW) hasEdited = true
 
+        } else if (requestCode == REQUEST_EDIT_CONTACT_COORDINATE) {
+            val latitude = data?.getDoubleExtra("latitude", 0.0)
+            val longitude = data?.getDoubleExtra("longitude", 0.0)
+            if (latitude != null && longitude != null) etMaps.setText("$latitude,$longitude")
+            etMaps.clearFocus()
         }
 
     }

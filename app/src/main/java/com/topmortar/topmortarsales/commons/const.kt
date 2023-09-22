@@ -47,6 +47,7 @@ const val REQUEST_BLUETOOTH_PERMISSIONS = 555
 const val IMG_PREVIEW_STATE = 666
 const val LOCATION_PERMISSION_REQUEST_CODE = 777
 const val CONNECTION_FAILURE_RESOLUTION_REQUEST = 888
+const val REQUEST_EDIT_CONTACT_COORDINATE = 999
 
 // Tag Log
 const val TAG_RESPONSE_CONTACT = "TAG RESPONSE CONTACT"
@@ -100,6 +101,7 @@ const val STATUS_TERMIN_30 = "30"
 const val STATUS_TERMIN_45 = "45"
 const val STATUS_TERMIN_60 = "60"
 const val INVOICE_PAID = "paid"
+const val GET_COORDINATE = "get_coordinate"
 
 // User Kind
 const val USER_KIND_ADMIN = "user_kind_admin"
