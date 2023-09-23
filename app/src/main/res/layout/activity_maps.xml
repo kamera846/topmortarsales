@@ -7,6 +7,7 @@
     tools:context=".view.MapsActivity">
 
     <LinearLayout
+        android:visibility="gone"
         android:layout_alignParentTop="true"
         android:id="@+id/search_bar"
         android:layout_width="match_parent"
@@ -44,11 +45,9 @@
 
     <fragment
         android:layout_below="@+id/search_bar"
-        android:layout_alignParentBottom="true"
         android:id="@+id/map"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="match_parent"
         android:name="com.google.android.gms.maps.SupportMapFragment"/>
 
     <androidx.recyclerview.widget.RecyclerView

@@ -18,6 +18,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -54,6 +55,7 @@ import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.databinding.ActivityMapsBinding
@@ -61,6 +63,8 @@ import java.io.IOException
 import java.util.Locale
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+
+    private lateinit var sessionManager: SessionManager
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
@@ -86,6 +90,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
+        sessionManager = SessionManager(this)
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -128,12 +133,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         binding.btnGetLatLng.visibility = View.GONE
     }
 
+    private fun showDialog(title: String = "Attention!", message: String) {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("Ok") { dialog, _ -> dialog.dismiss() }
+        builder.show()
+    }
+
     private fun dataActivityValidation() {
 
         val iMaps = intent.getStringExtra(CONST_MAPS)
         isGetCoordinate = intent.getBooleanExtra(GET_COORDINATE, false)
 
-        if (isGetCoordinate) binding.btnGetLatLng.visibility = View.VISIBLE
+        if (isGetCoordinate) {
+            binding.btnGetLatLng.visibility = View.VISIBLE
+            binding.searchBar.visibility = View.VISIBLE
+        }
 
         if (!iMaps.isNullOrEmpty()) {
 
@@ -144,7 +160,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 val mapsUrlPattern2 = Regex("https://maps\\.app\\.goo\\.gl/\\w+")
 
                 if (mapsUrlPattern1.matches(iMaps) || mapsUrlPattern2.matches(iMaps)) return onFindLocation(iMaps)
-                else Toast.makeText(this, "Failed to process maps url", TOAST_SHORT).show()
+                else showDialog(message = "Failed to process maps url")
             } else {
 
                 val coordinates = iMaps.trim().split(",")
@@ -157,8 +173,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         etSearch.setText(getPlaceNameFromLatLng(latLng))
                         binding.recyclerView.visibility = View.GONE
                         return initMaps(latLng)
-                    } else Toast.makeText(this, "Failed navigate to coordinate", TOAST_SHORT).show()
-                } else Toast.makeText(this, "Failed to process coordinate", TOAST_SHORT).show()
+                    } else showDialog(message = "Failed navigate to coordinate")
+                } else showDialog(message = "Failed to process coordinate")
 
             }
 
@@ -183,11 +199,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         etSearch.setText(placeName)
                         binding.recyclerView.visibility = View.GONE
                         searchLocation(placeName)
-                    } else Toast.makeText(this, "Failed to find coordinate", TOAST_SHORT).show()
+                    } else showDialog(message = "Failed to find the coordinates. Please select manual on the map!")
 
                 } else initMaps(latLng)
 
-            } else Toast.makeText(this, "Failed to process the URL", TOAST_SHORT).show()
+            } else showDialog(message = "Failed to process the URL")
 
         }
 
@@ -216,7 +232,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             if (selectedLocation != null) {
 
-//                Toast.makeText(this@MapsActivity, "Coordinate: ${ selectedLocation!!.latitude },${ selectedLocation!!.longitude }", TOAST_LONG).show()
                 val resultIntent = Intent()
                 resultIntent.putExtra("latitude", selectedLocation!!.latitude)
                 resultIntent.putExtra("longitude", selectedLocation!!.longitude)
@@ -277,7 +292,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         )
 
         if (moveCamera) {
-            val durationMs = 2000 // 1 second
+            val durationMs = 2000
             val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel)
 
             mMap.animateCamera(cameraUpdate, durationMs, null)
@@ -322,16 +337,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
             if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style_dark))
 
-//            initMaps()
-
             if (binding.btnGetLatLng.isVisible) {
                 mMap.setPadding(0,0,0, convertDpToPx(64, this))
                 mMap.setOnMapLongClickListener { latLng -> setPin(latLng, getPlaceNameFromLatLng(latLng), moveCamera = false) }
-                Snackbar.make(
-                    findViewById(android.R.id.content), // Replace with your root view
-                    "Press and hold on the map to mark a location",
-                    Snackbar.LENGTH_LONG
-                ).show()
+                if (!sessionManager.pinMapHint()) {
+                    showDialog(message = "Press and hold on the map to mark a location")
+                    sessionManager.pinMapHint(true)
+                }
             }
 
             mMap.setOnMapClickListener {
@@ -370,7 +382,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             val address = addressList!![0]
             val latLng = LatLng(address.latitude, address.longitude)
 
-//            setPin(latLng, getPlaceNameFromLatLng(latLng))
             initMaps(latLng)
 
         } else {
@@ -419,7 +430,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                             binding.recyclerView.apply {
                                 layoutManager = LinearLayoutManager(this@MapsActivity)
                                 adapter = placeAdapter
-                                this.visibility = View.VISIBLE
+                                if (isGetCoordinate) this.visibility = View.VISIBLE
                             }
                         } else binding.recyclerView.visibility = View.GONE
 
