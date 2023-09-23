@@ -1450,6 +1450,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             val latitude = data?.getDoubleExtra("latitude", 0.0)
             val longitude = data?.getDoubleExtra("longitude", 0.0)
             if (latitude != null && longitude != null) etMaps.setText("$latitude,$longitude")
+            etMaps.error = null
             etMaps.clearFocus()
         }
 
