@@ -344,12 +344,12 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         )
         slideOutToLeft.duration = animationDuration
 
-        etSearchBox.setOnFocusChangeListener { _, hasFocus ->
-            run {
-                if (hasFocus) showKeyboard(etSearchBox, this@MainActivity)
-                else hideKeyboard(etSearchBox, this@MainActivity)
-            }
-        }
+//        etSearchBox.setOnFocusChangeListener { _, hasFocus ->
+//            run {
+//                if (hasFocus) showKeyboard(etSearchBox, this@MainActivity)
+//                else hideKeyboard(etSearchBox, this@MainActivity)
+//            }
+//        }
 
         if (state == SEARCH_OPEN && !isSearchActive) {
 
