@@ -294,12 +294,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         tvTitleBar.text = "Detail Contact"
         tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
-        // Admin Access
-        if (sessionManager.userKind() == USER_KIND_ADMIN) {
-            icEdit.visibility = View.VISIBLE
-            tvKtpContainer.visibility = View.VISIBLE
-        }
-
         // Setup Date Picker Dialog
         setDatePickerDialog()
 
@@ -597,108 +591,129 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         if (isEdit) {
 
-            // Hide Case
-            icEdit.visibility = View.GONE
+            if (sessionManager.userKind() == USER_KIND_ADMIN) {
+                // Hide Case
+                icEdit.visibility = View.GONE
 
-            tvName.visibility = View.GONE
-            tvDescription.visibility = View.GONE
+                tvName.visibility = View.GONE
+                tvDescription.visibility = View.GONE
 
-            tvPhoneContainer.visibility = View.GONE
-            tvOwnerContainer.visibility = View.GONE
-            tvLocationContainer.visibility = View.GONE
-            tvMapsContainer.visibility = View.GONE
-            tvBirthdayContainer.visibility = View.GONE
-            tvKtpContainer.visibility = View.GONE
+                tvPhoneContainer.visibility = View.GONE
+                tvOwnerContainer.visibility = View.GONE
+                tvLocationContainer.visibility = View.GONE
+                tvMapsContainer.visibility = View.GONE
+                tvBirthdayContainer.visibility = View.GONE
+                tvKtpContainer.visibility = View.GONE
 
-            btnSendMessage.visibility = View.GONE
-            btnInvoice.visibility = View.GONE
+                btnSendMessage.visibility = View.GONE
+                btnInvoice.visibility = View.GONE
 
-            // Show Case
-            tvTitleBar.text = "Edit Contact"
-            icClose.visibility = View.VISIBLE
+                // Show Case
+                tvTitleBar.text = "Edit Contact"
+                icClose.visibility = View.VISIBLE
 
-            etName.visibility = View.VISIBLE
+                etName.visibility = View.VISIBLE
 
-            etPhoneContainer.visibility = View.VISIBLE
-            etOwnerContainer.visibility = View.VISIBLE
-            etLocationContainer.visibility = View.VISIBLE
-            etMapsContainer.visibility = View.VISIBLE
-            etBirthdayContainer.visibility = View.VISIBLE
-            etKtpContainer.visibility = View.VISIBLE
-            tvSelectedKtp.visibility = View.VISIBLE
-            tvSelectedKtp.text = "Selected file: "
+                etPhoneContainer.visibility = View.VISIBLE
+                etOwnerContainer.visibility = View.VISIBLE
+                etLocationContainer.visibility = View.VISIBLE
+                etMapsContainer.visibility = View.VISIBLE
+                etBirthdayContainer.visibility = View.VISIBLE
+                etKtpContainer.visibility = View.VISIBLE
+                tvSelectedKtp.visibility = View.VISIBLE
+                tvSelectedKtp.text = "Selected file: "
 
-            // Other Columns Handle
-            addressContainer.setBackgroundResource(R.drawable.et_background)
-            etAddress.isEnabled = true
-            if (iAddress.isNullOrEmpty()) etAddress.setText("")
+                // Other Columns Handle
+                addressContainer.setBackgroundResource(R.drawable.et_background)
+                etAddress.isEnabled = true
+                if (iAddress.isNullOrEmpty()) etAddress.setText("")
 
-            statusContainer.setBackgroundResource(R.drawable.et_background)
-            tooltipStatus.visibility = View.GONE
-            tvStatus.visibility = View.GONE
-            spinStatus.visibility = View.VISIBLE
-            terminContainer.setBackgroundResource(R.drawable.et_background)
-            tvTermin.visibility = View.GONE
-            spinTermin.visibility = View.VISIBLE
+                statusContainer.setBackgroundResource(R.drawable.et_background)
+                tooltipStatus.visibility = View.GONE
+                tvStatus.visibility = View.GONE
+                spinStatus.visibility = View.VISIBLE
+                terminContainer.setBackgroundResource(R.drawable.et_background)
+                tvTermin.visibility = View.GONE
+                spinTermin.visibility = View.VISIBLE
 
+                btnSaveEdit.visibility = View.VISIBLE
 
-            btnSaveEdit.visibility = View.VISIBLE
+                etName.requestFocus()
+                etName.setSelection(etName.text.length)
+            } else if (sessionManager.userKind() == USER_KIND_SALES) {
+                icEdit.visibility = View.GONE
+                tvMapsContainer.visibility = View.GONE
+                btnSendMessage.visibility = View.GONE
 
-            etName.requestFocus()
-            etName.setSelection(etName.text.length)
+                tvTitleBar.text = "Edit Contact"
+                icClose.visibility = View.VISIBLE
+                etMapsContainer.visibility = View.VISIBLE
+                btnSaveEdit.visibility = View.VISIBLE
+            }
 
         } else {
 
-            // Show Case
-            icEdit.visibility = View.VISIBLE
+            if (sessionManager.userKind() == USER_KIND_ADMIN) {
+                // Show Case
+                icEdit.visibility = View.VISIBLE
 
-            tvName.visibility = View.VISIBLE
-            tvDescription.visibility = View.VISIBLE
+                tvName.visibility = View.VISIBLE
+                tvDescription.visibility = View.VISIBLE
 
-            tvPhoneContainer.visibility = View.VISIBLE
-            tvOwnerContainer.visibility = View.VISIBLE
-            tvLocationContainer.visibility = View.VISIBLE
-            tvMapsContainer.visibility = View.VISIBLE
-            tvBirthdayContainer.visibility = View.VISIBLE
-            tvKtpContainer.visibility = View.VISIBLE
+                tvPhoneContainer.visibility = View.VISIBLE
+                tvOwnerContainer.visibility = View.VISIBLE
+                tvLocationContainer.visibility = View.VISIBLE
+                tvMapsContainer.visibility = View.VISIBLE
+                tvBirthdayContainer.visibility = View.VISIBLE
+                tvKtpContainer.visibility = View.VISIBLE
 
-            btnSendMessage.visibility = View.VISIBLE
+                btnSendMessage.visibility = View.VISIBLE
 
-            // Hide Case
-            tvTitleBar.text = "Detail Contact"
-            icClose.visibility = View.GONE
+                // Hide Case
+                tvTitleBar.text = "Detail Contact"
+                icClose.visibility = View.GONE
 
-            etName.visibility = View.GONE
+                etName.visibility = View.GONE
 
-            etPhoneContainer.visibility = View.GONE
-            etOwnerContainer.visibility = View.GONE
-            etLocationContainer.visibility = View.GONE
-            etMapsContainer.visibility = View.GONE
-            etBirthdayContainer.visibility = View.GONE
-            etKtpContainer.visibility = View.GONE
-            tvSelectedKtp.visibility = View.GONE
-            selectedUri = null
+                etPhoneContainer.visibility = View.GONE
+                etOwnerContainer.visibility = View.GONE
+                etLocationContainer.visibility = View.GONE
+                etMapsContainer.visibility = View.GONE
+                etBirthdayContainer.visibility = View.GONE
+                etKtpContainer.visibility = View.GONE
+                tvSelectedKtp.visibility = View.GONE
+                selectedUri = null
 
-            // Other Columns Handle
-            addressContainer.setBackgroundResource(R.drawable.background_rounded)
-            etAddress.isEnabled = false
-            if (iAddress.isNullOrEmpty()) etAddress.setText(EMPTY_FIELD_VALUE)
+                // Other Columns Handle
+                addressContainer.setBackgroundResource(R.drawable.background_rounded)
+                etAddress.isEnabled = false
+                if (iAddress.isNullOrEmpty()) etAddress.setText(EMPTY_FIELD_VALUE)
 
-            statusContainer.setBackgroundResource(R.drawable.background_rounded)
+                statusContainer.setBackgroundResource(R.drawable.background_rounded)
 //            if (!iStatus.isNullOrEmpty()) {
                 tooltipStatus.visibility = View.VISIBLE
                 if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) btnInvoice.visibility = View.GONE
                 else btnInvoice.visibility = View.VISIBLE
 //            }
-            tvStatus.visibility = View.VISIBLE
-            spinStatus.visibility = View.GONE
-            terminContainer.setBackgroundResource(R.drawable.background_rounded)
-            tvTermin.visibility = View.VISIBLE
-            spinTermin.visibility = View.GONE
+                tvStatus.visibility = View.VISIBLE
+                spinStatus.visibility = View.GONE
+                terminContainer.setBackgroundResource(R.drawable.background_rounded)
+                tvTermin.visibility = View.VISIBLE
+                spinTermin.visibility = View.GONE
 
-            btnSaveEdit.visibility = View.GONE
+                btnSaveEdit.visibility = View.GONE
 
-            etName.clearFocus()
+                etName.clearFocus()
+            } else if (sessionManager.userKind() == USER_KIND_SALES) {
+                icEdit.visibility = View.VISIBLE
+                tvMapsContainer.visibility = View.VISIBLE
+                btnSendMessage.visibility = View.VISIBLE
+
+                tvTitleBar.text = "Detail Contact"
+                icClose.visibility = View.GONE
+                etMapsContainer.visibility = View.GONE
+                btnSaveEdit.visibility = View.GONE
+            }
 
         }
 
@@ -762,6 +777,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         loadingState(true)
 
+//        Handler().postDelayed({
+//            handleMessage(this, "TAG SAVE", "${contactId!!}, ${formatPhoneNumber(pPhone)}, $pName, $pOwner, $pBirthday, $pMapsUrl, ${pCityID!!}, $pAddress, $pStatus, $imagePart, $pTermin")
+//            loadingState(false)
+//        }, 1000)
+//
+//        return
+
         lifecycleScope.launch {
             try {
 
@@ -814,9 +836,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             etPhone.setText(formatPhoneNumber("${ etPhone.text }"))
                             iAddress = "${ etAddress.text }"
 
-                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
-                            loadingState(false)
-                            toggleEdit(false)
+//                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
+//                            loadingState(false)
+//                            toggleEdit(false)
 
                             if (!etOwner.text.isNullOrEmpty()) tvOwner.text = "${ etOwner.text }"
                             else tvOwner.text = EMPTY_FIELD_VALUE
@@ -835,15 +857,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             } else tvLocation.text = EMPTY_FIELD_VALUE
 
                             iStatus = if (!pStatus.isNullOrEmpty()) pStatus else null
-//                            if (!iStatus.isNullOrEmpty()) {
-                                if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) {
-                                    btnInvoice.visibility = View.GONE
-                                } else btnInvoice.visibility = View.VISIBLE
-//                            }
-                            setupStatus(iStatus)
+////                            if (!iStatus.isNullOrEmpty()) {
+//                                if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) {
+//                                    btnInvoice.visibility = View.GONE
+//                                } else btnInvoice.visibility = View.VISIBLE
+////                            }
+//                            setupStatus(iStatus)
 
                             iTermin = if (!pTermin.isNullOrEmpty()) pTermin else null
-                            setupTermin(iTermin)
+//                            setupTermin(iTermin)
 
                             // Remove image temp
                             currentPhotoUri?.let {
@@ -912,6 +934,19 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 tvKtp.text = "Click to open preview KTP"
                                 iKtp = data.ktp_owner
                             }
+
+                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
+                            loadingState(false)
+                            toggleEdit(false)
+
+//                            if (!iStatus.isNullOrEmpty()) {
+                            if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) {
+                                btnInvoice.visibility = View.GONE
+                            } else btnInvoice.visibility = View.VISIBLE
+//                            }
+
+                            setupStatus(iStatus)
+                            setupTermin(iTermin)
 
                             hasEdited = true
                             loadingState(false)
@@ -1135,10 +1170,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         sendMessageModal = SendMessageModal(this, lifecycleScope)
         if (item != null) sendMessageModal.setItem(item)
 
-
         // Setup Indicator
         setupNetworkIndicator()
-
     }
 
     private fun showSearchModal() {
@@ -1178,6 +1211,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         } else {
                             tvLocation.text = EMPTY_FIELD_VALUE
                             etLocation.setText("")
+                        }
+
+                        // Admin Access
+                        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_SALES) {
+                            icEdit.visibility = View.VISIBLE
+                            val indicatorImageView = findViewById<View>(R.id.indicatorView)
+                            indicatorImageView.visibility = View.VISIBLE
+                            if (sessionManager.userKind() == USER_KIND_ADMIN) tvKtpContainer.visibility = View.VISIBLE
                         }
                     }
                     RESPONSE_STATUS_EMPTY -> {
@@ -1252,7 +1293,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun setupStatus(status: String? = null) {
         tooltipStatus.visibility = View.VISIBLE
-        when (status) {STATUS_CONTACT_DATA -> {
+        when (status) {
+            STATUS_CONTACT_DATA -> {
                 tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_data))
                 tooltipHandler(tooltipStatus, "Customer Status is Data")
                 tvStatus.text = statusItem[1]
@@ -1339,6 +1381,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
         }
 
+        selectedStatus = iStatus!!
         setupStatus(iStatus)
     }
 
@@ -1358,18 +1401,26 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
         }
 
+        selectedTermin = when (iTermin) {
+             STATUS_TERMIN_COD -> terminItem[1]
+             STATUS_TERMIN_COD_TF -> terminItem[2]
+             STATUS_TERMIN_COD_TUNAI -> terminItem[3]
+             STATUS_TERMIN_30 -> terminItem[4]
+             STATUS_TERMIN_45 -> terminItem[5]
+             STATUS_TERMIN_60 -> terminItem[6]
+            else -> "-1"
+        }
         setupTermin(iTermin)
     }
 
     private fun setupNetworkIndicator() {
-        val indicatorImageView = findViewById<View>(R.id.indicatorView) // Ganti dengan ID tampilan indikator Anda
-        indicatorImageView.visibility = View.VISIBLE
-        if (sessionManager.userKind() == USER_KIND_ADMIN) {
+        val indicatorImageView = findViewById<View>(R.id.indicatorView)
+        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_SALES) {
             val layoutParams = indicatorImageView.layoutParams as ViewGroup.MarginLayoutParams
             layoutParams.marginEnd = 0
             layoutParams.marginStart = 16
         }
-        val pingIntervalMillis = 2000L // Ganti dengan interval yang Anda inginkan (dalam milidetik)
+        val pingIntervalMillis = 1000L // milidetik
 
         val pingTimer = Timer()
         pingTimer.scheduleAtFixedRate(object : TimerTask() {
