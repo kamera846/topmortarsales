@@ -33,6 +33,7 @@ const val VERIFY_OTP = "verifyOtp.php"
 const val UPDATE_PASSWORD = "updatePassword.php"
 const val SURAT_JALAN = "suratjalan.php"
 const val INVOICE = "invoice.php"
+const val PAYMENT = "payment.php"
 const val SKILL = "skill.php"
 const val TUKANG = "tukang.php"
 const val TUKANG_MESSAGE = "tukangMessage.php"
@@ -45,6 +46,9 @@ const val MANAGE_USER_ACTIVITY_REQUEST_CODE = 333
 const val REQUEST_ENABLE_BLUETOOTH = 444
 const val REQUEST_BLUETOOTH_PERMISSIONS = 555
 const val IMG_PREVIEW_STATE = 666
+const val LOCATION_PERMISSION_REQUEST_CODE = 777
+const val CONNECTION_FAILURE_RESOLUTION_REQUEST = 888
+const val REQUEST_EDIT_CONTACT_COORDINATE = 999
 
 // Tag Log
 const val TAG_RESPONSE_CONTACT = "TAG RESPONSE CONTACT"
@@ -60,6 +64,7 @@ const val EMPTY_FIELD_VALUE = "Not set"
 const val CONST_CONTACT_ID = "const_contact_id"
 const val CONST_USER_ID = "const_user_id"
 const val CONST_INVOICE_ID = "const_invoice_id"
+const val CONST_INVOICE_NUMBER = "const_invoice_number"
 
 const val CONST_OWNER = "const_owner"
 const val CONST_LOCATION = "const_location"
@@ -75,6 +80,9 @@ const val CONST_ADDRESS = "const_address"
 const val CONST_USER_LEVEL = "const_user_level"
 const val CONST_FULL_NAME = "const_full_name"
 const val CONST_URI = "const_uri"
+const val CONST_STATUS_INVOICE = "const_status_invoice"
+const val CONST_TOTAL_INVOICE = "const_total_invoice"
+const val CONST_DATE_INVOICE = "const_date_invoice"
 
 // Status
 const val LOGGED_IN = true
@@ -95,6 +103,8 @@ const val STATUS_TERMIN_15 = "15"
 const val STATUS_TERMIN_30 = "30"
 const val STATUS_TERMIN_45 = "45"
 const val STATUS_TERMIN_60 = "60"
+const val INVOICE_PAID = "paid"
+const val GET_COORDINATE = "get_coordinate"
 
 // User Kind
 const val USER_KIND_ADMIN = "user_kind_admin"

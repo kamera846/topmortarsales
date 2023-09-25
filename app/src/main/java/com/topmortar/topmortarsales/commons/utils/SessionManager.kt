@@ -59,4 +59,13 @@ class SessionManager(context: Context) {
     fun userCityID(): String? {
         return sharedPreferences.getString("userCityID", "")
     }
+
+    fun pinMapHint(pinMapHint: Boolean) {
+        editor.putBoolean("pinMapHint", pinMapHint)
+        editor.apply()
+    }
+
+    fun pinMapHint(): Boolean {
+        return sharedPreferences.getBoolean("pinMapHint", false)
+    }
 }

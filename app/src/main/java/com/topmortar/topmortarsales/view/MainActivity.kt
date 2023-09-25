@@ -1,7 +1,9 @@
 package com.topmortar.topmortarsales.view
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -21,6 +23,7 @@ import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.RelativeLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -85,6 +88,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     private lateinit var llTitleBar: LinearLayout
     private lateinit var llSearchBox: LinearLayout
     private lateinit var btnFab: FloatingActionButton
+    private lateinit var btnFabAdmin: FloatingActionButton
     private lateinit var icMore: ImageView
     private lateinit var icSearch: ImageView
     private lateinit var icCloseSearch: ImageView
@@ -140,6 +144,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         llTitleBar = findViewById(R.id.title_bar)
         llSearchBox = findViewById(R.id.search_box)
         btnFab = findViewById(R.id.btn_fab)
+        btnFabAdmin = findViewById(R.id.btn_fab_admin)
         icMore = llTitleBar.findViewById(R.id.ic_more)
         icSearch = llTitleBar.findViewById(R.id.ic_search)
         tvTitleBarDescription = llTitleBar.findViewById(R.id.tv_title_bar_description)
@@ -149,7 +154,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
         // Set Title Bar
         icMore.visibility = View.VISIBLE
-//        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Hello, $it" else "Hello, ${ sessionManager.userName() }"}
         tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Hello, $it" else ""}
         tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
         etSearchBox.setPadding(0, 0, convertDpToPx(16, this), 0)
@@ -157,12 +161,14 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         // Set Floating Action Button
         if (sessionManager.userKind() == USER_KIND_SALES) btnFab.visibility = View.VISIBLE
         if (sessionManager.userKind() != USER_KIND_COURIER) icSearch.visibility = View.VISIBLE
+        if (sessionManager.userKind() == USER_KIND_COURIER) btnFabAdmin.visibility = View.VISIBLE
 
     }
 
     private fun initClickHandler() {
 
         btnFab.setOnClickListener { navigateAddNewRoom() }
+        btnFabAdmin.setOnClickListener { navigateChatAdmin() }
         icMore.setOnClickListener { showPopupMenu() }
         icSearch.setOnClickListener { toggleSearchEvent(SEARCH_OPEN) }
         icCloseSearch.setOnClickListener { toggleSearchEvent(SEARCH_CLOSE) }
@@ -187,6 +193,21 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
             rlLoading.visibility = View.GONE
             rvListChat.visibility = View.VISIBLE
 
+        }
+
+    }
+
+    private fun navigateChatAdmin() {
+        val phoneNumber = getString(R.string.topmortar_wa_number)
+        val message = "*#Courier Service*\nHalo admin, tolong bantu saya [KETIK PESAN ANDA]"
+
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")
+
+        try {
+            startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(this, "Failed direct to whatsapp", TOAST_SHORT).show()
         }
 
     }
@@ -323,12 +344,12 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         )
         slideOutToLeft.duration = animationDuration
 
-        etSearchBox.setOnFocusChangeListener { _, hasFocus ->
-            run {
-                if (hasFocus) showKeyboard(etSearchBox, this@MainActivity)
-                else hideKeyboard(etSearchBox, this@MainActivity)
-            }
-        }
+//        etSearchBox.setOnFocusChangeListener { _, hasFocus ->
+//            run {
+//                if (hasFocus) showKeyboard(etSearchBox, this@MainActivity)
+//                else hideKeyboard(etSearchBox, this@MainActivity)
+//            }
+//        }
 
         if (state == SEARCH_OPEN && !isSearchActive) {
 
@@ -568,13 +589,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
     private fun setRecyclerView(listItem: ArrayList<ContactModel>) {
 
-//        val itemStatus = listOf("", "data", "passive", "active", "blacklist")
-//        var indexItem = 0
-//        for (item in listItem) {
-//            item.store_status = itemStatus[indexItem]
-//            indexItem.let { if (it == 4) indexItem = 0 else indexItem++}
-//        }
-
         val rvAdapter = ContactsRecyclerViewAdapter(listItem, this@MainActivity)
 
         rvListChat.layoutManager = LinearLayoutManager(this@MainActivity)
@@ -682,8 +696,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
     override fun onItemClick(data: ContactModel?) {
 
-//        if (sessionManager.userKind() == USER_KIND_ADMIN) navigateDetailContact(data)
-//        else navigateAddNewRoom(data)
         navigateDetailContact(data)
 
     }

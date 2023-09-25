@@ -1,11 +1,14 @@
 package com.topmortar.topmortarsales.view.tukang
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
+import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.ArrayAdapter
@@ -15,6 +18,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
@@ -26,7 +30,10 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
+import com.topmortar.topmortarsales.commons.GET_COORDINATE
+import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
@@ -37,10 +44,12 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.updateTxtMaxLength
+import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.phoneValidation
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -49,6 +58,7 @@ import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.model.SkillModel
+import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -99,6 +109,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         initClickHandler()
 //        dataActivityValidation()
         etMessageListener()
+        checkLocationPermission()
 
         Handler().postDelayed({
             getSkills()
@@ -244,6 +255,32 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
     }
 
+    private fun checkLocationPermission() {
+        val urlUtility = URLUtility(this)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+            if (urlUtility.isLocationEnabled(this)) {
+
+                val urlUtility = URLUtility(this)
+                urlUtility.requestLocationUpdate()
+
+            } else {
+                val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                startActivity(enableLocationIntent)
+            }
+        } else ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+    }
+
+    private fun getCoordinate() {
+        val data = "${ etMapsUrl.text }"
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            val intent = Intent(this, MapsActivity::class.java)
+            intent.putExtra(CONST_MAPS, data)
+            intent.putExtra(GET_COORDINATE, true)
+            startActivityForResult(intent, REQUEST_EDIT_CONTACT_COORDINATE)
+        } else checkLocationPermission()
+    }
+
     private fun dataActivityValidation() {
 
         val iContactId = intent.getStringExtra(CONST_CONTACT_ID)
@@ -335,6 +372,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         icBack.setOnClickListener { finish() }
         btnSubmit.setOnClickListener { if (isLoaded) sendMessage() }
         etBirthday.setOnClickListener { datePicker.show() }
+        etMapsUrl.setOnClickListener { getCoordinate() }
         etSkill.setOnClickListener { showSearchModal() }
 
         // Focus Listener
@@ -349,6 +387,12 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                 datePicker.show()
                 etBirthday.setSelection(etBirthday.length())
             } else etBirthday.clearFocus()
+        }
+        etMapsUrl.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                getCoordinate()
+                etMapsUrl.setSelection(etMapsUrl.length())
+            } else etMapsUrl.clearFocus()
         }
         etSkill.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
@@ -442,8 +486,8 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         } else if (mapsUrl.isEmpty()) {
             etBirthday.error = null
             etBirthday.clearFocus()
-            etMapsUrl.error = "Maps url cannot be empty!"
-            etMapsUrl.requestFocus()
+            etMapsUrl.error = "Choose the coordinate first!"
+//            etMapsUrl.requestFocus()
             false
         } else if (skill.isEmpty()) {
             etMapsUrl.error = null
@@ -598,6 +642,37 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         etSkill.setText(data.title)
         selectedSkill = data
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == REQUEST_EDIT_CONTACT_COORDINATE) {
+            val latitude = data?.getDoubleExtra("latitude", 0.0)
+            val longitude = data?.getDoubleExtra("longitude", 0.0)
+            if (latitude != null && longitude != null) etMapsUrl.setText("$latitude,$longitude")
+            etMapsUrl.error = null
+            etMapsUrl.clearFocus()
+        }
+
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) checkLocationPermission()
+            else {
+                val customUtility = CustomUtility(this)
+                if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    val message = "Location permissions are required for this apps. Please grant the permissions."
+                    customUtility.showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE
+                    ) }
+                } else customUtility.showPermissionDeniedDialog("Location permissions are required for this apps. Please enable them in the app settings.")
+            }
+        }
+
     }
 
 }

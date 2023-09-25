@@ -9,6 +9,7 @@ import com.topmortar.topmortarsales.commons.CONTACT
 import com.topmortar.topmortarsales.commons.SURAT_JALAN
 import com.topmortar.topmortarsales.commons.GET_USERS
 import com.topmortar.topmortarsales.commons.INVOICE
+import com.topmortar.topmortarsales.commons.PAYMENT
 import com.topmortar.topmortarsales.commons.REQUEST_OTP
 import com.topmortar.topmortarsales.commons.SEARCH_CONTACT
 import com.topmortar.topmortarsales.commons.SEND_MESSAGE
@@ -21,8 +22,10 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.response.ResponseAuth
 import com.topmortar.topmortarsales.response.ResponseCities
 import com.topmortar.topmortarsales.response.ResponseContactList
-import com.topmortar.topmortarsales.response.ResponseInvoices
+import com.topmortar.topmortarsales.response.ResponseInvoice
+import com.topmortar.topmortarsales.response.ResponseSuratJalan
 import com.topmortar.topmortarsales.response.ResponseMessage
+import com.topmortar.topmortarsales.response.ResponsePayment
 import com.topmortar.topmortarsales.response.ResponseSkills
 import com.topmortar.topmortarsales.response.ResponseTukangList
 import com.topmortar.topmortarsales.response.ResponseUsers
@@ -171,23 +174,39 @@ interface ApiService {
     ): ResponseContactList
 
     @GET(SURAT_JALAN)
-    suspend fun getInvoices(
+    suspend fun getSuratJalan(
         @Query("p") processNumber: String,
         @Query("str") contactId: String
-    ): ResponseInvoices
+    ): ResponseSuratJalan
+
+    @GET(INVOICE)
+    suspend fun getInvoices(
+        @Query("id_contact") contactId: String
+    ): ResponseInvoice
+
+    @GET(INVOICE)
+    suspend fun getInvoices(
+        @Query("id_contact") contactId: String,
+        @Query("status") status: String
+    ): ResponseInvoice
+
+    @GET(PAYMENT)
+    suspend fun getPayment(
+        @Query("id_invoice") idInvoice: String
+    ): ResponsePayment
 
     @GET(SURAT_JALAN)
-    suspend fun getInvoicesDetail(
+    suspend fun getSuratJalanDetail(
         @Query("p") processNumber: String,
         @Query("sj") invoiceId: String
-    ): ResponseInvoices
+    ): ResponseSuratJalan
 
     @Multipart
     @POST(SURAT_JALAN)
     suspend fun printInvoice(
         @Part("command") command: RequestBody = createPartFromString("print"),
         @Part("id_surat_jalan") invoiceId: RequestBody
-    ): ResponseInvoices
+    ): ResponseSuratJalan
 
     @Multipart
     @POST(SURAT_JALAN)
@@ -195,13 +214,13 @@ interface ApiService {
         @Part("command") command: RequestBody = createPartFromString("closing"),
         @Part("id_surat_jalan") invoiceId: RequestBody,
         @Part image: MultipartBody.Part,
-    ): ResponseInvoices
+    ): ResponseSuratJalan
 
     @Multipart
     @POST(INVOICE)
     suspend fun addInvoice(
         @Part("id_surat_jalan") invoiceId: RequestBody
-     ): ResponseInvoices
+     ): ResponseInvoice
 
     @GET(SKILL)
     suspend fun getSkills(): ResponseSkills

@@ -1,97 +1,139 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".view.invoice.DetailInvoiceActivity">
+
+    <LinearLayout
+        android:id="@+id/card_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="90dp"
+        android:paddingBottom="150dp"
+        android:gravity="center"
+        android:background="@color/primary"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Total Invoice"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:id="@+id/tv_total_invoice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rp 2.890.000"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:textSize="26sp"/>
+
+    </LinearLayout>
 
     <include
         android:id="@+id/title_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         layout="@layout/component_title_bar_light"/>
 
-    <RelativeLayout
-        android:visibility="visible"
-        android:id="@+id/container"
-        android:layout_below="@+id/title_bar"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+    <LinearLayout
+        android:layout_below="@+id/card_header"
+        android:id="@+id/card_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-120dp"
         android:orientation="vertical">
 
-        <include
-            android:layout_above="@+id/bottom_action"
+        <View
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            layout="@layout/preview_invoice"/>
+            android:layout_height="1dp"
+            android:layout_marginHorizontal="32dp"
+            android:background="@color/white"/>
 
-        <!-- Bottom Action -->
         <LinearLayout
-            android:visibility="gone"
-            android:id="@+id/bottom_action"
-            android:layout_alignParentBottom="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingVertical="16dp"
-            android:paddingHorizontal="8dp"
+            android:layout_marginHorizontal="32dp"
+            android:layout_marginVertical="16dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <Button
-                android:id="@+id/btn_print_invoice"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/tv_date_invoce"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginHorizontal="8dp"
-                android:padding="12dp"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:text="Print" />
+                android:text="Status"
+                android:textColor="@color/white"
+                android:textSize="16sp"/>
 
-            <Button
-                android:id="@+id/btn_closing"
+            <TextView
+                android:id="@+id/tv_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="8dp"
-                android:padding="12dp"
-                android:textSize="18sp"
+                android:text="Paid"
+                android:textAllCaps="true"
                 android:textStyle="bold"
-                android:textColor="@color/black_200"
-                android:backgroundTint="@color/light"
-                android:drawableLeft="@drawable/button_img_camera_lens_black"
-                android:text="Closing" />
-
-            <LinearLayout
-                android:visibility="gone"
-                android:id="@+id/lnr_closing"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="8dp"
-                android:padding="12dp"
-                android:gravity="center"
-                android:background="@drawable/circular_border_black"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:contentDescription="Invoice Image Button"
-                    android:src="@drawable/camera_lens_black" />
-
-            </LinearLayout>
+                android:textColor="@color/white"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="2dp"
+                android:background="@drawable/bg_active_round"
+                android:textSize="12sp"/>
 
         </LinearLayout>
 
-    </RelativeLayout>
+    </LinearLayout>
 
-    <TextView
-        android:visibility="gone"
-        android:id="@+id/txt_loading"
-        android:layout_below="@+id/title_bar"
-        android:layout_width="wrap_content"
+    <androidx.cardview.widget.CardView
+        android:layout_below="@+id/card_status"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:padding="16dp"
-        android:text="@string/txt_loading"
-        android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+        android:layout_marginBottom="16dp"
+        android:layout_marginHorizontal="16dp"
+        app:cardCornerRadius="8dp"
+        android:theme="@style/Theme.TopMortarSales.CardView">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="History payment"
+                android:layout_margin="16dp"
+                android:textStyle="bold"
+                android:textAllCaps="true"
+                android:textSize="16sp"
+                android:alpha="0.5"
+                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_payments"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                tools:listitem="@layout/item_invoice_payment"/>
+
+            <TextView
+                android:visibility="gone"
+                android:id="@+id/text_loading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="There is no payment history yet"
+                android:paddingHorizontal="16dp"
+                android:paddingBottom="16dp"
+                android:textAlignment="center"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
 
 </RelativeLayout>

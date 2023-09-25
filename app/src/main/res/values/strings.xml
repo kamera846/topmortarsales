@@ -135,4 +135,7 @@
         <item>45 Hari</item>
         <item>60 Hari</item>
     </string-array>
+    <string name="title_activity_maps">MapsActivity</string>
+    <string name="maps_key">AIzaSyDLMtfb0qTk0lNWo22mn8hblqCl5OnDELA</string>
+    <string name="topmortar_wa_number">+6287826210888</string>
 </resources>

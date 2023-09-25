@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.provider.MediaStore
 import android.provider.OpenableColumns
+import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -32,6 +33,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.TooltipCompat
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
@@ -41,7 +43,6 @@ import com.topmortar.topmortarsales.commons.BASE_URL
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
-import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
@@ -53,8 +54,12 @@ import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.CONST_URI
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
+import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
+import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.REQUEST_BLUETOOTH_PERMISSIONS
+import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
@@ -64,7 +69,6 @@ import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BID
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BLACKLIST
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
-import com.topmortar.topmortarsales.commons.STATUS_TERMIN_15
 import com.topmortar.topmortarsales.commons.STATUS_TERMIN_30
 import com.topmortar.topmortarsales.commons.STATUS_TERMIN_45
 import com.topmortar.topmortarsales.commons.STATUS_TERMIN_60
@@ -74,14 +78,17 @@ import com.topmortar.topmortarsales.commons.STATUS_TERMIN_COD_TUNAI
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
+import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.PingUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -91,8 +98,9 @@ import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.modal.SendMessageModal
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
-import com.topmortar.topmortarsales.view.invoice.ListInvoiceActivity
-import com.topmortar.topmortarsales.view.invoice.PreviewClosingActivity
+import com.topmortar.topmortarsales.view.MapsActivity
+import com.topmortar.topmortarsales.view.suratJalan.ListSuratJalanActivity
+import com.topmortar.topmortarsales.view.suratJalan.PreviewClosingActivity
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -212,6 +220,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         initVariable()
         initClickHandler()
         dataActivityValidation()
+        checkLocationPermission()
 
         // Get List City
         getCities()
@@ -285,12 +294,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         tvTitleBar.text = "Detail Contact"
         tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
-        // Admin Access
-        if (sessionManager.userKind() == USER_KIND_ADMIN) {
-            icEdit.visibility = View.VISIBLE
-            tvKtpContainer.visibility = View.VISIBLE
-        }
-
         // Setup Date Picker Dialog
         setDatePickerDialog()
 
@@ -332,6 +335,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         btnInvoice.setOnClickListener { navigateToDetailInvoice() }
         etBirthdayContainer.setOnClickListener { datePicker.show() }
         etBirthday.setOnClickListener { datePicker.show() }
+        etMapsContainer.setOnClickListener { getCoordinate() }
+        etMaps.setOnClickListener { getCoordinate() }
         etLocationContainer.setOnClickListener { showSearchModal() }
         etLocation.setOnClickListener { showSearchModal() }
         addressContainer.setOnClickListener {
@@ -352,6 +357,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 datePicker.show()
                 etBirthday.setSelection(etBirthday.length())
             } else etBirthday.clearFocus()
+        }
+        etMaps.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                getCoordinate()
+                etMaps.setSelection(etMaps.length())
+            } else etMaps.clearFocus()
         }
         etLocation.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
@@ -382,6 +393,20 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
 
         })
+//        etMaps.addTextChangedListener(object : TextWatcher {
+//            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+//
+//            }
+//
+//            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+//
+//            }
+//
+//            override fun afterTextChanged(s: Editable?) {
+//                if (isEdit) getCoordinate()
+//            }
+//
+//        })
         etLocation.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
@@ -455,11 +480,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         iMapsUrl = intent.getStringExtra(CONST_MAPS)
         iStatus = intent.getStringExtra(CONST_STATUS)
         iTermin = intent.getStringExtra(CONST_TERMIN)
-        if (!iStatus.isNullOrEmpty()) {
+//        if (!iStatus.isNullOrEmpty()) {
             tooltipStatus.visibility = View.VISIBLE
             if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) btnInvoice.visibility = View.GONE
             else btnInvoice.visibility = View.VISIBLE
-        }
+//        }
         iAddress = intent.getStringExtra(CONST_ADDRESS)
         iLocation = intent.getStringExtra(CONST_LOCATION)
 
@@ -534,114 +559,161 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     }
 
+    private fun checkLocationPermission() {
+        val urlUtility = URLUtility(this)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+            if (urlUtility.isLocationEnabled(this)) {
+
+                val urlUtility = URLUtility(this)
+                urlUtility.requestLocationUpdate()
+
+            } else {
+                val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                startActivity(enableLocationIntent)
+            }
+        } else ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+    }
+
+    private fun getCoordinate() {
+        val data = "${ etMaps.text }"
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            val intent = Intent(this, MapsActivity::class.java)
+            intent.putExtra(CONST_MAPS, data)
+            intent.putExtra(GET_COORDINATE, true)
+            startActivityForResult(intent, REQUEST_EDIT_CONTACT_COORDINATE)
+        } else checkLocationPermission()
+    }
+
     private fun toggleEdit(value: Boolean? = null) {
 
         isEdit = if (value!!) value else !isEdit
 
         if (isEdit) {
 
-            // Hide Case
-            icEdit.visibility = View.GONE
+            if (sessionManager.userKind() == USER_KIND_ADMIN) {
+                // Hide Case
+                icEdit.visibility = View.GONE
 
-            tvName.visibility = View.GONE
-            tvDescription.visibility = View.GONE
+                tvName.visibility = View.GONE
+                tvDescription.visibility = View.GONE
 
-            tvPhoneContainer.visibility = View.GONE
-            tvOwnerContainer.visibility = View.GONE
-            tvLocationContainer.visibility = View.GONE
-            tvMapsContainer.visibility = View.GONE
-            tvBirthdayContainer.visibility = View.GONE
-            tvKtpContainer.visibility = View.GONE
+                tvPhoneContainer.visibility = View.GONE
+                tvOwnerContainer.visibility = View.GONE
+                tvLocationContainer.visibility = View.GONE
+                tvMapsContainer.visibility = View.GONE
+                tvBirthdayContainer.visibility = View.GONE
+                tvKtpContainer.visibility = View.GONE
 
-            btnSendMessage.visibility = View.GONE
-            btnInvoice.visibility = View.GONE
+                btnSendMessage.visibility = View.GONE
+                btnInvoice.visibility = View.GONE
 
-            // Show Case
-            tvTitleBar.text = "Edit Contact"
-            icClose.visibility = View.VISIBLE
+                // Show Case
+                tvTitleBar.text = "Edit Contact"
+                icClose.visibility = View.VISIBLE
 
-            etName.visibility = View.VISIBLE
+                etName.visibility = View.VISIBLE
 
-            etPhoneContainer.visibility = View.VISIBLE
-            etOwnerContainer.visibility = View.VISIBLE
-            etLocationContainer.visibility = View.VISIBLE
-            etMapsContainer.visibility = View.VISIBLE
-            etBirthdayContainer.visibility = View.VISIBLE
-            etKtpContainer.visibility = View.VISIBLE
-            tvSelectedKtp.visibility = View.VISIBLE
-            tvSelectedKtp.text = "Selected file: "
+                etPhoneContainer.visibility = View.VISIBLE
+                etOwnerContainer.visibility = View.VISIBLE
+                etLocationContainer.visibility = View.VISIBLE
+                etMapsContainer.visibility = View.VISIBLE
+                etBirthdayContainer.visibility = View.VISIBLE
+                etKtpContainer.visibility = View.VISIBLE
+                tvSelectedKtp.visibility = View.VISIBLE
+                tvSelectedKtp.text = "Selected file: "
 
-            // Other Columns Handle
-            addressContainer.setBackgroundResource(R.drawable.et_background)
-            etAddress.isEnabled = true
-            if (iAddress.isNullOrEmpty()) etAddress.setText("")
+                // Other Columns Handle
+                addressContainer.setBackgroundResource(R.drawable.et_background)
+                etAddress.isEnabled = true
+                if (iAddress.isNullOrEmpty()) etAddress.setText("")
 
-            statusContainer.setBackgroundResource(R.drawable.et_background)
-            tooltipStatus.visibility = View.GONE
-            tvStatus.visibility = View.GONE
-            spinStatus.visibility = View.VISIBLE
-            terminContainer.setBackgroundResource(R.drawable.et_background)
-            tvTermin.visibility = View.GONE
-            spinTermin.visibility = View.VISIBLE
+                statusContainer.setBackgroundResource(R.drawable.et_background)
+                tooltipStatus.visibility = View.GONE
+                tvStatus.visibility = View.GONE
+                spinStatus.visibility = View.VISIBLE
+                terminContainer.setBackgroundResource(R.drawable.et_background)
+                tvTermin.visibility = View.GONE
+                spinTermin.visibility = View.VISIBLE
 
+                btnSaveEdit.visibility = View.VISIBLE
 
-            btnSaveEdit.visibility = View.VISIBLE
+                etName.requestFocus()
+                etName.setSelection(etName.text.length)
+            } else if (sessionManager.userKind() == USER_KIND_SALES) {
+                icEdit.visibility = View.GONE
+                tvMapsContainer.visibility = View.GONE
+                btnSendMessage.visibility = View.GONE
 
-            etName.requestFocus()
-            etName.setSelection(etName.text.length)
+                tvTitleBar.text = "Edit Contact"
+                icClose.visibility = View.VISIBLE
+                etMapsContainer.visibility = View.VISIBLE
+                btnSaveEdit.visibility = View.VISIBLE
+            }
 
         } else {
 
-            // Show Case
-            icEdit.visibility = View.VISIBLE
+            if (sessionManager.userKind() == USER_KIND_ADMIN) {
+                // Show Case
+                icEdit.visibility = View.VISIBLE
 
-            tvName.visibility = View.VISIBLE
-            tvDescription.visibility = View.VISIBLE
+                tvName.visibility = View.VISIBLE
+                tvDescription.visibility = View.VISIBLE
 
-            tvPhoneContainer.visibility = View.VISIBLE
-            tvOwnerContainer.visibility = View.VISIBLE
-            tvLocationContainer.visibility = View.VISIBLE
-            tvMapsContainer.visibility = View.VISIBLE
-            tvBirthdayContainer.visibility = View.VISIBLE
-            tvKtpContainer.visibility = View.VISIBLE
+                tvPhoneContainer.visibility = View.VISIBLE
+                tvOwnerContainer.visibility = View.VISIBLE
+                tvLocationContainer.visibility = View.VISIBLE
+                tvMapsContainer.visibility = View.VISIBLE
+                tvBirthdayContainer.visibility = View.VISIBLE
+                tvKtpContainer.visibility = View.VISIBLE
 
-            btnSendMessage.visibility = View.VISIBLE
+                btnSendMessage.visibility = View.VISIBLE
 
-            // Hide Case
-            tvTitleBar.text = "Detail Contact"
-            icClose.visibility = View.GONE
+                // Hide Case
+                tvTitleBar.text = "Detail Contact"
+                icClose.visibility = View.GONE
 
-            etName.visibility = View.GONE
+                etName.visibility = View.GONE
 
-            etPhoneContainer.visibility = View.GONE
-            etOwnerContainer.visibility = View.GONE
-            etLocationContainer.visibility = View.GONE
-            etMapsContainer.visibility = View.GONE
-            etBirthdayContainer.visibility = View.GONE
-            etKtpContainer.visibility = View.GONE
-            tvSelectedKtp.visibility = View.GONE
-            selectedUri = null
+                etPhoneContainer.visibility = View.GONE
+                etOwnerContainer.visibility = View.GONE
+                etLocationContainer.visibility = View.GONE
+                etMapsContainer.visibility = View.GONE
+                etBirthdayContainer.visibility = View.GONE
+                etKtpContainer.visibility = View.GONE
+                tvSelectedKtp.visibility = View.GONE
+                selectedUri = null
 
-            // Other Columns Handle
-            addressContainer.setBackgroundResource(R.drawable.background_rounded)
-            etAddress.isEnabled = false
-            if (iAddress.isNullOrEmpty()) etAddress.setText(EMPTY_FIELD_VALUE)
+                // Other Columns Handle
+                addressContainer.setBackgroundResource(R.drawable.background_rounded)
+                etAddress.isEnabled = false
+                if (iAddress.isNullOrEmpty()) etAddress.setText(EMPTY_FIELD_VALUE)
 
-            statusContainer.setBackgroundResource(R.drawable.background_rounded)
-            if (!iStatus.isNullOrEmpty()) {
+                statusContainer.setBackgroundResource(R.drawable.background_rounded)
+//            if (!iStatus.isNullOrEmpty()) {
                 tooltipStatus.visibility = View.VISIBLE
                 if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) btnInvoice.visibility = View.GONE
                 else btnInvoice.visibility = View.VISIBLE
+//            }
+                tvStatus.visibility = View.VISIBLE
+                spinStatus.visibility = View.GONE
+                terminContainer.setBackgroundResource(R.drawable.background_rounded)
+                tvTermin.visibility = View.VISIBLE
+                spinTermin.visibility = View.GONE
+
+                btnSaveEdit.visibility = View.GONE
+
+                etName.clearFocus()
+            } else if (sessionManager.userKind() == USER_KIND_SALES) {
+                icEdit.visibility = View.VISIBLE
+                tvMapsContainer.visibility = View.VISIBLE
+                btnSendMessage.visibility = View.VISIBLE
+
+                tvTitleBar.text = "Detail Contact"
+                icClose.visibility = View.GONE
+                etMapsContainer.visibility = View.GONE
+                btnSaveEdit.visibility = View.GONE
             }
-            tvStatus.visibility = View.VISIBLE
-            spinStatus.visibility = View.GONE
-            terminContainer.setBackgroundResource(R.drawable.background_rounded)
-            tvTermin.visibility = View.VISIBLE
-            spinTermin.visibility = View.GONE
-
-            btnSaveEdit.visibility = View.GONE
-
-            etName.clearFocus()
 
         }
 
@@ -705,6 +777,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         loadingState(true)
 
+//        Handler().postDelayed({
+//            handleMessage(this, "TAG SAVE", "${contactId!!}, ${formatPhoneNumber(pPhone)}, $pName, $pOwner, $pBirthday, $pMapsUrl, ${pCityID!!}, $pAddress, $pStatus, $imagePart, $pTermin")
+//            loadingState(false)
+//        }, 1000)
+//
+//        return
+
         lifecycleScope.launch {
             try {
 
@@ -757,9 +836,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             etPhone.setText(formatPhoneNumber("${ etPhone.text }"))
                             iAddress = "${ etAddress.text }"
 
-                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
-                            loadingState(false)
-                            toggleEdit(false)
+//                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
+//                            loadingState(false)
+//                            toggleEdit(false)
 
                             if (!etOwner.text.isNullOrEmpty()) tvOwner.text = "${ etOwner.text }"
                             else tvOwner.text = EMPTY_FIELD_VALUE
@@ -778,15 +857,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             } else tvLocation.text = EMPTY_FIELD_VALUE
 
                             iStatus = if (!pStatus.isNullOrEmpty()) pStatus else null
-                            if (!iStatus.isNullOrEmpty()) {
-                                if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) {
-                                    btnInvoice.visibility = View.GONE
-                                } else btnInvoice.visibility = View.VISIBLE
-                            }
-                            setupStatus(iStatus)
+////                            if (!iStatus.isNullOrEmpty()) {
+//                                if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) {
+//                                    btnInvoice.visibility = View.GONE
+//                                } else btnInvoice.visibility = View.VISIBLE
+////                            }
+//                            setupStatus(iStatus)
 
                             iTermin = if (!pTermin.isNullOrEmpty()) pTermin else null
-                            setupTermin(iTermin)
+//                            setupTermin(iTermin)
 
                             // Remove image temp
                             currentPhotoUri?.let {
@@ -855,6 +934,19 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 tvKtp.text = "Click to open preview KTP"
                                 iKtp = data.ktp_owner
                             }
+
+                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
+                            loadingState(false)
+                            toggleEdit(false)
+
+//                            if (!iStatus.isNullOrEmpty()) {
+                            if (iStatus == STATUS_CONTACT_BLACKLIST || sessionManager.userKind() == USER_KIND_SALES) {
+                                btnInvoice.visibility = View.GONE
+                            } else btnInvoice.visibility = View.VISIBLE
+//                            }
+
+                            setupStatus(iStatus)
+                            setupTermin(iTermin)
 
                             hasEdited = true
                             loadingState(false)
@@ -951,10 +1043,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         } else if (!PhoneHandler.phoneValidation(phone, etPhone)) {
             etPhone.requestFocus()
             false
-        } else if (mapsUrl.isNotEmpty() && !isValidUrl(mapsUrl)) {
-            etMaps.error = "Please enter a valid URL!"
-            etMaps.requestFocus()
-            false
+//        } else if (mapsUrl.isNotEmpty() && !isValidUrl(mapsUrl)) {
+//            etMaps.error = "Please enter a valid URL!"
+//            etMaps.requestFocus()
+//            false
 //        } else if (owner.isEmpty()) {
 //            etName.error = null
 //            etName.clearFocus()
@@ -1054,7 +1146,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun navigateToDetailInvoice() {
 
-        val intent = Intent(this@DetailContactActivity, ListInvoiceActivity::class.java)
+        val intent = Intent(this@DetailContactActivity, ListSuratJalanActivity::class.java)
 
         intent.putExtra(CONST_CONTACT_ID, contactId)
         if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
@@ -1078,10 +1170,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         sendMessageModal = SendMessageModal(this, lifecycleScope)
         if (item != null) sendMessageModal.setItem(item)
 
-
         // Setup Indicator
         setupNetworkIndicator()
-
     }
 
     private fun showSearchModal() {
@@ -1121,6 +1211,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         } else {
                             tvLocation.text = EMPTY_FIELD_VALUE
                             etLocation.setText("")
+                        }
+
+                        // Admin Access
+                        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_SALES) {
+                            icEdit.visibility = View.VISIBLE
+                            val indicatorImageView = findViewById<View>(R.id.indicatorView)
+                            indicatorImageView.visibility = View.VISIBLE
+                            if (sessionManager.userKind() == USER_KIND_ADMIN) tvKtpContainer.visibility = View.VISIBLE
                         }
                     }
                     RESPONSE_STATUS_EMPTY -> {
@@ -1163,8 +1261,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 overlayMaps.alpha = 0f
                 overlayMaps.visibility = View.GONE
 
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(iMapsUrl))
-                startActivity(intent)
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    val intent = Intent(this@DetailContactActivity, MapsActivity::class.java)
+                    intent.putExtra(CONST_MAPS, iMapsUrl)
+                    startActivity(intent)
+                } else checkLocationPermission()
             }, animateDuration)
         }
     }
@@ -1172,7 +1273,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private fun previewKtp() {
         if (!iKtp.isNullOrEmpty() && iKtp != EMPTY_FIELD_VALUE && !isEdit) {
 
-//            val imageUrl = "https://cdn.popmama.com/content-images/community/20221018/community-6151307037af4cffa62490fdc39e65b7.jpg"
             val imageUrl = BASE_URL + "img/" + iKtp
             val intent = Intent(this, PreviewKtpActivity::class.java)
             intent.putExtra(CONST_KTP, imageUrl)
@@ -1193,7 +1293,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun setupStatus(status: String? = null) {
         tooltipStatus.visibility = View.VISIBLE
-        when (status) {STATUS_CONTACT_DATA -> {
+        when (status) {
+            STATUS_CONTACT_DATA -> {
                 tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_data))
                 tooltipHandler(tooltipStatus, "Customer Status is Data")
                 tvStatus.text = statusItem[1]
@@ -1280,6 +1381,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
         }
 
+        selectedStatus = iStatus!!
         setupStatus(iStatus)
     }
 
@@ -1299,18 +1401,26 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
         }
 
+        selectedTermin = when (iTermin) {
+             STATUS_TERMIN_COD -> terminItem[1]
+             STATUS_TERMIN_COD_TF -> terminItem[2]
+             STATUS_TERMIN_COD_TUNAI -> terminItem[3]
+             STATUS_TERMIN_30 -> terminItem[4]
+             STATUS_TERMIN_45 -> terminItem[5]
+             STATUS_TERMIN_60 -> terminItem[6]
+            else -> "-1"
+        }
         setupTermin(iTermin)
     }
 
     private fun setupNetworkIndicator() {
-        val indicatorImageView = findViewById<View>(R.id.indicatorView) // Ganti dengan ID tampilan indikator Anda
-        indicatorImageView.visibility = View.VISIBLE
-        if (sessionManager.userKind() == USER_KIND_ADMIN) {
+        val indicatorImageView = findViewById<View>(R.id.indicatorView)
+        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_SALES) {
             val layoutParams = indicatorImageView.layoutParams as ViewGroup.MarginLayoutParams
             layoutParams.marginEnd = 0
             layoutParams.marginStart = 16
         }
-        val pingIntervalMillis = 2000L // Ganti dengan interval yang Anda inginkan (dalam milidetik)
+        val pingIntervalMillis = 1000L // milidetik
 
         val pingTimer = Timer()
         pingTimer.scheduleAtFixedRate(object : TimerTask() {
@@ -1387,6 +1497,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             if (resultData == SYNC_NOW) hasEdited = true
 
+        } else if (requestCode == REQUEST_EDIT_CONTACT_COORDINATE) {
+            val latitude = data?.getDoubleExtra("latitude", 0.0)
+            val longitude = data?.getDoubleExtra("longitude", 0.0)
+            if (latitude != null && longitude != null) etMaps.setText("$latitude,$longitude")
+            etMaps.error = null
+            etMaps.clearFocus()
         }
 
     }
@@ -1404,6 +1520,22 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     override fun onPingResult(pingResult: Int?) {
         sendMessageModal.setPingStatus(pingResult)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) checkLocationPermission()
+            else {
+                val customUtility = CustomUtility(this)
+                if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    val message = "Location permissions are required for this apps. Please grant the permissions."
+                    customUtility.showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE) }
+                } else customUtility.showPermissionDeniedDialog("Location permissions are required for this apps. Please enable them in the app settings.")
+            }
+        }
+
     }
 
 }

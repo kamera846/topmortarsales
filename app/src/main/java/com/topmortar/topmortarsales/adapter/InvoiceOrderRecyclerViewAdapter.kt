@@ -10,13 +10,13 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.model.DetailInvoiceModel
+import com.topmortar.topmortarsales.model.DetailSuratJalanModel
 
 class InvoiceOrderRecyclerViewAdapter() : RecyclerView.Adapter<InvoiceOrderRecyclerViewAdapter.ViewHolder>() {
-    private var listItem: ArrayList<DetailInvoiceModel> = ArrayList()
+    private var listItem: ArrayList<DetailSuratJalanModel> = ArrayList()
     private var context: Context? = null
 
-    fun setListItem(listItem: ArrayList<DetailInvoiceModel>) {
+    fun setListItem(listItem: ArrayList<DetailSuratJalanModel>) {
         this.listItem = listItem
     }
 
@@ -27,7 +27,7 @@ class InvoiceOrderRecyclerViewAdapter() : RecyclerView.Adapter<InvoiceOrderRecyc
         private val tvProductName: TextView = itemView.findViewById(R.id.tv_product_name)
         private val tvProductSerialNumber: TextView = itemView.findViewById(R.id.tv_product_serial_number)
 
-        fun bind(item: DetailInvoiceModel) {
+        fun bind(item: DetailSuratJalanModel) {
 
             tvProductId.text = item.id_produk
             tvQtyNumber.text = item.qty_produk

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:map="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".view.MapsActivity">
+
+    <LinearLayout
+        android:visibility="gone"
+        android:layout_alignParentTop="true"
+        android:id="@+id/search_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <include
+            layout="@layout/component_search_box"/>
+
+        <EditText
+            android:visibility="gone"
+            android:id="@+id/inputSearchPlace"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingHorizontal="8dp"
+            android:paddingVertical="8dp"
+            android:layout_marginEnd="8dp"
+            android:inputType="text"
+            android:textSize="14sp"
+            android:background="@drawable/et_background"
+            android:text=""
+            android:hint="Enter place name..."/>
+
+        <Button
+            android:visibility="gone"
+            android:id="@+id/btnSearchPlace"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="0dp"
+            android:text="Search"/>
+
+    </LinearLayout>
+
+    <fragment
+        android:layout_below="@+id/search_bar"
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="com.google.android.gms.maps.SupportMapFragment"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:visibility="gone"
+        android:layout_below="@+id/search_bar"
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="8dp"
+        tools:listitem="@layout/item_place"
+        android:theme="@style/Theme.TopMortarSales.BaseBackground"/>
+
+    <Button
+        android:visibility="gone"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/btnGetDistance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Calculate Distance"
+        android:layout_gravity="center"
+        android:layout_margin="16dp"/>
+
+    <Button
+        android:visibility="gone"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/btnGetLatLng"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Get Coordinate"
+        android:layout_gravity="center"
+        android:layout_margin="16dp"/>
+
+</RelativeLayout>
