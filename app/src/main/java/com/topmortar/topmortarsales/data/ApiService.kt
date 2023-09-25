@@ -184,6 +184,12 @@ interface ApiService {
         @Query("id_contact") contactId: String
     ): ResponseInvoice
 
+    @GET(INVOICE)
+    suspend fun getInvoices(
+        @Query("id_contact") contactId: String,
+        @Query("status") status: String
+    ): ResponseInvoice
+
     @GET(PAYMENT)
     suspend fun getPayment(
         @Query("id_invoice") idInvoice: String

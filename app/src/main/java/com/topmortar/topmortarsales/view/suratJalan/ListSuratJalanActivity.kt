@@ -44,6 +44,7 @@ import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.view.invoice.DetailInvoiceActivity
 import com.topmortar.topmortarsales.model.InvoiceModel
 import com.topmortar.topmortarsales.model.SuratJalanModel
+import com.topmortar.topmortarsales.response.ResponseInvoice
 import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
@@ -218,7 +219,22 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
         lifecycleScope.launch {
             try {
 
-                val response = apiService.getInvoices(contactId = contactId!!)
+                val response: ResponseInvoice
+
+                when (isFilterInvoice) {
+                    FILTER_PAID -> {
+                        tvFilter.text = "Paid"
+                        response = apiService.getInvoices(contactId = contactId!!, "paid")
+                    }
+                    FILTER_UNPAID -> {
+                        tvFilter.text = "Unpaid"
+                        response = apiService.getInvoices(contactId = contactId!!, status = "waiting")
+                    }
+                    else -> {
+                        tvFilter.text = "None"
+                        response = apiService.getInvoices(contactId = contactId!!)
+                    }
+                }
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -227,11 +243,6 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
                         loadingState(false)
 
                         llFilter.visibility = View.VISIBLE
-                        when (isFilterInvoice) {
-                            FILTER_PAID -> tvFilter.text = "Paid"
-                            FILTER_UNPAID -> tvFilter.text = "Unpaid"
-                            else -> tvFilter.text = "None"
-                        }
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
