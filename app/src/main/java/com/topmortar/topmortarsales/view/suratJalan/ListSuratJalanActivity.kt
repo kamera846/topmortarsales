@@ -345,7 +345,10 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
                     true
                 }
                 R.id.option_invoices -> {
-                    if (isListActive != LIST_INVOICE) toggleList(LIST_INVOICE)
+                    if (isListActive != LIST_INVOICE) {
+                        isFilterInvoice = FILTER_NONE
+                        toggleList(LIST_INVOICE)
+                    }
                     true
                 }
                 else -> false
