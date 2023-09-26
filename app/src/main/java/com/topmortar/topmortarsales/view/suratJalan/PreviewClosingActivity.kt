@@ -62,7 +62,9 @@ class PreviewClosingActivity : AppCompatActivity() {
     }
 
     private fun executeClosing() {
+
         loadingState(true)
+
         lifecycleScope.launch {
             try {
 
@@ -78,7 +80,7 @@ class PreviewClosingActivity : AppCompatActivity() {
                     else -> {
 
                         handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, "Failed to closing. Err: ${response.message}")
-                        loadingState(true)
+                        loadingState(false)
 
                     }
                 }
@@ -86,7 +88,7 @@ class PreviewClosingActivity : AppCompatActivity() {
             } catch (e: Exception) {
 
                 handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
-                loadingState(true)
+                loadingState(false)
 
             }
 
@@ -95,7 +97,9 @@ class PreviewClosingActivity : AppCompatActivity() {
     }
 
     private fun createInvoice() {
+
         loadingState(true)
+
         lifecycleScope.launch {
             try {
 
@@ -119,7 +123,7 @@ class PreviewClosingActivity : AppCompatActivity() {
                     else -> {
 
                         handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, "Failed to closing. Err: ${response.message}")
-                        loadingState(true)
+                        loadingState(false)
 
                     }
                 }
@@ -127,7 +131,7 @@ class PreviewClosingActivity : AppCompatActivity() {
             } catch (e: Exception) {
 
                 handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
-                loadingState(true)
+                loadingState(false)
 
             }
 
@@ -152,7 +156,7 @@ class PreviewClosingActivity : AppCompatActivity() {
     }
 
     private fun initClickHandler() {
-        icBack.setOnClickListener { finish() }
+        icBack.setOnClickListener { onBackHandler() }
         btnUpload.setOnClickListener { executeClosing() }
 
     }

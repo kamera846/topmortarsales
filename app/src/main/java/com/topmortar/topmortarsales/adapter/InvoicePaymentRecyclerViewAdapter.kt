@@ -28,10 +28,10 @@ class InvoicePaymentRecyclerViewAdapter: RecyclerView.Adapter<InvoicePaymentRecy
 
         fun bind(item: InvoicePaymentModel) {
 
-            tvName.text = DateFormat.format(dateString = item.date_payment, input = "yyyy-MM-dd hh:mm:ss", format = "dd MMMM yyyy")
+            tvName.text = DateFormat.format(dateString = item.date_payment, input = "yyyy-MM-dd hh:mm:ss", format = "EEEE, dd MMMM yyyy")
             tvPrice.text = CurrencyFormat.format(amount = item.amount_payment.toDouble())
 //            tvDescription.text = item.debt.let { if (it != "0") "Remaining - ${CurrencyFormat.format(amount = it.toDouble())}" else "Paid"}
-            tvDescription.text = "at " + DateFormat.format(dateString = item.date_payment, input = "yyyy-MM-dd hh:mm:ss", format = "hh:mm")
+            tvDescription.text = DateFormat.format(dateString = item.date_payment, input = "yyyy-MM-dd hh:mm:ss", format = "hh:mm") + " WIB"
 
         }
 

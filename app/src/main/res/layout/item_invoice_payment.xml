@@ -18,7 +18,7 @@
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:text="20 Sep 2023, 20:36"
+            android:text="Tuesday, 26 September 2023"
             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
         <TextView
@@ -29,7 +29,7 @@
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:text="Rp 276.000"
+            android:text="-"
             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
     </RelativeLayout>
@@ -38,8 +38,7 @@
         android:id="@+id/tv_description"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textStyle="italic"
-        android:text="Remaining - Rp 0"
+        android:text="12.30 WIB"
         android:textSize="16sp"
         android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
