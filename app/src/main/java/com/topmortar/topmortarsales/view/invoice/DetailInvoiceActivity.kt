@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -29,6 +30,7 @@ import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.InvoicePaymentModel
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 class DetailInvoiceActivity : AppCompatActivity() {
 
@@ -41,7 +43,6 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
         supportActionBar?.hide()
         sessionManager = SessionManager(this)
-//        changeStatusBarColor(this, R.color.primary_200)
 
         setContentView(R.layout.activity_detail_invoice)
 
@@ -50,6 +51,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
         initVariable()
         initClickHandler()
         dataActivityValidation()
+        getList()
     }
 
     private fun loadingState(state: Boolean, message: String = getString(R.string.txt_loading)) {
@@ -78,17 +80,49 @@ class DetailInvoiceActivity : AppCompatActivity() {
             try {
 
                 val response = apiService.getPayment(iInvoiceID)
+                var totalPay = 0.0
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        setRecyclerView(response.results)
+                        val data = response.results
+                        setRecyclerView(data)
+
+                        for (item in data.listIterator()) {
+                            totalPay += item.amount_payment.toDouble()
+                        }
+
+                        val dateLastPayment = data[data.lastIndex].date_payment
+                        val remaining = totalInvoice.toDouble() - totalPay
+
+                        val iStatusInvoice = intent.getStringExtra(CONST_STATUS_INVOICE)
+                        if (!iStatusInvoice.isNullOrEmpty()) {
+                            if (iStatusInvoice == INVOICE_PAID) {
+                                tvDateInvoice.text = DateFormat.format(dateString = dateLastPayment, input = "yyyy-MM-dd hh:mm:ss", format = "EEEE, dd MMMM yyyy")
+                                tvStatus.text = "paid".uppercase(Locale.ROOT)
+                                tvStatus.setTextColor(getColor(R.color.white))
+                                tvStatus.setBackgroundDrawable(getDrawable(R.drawable.bg_active_round))
+                            } else {
+                                tvDateInvoice.text = "Remaining"
+                                tvStatus.text = CurrencyFormat.format(remaining)
+                                tvStatus.setTextColor(getColor(R.color.black_200))
+                                tvStatus.setBackgroundDrawable(getDrawable(R.drawable.bg_data_round))
+                            }
+                        }
+
                         loadingState(false)
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
+                        val remaining = totalInvoice.toDouble() - totalPay
+                        tvDateInvoice.text = "Remaining"
+                        tvStatus.text = CurrencyFormat.format(remaining)
+                        tvStatus.setTextColor(getColor(R.color.black_200))
+                        tvStatus.setBackgroundDrawable(getDrawable(R.drawable.bg_data_round))
+
                         loadingState(true, "There is no payment history yet")
+
 
                     }
                     else -> {
@@ -146,33 +180,21 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
         iInvoiceID = intent.getStringExtra(CONST_INVOICE_ID)!!
         val iInvoiceNumber = intent.getStringExtra(CONST_INVOICE_NUMBER)
-        val iStatusInvoice = intent.getStringExtra(CONST_STATUS_INVOICE)
         val iTotalInvoice = intent.getStringExtra(CONST_TOTAL_INVOICE)
-        val iDateInvoice = intent.getStringExtra(CONST_DATE_INVOICE)
+//        val iDateInvoice = intent.getStringExtra(CONST_DATE_INVOICE)
+//
+//        if (!iDateInvoice.isNullOrEmpty()) tvDateInvoice.text = DateFormat.format(dateString = iDateInvoice, input = "yyyy-MM-dd hh:mm:ss", format = "dd MMMM yyyy, hh:mm")
+//        else tvDateInvoice.text = "Status"
 
-        if (!iDateInvoice.isNullOrEmpty()) tvDateInvoice.text = DateFormat.format(dateString = iDateInvoice, input = "yyyy-MM-dd hh:mm:ss", format = "dd MMMM yyyy, hh:mm")
-        else tvDateInvoice.text = "Status"
-
-        if (!iTotalInvoice.isNullOrEmpty()) tvTotalInvoice.text = CurrencyFormat.format(iTotalInvoice.toDouble())
-        else tvTotalInvoice.text = CurrencyFormat.format(0.0)
+        if (!iTotalInvoice.isNullOrEmpty()) {
+            totalInvoice = iTotalInvoice
+            tvTotalInvoice.text = CurrencyFormat.format(totalInvoice.toDouble())
+        } else tvTotalInvoice.text = CurrencyFormat.format(0.0)
 
         if (!iInvoiceNumber.isNullOrEmpty()) {
             invoiceNumber = iInvoiceNumber.toString()
             tvTitleBar.text = "${tvTitleBar.text} - $invoiceNumber"
         }
-        if (!iStatusInvoice.isNullOrEmpty()) {
-            if (iStatusInvoice == INVOICE_PAID) {
-                tvStatus.text = "paid"
-                tvStatus.setTextColor(getColor(R.color.white))
-                tvStatus.setBackgroundDrawable(getDrawable(R.drawable.bg_active_round))
-            } else {
-                tvStatus.text = "unpaid"
-                tvStatus.setTextColor(getColor(R.color.black_200))
-                tvStatus.setBackgroundDrawable(getDrawable(R.drawable.bg_data_round))
-            }
-        }
-
-        getList()
 
     }
 
@@ -185,6 +207,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
         tvDateInvoice = findViewById(R.id.tv_date_invoce)
         tvLoading = findViewById(R.id.text_loading)
         rvPayments = findViewById(R.id.rv_payments)
+        cardStatus = findViewById(R.id.card_status)
 
         icBack.setImageDrawable(getDrawable(R.drawable.arrow_back_white))
         tvTitleBar.text = "Detail Invoice"
@@ -205,9 +228,11 @@ class DetailInvoiceActivity : AppCompatActivity() {
     private lateinit var tvDateInvoice: TextView
     private lateinit var tvLoading: TextView
     private lateinit var rvPayments: RecyclerView
+    private lateinit var cardStatus: LinearLayout
 
     private var invoiceNumber = ""
     private var iInvoiceID = ""
+    private var totalInvoice = "0"
 
     private lateinit var apiService: ApiService
 

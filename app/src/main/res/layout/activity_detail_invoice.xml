@@ -28,7 +28,7 @@
             android:id="@+id/tv_total_invoice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Rp 2.890.000"
+            android:text="-"
             android:textStyle="bold"
             android:textColor="@color/white"
             android:textSize="26sp"/>
@@ -68,7 +68,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Status"
+                android:text="-"
                 android:textColor="@color/white"
                 android:textSize="16sp"/>
 
@@ -76,13 +76,12 @@
                 android:id="@+id/tv_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Paid"
-                android:textAllCaps="true"
+                android:text="-"
                 android:textStyle="bold"
-                android:textColor="@color/white"
+                android:textColor="@color/black_200"
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="2dp"
-                android:background="@drawable/bg_active_round"
+                android:background="@drawable/bg_data_round"
                 android:textSize="12sp"/>
 
         </LinearLayout>
@@ -129,7 +128,6 @@
                 android:text="There is no payment history yet"
                 android:paddingHorizontal="16dp"
                 android:paddingBottom="16dp"
-                android:textAlignment="center"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
         </LinearLayout>
