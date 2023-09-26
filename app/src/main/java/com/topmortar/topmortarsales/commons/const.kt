@@ -3,12 +3,12 @@ package com.topmortar.topmortarsales.commons
 import android.widget.Toast
 
 // Services
-//const val BASE_URL = "https://saleswa.topmortarindonesia.com/" // Production
-const val BASE_URL = "https://dev-saleswa.topmortarindonesia.com/" // Development
+const val BASE_URL = "https://saleswa.topmortarindonesia.com/" // Production
+//const val BASE_URL = "https://dev-saleswa.topmortarindonesia.com/" // Development
 
 // Ping Host
-//const val PING_HOST = "saleswa.topmortarindonesia.com" // Production
-const val PING_HOST = "dev-saleswa.topmortarindonesia.com" // Development
+const val PING_HOST = "saleswa.topmortarindonesia.com" // Production
+//const val PING_HOST = "dev-saleswa.topmortarindonesia.com" // Development
 
 const val PING_NORMAL = 0
 const val PING_MEDIUM = 2
