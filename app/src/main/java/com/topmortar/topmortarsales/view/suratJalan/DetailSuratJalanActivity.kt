@@ -17,6 +17,7 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.provider.MediaStore
@@ -544,7 +545,19 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
     private fun printNow() {
 
-        if (hasBluetoothPermissions()) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (hasBluetoothPermissions()) {
+                if (bluetoothAdapter.isEnabled) {
+                    if (checkPermission()) {
+                        val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter.bondedDevices
+                        showPrinterSelectionDialog(pairedDevices)
+                    }
+                } else {
+                    val enableBluetoothIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                    startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BLUETOOTH)
+                }
+            } else requestBluetoothPermissions()
+        } else {
             if (bluetoothAdapter.isEnabled) {
                 if (checkPermission()) {
                     val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter.bondedDevices
@@ -554,7 +567,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                 val enableBluetoothIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                 startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BLUETOOTH)
             }
-        } else requestBluetoothPermissions()
+        }
 
     }
 
@@ -623,63 +636,6 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
                         val data = response.results[0]
                         printEscPos(data)
-//                        val orders = data.details.let { if (it.isNullOrEmpty()) arrayListOf() else it }
-
-//                        val txtReferenceNumber = "${ data.no_surat_jalan }"
-////                        val txtDeliveryDate = "${ data.dalivery_date }"
-//                        val txtShipToName = "${ data.ship_to_name }"
-//                        val txtShipToAddress = "${ data.ship_to_address }"
-//                        val txtShipToPhone = "${ data.ship_to_phone }"
-//                        val txtDeliveryOrderDate = "Delivery Date: ${ data.dalivery_date }"
-//                        val txtPrintedDate = "Printed Date: ${ data.date_printed }"
-//                        val txtCourier = "Kurir: ${ data.courier_name }"
-//                        val txtVehicle = "Kendaraan: ${ data.nama_kendaraan }"
-//                        val txtVehicleNumber = "No. Polisi: ${ data.nopol_kendaraan }"
-//
-//                        val bytes = ArrayList<ByteArray>()
-//                        bytes.add(printerManager.textLeft("~"))
-//                        bytes.add(printerManager.textEnter(gap*8))
-//                        bytes.add(printerManager.textCenter(txtReferenceNumber))
-//                        bytes.add(printerManager.textEnter(gap))
-//                        bytes.add(printerManager.textCenter("Distributor Indonesia"))
-//                        bytes.add(printerManager.textCenter("PT. TOP MORTAR INDONESIA"))
-////                        bytes.add(printerManager.textCenter(txtDeliveryDate))
-//                        bytes.add(printerManager.textEnter(gap))
-//                        bytes.add(printerManager.textLeft("Shipped to:"))
-//                        bytes.add(printerManager.textLeft(txtShipToName))
-//                        bytes.add(printerManager.textLeft(txtShipToAddress))
-//                        bytes.add(printerManager.textLeft(txtShipToPhone))
-//                        bytes.add(printerManager.textEnter(gap))
-//                        bytes.add(printerManager.textLeft("Delivery Order"))
-//                        bytes.add(printerManager.textLeft(txtDeliveryOrderDate))
-//                        bytes.add(printerManager.textLeft(txtPrintedDate))
-//                        bytes.add(printerManager.textEnter(gap))
-//                        bytes.add(printerManager.textBetween("Daftar Pesanan", "Qty"))
-//                        orders.forEach {
-//                            bytes.add(printerManager.textBetween(it.nama_produk, it.qty_produk))
-//                            if (it.is_bonus == "1") {
-//                                bytes.add(printerManager.textLeft("Free"))
-//                            }
-//                            bytes.add(printerManager.textEnter(gap))
-//                        }
-//                        bytes.add(printerManager.textLeft("Description"))
-//                        bytes.add(printerManager.textLeft(txtCourier))
-//                        bytes.add(printerManager.textLeft(txtVehicle))
-//                        bytes.add(printerManager.textLeft(txtVehicleNumber))
-//                        bytes.add(printerManager.textEnter(gap))
-//                        bytes.add(printerManager.textLeft("Received By:"))
-//                        bytes.add(printerManager.textEnter(gap*8))
-//                        bytes.add(printerManager.textCenterBoldUnderline(txtShipToName))
-//                        bytes.add(printerManager.textEnter(gap*2))
-//                        bytes.add(printerManager.textLeft("~"))
-//                        bytes.add(printerManager.textEnter(gap*2))
-//
-//                        Handler().postDelayed({
-//                            printerManager.connectToDevice(device, bytes)
-//                            Handler().postDelayed({
-//                                printingState(false)
-//                            }, 1000)
-//                        }, 1000)
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
@@ -710,6 +666,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     private fun printEscPos(data: SuratJalanModel) {
 
         val printersConnections = BluetoothPrintersConnections.selectFirstPaired()
+
         val printer = EscPosPrinter(printersConnections, 203, 70f, 48)
 
         // Change the desired width and height for your image (in pixels)
@@ -770,6 +727,10 @@ class DetailSuratJalanActivity : AppCompatActivity() {
             "[C]<b><u>$txtShipToName</u></b>\n" +
             "[L]\n"
         )
+
+        Handler().postDelayed({
+            printingState(false)
+        }, 1000)
     }
 
     private fun scaleDrawable(drawable: Drawable, width: Int, height: Int): Drawable {

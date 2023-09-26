@@ -29,6 +29,14 @@ class CustomUtility(private val context: Context) {
             .show()
     }
 
+    fun showDialog(title: String = "Warning!", message: String, positiveText: String = "Ok") {
+        AlertDialog.Builder(context)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton(positiveText) { dialog, _ -> dialog.dismiss() }
+            .show()
+    }
+
     private fun openAppSettings() {
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
         intent.data = Uri.fromParts("package", context.packageName, null)
