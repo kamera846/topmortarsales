@@ -80,4 +80,14 @@
         android:layout_gravity="center"
         android:layout_margin="16dp"/>
 
+    <Button
+        android:visibility="gone"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/btnGetDirection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Enable Navigation"
+        android:layout_gravity="center"
+        android:layout_margin="16dp"/>
+
 </RelativeLayout>

@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.graphics.Color
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
@@ -35,9 +36,12 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.PolylineOptions
+
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.Place
@@ -46,7 +50,13 @@ import com.google.android.libraries.places.api.net.FetchPlaceResponse
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
 import com.google.android.libraries.places.api.net.PlacesClient
-import com.google.android.material.snackbar.Snackbar
+import com.google.maps.DirectionsApi
+import com.google.maps.GeoApiContext
+import com.google.maps.PendingResult
+import com.google.maps.errors.ApiException
+import com.google.maps.model.DirectionsResult
+import com.google.maps.model.DirectionsRoute
+import com.google.maps.model.TravelMode
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.PlaceAdapter
 import com.topmortar.topmortarsales.commons.CONNECTION_FAILURE_RESOLUTION_REQUEST
@@ -74,8 +84,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var isGetCoordinate = false
 
     private val zoomLevel = 18f
+    private val mapsDuration = 2000
     private var selectedLocation: LatLng? = null
     private var currentLatLng: LatLng? = null
+    private var lineColor = listOf(R.color.primary_200, R.color.status_passive, R.color.status_passive)
 
     private lateinit var mLastLocation: Location
     private var mCurrLocationMarker: Marker? = null
@@ -131,6 +143,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         binding.btnGetDistance.visibility = View.GONE
         binding.btnGetLatLng.visibility = View.GONE
+        binding.btnGetDirection.visibility = View.GONE
     }
 
     private fun showDialog(title: String = "Attention!", message: String) {
@@ -149,6 +162,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         if (isGetCoordinate) {
             binding.btnGetLatLng.visibility = View.VISIBLE
             binding.searchBar.visibility = View.VISIBLE
+        } else {
+            binding.btnGetDirection.visibility = View.VISIBLE
         }
 
         if (!iMaps.isNullOrEmpty()) {
@@ -265,6 +280,133 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     }
 
+    private fun getDirections() {
+        val currentLocation = currentLatLng ?: return
+        val destination = selectedLocation ?: return
+
+        val directions = DirectionsApi.newRequest(getGeoContext())
+            .mode(TravelMode.DRIVING) // Ganti dengan mode perjalanan yang sesuai
+            .origin(com.google.maps.model.LatLng(currentLocation.latitude, currentLocation.longitude))
+            .destination(com.google.maps.model.LatLng(destination.latitude, destination.longitude))
+            .optimizeWaypoints(true)
+            .alternatives(true)
+
+        try {
+            val result = directions.await()
+
+            if (result.routes.isNotEmpty()) {
+
+                // Gambar rute pada peta
+                for (i in 0..result.routes.size) {
+                    if (i < 3) {
+                        val route = result.routes[i]
+                        val overviewPolyline = route.overviewPolyline.decodePath()
+                        val polylineOptions = PolylineOptions()
+                        polylineOptions.width(15f)
+                        polylineOptions.color(getColor(lineColor[i]))
+                        for (latLng in overviewPolyline) {
+                            polylineOptions.add(LatLng(latLng.lat, latLng.lng))
+                        }
+                        mMap.addPolyline(polylineOptions)
+                    }
+                }
+
+                val bounds = LatLngBounds.builder()
+                    .include(currentLocation)
+                    .include(destination)
+                    .build()
+                val updateCamera = CameraUpdateFactory.newLatLngBounds(bounds, 100)
+                mMap.animateCamera(updateCamera, mapsDuration, null)
+
+            } else {
+                Toast.makeText(this, "No route found", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: ApiException) {
+            Toast.makeText(this, "Error fetching directions", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
+        } catch (e: InterruptedException) {
+            Toast.makeText(this, "Error fetching directions", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
+        } catch (e: IOException) {
+            Toast.makeText(this, "Error fetching directions", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
+        }
+    }
+    private fun getDirections2() {
+        val currentLocation = currentLatLng ?: return
+        val destination = selectedLocation ?: return
+        var directionsResults: List<DirectionsRoute>? = null
+
+        val directionsApiRequest = DirectionsApi.newRequest(getGeoContext())
+            .origin(com.google.maps.model.LatLng(currentLocation.latitude, currentLocation.longitude))
+            .destination(com.google.maps.model.LatLng(destination.latitude, destination.longitude))
+            .mode(TravelMode.DRIVING)
+            .optimizeWaypoints(true)
+            .alternatives(true) // Mengaktifkan opsi jalur alternatif
+
+        directionsApiRequest.setCallback(object : PendingResult.Callback<DirectionsResult> {
+            override fun onResult(result: DirectionsResult) {
+                directionsResults = result.routes.toList()
+
+                // Menampilkan semua jalur yang tersedia dengan warna berbeda
+                for ((index, route) in directionsResults!!.withIndex()) {
+                    val color = if (index == 0) {
+                        R.color.primary
+                    } else {
+                        R.color.primary_600 // Warna untuk jalur lebih lambat
+                    }
+
+                    val overviewPolyLine = route.overviewPolyline.decodePath()
+                    val polylineOptions = PolylineOptions()
+//                        .addAll(route.overviewPolyline.decodePath())
+                        .width(10f)
+                        .color(color)
+
+                    for (latLng in overviewPolyLine) {
+                        polylineOptions.add(LatLng(latLng.lat, latLng.lng))
+                    }
+
+                    mMap.addPolyline(polylineOptions)
+                }
+
+                // Menandai jalur yang sudah dilewati dengan warna Hijau
+                val completedRouteIndex = 0 // Ganti dengan indeks jalur yang sudah dilewati
+                val completedRoute = directionsResults!![completedRouteIndex]
+                val completeOverviewPolyLine = completedRoute.overviewPolyline.decodePath()
+                val completedPolylineOptions = PolylineOptions()
+//                    .addAll(completedRoute.overviewPolyline.decodePath())
+                    .width(10f)
+                    .color(R.color.primary_300) // Warna untuk jalur yang sudah dilewati
+
+                for (latLng in completeOverviewPolyLine) {
+                    completedPolylineOptions.add(LatLng(latLng.lat, latLng.lng))
+                }
+                mMap.addPolyline(completedPolylineOptions)
+
+                // Zoom ke rute pertama
+                val bounds = LatLngBounds.builder()
+                    .include(currentLocation)
+                    .include(destination)
+                    .build()
+                val updateCamera = CameraUpdateFactory.newLatLngBounds(bounds, 100)
+                mMap.animateCamera(updateCamera, mapsDuration, null)
+            }
+
+            override fun onFailure(e: Throwable) {
+                // Tangani kesalahan permintaan API di sini
+            }
+        })
+    }
+
+    private fun getGeoContext(): GeoApiContext {
+
+        return GeoApiContext.Builder()
+            .apiKey(getString(R.string.maps_key)) // Ganti dengan kunci API Google Maps Anda
+            .build()
+
+    }
+
+
     @SuppressLint("MissingPermission")
     private fun initMaps(latLng: LatLng? = null) {
 
@@ -292,10 +434,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         )
 
         if (moveCamera) {
-            val durationMs = 2000
-            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel)
 
-            mMap.animateCamera(cameraUpdate, durationMs, null)
+            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel)
+            mMap.animateCamera(cameraUpdate, mapsDuration, null)
+
         }
         binding.recyclerView.visibility = View.GONE
 
@@ -335,7 +477,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             mMap.uiSettings.isMyLocationButtonEnabled = true
 
             val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-            if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style_dark))
+            if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) {
+                mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style_dark))
+                lineColor = listOf(R.color.primary_200, R.color.status_passive, R.color.status_passive)
+            }
 
             if (binding.btnGetLatLng.isVisible) {
                 mMap.setPadding(0,0,0, convertDpToPx(64, this))
@@ -343,6 +488,19 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 if (!sessionManager.pinMapHint()) {
                     showDialog(message = "Press and hold on the map to mark a location")
                     sessionManager.pinMapHint(true)
+                }
+            } else if (binding.btnGetDirection.isVisible) {
+                mMap.setPadding(0,0,0, convertDpToPx(64, this))
+
+                fusedLocationClient.lastLocation
+                    .addOnSuccessListener { location: Location? ->
+                        if (location != null) currentLatLng = LatLng(location.latitude, location.longitude)
+                    }
+
+                binding.btnGetDirection.setOnClickListener {
+                    if (currentLatLng == null) showDialog(message = "Failed to find your current location")
+                    else if (selectedLocation == null) showDialog(message = "Failed to find the target location")
+                    else getDirections()
                 }
             }
 

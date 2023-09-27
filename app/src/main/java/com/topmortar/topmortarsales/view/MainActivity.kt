@@ -170,7 +170,11 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         btnFab.setOnClickListener { navigateAddNewRoom() }
         btnFabAdmin.setOnClickListener { navigateChatAdmin() }
         icMore.setOnClickListener { showPopupMenu() }
-        icSearch.setOnClickListener { toggleSearchEvent(SEARCH_OPEN) }
+        icSearch.setOnClickListener {
+            showKeyboard(etSearchBox, this)
+            etSearchBox.requestFocus()
+            toggleSearchEvent(SEARCH_OPEN)
+        }
         icCloseSearch.setOnClickListener { toggleSearchEvent(SEARCH_CLOSE) }
         icClearSearch.setOnClickListener { etSearchBox.setText("") }
         rlLoading.setOnTouchListener { _, event -> blurSearchBox(event) }
