@@ -73,21 +73,79 @@
     <Button
         android:visibility="gone"
         android:layout_alignParentBottom="true"
-        android:id="@+id/btnGetLatLng"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Get Coordinate"
         android:layout_gravity="center"
         android:layout_margin="16dp"/>
 
+    <LinearLayout
+        android:visibility="gone"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/btnGetLatLng"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="16dp"
+        android:padding="12dp"
+        android:background="@drawable/bg_primary_round"
+        android:gravity="center">
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="8dp"
+            android:contentDescription="Invoice Image Button"
+            android:src="@drawable/location_white" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Get Coordinate"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textStyle="bold"/>
+
+    </LinearLayout>
+
     <Button
         android:visibility="gone"
         android:layout_alignParentBottom="true"
-        android:id="@+id/btnGetDirection"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Enable Navigation"
         android:layout_gravity="center"
         android:layout_margin="16dp"/>
+
+    <LinearLayout
+        android:visibility="gone"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/btnGetDirection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_margin="16dp"
+        android:padding="12dp"
+        android:background="@drawable/bg_primary_round"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/btnGetDirectionImg"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="8dp"
+            android:contentDescription="Invoice Image Button"
+            android:src="@drawable/direction_white" />
+
+        <TextView
+            android:id="@+id/btnGetDirectionTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enable Direction"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textStyle="bold"/>
+
+    </LinearLayout>
 
 </RelativeLayout>

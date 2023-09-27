@@ -12,6 +12,7 @@ import android.location.Geocoder
 import android.location.Location
 import android.location.LocationListener
 import android.os.Bundle
+import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -40,6 +41,7 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 
 import com.google.android.libraries.places.api.Places
@@ -80,6 +82,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private lateinit var binding: ActivityMapsBinding
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var placesClient: PlacesClient
+    private var routeDirections: Polyline? = null
 
     private var isGetCoordinate = false
 
@@ -144,6 +147,76 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         binding.btnGetDistance.visibility = View.GONE
         binding.btnGetLatLng.visibility = View.GONE
         binding.btnGetDirection.visibility = View.GONE
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun setupMaps() {
+
+        onCalculate()
+        onGetLatLng()
+        searchLocation()
+        dataActivityValidation()
+
+        mMap.isMyLocationEnabled = true
+        mMap.uiSettings.isCompassEnabled = true
+        mMap.uiSettings.isZoomControlsEnabled = true
+        mMap.uiSettings.isTiltGesturesEnabled = true
+        mMap.uiSettings.isMyLocationButtonEnabled = true
+        mMap.uiSettings.isZoomGesturesEnabled = true
+        mMap.uiSettings.isScrollGesturesEnabledDuringRotateOrZoom = true
+
+        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) {
+            mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style_dark))
+            lineColor = listOf(R.color.primary_200, R.color.status_passive, R.color.status_passive)
+        }
+
+        if (binding.btnGetLatLng.isVisible) {
+            mMap.setPadding(0,0,0, convertDpToPx(72, this))
+            mMap.setOnMapLongClickListener { latLng -> setPin(latLng, getPlaceNameFromLatLng(latLng), moveCamera = false) }
+            if (!sessionManager.pinMapHint()) {
+                showDialog(message = "Press and hold on the map to mark a location")
+                sessionManager.pinMapHint(true)
+            }
+        } else if (binding.btnGetDirection.isVisible) {
+            mMap.setPadding(0,0,0, convertDpToPx(72, this))
+
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location: Location? ->
+                    if (location != null) currentLatLng = LatLng(location.latitude, location.longitude)
+                }
+
+            binding.btnGetDirection.setOnClickListener {
+                toggleDirection()
+            }
+        }
+
+        mMap.setOnMapClickListener {
+            if (binding.recyclerView.isVisible) binding.recyclerView.visibility = View.GONE
+        }
+    }
+
+    private fun toggleDirection() {
+        if (routeDirections == null) {
+
+            if (currentLatLng == null) showDialog(message = "Failed to find your current location. Make sure your location is active and try to reopen maps")
+            else if (selectedLocation == null) showDialog(message = "Failed to find the target location")
+            else getDirections()
+
+        } else if (routeDirections != null) {
+            mMap.clear()
+            setupMaps()
+            routeDirections!!.remove()
+            routeDirections = null
+            Handler().postDelayed({
+                val button = binding.btnGetDirection
+                val img = binding.btnGetDirectionImg
+                val title = binding.btnGetDirectionTitle
+                button.setBackgroundResource(R.drawable.bg_primary_round)
+                img.setImageDrawable(getDrawable(R.drawable.direction_white))
+                title.text = "Enable Direction"
+            }, 500)
+        }
     }
 
     private fun showDialog(title: String = "Attention!", message: String) {
@@ -307,7 +380,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         for (latLng in overviewPolyline) {
                             polylineOptions.add(LatLng(latLng.lat, latLng.lng))
                         }
-                        mMap.addPolyline(polylineOptions)
+                        routeDirections = mMap.addPolyline(polylineOptions)
                     }
                 }
 
@@ -317,6 +390,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     .build()
                 val updateCamera = CameraUpdateFactory.newLatLngBounds(bounds, 100)
                 mMap.animateCamera(updateCamera, mapsDuration, null)
+
+                Handler().postDelayed({
+                    val button = binding.btnGetDirection
+                    val img = binding.btnGetDirectionImg
+                    val title = binding.btnGetDirectionTitle
+                    button.setBackgroundResource(R.drawable.bg_passive_round)
+                    img.setImageDrawable(getDrawable(R.drawable.direction_line_white))
+                    title.text = "Turn Off Direction"
+                }, 500)
 
             } else {
                 Toast.makeText(this, "No route found", Toast.LENGTH_SHORT).show()
@@ -465,48 +547,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             ) == PackageManager.PERMISSION_GRANTED
         ) {
 
-            onCalculate()
-            onGetLatLng()
-            searchLocation()
-            dataActivityValidation()
-
-            mMap.isMyLocationEnabled = true
-            mMap.uiSettings.isCompassEnabled = true
-            mMap.uiSettings.isZoomControlsEnabled = true
-            mMap.uiSettings.isTiltGesturesEnabled = true
-            mMap.uiSettings.isMyLocationButtonEnabled = true
-
-            val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-            if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) {
-                mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style_dark))
-                lineColor = listOf(R.color.primary_200, R.color.status_passive, R.color.status_passive)
-            }
-
-            if (binding.btnGetLatLng.isVisible) {
-                mMap.setPadding(0,0,0, convertDpToPx(64, this))
-                mMap.setOnMapLongClickListener { latLng -> setPin(latLng, getPlaceNameFromLatLng(latLng), moveCamera = false) }
-                if (!sessionManager.pinMapHint()) {
-                    showDialog(message = "Press and hold on the map to mark a location")
-                    sessionManager.pinMapHint(true)
-                }
-            } else if (binding.btnGetDirection.isVisible) {
-                mMap.setPadding(0,0,0, convertDpToPx(64, this))
-
-                fusedLocationClient.lastLocation
-                    .addOnSuccessListener { location: Location? ->
-                        if (location != null) currentLatLng = LatLng(location.latitude, location.longitude)
-                    }
-
-                binding.btnGetDirection.setOnClickListener {
-                    if (currentLatLng == null) showDialog(message = "Failed to find your current location")
-                    else if (selectedLocation == null) showDialog(message = "Failed to find the target location")
-                    else getDirections()
-                }
-            }
-
-            mMap.setOnMapClickListener {
-                if (binding.recyclerView.isVisible) binding.recyclerView.visibility = View.GONE
-            }
+            setupMaps()
 
         } else {
             ActivityCompat.requestPermissions(
@@ -515,6 +556,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 LOCATION_PERMISSION_REQUEST_CODE
             )
         }
+
         buildGoogleApiClient()
         mMap.isMyLocationEnabled = true
     }
@@ -645,5 +687,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             catch (e: IntentSender.SendIntentException) { e.printStackTrace() }
 
         } else Toast.makeText(this, "Connection to Google Play Services failed", TOAST_SHORT).show()
+    }
+
+    override fun onBackPressed() {
+        if (!isGetCoordinate && routeDirections != null) {
+            toggleDirection()
+        } else super.onBackPressed()
     }
 }
