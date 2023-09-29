@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     tools:context=".view.contact.DetailContactActivity">
 
@@ -10,7 +11,7 @@
         android:id="@+id/titleBarLight"
         layout="@layout/component_title_bar_light"/>
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_below="@+id/titleBarLight"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -60,12 +61,13 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Fulan bin fulan"
-                        android:layout_marginBottom="4dp"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
 
                     <LinearLayout
+                        android:visibility="gone"
+                        android:id="@+id/priceContainer"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:gravity="center_vertical"
@@ -85,25 +87,20 @@
                             android:text="Rp 2.500.000"
                             android:textColor="@color/status_bid"
                             android:textSize="14sp"
-                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="•"
-                            android:layout_marginHorizontal="4dp"
-                            android:textSize="14sp"
-                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
-
-                        <TextView
-                            android:id="@+id/tvLevel"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="user level"
-                            android:textSize="14sp"
+                            android:textStyle="bold"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
                     </LinearLayout>
+
+                    <TextView
+                        android:visibility="gone"
+                        android:id="@+id/tvLevel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="user level"
+                        android:layout_marginBottom="4dp"
+                        android:textSize="14sp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
                 </LinearLayout>
 
@@ -111,10 +108,12 @@
 
             <!-- Counter Container -->
             <LinearLayout
+                android:visibility="gone"
                 android:id="@+id/counterContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="16dp"
+                android:layout_marginTop="16dp"
                 android:orientation="horizontal"
                 android:background="@drawable/bg_light"
                 android:gravity="center">
@@ -123,7 +122,7 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingVertical="24dp"
+                    android:paddingVertical="32dp"
                     android:paddingHorizontal="32dp"
                     android:gravity="center"
                     android:orientation="vertical">
@@ -141,7 +140,8 @@
                         android:id="@+id/tvStoreName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Store"
+                        android:text="Total Store"
+                        android:gravity="center_horizontal"
                         android:textSize="14sp"
                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
@@ -149,9 +149,10 @@
 
                 <!-- Target Counter -->
                 <LinearLayout
+                    android:visibility="gone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingVertical="24dp"
+                    android:paddingVertical="32dp"
                     android:paddingHorizontal="32dp"
                     android:gravity="center"
                     android:orientation="vertical">
@@ -169,7 +170,8 @@
                         android:id="@+id/tvTargetName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Target"
+                        android:text="Targets\nin 1 Month"
+                        android:gravity="center_horizontal"
                         android:textSize="14sp"
                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
@@ -179,7 +181,7 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:paddingVertical="24dp"
+                    android:paddingVertical="32dp"
                     android:paddingHorizontal="32dp"
                     android:gravity="center"
                     android:orientation="vertical">
@@ -197,7 +199,8 @@
                         android:id="@+id/tvDoneName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Done"
+                        android:text="Visited Store"
+                        android:gravity="center"
                         android:textSize="14sp"
                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
@@ -205,16 +208,29 @@
 
             </LinearLayout>
 
-            <View
-                android:id="@+id/line"
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/tabContainer"
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginHorizontal="32dp"
-                android:layout_marginVertical="16dp"
-                android:theme="@style/Theme.TopMortarSales.BaseLine" />
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/tabLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:tabBackground="@color/baseBackground"/>
+
+                <androidx.viewpager.widget.ViewPager
+                    android:id="@+id/viewPager"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
 </RelativeLayout>
