@@ -224,8 +224,25 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
 
     }
 
+    private fun navigateDetailUser(data: UserModel? = null) {
+
+        val intent = Intent(this@ManageUserActivity, UserProfileActivity::class.java)
+
+        if (data != null) {
+            intent.putExtra(CONST_USER_ID, data.id_user)
+            intent.putExtra(CONST_PHONE, data.phone_user)
+            intent.putExtra(CONST_NAME, data.username)
+            intent.putExtra(CONST_USER_LEVEL, data.level_user)
+            intent.putExtra(CONST_LOCATION, data.id_city)
+            intent.putExtra(CONST_FULL_NAME, data.full_name)
+        }
+
+        startActivityForResult(intent, MANAGE_USER_ACTIVITY_REQUEST_CODE)
+
+    }
+
     override fun onItemClick(data: UserModel?) {
-        navigateAddUser(data)
+        navigateDetailUser(data)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
