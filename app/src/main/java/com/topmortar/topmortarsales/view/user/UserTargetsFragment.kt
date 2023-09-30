@@ -9,10 +9,15 @@ import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter
+import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.view.user.placeholder.PlaceholderContent
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
 
 /**
  * A fragment representing a list of Items.
@@ -67,5 +72,22 @@ class UserTargetsFragment : Fragment(), ContactsRecyclerViewAdapter.ItemClickLis
 //    }
 
     override fun onItemClick(data: ContactModel?) {
+        val messageEvent = EventBusUtils.MessageEvent(data!!.nama)
+        EventBus.getDefault().post(messageEvent)
     }
+
+    override fun onStart() {
+        super.onStart()
+        EventBus.getDefault().register(this)
+    }
+
+    override fun onStop() {
+        EventBus.getDefault().unregister(this)
+        super.onStop()
+    }
+
+    @Subscribe
+    fun onEventBus(event: EventBusUtils.MessageEvent) {
+    }
+
 }

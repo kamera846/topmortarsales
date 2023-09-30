@@ -23,6 +23,7 @@
     <string name="et_label">Label for the input field</string>
     <string name="et_hint">Enter your text here</string>
     <string name="sync_now">Sync Now</string>
+    <string name="my_profile">My Profile</string>
     <string name="search">Search</string>
     <string name="logout">Logout</string>
     <string name="search_contact">Search contact…</string>

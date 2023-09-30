@@ -54,13 +54,17 @@ import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
+import com.topmortar.topmortarsales.commons.CONST_USER_ID
+import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
+import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
@@ -69,11 +73,13 @@ import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
 import com.topmortar.topmortarsales.commons.utils.KeyboardHandler.hideKeyboard
 import com.topmortar.topmortarsales.commons.utils.KeyboardHandler.showKeyboard
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
+import com.topmortar.topmortarsales.model.UserModel
 import com.topmortar.topmortarsales.view.city.ManageCityActivity
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
 import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
 import com.topmortar.topmortarsales.view.user.ManageUserActivity
+import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
@@ -268,6 +274,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         popupMenu.inflate(R.menu.option_main_menu)
 
         val searchItem = popupMenu.menu.findItem(R.id.option_search)
+        val myProfile = popupMenu.menu.findItem(R.id.option_my_profile)
         val userItem = popupMenu.menu.findItem(R.id.option_user)
         val cityItem = popupMenu.menu.findItem(R.id.option_city)
         val skillItem = popupMenu.menu.findItem(R.id.option_skill)
@@ -279,11 +286,20 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
             skillItem.isVisible = false
         }
 
+        if (sessionManager.userKind() != USER_KIND_SALES) myProfile.isVisible = false
+
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
                 R.id.option_sync_now -> {
                     getContacts()
                     getUserLoggedIn()
+                    true
+                }
+                R.id.option_my_profile -> {
+
+                    val intent = Intent(this@MainActivity, UserProfileActivity::class.java)
+                    startActivity(intent)
+
                     true
                 }
                 R.id.option_search -> {
