@@ -36,6 +36,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -139,7 +140,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
         // Set Title Bar
         icBack.visibility = View.VISIBLE
 
-        if (sessionManager.userKind() == USER_KIND_ADMIN) icOption.visibility = View.VISIBLE
+        if (sessionManager.userKind() != USER_KIND_COURIER) icOption.visibility = View.VISIBLE
         else icSyncNow.visibility = View.VISIBLE
 //        icSyncNow.visibility = View.VISIBLE
 
