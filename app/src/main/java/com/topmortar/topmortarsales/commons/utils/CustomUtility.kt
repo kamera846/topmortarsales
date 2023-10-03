@@ -3,6 +3,7 @@ package com.topmortar.topmortarsales.commons.utils
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.provider.Settings
 import androidx.appcompat.app.AlertDialog
@@ -41,5 +42,9 @@ class CustomUtility(private val context: Context) {
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
         intent.data = Uri.fromParts("package", context.packageName, null)
         context.startActivity(intent)
+    }
+
+    fun isDarkMode(): Boolean {
+        return (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
     }
 }

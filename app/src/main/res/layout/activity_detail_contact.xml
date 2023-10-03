@@ -121,7 +121,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
-                        android:background="@drawable/background_rounded"
+                        android:background="@drawable/background_rounded_16"
                         android:orientation="horizontal">
 
                         <ImageView
@@ -201,7 +201,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
-                        android:background="@drawable/background_rounded"
+                        android:background="@drawable/background_rounded_16"
                         android:orientation="horizontal">
 
                         <ImageView
@@ -281,7 +281,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="58dp"
                         android:gravity="center_vertical"
-                        android:background="@drawable/background_rounded"
+                        android:background="@drawable/background_rounded_16"
                         android:orientation="horizontal">
 
                         <View
@@ -375,7 +375,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
-                        android:background="@drawable/background_rounded"
+                        android:background="@drawable/background_rounded_16"
                         android:orientation="horizontal">
 
 
@@ -459,7 +459,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
-                        android:background="@drawable/background_rounded"
+                        android:background="@drawable/background_rounded_16"
                         android:orientation="horizontal">
 
                         <ImageView
@@ -540,7 +540,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
-                        android:background="@drawable/background_rounded"
+                        android:background="@drawable/background_rounded_16"
                         android:orientation="horizontal">
 
 
@@ -622,7 +622,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
-                        android:background="@drawable/background_rounded"
+                        android:background="@drawable/background_rounded_16"
                         android:orientation="horizontal">
 
 
@@ -747,7 +747,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:layout_marginBottom="16dp"
-                    android:background="@drawable/background_rounded"
+                    android:background="@drawable/background_rounded_16"
                     android:orientation="horizontal">
 
                     <LinearLayout
@@ -808,7 +808,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:layout_marginBottom="16dp"
-                    android:background="@drawable/background_rounded"
+                    android:background="@drawable/background_rounded_16"
                     android:orientation="horizontal">
 
                     <LinearLayout
@@ -860,7 +860,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:padding="16dp"
-                    android:background="@drawable/background_rounded"
+                    android:background="@drawable/background_rounded_16"
                     android:orientation="vertical">
 
                     <TextView

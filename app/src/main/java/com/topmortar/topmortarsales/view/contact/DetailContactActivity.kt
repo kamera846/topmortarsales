@@ -685,11 +685,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 selectedUri = null
 
                 // Other Columns Handle
-                addressContainer.setBackgroundResource(R.drawable.background_rounded)
+                addressContainer.setBackgroundResource(R.drawable.background_rounded_16)
                 etAddress.isEnabled = false
                 if (iAddress.isNullOrEmpty()) etAddress.setText(EMPTY_FIELD_VALUE)
 
-                statusContainer.setBackgroundResource(R.drawable.background_rounded)
+                statusContainer.setBackgroundResource(R.drawable.background_rounded_16)
 //            if (!iStatus.isNullOrEmpty()) {
                 tooltipStatus.visibility = View.VISIBLE
                 if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
@@ -697,7 +697,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 //            }
                 tvStatus.visibility = View.VISIBLE
                 spinStatus.visibility = View.GONE
-                terminContainer.setBackgroundResource(R.drawable.background_rounded)
+                terminContainer.setBackgroundResource(R.drawable.background_rounded_16)
                 tvTermin.visibility = View.VISIBLE
                 spinTermin.visibility = View.GONE
 

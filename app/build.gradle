@@ -92,5 +92,7 @@ dependencies {
     // Event Bus
     implementation 'org.greenrobot:eventbus:3.2.0'
 
+    // MpAndroidChart
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 
 }

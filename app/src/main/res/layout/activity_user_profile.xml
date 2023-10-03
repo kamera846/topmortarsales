@@ -80,7 +80,7 @@
                             android:contentDescription="Image Sack Dollar"/>
 
                         <TextView
-                            android:id="@+id/tvUserName"
+                            android:id="@+id/tvPrice"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="6dp"
@@ -88,6 +88,16 @@
                             android:textColor="@color/status_bid"
                             android:textSize="14sp"
                             android:textStyle="bold"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                        <TextView
+                            android:id="@+id/tvDetailPrice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="6dp"
+                            android:text="- Show Detail"
+                            android:textSize="14sp"
+                            android:textStyle="italic"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
                     </LinearLayout>
@@ -104,6 +114,51 @@
 
                 </LinearLayout>
 
+            </LinearLayout>
+
+            <!-- Graphic Chart -->
+            <LinearLayout
+                android:id="@+id/barChartContainer"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:padding="8dp"
+                android:background="@drawable/background_rounded_8"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/toggleBarChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tvToggleBarChart"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center_vertical"
+                        android:text="Statistik Toko"
+                        android:textSize="14sp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                    <ImageView
+                        android:id="@+id/iconToggleBarChart"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginLeft="16dp"
+                        android:src="@drawable/chevron_down_solid"/>
+
+                </LinearLayout>
+                
+                <com.github.mikephil.charting.charts.BarChart
+                    android:visibility="gone"
+                    android:id="@+id/storeBarChart"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"/>
+                
             </LinearLayout>
 
             <!-- Counter Container -->
