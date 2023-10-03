@@ -40,6 +40,7 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityUserProfileBinding
+import com.topmortar.topmortarsales.modal.ChartSalesPricingModal
 import com.topmortar.topmortarsales.model.UserModel
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
@@ -50,6 +51,7 @@ class UserProfileActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private lateinit var binding: ActivityUserProfileBinding
     private lateinit var customUtility: CustomUtility
+    private lateinit var modalPricingDetails: ChartSalesPricingModal
 
     private var iUserName: String? = null; private var iFullName: String? = null; private var iUserLevel: String? = null
     private var iUserID: String? = null; private var iPhone: String? = null; private var iLocation: String? = null
@@ -72,6 +74,7 @@ class UserProfileActivity : AppCompatActivity() {
         iLocation = intent.getStringExtra(CONST_LOCATION)
 
         customUtility = CustomUtility(this)
+        modalPricingDetails = ChartSalesPricingModal(this)
 
         dataActivityValidation()
 
@@ -140,6 +143,8 @@ class UserProfileActivity : AppCompatActivity() {
             binding.titleBarLight.icEdit.setOnClickListener { navigateEditUser() }
         }
         binding.toggleBarChart.setOnClickListener { toggleBarChart() }
+        binding.priceContainer.setOnClickListener { modalPricingDetails.show() }
+        binding.titleBarLight.icBack.setOnClickListener { finish() }
 
     }
 
@@ -175,6 +180,8 @@ class UserProfileActivity : AppCompatActivity() {
             tabLayout.setupWithViewPager(viewPager)
 
         }
+
+        binding.tvToggleBarChart.text = "Store Statistics in Malang (show)"
 
         setupBarChart()
 
@@ -243,11 +250,11 @@ class UserProfileActivity : AppCompatActivity() {
 
         if (barChart.isVisible) {
             barChart.visibility = View.GONE
-            title.text = "Store Statistics in Malang (hidden)"
+            title.text = "Store Statistics in Malang (show)"
             icon.setImageDrawable(getDrawable(R.drawable.chevron_down_solid))
         } else {
             barChart.visibility = View.VISIBLE
-            title.text = "Store Statistics in Malang (showing)"
+            title.text = "Store Statistics in Malang (hide)"
             icon.setImageDrawable(getDrawable(R.drawable.chevron_up_solid))
         }
     }

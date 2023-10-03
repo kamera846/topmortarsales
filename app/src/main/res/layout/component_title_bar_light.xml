@@ -19,7 +19,6 @@
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:paddingHorizontal="16dp"
         android:gravity="center_vertical"
         android:orientation="vertical">
 
@@ -31,6 +30,7 @@
             android:text="@string/top_mortar_sales"
             android:textSize="18sp"
             android:textStyle="bold"
+            android:paddingHorizontal="16dp"
             android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
 
         <TextView
