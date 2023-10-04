@@ -139,7 +139,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         val name = "${ etName.text }"
         var birthday = "${ etBirthday.text }"
         val owner = "${ etOwner.text }"
-        var cityId = "$iLocation"
+        var cityId = sessionManager.userCityID().let { if (!it.isNullOrEmpty()) it else "0" }
         val mapsUrl = "${ etMapsUrl.text }"
         val message = "${ etMessage.text }"
         val termin = "-1"
@@ -151,15 +151,15 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         birthday = if (birthday.isEmpty()) "0000-00-00"
         else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
 
-        if (iLocation.isNullOrEmpty()) cityId = "0"
+//        if (iLocation.isNullOrEmpty()) cityId = "0"
 
         loadingState(true)
 
 //        Handler().postDelayed({
-//            handleMessage(this, "SEND MESSAGE", "$phone : $name : $owner : $birthday : $cityId : $termin : $message")
+//            handleMessage(this, "SEND MESSAGE", "$phone : $name : $owner : $birthday : $cityId : $mapsUrl : $userId : $currentName : $termin : $message")
 //            loadingState(false)
 //        }, 1000)
-
+//
 //        return
 
         lifecycleScope.launch {
