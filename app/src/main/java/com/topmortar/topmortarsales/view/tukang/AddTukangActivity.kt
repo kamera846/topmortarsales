@@ -123,7 +123,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         val name = "${ etName.text }"
         var birthday = "${ etBirthday.text }"
         val owner = "${ etOwner.text }"
-        val cityID = if (sessionManager.userCityID() != null) "${ sessionManager.userCityID()!! }" else "0"
+        val cityID = sessionManager.userCityID().let { if (!it.isNullOrEmpty()) it else "0" }
         val skillID = if (selectedSkill != null) "${ selectedSkill!!.id }" else "0"
         val mapsUrl = "${ etMapsUrl.text }"
         val message = "${ etMessage.text }"
