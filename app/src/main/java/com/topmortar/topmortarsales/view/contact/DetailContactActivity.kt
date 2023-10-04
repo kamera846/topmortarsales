@@ -37,6 +37,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.BASE_URL
@@ -79,7 +80,9 @@ import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.TOAST_LONG
+import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
@@ -94,6 +97,7 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.databinding.FragmentBottomSheetDetailContactBinding
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.modal.SendMessageModal
 import com.topmortar.topmortarsales.model.ContactModel
@@ -1146,14 +1150,67 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun navigateToDetailInvoice() {
 
-        val intent = Intent(this@DetailContactActivity, ListSuratJalanActivity::class.java)
+        if (sessionManager.userKind() == USER_KIND_COURIER) {
 
-        intent.putExtra(CONST_CONTACT_ID, contactId)
-        if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
-        else intent.putExtra(CONST_NAME, tvName.text)
+            val intent = Intent(this@DetailContactActivity, ListSuratJalanActivity::class.java)
 
-        startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+            intent.putExtra(CONST_CONTACT_ID, contactId)
+            if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
+            else intent.putExtra(CONST_NAME, tvName.text)
 
+            startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+
+        } else {
+            val bottomSheetLayout = layoutInflater.inflate(R.layout.fragment_bottom_sheet_detail_contact, null)
+
+            val invoiceOption = bottomSheetLayout.findViewById<LinearLayout>(R.id.invoiceOption)
+            val reportOption = bottomSheetLayout.findViewById<LinearLayout>(R.id.reportOption)
+            val btnNewReport = bottomSheetLayout.findViewById<Button>(R.id.btnNewReport)
+            val reportsTitle = bottomSheetLayout.findViewById<TextView>(R.id.reportsTitle)
+
+            if (sessionManager.userKind() == USER_KIND_COURIER) {
+                invoiceOption.visibility = View.GONE
+                reportOption.visibility = View.GONE
+                btnNewReport.visibility = View.GONE
+            } else if (sessionManager.userKind() == USER_KIND_ADMIN) {
+                reportsTitle.text = "Open Sales Reports"
+                btnNewReport.visibility = View.GONE
+            }
+
+            val bottomSheetDialog = BottomSheetDialog(this)
+            bottomSheetDialog.setContentView(bottomSheetLayout)
+
+            bottomSheetDialog.show()
+        }
+
+    }
+
+    fun onBottomSheetOptionClick(view: View) {
+
+        when (view.id) {
+            R.id.suratJalanOption, R.id.invoiceOption -> {
+
+                val intent = Intent(this@DetailContactActivity, ListSuratJalanActivity::class.java)
+
+                intent.putExtra(CONST_CONTACT_ID, contactId)
+                if (view.id == R.id.invoiceOption) intent.putExtra("type_list", "list_invoice")
+                if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
+                else intent.putExtra(CONST_NAME, tvName.text)
+
+                startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+
+            }
+            R.id.reportOption -> {
+                Toast.makeText(this, "Go To Reports Page", TOAST_SHORT).show()
+            }
+            else -> Toast.makeText(this, "Go To New Reports Page", TOAST_SHORT).show()
+        }
+
+    }
+
+    // Helper function to show a toast message
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
     private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {

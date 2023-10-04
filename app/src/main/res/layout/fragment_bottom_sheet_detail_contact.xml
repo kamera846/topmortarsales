@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <View
+        android:layout_width="50dp"
+        android:layout_height="5dp"
+        android:layout_marginVertical="16dp"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/bg_passive_round"/>
+
+    <!-- List Option -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="16dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/suratJalanOption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="12dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:onClick="onBottomSheetOptionClick"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackground">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/file_list_black"
+                android:contentDescription="Icon Surat Jalan"/>
+
+            <TextView
+                android:id="@+id/suratJalanTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Surat Jalan"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/invoiceOption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="12dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:onClick="onBottomSheetOptionClick"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackground">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/invoice_black"
+                android:contentDescription="Icon Invoice"/>
+
+            <TextView
+                android:id="@+id/invoiceTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Invoices"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/reportOption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="12dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:onClick="onBottomSheetOptionClick"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackground">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/file_list_black"
+                android:contentDescription="Icon Report"/>
+
+            <TextView
+                android:id="@+id/reportsTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Your Reports"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnNewReport"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:padding="8dp"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:text="New Report"
+        android:onClick="onBottomSheetOptionClick"/>
+
+</LinearLayout>

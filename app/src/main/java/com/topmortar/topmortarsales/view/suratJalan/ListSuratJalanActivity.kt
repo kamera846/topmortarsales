@@ -110,7 +110,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
         initVariable()
         initClickHandler()
         dataActivityValidation()
-        toggleList()
+//        toggleList()
 
     }
 
@@ -171,6 +171,9 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
         contactId = intent.getStringExtra(CONST_CONTACT_ID)
         iName = intent.getStringExtra(CONST_NAME)
+        val iListType = intent.getStringExtra("type_list").toString()
+        if (iListType == LIST_INVOICE) toggleList(LIST_INVOICE)
+        else toggleList()
 
     }
 
