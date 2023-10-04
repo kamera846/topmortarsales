@@ -25,6 +25,7 @@ import com.topmortar.topmortarsales.commons.utils.CurrencyFormat
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.changeStatusBarColor
+import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
@@ -212,6 +213,8 @@ class DetailInvoiceActivity : AppCompatActivity() {
         icBack.setImageDrawable(getDrawable(R.drawable.arrow_back_white))
         tvTitleBar.text = "Detail Invoice"
         tvTitleBar.setTextColor(getColor(R.color.white))
+        val padding16 = convertDpToPx(16, this)
+        tvTitleBar.setPadding(0, 0, padding16, 0)
 
     }
 

@@ -25,7 +25,6 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:paddingHorizontal="16dp"
             android:gravity="center_vertical"
             android:orientation="vertical">
 
@@ -34,6 +33,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
+                android:paddingHorizontal="16dp"
                 android:text="@string/list_chat"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -45,6 +45,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
+                android:paddingHorizontal="16dp"
                 android:text="@string/dummy_welcome_message"
                 android:textSize="14sp"
                 android:textColor="@color/white" />
