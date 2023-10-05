@@ -159,6 +159,7 @@ class UserProfileActivity : AppCompatActivity() {
             binding.titleBarLight.tvTitleBarDescription.visibility = View.VISIBLE
             binding.titleBarLight.tvTitleBarDescription.text = iUserLevel
             binding.titleBarLight.tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
+            binding.titleBarLight.tvTitleBarDescription.setPadding(0, 0, convertDpToPx(16, this), 0)
         }
         if (iFullName!!.isNotEmpty()) binding.tvFullName.text = iFullName
         if (iUserLevel!!.isNotEmpty()) binding.tvLevel.text = iUserLevel
@@ -180,8 +181,6 @@ class UserProfileActivity : AppCompatActivity() {
             tabLayout.setupWithViewPager(viewPager)
 
         }
-
-        binding.tvToggleBarChart.text = "Store Statistics in Malang (show)"
 
         setupBarChart()
 
@@ -205,7 +204,7 @@ class UserProfileActivity : AppCompatActivity() {
         val color2 = ContextCompat.getColor(this, R.color.status_passive)
         val color3 = ContextCompat.getColor(this, R.color.status_data)
         val color4 = ContextCompat.getColor(this, R.color.status_bid)
-        val color5 = ContextCompat.getColor(this, R.color.black_600)
+        val color5 = ContextCompat.getColor(this, R.color.black_200)
         val color6 = ContextCompat.getColor(this, R.color.status_blacklist)
 
         // Create a list of custom colors
@@ -241,6 +240,8 @@ class UserProfileActivity : AppCompatActivity() {
         barChart.setFitBars(true)
         barChart.description.isEnabled = false
         barChart.animateY(1000)
+
+        toggleBarChart()
     }
 
     private fun toggleBarChart() {

@@ -58,13 +58,15 @@
         android:theme="@style/Theme.TopMortarSales"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
-        <activity
-            android:name=".view.contact.NewReportActivity"
-            android:exported="false" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/maps_key" />
-
+        <activity
+            android:name=".view.user.UserProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".view.contact.NewReportActivity"
+            android:exported="false" />
         <activity
             android:name=".view.MapsActivity"
             android:exported="false"
