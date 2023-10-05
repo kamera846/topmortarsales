@@ -1,29 +1,51 @@
 package com.topmortar.topmortarsales.view.contact
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.app.ProgressDialog
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.LocationManager
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
+import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.REQUEST_BLUETOOTH_PERMISSIONS
+import com.topmortar.topmortarsales.commons.REQUEST_ENABLE_BLUETOOTH
+import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
+import com.topmortar.topmortarsales.commons.utils.CustomUtility
+import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.databinding.ActivityNewReportBinding
+import com.topmortar.topmortarsales.view.MapsActivity
 
 class NewReportActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityNewReportBinding
+    private lateinit var customUtility: CustomUtility
+    private lateinit var progressDialog: ProgressDialog
 
     private val msgMaxLines = 5
     private val msgMaxLength = 300
 
+    private var isDistanceToLong = false
     private var id: String = ""
     private var name: String = ""
     private var coordinate: String = ""
@@ -35,11 +57,20 @@ class NewReportActivity : AppCompatActivity() {
         binding = ActivityNewReportBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        customUtility = CustomUtility(this)
+
+        progressDialog = ProgressDialog(this)
+        progressDialog.setCancelable(false)
+        progressDialog.setMessage("Getting your distance...")
+
         initContent()
         initClickHandler()
     }
 
     private fun initContent() {
+        binding.titleBarLight.tvTitleBar.text = "Report Form"
+        binding.titleBarLight.tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
+
         loadingContent(true)
 
         etMessageListener()
@@ -49,36 +80,17 @@ class NewReportActivity : AppCompatActivity() {
         coordinate = intent.getStringExtra(CONST_MAPS).toString()
 
         Handler().postDelayed({
-            binding.titleBarLight.tvTitleBar.text = "Report Form"
-            binding.titleBarLight.tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
             binding.etName.text = name
-            binding.etDistance.text = coordinate
+            calculateDistance()
 
             loadingContent(false)
-        }, 2000)
+        }, 500)
     }
 
     private fun initClickHandler() {
         binding.titleBarLight.icBack.setOnClickListener { finish() }
         binding.btnReport.setOnClickListener { submitValidation() }
-    }
-
-    fun calculateDistance(view: View) {
-        val etDistance = binding.etDistance
-        val icRefreshDistance = binding.icRefreshDistance
-
-        val progressDialog = ProgressDialog(this)
-        progressDialog.setCancelable(false)
-        progressDialog.setMessage("Getting your distance...")
-
-        progressDialog.show()
-
-        Handler().postDelayed({
-            progressDialog.dismiss()
-            etDistance.text = "0.01"
-            icRefreshDistance.visibility = View.VISIBLE
-        }, 2000)
     }
 
     private fun etMessageListener() {
@@ -106,6 +118,132 @@ class NewReportActivity : AppCompatActivity() {
 
     }
 
+    @SuppressLint("MissingPermission")
+    fun calculateDistance(view: View? = null) {
+        progressDialog.show()
+
+        val mapsUrl = coordinate
+        val urlUtility = URLUtility(this)
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+            if (urlUtility.isLocationEnabled(this)) {
+
+                urlUtility.requestLocationUpdate()
+
+                if (!urlUtility.isUrl(mapsUrl) && !mapsUrl.isNullOrEmpty()) {
+                    val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
+                    val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+
+                    if (location != null) {
+
+                        // Courier Location
+                        val currentLatitude = location.latitude
+                        val currentLongitude = location.longitude
+
+                        // Store Location
+                        val coordinate = mapsUrl.split(",")
+                        val latitude = coordinate[0].toDoubleOrNull()
+                        val longitude = coordinate[1].toDoubleOrNull()
+
+                        if (latitude != null && longitude != null) {
+
+                            // Calculate Distance
+                            val urlUtility = URLUtility(this)
+                            val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
+                            val shortDistance = "%.3f".format(distance).toDouble()
+
+                            if (distance > 0.2) {
+                                val builder = AlertDialog.Builder(this)
+                                builder.setTitle("Warning!")
+                                    .setMessage("Your distance is $shortDistance km too far away from the store. Try to get closer to the store")
+                                    .setPositiveButton("Ok") { dialog, _ ->
+                                        progressDialog.dismiss()
+
+                                        binding.etDistance.setTextColor(getColor(R.color.primary))
+                                        binding.etDistance.text = shortDistance.toString()
+                                        binding.icRefreshDistance.visibility = View.VISIBLE
+                                        binding.tvDistanceError.visibility = View.VISIBLE
+                                        binding.tvDistanceError.text = "Try to get closer to the store and refresh the distance!"
+                                        isDistanceToLong = true
+
+                                        dialog.dismiss()
+                                    }
+                                    .setNegativeButton("Open Maps") { dialog, _ ->
+                                        val intent = Intent(this@NewReportActivity, MapsActivity::class.java)
+                                        intent.putExtra(CONST_MAPS, mapsUrl)
+                                        startActivity(intent)
+
+                                        progressDialog.dismiss()
+
+                                        binding.etDistance.setTextColor(getColor(R.color.primary))
+                                        binding.etDistance.text = shortDistance.toString()
+                                        binding.icRefreshDistance.visibility = View.VISIBLE
+                                        binding.tvDistanceError.visibility = View.VISIBLE
+                                        binding.tvDistanceError.text = "Try to get closer to the store and refresh the distance!"
+                                        isDistanceToLong = true
+
+                                        dialog.dismiss()
+                                    }
+                                builder.show()
+                            } else {
+                                progressDialog.dismiss()
+
+                                var textColor = getColor(R.color.black_200)
+                                if (customUtility.isDarkMode()) textColor = getColor(R.color.black_600)
+
+                                binding.etDistance.setTextColor(textColor)
+                                binding.etDistance.text = shortDistance.toString()
+                                binding.icRefreshDistance.visibility = View.VISIBLE
+                                binding.tvDistanceError.visibility = View.GONE
+                                isDistanceToLong = false
+                            }
+
+                        } else {
+                            progressDialog.dismiss()
+                            Toast.makeText(this, "Failed to process coordinate", TOAST_SHORT).show()
+                        }
+
+                    } else {
+                        progressDialog.dismiss()
+                        Toast.makeText(this, "can't access location, refresh and try again", TOAST_SHORT).show()
+                    }
+
+                } else {
+                    progressDialog.dismiss()
+                    val message = "You cannot report for now, please chat admin to update the coordinate for this store"
+                    val actionTitle = "Chat Now"
+                    customUtility.showPermissionDeniedSnackbar(message, actionTitle) { navigateChatAdmin() }
+                }
+
+            } else {
+                progressDialog.dismiss()
+                val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                startActivity(enableLocationIntent)
+            }
+
+        } else {
+            progressDialog.dismiss()
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+        }
+    }
+
+    private fun navigateChatAdmin() {
+        val phoneNumber = getString(R.string.topmortar_wa_number)
+        val message = "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada toko *${ name }*"
+
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")
+
+        try {
+            startActivity(intent)
+            finishAffinity()
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(this, "Failed direct to whatsapp", TOAST_SHORT).show()
+        }
+
+    }
+
     private fun submitValidation() {
 
         if (!formValidation()) return
@@ -121,14 +259,25 @@ class NewReportActivity : AppCompatActivity() {
     }
 
     private fun formValidation(): Boolean {
-        val message = binding.etMessage
-        if (message.text.isNullOrEmpty()) {
-            message.error = "The report message cannot be empty"
-            message.requestFocus()
+        val etMessage = binding.etMessage
+        if (coordinate.isNullOrEmpty()) {
+            val message = "Your distance is not calculated!"
+            customUtility.showDialog(message = message)
             return false
         }
-        message.error = null
-        message.clearFocus()
+        if (isDistanceToLong) {
+            val message = "You cannot report for now, Try to get closer to the store and refresh the distance!"
+            val actionTitle = "Refresh Now"
+            customUtility.showPermissionDeniedSnackbar(message, actionTitle) { calculateDistance() }
+            return false
+        }
+        if (etMessage.text.isNullOrEmpty()) {
+            etMessage.error = "The report message cannot be empty"
+            etMessage.requestFocus()
+            return false
+        }
+        etMessage.error = null
+        etMessage.clearFocus()
         return true
     }
 
@@ -158,5 +307,22 @@ class NewReportActivity : AppCompatActivity() {
             binding.tvLoading.visibility = View.GONE
             binding.container.visibility = View.VISIBLE
         }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                getDistance()
+                calculateDistance()
+            } else {
+                if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    val message = "Location permissions are required for this feature. Please grant the permissions."
+                    customUtility.showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE) }
+                } else customUtility.showPermissionDeniedDialog("Location permissions are required for this feature. Please enable them in the app settings.")
+            }
+        }
+
     }
 }
