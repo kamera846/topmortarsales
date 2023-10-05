@@ -211,6 +211,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var datePicker: DatePickerDialog
     private lateinit var searchModal: SearchModal
     private lateinit var sendMessageModal: SendMessageModal
+    private lateinit var bottomSheetDialog: BottomSheetDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -325,6 +326,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
             etKtp.clearFocus()
         }
+
+        bottomSheetDialog = BottomSheetDialog(this)
 
     }
 
@@ -1177,9 +1180,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 btnNewReport.visibility = View.GONE
             }
 
-            val bottomSheetDialog = BottomSheetDialog(this)
             bottomSheetDialog.setContentView(bottomSheetLayout)
-
             bottomSheetDialog.show()
         }
 
@@ -1199,12 +1200,26 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
 
-            }
-            R.id.reportOption -> {
+            } R.id.reportOption -> {
                 Toast.makeText(this, "Go To Reports Page", TOAST_SHORT).show()
+            } else -> {
+
+                val intent = Intent(this@DetailContactActivity, NewReportActivity::class.java)
+
+                intent.putExtra(CONST_CONTACT_ID, contactId)
+                if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
+                else intent.putExtra(CONST_NAME, tvName.text)
+                if (iMapsUrl.isNullOrEmpty()) intent.putExtra(CONST_MAPS, "")
+                else intent.putExtra(CONST_MAPS, iMapsUrl)
+
+                startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+
             }
-            else -> Toast.makeText(this, "Go To New Reports Page", TOAST_SHORT).show()
         }
+
+        Handler().postDelayed({
+            bottomSheetDialog.dismiss()
+        }, 500)
 
     }
 
