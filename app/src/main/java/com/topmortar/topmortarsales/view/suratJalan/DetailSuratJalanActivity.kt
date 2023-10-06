@@ -225,10 +225,10 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         icBack.setOnClickListener { backHandler() }
         icSyncNow.setOnClickListener { getDetail() }
         btnPrint.setOnClickListener { printNow() }
-        btnClosing.setOnClickListener { chooseFile() }
-        lnrClosing.setOnClickListener { chooseFile() }
-//        btnClosing.setOnClickListener { getMapsUrl() }
-//        lnrClosing.setOnClickListener { getMapsUrl() }
+//        btnClosing.setOnClickListener { chooseFile() }
+//        lnrClosing.setOnClickListener { chooseFile() }
+        btnClosing.setOnClickListener { getMapsUrl() }
+        lnrClosing.setOnClickListener { getMapsUrl() }
     }
 
     private fun dataActivityValidation() {
