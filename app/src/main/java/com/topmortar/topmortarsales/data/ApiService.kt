@@ -212,6 +212,7 @@ interface ApiService {
     @POST(SURAT_JALAN)
     suspend fun closingInvoice(
         @Part("command") command: RequestBody = createPartFromString("closing"),
+        @Part("distance") distance: RequestBody,
         @Part("id_surat_jalan") invoiceId: RequestBody,
         @Part image: MultipartBody.Part,
     ): ResponseSuratJalan
