@@ -36,7 +36,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginEnd="16dp"
-                android:src="@drawable/file_list_black"
+                android:src="@drawable/file_list_line_black"
                 android:contentDescription="Icon Surat Jalan"/>
 
             <TextView
@@ -66,7 +66,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginEnd="16dp"
-                android:src="@drawable/invoice_black"
+                android:src="@drawable/invoice_line_black"
                 android:contentDescription="Icon Invoice"/>
 
             <TextView
@@ -96,7 +96,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:layout_marginEnd="16dp"
-                android:src="@drawable/file_list_black"
+                android:src="@drawable/file_flat_list_line_black"
                 android:contentDescription="Icon Report"/>
 
             <TextView
