@@ -1,4 +1,4 @@
-package com.topmortar.topmortarsales.view.contact
+package com.topmortar.topmortarsales.view.reports
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -23,10 +23,7 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
-import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
-import com.topmortar.topmortarsales.commons.REQUEST_BLUETOOTH_PERMISSIONS
-import com.topmortar.topmortarsales.commons.REQUEST_ENABLE_BLUETOOTH
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength

@@ -65,7 +65,7 @@
             android:name=".view.user.UserProfileActivity"
             android:exported="false" />
         <activity
-            android:name=".view.contact.NewReportActivity"
+            android:name=".view.reports.NewReportActivity"
             android:exported="false" />
         <activity
             android:name=".view.MapsActivity"
