@@ -6,15 +6,12 @@ import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.location.Location
-import android.location.LocationListener
 import android.location.LocationManager
 import android.net.Uri
 import android.os.Build
@@ -45,11 +42,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dantsu.escposprinter.EscPosPrinter
 import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
 import com.dantsu.escposprinter.textparser.PrinterTextParserImg
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.material.snackbar.Snackbar
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.InvoiceOrderRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_DISTANCE
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_URI
@@ -60,8 +56,6 @@ import com.topmortar.topmortarsales.commons.REQUEST_ENABLE_BLUETOOTH
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
-import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
-import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.utils.BluetoothPrinterManager
@@ -77,7 +71,6 @@ import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.DetailSuratJalanModel
 import com.topmortar.topmortarsales.model.SuratJalanModel
 import com.topmortar.topmortarsales.view.MapsActivity
-import com.topmortar.topmortarsales.view.TestMapsDistanceActivity
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
@@ -123,7 +116,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     private var isClosing: Boolean = false
 
     private var detailContact: ContactModel? = null
-    private var originalMapsUrl = ""
+    private var shortDistance: Double = -1.0
 
     private var cameraPermissionLauncher: ActivityResultLauncher<String>? = null
     private var imagePicker: ActivityResultLauncher<Intent>? = null
@@ -216,6 +209,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         val intent = Intent(this, PreviewClosingActivity::class.java)
         intent.putExtra(CONST_INVOICE_ID, invoiceId)
         intent.putParcelableArrayListExtra(CONST_URI, uriList)
+        intent.putExtra(CONST_DISTANCE, shortDistance)
         startActivityForResult(intent, IMG_PREVIEW_STATE)
 
     }
@@ -325,7 +319,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                             tvReceivedBy.visibility = View.VISIBLE
                             tvReceivedDate.visibility = View.VISIBLE
                             tvReceivedBy.text = "${ data.ship_to_name }"
-                            tvReceivedDate.text = "Already closed at ${ data.date_closing }"
+                            tvReceivedDate.text = "Already closed at ${ data.date_closing }" + data.distance.let { if (!it.isNullOrEmpty()) "\n $it km from the coordinate point" else "" }
                             btnBottomAction.visibility = View.GONE
                         }
 
@@ -456,7 +450,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                             // Calculate Distance
                             val urlUtility = URLUtility(this)
                             val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
-                            val shortDistance = "%.3f".format(distance).toDouble()
+                            shortDistance = "%.3f".format(distance).toDouble()
 
                             if (distance > 0.2) {
                                 val builder = AlertDialog.Builder(this)

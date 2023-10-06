@@ -13,13 +13,14 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.CONST_DISTANCE
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_URI
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_SUCCESS
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
-import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil.compressImage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -46,6 +47,7 @@ class PreviewClosingActivity : AppCompatActivity() {
     private var isLoading: Boolean = false
     private var invoiceId: String? = null
     private var imagePart: MultipartBody.Part? = null
+    private var iDistance: Double = -1.0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,7 +71,11 @@ class PreviewClosingActivity : AppCompatActivity() {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.closingInvoice(invoiceId = createPartFromString(invoiceId!!), image = imagePart!!)
+                val response = apiService.closingInvoice(
+                    invoiceId = createPartFromString(invoiceId!!),
+                    distance = createPartFromString(iDistance.let { if (it >= 0) it.toString() else "" }),
+                    image = imagePart!!
+                )
 
                 when (response.status) {
                     RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
@@ -151,7 +157,7 @@ class PreviewClosingActivity : AppCompatActivity() {
         txtTitleBar.text = "Preview Closing"
 
         // Set Button Action
-        if (sessionManager.userKind() == USER_KIND_ADMIN) bottomAction.visibility = View.GONE
+        if (sessionManager.userKind() == USER_KIND_COURIER) bottomAction.visibility = View.VISIBLE
 
     }
 
@@ -163,6 +169,8 @@ class PreviewClosingActivity : AppCompatActivity() {
 
     private fun dataActivityValidation() {
         val invoiceId = intent.getStringExtra(CONST_INVOICE_ID)
+        iDistance = intent.getDoubleExtra(CONST_DISTANCE, -1.0)
+
         if (!invoiceId.isNullOrEmpty()) {
             this.invoiceId = invoiceId
         }
@@ -181,7 +189,6 @@ class PreviewClosingActivity : AppCompatActivity() {
             if (byteArray != null) {
                 val requestFile: RequestBody = RequestBody.create("image/*".toMediaTypeOrNull(), byteArray)
                 imagePart = MultipartBody.Part.createFormData("pic", "image.jpg", requestFile)
-//                imgPreview.setImageURI(imgUri)
             } else handleMessage(this, TAG_RESPONSE_CONTACT, "Image not located")
 
         }
