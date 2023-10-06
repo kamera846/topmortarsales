@@ -28,9 +28,9 @@ class ReportsActivity : AppCompatActivity() {
         contactID = intent.getStringExtra(CONST_CONTACT_ID).toString()
         contactName = intent.getStringExtra(CONST_NAME).toString()
 
-        binding.titleBarLight.tvTitleBar.text = "Reports"
-        binding.titleBarLight.tvTitleBarDescription.visibility = View.VISIBLE
-        binding.titleBarLight.tvTitleBarDescription.text = "List report pada toko $contactName"
+        binding.titleBarDark.tvTitleBar.text = "Reports"
+        binding.titleBarDark.tvTitleBarDescription.visibility = View.VISIBLE
+        binding.titleBarDark.tvTitleBarDescription.text = "List report pada toko $contactName"
 
         setRecyclerView()
 
