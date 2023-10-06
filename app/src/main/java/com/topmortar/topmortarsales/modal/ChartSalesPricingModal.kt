@@ -54,7 +54,6 @@ class ChartSalesPricingModal(private val context: Context) : Dialog(context) {
         val titleBar = binding.titleBarLight
         titleBar.tvTitleBar.text = "Income Details"
         titleBar.tvTitleBarDescription.text = "These are your details for this month"
-        titleBar.tvTitleBar.setPadding(0, 0, convertDpToPx(16, context), 0)
 
         setupBarChart()
     }

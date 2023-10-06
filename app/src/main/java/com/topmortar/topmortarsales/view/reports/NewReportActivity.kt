@@ -66,7 +66,6 @@ class NewReportActivity : AppCompatActivity() {
 
     private fun initContent() {
         binding.titleBarLight.tvTitleBar.text = "Report Form"
-        binding.titleBarLight.tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         loadingContent(true)
 

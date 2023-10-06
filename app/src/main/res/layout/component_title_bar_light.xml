@@ -30,7 +30,6 @@
             android:text="@string/top_mortar_sales"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:paddingHorizontal="16dp"
             android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
 
         <TextView
@@ -41,7 +40,6 @@
             android:gravity="center_vertical"
             android:text="sales freelance"
             android:textSize="14sp"
-            android:paddingHorizontal="16dp"
             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
     </LinearLayout>

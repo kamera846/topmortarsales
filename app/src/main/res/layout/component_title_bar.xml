@@ -12,7 +12,7 @@
         android:gravity="center_vertical">
 
         <ImageView
-            android:visibility="gone"
+            android:visibility="visible"
             android:id="@+id/ic_back"
             android:layout_width="56dp"
             android:layout_height="56dp"
@@ -33,7 +33,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
-                android:paddingHorizontal="16dp"
                 android:text="@string/list_chat"
                 android:textSize="18sp"
                 android:textStyle="bold"
@@ -45,7 +44,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
-                android:paddingHorizontal="16dp"
                 android:text="@string/dummy_welcome_message"
                 android:textSize="14sp"
                 android:textColor="@color/white" />

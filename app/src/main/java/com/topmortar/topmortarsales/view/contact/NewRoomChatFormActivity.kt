@@ -378,7 +378,6 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
         // Set Title Bar
         tvTitleBar.text = "New Contact"
-        tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Setup Date Picker Dialog
         setDatePickerDialog()

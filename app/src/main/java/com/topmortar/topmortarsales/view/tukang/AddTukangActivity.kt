@@ -354,7 +354,6 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         // Set Title Bar
         tvTitleBar.text = "Add New Tukang"
-        tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Setup Date Picker Dialog
         setDatePickerDialog()

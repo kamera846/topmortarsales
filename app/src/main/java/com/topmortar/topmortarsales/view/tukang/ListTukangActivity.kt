@@ -45,6 +45,7 @@ import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
@@ -68,6 +69,8 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
     private lateinit var btnFab: FloatingActionButton
     private lateinit var titleBar: TextView
     private lateinit var icMore: ImageView
+    private lateinit var icBack: ImageView
+    private lateinit var tvTitleBar: TextView
     private lateinit var tvTitleBarDescription: TextView
 
     // Global
@@ -112,13 +115,18 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         btnFab = findViewById(R.id.btn_fab)
         titleBar = llTitleBar.findViewById(R.id.tv_title_bar)
         icMore = llTitleBar.findViewById(R.id.ic_more)
+        icBack = llTitleBar.findViewById(R.id.ic_back)
+        tvTitleBar = llTitleBar.findViewById(R.id.tv_title_bar)
         tvTitleBarDescription = llTitleBar.findViewById(R.id.tv_title_bar_description)
 
         // Set Title Bar
+        icBack.visibility = View.GONE
         icMore.visibility = View.VISIBLE
         titleBar.text = "List Tukang"
         tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Hello, $it" else ""}
         tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
+        tvTitleBar.setPadding(convertDpToPx(16, this), 0, convertDpToPx(16, this), 0)
+        tvTitleBarDescription.setPadding(convertDpToPx(16, this), 0, convertDpToPx(16, this), 0)
 
 
     }

@@ -295,7 +295,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         // Setup Title Bar
         tvTitleBar.text = "Detail Contact"
-        tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Setup Date Picker Dialog
         setDatePickerDialog()

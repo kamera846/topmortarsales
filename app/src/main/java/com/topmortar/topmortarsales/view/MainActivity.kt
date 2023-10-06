@@ -97,9 +97,11 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
     private lateinit var btnFabAdmin: FloatingActionButton
     private lateinit var icMore: ImageView
     private lateinit var icSearch: ImageView
+    private lateinit var icBack: ImageView
     private lateinit var icCloseSearch: ImageView
     private lateinit var icClearSearch: ImageView
     private lateinit var etSearchBox: EditText
+    private lateinit var tvTitleBar: TextView
     private lateinit var tvTitleBarDescription: TextView
 
     // Global
@@ -152,17 +154,22 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         btnFab = findViewById(R.id.btn_fab)
         btnFabAdmin = findViewById(R.id.btn_fab_admin)
         icMore = llTitleBar.findViewById(R.id.ic_more)
+        icBack = llTitleBar.findViewById(R.id.ic_back)
         icSearch = llTitleBar.findViewById(R.id.ic_search)
+        tvTitleBar = llTitleBar.findViewById(R.id.tv_title_bar)
         tvTitleBarDescription = llTitleBar.findViewById(R.id.tv_title_bar_description)
         icCloseSearch = findViewById(R.id.ic_close_search)
         icClearSearch = findViewById(R.id.ic_clear_search)
         etSearchBox = findViewById(R.id.et_search_box)
 
         // Set Title Bar
+        icBack.visibility = View.GONE
         icMore.visibility = View.VISIBLE
         tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Hello, $it" else ""}
         tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
         etSearchBox.setPadding(0, 0, convertDpToPx(16, this), 0)
+        tvTitleBar.setPadding(convertDpToPx(16, this), 0, convertDpToPx(16, this), 0)
+        tvTitleBarDescription.setPadding(convertDpToPx(16, this), 0, convertDpToPx(16, this), 0)
 
         // Set Floating Action Button
         if (sessionManager.userKind() == USER_KIND_SALES) btnFab.visibility = View.VISIBLE

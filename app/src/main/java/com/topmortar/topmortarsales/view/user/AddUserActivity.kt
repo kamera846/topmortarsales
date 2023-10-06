@@ -224,7 +224,6 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         // Set Title Bar
         tvTitleBar.text = "Register New User"
-        tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Text View Generated Username
         val usernameGeneratedDescription = "The username will be generated as:"

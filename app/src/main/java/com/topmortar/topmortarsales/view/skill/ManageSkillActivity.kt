@@ -93,7 +93,6 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
         icBack.visibility = View.VISIBLE
 //        icSearch.visibility = View.VISIBLE
         titleBar.text = "Manage Skill"
-        titleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
     }
 

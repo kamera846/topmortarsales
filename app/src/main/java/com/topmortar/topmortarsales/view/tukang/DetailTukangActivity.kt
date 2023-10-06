@@ -271,7 +271,6 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         // Setup Title Bar
         tvTitleBar.text = "Detail Tukang"
         tvDescription.text = "Top Mortar Tukang"
-        tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Admin Access
         if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_BA) {

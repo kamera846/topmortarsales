@@ -158,8 +158,6 @@ class UserProfileActivity : AppCompatActivity() {
             binding.titleBarLight.tvTitleBar.text = iUserName
             binding.titleBarLight.tvTitleBarDescription.visibility = View.VISIBLE
             binding.titleBarLight.tvTitleBarDescription.text = iUserLevel
-            binding.titleBarLight.tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
-            binding.titleBarLight.tvTitleBarDescription.setPadding(0, 0, convertDpToPx(16, this), 0)
         }
         if (iFullName!!.isNotEmpty()) binding.tvFullName.text = iFullName
         if (iUserLevel!!.isNotEmpty()) binding.tvLevel.text = iUserLevel

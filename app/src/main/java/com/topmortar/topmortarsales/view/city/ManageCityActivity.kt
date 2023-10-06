@@ -93,7 +93,6 @@ class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClic
         icBack.visibility = View.VISIBLE
 //        icSearch.visibility = View.VISIBLE
         titleBar.text = "Manage City"
-        titleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
     }
 

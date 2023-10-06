@@ -150,11 +150,6 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
         else llFilter.background = getDrawable(R.color.light)
 
         val padding16 = convertDpToPx(16, this)
-//        val padding8 = convertDpToPx(8, this)
-        titleBar.setPadding(0, 0, padding16, 0)
-        titleBarDescription.setPadding(0, 0, padding16, 0)
-//        icSyncNow.setPadding(padding16, 0, 0, 0)
-//        icOption.setPadding(padding8, 0, padding16, 0)
 
     }
 

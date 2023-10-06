@@ -180,7 +180,6 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         // Setup Title Bar
         icSyncNow.visibility = View.VISIBLE
         tvTitleBar.text = "Detail Surat Jalan"
-        tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Setup Printer
         if (sessionManager.userKind() == USER_KIND_COURIER) {

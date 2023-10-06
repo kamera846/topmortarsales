@@ -105,7 +105,6 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
         icBack.visibility = View.VISIBLE
 //        icSearch.visibility = View.VISIBLE
         titleBar.text = "Manage User"
-        titleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
     }
 

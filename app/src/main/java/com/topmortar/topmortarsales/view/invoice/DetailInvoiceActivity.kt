@@ -213,8 +213,6 @@ class DetailInvoiceActivity : AppCompatActivity() {
         icBack.setImageDrawable(getDrawable(R.drawable.arrow_back_white))
         tvTitleBar.text = "Detail Invoice"
         tvTitleBar.setTextColor(getColor(R.color.white))
-        val padding16 = convertDpToPx(16, this)
-        tvTitleBar.setPadding(0, 0, padding16, 0)
 
     }
 
