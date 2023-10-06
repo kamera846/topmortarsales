@@ -100,6 +100,7 @@ import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.reports.NewReportActivity
+import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import com.topmortar.topmortarsales.view.suratJalan.ListSuratJalanActivity
 import com.topmortar.topmortarsales.view.suratJalan.PreviewClosingActivity
 import kotlinx.coroutines.launch
@@ -1198,7 +1199,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
 
             } R.id.reportOption -> {
-                Toast.makeText(this, "Go To Reports Page", TOAST_SHORT).show()
+
+                val intent = Intent(this@DetailContactActivity, ReportsActivity::class.java)
+
+                intent.putExtra(CONST_CONTACT_ID, contactId)
+                if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
+                else intent.putExtra(CONST_NAME, tvName.text)
+
+                startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+
             } else -> {
 
                 val intent = Intent(this@DetailContactActivity, NewReportActivity::class.java)

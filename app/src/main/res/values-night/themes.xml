@@ -49,5 +49,9 @@
         <item name="android:background">@color/black_200</item>
         <item name="android:outlineSpotShadowColor" tools:targetApi="P">@color/white</item>
     </style>
+    <style name="Theme.TopMortarSales.CardViewReports" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="android:background">@drawable/bg_card_clickable</item>
+        <item name="android:outlineSpotShadowColor" tools:targetApi="P">@color/white</item>
+    </style>
 
 </resources>

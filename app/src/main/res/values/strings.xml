@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Top Mortar Sales</string>
+    <string name="lorem_title">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</string>
+    <string name="lorem_desc">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</string>
     <string name="list_chat">Top Mortar Sales</string>
     <string name="new_chat_room">New Chat Room</string>
     <string name="logo_horizontal">Logo Horizontal</string>
@@ -139,6 +141,5 @@
     <string name="title_activity_maps">MapsActivity</string>
     <string name="maps_key">AIzaSyDLMtfb0qTk0lNWo22mn8hblqCl5OnDELA</string>
     <string name="topmortar_wa_number">+6287826210888</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
