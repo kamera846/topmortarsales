@@ -15,6 +15,7 @@ data class SuratJalanModel(
     var date_printed: String = "",
     var is_closing: String = "",
     var date_closing: String = "",
+    var distance: String = "",
     var courier_name : String = "",
     var nama_kendaraan : String = "",
     var nopol_kendaraan : String = "",
