@@ -225,10 +225,10 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         icBack.setOnClickListener { backHandler() }
         icSyncNow.setOnClickListener { getDetail() }
         btnPrint.setOnClickListener { printNow() }
-        btnClosing.setOnClickListener { chooseFile() }
-        lnrClosing.setOnClickListener { chooseFile() }
-//        btnClosing.setOnClickListener { getMapsUrl() }
-//        lnrClosing.setOnClickListener { getMapsUrl() }
+//        btnClosing.setOnClickListener { chooseFile() }
+//        lnrClosing.setOnClickListener { chooseFile() }
+        btnClosing.setOnClickListener { getMapsUrl() }
+        lnrClosing.setOnClickListener { getMapsUrl() }
     }
 
     private fun dataActivityValidation() {
@@ -462,7 +462,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                             if (distance > 0.2) {
                                 val builder = AlertDialog.Builder(this)
                                 builder.setTitle("Warning!")
-                                    .setMessage("Your distance is ${shortDistance}km too far away from the store. Try to get closer to the store")
+                                    .setMessage("Your distance is $shortDistance km too far away from the store. Try to get closer to the store")
                                     .setPositiveButton("Ok") { dialog, _ -> dialog.dismiss() }
                                     .setNegativeButton("Open Maps") { dialog, _ ->
                                         val intent = Intent(this@DetailSuratJalanActivity, MapsActivity::class.java)
