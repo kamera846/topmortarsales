@@ -1,20 +1,20 @@
 package com.topmortar.topmortarsales.view.invoice
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.InvoicePaymentRecyclerViewAdapter
-import com.topmortar.topmortarsales.commons.CONST_DATE_INVOICE
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_NUMBER
+import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_STATUS_INVOICE
 import com.topmortar.topmortarsales.commons.CONST_TOTAL_INVOICE
 import com.topmortar.topmortarsales.commons.INVOICE_PAID
@@ -24,8 +24,6 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.utils.CurrencyFormat
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.SessionManager
-import com.topmortar.topmortarsales.commons.utils.changeStatusBarColor
-import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
@@ -180,12 +178,9 @@ class DetailInvoiceActivity : AppCompatActivity() {
     private fun dataActivityValidation() {
 
         iInvoiceID = intent.getStringExtra(CONST_INVOICE_ID)!!
+        val iName = intent.getStringExtra(CONST_NAME)
         val iInvoiceNumber = intent.getStringExtra(CONST_INVOICE_NUMBER)
         val iTotalInvoice = intent.getStringExtra(CONST_TOTAL_INVOICE)
-//        val iDateInvoice = intent.getStringExtra(CONST_DATE_INVOICE)
-//
-//        if (!iDateInvoice.isNullOrEmpty()) tvDateInvoice.text = DateFormat.format(dateString = iDateInvoice, input = "yyyy-MM-dd hh:mm:ss", format = "dd MMMM yyyy, hh:mm")
-//        else tvDateInvoice.text = "Status"
 
         if (!iTotalInvoice.isNullOrEmpty()) {
             totalInvoice = iTotalInvoice
@@ -197,12 +192,17 @@ class DetailInvoiceActivity : AppCompatActivity() {
             tvTitleBar.text = "${tvTitleBar.text} - $invoiceNumber"
         }
 
+        if (!iName.isNullOrEmpty()) {
+            tvContactName.text = "$iName"
+        }
+
     }
 
     private fun initVariable() {
 
         icBack = findViewById(R.id.ic_back)
         tvTitleBar = findViewById(R.id.tv_title_bar)
+        tvContactName = findViewById(R.id.tv_contact_name)
         tvTotalInvoice = findViewById(R.id.tv_total_invoice)
         tvStatus = findViewById(R.id.tv_status)
         tvDateInvoice = findViewById(R.id.tv_date_invoce)
@@ -224,6 +224,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
     private lateinit var icBack: ImageView
     private lateinit var tvTitleBar: TextView
+    private lateinit var tvContactName: TextView
     private lateinit var tvTotalInvoice: TextView
     private lateinit var tvStatus: TextView
     private lateinit var tvDateInvoice: TextView
