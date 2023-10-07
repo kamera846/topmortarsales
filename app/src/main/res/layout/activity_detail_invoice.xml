@@ -17,11 +17,22 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/tv_contact_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="-"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:textSize="16sp"/>
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Total Invoice"
             android:textAllCaps="true"
             android:textColor="@color/white"
+            android:layout_marginBottom="12dp"
+            android:alpha="0.8"
             android:textSize="16sp"/>
 
         <TextView

@@ -435,6 +435,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
         val intent = Intent(this@ListSuratJalanActivity, DetailInvoiceActivity::class.java)
         intent.putExtra(CONST_INVOICE_ID, data?.id_invoice)
+        intent.putExtra(CONST_NAME, iName)
         intent.putExtra(CONST_INVOICE_NUMBER, data?.no_invoice)
         intent.putExtra(CONST_STATUS_INVOICE, data?.status_invoice)
         intent.putExtra(CONST_TOTAL_INVOICE, data?.total_invoice)
