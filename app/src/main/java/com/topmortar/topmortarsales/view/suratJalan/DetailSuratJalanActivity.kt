@@ -450,7 +450,10 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                             // Calculate Distance
                             val urlUtility = URLUtility(this)
                             val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
-                            shortDistance = "%.3f".format(distance).toDouble()
+                            var stringDistance = "%.3f".format(distance)
+
+                            if (stringDistance.contains(",")) stringDistance = stringDistance.replace(",", ".")
+                            shortDistance = stringDistance.toDouble()
 
                             if (distance > 0.2) {
                                 val builder = AlertDialog.Builder(this)
