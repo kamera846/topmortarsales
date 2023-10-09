@@ -214,7 +214,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                     when (responseBody.status) {
                         RESPONSE_STATUS_OK -> {
 
-                            handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, message.let { if (!it.isNullOrEmpty()) "Successfully saved & sent message!" else "Successfully saved contact!" })
+                            handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, message.let { if (!it.isNullOrEmpty()) "Berhasil menyimpan & mengirim pesan!" else "Berhasil menyimpan kontak!" })
                             loadingState(false)
 
                             val resultIntent = Intent()
@@ -225,13 +225,13 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Failed to send! Message: ${ responseBody.message }")
+                            handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim pesan: ${ responseBody.message }")
                             loadingState(false)
 
                         }
                         else -> {
 
-                            handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Failed to send!")
+                            handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim pesan!")
                             loadingState(false)
 
                         }
@@ -239,7 +239,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
                 } else {
 
-                    handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Failed to send! Error: " + response.message())
+                    handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim pesan. Error: " + response.message())
                     loadingState(false)
 
                 }
@@ -270,8 +270,8 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             }
 
             override fun afterTextChanged(s: Editable?) {
-                if (s.toString().isNullOrEmpty()) btnSubmit.text = "Save Contact"
-                else btnSubmit.text = "Save & Send Message"
+                if (s.toString().isNullOrEmpty()) btnSubmit.text = "Simpan Kontak"
+                else btnSubmit.text = "Simpan & Kirim Pesan"
             }
         })
 
@@ -337,7 +337,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             etOwner.isEnabled = false
         }
         if (!iLocation.isNullOrEmpty()) {
-            etStoreLocated.setText("Loading...")
+            etStoreLocated.setText(getString(R.string.txt_loading))
             etStoreLocated.setTextColor(getColor(R.color.black_500))
             etStoreLocated.setBackgroundResource(R.drawable.et_background_disabled)
             etStoreLocated.isEnabled = false
@@ -377,7 +377,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         etMapsUrl = findViewById(R.id.et_maps_url)
 
         // Set Title Bar
-        tvTitleBar.text = "New Contact"
+        tvTitleBar.text = "Tambah Kontak Baru"
         tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Setup Date Picker Dialog
@@ -473,7 +473,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         } else {
 
             btnSubmit.isEnabled = true
-            btnSubmit.text = if (etMessage.text.isNullOrEmpty()) "Save Contact" else "Save & Send Message"
+            btnSubmit.text = if (etMessage.text.isNullOrEmpty()) "Simpan Kontak" else "Simpan & Kirim Pesan"
             btnSubmit.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
 
         }
@@ -590,7 +590,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
         searchModal = SearchModal(this, items)
         searchModal.setCustomDialogListener(this)
-        searchModal.searchHint = "Enter city name..."
+        searchModal.searchHint = "Ketik nama kota…"
         searchModal.setOnDismissListener {
             etStoreLocated.clearFocus()
             etOwner.requestFocus()
@@ -646,14 +646,14 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        handleMessage(this@NewRoomChatFormActivity, "LIST CITY", "Empty cities data!")
+                        handleMessage(this@NewRoomChatFormActivity, "LIST CITY", "Daftar kota kosong!")
                         isCitiesLoaded = false
 //                        searchModal.isLoading(true)
 
                     }
                     else -> {
 
-                        handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                        handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_CONTACT, "Gagal memuat data")
                         isCitiesLoaded = false
 //                        searchModal.isLoading(true)
 
@@ -762,9 +762,9 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             else {
                 val customUtility = CustomUtility(this)
                 if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    val message = "Location permissions are required for this apps. Please grant the permissions."
+                    val message = "Izin lokasi diperlukan untuk fitur ini. Izinkan aplikasi mengakses lokasi perangkat."
                     customUtility.showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE) }
-                } else customUtility.showPermissionDeniedDialog("Location permissions are required for this apps. Please enable them in the app settings.")
+                } else customUtility.showPermissionDeniedDialog("Izin lokasi diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
             }
         }
 

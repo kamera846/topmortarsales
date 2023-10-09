@@ -85,7 +85,7 @@ class PreviewClosingActivity : AppCompatActivity() {
                     }
                     else -> {
 
-                        handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, "Failed to closing. Err: ${response.message}")
+                        handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, "Gagal closing. Error: ${response.message}")
                         loadingState(false)
 
                     }
@@ -128,7 +128,7 @@ class PreviewClosingActivity : AppCompatActivity() {
                     }
                     else -> {
 
-                        handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, "Failed to closing. Err: ${response.message}")
+                        handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, "Gagal closing. Error: ${response.message}")
                         loadingState(false)
 
                     }
@@ -189,7 +189,7 @@ class PreviewClosingActivity : AppCompatActivity() {
             if (byteArray != null) {
                 val requestFile: RequestBody = RequestBody.create("image/*".toMediaTypeOrNull(), byteArray)
                 imagePart = MultipartBody.Part.createFormData("pic", "image.jpg", requestFile)
-            } else handleMessage(this, TAG_RESPONSE_CONTACT, "Image not located")
+            } else handleMessage(this, TAG_RESPONSE_CONTACT, "Gambar tidak ditemukan")
 
         }
 
@@ -198,11 +198,11 @@ class PreviewClosingActivity : AppCompatActivity() {
     private fun loadingState(state: Boolean) {
         if (state) {
             isLoading = true
-            btnUpload.text = "Loading..."
+            btnUpload.text = getString(R.string.txt_loading)
 
         } else {
             isLoading = false
-            btnUpload.text = "Closing Now"
+            btnUpload.text = "Closing Sekarang"
 
         }
 
@@ -214,8 +214,8 @@ class PreviewClosingActivity : AppCompatActivity() {
 
         } else {
             val builder = AlertDialog.Builder(this)
-            builder.setMessage("Wait a moment. The closing progress is still ongoing.")
-                .setPositiveButton("Ok") { dialog, _ -> dialog.dismiss() }
+            builder.setMessage("Tunggu sebentar. Proses closing masih berjalan.")
+                .setPositiveButton("Oke") { dialog, _ -> dialog.dismiss() }
             val dialog = builder.create()
             dialog.show()
 

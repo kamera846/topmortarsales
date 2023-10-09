@@ -303,10 +303,10 @@ class SplashScreenActivity : AppCompatActivity() {
 
     private fun showResetConfirmation() {
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Cancel Reset Password")
-            .setMessage("Are you sure you want to cancel \"Reset Password\" process?")
-            .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
-            .setPositiveButton("Yes") { dialog, _ ->
+        builder.setTitle("Batalkan Reset Kata Sandi")
+            .setMessage("Apakah Anda yakin ingin membatalkan proses \"Reset Kata Sandi\"?")
+            .setNegativeButton("Tidak") { dialog, _ -> dialog.dismiss() }
+            .setPositiveButton("Iya") { dialog, _ ->
 
                 currentSubmitStep += 1
                 submitHandler(next = true)
@@ -387,13 +387,13 @@ class SplashScreenActivity : AppCompatActivity() {
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        showAlert("Your username or password seems wrong!", 5000)
+                        showAlert("Username atau kata sandi anda sepertinya salah!", 5000)
                         loadingState(false)
 
                     }
                     else -> {
 
-                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_CONTACT, response.message.let { if (!it.isNullOrEmpty()) it else "Failed process auth" })
+                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_CONTACT, response.message.let { if (!it.isNullOrEmpty()) it else "Proses autentikasi gagal" })
                         loadingState(false)
 
                     }
@@ -486,7 +486,7 @@ class SplashScreenActivity : AppCompatActivity() {
             otpObject.error = null
 
             if (otpInput.isEmpty()) {
-                otpObject.error = "Otp ${ i + 1 } cannot be empty"
+                otpObject.error = "OTP ${ i + 1 } tidak boleh kosong"
                 otpObject.requestFocus()
                 isReady = false
                 break
@@ -498,7 +498,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
         if (otpCode.isEmpty()) {
             isReady = false
-            handleMessage(this, "EMPTY OTP CODE", "Otp code cannot be empty!")
+            handleMessage(this, "EMPTY OTP CODE", "Kode OTP tidak boleh kosong!")
         }
 
         if (!isReady) return
@@ -535,14 +535,14 @@ class SplashScreenActivity : AppCompatActivity() {
 
                     } else {
 
-                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed verify otp!: ${ responseBody.message }")
+                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Gagal verifikasi OTP!: ${ responseBody.message }")
                         loadingState(false)
 
                     }
 
                 } else {
 
-                    handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed verify otp! Error: " + response.message())
+                    handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Gagal verifikasi OTP! Error: " + response.message())
                     loadingState(false)
 
                 }
@@ -612,7 +612,7 @@ class SplashScreenActivity : AppCompatActivity() {
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed reset password! Message: ${ responseBody.message }")
+                            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Gagal mereset kata sandi! Message: ${ responseBody.message }")
                             loadingState(false)
 
                         }

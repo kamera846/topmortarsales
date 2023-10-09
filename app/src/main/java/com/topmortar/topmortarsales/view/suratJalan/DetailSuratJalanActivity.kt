@@ -81,7 +81,6 @@ import java.util.Locale
 class DetailSuratJalanActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
-    private lateinit var urlUtility: URLUtility
     private lateinit var customUtility: CustomUtility
 
     private lateinit var icBack: ImageView
@@ -122,7 +121,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     private var imagePicker: ActivityResultLauncher<Intent>? = null
     private var selectedUri: Uri? = null
     private var currentPhotoUri: Uri? = null
-    private lateinit var bluetoothAdapter: BluetoothAdapter
+    private var bluetoothAdapter: BluetoothAdapter? = null
     private var printerManager = BluetoothPrinterManager()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -188,9 +187,9 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                 chooseFile()
             } else {
                 if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
-                    val message = "Camera permissions are required for this feature. Please grant the permissions."
+                    val message = "Izin kamera diperlukan untuk fitur ini. Izinkan aplikasi mengakses kamera pada perangkat!"
                     customUtility.showPermissionDeniedSnackbar(message) { cameraPermissionLauncher!!.launch(Manifest.permission.CAMERA) }
-                } else customUtility.showPermissionDeniedDialog("Camera permissions are required for this feature. Please enable them in the app settings.")
+                } else customUtility.showPermissionDeniedDialog("Izin kamera diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
             }
         }
         imagePicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -267,14 +266,14 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                         }
                         else -> {
 
-                            handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                            handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal memuat data.")
                             loadingState(true, getString(R.string.failed_request))
 
                         }
                     }
                 } else {
 
-                    handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed to get detail! Error: " + response.message())
+                    handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal memuat data. Error : " + response.message())
                     loadingState(false)
 
                 }
@@ -320,7 +319,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                             tvReceivedBy.visibility = View.VISIBLE
                             tvReceivedDate.visibility = View.VISIBLE
                             tvReceivedBy.text = "${ data.ship_to_name }"
-                            tvReceivedDate.text = "Already closed at ${ data.date_closing }" + data.distance.let { if (!it.isNullOrEmpty()) "\n $it km from the coordinate point" else "" }
+                            tvReceivedDate.text = "Sudah di closing pada ${ data.date_closing }" + data.distance.let { if (!it.isNullOrEmpty()) "\ndengan jarak $it km dari titik toko" else "" }
                             btnBottomAction.visibility = View.GONE
                         }
 
@@ -337,7 +336,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                     }
                     else -> {
 
-                        handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                        handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal memuat data.")
                         loadingState(true, getString(R.string.failed_request))
 
                     }
@@ -458,8 +457,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
                             if (distance > 0.2) {
                                 val builder = AlertDialog.Builder(this)
-                                builder.setTitle("Warning!")
-                                    .setMessage("Your distance is $shortDistance km too far away from the store. Try to get closer to the store")
+                                builder.setTitle("Peringatan!")
+                                    .setMessage("Titik anda saat ini $shortDistance km dari titik toko. Cobalah untuk lebih dekat dengan toko!")
                                     .setPositiveButton("Ok") { dialog, _ -> dialog.dismiss() }
                                     .setNegativeButton("Open Maps") { dialog, _ ->
                                         val intent = Intent(this@DetailSuratJalanActivity, MapsActivity::class.java)
@@ -470,13 +469,13 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                                 builder.show()
                             } else chooseFile()
 
-                        } else Toast.makeText(this, "Failed to process coordinate", TOAST_SHORT).show()
+                        } else Toast.makeText(this, "Gagal memproses koordinat.", TOAST_SHORT).show()
 
-                    } else Toast.makeText(this, "can't access location, refresh and try again", TOAST_SHORT).show()
+                    } else Toast.makeText(this, "Tidak dapat mengakses lokasi, refresh dan coba lagi", TOAST_SHORT).show()
 
                 } else {
-                    val message = "Cannot closing for now, please chat admin to update the coordinate"
-                    val actionTitle = "Chat Now"
+                    val message = "Untuk saat ini belum bisa closing, silahkan hubungi admin untuk update koordinatnya"
+                    val actionTitle = "Hubungi Sekarang"
                     customUtility.showPermissionDeniedSnackbar(message, actionTitle) { navigateChatAdmin() }
                 }
 
@@ -500,7 +499,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
             startActivity(intent)
             finishAffinity()
         } catch (e: ActivityNotFoundException) {
-            Toast.makeText(this, "Failed direct to whatsapp", TOAST_SHORT).show()
+            Toast.makeText(this, "Gagal mengalihkan ke whatsapp.", TOAST_SHORT).show()
         }
 
     }
@@ -519,7 +518,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                 currentPhotoUri = photoUri
             }
 
-            val chooserIntent = Intent.createChooser(galleryIntent, "Select Image")
+            val chooserIntent = Intent.createChooser(galleryIntent, "Pilih Gambar")
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(cameraIntent))
 
             imagePicker!!.launch(chooserIntent)
@@ -542,28 +541,32 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
     private fun printNow() {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (hasBluetoothPermissions()) {
-                if (bluetoothAdapter.isEnabled) {
+        if (bluetoothAdapter != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (hasBluetoothPermissions()) {
+                    if (bluetoothAdapter!!.isEnabled) {
+                        if (checkPermission()) {
+                            val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter!!.bondedDevices
+                            showPrinterSelectionDialog(pairedDevices)
+                        }
+                    } else {
+                        val enableBluetoothIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                        startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BLUETOOTH)
+                    }
+                } else requestBluetoothPermissions()
+            } else {
+                if (bluetoothAdapter!!.isEnabled) {
                     if (checkPermission()) {
-                        val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter.bondedDevices
+                        val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter!!.bondedDevices
                         showPrinterSelectionDialog(pairedDevices)
                     }
                 } else {
                     val enableBluetoothIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                     startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BLUETOOTH)
                 }
-            } else requestBluetoothPermissions()
-        } else {
-            if (bluetoothAdapter.isEnabled) {
-                if (checkPermission()) {
-                    val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter.bondedDevices
-                    showPrinterSelectionDialog(pairedDevices)
-                }
-            } else {
-                val enableBluetoothIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BLUETOOTH)
             }
+        } else {
+            customUtility.showDialog(title = "Peringatan", message = "Perangkat anda tidak support menggunakan bluetooth!")
         }
 
     }
@@ -574,12 +577,12 @@ class DetailSuratJalanActivity : AppCompatActivity() {
             val deviceNames = deviceList.map { it.name }.toTypedArray()
 
             val builder = AlertDialog.Builder(this)
-            builder.setTitle("Select printer device")
+            builder.setTitle("Pilih perangkat printer")
             builder.setItems(deviceNames) { _, which ->
                 val selectedDevice = deviceList[which]
                 executePrinter(selectedDevice)
 //                printEscPos()
-                Toast.makeText(this, "Try to connect with: ${ selectedDevice.name }", TOAST_SHORT).show()
+                Toast.makeText(this, "Menghubungkan ke: ${ selectedDevice.name }", TOAST_SHORT).show()
             }
             builder.show()
         }
@@ -637,13 +640,13 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed to print: Detail surat jalan kosong!")
+                        handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal mencetak: Detail surat jalan kosong!")
                         printingState(false)
 
                     }
                     else -> {
 
-                        handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed to print")
+                        handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal mencetak")
                         printingState(false)
 
                     }
@@ -751,9 +754,9 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                     shouldShowRequestPermissionRationale(Manifest.permission.BLUETOOTH_SCAN) ||
                     shouldShowRequestPermissionRationale(Manifest.permission.BLUETOOTH_CONNECT)
                 ) {
-                    val message = "Bluetooth permissions are required for this feature. Please grant the permissions."
+                    val message = "Izin Bluetooth diperlukan untuk fitur ini. Izinkan aplikasi mengakses bluetooth pada perangkat."
                     customUtility.showPermissionDeniedSnackbar(message) { requestBluetoothPermissions() }
-                } else customUtility.showPermissionDeniedDialog("Bluetooth permissions are required for this feature. Please enable them in the app settings.")
+                } else customUtility.showPermissionDeniedDialog("Izin Bluetooth diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
             }
         } else if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -761,9 +764,9 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                 getMapsUrl()
             } else {
                 if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    val message = "Location permissions are required for this feature. Please grant the permissions."
+                    val message = "Izin lokasi diperlukan untuk fitur ini. Izinkan aplikasi mengakses lokasi perangkat."
                     customUtility.showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE) }
-                } else customUtility.showPermissionDeniedDialog("Location permissions are required for this feature. Please enable them in the app settings.")
+                } else customUtility.showPermissionDeniedDialog("Izin lokasi diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
             }
         }
 
@@ -773,7 +776,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_ENABLE_BLUETOOTH) {
             if (resultCode == RESULT_OK) printNow()
-            else Toast.makeText(this, "Bluetooth still inactive", TOAST_SHORT).show()
+            else Toast.makeText(this, "Bluetooth belum diaktifkan", TOAST_SHORT).show()
         } else if (requestCode == IMG_PREVIEW_STATE || "$requestCode" == "$IMG_PREVIEW_STATE") {
             val resultData = data?.getIntExtra("$IMG_PREVIEW_STATE", 0)
             if (resultData == RESULT_OK ) {

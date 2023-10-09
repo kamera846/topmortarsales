@@ -103,12 +103,12 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
         if (state) {
 
             btnSubmit.isEnabled = false
-            btnSubmit.text = "LOADING..."
+            btnSubmit.text = context.getString(R.string.txt_loading)
 
         } else {
 
             btnSubmit.isEnabled = true
-            btnSubmit.text = "SUBMIT"
+            btnSubmit.text = context.getString(R.string.submit)
             btnSubmit.setBackgroundColor(ContextCompat.getColor(context, R.color.primary))
 
         }

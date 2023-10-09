@@ -724,10 +724,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         if (!formValidation("${ etPhone.text }","${ etName.text }", "${ etOwner.text }", "${ etMaps.text }", "${ etLocation.text }", "${ etBirthday.text }", "${ etAddress.text }")) return
 
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Edit Confirmation")
-            .setMessage("Are you sure you want to save changes?")
-            .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
-            .setPositiveButton("Yes") { dialog, _ ->
+        builder.setTitle("Konfirmasi Perubahan")
+            .setMessage("Apakah anda yakin ingin menyimpan perubahan?")
+            .setNegativeButton("Tidak") { dialog, _ -> dialog.dismiss() }
+            .setPositiveButton("Iya") { dialog, _ ->
                 dialog.dismiss()
                 saveEdit()
             }
@@ -1019,12 +1019,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         if (state) {
 
             btnSaveEdit.isEnabled = false
-            btnSaveEdit.text = "LOADING..."
+            btnSaveEdit.text = getString(R.string.txt_loading)
 
         } else {
 
             btnSaveEdit.isEnabled = true
-            btnSaveEdit.text = "SAVE"
+            btnSaveEdit.text = getString(R.string.save)
             btnSaveEdit.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
 
         }

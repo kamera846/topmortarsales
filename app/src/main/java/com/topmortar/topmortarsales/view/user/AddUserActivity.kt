@@ -86,8 +86,8 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
     private var iUserLevel: String? = null
     private var iLocation: String? = null
 
-    private val txtSubmit = "SUBMIT"
-    private val txtSave = "SAVE"
+    private var txtSubmit = ""
+    private var txtSave = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -97,6 +97,9 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         sessionManager = SessionManager(this)
 
         setContentView(R.layout.activity_add_user)
+
+        txtSubmit = getString(R.string.submit)
+        txtSave = getString(R.string.save)
 
         initVariable()
         initClickHandler()
