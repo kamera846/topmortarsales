@@ -123,7 +123,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         icBack.visibility = View.GONE
         icMore.visibility = View.VISIBLE
         titleBar.text = "List Tukang"
-        tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Hello, $it" else ""}
+        tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
         tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
         tvTitleBar.setPadding(convertDpToPx(16, this), 0, convertDpToPx(16, this), 0)
         tvTitleBarDescription.setPadding(convertDpToPx(16, this), 0, convertDpToPx(16, this), 0)
@@ -303,8 +303,8 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
                         sessionManager.setFullName(data.full_name)
                         sessionManager.setUserCityID(data.id_city)
 
-//                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Hello, $it" else "Hello, ${ sessionManager.userName() }"}
-                        tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Hello, $it" else ""}
+//                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "Halo, ${ sessionManager.userName() }"}
+                        tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
                         tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
 
                     }

@@ -247,12 +247,12 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        loadingState(true, "Data surat jalan kosong!")
+                        loadingState(true, "Daftar invoice kosong!")
 
                     }
                     else -> {
 
-                        handleMessage(this@ListSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                        handleMessage(this@ListSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal memuat data")
                         loadingState(true, getString(R.string.failed_request))
 
                     }

@@ -108,7 +108,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
         // Set Title Bar
         icBack.visibility = View.GONE
         icClose.visibility = View.VISIBLE
-        tvTitleBar.text = "Send Message to Customer"
+        tvTitleBar.text = "Kirim Pesan ke Toko"
     }
 
     private fun initClickHandler() {
@@ -124,12 +124,12 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
         if (state) {
 
             btnSend.isEnabled = false
-            btnSend.text = "LOADING..."
+            btnSend.text = context.getString(R.string.txt_loading)
 
         } else {
 
             btnSend.isEnabled = true
-            btnSend.text = "SUBMIT"
+            btnSend.text = context.getString(R.string.submit)
             btnSend.setBackgroundColor(ContextCompat.getColor(context, R.color.primary))
 
         }
@@ -160,9 +160,9 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
         if (!formValidation( "${ etMessage.text }")) return
 
         val builder = AlertDialog.Builder(context)
-        builder.setTitle("Unstable Connection!")
-            .setMessage("Wait until the signal indicator turns green and try again.")
-            .setPositiveButton("Ok") { dialog, _ -> dialog.dismiss() }
+        builder.setTitle("Koneksi Tidak Stabil!")
+            .setMessage("Tunggu beberapa saat sampai indikasi sinyal berubah menjadi hijau.")
+            .setPositiveButton("Oke") { dialog, _ -> dialog.dismiss() }
         val dialog = builder.create()
 
         if (pingStatus != PING_NORMAL) return dialog.show()
@@ -206,7 +206,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
                             etMessage.setText("")
                             loadingState(false)
-                            handleMessage(context, TAG_RESPONSE_CONTACT, "Successfully send message!")
+                            handleMessage(context, TAG_RESPONSE_CONTACT, "Berhasil mengirim pesan!")
 
                             if (modalInterface != null) modalInterface!!.onSubmit(true)
                             this@SendMessageModal.dismiss()
@@ -214,13 +214,13 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(context, TAG_RESPONSE_MESSAGE, "Failed to send!: ${ responseBody.message }")
+                            handleMessage(context, TAG_RESPONSE_MESSAGE, "Gagal mengirim: ${ responseBody.message }")
                             loadingState(false)
 
                         }
                         else -> {
 
-                            handleMessage(context, TAG_RESPONSE_CONTACT, "Failed to send!")
+                            handleMessage(context, TAG_RESPONSE_CONTACT, "Gagal mengirim!")
                             loadingState(false)
 
                         }
@@ -228,7 +228,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
                 } else {
 
-                    handleMessage(context, TAG_RESPONSE_CONTACT, "Failed to send! Error: " + response.message())
+                    handleMessage(context, TAG_RESPONSE_CONTACT, "Gagal mengirim. Error: " + response.message())
                     loadingState(false)
 
                 }
@@ -247,7 +247,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
     private fun formValidation(message: String): Boolean {
         return if (message.isEmpty()) {
-            etMessage.error = "Message cannot be empty!"
+            etMessage.error = "Pesan tidak boleh kosong!"
             etMessage.requestFocus()
             false
         } else {

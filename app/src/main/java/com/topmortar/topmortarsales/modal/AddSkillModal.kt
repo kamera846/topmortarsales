@@ -54,7 +54,7 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
     }
     fun setEditCase(isEdit: Boolean) {
         this.isEdit = isEdit
-        btnSubmit.text = "SAVE"
+        btnSubmit.text = context.getString(R.string.save)
     }
 
     private var modalInterface : AddSkillModalInterface? = null
@@ -127,12 +127,12 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
         if (state) {
 
             btnSubmit.isEnabled = false
-            btnSubmit.text = "LOADING..."
+            btnSubmit.text = context.getString(R.string.txt_loading)
 
         } else {
 
             btnSubmit.isEnabled = true
-            btnSubmit.text = "SUBMIT"
+            btnSubmit.text = context.getString(R.string.submit)
             btnSubmit.setBackgroundColor(ContextCompat.getColor(context, R.color.primary))
 
         }
