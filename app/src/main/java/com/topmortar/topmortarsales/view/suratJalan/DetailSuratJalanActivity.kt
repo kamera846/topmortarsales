@@ -455,7 +455,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                             if (stringDistance.contains(",")) stringDistance = stringDistance.replace(",", ".")
                             shortDistance = stringDistance.toDouble()
 
-                            if (distance > 0.2) {
+                            if (distance > 0.4) {
                                 val builder = AlertDialog.Builder(this)
                                 builder.setTitle("Peringatan!")
                                     .setMessage("Titik anda saat ini $shortDistance km dari titik toko. Cobalah untuk lebih dekat dengan toko!")
