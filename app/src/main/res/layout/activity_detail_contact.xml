@@ -702,7 +702,7 @@
                         android:inputType="textCapWords"
                         android:autofillHints="Choose Owner Birthday"
                         android:textSize="16sp"
-                        android:text="Selected file: "
+                        android:text="File terpilih: "
                         android:background="@android:color/transparent"
                         android:outlineProvider="none"/>
 

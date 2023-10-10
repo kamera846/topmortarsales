@@ -133,11 +133,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         binding.btnGetLatLng.visibility = View.GONE
     }
 
-    private fun showDialog(title: String = "Attention!", message: String) {
+    private fun showDialog(title: String = "Perhatian!", message: String) {
         val builder = AlertDialog.Builder(this)
         builder.setTitle(title)
             .setMessage(message)
-            .setPositiveButton("Ok") { dialog, _ -> dialog.dismiss() }
+            .setPositiveButton("Oke") { dialog, _ -> dialog.dismiss() }
         builder.show()
     }
 
@@ -160,7 +160,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 val mapsUrlPattern2 = Regex("https://maps\\.app\\.goo\\.gl/\\w+")
 
                 if (mapsUrlPattern1.matches(iMaps) || mapsUrlPattern2.matches(iMaps)) return onFindLocation(iMaps)
-                else showDialog(message = "Failed to process maps url")
+                else showDialog(message = "Gagal memproses maps url")
             } else {
 
                 val coordinates = iMaps.trim().split(",")
@@ -173,8 +173,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         etSearch.setText(getPlaceNameFromLatLng(latLng))
                         binding.recyclerView.visibility = View.GONE
                         return initMaps(latLng)
-                    } else showDialog(message = "Failed navigate to coordinate")
-                } else showDialog(message = "Failed to process coordinate")
+                    } else showDialog(message = "Gagal menavigasi koordinat")
+                } else showDialog(message = "Gagal memproses koordinat")
 
             }
 
@@ -199,11 +199,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         etSearch.setText(placeName)
                         binding.recyclerView.visibility = View.GONE
                         searchLocation(placeName)
-                    } else showDialog(message = "Failed to find the coordinates. Please select manual on the map!")
+                    } else showDialog(message = "Gagal menemukan koordinatnya. Silakan pilih manual di peta!")
 
                 } else initMaps(latLng)
 
-            } else showDialog(message = "Failed to process the URL")
+            } else showDialog(message = "Gagal memproses URL")
 
         }
 
@@ -223,7 +223,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         val geocoder = Geocoder(this, Locale.getDefault())
         val addresses = geocoder.getFromLocation(latLng!!.latitude, latLng.longitude, 1)
 
-        return if (addresses!!.isNotEmpty()) addresses[0].getAddressLine(0) else "Location Name Not Found"
+        return if (addresses!!.isNotEmpty()) addresses[0].getAddressLine(0) else "Nama Lokasi Tidak Ditemukan"
 
     }
 
@@ -238,7 +238,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 setResult(RESULT_OK, resultIntent)
                 finish()
 
-            } else Toast.makeText(this, "Not selected location", Toast.LENGTH_SHORT).show()
+            } else Toast.makeText(this, "Tidak ada lokasi yang ditandai", Toast.LENGTH_SHORT).show()
 
         }
     }
@@ -274,7 +274,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 .addOnSuccessListener { location: Location? ->
                     if (location != null) {
                         currentLatLng = LatLng(location.latitude, location.longitude)
-                        setPin(currentLatLng!!, "My Current Location")
+                        setPin(currentLatLng!!, "Lokasi Saya")
                     }
                 }
         }
@@ -341,7 +341,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 mMap.setPadding(0,0,0, convertDpToPx(64, this))
                 mMap.setOnMapLongClickListener { latLng -> setPin(latLng, getPlaceNameFromLatLng(latLng), moveCamera = false) }
                 if (!sessionManager.pinMapHint()) {
-                    showDialog(message = "Press and hold on the map to mark a location")
+                    showDialog(message = "Tekan dan tahan pada peta untuk menandai lokasi")
                     sessionManager.pinMapHint(true)
                 }
             }
@@ -416,13 +416,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                                         if (latLng != null) setPin(latLng, placeNames[position])
                                         else {
-                                            Toast.makeText(this, "Failed direct to coordinate", TOAST_SHORT).show()
+                                            Toast.makeText(this, "Gagal menampilkan koordinat", TOAST_SHORT).show()
                                             binding.recyclerView.visibility = View.GONE
                                         }
 
                                     }
                                     .addOnFailureListener { _: Exception ->
-                                        Toast.makeText(this, "Failure direct to location", TOAST_SHORT).show()
+                                        Toast.makeText(this, "Gagal menampilkan lokasi", TOAST_SHORT).show()
                                         binding.recyclerView.visibility = View.GONE
                                     }
                             }
@@ -436,7 +436,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                     }
                     .addOnFailureListener {
-                        Toast.makeText(this, "Failed to find place", TOAST_SHORT).show()
+                        Toast.makeText(this, "Gagal menemukan lokasi", TOAST_SHORT).show()
                         binding.recyclerView.visibility = View.GONE
                     }
             } else binding.recyclerView.visibility = View.GONE
@@ -452,7 +452,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         val latLng = LatLng(location.latitude, location.longitude)
         val markerOptions = MarkerOptions()
         markerOptions.position(latLng)
-        markerOptions.title("Current Position")
+        markerOptions.title("Posisi Terbaru")
         markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
 
         mCurrLocationMarker = mMap.addMarker(markerOptions)
@@ -486,6 +486,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             try { connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST) }
             catch (e: IntentSender.SendIntentException) { e.printStackTrace() }
 
-        } else Toast.makeText(this, "Connection to Google Play Services failed", TOAST_SHORT).show()
+        } else Toast.makeText(this, "Koneksi ke Layanan Google Play gagal", TOAST_SHORT).show()
     }
 }

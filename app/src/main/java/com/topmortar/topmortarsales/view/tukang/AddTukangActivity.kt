@@ -193,7 +193,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                     when (responseBody.status) {
                         RESPONSE_STATUS_OK -> {
 
-                            handleMessage(this@AddTukangActivity, TAG_RESPONSE_MESSAGE, message.let { if (!it.isNullOrEmpty()) "Successfully saved & sent message!" else "Successfully saved contact!" })
+                            handleMessage(this@AddTukangActivity, TAG_RESPONSE_MESSAGE, message.let { if (!it.isNullOrEmpty()) "Berhasil menyimpan & mengirim pesan!" else "Berhasil menyimpan kontak!" })
                             loadingState(false)
 
                             val resultIntent = Intent()
@@ -204,13 +204,13 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(this@AddTukangActivity, TAG_RESPONSE_MESSAGE, "Failed to send! Message: ${ responseBody.message }")
+                            handleMessage(this@AddTukangActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim pesan: ${ responseBody.message }")
                             loadingState(false)
 
                         }
                         else -> {
 
-                            handleMessage(this@AddTukangActivity, TAG_RESPONSE_MESSAGE, "Failed to send!")
+                            handleMessage(this@AddTukangActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim pesan!")
                             loadingState(false)
 
                         }
@@ -218,7 +218,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
                 } else {
 
-                    handleMessage(this@AddTukangActivity, TAG_RESPONSE_MESSAGE, "Failed to send! Error: " + response.message())
+                    handleMessage(this@AddTukangActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim pesan! Error: " + response.message())
                     loadingState(false)
 
                 }
@@ -248,8 +248,8 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             }
 
             override fun afterTextChanged(s: Editable?) {
-                if (s.toString().isNullOrEmpty()) btnSubmit.text = "Save Contact"
-                else btnSubmit.text = "Save & Send Message"
+                if (s.toString().isNullOrEmpty()) btnSubmit.text = "Simpan Kontak"
+                else btnSubmit.text = "Simpan & Kirim Pesan"
             }
         })
 
@@ -314,7 +314,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             etOwner.isEnabled = false
         }
         if (!iLocation.isNullOrEmpty()) {
-            etSkill.setText("Loading...")
+            etSkill.setText(getString(R.string.txt_loading))
             etSkill.setTextColor(getColor(R.color.black_500))
             etSkill.setBackgroundResource(R.drawable.et_background_disabled)
             etSkill.isEnabled = false
@@ -353,7 +353,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         etMapsUrl = findViewById(R.id.et_maps_url)
 
         // Set Title Bar
-        tvTitleBar.text = "Add New Tukang"
+        tvTitleBar.text = "Tambah Tukang Baru"
         tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Setup Date Picker Dialog
@@ -449,7 +449,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         } else {
 
             btnSubmit.isEnabled = true
-            btnSubmit.text = if (etMessage.text.isNullOrEmpty()) "Save Contact" else "Save & Send Message"
+            btnSubmit.text = if (etMessage.text.isNullOrEmpty()) "Simpan Kontak" else "Simpan & Kirim Pesan"
             btnSubmit.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
 
         }
@@ -458,7 +458,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
     private fun formValidation(phone: String, name: String, skill: String = "", birthday: String = "", owner: String = "", mapsUrl: String = "", message: String): Boolean {
         return if (phone.isEmpty()) {
-            etPhone.error = "Phone number cannot be empty!"
+            etPhone.error = "Nomor telpon wajib diisi!"
             etPhone.requestFocus()
             false
         } else if (!phoneValidation(phone, etPhone)) {
@@ -467,7 +467,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         } else if (name.isEmpty()) {
             etPhone.error = null
             etPhone.clearFocus()
-            etName.error = "Name cannot be empty!"
+            etName.error = "Nama wajib diisi!"
             etName.requestFocus()
             false
 //        } else if (owner.isEmpty()) {
@@ -486,13 +486,13 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         } else if (mapsUrl.isEmpty()) {
             etBirthday.error = null
             etBirthday.clearFocus()
-            etMapsUrl.error = "Choose the coordinate first!"
+            etMapsUrl.error = "Pilih koordinat!"
 //            etMapsUrl.requestFocus()
             false
         } else if (skill.isEmpty()) {
             etMapsUrl.error = null
             etMapsUrl.clearFocus()
-            etSkill.error = "Choose skill tukang!"
+            etSkill.error = "Pilih keahlian tukang!"
             etSkill.requestFocus()
             false
 //        } else if (message.isEmpty()) {
@@ -563,8 +563,8 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         searchModal = SearchModal(this, items)
         searchModal.setCustomDialogListener(this)
-        searchModal.label = "Select Skill Option"
-        searchModal.searchHint = "Enter skill name..."
+        searchModal.label = "Pilih Opsi Keahlian"
+        searchModal.searchHint = "Ketik nama keahlian…"
         searchModal.setOnDismissListener {
             etSkill.clearFocus()
         }
@@ -578,7 +578,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
     private fun getSkills() {
         // Get Cities
-        etSkill.setText("Loading...")
+        etSkill.setText(getString(R.string.txt_loading))
         etSkill.isEnabled = false
 
         lifecycleScope.launch {
@@ -615,13 +615,13 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        handleMessage(this@AddTukangActivity, "LIST CITY", "Empty skill data!")
+                        handleMessage(this@AddTukangActivity, "LIST CITY", "Daftar keahlian kosong!")
                         etSkill.isEnabled = true
 
                     }
                     else -> {
 
-                        handleMessage(this@AddTukangActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                        handleMessage(this@AddTukangActivity, TAG_RESPONSE_CONTACT, "Gagal memuat data")
                         etSkill.isEnabled = true
 
                     }
@@ -665,11 +665,9 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             else {
                 val customUtility = CustomUtility(this)
                 if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    val message = "Location permissions are required for this apps. Please grant the permissions."
-                    customUtility.showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(
-                        Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE
-                    ) }
-                } else customUtility.showPermissionDeniedDialog("Location permissions are required for this apps. Please enable them in the app settings.")
+                    val message = "Izin lokasi diperlukan untuk fitur ini. Izinkan aplikasi mengakses lokasi perangkat."
+                    customUtility.showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE) }
+                } else customUtility.showPermissionDeniedDialog("Izin lokasi diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
             }
         }
 

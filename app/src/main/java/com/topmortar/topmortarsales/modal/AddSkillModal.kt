@@ -53,7 +53,7 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
     }
     fun setEditCase(isEdit: Boolean) {
         this.isEdit = isEdit
-        btnSubmit.text = "SAVE"
+        btnSubmit.text = context.getString(R.string.save)
     }
 
     private var modalInterface : AddSkillModalInterface? = null
@@ -124,12 +124,12 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
         if (state) {
 
             btnSubmit.isEnabled = false
-            btnSubmit.text = "LOADING..."
+            btnSubmit.text = context.getString(R.string.txt_loading)
 
         } else {
 
             btnSubmit.isEnabled = true
-            btnSubmit.text = "SUBMIT"
+            btnSubmit.text = context.getString(R.string.submit)
             btnSubmit.setBackgroundColor(ContextCompat.getColor(context, R.color.primary))
 
         }
@@ -164,9 +164,9 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
                     when (responseBody.status) {
                         RESPONSE_STATUS_OK -> {
 
-                            handleMessage(context, TAG_RESPONSE_CONTACT, if (isEdit) "Successfully edit data" else "Successfully added data!")
+                            handleMessage(context, TAG_RESPONSE_CONTACT, if (isEdit) "Berhasil mengubah data" else "Berhasil menambahkan data!")
 
-                            tvTitleBar.text = "Add New Skill"
+                            tvTitleBar.text = "Tambah Keahlian Baru"
                             etSkillName.setText("")
                             etSkillCode.setText("")
                             isEdit = false
@@ -178,13 +178,13 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(context, TAG_RESPONSE_MESSAGE, "Failed to add! Message: ${ responseBody.message }")
+                            handleMessage(context, TAG_RESPONSE_MESSAGE, "Gagal menambahkan! Message: ${ responseBody.message }")
                             loadingState(false)
 
                         }
                         else -> {
 
-                            handleMessage(context, TAG_RESPONSE_CONTACT, "Failed added data!")
+                            handleMessage(context, TAG_RESPONSE_CONTACT, "Gagal menambahkan data!")
                             loadingState(false)
 
                         }
@@ -192,7 +192,7 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
 
                 } else {
 
-                    handleMessage(context, TAG_RESPONSE_CONTACT, "Failed added data! Message: " + response.message())
+                    handleMessage(context, TAG_RESPONSE_CONTACT, "Gagal menambahkan data! Message: " + response.message())
                     loadingState(false)
 
                 }
@@ -211,13 +211,13 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
 
     private fun formValidation(name: String, code: String): Boolean {
         return if (name.isEmpty()) {
-            etSkillName.error = "Skill name cannot be empty!"
+            etSkillName.error = "Nama keahlian wajib diisi!"
             etSkillName.requestFocus()
             false
         } else if (code.isEmpty()) {
             etSkillName.error = null
             etSkillName.clearFocus()
-            etSkillCode.error = "Code cannot be empty!"
+            etSkillCode.error = "Kode wajib diisi!"
             etSkillCode.requestFocus()
             false
         } else {

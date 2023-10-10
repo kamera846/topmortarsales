@@ -126,7 +126,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                     }
                     else -> {
 
-                        handleMessage(this@DetailInvoiceActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                        handleMessage(this@DetailInvoiceActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
                         loadingState(true, getString(R.string.failed_request))
 
                     }

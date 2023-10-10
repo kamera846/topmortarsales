@@ -136,12 +136,12 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        loadingState(true, "Contact data is empty!")
+                        loadingState(true, "Daftar kontak kosong!")
 
                     }
                     else -> {
 
-                        handleMessage(this@ManageUserActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                        handleMessage(this@ManageUserActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
                         loadingState(true, getString(R.string.failed_request))
 
                     }

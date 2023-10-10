@@ -478,7 +478,7 @@
                     android:padding="12dp"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:text="Save Contact" />
+                    android:text="Simpan Kontak" />
 
             </LinearLayout>
 

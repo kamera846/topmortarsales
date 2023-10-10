@@ -29,8 +29,8 @@ class SearchModal(private val context: Context, private val listItem: ArrayList<
     private var isLoading = false
     private var loadingListener: ((Boolean) -> Unit)? = null
     private var searchKeyListener: ((String) -> Unit)? = null
-    var label = "Select City Option"
-    var searchHint = "Enter title..."
+    var label = "Pilih Opsi Kota"
+    var searchHint = "Masukan judul…"
 
     private lateinit var txtLoading: TextView
     private lateinit var rvItems: RecyclerView

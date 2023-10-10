@@ -154,7 +154,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
         // Set Title Bar
         icMore.visibility = View.VISIBLE
-        tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Hello, $it" else ""}
+        tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
         tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
         etSearchBox.setPadding(0, 0, convertDpToPx(16, this), 0)
 
@@ -207,7 +207,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         try {
             startActivity(intent)
         } catch (e: ActivityNotFoundException) {
-            Toast.makeText(this, "Failed direct to whatsapp", TOAST_SHORT).show()
+            Toast.makeText(this, "Gagal mengarahkan ke whatsapp", TOAST_SHORT).show()
         }
 
     }
@@ -472,12 +472,12 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        loadingState(true, "Contact data is empty!")
+                        loadingState(true, "Daftar kontak kosong!")
 
                     }
                     else -> {
 
-                        handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                        handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
                         loadingState(true, getString(R.string.failed_request))
 
                     }
@@ -513,8 +513,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
                         sessionManager.setFullName(data.full_name)
                         sessionManager.setUserCityID(data.id_city)
 
-//                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Hello, $it" else "Hello, ${ sessionManager.userName() }"}
-                        tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Hello, $it" else ""}
+//                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "Halo, ${ sessionManager.userName() }"}
+                        tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
                         tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
 
                     }
@@ -557,12 +557,12 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
                         }
                         RESPONSE_STATUS_EMPTY -> {
 
-                            loadingState(true, "Contact data is empty!")
+                            loadingState(true, "Daftar kontak kosong!")
 
                         }
                         else -> {
 
-                            handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                            handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
                             loadingState(true, getString(R.string.failed_request))
 
                         }
@@ -618,10 +618,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
     private fun logoutConfirmation() {
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Logout Confirmation")
-            .setMessage("Are you sure you want to log out?")
-            .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
-            .setPositiveButton("Yes") { dialog, _ ->
+        builder.setTitle("Konfirmasi Logout")
+            .setMessage("Apakah anda yakin ingin keluar?")
+            .setNegativeButton("Tidak") { dialog, _ -> dialog.dismiss() }
+            .setPositiveButton("Iya") { dialog, _ ->
 
                 dialog.dismiss()
                 logoutHandler()
@@ -633,9 +633,9 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
     private fun missingDataHandler() {
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Incomplete Data Detected")
-            .setMessage("An incomplete login data has been detected, please try to log in again!")
-            .setPositiveButton("Yes") { dialog, _ ->
+        builder.setTitle("Data Tidak Lengkap Terdeteksi")
+            .setMessage("Data login yang tidak lengkap telah terdeteksi, silakan coba login kembali!")
+            .setPositiveButton("Oke") { dialog, _ ->
 
                 dialog.dismiss()
                 logoutHandler()

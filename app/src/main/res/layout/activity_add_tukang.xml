@@ -214,7 +214,7 @@
                         android:layout_height="48dp"
                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                         android:textColorHint="@color/black_600"
-                        android:hint="Select Skill Tukang"
+                        android:hint="Pilih Keahlian Tukang"
                         android:inputType="textCapWords"
                         android:autofillHints="e.g John Doe"
                         android:textSize="14sp"
@@ -433,7 +433,7 @@
                     android:padding="12dp"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:text="Save Contact" />
+                    android:text="Simpan Kontak" />
 
             </LinearLayout>
 

@@ -86,8 +86,8 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
     private var iUserLevel: String? = null
     private var iLocation: String? = null
 
-    private val txtSubmit = "SUBMIT"
-    private val txtSave = "SAVE"
+    private var txtSubmit = ""
+    private var txtSave = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -97,6 +97,9 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         sessionManager = SessionManager(this)
 
         setContentView(R.layout.activity_add_user)
+
+        txtSubmit = getString(R.string.submit)
+        txtSave = getString(R.string.save)
 
         initVariable()
         initClickHandler()
@@ -227,7 +230,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Text View Generated Username
-        val usernameGeneratedDescription = "The username will be generated as:"
+        val usernameGeneratedDescription = "Username akan dibuat menjadi:"
         etUsername.addTextChangedListener(object: TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
@@ -310,11 +313,11 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             etUsername.setTextColor(getColor(R.color.black_500))
             etUsername.setBackgroundResource(R.drawable.et_background_disabled)
             etUsername.isEnabled = false
-            tvUsernameGenerated.text = "Username cannot be edited."
+            tvUsernameGenerated.text = "Username tidak bisa diganti."
             tvUsernameGenerated.setTypeface(null, Typeface.ITALIC)
         }
         if (!iFullName.isNullOrEmpty()) etFullName.setText(iFullName)
-        if (!iLocation.isNullOrEmpty()) etUserCity.setText("Loading...")
+        if (!iLocation.isNullOrEmpty()) etUserCity.setText(getString(R.string.txt_loading))
         else etUserCity.setText("")
     }
 
@@ -340,14 +343,14 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
     private fun formValidation(level: String? = null, city: String = "", phone: String = "", username: String = "", fullName: String = "", password: String = "", confirmPassword: String = ""): Boolean {
         return if (level == null) {
-            handleMessage(this, "ERROR SPINNER", "Choose user level")
+            handleMessage(this, "ERROR SPINNER", "Pilih level pengguna")
             false
         } else if (city.isEmpty()) {
-            etUserCity.error = "Choose user city!"
+            etUserCity.error = "Pilih kota pengguna!"
             etUserCity.requestFocus()
             false
         } else if (phone.isEmpty()) {
-            etPhone.error = "Phone number cannot be empty!"
+            etPhone.error = "Nomor telpon wajib diisi!"
             etPhone.requestFocus()
             false
         } else if (!phoneValidation(phone, etPhone)) {
@@ -356,43 +359,43 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         } else if (username.isEmpty()) {
             etUserCity.error = null
             etUserCity.clearFocus()
-            etUsername.error = "Username cannot be empty!"
+            etUsername.error = "Username wajib diisi!"
             etUsername.requestFocus()
             false
         } else if (fullName.isEmpty()) {
             etUsername.error = null
             etUsername.clearFocus()
-            etFullName.error = "Full Name cannot be empty!"
+            etFullName.error = "Nama lengkap wajib diisi!"
             etFullName.requestFocus()
             false
         } else if (userID == null) {
             if (password.isEmpty()) {
                 etUsername.error = null
                 etUsername.clearFocus()
-                etPassword.error = "Password cannot be empty!"
+                etPassword.error = "Password wajib diisi!"
                 etPassword.requestFocus()
                 false
             } else if (password.length < 8) {
                 etUsername.error = null
                 etUsername.clearFocus()
-                etPassword.error = "Minimum password is 8 characters!"
+                etPassword.error = "Kata sandi minimum adalah 8 karakter!"
                 etPassword.requestFocus()
                 false
             } else if (confirmPassword.isEmpty()) {
                 etPassword.error = null
                 etPassword.clearFocus()
-                etConfirmPassword.error = "Confirm password cannot be empty!"
+                etConfirmPassword.error = "Konfirmasi kata sandi tidak boleh kosong!"
                 etConfirmPassword.requestFocus()
                 false
             } else if (confirmPassword.length < 8) {
                 etPassword.error = null
                 etPassword.clearFocus()
-                etConfirmPassword.error = "Minimum password is 8 characters!"
+                etConfirmPassword.error = "Kata sandi minimum adalah 8 karakter!"
                 etConfirmPassword.requestFocus()
                 false
             } else if (password != confirmPassword) {
-                etPassword.error = "Passwords do not match"
-                etConfirmPassword.error = "Passwords do not match"
+                etPassword.error = "Password tidak sama"
+                etConfirmPassword.error = "password tidak sama"
                 etPassword.requestFocus()
                 etConfirmPassword.requestFocus()
                 false
@@ -474,7 +477,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         searchModal = SearchModal(this, items)
         searchModal.setCustomDialogListener(this)
-        searchModal.searchHint = "Enter city name..."
+        searchModal.searchHint = "Masukan nama kota…"
         searchModal.setOnDismissListener {
             etUserCity.clearFocus()
             etUsername.requestFocus()
@@ -523,13 +526,13 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        handleMessage(this@AddUserActivity, "LIST CITY", "Empty cities data!")
+                        handleMessage(this@AddUserActivity, "LIST CITY", "Daftar kota kosong!")
                         isCitiesLoaded = false
 
                     }
                     else -> {
 
-                        handleMessage(this@AddUserActivity, TAG_RESPONSE_CONTACT, "Failed get data")
+                        handleMessage(this@AddUserActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
                         isCitiesLoaded = false
 
                     }

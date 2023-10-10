@@ -10,7 +10,7 @@ import androidx.core.content.ContextCompat.startActivity
 import com.google.android.material.snackbar.Snackbar
 
 class CustomUtility(private val context: Context) {
-    fun showPermissionDeniedSnackbar(message: String, actionTitle: String = "Try Again", unit: () -> Unit) {
+    fun showPermissionDeniedSnackbar(message: String, actionTitle: String = "Coba Lagi", unit: () -> Unit) {
         Snackbar.make(
             (context as Activity).findViewById(android.R.id.content), // Replace with your root view
             message,
@@ -22,14 +22,14 @@ class CustomUtility(private val context: Context) {
 
     fun showPermissionDeniedDialog(message: String) {
         AlertDialog.Builder(context)
-            .setTitle("Permission Required")
+            .setTitle("Izin Diperlukan")
             .setMessage(message)
-            .setPositiveButton("App Settings") { _, _ -> openAppSettings() }
-            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+            .setPositiveButton("Pengaturan aplikasi") { _, _ -> openAppSettings() }
+            .setNegativeButton("Batal") { dialog, _ -> dialog.dismiss() }
             .show()
     }
 
-    fun showDialog(title: String = "Warning!", message: String, positiveText: String = "Ok") {
+    fun showDialog(title: String = "Peringatan!", message: String, positiveText: String = "Oke") {
         AlertDialog.Builder(context)
             .setTitle(title)
             .setMessage(message)
