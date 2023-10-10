@@ -257,7 +257,7 @@ class SendMessageTukangModal(private val context: Context, private val lifecycle
 
     private fun formValidation(message: String): Boolean {
         return if (message.isEmpty()) {
-            etMessage.error = "Pesan tidak boleh kosong!"
+            etMessage.error = "Pesan wajib diisi!"
             etMessage.requestFocus()
             false
         } else {

@@ -303,8 +303,8 @@ class SplashScreenActivity : AppCompatActivity() {
 
     private fun showResetConfirmation() {
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Batalkan Reset Kata Sandi")
-            .setMessage("Apakah Anda yakin ingin membatalkan proses \"Reset Kata Sandi\"?")
+        builder.setTitle("Batalkan Setel Ulang Kata Sandi")
+            .setMessage("Apakah Anda yakin ingin membatalkan proses \"Setel Ulang Kata Sandi\"?")
             .setNegativeButton("Tidak") { dialog, _ -> dialog.dismiss() }
             .setPositiveButton("Iya") { dialog, _ ->
 
@@ -323,17 +323,17 @@ class SplashScreenActivity : AppCompatActivity() {
 
         if (TextUtils.isEmpty(username)) {
             etUsername.requestFocus()
-            etUsername.error = "Username cannot be empty!"
+            etUsername.error = "Username tidak boleh kosong!"
             return
         } else if (TextUtils.isEmpty(password)) {
             etUsername.clearFocus()
             etPassword.requestFocus()
-            etPassword.error = "Password cannot be empty!"
+            etPassword.error = "Kata sandi tidak boleh kosong!"
             return
         } else if (password.length < 8) {
             etUsername.clearFocus()
             etPassword.requestFocus()
-            etPassword.error = "Minimum password is 8 characters!"
+            etPassword.error = "Kata sandi minimum adalah 8 karakter!"
             return
         } else {
             etUsername.clearFocus()
@@ -414,7 +414,7 @@ class SplashScreenActivity : AppCompatActivity() {
         val usernameForgot = "${ etUsernameForgot.text }".trim().replace(" ", "").toLowerCase()
 
         if (usernameForgot.isEmpty()) {
-            etUsernameForgot.error = "Username cannot be empty!"
+            etUsernameForgot.error = "Username tidak boleh kosong!"
             etUsernameForgot.requestFocus()
             return
         } else {
@@ -452,14 +452,14 @@ class SplashScreenActivity : AppCompatActivity() {
 
                     } else {
 
-                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed create otp code!: ${ responseBody.message }")
+                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Gagal mendapatkan kode OTP!: ${ responseBody.message }")
                         loadingState(false)
 
                     }
 
                 } else {
 
-                    handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed create otp code! Error: " + response.message())
+                    handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Gagal mendapatkan kode OTP! Error: " + response.message())
                     loadingState(false)
 
                 }
@@ -559,15 +559,15 @@ class SplashScreenActivity : AppCompatActivity() {
         val password = "${ etNewPassword.text }"
 
         if (userID.isNullOrEmpty()) {
-            handleMessage(this, "USER RESET PASSWORD", "Cannot find user to reset password, please try input your password!")
+            handleMessage(this, "USER RESET PASSWORD", "Tidak dapat menemukan pengguna untuk setel ulang kata sandi, silakan coba masukkan kata sandi Anda!")
         } else if (password.isEmpty()) {
-            etNewPassword.error = "Your new password cannot be empty!"
+            etNewPassword.error = "Kata sandi baru Anda tidak boleh kosong!"
             etNewPassword.requestFocus()
             return
         } else if (password.length < 8) {
             etUsername.clearFocus()
             etPassword.requestFocus()
-            etPassword.error = "Minimum password is 8 characters!"
+            etPassword.error = "Kata sandi minimum adalah 8 karakter!"
             return
         } else {
             etNewPassword.error = null
@@ -612,13 +612,13 @@ class SplashScreenActivity : AppCompatActivity() {
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Gagal mereset kata sandi! Message: ${ responseBody.message }")
+                            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Gagal setel ulang kata sandi! Message: ${ responseBody.message }")
                             loadingState(false)
 
                         }
                         else -> {
 
-                            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed reset password!: ${ responseBody.message }")
+                            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Gagal setel ulang kata sandi!: ${ responseBody.message }")
                             loadingState(false)
 
                         }
@@ -626,7 +626,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
                 } else {
 
-                    handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed reset password! Error: " + response.message())
+                    handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Gagal setel ulang kata sandi! Error: " + response.message())
                     loadingState(false)
 
                 }
@@ -665,8 +665,8 @@ class SplashScreenActivity : AppCompatActivity() {
                     icBack.visibility = View.VISIBLE
                     etUsernameForgot.visibility = View.VISIBLE
                     tvUsernameForgot.visibility = View.VISIBLE
-                    tvTitleAuth.text = "Reset Password"
-                    btnLogin.text = "Get OTP Code"
+                    tvTitleAuth.text = "Setel Ulang Kata Sandi"
+                    btnLogin.text = "Dapatkan Kode OTP"
 
                     etUsernameForgot.requestFocus()
                 }
@@ -684,8 +684,8 @@ class SplashScreenActivity : AppCompatActivity() {
                     inputNewPassword.visibility = View.GONE
                     icBack.visibility = View.VISIBLE
                     inputOtp.visibility = View.VISIBLE
-                    tvTitleAuth.text = "Input OTP Code"
-                    btnLogin.text = "Verify OTP Code"
+                    tvTitleAuth.text = "Masukan Kode OTP"
+                    btnLogin.text = "Verifikasi Kode OTP"
 
                     etOtp1.requestFocus()
                     showKeyboard(etOtp1, this)
@@ -704,8 +704,8 @@ class SplashScreenActivity : AppCompatActivity() {
                     inputOtp.visibility = View.GONE
                     icBack.visibility = View.GONE
                     inputNewPassword.visibility = View.VISIBLE
-                    tvTitleAuth.text = "Input New Password"
-                    btnLogin.text = "Reset Password Now"
+                    tvTitleAuth.text = "Masukan Password Baru"
+                    btnLogin.text = "Setel Ulang Password Sekarang"
                     etNewPassword.requestFocus()
                 }
 
@@ -770,9 +770,9 @@ class SplashScreenActivity : AppCompatActivity() {
             btnLogin.isEnabled = true
             when (currentSubmitStep) {
                 0 -> btnLogin.text = "Login"
-                1 -> btnLogin.text = "Get OTP Code"
-                2 -> btnLogin.text = "Verify OTP Code"
-                3 -> btnLogin.text = "Reset Password Now"
+                1 -> btnLogin.text = "Dapatkan Kode OTP"
+                2 -> btnLogin.text = "Verifikasi Kode OTP"
+                3 -> btnLogin.text = "Setel Ulang Password Sekarang"
                 else -> btnLogin.text = "Login"
             }
             btnLogin.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))

@@ -458,7 +458,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
     private fun formValidation(phone: String, name: String, skill: String = "", birthday: String = "", owner: String = "", mapsUrl: String = "", message: String): Boolean {
         return if (phone.isEmpty()) {
-            etPhone.error = "Phone number cannot be empty!"
+            etPhone.error = "Nomor telpon wajib diisi!"
             etPhone.requestFocus()
             false
         } else if (!phoneValidation(phone, etPhone)) {
@@ -467,7 +467,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         } else if (name.isEmpty()) {
             etPhone.error = null
             etPhone.clearFocus()
-            etName.error = "Name cannot be empty!"
+            etName.error = "Nama wajib diisi!"
             etName.requestFocus()
             false
 //        } else if (owner.isEmpty()) {
@@ -486,13 +486,13 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         } else if (mapsUrl.isEmpty()) {
             etBirthday.error = null
             etBirthday.clearFocus()
-            etMapsUrl.error = "Choose the coordinate first!"
+            etMapsUrl.error = "Pilih koordinat!"
 //            etMapsUrl.requestFocus()
             false
         } else if (skill.isEmpty()) {
             etMapsUrl.error = null
             etMapsUrl.clearFocus()
-            etSkill.error = "Choose skill tukang!"
+            etSkill.error = "Pilih keahlian tukang!"
             etSkill.requestFocus()
             false
 //        } else if (message.isEmpty()) {

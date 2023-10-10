@@ -140,7 +140,7 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
                             etCityName.setText("")
                             etCityCode.setText("")
                             loadingState(false)
-                            handleMessage(context, TAG_RESPONSE_CONTACT, "Successfully added data!")
+                            handleMessage(context, TAG_RESPONSE_CONTACT, "Berhasil menambahkan data!")
 
                             modalInterface!!.onSubmit(true)
                             this@AddCityModal.dismiss()
@@ -148,13 +148,13 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(context, TAG_RESPONSE_MESSAGE, "Failed to add! Message: ${ responseBody.message }")
+                            handleMessage(context, TAG_RESPONSE_MESSAGE, "Gagal menambahkan! Message: ${ responseBody.message }")
                             loadingState(false)
 
                         }
                         else -> {
 
-                            handleMessage(context, TAG_RESPONSE_CONTACT, "Failed added data!")
+                            handleMessage(context, TAG_RESPONSE_CONTACT, "Gagal menambahkan data!")
                             loadingState(false)
 
                         }
@@ -162,7 +162,7 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
 
                 } else {
 
-                    handleMessage(context, TAG_RESPONSE_CONTACT, "Failed added data! Message: " + response.message())
+                    handleMessage(context, TAG_RESPONSE_CONTACT, "Gagal menambahkan data! Message: " + response.message())
                     loadingState(false)
 
                 }
@@ -181,13 +181,13 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
 
     private fun formValidation(name: String, code: String): Boolean {
         return if (name.isEmpty()) {
-            etCityName.error = "City name cannot be empty!"
+            etCityName.error = "Nama kota wajib diisi!"
             etCityName.requestFocus()
             false
         } else if (code.isEmpty()) {
             etCityName.error = null
             etCityName.clearFocus()
-            etCityCode.error = "Code cannot be empty!"
+            etCityCode.error = "Kode wajib diisi!"
             etCityCode.requestFocus()
             false
         } else {
