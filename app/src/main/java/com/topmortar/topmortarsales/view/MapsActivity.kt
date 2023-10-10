@@ -199,8 +199,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private fun toggleDirection() {
         if (routeDirections == null) {
 
-            if (currentLatLng == null) showDialog(message = "Failed to find your current location. Make sure your location is active and try to reopen maps")
-            else if (selectedLocation == null) showDialog(message = "Failed to find the target location")
+            if (currentLatLng == null) showDialog(message = "Gagal menemukan lokasi Anda saat ini. Pastikan lokasi Anda aktif dan coba buka kembali peta")
+            else if (selectedLocation == null) showDialog(message = "Gagal menemukan lokasi target")
             else getDirections()
 
         } else if (routeDirections != null) {
@@ -214,7 +214,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 val title = binding.btnGetDirectionTitle
                 button.setBackgroundResource(R.drawable.bg_primary_round)
                 img.setImageDrawable(getDrawable(R.drawable.direction_white))
-                title.text = "Enable Direction"
+                title.text = "Aktifkan Navigasi"
             }, 500)
         }
     }
@@ -368,10 +368,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             val result = directions.await()
 
             if (result.routes.isNotEmpty()) {
+                Toast.makeText(this, "${result.routes.size}", TOAST_SHORT).show()
 
                 // Gambar rute pada peta
                 for (i in 0..result.routes.size) {
-                    if (i < 3) {
+                    if (i < result.routes.size && i < 3) {
                         val route = result.routes[i]
                         val overviewPolyline = route.overviewPolyline.decodePath()
                         val polylineOptions = PolylineOptions()
@@ -397,20 +398,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     val title = binding.btnGetDirectionTitle
                     button.setBackgroundResource(R.drawable.bg_passive_round)
                     img.setImageDrawable(getDrawable(R.drawable.direction_line_white))
-                    title.text = "Turn Off Direction"
+                    title.text = "Matikan Navigasi"
                 }, 500)
 
             } else {
-                Toast.makeText(this, "No route found", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Tidak ada rute ditemukan", Toast.LENGTH_SHORT).show()
             }
         } catch (e: ApiException) {
-            Toast.makeText(this, "Error fetching directions", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Gagal memuat navigasi", Toast.LENGTH_SHORT).show()
             e.printStackTrace()
         } catch (e: InterruptedException) {
-            Toast.makeText(this, "Error fetching directions", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Gagal memuat navigasi", Toast.LENGTH_SHORT).show()
             e.printStackTrace()
         } catch (e: IOException) {
-            Toast.makeText(this, "Error fetching directions", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Gagal memuat navigasi", Toast.LENGTH_SHORT).show()
             e.printStackTrace()
         }
     }
