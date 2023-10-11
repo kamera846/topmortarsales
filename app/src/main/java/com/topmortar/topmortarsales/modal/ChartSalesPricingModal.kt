@@ -52,21 +52,23 @@ class ChartSalesPricingModal(private val context: Context) : Dialog(context) {
         window?.attributes = layoutParams as WindowManager.LayoutParams
 
         val titleBar = binding.titleBarLight
-        titleBar.tvTitleBar.text = "Income Details"
-        titleBar.tvTitleBarDescription.text = "These are your details for this month"
+        titleBar.tvTitleBar.text = "Rincian Pendapatan"
+        titleBar.tvTitleBar.setPadding(convertDpToPx(16, context),0,0,0)
+        titleBar.tvTitleBarDescription.text = "Ini adalah rincian anda pada bulan ini"
 
         setupBarChart()
     }
 
     private fun initClickHandler() {
         val titleBar = binding.titleBarLight
-//        titleBar.icBack.visibility = View.VI
-        titleBar.icBack.setOnClickListener { this.dismiss() }
+        titleBar.icBack.visibility = View.GONE
+        titleBar.icClose.visibility = View.VISIBLE
+        titleBar.icClose.setOnClickListener { this.dismiss() }
     }
 
     private fun setupBarChart() {
         val pricingChart = binding.pricingChart
-        pricingChart.visibility = View.VISIBLE
+//        pricingChart.visibility = View.VISIBLE
 
         // Create some sample data
         val entries = ArrayList<PieEntry>()
