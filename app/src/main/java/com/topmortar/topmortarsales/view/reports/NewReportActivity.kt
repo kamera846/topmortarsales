@@ -66,7 +66,7 @@ class NewReportActivity : AppCompatActivity() {
     }
 
     private fun initContent() {
-        binding.titleBarLight.tvTitleBar.text = "Buat Laporan Baru"
+        binding.titleBarLight.tvTitleBar.text = "Buat Laporan"
 
         loadingContent(true)
 
@@ -152,43 +152,43 @@ class NewReportActivity : AppCompatActivity() {
                                 val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
                                 val shortDistance = "%.3f".format(distance).toDouble()
 
-                                if (distance > MAX_DISTANCE) {
-                                    val builder = AlertDialog.Builder(this)
-                                    builder.setCancelable(false)
-                                    builder.setOnDismissListener { progressDialog.dismiss() }
-                                    builder.setOnCancelListener { progressDialog.dismiss() }
-                                    builder.setTitle("Peringatan!")
-                                        .setMessage("Titik anda saat ini $shortDistance km dari titik toko. Cobalah untuk lebih dekat dengan toko!")
-                                        .setPositiveButton("Oke") { dialog, _ ->
-                                            progressDialog.dismiss()
-
-                                            binding.etDistance.setTextColor(getColor(R.color.primary))
-                                            binding.etDistance.text = shortDistance.toString()
-                                            binding.icRefreshDistance.visibility = View.VISIBLE
-                                            binding.tvDistanceError.visibility = View.VISIBLE
-                                            binding.tvDistanceError.text = "Try to get closer to the store and refresh the distance!"
-                                            isDistanceToLong = true
-
-                                            dialog.dismiss()
-                                        }
-                                        .setNegativeButton("Buka Maps") { dialog, _ ->
-                                            val intent = Intent(this@NewReportActivity, MapsActivity::class.java)
-                                            intent.putExtra(CONST_MAPS, mapsUrl)
-                                            startActivity(intent)
-
-                                            progressDialog.dismiss()
-
-                                            binding.etDistance.setTextColor(getColor(R.color.primary))
-                                            binding.etDistance.text = shortDistance.toString()
-                                            binding.icRefreshDistance.visibility = View.VISIBLE
-                                            binding.tvDistanceError.visibility = View.VISIBLE
-                                            binding.tvDistanceError.text = "Cobalah untuk lebih dekat ke toko dan refresh lagi jaraknya!"
-                                            isDistanceToLong = true
-
-                                            dialog.dismiss()
-                                        }
-                                    builder.show()
-                                } else {
+//                                if (distance > MAX_DISTANCE) {
+//                                    val builder = AlertDialog.Builder(this)
+//                                    builder.setCancelable(false)
+//                                    builder.setOnDismissListener { progressDialog.dismiss() }
+//                                    builder.setOnCancelListener { progressDialog.dismiss() }
+//                                    builder.setTitle("Peringatan!")
+//                                        .setMessage("Titik anda saat ini $shortDistance km dari titik toko. Cobalah untuk lebih dekat dengan toko!")
+//                                        .setPositiveButton("Oke") { dialog, _ ->
+//                                            progressDialog.dismiss()
+//
+//                                            binding.etDistance.setTextColor(getColor(R.color.primary))
+//                                            binding.etDistance.text = shortDistance.toString()
+//                                            binding.icRefreshDistance.visibility = View.VISIBLE
+//                                            binding.tvDistanceError.visibility = View.VISIBLE
+//                                            binding.tvDistanceError.text = "Cobalah untuk lebih dekat dengan titik toko dan refresh jaraknya!"
+//                                            isDistanceToLong = true
+//
+//                                            dialog.dismiss()
+//                                        }
+//                                        .setNegativeButton("Buka Maps") { dialog, _ ->
+//                                            val intent = Intent(this@NewReportActivity, MapsActivity::class.java)
+//                                            intent.putExtra(CONST_MAPS, mapsUrl)
+//                                            startActivity(intent)
+//
+//                                            progressDialog.dismiss()
+//
+//                                            binding.etDistance.setTextColor(getColor(R.color.primary))
+//                                            binding.etDistance.text = shortDistance.toString()
+//                                            binding.icRefreshDistance.visibility = View.VISIBLE
+//                                            binding.tvDistanceError.visibility = View.VISIBLE
+//                                            binding.tvDistanceError.text = "Cobalah untuk lebih dekat dengan titik toko dan refresh jaraknya!"
+//                                            isDistanceToLong = true
+//
+//                                            dialog.dismiss()
+//                                        }
+//                                    builder.show()
+//                                } else {
                                     progressDialog.dismiss()
 
                                     var textColor = getColor(R.color.black_200)
@@ -199,7 +199,7 @@ class NewReportActivity : AppCompatActivity() {
                                     binding.icRefreshDistance.visibility = View.VISIBLE
                                     binding.tvDistanceError.visibility = View.GONE
                                     isDistanceToLong = false
-                                }
+//                                }
 
                             } else {
                                 progressDialog.dismiss()
@@ -290,6 +290,8 @@ class NewReportActivity : AppCompatActivity() {
 
         Handler().postDelayed({
             loadingSubmit(false)
+            Toast.makeText(this, "Berhasil mengirim laporan", TOAST_SHORT).show()
+            finish()
         }, 2000)
     }
 

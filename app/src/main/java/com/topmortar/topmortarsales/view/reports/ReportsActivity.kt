@@ -30,7 +30,7 @@ class ReportsActivity : AppCompatActivity() {
 
         binding.titleBarDark.tvTitleBar.text = contactName
         binding.titleBarDark.tvTitleBarDescription.visibility = View.VISIBLE
-        binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan saya"
+        binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan saya pada toko ini"
 
         setRecyclerView()
         initClickHandler()
