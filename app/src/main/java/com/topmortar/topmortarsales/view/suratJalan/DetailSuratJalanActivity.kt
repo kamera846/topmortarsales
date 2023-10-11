@@ -51,6 +51,7 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_URI
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.MAX_DISTANCE
 import com.topmortar.topmortarsales.commons.REQUEST_BLUETOOTH_PERMISSIONS
 import com.topmortar.topmortarsales.commons.REQUEST_ENABLE_BLUETOOTH
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -454,7 +455,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                             if (stringDistance.contains(",")) stringDistance = stringDistance.replace(",", ".")
                             shortDistance = stringDistance.toDouble()
 
-                            if (distance > 0.4) {
+                            if (distance > MAX_DISTANCE) {
                                 val builder = AlertDialog.Builder(this)
                                 builder.setTitle("Peringatan!")
                                     .setMessage("Titik anda saat ini $shortDistance km dari titik toko. Cobalah untuk lebih dekat dengan toko!")

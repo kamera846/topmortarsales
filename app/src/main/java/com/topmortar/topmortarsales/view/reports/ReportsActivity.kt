@@ -28,11 +28,12 @@ class ReportsActivity : AppCompatActivity() {
         contactID = intent.getStringExtra(CONST_CONTACT_ID).toString()
         contactName = intent.getStringExtra(CONST_NAME).toString()
 
-        binding.titleBarDark.tvTitleBar.text = "Reports"
+        binding.titleBarDark.tvTitleBar.text = contactName
         binding.titleBarDark.tvTitleBarDescription.visibility = View.VISIBLE
-        binding.titleBarDark.tvTitleBarDescription.text = "List report pada toko $contactName"
+        binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan saya"
 
         setRecyclerView()
+        initClickHandler()
 
     }
 
@@ -55,5 +56,11 @@ class ReportsActivity : AppCompatActivity() {
             layoutManager = GridLayoutManager(this@ReportsActivity, 2)
             adapter = mAdapter
         }
+    }
+
+    private fun initClickHandler() {
+
+        binding.titleBarDark.icBack.setOnClickListener { finish() }
+
     }
 }

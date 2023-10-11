@@ -81,8 +81,8 @@ class UserProfileActivity : AppCompatActivity() {
     }
 
     private fun getUserDetail() {
-        binding.titleBarLight.tvTitleBar.text = "Loading..."
-        binding.tvFullName.text = "Loading..."
+        binding.titleBarLight.tvTitleBar.text = getString(R.string.txt_loading)
+        binding.tvFullName.text = getString(R.string.txt_loading)
 
         lifecycleScope.launch {
             try {
@@ -109,8 +109,8 @@ class UserProfileActivity : AppCompatActivity() {
 
                             dataActivityValidation()
 
-                        } RESPONSE_STATUS_EMPTY -> handleMessage(this@UserProfileActivity, "GET USER DETAIL", "Failed get detail user: ${response.message}")
-                        else -> handleMessage(this@UserProfileActivity, "GET USER DETAIL", "Failed get data. Error: ${response.message}")
+                        } RESPONSE_STATUS_EMPTY -> handleMessage(this@UserProfileActivity, "GET USER DETAIL", "Gagal memuat detail pengguna: ${response.message}")
+                        else -> handleMessage(this@UserProfileActivity, "GET USER DETAIL", "Gagal memuat data. Error: ${response.message}")
                     }
                 }
 
@@ -249,11 +249,11 @@ class UserProfileActivity : AppCompatActivity() {
 
         if (barChart.isVisible) {
             barChart.visibility = View.GONE
-            title.text = "Store Statistics in Malang (show)"
+            title.text = "Statistik Toko di Kota Malang (tampilkan)"
             icon.setImageDrawable(getDrawable(R.drawable.chevron_down_solid))
         } else {
             barChart.visibility = View.VISIBLE
-            title.text = "Store Statistics in Malang (hide)"
+            title.text = "Statistik Toko di Kota Malang (sembunyikan)"
             icon.setImageDrawable(getDrawable(R.drawable.chevron_up_solid))
         }
     }

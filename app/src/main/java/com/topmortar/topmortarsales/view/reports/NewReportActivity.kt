@@ -24,6 +24,7 @@ import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.MAX_DISTANCE
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
@@ -39,8 +40,8 @@ class NewReportActivity : AppCompatActivity() {
     private lateinit var customUtility: CustomUtility
     private lateinit var progressDialog: ProgressDialog
 
-    private val msgMaxLines = 5
-    private val msgMaxLength = 300
+    private val msgMaxLines = 6
+    private val msgMaxLength = 500
 
     private var isDistanceToLong = false
     private var id: String = ""
@@ -58,14 +59,14 @@ class NewReportActivity : AppCompatActivity() {
 
         progressDialog = ProgressDialog(this)
         progressDialog.setCancelable(false)
-        progressDialog.setMessage("Getting your distance...")
+        progressDialog.setMessage("Sedang menghitung jarak...")
 
         initContent()
         initClickHandler()
     }
 
     private fun initContent() {
-        binding.titleBarLight.tvTitleBar.text = "Report Form"
+        binding.titleBarLight.tvTitleBar.text = "Buat Laporan Baru"
 
         loadingContent(true)
 
@@ -118,110 +119,117 @@ class NewReportActivity : AppCompatActivity() {
     fun calculateDistance(view: View? = null) {
         progressDialog.show()
 
-        val mapsUrl = coordinate
-        val urlUtility = URLUtility(this)
+        Handler().postDelayed({
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            val mapsUrl = coordinate
+            val urlUtility = URLUtility(this)
 
-            if (urlUtility.isLocationEnabled(this)) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-                urlUtility.requestLocationUpdate()
+                if (urlUtility.isLocationEnabled(this)) {
 
-                if (!urlUtility.isUrl(mapsUrl) && !mapsUrl.isNullOrEmpty()) {
-                    val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
-                    val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                    urlUtility.requestLocationUpdate()
 
-                    if (location != null) {
+                    if (!urlUtility.isUrl(mapsUrl) && !mapsUrl.isNullOrEmpty()) {
+                        val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
+                        val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
 
-                        // Courier Location
-                        val currentLatitude = location.latitude
-                        val currentLongitude = location.longitude
+                        if (location != null) {
 
-                        // Store Location
-                        val coordinate = mapsUrl.split(",")
-                        val latitude = coordinate[0].toDoubleOrNull()
-                        val longitude = coordinate[1].toDoubleOrNull()
+                            // Courier Location
+                            val currentLatitude = location.latitude
+                            val currentLongitude = location.longitude
 
-                        if (latitude != null && longitude != null) {
+                            // Store Location
+                            val coordinate = mapsUrl.split(",")
+                            val latitude = coordinate[0].toDoubleOrNull()
+                            val longitude = coordinate[1].toDoubleOrNull()
 
-                            // Calculate Distance
-                            val urlUtility = URLUtility(this)
-                            val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
-                            val shortDistance = "%.3f".format(distance).toDouble()
+                            if (latitude != null && longitude != null) {
 
-                            if (distance > 0.2) {
-                                val builder = AlertDialog.Builder(this)
-                                builder.setTitle("Warning!")
-                                    .setMessage("Your distance is $shortDistance km too far away from the store. Try to get closer to the store")
-                                    .setPositiveButton("Ok") { dialog, _ ->
-                                        progressDialog.dismiss()
+                                // Calculate Distance
+                                val urlUtility = URLUtility(this)
+                                val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
+                                val shortDistance = "%.3f".format(distance).toDouble()
 
-                                        binding.etDistance.setTextColor(getColor(R.color.primary))
-                                        binding.etDistance.text = shortDistance.toString()
-                                        binding.icRefreshDistance.visibility = View.VISIBLE
-                                        binding.tvDistanceError.visibility = View.VISIBLE
-                                        binding.tvDistanceError.text = "Try to get closer to the store and refresh the distance!"
-                                        isDistanceToLong = true
+                                if (distance > MAX_DISTANCE) {
+                                    val builder = AlertDialog.Builder(this)
+                                    builder.setCancelable(false)
+                                    builder.setOnDismissListener { progressDialog.dismiss() }
+                                    builder.setOnCancelListener { progressDialog.dismiss() }
+                                    builder.setTitle("Peringatan!")
+                                        .setMessage("Titik anda saat ini $shortDistance km dari titik toko. Cobalah untuk lebih dekat dengan toko!")
+                                        .setPositiveButton("Oke") { dialog, _ ->
+                                            progressDialog.dismiss()
 
-                                        dialog.dismiss()
-                                    }
-                                    .setNegativeButton("Open Maps") { dialog, _ ->
-                                        val intent = Intent(this@NewReportActivity, MapsActivity::class.java)
-                                        intent.putExtra(CONST_MAPS, mapsUrl)
-                                        startActivity(intent)
+                                            binding.etDistance.setTextColor(getColor(R.color.primary))
+                                            binding.etDistance.text = shortDistance.toString()
+                                            binding.icRefreshDistance.visibility = View.VISIBLE
+                                            binding.tvDistanceError.visibility = View.VISIBLE
+                                            binding.tvDistanceError.text = "Try to get closer to the store and refresh the distance!"
+                                            isDistanceToLong = true
 
-                                        progressDialog.dismiss()
+                                            dialog.dismiss()
+                                        }
+                                        .setNegativeButton("Buka Maps") { dialog, _ ->
+                                            val intent = Intent(this@NewReportActivity, MapsActivity::class.java)
+                                            intent.putExtra(CONST_MAPS, mapsUrl)
+                                            startActivity(intent)
 
-                                        binding.etDistance.setTextColor(getColor(R.color.primary))
-                                        binding.etDistance.text = shortDistance.toString()
-                                        binding.icRefreshDistance.visibility = View.VISIBLE
-                                        binding.tvDistanceError.visibility = View.VISIBLE
-                                        binding.tvDistanceError.text = "Try to get closer to the store and refresh the distance!"
-                                        isDistanceToLong = true
+                                            progressDialog.dismiss()
 
-                                        dialog.dismiss()
-                                    }
-                                builder.show()
+                                            binding.etDistance.setTextColor(getColor(R.color.primary))
+                                            binding.etDistance.text = shortDistance.toString()
+                                            binding.icRefreshDistance.visibility = View.VISIBLE
+                                            binding.tvDistanceError.visibility = View.VISIBLE
+                                            binding.tvDistanceError.text = "Cobalah untuk lebih dekat ke toko dan refresh lagi jaraknya!"
+                                            isDistanceToLong = true
+
+                                            dialog.dismiss()
+                                        }
+                                    builder.show()
+                                } else {
+                                    progressDialog.dismiss()
+
+                                    var textColor = getColor(R.color.black_200)
+                                    if (customUtility.isDarkMode()) textColor = getColor(R.color.black_600)
+
+                                    binding.etDistance.setTextColor(textColor)
+                                    binding.etDistance.text = shortDistance.toString()
+                                    binding.icRefreshDistance.visibility = View.VISIBLE
+                                    binding.tvDistanceError.visibility = View.GONE
+                                    isDistanceToLong = false
+                                }
+
                             } else {
                                 progressDialog.dismiss()
-
-                                var textColor = getColor(R.color.black_200)
-                                if (customUtility.isDarkMode()) textColor = getColor(R.color.black_600)
-
-                                binding.etDistance.setTextColor(textColor)
-                                binding.etDistance.text = shortDistance.toString()
-                                binding.icRefreshDistance.visibility = View.VISIBLE
-                                binding.tvDistanceError.visibility = View.GONE
-                                isDistanceToLong = false
+                                Toast.makeText(this, "Gagal memproses koordinat", TOAST_SHORT).show()
                             }
 
                         } else {
                             progressDialog.dismiss()
-                            Toast.makeText(this, "Failed to process coordinate", TOAST_SHORT).show()
+                            Toast.makeText(this, "Tidak dapat mengakses lokasi, kembali dan coba lagi", TOAST_SHORT).show()
                         }
 
                     } else {
                         progressDialog.dismiss()
-                        Toast.makeText(this, "can't access location, refresh and try again", TOAST_SHORT).show()
+                        val message = "Anda tidak dapat membuat laporkan untuk saat ini, silakan hubungi admin untuk memperbarui koordinat toko ini"
+                        val actionTitle = "Hubungi Sekarang"
+                        customUtility.showPermissionDeniedSnackbar(message, actionTitle) { navigateChatAdmin() }
                     }
 
                 } else {
                     progressDialog.dismiss()
-                    val message = "You cannot report for now, please chat admin to update the coordinate for this store"
-                    val actionTitle = "Chat Now"
-                    customUtility.showPermissionDeniedSnackbar(message, actionTitle) { navigateChatAdmin() }
+                    val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                    startActivity(enableLocationIntent)
                 }
 
             } else {
                 progressDialog.dismiss()
-                val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                startActivity(enableLocationIntent)
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
             }
 
-        } else {
-            progressDialog.dismiss()
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
-        }
+        }, 500)
     }
 
     private fun navigateChatAdmin() {
@@ -235,7 +243,7 @@ class NewReportActivity : AppCompatActivity() {
             startActivity(intent)
             finishAffinity()
         } catch (e: ActivityNotFoundException) {
-            Toast.makeText(this, "Failed direct to whatsapp", TOAST_SHORT).show()
+            Toast.makeText(this, "Gagal menghubungkan ke whatsapp", TOAST_SHORT).show()
         }
 
     }
@@ -245,10 +253,10 @@ class NewReportActivity : AppCompatActivity() {
         if (!formValidation()) return
 
         val dialog = AlertDialog.Builder(this)
-            .setTitle("Submit Confirmation")
-            .setMessage("Are you sure to submit your report now?")
-            .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
-            .setPositiveButton("Yes") { _, _ -> submitReport() }
+            .setTitle("Konfirmasi Laporan!")
+            .setMessage("Apakah anda yakin ingi mengirim laporan sekarang?")
+            .setNegativeButton("Tidak") { dialog, _ -> dialog.dismiss() }
+            .setPositiveButton("Iya") { _, _ -> submitReport() }
             .create()
 
         dialog.show()
@@ -257,18 +265,18 @@ class NewReportActivity : AppCompatActivity() {
     private fun formValidation(): Boolean {
         val etMessage = binding.etMessage
         if (coordinate.isNullOrEmpty()) {
-            val message = "Your distance is not calculated!"
+            val message = "Jarak anda belum terhitung!"
             customUtility.showDialog(message = message)
             return false
         }
         if (isDistanceToLong) {
-            val message = "You cannot report for now, Try to get closer to the store and refresh the distance!"
-            val actionTitle = "Refresh Now"
+            val message = "Anda tidak dapat membuat laporan untuk saat ini, Cobalah untuk lebih dekat dengan titik toko dan refresh jaraknya!"
+            val actionTitle = "Refresh Sekarang"
             customUtility.showPermissionDeniedSnackbar(message, actionTitle) { calculateDistance() }
             return false
         }
         if (etMessage.text.isNullOrEmpty()) {
-            etMessage.error = "The report message cannot be empty"
+            etMessage.error = "Pesan laporan wajib diisi"
             etMessage.requestFocus()
             return false
         }
@@ -290,7 +298,7 @@ class NewReportActivity : AppCompatActivity() {
             binding.btnReport.text = getString(R.string.txt_loading)
             binding.btnReport.isEnabled = false
         } else {
-            binding.btnReport.text = "SUBMIT REPORT"
+            binding.btnReport.text = "Kirim Laporan"
             binding.btnReport.isEnabled = true
         }
     }
@@ -314,9 +322,9 @@ class NewReportActivity : AppCompatActivity() {
                 calculateDistance()
             } else {
                 if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    val message = "Location permissions are required for this feature. Please grant the permissions."
+                    val message = "Izin lokasi diperlukan untuk fitur ini. Tolong berikan izinnya."
                     customUtility.showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE) }
-                } else customUtility.showPermissionDeniedDialog("Location permissions are required for this feature. Please enable them in the app settings.")
+                } else customUtility.showPermissionDeniedDialog("Izin lokasi diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
             }
         }
 
