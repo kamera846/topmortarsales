@@ -6,7 +6,9 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,6 +23,7 @@ import com.topmortar.topmortarsales.commons.INVOICE_PAID
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
+import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.utils.CurrencyFormat
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -61,11 +64,13 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
             tvLoading.visibility = View.VISIBLE
             rvPayments.visibility = View.GONE
+            cardOthers.visibility = View.GONE
 
         } else {
 
             tvLoading.visibility = View.GONE
             rvPayments.visibility = View.VISIBLE
+            cardOthers.visibility = View.VISIBLE
 
         }
 
@@ -80,6 +85,8 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
                 val response = apiService.getPayment(iInvoiceID)
                 var totalPay = 0.0
+                var totalDiscnt = 0.0
+                var totalAdjustmnt = 0.0
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -89,10 +96,17 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
                         for (item in data.listIterator()) {
                             totalPay += item.amount_payment.toDouble()
+                            totalDiscnt += item.potongan_payment.toDouble()
+                            totalAdjustmnt += item.adjustment_payment.toDouble()
                         }
 
                         val dateLastPayment = data[data.lastIndex].date_payment
-                        val remaining = totalInvoice.toDouble() - totalPay
+                        val remaining = totalInvoice.toDouble() - totalPay - totalDiscnt - totalAdjustmnt
+
+                        Toast.makeText(this@DetailInvoiceActivity, "$remaining", TOAST_SHORT).show()
+
+                        tvTotalPotongan.text = CurrencyFormat.format(totalDiscnt)
+                        tvTotalAdjustment.text = CurrencyFormat.format(totalAdjustmnt)
 
                         val iStatusInvoice = intent.getStringExtra(CONST_STATUS_INVOICE)
                         if (!iStatusInvoice.isNullOrEmpty()) {
@@ -102,7 +116,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                                 tvStatus.setTextColor(getColor(R.color.white))
                                 tvStatus.setBackgroundDrawable(getDrawable(R.drawable.bg_active_round))
                             } else {
-                                tvDateInvoice.text = "Remaining"
+                                tvDateInvoice.text = "Sisa Hutang"
                                 tvStatus.text = CurrencyFormat.format(remaining)
                                 tvStatus.setTextColor(getColor(R.color.black_200))
                                 tvStatus.setBackgroundDrawable(getDrawable(R.drawable.bg_data_round))
@@ -115,12 +129,12 @@ class DetailInvoiceActivity : AppCompatActivity() {
                     RESPONSE_STATUS_EMPTY -> {
 
                         val remaining = totalInvoice.toDouble() - totalPay
-                        tvDateInvoice.text = "Remaining"
+                        tvDateInvoice.text = "Sisa Hutang"
                         tvStatus.text = CurrencyFormat.format(remaining)
                         tvStatus.setTextColor(getColor(R.color.black_200))
                         tvStatus.setBackgroundDrawable(getDrawable(R.drawable.bg_data_round))
 
-                        loadingState(true, "There is no payment history yet")
+                        loadingState(true, "Belum ada pembayaran")
 
 
                     }
@@ -204,11 +218,14 @@ class DetailInvoiceActivity : AppCompatActivity() {
         tvTitleBar = findViewById(R.id.tv_title_bar)
         tvContactName = findViewById(R.id.tv_contact_name)
         tvTotalInvoice = findViewById(R.id.tv_total_invoice)
+        tvTotalPotongan = findViewById(R.id.tvPotongan)
+        tvTotalAdjustment = findViewById(R.id.tvAdjustment)
         tvStatus = findViewById(R.id.tv_status)
         tvDateInvoice = findViewById(R.id.tv_date_invoce)
         tvLoading = findViewById(R.id.text_loading)
         rvPayments = findViewById(R.id.rv_payments)
         cardStatus = findViewById(R.id.card_status)
+        cardOthers = findViewById(R.id.card_others)
 
         icBack.setImageDrawable(getDrawable(R.drawable.arrow_back_white))
         tvTitleBar.text = "Detail Invoice"
@@ -226,11 +243,14 @@ class DetailInvoiceActivity : AppCompatActivity() {
     private lateinit var tvTitleBar: TextView
     private lateinit var tvContactName: TextView
     private lateinit var tvTotalInvoice: TextView
+    private lateinit var tvTotalPotongan: TextView
+    private lateinit var tvTotalAdjustment: TextView
     private lateinit var tvStatus: TextView
     private lateinit var tvDateInvoice: TextView
     private lateinit var tvLoading: TextView
     private lateinit var rvPayments: RecyclerView
     private lateinit var cardStatus: LinearLayout
+    private lateinit var cardOthers: CardView
 
     private var invoiceNumber = ""
     private var iInvoiceID = ""
