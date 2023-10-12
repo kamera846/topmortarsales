@@ -352,9 +352,9 @@
                             android:gravity="center_vertical"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                             android:textColorHint="@color/black_600"
-                            android:hint="Click to get coordinate on maps"
+                            android:hint="Tekan untuk mendapatkan koordinat"
                             android:inputType="textCapWords"
-                            android:autofillHints="Click to get coordinate on maps"
+                            android:autofillHints="Tekan untuk mendapatkan koordinat"
                             android:textSize="16sp"
                             android:background="@android:color/transparent"
                             android:outlineProvider="none"/>
@@ -681,7 +681,7 @@
                             android:gravity="center_vertical"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                             android:textColorHint="@color/black_600"
-                            android:hint="Click to upload file"
+                            android:hint="Tekan untuk meng-upload file"
                             android:inputType="textCapWords"
                             android:autofillHints="Choose Owner Birthday"
                             android:textSize="16sp"
@@ -742,6 +742,7 @@
 
                 <!-- Text Status -->
                 <LinearLayout
+                    android:visibility="gone"
                     android:id="@+id/status_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -801,8 +802,9 @@
 
                 </LinearLayout>
 
-                <!-- Text Status -->
+                <!-- Text Termin -->
                 <LinearLayout
+                    android:visibility="gone"
                     android:id="@+id/termin_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -848,6 +850,66 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="12dp"
                             android:layout_marginBottom="16dp"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Text Promo -->
+                <LinearLayout
+                    android:id="@+id/promo_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/background_rounded"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:text="Promo"
+                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginTop="16dp"
+                            android:layout_marginBottom="4dp"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
+
+                        <TextView
+                            android:visibility="visible"
+                            android:id="@+id/tv_promo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:text="@string/tidak_ada_promo"
+                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginBottom="16dp"
+                            android:textSize="14sp"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                        <EditText
+                            android:visibility="gone"
+                            android:id="@+id/et_promo"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                            android:textColorHint="@color/black_600"
+                            android:hint="Tekan untuk memilih promo"
+                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginBottom="16dp"
+                            android:inputType="text"
+                            android:textSize="16sp"
+                            android:background="@android:color/transparent"
+                            android:outlineProvider="none"/>
 
                     </LinearLayout>
 
