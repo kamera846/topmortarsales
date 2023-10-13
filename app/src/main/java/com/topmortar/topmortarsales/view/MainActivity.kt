@@ -236,7 +236,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
     private fun navigateDetailContact(data: ContactModel? = null) {
 
-        toggleSearchEvent(SEARCH_CLOSE)
+//        toggleSearchEvent(SEARCH_CLOSE)
 
         val intent = Intent(this@MainActivity, DetailContactActivity::class.java)
 
@@ -668,7 +668,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
             if (resultData == SYNC_NOW) {
 
-                getContacts()
+                if (isSearchActive) searchContact("${etSearchBox.text}") else getContacts()
 
             }
 
