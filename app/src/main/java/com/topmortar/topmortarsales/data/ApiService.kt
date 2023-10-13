@@ -60,6 +60,7 @@ interface ApiService {
         @Part("address") address: RequestBody,
         @Part("status") status: RequestBody,
         @Part("termin_payment") termin: RequestBody,
+        @Part("id_promo") promoId: RequestBody,
         @Part ktp: MultipartBody.Part? = null,
     ): Response<ResponseMessage>
 

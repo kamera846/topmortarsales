@@ -827,12 +827,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         loadingState(true)
 
-        Handler().postDelayed({
-            handleMessage(this, "TAG SAVE", "${contactId!!}, ${formatPhoneNumber(pPhone)}, $pName, $pOwner, $pBirthday, $pMapsUrl, ${pCityID!!}, $pAddress, $pStatus, $imagePart, $pTermin, $pPromoID")
-            loadingState(false)
-        }, 1000)
-
-        return
+//        Handler().postDelayed({
+//            handleMessage(this, "TAG SAVE", "${contactId!!}, ${formatPhoneNumber(pPhone)}, $pName, $pOwner, $pBirthday, $pMapsUrl, ${pCityID!!}, $pAddress, $pStatus, $imagePart, $pTermin, $pPromoID")
+//            loadingState(false)
+//        }, 1000)
+//
+//        return
 
         lifecycleScope.launch {
             try {
@@ -847,6 +847,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbAddress = createPartFromString(pAddress)
                 val rbStatus = createPartFromString(pStatus)
                 val rbTermin = createPartFromString(pTermin)
+                val rbPromoId = createPartFromString(pPromoID!!)
 
                 val apiService: ApiService = HttpClient.create()
                 val response = apiService.editContact(
@@ -860,6 +861,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     address = rbAddress,
                     status = rbStatus,
                     termin = rbTermin,
+                    promoId = rbPromoId,
                     ktp = imagePart?.let { imagePart }
                 )
 

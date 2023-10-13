@@ -742,7 +742,7 @@
 
                 <!-- Text Status -->
                 <LinearLayout
-                    android:visibility="gone"
+                    android:visibility="visible"
                     android:id="@+id/status_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -804,7 +804,7 @@
 
                 <!-- Text Termin -->
                 <LinearLayout
-                    android:visibility="gone"
+                    android:visibility="visible"
                     android:id="@+id/termin_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

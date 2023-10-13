@@ -12,4 +12,5 @@ data class ContactModel(
     var store_status: String = "",
     var ktp_owner: String = "",
     var termin_payment: String = "",
+    var id_promo: String = "",
 )
