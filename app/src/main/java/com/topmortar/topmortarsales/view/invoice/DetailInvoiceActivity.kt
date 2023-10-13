@@ -103,8 +103,6 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         val dateLastPayment = data[data.lastIndex].date_payment
                         val remaining = totalInvoice.toDouble() - totalPay - totalDiscnt - totalAdjustmnt
 
-                        Toast.makeText(this@DetailInvoiceActivity, "$remaining", TOAST_SHORT).show()
-
                         tvTotalPotongan.text = CurrencyFormat.format(totalDiscnt)
                         tvTotalAdjustment.text = CurrencyFormat.format(totalAdjustmnt)
 

@@ -30,7 +30,7 @@ class SearchModal(private val context: Context, private val listItem: ArrayList<
     private var loadingListener: ((Boolean) -> Unit)? = null
     private var searchKeyListener: ((String) -> Unit)? = null
     var label = "Pilih Opsi Kota"
-    var searchHint = "Masukan judul…"
+    var searchHint = "Masukkan judul…"
 
     private lateinit var txtLoading: TextView
     private lateinit var rvItems: RecyclerView

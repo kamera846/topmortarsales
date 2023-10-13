@@ -684,7 +684,7 @@ class SplashScreenActivity : AppCompatActivity() {
                     inputNewPassword.visibility = View.GONE
                     icBack.visibility = View.VISIBLE
                     inputOtp.visibility = View.VISIBLE
-                    tvTitleAuth.text = "Masukan Kode OTP"
+                    tvTitleAuth.text = "Masukkan Kode OTP"
                     btnLogin.text = "Verifikasi Kode OTP"
 
                     etOtp1.requestFocus()
@@ -704,7 +704,7 @@ class SplashScreenActivity : AppCompatActivity() {
                     inputOtp.visibility = View.GONE
                     icBack.visibility = View.GONE
                     inputNewPassword.visibility = View.VISIBLE
-                    tvTitleAuth.text = "Masukan Password Baru"
+                    tvTitleAuth.text = "Masukkan Password Baru"
                     btnLogin.text = "Setel Ulang Password Sekarang"
                     etNewPassword.requestFocus()
                 }

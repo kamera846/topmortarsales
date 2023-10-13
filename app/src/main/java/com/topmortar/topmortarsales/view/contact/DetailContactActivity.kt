@@ -1219,7 +1219,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         searchModal = SearchModal(this, items)
         searchModal.setCustomDialogListener(this)
-        searchModal.searchHint = "Enter city name…"
+        searchModal.searchHint = "Masukkan nama kota…"
         searchModal.setOnDismissListener {
             etLocation.clearFocus()
             isSearchCity = false
@@ -1231,7 +1231,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         searchPromoModal = SearchModal(this, items)
         searchPromoModal.setCustomDialogListener(this)
         searchPromoModal.label = "Pilih Opsi Promo"
-        searchPromoModal.searchHint = "Enter promo name…"
+        searchPromoModal.searchHint = "Masukkan nama promo…"
         searchPromoModal.setOnDismissListener {
             etPromo.clearFocus()
             isSearchPromo = false
