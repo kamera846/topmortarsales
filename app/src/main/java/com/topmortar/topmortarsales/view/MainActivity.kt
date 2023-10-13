@@ -59,6 +59,7 @@ import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_OWNER
+import com.topmortar.topmortarsales.commons.CONST_PROMO
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
@@ -269,7 +270,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
             intent.putExtra(CONST_STATUS, data.store_status)
             intent.putExtra(CONST_KTP, data.ktp_owner)
             intent.putExtra(CONST_TERMIN, data.termin_payment)
-//            intent.putExtra(CONST_LOCATION, "1")
+            intent.putExtra(CONST_PROMO, data.id_promo)
         }
 
         startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)

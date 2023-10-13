@@ -6,5 +6,7 @@ data class InvoicePaymentModel(
     var date_payment: String = "",
     var remark_payment: String = "",
     var id_invoice: String = "",
-    var is_removed: String = ""
+    var is_removed: String = "",
+    var potongan_payment: String = "",
+    var adjustment_payment: String = ""
 )

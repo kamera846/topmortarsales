@@ -37,6 +37,7 @@ const val PAYMENT = "payment.php"
 const val SKILL = "skill.php"
 const val TUKANG = "tukang.php"
 const val TUKANG_MESSAGE = "tukangMessage.php"
+const val PROMO = "promo.php"
 
 // Request Code
 const val ACTIVITY_REQUEST_CODE = "activity_request_code"
@@ -85,6 +86,7 @@ const val CONST_DISTANCE = "const_distance"
 const val CONST_STATUS_INVOICE = "const_status_invoice"
 const val CONST_TOTAL_INVOICE = "const_total_invoice"
 const val CONST_DATE_INVOICE = "const_date_invoice"
+const val CONST_PROMO = "const_promo"
 
 // Status
 const val LOGGED_IN = true
