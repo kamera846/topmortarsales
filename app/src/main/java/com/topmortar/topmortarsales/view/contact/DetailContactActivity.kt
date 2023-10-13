@@ -49,6 +49,7 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
+import com.topmortar.topmortarsales.commons.CONST_PROMO
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.CONST_URI
@@ -137,6 +138,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private lateinit var statusContainer: LinearLayout
     private lateinit var terminContainer: LinearLayout
+    private lateinit var promoContainer: LinearLayout
     private lateinit var addressContainer: LinearLayout
 
     private lateinit var icBack: ImageView
@@ -172,6 +174,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private lateinit var tvStatus: TextView
     private lateinit var tvTermin: TextView
+    private lateinit var tvPromo: TextView
+    private lateinit var etPromo: EditText
     private lateinit var spinStatus: Spinner
     private lateinit var spinTermin: Spinner
     private lateinit var etAddress: EditText
@@ -186,6 +190,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var hasEdited: Boolean = false
     private var selectedDate: Calendar = Calendar.getInstance()
     private var selectedCity: ModalSearchModel? = null
+    private var selectedPromo: ModalSearchModel? = null
     private var itemSendMessage: ContactModel? = null
 
     private var statusItem: List<String> = listOf("Pilih Status", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
@@ -203,9 +208,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var iAddress: String? = null
     private var iMapsUrl: String? = null
     private var iKtp: String? = null
+    private var iPromo: String? = null
+
+    private var isSearchCity = false
+    private var isSearchPromo = false
 
     private lateinit var datePicker: DatePickerDialog
     private lateinit var searchModal: SearchModal
+    private lateinit var searchPromoModal: SearchModal
     private lateinit var sendMessageModal: SendMessageModal
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -251,6 +261,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         statusContainer = findViewById(R.id.status_container)
         terminContainer = findViewById(R.id.termin_container)
+        promoContainer = findViewById(R.id.promo_container)
         addressContainer = findViewById(R.id.address_container)
 
         tooltipPhone = findViewById(R.id.tooltip_phone)
@@ -283,6 +294,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         tvStatus = findViewById(R.id.tv_status)
         spinStatus = findViewById(R.id.spin_status)
         tvTermin = findViewById(R.id.tv_termin)
+        tvPromo = findViewById(R.id.tv_promo)
+        etPromo = findViewById(R.id.et_promo)
         spinTermin = findViewById(R.id.spin_termin)
         etAddress = findViewById(R.id.et_address)
 
@@ -299,6 +312,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         // Setup Dialog Search
         setupDialogSearch()
+        setupDialogSearchPromo()
 
         // Setup Dialog Send Message
         setupDialogSendMessage()
@@ -339,6 +353,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         etMaps.setOnClickListener { getCoordinate() }
         etLocationContainer.setOnClickListener { showSearchModal() }
         etLocation.setOnClickListener { showSearchModal() }
+        etPromo.setOnClickListener { showSearchPromoModal() }
         addressContainer.setOnClickListener {
             if (isEdit) etAddress.requestFocus()
         }
@@ -369,6 +384,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 showSearchModal()
                 etLocation.setSelection(etLocation.length())
             } else etLocation.clearFocus()
+        }
+        etPromo.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                showSearchPromoModal()
+                etPromo.setSelection(etPromo.length())
+            } else etPromo.clearFocus()
         }
         etKtp.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
@@ -418,6 +439,20 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             override fun afterTextChanged(s: Editable?) {
                 if (isEdit) showSearchModal()
+            }
+
+        })
+        etPromo.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                if (isEdit) showSearchPromoModal()
             }
 
         })
@@ -487,6 +522,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 //        }
         iAddress = intent.getStringExtra(CONST_ADDRESS)
         iLocation = intent.getStringExtra(CONST_LOCATION)
+        iPromo = intent.getStringExtra(CONST_PROMO)
 
         activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
 
@@ -523,6 +559,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         } else {
             tvLocation.text = EMPTY_FIELD_VALUE
             etLocation.setText("")
+        }
+        if (!iPromo.isNullOrEmpty()) {
+            tvPromo.text = getString(R.string.txt_loading)
+            etPromo.setText(getString(R.string.txt_loading))
+        } else {
+            tvPromo.text = EMPTY_FIELD_VALUE
+            etPromo.setText("")
         }
         if (!iBirthday.isNullOrEmpty() ) {
             if (iBirthday == "0000-00-00") {
@@ -635,6 +678,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 terminContainer.setBackgroundResource(R.drawable.et_background)
                 tvTermin.visibility = View.GONE
                 spinTermin.visibility = View.VISIBLE
+                tvPromo.visibility = View.GONE
+                etPromo.visibility = View.VISIBLE
+                promoContainer.setBackgroundResource(R.drawable.et_background)
 
                 btnSaveEdit.visibility = View.VISIBLE
 
@@ -700,6 +746,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 terminContainer.setBackgroundResource(R.drawable.background_rounded)
                 tvTermin.visibility = View.VISIBLE
                 spinTermin.visibility = View.GONE
+                tvPromo.visibility = View.VISIBLE
+                etPromo.visibility = View.GONE
+                promoContainer.setBackgroundResource(R.drawable.background_rounded)
 
                 btnSaveEdit.visibility = View.GONE
 
@@ -774,11 +823,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
 
         val pCityID = if (selectedCity != null) selectedCity!!.id else "0"
+        val pPromoID = if (selectedPromo != null) selectedPromo!!.id else "0"
 
         loadingState(true)
 
 //        Handler().postDelayed({
-//            handleMessage(this, "TAG SAVE", "${contactId!!}, ${formatPhoneNumber(pPhone)}, $pName, $pOwner, $pBirthday, $pMapsUrl, ${pCityID!!}, $pAddress, $pStatus, $imagePart, $pTermin")
+//            handleMessage(this, "TAG SAVE", "${contactId!!}, ${formatPhoneNumber(pPhone)}, $pName, $pOwner, $pBirthday, $pMapsUrl, ${pCityID!!}, $pAddress, $pStatus, $imagePart, $pTermin, $pPromoID")
 //            loadingState(false)
 //        }, 1000)
 //
@@ -797,6 +847,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbAddress = createPartFromString(pAddress)
                 val rbStatus = createPartFromString(pStatus)
                 val rbTermin = createPartFromString(pTermin)
+                val rbPromoId = createPartFromString(pPromoID!!)
 
                 val apiService: ApiService = HttpClient.create()
                 val response = apiService.editContact(
@@ -810,6 +861,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     address = rbAddress,
                     status = rbStatus,
                     termin = rbTermin,
+                    promoId = rbPromoId,
                     ktp = imagePart?.let { imagePart }
                 )
 
@@ -855,6 +907,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 if (selectedCity!!.id != "0") tvLocation.text = "${ etLocation.text }"
                                 else tvLocation.text = EMPTY_FIELD_VALUE
                             } else tvLocation.text = EMPTY_FIELD_VALUE
+                            if (selectedPromo != null) {
+                                if (selectedPromo!!.id != "0") tvPromo.text = "${ etPromo.text }"
+                                else tvPromo.text = EMPTY_FIELD_VALUE
+                            } else tvPromo.text = EMPTY_FIELD_VALUE
 
                             iStatus = if (!pStatus.isNullOrEmpty()) pStatus else null
 ////                            if (!iStatus.isNullOrEmpty()) {
@@ -1137,6 +1193,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         if (tvLocation.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_LOCATION, "")
         else intent.putExtra(CONST_LOCATION, selectedCity!!.id)
 
+        if (tvPromo.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_PROMO, "")
+        else intent.putExtra(CONST_PROMO, selectedPromo!!.id)
+
         if (iMapsUrl == EMPTY_FIELD_VALUE) intent.putExtra(CONST_MAPS, "")
         else intent.putExtra(CONST_MAPS, iMapsUrl)
 
@@ -1161,7 +1220,22 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         searchModal = SearchModal(this, items)
         searchModal.setCustomDialogListener(this)
         searchModal.searchHint = "Enter city name…"
-        searchModal.setOnDismissListener { etLocation.clearFocus() }
+        searchModal.setOnDismissListener {
+            etLocation.clearFocus()
+            isSearchCity = false
+        }
+    }
+
+    private fun setupDialogSearchPromo(items: ArrayList<ModalSearchModel> = ArrayList()) {
+
+        searchPromoModal = SearchModal(this, items)
+        searchPromoModal.setCustomDialogListener(this)
+        searchPromoModal.label = "Pilih Opsi Promo"
+        searchPromoModal.searchHint = "Enter promo name…"
+        searchPromoModal.setOnDismissListener {
+            etPromo.clearFocus()
+            isSearchPromo = false
+        }
 
     }
 
@@ -1175,9 +1249,17 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     }
 
     private fun showSearchModal() {
+        isSearchCity = true
         val searchKey = etLocation.text.toString()
         if (searchKey.isNotEmpty()) searchModal.setSearchKey(searchKey)
         searchModal.show()
+    }
+
+    private fun showSearchPromoModal() {
+        isSearchPromo = true
+        val searchKey = etPromo.text.toString()
+        if (searchKey.isNotEmpty()) searchPromoModal.setSearchKey(searchKey)
+        searchPromoModal.show()
     }
 
     private fun getCities() {
@@ -1201,7 +1283,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         }
 
                         setupDialogSearch(items)
-//                        searchModal.isLoading(false)
 
                         val foundItem = results.find { it.id_city == iLocation }
                         if (foundItem != null) {
@@ -1214,6 +1295,71 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         }
 
                         // Admin Access
+//                        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_SALES) {
+//                            icEdit.visibility = View.VISIBLE
+//                            val indicatorImageView = findViewById<View>(R.id.indicatorView)
+//                            indicatorImageView.visibility = View.VISIBLE
+//                            if (sessionManager.userKind() == USER_KIND_ADMIN) tvKtpContainer.visibility = View.VISIBLE
+//                        }
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        handleMessage(this@DetailContactActivity, "LIST CITY", "Daftar kota kosong!")
+
+                    }
+                    else -> {
+
+                        handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+
+            }
+
+            getPromo()
+
+        }
+    }
+
+    private fun getPromo() {
+
+        // Get Cities
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.getPromo()
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        val results = response.results
+                        val items: ArrayList<ModalSearchModel> = ArrayList()
+                        items.add(ModalSearchModel("0", EMPTY_FIELD_VALUE))
+
+                        for (i in 0 until results.size) {
+                            val data = results[i]
+                            items.add(ModalSearchModel(data.id_promo, "${data.nama_promo}"))
+                        }
+
+                        setupDialogSearchPromo(items)
+
+                        val foundItem = results.find { it.id_promo == iPromo }
+                        if (foundItem != null) {
+                            tvPromo.text = "${foundItem.nama_promo}"
+                            etPromo.setText("${foundItem.nama_promo}")
+                            selectedPromo = ModalSearchModel(foundItem.id_promo, foundItem.nama_promo)
+                        } else {
+                            tvPromo.text = EMPTY_FIELD_VALUE
+                            etPromo.setText("")
+                        }
+
+                        // Admin Access
                         if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_SALES) {
                             icEdit.visibility = View.VISIBLE
                             val indicatorImageView = findViewById<View>(R.id.indicatorView)
@@ -1223,14 +1369,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        handleMessage(this@DetailContactActivity, "LIST CITY", "Daftar kota kosong!")
-//                        searchModal.isLoading(true)
+                        handleMessage(this@DetailContactActivity, "LIST PROMO", "Daftar promo kosong!")
 
                     }
                     else -> {
 
                         handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
-//                        searchModal.isLoading(true)
 
                     }
                 }
@@ -1239,7 +1383,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             } catch (e: Exception) {
 
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
-//                searchModal.isLoading(true)
 
             }
 
@@ -1514,8 +1657,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     // Interfade Search Modal
     override fun onDataReceived(data: ModalSearchModel) {
-        etLocation.setText(data.title)
-        selectedCity = data
+        if (isSearchCity) {
+            etLocation.setText(data.title)
+            selectedCity = data
+        } else if (isSearchPromo) {
+            etPromo.setText(data.title)
+            selectedPromo = data
+        }
+        isSearchCity = false
+        isSearchPromo = false
     }
 
     override fun onPingResult(pingResult: Int?) {

@@ -100,7 +100,119 @@
     </LinearLayout>
 
     <androidx.cardview.widget.CardView
+        android:visibility="gone"
         android:layout_below="@+id/card_status"
+        android:id="@+id/card_others"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginHorizontal="16dp"
+        app:cardCornerRadius="8dp"
+        android:theme="@style/Theme.TopMortarSales.CardView">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="16dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Informasi Lainnya"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="16dp"
+                android:textStyle="bold"
+                android:textAllCaps="true"
+                android:textSize="16sp"
+                android:alpha="0.5"
+                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp">
+
+                <TextView
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:text="Adjustment"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                <TextView
+                    android:id="@+id/tvAdjustment"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:text="-"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp">
+
+                <TextView
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:text="Potongan"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                <TextView
+                    android:id="@+id/tvPotongan"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:text="-"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp">
+
+                <TextView
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:text="Umur Hutang"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                <TextView
+                    android:id="@+id/tvUmurHutang"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:text="-"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+            </RelativeLayout>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:layout_below="@+id/card_others"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
@@ -116,7 +228,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="History payment"
+                android:text="Riwayat Pembayaran"
                 android:layout_margin="16dp"
                 android:textStyle="bold"
                 android:textAllCaps="true"
@@ -125,6 +237,7 @@
                 android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
 
             <androidx.recyclerview.widget.RecyclerView
+                android:visibility="gone"
                 android:id="@+id/rv_payments"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -132,11 +245,11 @@
                 tools:listitem="@layout/item_invoice_payment"/>
 
             <TextView
-                android:visibility="gone"
+                android:visibility="visible"
                 android:id="@+id/text_loading"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="There is no payment history yet"
+                android:text="Belum ada pembayaran"
                 android:paddingHorizontal="16dp"
                 android:paddingBottom="16dp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
