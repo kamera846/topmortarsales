@@ -752,7 +752,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 spinTermin.visibility = View.GONE
                 tvPromo.visibility = View.VISIBLE
                 etPromo.visibility = View.GONE
-                promoContainer.setBackgroundResource(R.drawable.background_rounded)
+                promoContainer.setBackgroundResource(R.drawable.background_rounded_16)
 
                 btnSaveEdit.visibility = View.GONE
 

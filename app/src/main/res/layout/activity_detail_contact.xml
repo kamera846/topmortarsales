@@ -862,7 +862,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:layout_marginBottom="16dp"
-                    android:background="@drawable/background_rounded"
+                    android:background="@drawable/background_rounded_16"
                     android:orientation="horizontal">
 
                     <LinearLayout
