@@ -477,7 +477,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         searchModal = SearchModal(this, items)
         searchModal.setCustomDialogListener(this)
-        searchModal.searchHint = "Masukan nama kota…"
+        searchModal.searchHint = "Masukkan nama kota…"
         searchModal.setOnDismissListener {
             etUserCity.clearFocus()
             etUsername.requestFocus()

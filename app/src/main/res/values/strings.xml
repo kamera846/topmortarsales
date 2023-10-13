@@ -25,7 +25,7 @@
     <string name="sync_now">Refresh</string>
     <string name="search">Cari</string>
     <string name="logout">Logout</string>
-    <string name="search_contact">Masukan nama toko…</string>
+    <string name="search_contact">Masukkan nama toko…</string>
     <string name="failed_request">Permintaan ke server gagal!</string>
     <string name="failed_get_data">Gagal memuat data!</string>
     <string name="card_auth_title">Authentication</string>
@@ -36,8 +36,8 @@
     <string name="manage_user">Kelola Pengguna</string>
     <string name="manage_city">Kelola Kota</string>
     <string name="hey_nlogin_now">Hey, \nLogin Now</string>
-    <string name="enter_username">Masukan username</string>
-    <string name="enter_password">Masukan kata sandi</string>
+    <string name="enter_username">Masukkan username</string>
+    <string name="enter_password">Masukkan kata sandi</string>
     <string name="icon_toggle_hide_password">Icon Toggle Hide Password</string>
     <string name="icon_toggle_show_password">Icon Toggle Show Password</string>
     <string name="forgot_your_password">Lupa kata sandi?</string>
@@ -75,13 +75,13 @@
     <string name="send_now">Kirim Sekarang</string>
     <string name="image_profile_top_mortar">Image Profile Top Mortar</string>
     <string name="image_background_profile_top_mortar">Image Background Profile Top Mortar</string>
-    <string name="enter_store_name">Masukan Nama Toko</string>
+    <string name="enter_store_name">Masukkan Nama Toko</string>
     <string name="top_mortar_customer">Top Mortar Customer</string>
     <string name="icon_phone_black">Icon Phone Black</string>
     <string name="phone_dummy">+628000000000</string>
     <string name="icon_tooltip_information">Icon Tooltip Information</string>
     <string name="icon_person_black">Icon Person Black</string>
-    <string name="enter_owner_name">Masukan Nama Pemilik</string>
+    <string name="enter_owner_name">Masukkan Nama Pemilik</string>
     <string name="icon_location_black">Icon Location Black</string>
     <string name="maps_coordinates">Koordinat Maps</string>
     <string name="enter_maps_coordinates_url">Koordinat Maps</string>
@@ -91,7 +91,7 @@
     <string name="icon_date_black">Icon Date Black</string>
     <string name="other_information">Informasi Lainnya</string>
     <string name="address">Alamat</string>
-    <string name="enter_address">Masukan Alamat</string>
+    <string name="enter_address">Masukkan Alamat</string>
     <string name="dummy_address">Jl. TB Simatupang, RT.9/RW.3, Rambutan, Ciracas, Kota Jakarta Timur, Daerah Khusus Ibukota Jakarta 13830</string>
     <string name="send_message">Kirim Pesan</string>
     <string name="save">Simpan</string>
@@ -111,7 +111,7 @@
     <string name="city_code">Kode Kota</string>
     <string name="dummy_city_code">e.g SDA</string>
     <string name="select_city_option">Pilih Opsi Kota</string>
-    <string name="enter_key">Masukan untuk mencari…</string>
+    <string name="enter_key">Masukkan untuk mencari…</string>
     <string name="status">Status</string>
     <string name="active">Active</string>
     <string name="full_name">Nama Lengkap</string>

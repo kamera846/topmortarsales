@@ -940,7 +940,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
         searchModal = SearchModal(this, items)
         searchModal.setCustomDialogListener(this)
-        searchModal.searchHint = "Masukan nama kota…"
+        searchModal.searchHint = "Masukkan nama kota…"
         searchModal.setOnDismissListener {
             etLocation.clearFocus()
             isSearchCity = false
@@ -953,7 +953,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         searchModalSkill = SearchModal(this, items)
         searchModalSkill.setCustomDialogListener(this)
         searchModalSkill.label = "Pilih Opsi Keahlian"
-        searchModalSkill.searchHint = "Masukan nama keahlian…"
+        searchModalSkill.searchHint = "Masukkan nama keahlian…"
         searchModalSkill.setOnDismissListener {
             etSkill.clearFocus()
             isSearchSkill = false
