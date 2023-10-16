@@ -143,4 +143,6 @@
     <string name="filter_by">Filter berdasarkan:</string>
     <string name="none">None</string>
     <string name="all_cities">Semua Kota</string>
+    <string name="free">Free</string>
+    <string name="retur">Retur</string>
 </resources>

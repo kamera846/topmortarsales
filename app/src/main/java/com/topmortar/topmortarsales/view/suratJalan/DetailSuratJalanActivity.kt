@@ -701,7 +701,9 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         orders.forEach {
             textOrders += "[L]${ it.nama_produk }[R]${ it.qty_produk }\n"
             if (it.is_bonus == "1") {
-                textOrders += "[L]Free\n"
+                textOrders += "[L]${getString(R.string.free)}\n"
+            } else if (it.is_bonus == "2") {
+                textOrders += "[L]${getString(R.string.retur)}\n"
             }
             textOrders += "[L]\n"
         }
