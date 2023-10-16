@@ -56,6 +56,8 @@ import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_KTP
+import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
+import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_OWNER
@@ -112,6 +114,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
     private lateinit var userCity: String
     private lateinit var userKind: String
     private var userId: String = ""
+    private var contacts: ArrayList<ContactModel> = arrayListOf()
 
     // Initialize Search Engine
     private val searchDelayMillis = 500L
@@ -189,6 +192,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 //        rlParent.setOnTouchListener { _, event -> blurSearchBox(event) }
         rvListChat.setOnTouchListener { _, event -> blurSearchBox(event) }
         binding.llFilter.setOnClickListener { showSearchModal() }
+        if (userKind == USER_KIND_ADMIN) {
+            binding.btnCheckLocation.visibility = View.VISIBLE
+            binding.btnCheckLocation.setOnClickListener { navigateChecklocation() }
+        }
 
     }
 
@@ -270,6 +277,21 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
         startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
 
+    }
+
+    private fun navigateChecklocation() {
+        val listCoordinate = arrayListOf<String>()
+        val listCoordinateName = arrayListOf<String>()
+        for (item in contacts.listIterator()) {
+            listCoordinate.add(item.maps_url)
+            listCoordinateName.add(item.nama)
+        }
+
+        val intent = Intent(this@MainActivity, MapsActivity::class.java)
+
+        intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
+        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+        startActivity(intent)
     }
 
     private fun showPopupMenu() {
@@ -484,6 +506,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
+                        contacts = response.results
                         setRecyclerView(response.results)
                         binding.tvFilter.text = "$textFilter (${response.results.size})"
                         loadingState(false)
@@ -648,6 +671,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                     when (responseBody.status) {
                         RESPONSE_STATUS_OK -> {
 
+                            contacts = responseBody.results
                             setRecyclerView(responseBody.results)
                             binding.tvFilter.text = "$textFilter (${responseBody.results.size})"
                             loadingState(false)

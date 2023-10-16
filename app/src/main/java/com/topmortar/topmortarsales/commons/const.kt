@@ -86,6 +86,8 @@ const val CONST_STATUS_INVOICE = "const_status_invoice"
 const val CONST_TOTAL_INVOICE = "const_total_invoice"
 const val CONST_DATE_INVOICE = "const_date_invoice"
 const val CONST_PROMO = "const_promo"
+const val CONST_LIST_COORDINATE = "const_list_coordinate"
+const val CONST_LIST_COORDINATE_NAME = "const_list_coordinate_name"
 
 // Status
 const val LOGGED_IN = true

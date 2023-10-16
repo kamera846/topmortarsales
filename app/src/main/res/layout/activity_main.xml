@@ -114,4 +114,16 @@
         android:contentDescription="@string/fab_description"
         android:src="@drawable/customer_service_white" />
 
+    <Button
+        android:visibility="gone"
+        android:id="@+id/btn_check_location"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginHorizontal="8dp"
+        android:padding="8dp"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:text="Cek Lokasi" />
+
 </RelativeLayout>
