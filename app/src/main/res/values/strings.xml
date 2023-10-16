@@ -140,4 +140,7 @@
     <string name="maps_key">AIzaSyDLMtfb0qTk0lNWo22mn8hblqCl5OnDELA</string>
     <string name="topmortar_wa_number">+6287826210888</string>
     <string name="tidak_ada_promo">Tidak ada promo</string>
+    <string name="filter_by">Filter berdasarkan:</string>
+    <string name="none">None</string>
+    <string name="all_cities">Semua Kota</string>
 </resources>

@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.user.ManageUserActivity"
+    tools:context=".view.suratJalan.ListSuratJalanActivity"
     android:theme="@style/Theme.TopMortarSales"
     android:id="@+id/rl_parent">
 
@@ -36,13 +36,14 @@
         android:paddingHorizontal="16dp"
         android:paddingVertical="8dp"
         android:background="@color/light"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
-            android:text="Filter by: "/>
+            android:text="@string/filter_by"/>
 
         <TextView
             android:id="@+id/tv_filter"
@@ -51,7 +52,8 @@
             android:layout_weight="1"
             android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
             android:textStyle="bold"
-            android:text="None"/>
+            android:layout_marginStart="4dp"
+            android:text="@string/none"/>
 
         <ImageView
             android:layout_width="16dp"
