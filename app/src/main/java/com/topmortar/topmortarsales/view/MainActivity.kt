@@ -1,8 +1,10 @@
 package com.topmortar.topmortarsales.view
 
+import android.app.ProgressDialog
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -56,6 +58,8 @@ import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_KTP
+import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
+import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_OWNER
@@ -64,6 +68,7 @@ import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
+import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
@@ -75,16 +80,19 @@ import com.topmortar.topmortarsales.commons.utils.KeyboardHandler.hideKeyboard
 import com.topmortar.topmortarsales.commons.utils.KeyboardHandler.showKeyboard
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.model.UserModel
+import com.topmortar.topmortarsales.databinding.ActivityMainBinding
+import com.topmortar.topmortarsales.modal.SearchModal
+import com.topmortar.topmortarsales.model.CityModel
+import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.city.ManageCityActivity
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
 import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
 import com.topmortar.topmortarsales.view.user.ManageUserActivity
-import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
-class MainActivity : AppCompatActivity(), ItemClickListener {
+class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchModalListener {
 
     private lateinit var scaleAnimation: Animation
 
@@ -107,10 +115,14 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
     // Global
     private lateinit var sessionManager: SessionManager
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var searchModal: SearchModal
+    private var selectedCity: ModalSearchModel? = null
     private var doubleBackToExitPressedOnce = false
     private lateinit var userCity: String
     private lateinit var userKind: String
     private var userId: String = ""
+    private var contacts: ArrayList<ContactModel> = arrayListOf()
 
     // Initialize Search Engine
     private val searchDelayMillis = 500L
@@ -133,14 +145,16 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
         if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()) return missingDataHandler()
 
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
 
         initVariable()
         initClickHandler()
         loadingState(true)
-        getContacts()
+        if (userKind == USER_KIND_ADMIN) getCities()
+        else getContacts()
 
     }
 
@@ -194,6 +208,11 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         rlLoading.setOnTouchListener { _, event -> blurSearchBox(event) }
 //        rlParent.setOnTouchListener { _, event -> blurSearchBox(event) }
         rvListChat.setOnTouchListener { _, event -> blurSearchBox(event) }
+        binding.llFilter.setOnClickListener { showSearchModal() }
+//        if (userKind == USER_KIND_ADMIN) {
+//            binding.btnCheckLocation.visibility = View.VISIBLE
+//            binding.btnCheckLocation.setOnClickListener { navigateChecklocation() }
+//        }
 
     }
 
@@ -277,6 +296,73 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
     }
 
+    private fun navigateChecklocation() {
+        val progressDialog = ProgressDialog(this)
+        progressDialog.setMessage("Memuat data toko…")
+        progressDialog.show()
+
+        Handler().postDelayed({
+
+            lifecycleScope.launch {
+                try {
+
+                    val apiService: ApiService = HttpClient.create()
+                    val response = apiService.getContacts()
+
+                    when (response.status) {
+                        RESPONSE_STATUS_OK -> {
+
+                            val listCoordinate = arrayListOf<String>()
+                            val listCoordinateName = arrayListOf<String>()
+                            for (item in response.results.listIterator()) {
+                                listCoordinate.add(item.maps_url)
+                                listCoordinateName.add(item.nama)
+                            }
+
+                            val intent = Intent(this@MainActivity, MapsActivity::class.java)
+
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+
+                            progressDialog.dismiss()
+                            startActivity(intent)
+
+                        }
+                        RESPONSE_STATUS_EMPTY -> {
+
+                            val listCoordinate = arrayListOf<String>()
+                            val listCoordinateName = arrayListOf<String>()
+
+                            val intent = Intent(this@MainActivity, MapsActivity::class.java)
+
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+
+                            progressDialog.dismiss()
+                            startActivity(intent)
+
+                        }
+                        else -> {
+
+                            handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                            progressDialog.dismiss()
+
+                        }
+                    }
+
+
+                } catch (e: Exception) {
+
+                    handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                    progressDialog.dismiss()
+
+                }
+
+            }
+
+        }, 1000)
+    }
+
     private fun showPopupMenu() {
         val popupMenu = PopupMenu(this@MainActivity, icMore)
         popupMenu.inflate(R.menu.option_main_menu)
@@ -308,6 +394,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
                     val intent = Intent(this@MainActivity, UserProfileActivity::class.java)
                     startActivity(intent)
 
+                    true
+                }
+                R.id.nearest_store -> {
+                    navigateChecklocation()
                     true
                 }
                 R.id.option_search -> {
@@ -485,22 +575,30 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
                 val apiService: ApiService = HttpClient.create()
                 var response = apiService.getContacts()
-                when (userKind) {
-                    USER_KIND_ADMIN -> response = apiService.getContacts()
-                    USER_KIND_COURIER -> response = apiService.getCourierStore(processNumber = "1", courierId = userId)
-                    else -> response = apiService.getContacts(cityId = userCity)
+                response = when (userKind) {
+                    USER_KIND_ADMIN -> {
+                        if (selectedCity != null ) {
+                            if (selectedCity!!.id != "-1") apiService.getContacts(cityId = selectedCity!!.id!!) else apiService.getContacts()
+                        } else apiService.getContacts()
+                    } USER_KIND_COURIER -> apiService.getCourierStore(processNumber = "1", courierId = userId)
+                    else -> apiService.getContacts(cityId = userCity)
                 }
+
+                val textFilter = if (selectedCity != null && selectedCity?.id != "-1") selectedCity?.title else getString(R.string.all_cities)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
+                        contacts = response.results
                         setRecyclerView(response.results)
+                        binding.tvFilter.text = "$textFilter (${response.results.size})"
                         loadingState(false)
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(true, "Daftar kontak kosong!")
+                        binding.tvFilter.text = "$textFilter (${response.results.size})"
 
                     }
                     else -> {
@@ -521,6 +619,75 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
         }
 
+    }
+
+    private fun getCities() {
+
+        loadingState(true)
+        // Get Cities
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.getCities()
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        val results = response.results
+                        val items: ArrayList<ModalSearchModel> = ArrayList()
+
+                        items.add(ModalSearchModel("-1", "Hapus filter"))
+                        for (i in 0 until results.size) {
+                            val data = results[i]
+                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                        }
+
+                        setupFilterContacts(items)
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        handleMessage(this@MainActivity, "LIST CITY", "Daftar kota kosong!")
+
+                    }
+                    else -> {
+
+                        handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+
+            }
+
+            getContacts()
+
+        }
+    }
+
+    private fun setupFilterContacts(items: ArrayList<ModalSearchModel> = ArrayList()) {
+
+        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.background = getDrawable(R.color.black_400)
+        else binding.llFilter.background = getDrawable(R.color.light)
+
+        binding.llFilter.visibility = View.VISIBLE
+
+        searchModal = SearchModal(this, items)
+        searchModal.setCustomDialogListener(this)
+        searchModal.searchHint = "Masukkan nama kota…"
+        searchModal.setOnDismissListener {}
+    }
+
+    private fun showSearchModal() {
+        val searchKey = if (selectedCity != null) selectedCity!!.title!! else ""
+        if (searchKey.isNotEmpty()) searchModal.setSearchKey(searchKey)
+        searchModal.show()
     }
 
     private fun getUserLoggedIn() {
@@ -559,7 +726,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
     }
 
-    private fun searchContact(key: String) {
+    private fun searchContact(key: String = "${etSearchBox.text}") {
 
         loadingState(true)
 
@@ -570,22 +737,33 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
                 val searchCity = createPartFromString(userCity)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = if (userKind == USER_KIND_ADMIN) apiService.searchContact(key = searchKey) else apiService.searchContact(cityId = searchCity, key = searchKey)
+                val response = if (userKind == USER_KIND_ADMIN) {
+                    if (selectedCity != null ) {
+                        if (selectedCity!!.id != "-1") {
+                            val cityId = createPartFromString(selectedCity!!.id!!)
+                            apiService.searchContact(key = searchKey, cityId = cityId)
+                        } else apiService.searchContact(key = searchKey)
+                    } else apiService.searchContact(key = searchKey)
+                } else apiService.searchContact(cityId = searchCity, key = searchKey)
 
                 if (response.isSuccessful) {
 
                     val responseBody = response.body()!!
+                    val textFilter = if (selectedCity != null && selectedCity?.id != "-1") selectedCity?.title else getString(R.string.all_cities)
 
                     when (responseBody.status) {
                         RESPONSE_STATUS_OK -> {
 
+                            contacts = responseBody.results
                             setRecyclerView(responseBody.results)
+                            binding.tvFilter.text = "$textFilter (${responseBody.results.size})"
                             loadingState(false)
 
                         }
                         RESPONSE_STATUS_EMPTY -> {
 
                             loadingState(true, "Daftar kontak kosong!")
+                            binding.tvFilter.text = "$textFilter (${responseBody.results.size})"
 
                         }
                         else -> {
@@ -695,7 +873,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
 
             if (resultData == SYNC_NOW) {
 
-                if (isSearchActive) searchContact("${etSearchBox.text}") else getContacts()
+                if (isSearchActive) searchContact() else getContacts()
 
             }
 
@@ -735,6 +913,36 @@ class MainActivity : AppCompatActivity(), ItemClickListener {
         AppUpdateHelper.checkForUpdates(this)
         getUserLoggedIn()
 
+    }
+
+    override fun onDataReceived(data: ModalSearchModel) {
+
+        if (selectedCity != null) {
+            if (data.id != selectedCity!!.id) {
+
+                if (data.id == "-1") {
+                    selectedCity = null
+                    binding.tvFilter.text = getString(R.string.all_cities)
+                } else {
+                    selectedCity = data
+                    binding.tvFilter.text = data.title
+                }
+
+                if (isSearchActive) searchContact()
+                else getContacts()
+
+            }
+        } else {
+            if (data.id != "-1") {
+
+                selectedCity = data
+                binding.tvFilter.text = data.title
+
+                if (isSearchActive) searchContact()
+                else getContacts()
+
+            }
+        }
     }
 
 }
