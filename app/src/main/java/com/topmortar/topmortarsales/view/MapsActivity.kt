@@ -48,7 +48,6 @@ import com.google.android.libraries.places.api.net.FetchPlaceResponse
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
 import com.google.android.libraries.places.api.net.PlacesClient
-import com.google.android.material.snackbar.Snackbar
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.PlaceAdapter
 import com.topmortar.topmortarsales.commons.CONNECTION_FAILURE_RESOLUTION_REQUEST
@@ -62,7 +61,6 @@ import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
-import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.databinding.ActivityMapsBinding
 import java.io.IOException
 import java.util.Locale
@@ -257,7 +255,45 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             mMap.animateCamera(cameraUpdate, durationMs, null)
 
             binding.cardTelusuri.visibility = View.VISIBLE
-            binding.btnTelusuri.setOnClickListener { searchCoordinate() }
+            binding.btnTelusuri.setOnClickListener {
+                if (binding.etKm.toString().isNotEmpty()) {
+                    binding.etKm.error = null
+                    binding.etKm.clearFocus()
+                    searchCoordinate()
+                } else {
+                    binding.etKm.error = "0-100"
+                    binding.etKm.requestFocus()
+                }
+            }
+            binding.btnMinusKm.setOnClickListener {
+                val etKm = binding.etKm.text.toString().toInt()
+                if (etKm > 1) binding.etKm.setText("${etKm - 1}")
+            }
+            binding.btnPlusKm.setOnClickListener {
+                val etKm = binding.etKm.text.toString().toInt()
+                if (etKm < 100) binding.etKm.setText("${etKm + 1}")
+            }
+            binding.etKm.addTextChangedListener(object: TextWatcher {
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                }
+
+                override fun afterTextChanged(s: Editable?) {
+                    val etKm = s.toString()
+                    if (etKm.isNotEmpty()) {
+                        if (etKm.toInt() < 1) binding.etKm.setText("${1}")
+                        else if (etKm.toInt() > 100) binding.etKm.setText("${100}")
+                    }
+                }
+
+            })
 
         }, 2000)
     }
