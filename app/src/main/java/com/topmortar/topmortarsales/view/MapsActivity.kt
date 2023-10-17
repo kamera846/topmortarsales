@@ -261,15 +261,19 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     binding.etKm.clearFocus()
                     searchCoordinate()
                 } else {
-                    binding.etKm.error = "0-100"
+                    binding.etKm.error = "1-100"
                     binding.etKm.requestFocus()
                 }
             }
             binding.btnMinusKm.setOnClickListener {
+                binding.etKm.clearFocus()
+                binding.etKm.error = null
                 val etKm = binding.etKm.text.toString().toInt()
                 if (etKm > 1) binding.etKm.setText("${etKm - 1}")
             }
             binding.btnPlusKm.setOnClickListener {
+                binding.etKm.clearFocus()
+                binding.etKm.error = null
                 val etKm = binding.etKm.text.toString().toInt()
                 if (etKm < 100) binding.etKm.setText("${etKm + 1}")
             }
