@@ -247,7 +247,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             binding.btnGetLatLng.visibility = View.VISIBLE
             binding.searchBar.visibility = View.VISIBLE
         } else {
-            binding.btnGetDirection.visibility = View.VISIBLE
+            if (!isNearestStore) binding.btnGetDirection.visibility = View.VISIBLE
         }
 
         if (!iMaps.isNullOrEmpty()) {
