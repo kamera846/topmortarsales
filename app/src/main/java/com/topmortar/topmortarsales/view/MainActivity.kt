@@ -1,5 +1,6 @@
 package com.topmortar.topmortarsales.view
 
+import android.app.ProgressDialog
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -192,10 +193,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 //        rlParent.setOnTouchListener { _, event -> blurSearchBox(event) }
         rvListChat.setOnTouchListener { _, event -> blurSearchBox(event) }
         binding.llFilter.setOnClickListener { showSearchModal() }
-        if (userKind == USER_KIND_ADMIN) {
-            binding.btnCheckLocation.visibility = View.VISIBLE
-            binding.btnCheckLocation.setOnClickListener { navigateChecklocation() }
-        }
+//        if (userKind == USER_KIND_ADMIN) {
+//            binding.btnCheckLocation.visibility = View.VISIBLE
+//            binding.btnCheckLocation.setOnClickListener { navigateChecklocation() }
+//        }
 
     }
 
@@ -280,18 +281,70 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
     }
 
     private fun navigateChecklocation() {
-        val listCoordinate = arrayListOf<String>()
-        val listCoordinateName = arrayListOf<String>()
-        for (item in contacts.listIterator()) {
-            listCoordinate.add(item.maps_url)
-            listCoordinateName.add(item.nama)
-        }
+        val progressDialog = ProgressDialog(this)
+        progressDialog.setMessage("Memuat data toko…")
+        progressDialog.show()
 
-        val intent = Intent(this@MainActivity, MapsActivity::class.java)
+        Handler().postDelayed({
 
-        intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
-        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
-        startActivity(intent)
+            lifecycleScope.launch {
+                try {
+
+                    val apiService: ApiService = HttpClient.create()
+                    val response = apiService.getContacts()
+
+                    when (response.status) {
+                        RESPONSE_STATUS_OK -> {
+
+                            val listCoordinate = arrayListOf<String>()
+                            val listCoordinateName = arrayListOf<String>()
+                            for (item in response.results.listIterator()) {
+                                listCoordinate.add(item.maps_url)
+                                listCoordinateName.add(item.nama)
+                            }
+
+                            val intent = Intent(this@MainActivity, MapsActivity::class.java)
+
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+
+                            progressDialog.dismiss()
+                            startActivity(intent)
+
+                        }
+                        RESPONSE_STATUS_EMPTY -> {
+
+                            val listCoordinate = arrayListOf<String>()
+                            val listCoordinateName = arrayListOf<String>()
+
+                            val intent = Intent(this@MainActivity, MapsActivity::class.java)
+
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+
+                            progressDialog.dismiss()
+                            startActivity(intent)
+
+                        }
+                        else -> {
+
+                            handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                            progressDialog.dismiss()
+
+                        }
+                    }
+
+
+                } catch (e: Exception) {
+
+                    handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                    progressDialog.dismiss()
+
+                }
+
+            }
+
+        }, 1000)
     }
 
     private fun showPopupMenu() {
@@ -315,6 +368,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 R.id.option_sync_now -> {
                     getContacts()
                     getUserLoggedIn()
+                    true
+                }
+                R.id.nearest_store -> {
+                    navigateChecklocation()
                     true
                 }
                 R.id.option_search -> {

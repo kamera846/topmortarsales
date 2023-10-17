@@ -145,4 +145,5 @@
     <string name="all_cities">Semua Kota</string>
     <string name="free">Free</string>
     <string name="retur">Retur</string>
+    <string name="nearest_store">Cari Toko Terdekat</string>
 </resources>

@@ -195,13 +195,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     private fun searchCoordinate() {
         val progressDialog = ProgressDialog(this)
-        progressDialog.setMessage("Mencari Toko Terdekat")
+        progressDialog.setMessage("Mencari toko terdekat…")
         progressDialog.show()
 
         Handler().postDelayed({
 
             val urlUtility = URLUtility(this)
+            val limitKm = binding.etKm.text.toString().toDouble()
             mMap.clear()
+
             for ((i, item) in listCoordinate!!.iterator().withIndex()) {
 
                 if (!urlUtility.isUrl(item)) {
@@ -216,7 +218,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                             val urlUtility = URLUtility(this)
                             val distance = urlUtility.calculateDistance(currentLatLng!!.latitude, currentLatLng!!.longitude, latitude, longitude)
 
-                            if (distance < 1) {
+                            if (distance < limitKm) {
 
                                 val latLng = LatLng(latitude, longitude)
                                 binding.recyclerView.visibility = View.GONE
@@ -239,9 +241,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             progressDialog.dismiss()
             val durationMs = 2000
-            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentLatLng!!, 15f)
+            val responsiveZoom = when {
+                limitKm >= 1 -> when {
+                    limitKm >= 18 -> 10
+                    limitKm >= 13 -> 11
+                    limitKm >= 8 -> 12
+                    limitKm >= 3 -> 13
+                    else -> 14
+                }
+                else -> 15
+            }
+
+            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentLatLng!!, responsiveZoom.toFloat())
 
             mMap.animateCamera(cameraUpdate, durationMs, null)
+
+            binding.cardTelusuri.visibility = View.VISIBLE
+            binding.btnTelusuri.setOnClickListener { searchCoordinate() }
 
         }, 2000)
     }
