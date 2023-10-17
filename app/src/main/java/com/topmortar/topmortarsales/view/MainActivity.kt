@@ -89,6 +89,7 @@ import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
 import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
 import com.topmortar.topmortarsales.view.user.ManageUserActivity
+import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
