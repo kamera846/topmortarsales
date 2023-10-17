@@ -323,6 +323,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
                             val intent = Intent(this@MainActivity, MapsActivity::class.java)
 
+                            intent.putExtra(CONST_NEAREST_STORE, true)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
 
