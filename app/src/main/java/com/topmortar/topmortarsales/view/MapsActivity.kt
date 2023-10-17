@@ -66,6 +66,7 @@ import com.topmortar.topmortarsales.commons.CONNECTION_FAILURE_RESOLUTION_REQUES
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
 import com.topmortar.topmortarsales.commons.CONST_MAPS
+import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.TOAST_LONG
@@ -89,6 +90,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var routeDirections: Polyline? = null
 
     private var isGetCoordinate = false
+    private var isNearestStore = false
     private var listCoordinate: ArrayList<String>? = null
     private var listCoordinateName: ArrayList<String>? = null
 
@@ -237,6 +239,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         val iMaps = intent.getStringExtra(CONST_MAPS)
         isGetCoordinate = intent.getBooleanExtra(GET_COORDINATE, false)
+        isNearestStore = intent.getBooleanExtra(CONST_NEAREST_STORE, false)
         listCoordinate = intent.getStringArrayListExtra(CONST_LIST_COORDINATE)
         listCoordinateName = intent.getStringArrayListExtra(CONST_LIST_COORDINATE_NAME)
 
