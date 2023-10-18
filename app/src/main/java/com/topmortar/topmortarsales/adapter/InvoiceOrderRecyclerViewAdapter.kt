@@ -32,7 +32,13 @@ class InvoiceOrderRecyclerViewAdapter() : RecyclerView.Adapter<InvoiceOrderRecyc
             tvProductId.text = item.id_produk
             tvQtyNumber.text = item.qty_produk
             tvProductName.text = item.nama_produk
-            if (item.is_bonus == "1") tvProductSerialNumber.visibility = View.VISIBLE
+            if (item.is_bonus == "1") {
+                tvProductSerialNumber.text = context?.getString(R.string.free)
+                tvProductSerialNumber.visibility = View.VISIBLE
+            } else if (item.is_bonus == "2") {
+                tvProductSerialNumber.text = context?.getString(R.string.retur)
+                tvProductSerialNumber.visibility = View.VISIBLE
+            }
 
         }
 

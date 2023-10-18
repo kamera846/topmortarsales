@@ -2,6 +2,7 @@ package com.topmortar.topmortarsales.view
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.ProgressDialog
 import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
@@ -11,6 +12,7 @@ import android.location.Geocoder
 import android.location.Location
 import android.location.LocationListener
 import android.os.Bundle
+import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -46,11 +48,13 @@ import com.google.android.libraries.places.api.net.FetchPlaceResponse
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
 import com.google.android.libraries.places.api.net.PlacesClient
-import com.google.android.material.snackbar.Snackbar
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.PlaceAdapter
 import com.topmortar.topmortarsales.commons.CONNECTION_FAILURE_RESOLUTION_REQUEST
+import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
+import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
 import com.topmortar.topmortarsales.commons.CONST_MAPS
+import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.TOAST_LONG
@@ -72,6 +76,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private lateinit var placesClient: PlacesClient
 
     private var isGetCoordinate = false
+    private var isNearestStore = false
+    private var listCoordinate: ArrayList<String>? = null
+    private var listCoordinateName: ArrayList<String>? = null
 
     private val zoomLevel = 18f
     private var selectedLocation: LatLng? = null
@@ -145,6 +152,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         val iMaps = intent.getStringExtra(CONST_MAPS)
         isGetCoordinate = intent.getBooleanExtra(GET_COORDINATE, false)
+        isNearestStore = intent.getBooleanExtra(CONST_NEAREST_STORE, false)
+        listCoordinate = intent.getStringArrayListExtra(CONST_LIST_COORDINATE)
+        listCoordinateName = intent.getStringArrayListExtra(CONST_LIST_COORDINATE_NAME)
 
         if (isGetCoordinate) {
             binding.btnGetLatLng.visibility = View.VISIBLE
@@ -182,6 +192,117 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         } else initMaps()
 
+    }
+
+    private fun searchCoordinate() {
+        val progressDialog = ProgressDialog(this)
+        progressDialog.setMessage("Mencari toko terdekat…")
+        progressDialog.show()
+
+        Handler().postDelayed({
+
+            val urlUtility = URLUtility(this)
+            val limitKm = binding.etKm.text.toString().toDouble()
+            mMap.clear()
+
+            for ((i, item) in listCoordinate!!.iterator().withIndex()) {
+
+                if (!urlUtility.isUrl(item)) {
+
+                    val coordinates = item.trim().split(",")
+                    if (coordinates.size == 2) {
+                        val latitude = coordinates[0].toDoubleOrNull()
+                        val longitude = coordinates[1].toDoubleOrNull()
+
+                        if (latitude != null && longitude != null) {
+
+                            val urlUtility = URLUtility(this)
+                            val distance = urlUtility.calculateDistance(currentLatLng!!.latitude, currentLatLng!!.longitude, latitude, longitude)
+
+                            if (distance < limitKm) {
+
+                                val latLng = LatLng(latitude, longitude)
+                                binding.recyclerView.visibility = View.GONE
+
+                                selectedLocation = latLng
+                                mMap.addMarker(
+                                    MarkerOptions()
+                                        .position(latLng)
+                                        .title(listCoordinateName?.get(i))
+                                )
+
+                            }
+
+                        }
+                    }
+
+                }
+
+            }
+
+            progressDialog.dismiss()
+            val durationMs = 2000
+            val responsiveZoom = when {
+                limitKm >= 1 -> when {
+                    limitKm >= 18 -> 10
+                    limitKm >= 13 -> 11
+                    limitKm >= 8 -> 12
+                    limitKm >= 3 -> 13
+                    else -> 14
+                }
+                else -> 15
+            }
+
+            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentLatLng!!, responsiveZoom.toFloat())
+
+            mMap.animateCamera(cameraUpdate, durationMs, null)
+
+            binding.cardTelusuri.visibility = View.VISIBLE
+            binding.btnTelusuri.setOnClickListener {
+                if (binding.etKm.toString().isNotEmpty()) {
+                    binding.etKm.error = null
+                    binding.etKm.clearFocus()
+                    searchCoordinate()
+                } else {
+                    binding.etKm.error = "1-100"
+                    binding.etKm.requestFocus()
+                }
+            }
+            binding.btnMinusKm.setOnClickListener {
+                binding.etKm.clearFocus()
+                binding.etKm.error = null
+                val etKm = binding.etKm.text.toString().toInt()
+                if (etKm > 1) binding.etKm.setText("${etKm - 1}")
+            }
+            binding.btnPlusKm.setOnClickListener {
+                binding.etKm.clearFocus()
+                binding.etKm.error = null
+                val etKm = binding.etKm.text.toString().toInt()
+                if (etKm < 100) binding.etKm.setText("${etKm + 1}")
+            }
+            binding.etKm.addTextChangedListener(object: TextWatcher {
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                }
+
+                override fun afterTextChanged(s: Editable?) {
+                    val etKm = s.toString()
+                    if (etKm.isNotEmpty()) {
+                        if (etKm.toInt() < 1) binding.etKm.setText("${1}")
+                        else if (etKm.toInt() > 100) binding.etKm.setText("${100}")
+                    }
+                }
+
+            })
+
+        }, 2000)
     }
 
     private fun onFindLocation(mapsUrl: String) {
@@ -275,6 +396,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     if (location != null) {
                         currentLatLng = LatLng(location.latitude, location.longitude)
                         setPin(currentLatLng!!, "Lokasi Saya")
+
+                        if (!listCoordinate.isNullOrEmpty()) searchCoordinate()
                     }
                 }
         }

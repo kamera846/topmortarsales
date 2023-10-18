@@ -6,7 +6,6 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.lifecycle.lifecycleScope
@@ -23,13 +22,13 @@ import com.topmortar.topmortarsales.commons.INVOICE_PAID
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
-import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.utils.CurrencyFormat
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.databinding.ActivityDetailInvoiceBinding
 import com.topmortar.topmortarsales.model.InvoicePaymentModel
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -38,6 +37,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
     // Global
     private lateinit var sessionManager: SessionManager
+    private lateinit var binding: ActivityDetailInvoiceBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -46,7 +46,8 @@ class DetailInvoiceActivity : AppCompatActivity() {
         supportActionBar?.hide()
         sessionManager = SessionManager(this)
 
-        setContentView(R.layout.activity_detail_invoice)
+        binding = ActivityDetailInvoiceBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         apiService = HttpClient.create()
 
@@ -77,6 +78,18 @@ class DetailInvoiceActivity : AppCompatActivity() {
     }
 
     private fun getList() {
+
+        if (totalInvoice.toInt() == 0) {
+
+            tvDateInvoice.text = "Sisa Hutang"
+            tvStatus.text = "-"
+            tvStatus.setTextColor(getColor(R.color.black_200))
+            tvStatus.setBackgroundDrawable(getDrawable(R.drawable.bg_data_round))
+
+            loadingState(true, "Belum ada pembayaran")
+            return
+
+        }
 
         loadingState(true)
 
@@ -133,7 +146,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         tvStatus.setBackgroundDrawable(getDrawable(R.drawable.bg_data_round))
 
                         loadingState(true, "Belum ada pembayaran")
-
+//                        binding.cardOthers.visibility = View.VISIBLE
 
                     }
                     else -> {
@@ -195,8 +208,11 @@ class DetailInvoiceActivity : AppCompatActivity() {
         val iTotalInvoice = intent.getStringExtra(CONST_TOTAL_INVOICE)
 
         if (!iTotalInvoice.isNullOrEmpty()) {
-            totalInvoice = iTotalInvoice
-            tvTotalInvoice.text = CurrencyFormat.format(totalInvoice.toDouble())
+            if (iTotalInvoice.toInt() == 0) tvTotalInvoice.text = "Invoice telah di retur"
+            else {
+                totalInvoice = iTotalInvoice
+                tvTotalInvoice.text = CurrencyFormat.format(totalInvoice.toDouble())
+            }
         } else tvTotalInvoice.text = CurrencyFormat.format(0.0)
 
         if (!iInvoiceNumber.isNullOrEmpty()) {

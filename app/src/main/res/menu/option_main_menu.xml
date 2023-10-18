@@ -4,6 +4,9 @@
         android:id="@+id/option_sync_now"
         android:title="@string/sync_now" />
     <item
+        android:id="@+id/nearest_store"
+        android:title="@string/nearest_store" />
+    <item
         android:id="@+id/option_search"
         android:title="@string/search" />
     <item

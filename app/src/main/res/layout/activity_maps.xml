@@ -80,4 +80,105 @@
         android:layout_gravity="center"
         android:layout_margin="16dp"/>
 
+    <androidx.cardview.widget.CardView
+        android:visibility="gone"
+        android:id="@+id/cardTelusuri"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="-16dp"
+        map:cardCornerRadius="16dp"
+        android:layout_alignParentBottom="true"
+        android:theme="@style/Theme.TopMortarSales.CardView">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="32dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:alpha="0.7"
+                android:text="Penelusuran Toko Terdekat"
+                android:layout_marginBottom="8dp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="14sp"
+                    android:layout_marginEnd="8dp"
+                    android:text="Atur radius dari lokasi anda saat ini dalam km (1-100)."
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageButton
+                        android:id="@+id/btnMinusKm"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:scaleType="fitCenter"
+                        android:background="@android:color/transparent"
+                        android:src="@drawable/minus_dark"/>
+
+                    <LinearLayout
+                        android:layout_width="48dp"
+                        android:layout_height="24dp"
+                        android:gravity="center_vertical"
+                        android:background="@drawable/bg_outline"
+                        android:orientation="horizontal">
+
+                        <EditText
+                            android:id="@+id/etKm"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="1"
+                            android:textSize="14sp"
+                            android:gravity="center"
+                            android:inputType="number"
+                            android:background="@android:color/transparent"/>
+
+                    </LinearLayout>
+
+                    <ImageButton
+                        android:id="@+id/btnPlusKm"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:scaleType="fitCenter"
+                        android:background="@android:color/transparent"
+                        android:src="@drawable/add_dark"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnTelusuri"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Telusuri Lagi"
+                android:backgroundTint="@color/primary"
+                android:textColor="@color/white"/>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
 </RelativeLayout>
