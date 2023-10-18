@@ -2,7 +2,6 @@ package com.topmortar.topmortarsales.view
 
 import android.app.ProgressDialog
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
@@ -18,7 +17,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -31,10 +29,27 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter
 import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter.ItemClickListener
+import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.CONST_ADDRESS
+import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
+import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_KTP
+import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
+import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
+import com.topmortar.topmortarsales.commons.CONST_LOCATION
+import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
+import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
+import com.topmortar.topmortarsales.commons.CONST_PROMO
+import com.topmortar.topmortarsales.commons.CONST_STATUS
+import com.topmortar.topmortarsales.commons.CONST_TERMIN
+import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -45,52 +60,25 @@ import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
+import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
+import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
-import com.topmortar.topmortarsales.model.ContactModel
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
-import com.topmortar.topmortarsales.commons.CONST_ADDRESS
-import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
-import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
-import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
-import com.topmortar.topmortarsales.commons.CONST_KTP
-import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
-import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
-import com.topmortar.topmortarsales.commons.CONST_LOCATION
-import com.topmortar.topmortarsales.commons.CONST_MAPS
-import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
-import com.topmortar.topmortarsales.commons.CONST_OWNER
-import com.topmortar.topmortarsales.commons.CONST_PROMO
-import com.topmortar.topmortarsales.commons.CONST_STATUS
-import com.topmortar.topmortarsales.commons.CONST_TERMIN
-import com.topmortar.topmortarsales.commons.CONST_USER_ID
-import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
-import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
-import com.topmortar.topmortarsales.commons.LOGGED_OUT
-import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
-import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
-import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
-import com.topmortar.topmortarsales.commons.USER_KIND_SALES
-import com.topmortar.topmortarsales.commons.utils.SessionManager
-import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
-import com.topmortar.topmortarsales.commons.utils.KeyboardHandler.hideKeyboard
-import com.topmortar.topmortarsales.commons.utils.KeyboardHandler.showKeyboard
-import com.topmortar.topmortarsales.commons.utils.convertDpToPx
-import com.topmortar.topmortarsales.model.UserModel
 import com.topmortar.topmortarsales.databinding.ActivityMainBinding
 import com.topmortar.topmortarsales.modal.SearchModal
-import com.topmortar.topmortarsales.model.CityModel
+import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.city.ManageCityActivity
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
 import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
 import com.topmortar.topmortarsales.view.user.ManageUserActivity
-import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
@@ -108,11 +96,9 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
     private lateinit var btnFabAdmin: FloatingActionButton
     private lateinit var icMore: ImageView
     private lateinit var icSearch: ImageView
-    private lateinit var icBack: ImageView
     private lateinit var icCloseSearch: ImageView
     private lateinit var icClearSearch: ImageView
     private lateinit var etSearchBox: EditText
-    private lateinit var tvTitleBar: TextView
     private lateinit var tvTitleBarDescription: TextView
 
     // Global
@@ -171,22 +157,17 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         btnFab = findViewById(R.id.btn_fab)
         btnFabAdmin = findViewById(R.id.btn_fab_admin)
         icMore = llTitleBar.findViewById(R.id.ic_more)
-        icBack = llTitleBar.findViewById(R.id.ic_back)
         icSearch = llTitleBar.findViewById(R.id.ic_search)
-        tvTitleBar = llTitleBar.findViewById(R.id.tv_title_bar)
         tvTitleBarDescription = llTitleBar.findViewById(R.id.tv_title_bar_description)
         icCloseSearch = findViewById(R.id.ic_close_search)
         icClearSearch = findViewById(R.id.ic_clear_search)
         etSearchBox = findViewById(R.id.et_search_box)
 
         // Set Title Bar
-        icBack.visibility = View.GONE
         icMore.visibility = View.VISIBLE
         tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
         tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
         etSearchBox.setPadding(0, 0, convertDpToPx(16, this), 0)
-        tvTitleBar.setPadding(convertDpToPx(16, this), 0, convertDpToPx(16, this), 0)
-        tvTitleBarDescription.setPadding(convertDpToPx(16, this), 0, convertDpToPx(16, this), 0)
 
         // Set Floating Action Button
         if (sessionManager.userKind() == USER_KIND_SALES) btnFab.visibility = View.VISIBLE
@@ -200,11 +181,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         btnFab.setOnClickListener { navigateAddNewRoom() }
         btnFabAdmin.setOnClickListener { navigateChatAdmin() }
         icMore.setOnClickListener { showPopupMenu() }
-        icSearch.setOnClickListener {
-            showKeyboard(etSearchBox, this)
-            etSearchBox.requestFocus()
-            toggleSearchEvent(SEARCH_OPEN)
-        }
+        icSearch.setOnClickListener { toggleSearchEvent(SEARCH_OPEN) }
         icCloseSearch.setOnClickListener { toggleSearchEvent(SEARCH_CLOSE) }
         icClearSearch.setOnClickListener { etSearchBox.setText("") }
         rlLoading.setOnTouchListener { _, event -> blurSearchBox(event) }
@@ -372,32 +349,24 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         popupMenu.inflate(R.menu.option_main_menu)
 
         val searchItem = popupMenu.menu.findItem(R.id.option_search)
-        val myProfile = popupMenu.menu.findItem(R.id.option_my_profile)
         val userItem = popupMenu.menu.findItem(R.id.option_user)
         val cityItem = popupMenu.menu.findItem(R.id.option_city)
         val skillItem = popupMenu.menu.findItem(R.id.option_skill)
+        val nearestStoreItem = popupMenu.menu.findItem(R.id.nearest_store)
 
         searchItem.isVisible = false
+        nearestStoreItem.isVisible = false
         if (sessionManager.userKind() != USER_KIND_ADMIN) {
             userItem.isVisible = false
             cityItem.isVisible = false
             skillItem.isVisible = false
         }
 
-        if (sessionManager.userKind() != USER_KIND_SALES) myProfile.isVisible = false
-
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
                 R.id.option_sync_now -> {
                     getContacts()
                     getUserLoggedIn()
-                    true
-                }
-                R.id.option_my_profile -> {
-
-                    val intent = Intent(this@MainActivity, UserProfileActivity::class.java)
-                    startActivity(intent)
-
                     true
                 }
                 R.id.nearest_store -> {
