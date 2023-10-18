@@ -79,6 +79,18 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
     private fun getList() {
 
+        if (totalInvoice.toInt() == 0) {
+
+            tvDateInvoice.text = "Sisa Hutang"
+            tvStatus.text = "-"
+            tvStatus.setTextColor(getColor(R.color.black_200))
+            tvStatus.setBackgroundDrawable(getDrawable(R.drawable.bg_data_round))
+
+            loadingState(true, "Belum ada pembayaran")
+            return
+
+        }
+
         loadingState(true)
 
         lifecycleScope.launch {
@@ -196,8 +208,11 @@ class DetailInvoiceActivity : AppCompatActivity() {
         val iTotalInvoice = intent.getStringExtra(CONST_TOTAL_INVOICE)
 
         if (!iTotalInvoice.isNullOrEmpty()) {
-            totalInvoice = iTotalInvoice
-            tvTotalInvoice.text = CurrencyFormat.format(totalInvoice.toDouble())
+            if (iTotalInvoice.toInt() == 0) tvTotalInvoice.text = "Invoice telah di retur"
+            else {
+                totalInvoice = iTotalInvoice
+                tvTotalInvoice.text = CurrencyFormat.format(totalInvoice.toDouble())
+            }
         } else tvTotalInvoice.text = CurrencyFormat.format(0.0)
 
         if (!iInvoiceNumber.isNullOrEmpty()) {
