@@ -84,7 +84,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="6dp"
-                            android:text="Rp 2.500.000"
+                            android:text="Rp 7.400.000"
                             android:textColor="@color/status_bid"
                             android:textSize="14sp"
                             android:textStyle="bold"

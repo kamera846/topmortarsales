@@ -84,15 +84,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Data -> Active"
+                android:textStyle="bold"
                 android:background="@android:color/transparent"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
             <TextView
+                android:id="@+id/tvCountData"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="(50)"
+                android:text="(50 x 100k / Toko)"
                 android:layout_marginStart="4dp"
-                android:textStyle="bold"
                 android:background="@android:color/transparent"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
@@ -100,13 +101,14 @@
 
 
         <ProgressBar
+            android:id="@+id/progressBarData"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:indeterminate="false"
-            android:max="85"
+            android:max="100"
             android:minWidth="200dp"
-            android:progress="50"
+            android:progress="100"
             android:background="@android:color/transparent"
             android:progressBackgroundTint="@android:color/transparent"
             android:progressTint="@color/status_data" />
@@ -134,31 +136,84 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Passive -> Active"
+                android:textStyle="bold"
                 android:background="@android:color/transparent"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
             <TextView
+                android:id="@+id/tvCountPassive"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="(35)"
+                android:text="(35 x 50k / Toko)"
                 android:layout_marginStart="4dp"
-                android:textStyle="bold"
                 android:background="@android:color/transparent"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
         </LinearLayout>
 
         <ProgressBar
+            android:id="@+id/progressBarPassive"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:indeterminate="false"
-            android:max="85"
+            android:max="100"
             android:minWidth="200dp"
-            android:progress="35"
+            android:progress="100"
             android:background="@android:color/transparent"
             android:progressBackgroundTint="@android:color/transparent"
             android:progressTint="@color/status_passive" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_marginVertical="8dp"
+        android:layout_marginHorizontal="16dp"
+        android:paddingVertical="12dp"
+        android:paddingHorizontal="16dp"
+        android:background="@drawable/background_rounded_16"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Penjualan"
+                android:textStyle="bold"
+                android:background="@android:color/transparent"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+            <TextView
+                android:id="@+id/tvCountPenjualan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="(850 x 1k / Sak)"
+                android:layout_marginStart="4dp"
+                android:background="@android:color/transparent"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progressBarPenjualan"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:indeterminate="false"
+            android:max="100"
+            android:minWidth="200dp"
+            android:progress="100"
+            android:background="@android:color/transparent"
+            android:progressBackgroundTint="@android:color/transparent"
+            android:progressTint="@color/status_active" />
 
     </LinearLayout>
 
@@ -187,17 +242,19 @@
             android:orientation="horizontal">
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:text="Total \t\t\t\t\t\t\t: "
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Total Data :"
                 android:textSize="14sp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
             <TextView
+                android:id="@+id/tvPriceData"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="6dp"
-                android:text="85"
+                android:text="5.000.000"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
@@ -210,9 +267,60 @@
             android:orientation="horizontal">
 
             <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Total Passive :"
+                android:textSize="14sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+            <TextView
+                android:id="@+id/tvPricePassive"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Pendapatan\t\t: "
+                android:layout_marginLeft="6dp"
+                android:text="1.750.000"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Total Penjualan :"
+                android:textSize="14sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+            <TextView
+                android:id="@+id/tvPricePenjualan"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="6dp"
+                android:text="850.000"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Total Pendapatan :"
                 android:textSize="14sp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
@@ -221,7 +329,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="6dp"
-                android:text="Rp 2.500.000"
+                android:text="Rp 7.600.000"
                 android:textColor="@color/status_bid"
                 android:textSize="14sp"
                 android:textStyle="bold"

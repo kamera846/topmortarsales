@@ -17,6 +17,7 @@ import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.utils.CurrencyFormat
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.databinding.ModalChartSalesPricingBinding
@@ -25,6 +26,19 @@ class ChartSalesPricingModal(private val context: Context) : Dialog(context) {
 
     private lateinit var customUtility: CustomUtility
     private lateinit var binding: ModalChartSalesPricingBinding
+
+    private var countData = 50
+    private var countPassive = 35
+    private var countPenjualan = 650
+
+    private var komisiData = 100000 // 100k
+    private var komisiPassive = 50000 // 50k
+    private var komisiPenjualan = 1000 // 1k
+
+    private var priceData = 0
+    private var pricePassive = 0
+    private var pricePenjualan = 0
+    private var priceTotal = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,7 +70,8 @@ class ChartSalesPricingModal(private val context: Context) : Dialog(context) {
         titleBar.tvTitleBar.setPadding(convertDpToPx(16, context),0,0,0)
         titleBar.tvTitleBarDescription.text = "Ini adalah rincian anda pada bulan ini"
 
-        setupBarChart()
+        setupPricing()
+//        setupBarChart()
     }
 
     private fun initClickHandler() {
@@ -64,6 +79,32 @@ class ChartSalesPricingModal(private val context: Context) : Dialog(context) {
         titleBar.icBack.visibility = View.GONE
         titleBar.icClose.visibility = View.VISIBLE
         titleBar.icClose.setOnClickListener { this.dismiss() }
+    }
+
+    private fun setupPricing() {
+        binding.tvCountData.text = "($countData x ${CurrencyFormat.format(komisiData.toDouble(), false)} / Toko)"
+        binding.tvCountPassive.text = "($countPassive x ${CurrencyFormat.format(komisiPassive.toDouble(), false)} / Toko)"
+        binding.tvCountPenjualan.text = "($countPenjualan x ${CurrencyFormat.format(komisiPenjualan.toDouble(), false)} / Sak)"
+
+        priceData = countData * komisiData
+        pricePassive = countPassive * komisiPassive
+        pricePenjualan = countPenjualan * komisiPenjualan
+        priceTotal = priceData + pricePassive + pricePenjualan
+
+        binding.tvPriceData.text = CurrencyFormat.format(priceData.toDouble(), false)
+        binding.tvPricePassive.text = CurrencyFormat.format(pricePassive.toDouble(), false)
+        binding.tvPricePenjualan.text = CurrencyFormat.format(pricePenjualan.toDouble(), false)
+        binding.tvPrice.text = CurrencyFormat.format(priceTotal.toDouble())
+
+        val maxProgressToko = countData + countPassive
+        val maxProgressSak = maxProgressToko * 10
+
+        binding.progressBarData.max = maxProgressToko
+        binding.progressBarData.progress = countData
+        binding.progressBarPassive.max = maxProgressToko
+        binding.progressBarPassive.progress = countPassive
+        binding.progressBarPenjualan.max = if (maxProgressSak > countPenjualan) maxProgressSak else countPenjualan
+        binding.progressBarPenjualan.progress = countPenjualan
     }
 
     private fun setupBarChart() {
