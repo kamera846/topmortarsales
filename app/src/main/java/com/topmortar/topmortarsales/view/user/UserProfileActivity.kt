@@ -29,6 +29,7 @@ import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
@@ -185,61 +186,111 @@ class UserProfileActivity : AppCompatActivity() {
     }
 
     private fun setupBarChart() {
-        binding.barChartContainer.visibility = View.VISIBLE
-        val barChart = binding.storeBarChart
+        lifecycleScope.launch {
+            try {
 
-        // Create some sample data
-        val entries = ArrayList<BarEntry>()
-        entries.add(BarEntry(0f, 100f))
-        entries.add(BarEntry(1f, 150f))
-        entries.add(BarEntry(2f, 80f))
-        entries.add(BarEntry(3f, 120f))
-        entries.add(BarEntry(4f, 60f))
-        entries.add(BarEntry(5f, 90f))
+                val apiService: ApiService = HttpClient.create()
+                val response = when (sessionManager.userKind()) {
+                    USER_KIND_ADMIN -> apiService.getStoreCount()
+                    else -> apiService.getStoreCount(sessionManager.userCityID().toString())
+                }
 
-        // Access the custom colors from resources
-        val color1 = ContextCompat.getColor(this, R.color.status_active)
-        val color2 = ContextCompat.getColor(this, R.color.status_passive)
-        val color3 = ContextCompat.getColor(this, R.color.status_data)
-        val color4 = ContextCompat.getColor(this, R.color.status_bid)
-        val color5 = ContextCompat.getColor(this, R.color.black_200)
-        val color6 = ContextCompat.getColor(this, R.color.status_blacklist)
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
 
-        // Create a list of custom colors
-        val customColors = listOf(color1, color2, color3, color4, color5, color6)
+                        val dataList = response.results
 
-        val dataSet = BarDataSet(entries, "")
-        dataSet.colors = customColors
+                        binding.barChartContainer.visibility = View.VISIBLE
+                        val barChart = binding.storeBarChart
 
-        val textColorResId = if (customUtility.isDarkMode()) R.color.white else R.color.black_200
-        val textColor = ContextCompat.getColor(this, textColorResId)
+                        // Create some sample data
+                        val entries = ArrayList<BarEntry>()
+                        val labels = arrayOf<String>()
 
-        // Customize the x-axis labels (optional)
-        val xAxis = barChart.xAxis
-        val yAxisLeft = barChart.axisLeft
-        val yAxisRight = barChart.axisRight
-        val labels = arrayOf("Active", "Passive", "Data", "Bid", "Not Set", "Blacklist")
+                        for ((i, item) in dataList.listIterator().withIndex()) {
+                            entries.add(BarEntry(i.toFloat(), item.jml_store.toFloat()))
+                            labels.plus(item.store_status)
+                        }
 
-        xAxis.valueFormatter = IndexAxisValueFormatter(labels)
-        xAxis.position = XAxis.XAxisPosition.BOTTOM
-        xAxis.setDrawGridLines(false)
-        xAxis.setDrawAxisLine(true)
-        xAxis.granularity = 1f
+//                        entries.add(BarEntry(0f, 100f))
+//                        entries.add(BarEntry(1f, 150f))
+//                        entries.add(BarEntry(2f, 80f))
+//                        entries.add(BarEntry(3f, 120f))
+//                        entries.add(BarEntry(4f, 60f))
+//                        entries.add(BarEntry(5f, 90f))
 
-        xAxis.textColor = textColor
-        yAxisLeft.textColor = textColor
-        yAxisRight.textColor = textColor
-        dataSet.valueTextColor = textColor
+                        // Access the custom colors from resources
+                        val colorActive = ContextCompat.getColor(this@UserProfileActivity, R.color.status_active)
+                        val colorPassive = ContextCompat.getColor(this@UserProfileActivity, R.color.status_passive)
+                        val colorData = ContextCompat.getColor(this@UserProfileActivity, R.color.status_data)
+                        val colorBid = ContextCompat.getColor(this@UserProfileActivity, R.color.status_bid)
+                        val colorBlack = ContextCompat.getColor(this@UserProfileActivity, R.color.black_200)
+                        val colorBlackList = ContextCompat.getColor(this@UserProfileActivity, R.color.status_blacklist)
 
-        val data = BarData(dataSet)
-        barChart.data = data
+                        // Create a list of custom colors
+                        val customColors = listOf(
+                            colorActive,
+                            colorBid,
+                            colorBlackList,
+                            colorPassive,
+//                            colorData,
+//                            colorBlack
+                        )
 
-        // Customize the chart (optional)
-        barChart.setFitBars(true)
-        barChart.description.isEnabled = false
-        barChart.animateY(1000)
+                        val dataSet = BarDataSet(entries, "")
+                        dataSet.colors = customColors
 
-        toggleBarChart()
+                        val textColorResId = if (customUtility.isDarkMode()) R.color.white else R.color.black_200
+                        val textColor = ContextCompat.getColor(this@UserProfileActivity, textColorResId)
+
+                        // Customize the x-axis labels (optional)
+                        val xAxis = barChart.xAxis
+                        val yAxisLeft = barChart.axisLeft
+                        val yAxisRight = barChart.axisRight
+//                        val labels = arrayOf("Active", "Passive", "Data", "Bid", "Not Set", "Blacklist")
+
+                        xAxis.valueFormatter = IndexAxisValueFormatter(labels)
+                        xAxis.position = XAxis.XAxisPosition.BOTTOM
+                        xAxis.setDrawGridLines(false)
+                        xAxis.setDrawAxisLine(true)
+                        xAxis.granularity = 1f
+
+                        xAxis.textColor = textColor
+                        yAxisLeft.textColor = textColor
+                        yAxisRight.textColor = textColor
+                        dataSet.valueTextColor = textColor
+
+                        val data = BarData(dataSet)
+                        barChart.data = data
+
+                        // Customize the chart (optional)
+                        barChart.setFitBars(true)
+                        barChart.description.isEnabled = false
+                        barChart.animateY(1000)
+
+                        toggleBarChart()
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        handleMessage(this@UserProfileActivity, TAG_RESPONSE_CONTACT, "Belum ada statistik toko.")
+
+                    }
+                    else -> {
+
+                        handleMessage(this@UserProfileActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(this@UserProfileActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+
+            }
+
+        }
     }
 
     private fun toggleBarChart() {

@@ -15,6 +15,7 @@ import com.topmortar.topmortarsales.commons.REQUEST_OTP
 import com.topmortar.topmortarsales.commons.SEARCH_CONTACT
 import com.topmortar.topmortarsales.commons.SEND_MESSAGE
 import com.topmortar.topmortarsales.commons.SKILL
+import com.topmortar.topmortarsales.commons.STORE_STATUS
 import com.topmortar.topmortarsales.commons.TUKANG
 import com.topmortar.topmortarsales.commons.TUKANG_MESSAGE
 import com.topmortar.topmortarsales.commons.UPDATE_PASSWORD
@@ -23,6 +24,7 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.response.ResponseAuth
 import com.topmortar.topmortarsales.response.ResponseCities
 import com.topmortar.topmortarsales.response.ResponseContactList
+import com.topmortar.topmortarsales.response.ResponseCountStore
 import com.topmortar.topmortarsales.response.ResponseInvoice
 import com.topmortar.topmortarsales.response.ResponseSuratJalan
 import com.topmortar.topmortarsales.response.ResponseMessage
@@ -291,4 +293,12 @@ interface ApiService {
 
     @GET(PROMO)
     suspend fun getPromo(): ResponsePromo
+
+    @GET(STORE_STATUS)
+    suspend fun getStoreCount(): ResponseCountStore
+
+    @GET(STORE_STATUS)
+    suspend fun getStoreCount(
+        @Query("c") cityId: String
+    ): ResponseCountStore
 }

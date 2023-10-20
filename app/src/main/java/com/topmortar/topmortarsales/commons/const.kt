@@ -38,6 +38,7 @@ const val SKILL = "skill.php"
 const val TUKANG = "tukang.php"
 const val TUKANG_MESSAGE = "tukangMessage.php"
 const val PROMO = "promo.php"
+const val STORE_STATUS = "storeStatus.php"
 
 // Request Code
 const val ACTIVITY_REQUEST_CODE = "activity_request_code"
