@@ -79,6 +79,7 @@ import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
 import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
 import com.topmortar.topmortarsales.view.user.ManageUserActivity
+import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
@@ -167,6 +168,9 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         icMore.visibility = View.VISIBLE
         tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
         tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
+        binding.titleBar.icBack.visibility = View.GONE
+        binding.titleBar.tvTitleBar.setPadding(convertDpToPx(16, this), 0, 0, 0)
+        binding.titleBar.tvTitleBarDescription.setPadding(convertDpToPx(16, this), 0, 0, 0)
         etSearchBox.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Set Floating Action Button
@@ -350,6 +354,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
         val searchItem = popupMenu.menu.findItem(R.id.option_search)
         val userItem = popupMenu.menu.findItem(R.id.option_user)
+        val myProfile = popupMenu.menu.findItem(R.id.option_my_profile)
         val cityItem = popupMenu.menu.findItem(R.id.option_city)
         val skillItem = popupMenu.menu.findItem(R.id.option_skill)
         val nearestStoreItem = popupMenu.menu.findItem(R.id.nearest_store)
@@ -361,6 +366,9 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             cityItem.isVisible = false
             skillItem.isVisible = false
         }
+        if (sessionManager.userKind() != USER_KIND_ADMIN && sessionManager.userKind() != USER_KIND_SALES) {
+            myProfile.isVisible = false
+        }
 
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
@@ -371,6 +379,11 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 }
                 R.id.nearest_store -> {
                     navigateChecklocation()
+                    true
+                }
+                R.id.option_my_profile -> {
+                    val intent = Intent(this@MainActivity, UserProfileActivity::class.java)
+                    startActivity(intent)
                     true
                 }
                 R.id.option_search -> {
