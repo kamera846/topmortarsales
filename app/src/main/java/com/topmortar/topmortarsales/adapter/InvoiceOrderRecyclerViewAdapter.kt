@@ -36,7 +36,7 @@ class InvoiceOrderRecyclerViewAdapter() : RecyclerView.Adapter<InvoiceOrderRecyc
                 tvProductSerialNumber.text = context?.getString(R.string.free)
                 tvProductSerialNumber.visibility = View.VISIBLE
             } else if (item.is_bonus == "2") {
-                tvProductSerialNumber.text = context?.getString(R.string.retur)
+                tvProductSerialNumber.text = context?.getString(R.string.free)
                 tvProductSerialNumber.visibility = View.VISIBLE
             }
 
