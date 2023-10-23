@@ -536,7 +536,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             val result = directions.await()
 
             if (result.routes.isNotEmpty()) {
-                Toast.makeText(this, "${result.routes.size}", TOAST_SHORT).show()
+                val listPolylineOptions = arrayListOf<PolylineOptions>()
 
                 // Gambar rute pada peta
                 for (i in 0..result.routes.size) {
@@ -549,8 +549,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         for (latLng in overviewPolyline) {
                             polylineOptions.add(LatLng(latLng.lat, latLng.lng))
                         }
-                        routeDirections = mMap.addPolyline(polylineOptions)
+                        listPolylineOptions.add(polylineOptions)
                     }
+                }
+
+                for (i in listPolylineOptions.size - 1 downTo 0) {
+                    routeDirections = mMap.addPolyline(listPolylineOptions[i])
                 }
 
                 val bounds = LatLngBounds.builder()
