@@ -15,6 +15,7 @@ import android.location.Location
 import android.location.LocationListener
 import android.os.Bundle
 import android.os.Handler
+import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -70,12 +71,14 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_ACTIVE
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BID
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
 import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
@@ -122,6 +125,28 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        checkLocationPermission()
+
+    }
+
+    private fun checkLocationPermission() {
+        val urlUtility = URLUtility(this)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+            if (urlUtility.isLocationEnabled(this)) {
+
+                val urlUtility = URLUtility(this)
+                urlUtility.requestLocationUpdate()
+
+                initView()
+
+            } else {
+                val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                startActivity(enableLocationIntent)
+            }
+        } else ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+    }
+
+    private fun initView() {
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -678,8 +703,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                initMaps()
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) checkLocationPermission()
+            else {
+                val customUtility = CustomUtility(this)
+                if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    val message = "Izin lokasi diperlukan untuk fitur ini. Izinkan aplikasi mengakses lokasi perangkat."
+                    customUtility.showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE) }
+                } else customUtility.showPermissionDeniedDialog("Izin lokasi diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
             }
         }
     }

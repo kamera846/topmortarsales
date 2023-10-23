@@ -1757,9 +1757,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             else {
                 val customUtility = CustomUtility(this)
                 if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    val message = "Location permissions are required for this apps. Please grant the permissions."
+                    val message = "Izin lokasi diperlukan untuk fitur ini. Izinkan aplikasi mengakses lokasi perangkat."
                     customUtility.showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE) }
-                } else customUtility.showPermissionDeniedDialog("Location permissions are required for this apps. Please enable them in the app settings.")
+                } else customUtility.showPermissionDeniedDialog("Izin lokasi diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
             }
         }
 
