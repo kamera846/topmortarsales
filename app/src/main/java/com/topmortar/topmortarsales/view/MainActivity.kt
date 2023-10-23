@@ -291,7 +291,11 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 try {
 
                     val apiService: ApiService = HttpClient.create()
-                    val response = apiService.getContacts()
+                    val response = when (userKind) {
+                        USER_KIND_ADMIN -> apiService.getContacts()
+                        USER_KIND_COURIER -> apiService.getCourierStore(processNumber = "1", courierId = userId)
+                        else -> apiService.getContacts(cityId = userCity)
+                    }
 
                     when (response.status) {
                         RESPONSE_STATUS_OK -> {
@@ -565,8 +569,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                var response = apiService.getContacts()
-                response = when (userKind) {
+                val response = when (userKind) {
                     USER_KIND_ADMIN -> {
                         if (selectedCity != null ) {
                             if (selectedCity!!.id != "-1") apiService.getContacts(cityId = selectedCity!!.id!!) else apiService.getContacts()

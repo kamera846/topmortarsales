@@ -173,8 +173,16 @@
                 android:textSize="16sp"
                 android:alpha="0.7"
                 android:text="Penelusuran Toko Terdekat"
-                android:layout_marginBottom="8dp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+            <TextView
+                android:id="@+id/textTotalNearest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:text="100 toko ditemukan dalam radius 1 km"
+                android:layout_marginBottom="16dp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
             <LinearLayout
                 android:layout_width="match_parent"

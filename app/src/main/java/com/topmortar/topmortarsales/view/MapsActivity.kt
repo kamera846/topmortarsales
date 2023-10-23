@@ -323,6 +323,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             val urlUtility = URLUtility(this)
             val limitKm = binding.etKm.text.toString().toDouble()
+            var currentTotal = 0
+
             mMap.clear()
 
             for ((i, item) in listCoordinate!!.iterator().withIndex()) {
@@ -365,6 +367,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                     .title(listCoordinateName?.get(i))
                                     .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
                                 mMap.addMarker(markerOptions)
+                                currentTotal ++
 
                             }
 
@@ -376,21 +379,27 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             }
 
             progressDialog.dismiss()
-            val durationMs = 2000
-            val responsiveZoom = when {
-                limitKm >= 1 -> when {
-                    limitKm >= 18 -> 10
-                    limitKm >= 13 -> 11
-                    limitKm >= 8 -> 12
-                    limitKm >= 3 -> 13
-                    else -> 14
+            if (currentTotal > 0) {
+                val durationMs = 2000
+                val responsiveZoom = when {
+                    limitKm >= 1 -> when {
+                        limitKm >= 18 -> 10
+                        limitKm >= 13 -> 11
+                        limitKm >= 8 -> 12
+                        limitKm >= 3 -> 13
+                        else -> 14
+                    }
+                    else -> 15
                 }
-                else -> 15
+
+                val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentLatLng!!, responsiveZoom.toFloat())
+
+                mMap.animateCamera(cameraUpdate, durationMs, null)
+                binding.textTotalNearest.text = "$currentTotal toko ditemukan dalam radius $limitKm km"
+            } else {
+                showDialog(message = "Tidak menemukan toko di sekitar anda saat ini dalam radius jarak $limitKm km")
+                binding.textTotalNearest.text = "Tidak dapat menemukan toko dalam radius $limitKm km"
             }
-
-            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentLatLng!!, responsiveZoom.toFloat())
-
-            mMap.animateCamera(cameraUpdate, durationMs, null)
 
             binding.cardTelusuri.visibility = View.VISIBLE
             binding.btnTelusuri.setOnClickListener {
@@ -437,7 +446,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             })
 
-        }, 2000)
+        }, 1000)
     }
 
     private fun onFindLocation(mapsUrl: String) {
@@ -673,7 +682,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         currentLatLng = LatLng(location.latitude, location.longitude)
                         setPin(currentLatLng!!, "Lokasi Saya")
 
-                        if (!listCoordinate.isNullOrEmpty()) searchCoordinate()
+                        if (isNearestStore) searchCoordinate()
                     }
                 }
         }
