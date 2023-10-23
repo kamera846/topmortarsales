@@ -91,6 +91,7 @@ const val CONST_PROMO = "const_promo"
 const val CONST_NEAREST_STORE = "const_nearest_store"
 const val CONST_LIST_COORDINATE = "const_list_coordinate"
 const val CONST_LIST_COORDINATE_NAME = "const_list_coordinate_name"
+const val CONST_LIST_COORDINATE_STATUS = "const_list_coordinate_status"
 
 // Status
 const val LOGGED_IN = true

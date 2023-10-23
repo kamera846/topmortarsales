@@ -40,6 +40,7 @@ import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
+import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_STATUS
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
@@ -297,9 +298,12 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
                             val listCoordinate = arrayListOf<String>()
                             val listCoordinateName = arrayListOf<String>()
+                            val listCoordinateStatus = arrayListOf<String>()
+
                             for (item in response.results.listIterator()) {
                                 listCoordinate.add(item.maps_url)
                                 listCoordinateName.add(item.nama)
+                                listCoordinateStatus.add(item.store_status)
                             }
 
                             val intent = Intent(this@MainActivity, MapsActivity::class.java)
@@ -307,6 +311,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                             intent.putExtra(CONST_NEAREST_STORE, true)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
 
                             progressDialog.dismiss()
                             startActivity(intent)
@@ -360,7 +365,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         val nearestStoreItem = popupMenu.menu.findItem(R.id.nearest_store)
 
         searchItem.isVisible = false
-        nearestStoreItem.isVisible = false
+//        nearestStoreItem.isVisible = false
         if (sessionManager.userKind() != USER_KIND_ADMIN) {
             userItem.isVisible = false
             cityItem.isVisible = false

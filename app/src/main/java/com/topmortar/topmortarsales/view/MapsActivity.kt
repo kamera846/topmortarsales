@@ -7,7 +7,8 @@ import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.graphics.Color
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
@@ -44,7 +45,6 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
-
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.Place
@@ -65,16 +65,20 @@ import com.topmortar.topmortarsales.adapter.PlaceAdapter
 import com.topmortar.topmortarsales.commons.CONNECTION_FAILURE_RESOLUTION_REQUEST
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
+import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_STATUS
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.STATUS_CONTACT_ACTIVE
+import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BID
+import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
+import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
 import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
-import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.databinding.ActivityMapsBinding
 import java.io.IOException
 import java.util.Locale
@@ -93,6 +97,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var isNearestStore = false
     private var listCoordinate: ArrayList<String>? = null
     private var listCoordinateName: ArrayList<String>? = null
+    private var listCoordinateStatus: ArrayList<String>? = null
 
     private val zoomLevel = 18f
     private val mapsDuration = 2000
@@ -242,6 +247,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         isNearestStore = intent.getBooleanExtra(CONST_NEAREST_STORE, false)
         listCoordinate = intent.getStringArrayListExtra(CONST_LIST_COORDINATE)
         listCoordinateName = intent.getStringArrayListExtra(CONST_LIST_COORDINATE_NAME)
+        listCoordinateStatus = intent.getStringArrayListExtra(CONST_LIST_COORDINATE_STATUS)
 
         if (isGetCoordinate) {
             binding.btnGetLatLng.visibility = View.VISIBLE
@@ -313,12 +319,27 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                 val latLng = LatLng(latitude, longitude)
                                 binding.recyclerView.visibility = View.GONE
 
+                                val iconDrawable = when (listCoordinateStatus?.get(i)) {
+                                    STATUS_CONTACT_DATA -> R.drawable.store_location_status_data
+                                    STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active
+                                    STATUS_CONTACT_PASSIVE -> R.drawable.store_location_status_passive
+                                    STATUS_CONTACT_BID -> R.drawable.store_location_status_biding
+                                    else -> R.drawable.store_location_status_blacklist
+                                }
+
+                                val originalBitmap = BitmapFactory.decodeResource(resources, iconDrawable)
+
+                                val newWidth = convertDpToPx(32, this)
+                                val newHeight = convertDpToPx(32, this)
+
+                                val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
+
                                 selectedLocation = latLng
-                                mMap.addMarker(
-                                    MarkerOptions()
-                                        .position(latLng)
-                                        .title(listCoordinateName?.get(i))
-                                )
+                                val markerOptions = MarkerOptions()
+                                    .position(latLng)
+                                    .title(listCoordinateName?.get(i))
+                                    .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
+                                mMap.addMarker(markerOptions)
 
                             }
 
