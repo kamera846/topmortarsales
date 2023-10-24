@@ -19,13 +19,24 @@ import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.android.material.tabs.TabLayout
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.viewpager.UserProfileViewPagerAdapter
+import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
+import com.topmortar.topmortarsales.commons.CONST_ADDRESS
+import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
+import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
+import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
+import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
+import com.topmortar.topmortarsales.commons.CONST_PROMO
+import com.topmortar.topmortarsales.commons.CONST_STATUS
+import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
+import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -42,7 +53,9 @@ import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityUserProfileBinding
 import com.topmortar.topmortarsales.modal.ChartSalesPricingModal
+import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.UserModel
+import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -137,6 +150,30 @@ class UserProfileActivity : AppCompatActivity() {
 
     }
 
+    private fun navigateDetailContact(data: ContactModel? = null) {
+
+        val intent = Intent(this@UserProfileActivity, DetailContactActivity::class.java)
+
+        if (data != null) {
+            intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
+            intent.putExtra(CONST_CONTACT_ID, data.id_contact)
+            intent.putExtra(CONST_NAME, data.nama)
+            intent.putExtra(CONST_PHONE, data.nomorhp)
+            intent.putExtra(CONST_BIRTHDAY, data.tgl_lahir)
+            intent.putExtra(CONST_OWNER, data.store_owner)
+            intent.putExtra(CONST_LOCATION, data.id_city)
+            intent.putExtra(CONST_MAPS, data.maps_url)
+            intent.putExtra(CONST_ADDRESS, data.address)
+            intent.putExtra(CONST_STATUS, data.store_status)
+            intent.putExtra(CONST_KTP, data.ktp_owner)
+            intent.putExtra(CONST_TERMIN, data.termin_payment)
+            intent.putExtra(CONST_PROMO, data.id_promo)
+        }
+
+        startActivity(intent)
+
+    }
+
     private fun initClickHandler() {
 
         if (sessionManager.userKind() == USER_KIND_ADMIN) {
@@ -174,6 +211,8 @@ class UserProfileActivity : AppCompatActivity() {
             val viewPager: ViewPager = binding.viewPager // If using ViewPager
 
             val pagerAdapter = UserProfileViewPagerAdapter(supportFragmentManager) // Create your PagerAdapter
+
+            pagerAdapter.setUserCityParam(iLocation)
             viewPager.adapter = pagerAdapter
 
             // Connect TabLayout and ViewPager
@@ -320,11 +359,8 @@ class UserProfileActivity : AppCompatActivity() {
     }
 
     @Subscribe
-    fun onEventBus(event: EventBusUtils.MessageEvent) {
-        // Handle the event here
-        val message = event.message
-        Toast.makeText(this, message, TOAST_SHORT).show()
-        // Update UI or perform other actions
+    fun onEventBus(event: EventBusUtils.ContactModelEvent) {
+        navigateDetailContact(event.data)
     }
 
 }

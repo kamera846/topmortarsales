@@ -8,11 +8,28 @@ import com.topmortar.topmortarsales.view.user.UserVisitedStoreFragment
 
 class UserProfileViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
 
+    private var userCityParam: String? = ""
+
+    fun setUserCityParam(id: String?) {
+        this.userCityParam = id
+    }
+
     override fun getItem(position: Int): Fragment {
         // Return a Fragment for each tab position
         return when (position) {
-            0 -> UserOnGoingStoreFragment()
-            else -> UserVisitedStoreFragment()
+            0 -> {
+
+                val fragment = UserOnGoingStoreFragment()
+                fragment.setUserCityParam(userCityParam)
+                return fragment
+
+            } else -> {
+
+                val fragment = UserVisitedStoreFragment()
+                fragment.setUserCityParam(userCityParam)
+                return fragment
+
+            }
         }
     }
 
