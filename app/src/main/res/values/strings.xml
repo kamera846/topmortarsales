@@ -149,4 +149,6 @@
     <string name="free">Free</string>
     <string name="retur">Retur</string>
     <string name="nearest_store">Cari Toko Terdekat</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

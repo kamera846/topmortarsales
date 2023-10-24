@@ -1,28 +1,23 @@
 package com.topmortar.topmortarsales.view.user
 
-import android.app.Activity
 import android.os.Bundle
-import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter
-import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.model.ContactModel
-import com.topmortar.topmortarsales.view.user.placeholder.PlaceholderContent
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
 /**
  * A fragment representing a list of Items.
  */
-class UserTargetsFragment : Fragment(), ContactsRecyclerViewAdapter.ItemClickListener {
+class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemClickListener {
 
 //    private var columnCount = 1
 
@@ -38,7 +33,7 @@ class UserTargetsFragment : Fragment(), ContactsRecyclerViewAdapter.ItemClickLis
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_user_targets, container, false)
+        val view = inflater.inflate(R.layout.fragment_user_on_going_store, container, false)
         val items = arrayListOf<ContactModel>()
 
         for (i in 0..25) {
@@ -50,7 +45,7 @@ class UserTargetsFragment : Fragment(), ContactsRecyclerViewAdapter.ItemClickLis
         if (view is RecyclerView) {
             with(view) {
                 layoutManager = LinearLayoutManager(context)
-                adapter = ContactsRecyclerViewAdapter(items, this@UserTargetsFragment)
+                adapter = ContactsRecyclerViewAdapter(items, this@UserOnGoingStoreFragment)
             }
         }
         return view

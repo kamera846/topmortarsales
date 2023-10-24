@@ -7,5 +7,5 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layoutManager="LinearLayoutManager"
-    tools:context=".view.user.UserTargetsFragment"
+    tools:context=".view.user.UserOnGoingStoreFragment"
     tools:listitem="@layout/item_chat_room" />
