@@ -664,7 +664,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 etBirthdayContainer.visibility = View.VISIBLE
                 etKtpContainer.visibility = View.VISIBLE
                 tvSelectedKtp.visibility = View.VISIBLE
-                tvSelectedKtp.text = "File Terpilih: "
+                tvSelectedKtp.text = "File terpilih: "
 
                 // Other Columns Handle
                 addressContainer.setBackgroundResource(R.drawable.et_background)
@@ -1590,7 +1590,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 currentPhotoUri = photoUri
             }
 
-            val chooserIntent = Intent.createChooser(galleryIntent, "Select Image")
+            val chooserIntent = Intent.createChooser(galleryIntent, "Pilih Gambar")
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(cameraIntent))
 
             imagePicker!!.launch(chooserIntent)

@@ -27,6 +27,7 @@ import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
@@ -185,7 +186,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
             intent.putExtra(CONST_ADDRESS, data.address)
             intent.putExtra(CONST_STATUS, data.tukang_status)
             intent.putExtra(CONST_SKILL, data.id_skill)
-//            intent.putExtra(CONST_LOCATION, "1")
+            intent.putExtra(CONST_KTP, data.ktp_tukang)
         }
 
         startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
@@ -199,8 +200,10 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         val searchItem = popupMenu.menu.findItem(R.id.option_search)
         val userItem = popupMenu.menu.findItem(R.id.option_user)
         val cityItem = popupMenu.menu.findItem(R.id.option_city)
+        val nearestStore = popupMenu.menu.findItem(R.id.nearest_store)
 
         searchItem.isVisible = false
+        nearestStore.isVisible = false
         if (sessionManager.userKind() != USER_KIND_ADMIN) {
             userItem.isVisible = false
             cityItem.isVisible = false

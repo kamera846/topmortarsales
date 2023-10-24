@@ -257,10 +257,14 @@ interface ApiService {
         @Part("address") address: RequestBody,
         @Part("status") status: RequestBody,
         @Part("id_skill") skillId: RequestBody,
+        @Part ktp: MultipartBody.Part? = null,
     ): Response<ResponseMessage>
 
     @GET(TUKANG)
     suspend fun getTukang(@Query("c") cityId: String): ResponseTukangList
+
+    @GET(TUKANG)
+    suspend fun getDetailTukang(@Query("id") tukangId: String): Response<ResponseTukangList>
 
     @Multipart
     @POST(TUKANG)
