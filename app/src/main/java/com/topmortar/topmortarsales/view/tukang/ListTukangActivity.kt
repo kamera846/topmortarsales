@@ -44,6 +44,7 @@ import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
@@ -209,12 +210,16 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         val userItem = popupMenu.menu.findItem(R.id.option_user)
         val cityItem = popupMenu.menu.findItem(R.id.option_city)
         val nearestStore = popupMenu.menu.findItem(R.id.nearest_store)
+        val myProfile = popupMenu.menu.findItem(R.id.option_my_profile)
 
         searchItem.isVisible = false
         nearestStore.isVisible = false
         if (sessionManager.userKind() != USER_KIND_ADMIN) {
             userItem.isVisible = false
             cityItem.isVisible = false
+        }
+        if (sessionManager.userKind() != USER_KIND_ADMIN && sessionManager.userKind() != USER_KIND_SALES) {
+            myProfile.isVisible = false
         }
 
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
