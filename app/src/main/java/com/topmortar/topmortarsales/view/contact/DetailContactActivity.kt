@@ -78,7 +78,6 @@ import com.topmortar.topmortarsales.commons.STATUS_TERMIN_COD_TUNAI
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
-import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
@@ -90,7 +89,6 @@ import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.PingUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
-import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -120,7 +118,7 @@ import java.util.TimerTask
 
 @Suppress("DEPRECATION")
 class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListener,
-    PingUtility.PingResultInterface {
+    PingUtility.PingResultInterface, SendMessageModal.SendMessageModalInterface {
 
     private lateinit var sessionManager: SessionManager
 
@@ -694,6 +692,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 icEdit.visibility = View.GONE
                 tvMapsContainer.visibility = View.GONE
                 btnSendMessage.visibility = View.GONE
+                btnInvoice.visibility = View.GONE
 
                 tvTitleBar.text = "Edit Contact"
                 icClose.visibility = View.VISIBLE
@@ -761,6 +760,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 icEdit.visibility = View.VISIBLE
                 tvMapsContainer.visibility = View.VISIBLE
                 btnSendMessage.visibility = View.VISIBLE
+                btnInvoice.visibility = View.VISIBLE
 
                 tvTitleBar.text = "Detail Contact"
                 icClose.visibility = View.GONE
@@ -973,7 +973,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     }
 
-    private fun getDetailContact() {
+    private fun getDetailContact(withToggleEdit: Boolean = true) {
         loadingState(true)
 
         lifecycleScope.launch {
@@ -990,23 +990,30 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         RESPONSE_STATUS_OK -> {
 
                             val data = responseBody.results[0]
-                            if (!data.ktp_owner.isNullOrEmpty()) {
-                                tvKtp.text = "Tekan untuk menampilkan KTP"
-                                iKtp = data.ktp_owner
+
+                            if (withToggleEdit) {
+                                if (!data.ktp_owner.isNullOrEmpty()) {
+                                    tvKtp.text = "Tekan untuk menampilkan KTP"
+                                    iKtp = data.ktp_owner
+                                }
+
+                                handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Berhasil mengubah data!")
+                                toggleEdit(false)
+
+                                if (iStatus == STATUS_CONTACT_BLACKLIST) {
+                                    btnInvoice.visibility = View.GONE
+                                } else btnInvoice.visibility = View.VISIBLE
+
+                                setupStatus(iStatus)
+                                setupTermin(iTermin)
+                            } else {
+
+                                if (data.store_status == STATUS_CONTACT_BLACKLIST) {
+                                    btnInvoice.visibility = View.GONE
+                                } else btnInvoice.visibility = View.VISIBLE
+
+                                setupStatus(data.store_status)
                             }
-
-                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Berhasil mengubah data!")
-                            loadingState(false)
-                            toggleEdit(false)
-
-//                            if (!iStatus.isNullOrEmpty()) {
-                            if (iStatus == STATUS_CONTACT_BLACKLIST) {
-                                btnInvoice.visibility = View.GONE
-                            } else btnInvoice.visibility = View.VISIBLE
-//                            }
-
-                            setupStatus(iStatus)
-                            setupTermin(iTermin)
 
                             hasEdited = true
                             loadingState(false)
@@ -1319,6 +1326,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private fun setupDialogSendMessage(item: ContactModel? = null) {
 
         sendMessageModal = SendMessageModal(this, lifecycleScope)
+        sendMessageModal.initializeInterface(this)
         if (item != null) sendMessageModal.setItem(item)
 
         // Setup Indicator
@@ -1763,6 +1771,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
         }
 
+    }
+
+    override fun onSubmitMessage(status: Boolean) {
+        getDetailContact(false)
     }
 
 }

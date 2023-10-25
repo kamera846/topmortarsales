@@ -62,7 +62,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
         this.modalInterface = data
     }
     interface SendMessageModalInterface {
-        fun onSubmit(status: Boolean)
+        fun onSubmitMessage(status: Boolean)
     }
 
     fun setPingStatus(pingStatus: Int? = null) {
@@ -192,7 +192,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
 //                etMessage.setText("")
 //                loadingState(false)
-//                if (modalInterface != null) modalInterface!!.onSubmit(true)
+//                if (modalInterface != null) modalInterface!!.onSubmitMessage(true)
 //                this@SendMessageModal.dismiss()
 //                return@launch
 
@@ -210,7 +210,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
                             loadingState(false)
                             handleMessage(context, TAG_RESPONSE_CONTACT, "Berhasil mengirim pesan!")
 
-                            if (modalInterface != null) modalInterface!!.onSubmit(true)
+                            if (modalInterface != null) modalInterface!!.onSubmitMessage(true)
                             this@SendMessageModal.dismiss()
 
                         }
