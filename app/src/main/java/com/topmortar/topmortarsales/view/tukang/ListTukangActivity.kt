@@ -310,6 +310,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
                         sessionManager.setUserName(data.username)
                         sessionManager.setFullName(data.full_name)
                         sessionManager.setUserCityID(data.id_city)
+                        sessionManager.userBidLimit(data.bid_limit)
 
 //                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "Halo, ${ sessionManager.userName() }"}
                         tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}

@@ -120,6 +120,7 @@ class UserProfileActivity : AppCompatActivity() {
                             sessionManager.setUserName(data.username)
                             sessionManager.setFullName(data.full_name)
                             sessionManager.setUserCityID(data.id_city)
+                            sessionManager.userBidLimit(data.bid_limit)
 
                             dataActivityValidation()
 

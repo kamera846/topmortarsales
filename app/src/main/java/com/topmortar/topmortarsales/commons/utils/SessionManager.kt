@@ -68,4 +68,13 @@ class SessionManager(context: Context) {
     fun pinMapHint(): Boolean {
         return sharedPreferences.getBoolean("pinMapHint", false)
     }
+
+    fun userBidLimit(userBidLimit: String) {
+        editor.putString("userBidLimit", userBidLimit)
+        editor.apply()
+    }
+
+    fun userBidLimit(): String? {
+        return sharedPreferences.getString("userBidLimit", "0")
+    }
 }

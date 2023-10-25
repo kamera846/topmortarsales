@@ -23,6 +23,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.updateTxtMaxLength
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
@@ -32,6 +33,7 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.databinding.ModalSendMessageBinding
 import com.topmortar.topmortarsales.model.ContactModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -47,10 +49,17 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
     private lateinit var btnSend: Button
 
     private lateinit var sessionManager: SessionManager
+    private val userKind get() = sessionManager.userKind().toString()
+    private lateinit var binding: ModalSendMessageBinding
 
     private var pingStatus: Int? = null
     private val msgMaxLines = 5
     private val msgMaxLength = 200
+
+    // Bidding Notice
+    private var isBiddingAvailable = true
+    private val currentBidding get() = sessionManager.userID()
+    private val limitBidding get() = sessionManager.userBidLimit()
 
     private var item: ContactModel? = null
     fun setItem(data: ContactModel) {
@@ -74,12 +83,14 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
         sessionManager = SessionManager(context)
 
-        setContentView(R.layout.modal_send_message)
+        binding = ModalSendMessageBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         setLayout()
         initVariable()
         initClickHandler()
         etMessageListener()
+        setupBiddingNotice()
     }
 
     private fun setLayout() {
@@ -154,6 +165,37 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
             override fun afterTextChanged(s: Editable?) {
             }
         })
+
+    }
+
+    private fun setupBiddingNotice() {
+
+        if (userKind == USER_KIND_SALES) {
+
+            binding.noticeBidding.visibility = View.VISIBLE
+            binding.textTotalBidding.text = "$currentBidding/$limitBidding"
+
+            if (isBiddingAvailable) {
+//                binding.inputContainer.visibility = View.VISIBLE
+//                binding.btnSend.visibility = View.VISIBLE
+                binding.etMessage.isEnabled = true
+                binding.etMessage.setBackgroundResource(R.drawable.et_background)
+                binding.btnSend.isEnabled = true
+                binding.btnSend.setBackgroundColor(context.getColor(R.color.primary))
+                binding.textTotalBidding.setTextColor(context.getColor(R.color.status_bid))
+                binding.textNotice.text = context.getString(R.string.text_bid_available)
+            } else {
+//                binding.inputContainer.visibility = View.GONE
+//                binding.btnSend.visibility = View.GONE
+                binding.etMessage.isEnabled = false
+                binding.etMessage.setBackgroundResource(R.drawable.et_background_disabled)
+                binding.btnSend.isEnabled = false
+                binding.btnSend.setBackgroundColor(context.getColor(R.color.mixed_300))
+                binding.textTotalBidding.setTextColor(context.getColor(R.color.primary))
+                binding.textNotice.text = context.getString(R.string.text_bid_not_available)
+            }
+
+        }
 
     }
 
