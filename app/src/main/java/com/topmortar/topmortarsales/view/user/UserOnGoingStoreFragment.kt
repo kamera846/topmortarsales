@@ -45,6 +45,7 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
     private lateinit var sessionManager: SessionManager
     private lateinit var userKind: String
     private lateinit var userCity: String
+    private lateinit var userID: String
     private var userCityParam: String? = ""
     private lateinit var searchModal: SearchModal
     private var selectedCity: ModalSearchModel? = null
@@ -70,8 +71,10 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
         sessionManager = SessionManager(requireContext())
         userKind = sessionManager.userKind().toString()
         userCity = sessionManager.userCityID().toString()
+        userID = sessionManager.userID().toString()
 
-        setupSearchBox()
+//        setupSearchBox()
+        getContacts()
 
         return view
     }
@@ -145,14 +148,14 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
             try {
 
                 val apiService: ApiService = HttpClient.create()
-//                val response = apiService.getContacts(cityId = userCity)
-                val response = when (userKind) {
-                    USER_KIND_ADMIN -> {
-                        if (selectedCity != null ) {
-                            if (selectedCity!!.id != "-1") apiService.getContacts(cityId = selectedCity!!.id!!) else apiService.getContacts(cityId = userCityParam!!)
-                        } else apiService.getContacts(cityId = userCityParam!!)
-                    } else -> apiService.getContacts(cityId = userCity)
-                }
+                val response = apiService.getContactsUserBid(userId = userID)
+//                val response = when (userKind) {
+//                    USER_KIND_ADMIN -> {
+//                        if (selectedCity != null ) {
+//                            if (selectedCity!!.id != "-1") apiService.getContacts(cityId = selectedCity!!.id!!) else apiService.getContacts(cityId = userCityParam!!)
+//                        } else apiService.getContacts(cityId = userCityParam!!)
+//                    } else -> apiService.getContacts(cityId = userCity)
+//                }
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {

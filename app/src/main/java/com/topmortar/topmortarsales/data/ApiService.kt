@@ -3,6 +3,7 @@ package com.topmortar.topmortarsales.data
 import com.topmortar.topmortarsales.commons.ADD_CITY
 import com.topmortar.topmortarsales.commons.ADD_USERS
 import com.topmortar.topmortarsales.commons.AUTH
+import com.topmortar.topmortarsales.commons.BID
 import com.topmortar.topmortarsales.commons.EDIT_CONTACT
 import com.topmortar.topmortarsales.commons.GET_CITY
 import com.topmortar.topmortarsales.commons.CONTACT
@@ -305,4 +306,9 @@ interface ApiService {
     suspend fun getStoreCount(
         @Query("c") cityId: String
     ): ResponseCountStore
+
+    @GET(BID)
+    suspend fun getContactsUserBid(
+        @Query("u") userId: String
+    ): ResponseContactList
 }

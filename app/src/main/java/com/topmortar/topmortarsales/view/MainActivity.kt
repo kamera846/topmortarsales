@@ -383,7 +383,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             when (item.itemId) {
                 R.id.option_sync_now -> {
                     getContacts()
-                    getUserLoggedIn()
                     true
                 }
                 R.id.nearest_store -> {
@@ -612,6 +611,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             }
 
         }
+
+        getUserLoggedIn()
 
     }
 
