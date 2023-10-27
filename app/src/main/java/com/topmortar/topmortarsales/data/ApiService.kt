@@ -324,4 +324,10 @@ interface ApiService {
         @Part("distance_visit") distanceVisit: RequestBody,
         @Part("laporan_visit") laporanVisit: RequestBody
     ): Response<ResponseReportVisit>
+
+    @GET(VISIT)
+    suspend fun listReport(
+        @Query("u") idUser: String,
+        @Query("s") idContact: String
+    ): Response<ResponseReportVisit>
 }

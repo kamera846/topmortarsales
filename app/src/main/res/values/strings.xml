@@ -154,4 +154,5 @@
     <string name="text_pricing_detail">Ini adalah rincian anda pada bulan ini</string>
     <string name="text_bid_available">Dengan mengirim pesan, berarti anda telah mem-bidding toko ini.</string>
     <string name="text_bid_not_available">Anda telah mencapai limit bidding, selesaikan proses bidding yang berjalan untuk mem-bidding toko lainnya.</string>
+    <string name="bullet">•</string>
 </resources>
