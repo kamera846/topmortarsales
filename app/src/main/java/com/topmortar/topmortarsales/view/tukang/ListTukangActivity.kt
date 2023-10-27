@@ -44,8 +44,10 @@ import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
@@ -69,6 +71,8 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
     private lateinit var btnFab: FloatingActionButton
     private lateinit var titleBar: TextView
     private lateinit var icMore: ImageView
+    private lateinit var icBack: ImageView
+    private lateinit var tvTitleBar: TextView
     private lateinit var tvTitleBarDescription: TextView
 
     // Global
@@ -113,13 +117,18 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         btnFab = findViewById(R.id.btn_fab)
         titleBar = llTitleBar.findViewById(R.id.tv_title_bar)
         icMore = llTitleBar.findViewById(R.id.ic_more)
+        icBack = llTitleBar.findViewById(R.id.ic_back)
+        tvTitleBar = llTitleBar.findViewById(R.id.tv_title_bar)
         tvTitleBarDescription = llTitleBar.findViewById(R.id.tv_title_bar_description)
 
         // Set Title Bar
+        icBack.visibility = View.GONE
         icMore.visibility = View.VISIBLE
         titleBar.text = "List Tukang"
         tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
         tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
+        tvTitleBar.setPadding(convertDpToPx(16, this), 0, convertDpToPx(16, this), 0)
+        tvTitleBarDescription.setPadding(convertDpToPx(16, this), 0, convertDpToPx(16, this), 0)
 
 
     }
@@ -201,12 +210,16 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         val userItem = popupMenu.menu.findItem(R.id.option_user)
         val cityItem = popupMenu.menu.findItem(R.id.option_city)
         val nearestStore = popupMenu.menu.findItem(R.id.nearest_store)
+        val myProfile = popupMenu.menu.findItem(R.id.option_my_profile)
 
         searchItem.isVisible = false
         nearestStore.isVisible = false
         if (sessionManager.userKind() != USER_KIND_ADMIN) {
             userItem.isVisible = false
             cityItem.isVisible = false
+        }
+        if (sessionManager.userKind() != USER_KIND_ADMIN && sessionManager.userKind() != USER_KIND_SALES) {
+            myProfile.isVisible = false
         }
 
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
@@ -297,6 +310,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
                         sessionManager.setUserName(data.username)
                         sessionManager.setFullName(data.full_name)
                         sessionManager.setUserCityID(data.id_city)
+                        sessionManager.userBidLimit(data.bid_limit)
 
 //                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "Halo, ${ sessionManager.userName() }"}
                         tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}

@@ -40,6 +40,7 @@ import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
+import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_STATUS
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
@@ -79,6 +80,7 @@ import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
 import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
 import com.topmortar.topmortarsales.view.user.ManageUserActivity
+import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
@@ -167,6 +169,9 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         icMore.visibility = View.VISIBLE
         tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
         tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
+        binding.titleBar.icBack.visibility = View.GONE
+        binding.titleBar.tvTitleBar.setPadding(convertDpToPx(16, this), 0, 0, 0)
+        binding.titleBar.tvTitleBarDescription.setPadding(convertDpToPx(16, this), 0, 0, 0)
         etSearchBox.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Set Floating Action Button
@@ -286,16 +291,23 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 try {
 
                     val apiService: ApiService = HttpClient.create()
-                    val response = apiService.getContacts()
+                    val response = when (userKind) {
+                        USER_KIND_ADMIN -> apiService.getContacts()
+                        USER_KIND_COURIER -> apiService.getCourierStore(processNumber = "1", courierId = userId)
+                        else -> apiService.getContacts(cityId = userCity)
+                    }
 
                     when (response.status) {
                         RESPONSE_STATUS_OK -> {
 
                             val listCoordinate = arrayListOf<String>()
                             val listCoordinateName = arrayListOf<String>()
+                            val listCoordinateStatus = arrayListOf<String>()
+
                             for (item in response.results.listIterator()) {
                                 listCoordinate.add(item.maps_url)
                                 listCoordinateName.add(item.nama)
+                                listCoordinateStatus.add(item.store_status)
                             }
 
                             val intent = Intent(this@MainActivity, MapsActivity::class.java)
@@ -303,6 +315,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                             intent.putExtra(CONST_NEAREST_STORE, true)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
 
                             progressDialog.dismiss()
                             startActivity(intent)
@@ -350,27 +363,35 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
         val searchItem = popupMenu.menu.findItem(R.id.option_search)
         val userItem = popupMenu.menu.findItem(R.id.option_user)
+        val myProfile = popupMenu.menu.findItem(R.id.option_my_profile)
         val cityItem = popupMenu.menu.findItem(R.id.option_city)
         val skillItem = popupMenu.menu.findItem(R.id.option_skill)
         val nearestStoreItem = popupMenu.menu.findItem(R.id.nearest_store)
 
         searchItem.isVisible = false
-        nearestStoreItem.isVisible = false
+//        nearestStoreItem.isVisible = false
         if (sessionManager.userKind() != USER_KIND_ADMIN) {
             userItem.isVisible = false
             cityItem.isVisible = false
             skillItem.isVisible = false
+        }
+        if (sessionManager.userKind() != USER_KIND_SALES) {
+            myProfile.isVisible = false
         }
 
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
                 R.id.option_sync_now -> {
                     getContacts()
-                    getUserLoggedIn()
                     true
                 }
                 R.id.nearest_store -> {
                     navigateChecklocation()
+                    true
+                }
+                R.id.option_my_profile -> {
+                    val intent = Intent(this@MainActivity, UserProfileActivity::class.java)
+                    startActivity(intent)
                     true
                 }
                 R.id.option_search -> {
@@ -547,8 +568,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                var response = apiService.getContacts()
-                response = when (userKind) {
+                val response = when (userKind) {
                     USER_KIND_ADMIN -> {
                         if (selectedCity != null ) {
                             if (selectedCity!!.id != "-1") apiService.getContacts(cityId = selectedCity!!.id!!) else apiService.getContacts()
@@ -591,6 +611,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             }
 
         }
+
+        getUserLoggedIn()
 
     }
 
@@ -680,6 +702,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                         sessionManager.setUserName(data.username)
                         sessionManager.setFullName(data.full_name)
                         sessionManager.setUserCityID(data.id_city)
+                        sessionManager.userBidLimit(data.bid_limit)
 
 //                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "Halo, ${ sessionManager.userName() }"}
                         tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}

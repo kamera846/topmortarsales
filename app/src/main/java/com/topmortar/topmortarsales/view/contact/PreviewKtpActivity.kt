@@ -35,7 +35,6 @@ class PreviewKtpActivity : AppCompatActivity() {
         lnrTitleBar = findViewById(R.id.title_bar_light)
 
         tvTitleBar.text = "Preview File"
-        tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         val imageUrl = intent.getStringExtra(CONST_KTP) // Dapatkan URL gambar dari intent
 

@@ -27,6 +27,7 @@ import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.updateTxtMaxLength
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -109,6 +110,7 @@ class SendMessageTukangModal(private val context: Context, private val lifecycle
         icBack.visibility = View.GONE
         icClose.visibility = View.VISIBLE
         tvTitleBar.text = "Kirim Pesan ke Tukang"
+        tvTitleBar.setPadding(convertDpToPx(16, context), 0, 0, 0)
     }
 
     private fun initClickHandler() {

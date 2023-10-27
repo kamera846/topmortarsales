@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Top Mortar Sales</string>
+    <string name="lorem_title">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</string>
+    <string name="lorem_desc">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</string>
     <string name="list_chat">Top Mortar Sales</string>
     <string name="new_chat_room">New Chat Room</string>
     <string name="logo_horizontal">Logo Horizontal</string>
@@ -23,6 +25,7 @@
     <string name="et_label">Label for the input field</string>
     <string name="et_hint">Enter your text here</string>
     <string name="sync_now">Refresh</string>
+    <string name="my_profile">Profil Saya</string>
     <string name="search">Cari</string>
     <string name="logout">Logout</string>
     <string name="search_contact">Masukkan nama toko…</string>
@@ -146,4 +149,11 @@
     <string name="free">Free</string>
     <string name="retur">Retur</string>
     <string name="nearest_store">Cari Toko Terdekat</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="text_pricing_detail">Ini adalah rincian anda pada bulan ini</string>
+    <string name="text_bid_available">Dengan mengirim pesan, berarti anda telah mem-bidding toko ini.</string>
+    <string name="text_bid_not_available">Anda telah mencapai limit bidding, selesaikan proses bidding yang berjalan untuk mem-bidding toko lainnya.</string>
+    <string name="text_bid_on_going">Anda sedang dalam proses bidding dengan toko ini.</string>
+    <string name="bullet">•</string>
 </resources>

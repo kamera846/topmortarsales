@@ -19,6 +19,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -109,6 +110,8 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
         tvSkillCode.text = "Skill Code"
         etSkillName.hint = "e.g Tukang Batu"
         etSkillCode.hint = "e.g TB"
+
+        tvTitleBar.setPadding(convertDpToPx(16, context),0, convertDpToPx(16, context), 0)
     }
 
     private fun initClickHandler() {

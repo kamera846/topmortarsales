@@ -3,6 +3,8 @@ package com.topmortar.topmortarsales.data
 import com.topmortar.topmortarsales.commons.ADD_CITY
 import com.topmortar.topmortarsales.commons.ADD_USERS
 import com.topmortar.topmortarsales.commons.AUTH
+import com.topmortar.topmortarsales.commons.BID
+import com.topmortar.topmortarsales.commons.BID_ON_GOING
 import com.topmortar.topmortarsales.commons.EDIT_CONTACT
 import com.topmortar.topmortarsales.commons.GET_CITY
 import com.topmortar.topmortarsales.commons.CONTACT
@@ -15,19 +17,23 @@ import com.topmortar.topmortarsales.commons.REQUEST_OTP
 import com.topmortar.topmortarsales.commons.SEARCH_CONTACT
 import com.topmortar.topmortarsales.commons.SEND_MESSAGE
 import com.topmortar.topmortarsales.commons.SKILL
+import com.topmortar.topmortarsales.commons.STORE_STATUS
 import com.topmortar.topmortarsales.commons.TUKANG
 import com.topmortar.topmortarsales.commons.TUKANG_MESSAGE
 import com.topmortar.topmortarsales.commons.UPDATE_PASSWORD
 import com.topmortar.topmortarsales.commons.VERIFY_OTP
+import com.topmortar.topmortarsales.commons.VISIT
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.response.ResponseAuth
 import com.topmortar.topmortarsales.response.ResponseCities
 import com.topmortar.topmortarsales.response.ResponseContactList
+import com.topmortar.topmortarsales.response.ResponseCountStore
 import com.topmortar.topmortarsales.response.ResponseInvoice
 import com.topmortar.topmortarsales.response.ResponseSuratJalan
 import com.topmortar.topmortarsales.response.ResponseMessage
 import com.topmortar.topmortarsales.response.ResponsePayment
 import com.topmortar.topmortarsales.response.ResponsePromo
+import com.topmortar.topmortarsales.response.ResponseReportVisit
 import com.topmortar.topmortarsales.response.ResponseSkills
 import com.topmortar.topmortarsales.response.ResponseTukangList
 import com.topmortar.topmortarsales.response.ResponseUsers
@@ -295,4 +301,33 @@ interface ApiService {
 
     @GET(PROMO)
     suspend fun getPromo(): ResponsePromo
+
+    @GET(STORE_STATUS)
+    suspend fun getStoreCount(): ResponseCountStore
+
+    @GET(STORE_STATUS)
+    suspend fun getStoreCount(
+        @Query("c") cityId: String
+    ): ResponseCountStore
+
+    @GET(BID)
+    suspend fun getContactsUserBid(
+        @Query("u") userId: String,
+        @Query("visit") visit: String = BID_ON_GOING
+    ): ResponseContactList
+
+    @Multipart
+    @POST(VISIT)
+    suspend fun makeVisitReport(
+        @Part("id_contact") idContact: RequestBody,
+        @Part("id_user") idUser: RequestBody,
+        @Part("distance_visit") distanceVisit: RequestBody,
+        @Part("laporan_visit") laporanVisit: RequestBody
+    ): Response<ResponseReportVisit>
+
+    @GET(VISIT)
+    suspend fun listReport(
+        @Query("u") idUser: String,
+        @Query("s") idContact: String
+    ): Response<ResponseReportVisit>
 }

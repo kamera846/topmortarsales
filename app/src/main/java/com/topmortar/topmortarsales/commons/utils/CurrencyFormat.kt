@@ -6,14 +6,21 @@ import java.util.Locale
 
 object CurrencyFormat {
 
-    fun format(amount: Double): String {
+    fun format(amount: Double, withCurrency: Boolean = true): String {
         val localeID = Locale("id", "ID") // Create a Locale for Indonesia (ID)
         val currencyFormat = NumberFormat.getCurrencyInstance(localeID)
-        var formattedAmmount = currencyFormat.format(amount).replace("Rp", "Rp ").replace(",00", "")
-        if (amount < 0) {
-            formattedAmmount = currencyFormat.format(amount).replace("-Rp", "Rp -").replace(",00", "")
+
+        val formattedAmount = if (withCurrency) {
+            if (amount < 0) {
+                currencyFormat.format(amount).replace("-Rp", "Rp -").replace(",00", "")
+            } else currencyFormat.format(amount).replace("Rp", "Rp ").replace(",00", "")
+        } else {
+            if (amount < 0) {
+                currencyFormat.format(amount).replace("-Rp", "-").replace(",00", "")
+            } else currencyFormat.format(amount).replace("Rp", "").replace(",00", "")
         }
-        return formattedAmmount
+
+        return formattedAmount
     }
 
 }

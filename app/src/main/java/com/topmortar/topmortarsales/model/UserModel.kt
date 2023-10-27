@@ -9,5 +9,6 @@ data class UserModel(
     val id_city: String = "",
     val nama_city: String = "",
     val kode_city: String = "",
+    val bid_limit: String = "",
     val full_name: String = ""
 )

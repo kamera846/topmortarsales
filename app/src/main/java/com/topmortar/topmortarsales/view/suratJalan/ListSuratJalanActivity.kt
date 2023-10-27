@@ -110,7 +110,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
         initVariable()
         initClickHandler()
         dataActivityValidation()
-        toggleList()
+//        toggleList()
 
     }
 
@@ -150,10 +150,6 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
         else llFilter.background = getDrawable(R.color.light)
 
         val padding16 = convertDpToPx(16, this)
-//        val padding8 = convertDpToPx(8, this)
-        titleBar.setPadding(0, 0, padding16, 0)
-//        icSyncNow.setPadding(padding16, 0, 0, 0)
-//        icOption.setPadding(padding8, 0, padding16, 0)
 
     }
 
@@ -170,6 +166,9 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
         contactId = intent.getStringExtra(CONST_CONTACT_ID)
         iName = intent.getStringExtra(CONST_NAME)
+        val iListType = intent.getStringExtra("type_list").toString()
+        if (iListType == LIST_INVOICE) toggleList(LIST_INVOICE)
+        else toggleList()
 
     }
 

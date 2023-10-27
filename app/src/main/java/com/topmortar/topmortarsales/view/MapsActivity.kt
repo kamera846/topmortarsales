@@ -7,12 +7,15 @@ import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.location.Address
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationListener
 import android.os.Bundle
 import android.os.Handler
+import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -37,9 +40,12 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.Polyline
+import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompletePrediction
 import com.google.android.libraries.places.api.model.Place
@@ -48,17 +54,31 @@ import com.google.android.libraries.places.api.net.FetchPlaceResponse
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
 import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.maps.DirectionsApi
+import com.google.maps.GeoApiContext
+import com.google.maps.PendingResult
+import com.google.maps.errors.ApiException
+import com.google.maps.model.DirectionsResult
+import com.google.maps.model.DirectionsRoute
+import com.google.maps.model.TravelMode
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.PlaceAdapter
 import com.topmortar.topmortarsales.commons.CONNECTION_FAILURE_RESOLUTION_REQUEST
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
+import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_STATUS
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
+import com.topmortar.topmortarsales.commons.STATUS_CONTACT_ACTIVE
+import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BID
+import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
+import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
 import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
@@ -74,15 +94,19 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private lateinit var binding: ActivityMapsBinding
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var placesClient: PlacesClient
+    private var routeDirections: Polyline? = null
 
     private var isGetCoordinate = false
     private var isNearestStore = false
     private var listCoordinate: ArrayList<String>? = null
     private var listCoordinateName: ArrayList<String>? = null
+    private var listCoordinateStatus: ArrayList<String>? = null
 
     private val zoomLevel = 18f
+    private val mapsDuration = 2000
     private var selectedLocation: LatLng? = null
     private var currentLatLng: LatLng? = null
+    private var lineColor = listOf(R.color.primary_200, R.color.status_passive, R.color.status_passive)
 
     private lateinit var mLastLocation: Location
     private var mCurrLocationMarker: Marker? = null
@@ -101,6 +125,28 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        checkLocationPermission()
+
+    }
+
+    private fun checkLocationPermission() {
+        val urlUtility = URLUtility(this)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+            if (urlUtility.isLocationEnabled(this)) {
+
+                val urlUtility = URLUtility(this)
+                urlUtility.requestLocationUpdate()
+
+                initView()
+
+            } else {
+                val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                startActivity(enableLocationIntent)
+            }
+        } else ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+    }
+
+    private fun initView() {
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -138,6 +184,77 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         binding.btnGetDistance.visibility = View.GONE
         binding.btnGetLatLng.visibility = View.GONE
+        binding.btnGetDirection.visibility = View.GONE
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun setupMaps() {
+
+        onCalculate()
+        onGetLatLng()
+        searchLocation()
+        dataActivityValidation()
+
+        mMap.isMyLocationEnabled = true
+        mMap.uiSettings.isCompassEnabled = true
+        mMap.uiSettings.isZoomControlsEnabled = true
+        mMap.uiSettings.isTiltGesturesEnabled = true
+        mMap.uiSettings.isMyLocationButtonEnabled = true
+        mMap.uiSettings.isZoomGesturesEnabled = true
+        mMap.uiSettings.isScrollGesturesEnabledDuringRotateOrZoom = true
+
+        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) {
+            mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style_dark))
+            lineColor = listOf(R.color.primary_200, R.color.status_passive, R.color.status_passive)
+        }
+
+        if (binding.btnGetLatLng.isVisible) {
+            mMap.setPadding(0,0,0, convertDpToPx(72, this))
+            mMap.setOnMapLongClickListener { latLng -> setPin(latLng, getPlaceNameFromLatLng(latLng), moveCamera = false) }
+            if (!sessionManager.pinMapHint()) {
+                showDialog(message = "Tekan dan tahan pada peta untuk menandai lokasi")
+                sessionManager.pinMapHint(true)
+            }
+        } else if (binding.btnGetDirection.isVisible) {
+            mMap.setPadding(0,0,0, convertDpToPx(72, this))
+
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location: Location? ->
+                    if (location != null) currentLatLng = LatLng(location.latitude, location.longitude)
+                }
+
+            binding.btnGetDirection.setOnClickListener {
+                toggleDirection()
+            }
+        }
+
+        mMap.setOnMapClickListener {
+            if (binding.recyclerView.isVisible) binding.recyclerView.visibility = View.GONE
+        }
+    }
+
+    private fun toggleDirection() {
+        if (routeDirections == null) {
+
+            if (currentLatLng == null) showDialog(message = "Gagal menemukan lokasi Anda saat ini. Pastikan lokasi Anda aktif dan coba buka kembali peta")
+            else if (selectedLocation == null) showDialog(message = "Gagal menemukan lokasi target")
+            else getDirections()
+
+        } else if (routeDirections != null) {
+            mMap.clear()
+            setupMaps()
+            routeDirections!!.remove()
+            routeDirections = null
+            Handler().postDelayed({
+                val button = binding.btnGetDirection
+                val img = binding.btnGetDirectionImg
+                val title = binding.btnGetDirectionTitle
+                button.setBackgroundResource(R.drawable.bg_primary_round)
+                img.setImageDrawable(getDrawable(R.drawable.direction_white))
+                title.text = "Aktifkan Navigasi"
+            }, 500)
+        }
     }
 
     private fun showDialog(title: String = "Perhatian!", message: String) {
@@ -155,10 +272,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         isNearestStore = intent.getBooleanExtra(CONST_NEAREST_STORE, false)
         listCoordinate = intent.getStringArrayListExtra(CONST_LIST_COORDINATE)
         listCoordinateName = intent.getStringArrayListExtra(CONST_LIST_COORDINATE_NAME)
+        listCoordinateStatus = intent.getStringArrayListExtra(CONST_LIST_COORDINATE_STATUS)
 
         if (isGetCoordinate) {
             binding.btnGetLatLng.visibility = View.VISIBLE
             binding.searchBar.visibility = View.VISIBLE
+        } else {
+            if (!isNearestStore) binding.btnGetDirection.visibility = View.VISIBLE
         }
 
         if (!iMaps.isNullOrEmpty()) {
@@ -203,6 +323,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             val urlUtility = URLUtility(this)
             val limitKm = binding.etKm.text.toString().toDouble()
+            var currentTotal = 0
+
             mMap.clear()
 
             for ((i, item) in listCoordinate!!.iterator().withIndex()) {
@@ -224,12 +346,28 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                 val latLng = LatLng(latitude, longitude)
                                 binding.recyclerView.visibility = View.GONE
 
+                                val iconDrawable = when (listCoordinateStatus?.get(i)) {
+                                    STATUS_CONTACT_DATA -> R.drawable.store_location_status_data
+                                    STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active
+                                    STATUS_CONTACT_PASSIVE -> R.drawable.store_location_status_passive
+                                    STATUS_CONTACT_BID -> R.drawable.store_location_status_biding
+                                    else -> R.drawable.store_location_status_blacklist
+                                }
+
+                                val originalBitmap = BitmapFactory.decodeResource(resources, iconDrawable)
+
+                                val newWidth = convertDpToPx(32, this)
+                                val newHeight = convertDpToPx(32, this)
+
+                                val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
+
                                 selectedLocation = latLng
-                                mMap.addMarker(
-                                    MarkerOptions()
-                                        .position(latLng)
-                                        .title(listCoordinateName?.get(i))
-                                )
+                                val markerOptions = MarkerOptions()
+                                    .position(latLng)
+                                    .title(listCoordinateName?.get(i))
+                                    .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
+                                mMap.addMarker(markerOptions)
+                                currentTotal ++
 
                             }
 
@@ -241,21 +379,27 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             }
 
             progressDialog.dismiss()
-            val durationMs = 2000
-            val responsiveZoom = when {
-                limitKm >= 1 -> when {
-                    limitKm >= 18 -> 10
-                    limitKm >= 13 -> 11
-                    limitKm >= 8 -> 12
-                    limitKm >= 3 -> 13
-                    else -> 14
+            if (currentTotal > 0) {
+                val durationMs = 2000
+                val responsiveZoom = when {
+                    limitKm >= 1 -> when {
+                        limitKm >= 18 -> 10
+                        limitKm >= 13 -> 11
+                        limitKm >= 8 -> 12
+                        limitKm >= 3 -> 13
+                        else -> 14
+                    }
+                    else -> 15
                 }
-                else -> 15
+
+                val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentLatLng!!, responsiveZoom.toFloat())
+
+                mMap.animateCamera(cameraUpdate, durationMs, null)
+                binding.textTotalNearest.text = "$currentTotal toko ditemukan dalam radius $limitKm km"
+            } else {
+                showDialog(message = "Tidak menemukan toko di sekitar anda saat ini dalam radius jarak $limitKm km")
+                binding.textTotalNearest.text = "Tidak dapat menemukan toko dalam radius $limitKm km"
             }
-
-            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentLatLng!!, responsiveZoom.toFloat())
-
-            mMap.animateCamera(cameraUpdate, durationMs, null)
 
             binding.cardTelusuri.visibility = View.VISIBLE
             binding.btnTelusuri.setOnClickListener {
@@ -302,7 +446,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             })
 
-        }, 2000)
+        }, 1000)
     }
 
     private fun onFindLocation(mapsUrl: String) {
@@ -386,6 +530,147 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     }
 
+    private fun getDirections() {
+        val currentLocation = currentLatLng ?: return
+        val destination = selectedLocation ?: return
+
+        val directions = DirectionsApi.newRequest(getGeoContext())
+            .mode(TravelMode.DRIVING) // Ganti dengan mode perjalanan yang sesuai
+            .origin(com.google.maps.model.LatLng(currentLocation.latitude, currentLocation.longitude))
+            .destination(com.google.maps.model.LatLng(destination.latitude, destination.longitude))
+            .optimizeWaypoints(true)
+            .alternatives(true)
+
+        try {
+            val result = directions.await()
+
+            if (result.routes.isNotEmpty()) {
+                val listPolylineOptions = arrayListOf<PolylineOptions>()
+
+                // Gambar rute pada peta
+                for (i in 0..result.routes.size) {
+                    if (i < result.routes.size && i < 3) {
+                        val route = result.routes[i]
+                        val overviewPolyline = route.overviewPolyline.decodePath()
+                        val polylineOptions = PolylineOptions()
+                        polylineOptions.width(15f)
+                        polylineOptions.color(getColor(lineColor[i]))
+                        for (latLng in overviewPolyline) {
+                            polylineOptions.add(LatLng(latLng.lat, latLng.lng))
+                        }
+                        listPolylineOptions.add(polylineOptions)
+                    }
+                }
+
+                for (i in listPolylineOptions.size - 1 downTo 0) {
+                    routeDirections = mMap.addPolyline(listPolylineOptions[i])
+                }
+
+                val bounds = LatLngBounds.builder()
+                    .include(currentLocation)
+                    .include(destination)
+                    .build()
+                val updateCamera = CameraUpdateFactory.newLatLngBounds(bounds, 100)
+                mMap.animateCamera(updateCamera, mapsDuration, null)
+
+                Handler().postDelayed({
+                    val button = binding.btnGetDirection
+                    val img = binding.btnGetDirectionImg
+                    val title = binding.btnGetDirectionTitle
+                    button.setBackgroundResource(R.drawable.bg_passive_round)
+                    img.setImageDrawable(getDrawable(R.drawable.direction_line_white))
+                    title.text = "Matikan Navigasi"
+                }, 500)
+
+            } else {
+                Toast.makeText(this, "Tidak ada rute ditemukan", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: ApiException) {
+            Toast.makeText(this, "Gagal memuat navigasi", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
+        } catch (e: InterruptedException) {
+            Toast.makeText(this, "Gagal memuat navigasi", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
+        } catch (e: IOException) {
+            Toast.makeText(this, "Gagal memuat navigasi", Toast.LENGTH_SHORT).show()
+            e.printStackTrace()
+        }
+    }
+    private fun getDirections2() {
+        val currentLocation = currentLatLng ?: return
+        val destination = selectedLocation ?: return
+        var directionsResults: List<DirectionsRoute>? = null
+
+        val directionsApiRequest = DirectionsApi.newRequest(getGeoContext())
+            .origin(com.google.maps.model.LatLng(currentLocation.latitude, currentLocation.longitude))
+            .destination(com.google.maps.model.LatLng(destination.latitude, destination.longitude))
+            .mode(TravelMode.DRIVING)
+            .optimizeWaypoints(true)
+            .alternatives(true) // Mengaktifkan opsi jalur alternatif
+
+        directionsApiRequest.setCallback(object : PendingResult.Callback<DirectionsResult> {
+            override fun onResult(result: DirectionsResult) {
+                directionsResults = result.routes.toList()
+
+                // Menampilkan semua jalur yang tersedia dengan warna berbeda
+                for ((index, route) in directionsResults!!.withIndex()) {
+                    val color = if (index == 0) {
+                        R.color.primary
+                    } else {
+                        R.color.primary_600 // Warna untuk jalur lebih lambat
+                    }
+
+                    val overviewPolyLine = route.overviewPolyline.decodePath()
+                    val polylineOptions = PolylineOptions()
+//                        .addAll(route.overviewPolyline.decodePath())
+                        .width(10f)
+                        .color(color)
+
+                    for (latLng in overviewPolyLine) {
+                        polylineOptions.add(LatLng(latLng.lat, latLng.lng))
+                    }
+
+                    mMap.addPolyline(polylineOptions)
+                }
+
+                // Menandai jalur yang sudah dilewati dengan warna Hijau
+                val completedRouteIndex = 0 // Ganti dengan indeks jalur yang sudah dilewati
+                val completedRoute = directionsResults!![completedRouteIndex]
+                val completeOverviewPolyLine = completedRoute.overviewPolyline.decodePath()
+                val completedPolylineOptions = PolylineOptions()
+//                    .addAll(completedRoute.overviewPolyline.decodePath())
+                    .width(10f)
+                    .color(R.color.primary_300) // Warna untuk jalur yang sudah dilewati
+
+                for (latLng in completeOverviewPolyLine) {
+                    completedPolylineOptions.add(LatLng(latLng.lat, latLng.lng))
+                }
+                mMap.addPolyline(completedPolylineOptions)
+
+                // Zoom ke rute pertama
+                val bounds = LatLngBounds.builder()
+                    .include(currentLocation)
+                    .include(destination)
+                    .build()
+                val updateCamera = CameraUpdateFactory.newLatLngBounds(bounds, 100)
+                mMap.animateCamera(updateCamera, mapsDuration, null)
+            }
+
+            override fun onFailure(e: Throwable) {
+                // Tangani kesalahan permintaan API di sini
+            }
+        })
+    }
+
+    private fun getGeoContext(): GeoApiContext {
+
+        return GeoApiContext.Builder()
+            .apiKey(getString(R.string.maps_key)) // Ganti dengan kunci API Google Maps Anda
+            .build()
+
+    }
+
+
     @SuppressLint("MissingPermission")
     private fun initMaps(latLng: LatLng? = null) {
 
@@ -397,7 +682,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         currentLatLng = LatLng(location.latitude, location.longitude)
                         setPin(currentLatLng!!, "Lokasi Saya")
 
-                        if (!listCoordinate.isNullOrEmpty()) searchCoordinate()
+                        if (isNearestStore) searchCoordinate()
                     }
                 }
         }
@@ -415,10 +700,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         )
 
         if (moveCamera) {
-            val durationMs = 2000
-            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel)
 
-            mMap.animateCamera(cameraUpdate, durationMs, null)
+            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel)
+            mMap.animateCamera(cameraUpdate, mapsDuration, null)
+
         }
         binding.recyclerView.visibility = View.GONE
 
@@ -431,8 +716,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                initMaps()
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) checkLocationPermission()
+            else {
+                val customUtility = CustomUtility(this)
+                if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    val message = "Izin lokasi diperlukan untuk fitur ini. Izinkan aplikasi mengakses lokasi perangkat."
+                    customUtility.showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE) }
+                } else customUtility.showPermissionDeniedDialog("Izin lokasi diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
             }
         }
     }
@@ -446,32 +736,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             ) == PackageManager.PERMISSION_GRANTED
         ) {
 
-            onCalculate()
-            onGetLatLng()
-            searchLocation()
-            dataActivityValidation()
-
-            mMap.isMyLocationEnabled = true
-            mMap.uiSettings.isCompassEnabled = true
-            mMap.uiSettings.isZoomControlsEnabled = true
-            mMap.uiSettings.isTiltGesturesEnabled = true
-            mMap.uiSettings.isMyLocationButtonEnabled = true
-
-            val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-            if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style_dark))
-
-            if (binding.btnGetLatLng.isVisible) {
-                mMap.setPadding(0,0,0, convertDpToPx(64, this))
-                mMap.setOnMapLongClickListener { latLng -> setPin(latLng, getPlaceNameFromLatLng(latLng), moveCamera = false) }
-                if (!sessionManager.pinMapHint()) {
-                    showDialog(message = "Tekan dan tahan pada peta untuk menandai lokasi")
-                    sessionManager.pinMapHint(true)
-                }
-            }
-
-            mMap.setOnMapClickListener {
-                if (binding.recyclerView.isVisible) binding.recyclerView.visibility = View.GONE
-            }
+            setupMaps()
 
         } else {
             ActivityCompat.requestPermissions(
@@ -480,6 +745,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 LOCATION_PERMISSION_REQUEST_CODE
             )
         }
+
         buildGoogleApiClient()
         mMap.isMyLocationEnabled = true
     }
@@ -610,5 +876,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             catch (e: IntentSender.SendIntentException) { e.printStackTrace() }
 
         } else Toast.makeText(this, "Koneksi ke Layanan Google Play gagal", TOAST_SHORT).show()
+    }
+
+    override fun onBackPressed() {
+        if (!isGetCoordinate && routeDirections != null) {
+            toggleDirection()
+        } else super.onBackPressed()
     }
 }

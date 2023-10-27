@@ -15,17 +15,34 @@
         android:src="@drawable/arrow_back_black"
         android:contentDescription="@string/icon_back_black"/>
 
-    <TextView
-        android:id="@+id/tv_title_bar"
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center_vertical"
-        android:text="@string/top_mortar_sales"
-        android:paddingHorizontal="16dp"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_title_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:text="@string/top_mortar_sales"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
+
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/tv_title_bar_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:text="sales freelance"
+            android:textSize="14sp"
+            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+    </LinearLayout>
 
     <View
         android:visibility="gone"

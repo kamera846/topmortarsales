@@ -17,7 +17,6 @@ import android.text.TextWatcher
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.webkit.URLUtil.isValidUrl
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -37,6 +36,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.BASE_URL
@@ -59,7 +59,6 @@ import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
-import com.topmortar.topmortarsales.commons.REQUEST_BLUETOOTH_PERMISSIONS
 import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
@@ -79,8 +78,8 @@ import com.topmortar.topmortarsales.commons.STATUS_TERMIN_COD_TUNAI
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
-import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
@@ -90,7 +89,6 @@ import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.PingUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
-import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -100,6 +98,8 @@ import com.topmortar.topmortarsales.modal.SendMessageModal
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MapsActivity
+import com.topmortar.topmortarsales.view.reports.NewReportActivity
+import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import com.topmortar.topmortarsales.view.suratJalan.ListSuratJalanActivity
 import com.topmortar.topmortarsales.view.suratJalan.PreviewClosingActivity
 import kotlinx.coroutines.launch
@@ -118,7 +118,7 @@ import java.util.TimerTask
 
 @Suppress("DEPRECATION")
 class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListener,
-    PingUtility.PingResultInterface {
+    PingUtility.PingResultInterface, SendMessageModal.SendMessageModalInterface {
 
     private lateinit var sessionManager: SessionManager
 
@@ -217,6 +217,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var searchModal: SearchModal
     private lateinit var searchPromoModal: SearchModal
     private lateinit var sendMessageModal: SendMessageModal
+    private lateinit var bottomSheetDialog: BottomSheetDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -305,7 +306,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         // Setup Title Bar
         tvTitleBar.text = "Detail Contact"
-        tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         // Setup Date Picker Dialog
         setDatePickerDialog()
@@ -335,6 +335,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
             etKtp.clearFocus()
         }
+
+        bottomSheetDialog = BottomSheetDialog(this)
 
     }
 
@@ -517,7 +519,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         iTermin = intent.getStringExtra(CONST_TERMIN)
 //        if (!iStatus.isNullOrEmpty()) {
             tooltipStatus.visibility = View.VISIBLE
-        if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
+            if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
             else btnInvoice.visibility = View.VISIBLE
 //        }
         iAddress = intent.getStringExtra(CONST_ADDRESS)
@@ -526,7 +528,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
 
-        itemSendMessage = ContactModel(nama = iName!!, nomorhp = iPhone!!, store_owner = iOwner!!, tgl_lahir = iBirthday!!, maps_url = iMapsUrl!!, id_city = iLocation!!)
+        itemSendMessage = ContactModel(id_contact = iContactId!!, nama = iName!!, nomorhp = iPhone!!, store_owner = iOwner!!, tgl_lahir = iBirthday!!, maps_url = iMapsUrl!!, id_city = iLocation!!)
         setupDialogSendMessage(itemSendMessage)
 
         if (!iContactId.isNullOrEmpty() ) {
@@ -690,6 +692,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 icEdit.visibility = View.GONE
                 tvMapsContainer.visibility = View.GONE
                 btnSendMessage.visibility = View.GONE
+                btnInvoice.visibility = View.GONE
 
                 tvTitleBar.text = "Edit Contact"
                 icClose.visibility = View.VISIBLE
@@ -731,11 +734,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 selectedUri = null
 
                 // Other Columns Handle
-                addressContainer.setBackgroundResource(R.drawable.background_rounded)
+                addressContainer.setBackgroundResource(R.drawable.background_rounded_16)
                 etAddress.isEnabled = false
                 if (iAddress.isNullOrEmpty()) etAddress.setText(EMPTY_FIELD_VALUE)
 
-                statusContainer.setBackgroundResource(R.drawable.background_rounded)
+                statusContainer.setBackgroundResource(R.drawable.background_rounded_16)
 //            if (!iStatus.isNullOrEmpty()) {
                 tooltipStatus.visibility = View.VISIBLE
                 if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
@@ -743,12 +746,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 //            }
                 tvStatus.visibility = View.VISIBLE
                 spinStatus.visibility = View.GONE
-                terminContainer.setBackgroundResource(R.drawable.background_rounded)
+                terminContainer.setBackgroundResource(R.drawable.background_rounded_16)
                 tvTermin.visibility = View.VISIBLE
                 spinTermin.visibility = View.GONE
                 tvPromo.visibility = View.VISIBLE
                 etPromo.visibility = View.GONE
-                promoContainer.setBackgroundResource(R.drawable.background_rounded)
+                promoContainer.setBackgroundResource(R.drawable.background_rounded_16)
 
                 btnSaveEdit.visibility = View.GONE
 
@@ -757,6 +760,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 icEdit.visibility = View.VISIBLE
                 tvMapsContainer.visibility = View.VISIBLE
                 btnSendMessage.visibility = View.VISIBLE
+                btnInvoice.visibility = View.VISIBLE
 
                 tvTitleBar.text = "Detail Contact"
                 icClose.visibility = View.GONE
@@ -873,6 +877,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         RESPONSE_STATUS_OK -> {
 
                             itemSendMessage = ContactModel(
+                                id_contact = contactId!!,
                                 nomorhp = pPhone,
                                 nama = pName,
                                 store_owner = pOwner,
@@ -969,7 +974,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     }
 
-    private fun getDetailContact() {
+    private fun getDetailContact(withToggleEdit: Boolean = true) {
         loadingState(true)
 
         lifecycleScope.launch {
@@ -986,23 +991,30 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         RESPONSE_STATUS_OK -> {
 
                             val data = responseBody.results[0]
-                            if (!data.ktp_owner.isNullOrEmpty()) {
-                                tvKtp.text = "Tekan untuk menampilkan KTP"
-                                iKtp = data.ktp_owner
+
+                            if (withToggleEdit) {
+                                if (!data.ktp_owner.isNullOrEmpty()) {
+                                    tvKtp.text = "Tekan untuk menampilkan KTP"
+                                    iKtp = data.ktp_owner
+                                }
+
+                                handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Berhasil mengubah data!")
+                                toggleEdit(false)
+
+                                if (iStatus == STATUS_CONTACT_BLACKLIST) {
+                                    btnInvoice.visibility = View.GONE
+                                } else btnInvoice.visibility = View.VISIBLE
+
+                                setupStatus(iStatus)
+                                setupTermin(iTermin)
+                            } else {
+
+                                if (data.store_status == STATUS_CONTACT_BLACKLIST) {
+                                    btnInvoice.visibility = View.GONE
+                                } else btnInvoice.visibility = View.VISIBLE
+
+                                setupStatus(data.store_status)
                             }
-
-                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Berhasil mengubah data!")
-                            loadingState(false)
-                            toggleEdit(false)
-
-//                            if (!iStatus.isNullOrEmpty()) {
-                            if (iStatus == STATUS_CONTACT_BLACKLIST) {
-                                btnInvoice.visibility = View.GONE
-                            } else btnInvoice.visibility = View.VISIBLE
-//                            }
-
-                            setupStatus(iStatus)
-                            setupTermin(iTermin)
 
                             hasEdited = true
                             loadingState(false)
@@ -1205,14 +1217,88 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun navigateToDetailInvoice() {
 
-        val intent = Intent(this@DetailContactActivity, ListSuratJalanActivity::class.java)
+        if (sessionManager.userKind() == USER_KIND_COURIER) {
 
-        intent.putExtra(CONST_CONTACT_ID, contactId)
-        if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
-        else intent.putExtra(CONST_NAME, tvName.text)
+            val intent = Intent(this@DetailContactActivity, ListSuratJalanActivity::class.java)
 
-        startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+            intent.putExtra(CONST_CONTACT_ID, contactId)
+            if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
+            else intent.putExtra(CONST_NAME, tvName.text)
 
+            startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+
+        } else {
+            val bottomSheetLayout = layoutInflater.inflate(R.layout.fragment_bottom_sheet_detail_contact, null)
+
+            val invoiceOption = bottomSheetLayout.findViewById<LinearLayout>(R.id.invoiceOption)
+            val reportOption = bottomSheetLayout.findViewById<LinearLayout>(R.id.reportOption)
+            val btnNewReport = bottomSheetLayout.findViewById<Button>(R.id.btnNewReport)
+            val reportsTitle = bottomSheetLayout.findViewById<TextView>(R.id.reportsTitle)
+
+            if (sessionManager.userKind() == USER_KIND_COURIER) {
+                invoiceOption.visibility = View.GONE
+                reportOption.visibility = View.GONE
+                btnNewReport.visibility = View.GONE
+            } else if (sessionManager.userKind() == USER_KIND_ADMIN) {
+                reportsTitle.text = "Open Sales Reports"
+                reportOption.visibility = View.GONE
+                btnNewReport.visibility = View.GONE
+            }
+
+            bottomSheetDialog.setContentView(bottomSheetLayout)
+            bottomSheetDialog.show()
+        }
+
+    }
+
+    fun onBottomSheetOptionClick(view: View) {
+
+        when (view.id) {
+            R.id.suratJalanOption, R.id.invoiceOption -> {
+
+                val intent = Intent(this@DetailContactActivity, ListSuratJalanActivity::class.java)
+
+                intent.putExtra(CONST_CONTACT_ID, contactId)
+                if (view.id == R.id.invoiceOption) intent.putExtra("type_list", "list_invoice")
+                if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
+                else intent.putExtra(CONST_NAME, tvName.text)
+
+                startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+
+            } R.id.reportOption -> {
+
+                val intent = Intent(this@DetailContactActivity, ReportsActivity::class.java)
+
+                intent.putExtra(CONST_CONTACT_ID, contactId)
+                if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
+                else intent.putExtra(CONST_NAME, tvName.text)
+
+                startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+
+            } else -> {
+
+                val intent = Intent(this@DetailContactActivity, NewReportActivity::class.java)
+
+                intent.putExtra(CONST_CONTACT_ID, contactId)
+                if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
+                else intent.putExtra(CONST_NAME, tvName.text)
+                if (iMapsUrl == EMPTY_FIELD_VALUE) intent.putExtra(CONST_MAPS, "")
+                else intent.putExtra(CONST_MAPS, iMapsUrl)
+
+                startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+
+            }
+        }
+
+        Handler().postDelayed({
+            bottomSheetDialog.dismiss()
+        }, 500)
+
+    }
+
+    // Helper function to show a toast message
+    private fun showToast(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
     private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
@@ -1242,6 +1328,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private fun setupDialogSendMessage(item: ContactModel? = null) {
 
         sendMessageModal = SendMessageModal(this, lifecycleScope)
+        sendMessageModal.initializeInterface(this)
         if (item != null) sendMessageModal.setItem(item)
 
         // Setup Indicator
@@ -1680,12 +1767,17 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             else {
                 val customUtility = CustomUtility(this)
                 if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    val message = "Location permissions are required for this apps. Please grant the permissions."
+                    val message = "Izin lokasi diperlukan untuk fitur ini. Izinkan aplikasi mengakses lokasi perangkat."
                     customUtility.showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE) }
-                } else customUtility.showPermissionDeniedDialog("Location permissions are required for this apps. Please enable them in the app settings.")
+                } else customUtility.showPermissionDeniedDialog("Izin lokasi diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
             }
         }
 
+    }
+
+    override fun onSubmitMessage(status: Boolean) {
+        getDetailContact(false)
+        setupDialogSendMessage(itemSendMessage)
     }
 
 }

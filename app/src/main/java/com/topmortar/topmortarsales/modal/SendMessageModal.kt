@@ -17,20 +17,25 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.BID_VISITED
 import com.topmortar.topmortarsales.commons.PING_NORMAL
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.updateTxtMaxLength
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.databinding.ModalSendMessageBinding
 import com.topmortar.topmortarsales.model.ContactModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -46,10 +51,19 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
     private lateinit var btnSend: Button
 
     private lateinit var sessionManager: SessionManager
+    private val userKind get() = sessionManager.userKind().toString()
+    private val userID get() = sessionManager.userID().toString()
+    private lateinit var binding: ModalSendMessageBinding
 
     private var pingStatus: Int? = null
     private val msgMaxLines = 5
     private val msgMaxLength = 200
+
+    // Bidding Notice
+    private var isBiddingAvailable = true
+    private var isOnBidorVisited = false
+    private var currentBidding = 0
+    private val limitBidding get() = sessionManager.userBidLimit().toString().toInt()
 
     private var item: ContactModel? = null
     fun setItem(data: ContactModel) {
@@ -61,7 +75,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
         this.modalInterface = data
     }
     interface SendMessageModalInterface {
-        fun onSubmit(status: Boolean)
+        fun onSubmitMessage(status: Boolean)
     }
 
     fun setPingStatus(pingStatus: Int? = null) {
@@ -73,12 +87,16 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
         sessionManager = SessionManager(context)
 
-        setContentView(R.layout.modal_send_message)
+        binding = ModalSendMessageBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         setLayout()
         initVariable()
         initClickHandler()
         etMessageListener()
+
+        if (userKind == USER_KIND_SALES) getCurrentBid()
+        else setupBiddingNotice()
     }
 
     private fun setLayout() {
@@ -109,6 +127,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
         icBack.visibility = View.GONE
         icClose.visibility = View.VISIBLE
         tvTitleBar.text = "Kirim Pesan ke Toko"
+        tvTitleBar.setPadding(convertDpToPx(16, context), 0, 0, 0)
     }
 
     private fun initClickHandler() {
@@ -155,6 +174,141 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
     }
 
+    private fun setupBiddingNotice() {
+
+        if (userKind == USER_KIND_SALES) {
+
+            binding.contaierCountBidding.visibility = View.VISIBLE
+            binding.noticeBidding.visibility = View.VISIBLE
+            binding.textTotalBidding.text = "$currentBidding/$limitBidding"
+
+            if (isBiddingAvailable) {
+
+                binding.etMessage.isEnabled = true
+                binding.etMessage.setBackgroundResource(R.drawable.et_background)
+                binding.btnSend.isEnabled = true
+                binding.btnSend.setBackgroundColor(context.getColor(R.color.primary))
+
+                if (isOnBidorVisited) {
+                    binding.contaierCountBidding.visibility = View.GONE
+                    binding.textNotice.text = context.getString(R.string.text_bid_on_going)
+                } else {
+                    binding.textTotalBidding.setTextColor(context.getColor(R.color.status_bid))
+                    binding.textNotice.text = context.getString(R.string.text_bid_available)
+                }
+            } else {
+                binding.etMessage.isEnabled = false
+                binding.etMessage.setBackgroundResource(R.drawable.et_background_disabled)
+                binding.btnSend.isEnabled = false
+                binding.btnSend.setBackgroundColor(context.getColor(R.color.mixed_300))
+                binding.textTotalBidding.setTextColor(context.getColor(R.color.primary))
+                binding.textNotice.text = context.getString(R.string.text_bid_not_available)
+            }
+
+        }
+
+    }
+
+    private fun getCurrentBid() {
+        loadingState(true)
+
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.getContactsUserBid(userId = userID)
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        loadingState(false)
+
+                        currentBidding = response.results.size
+                        isBiddingAvailable = currentBidding < limitBidding
+                        for (data in response.results.listIterator()) {
+                            if (data.id_contact == item!!.id_contact) {
+                                isBiddingAvailable = true
+                                isOnBidorVisited = true
+                            }
+                        }
+                        getCurrentVisited()
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        loadingState(false)
+                        currentBidding = 0
+                        isBiddingAvailable = true
+                        getCurrentVisited()
+
+                    }
+                    else -> {
+
+                        handleMessage(context, TAG_RESPONSE_CONTACT, context.getString(R.string.failed_get_data))
+                        loadingState(true)
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(context, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                loadingState(true)
+
+            }
+
+        }
+    }
+
+    private fun getCurrentVisited() {
+        loadingState(true)
+
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.getContactsUserBid(userId = userID, visit = BID_VISITED)
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        loadingState(false)
+
+                        for (data in response.results.listIterator()) {
+                            if (data.id_contact == item!!.id_contact) {
+                                isBiddingAvailable = true
+                                isOnBidorVisited = true
+                            }
+                        }
+                        setupBiddingNotice()
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        loadingState(false)
+                        setupBiddingNotice()
+
+                    }
+                    else -> {
+
+                        handleMessage(context, TAG_RESPONSE_CONTACT, context.getString(R.string.failed_get_data))
+                        loadingState(true)
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(context, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                loadingState(true)
+
+            }
+
+        }
+    }
+
     private fun submitHandler() {
 
         if (!formValidation( "${ etMessage.text }")) return
@@ -190,7 +344,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
 //                etMessage.setText("")
 //                loadingState(false)
-//                if (modalInterface != null) modalInterface!!.onSubmit(true)
+//                if (modalInterface != null) modalInterface!!.onSubmitMessage(true)
 //                this@SendMessageModal.dismiss()
 //                return@launch
 
@@ -208,7 +362,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
                             loadingState(false)
                             handleMessage(context, TAG_RESPONSE_CONTACT, "Berhasil mengirim pesan!")
 
-                            if (modalInterface != null) modalInterface!!.onSubmit(true)
+                            if (modalInterface != null) modalInterface!!.onSubmitMessage(true)
                             this@SendMessageModal.dismiss()
 
                         }

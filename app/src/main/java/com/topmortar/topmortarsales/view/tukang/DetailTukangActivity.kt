@@ -296,7 +296,6 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         // Setup Title Bar
         tvTitleBar.text = "Detail Tukang"
         tvDescription.text = "Top Mortar Tukang"
-        tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
         etName.hint = "Masukkan Nama Tukang"
         etOwner.hint = "Masukkan Nama Lengkap Tukang"
@@ -684,11 +683,11 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             selectedUri = null
 
             // Other Columns Handle
-            addressContainer.setBackgroundResource(R.drawable.background_rounded)
+            addressContainer.setBackgroundResource(R.drawable.background_rounded_16)
             etAddress.isEnabled = false
             if (iAddress.isNullOrEmpty()) etAddress.setText(EMPTY_FIELD_VALUE)
 
-            statusContainer.setBackgroundResource(R.drawable.background_rounded)
+            statusContainer.setBackgroundResource(R.drawable.background_rounded_16)
             if (!iStatus.isNullOrEmpty()) {
                 tooltipStatus.visibility = View.VISIBLE
             }

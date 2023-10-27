@@ -38,6 +38,11 @@ const val SKILL = "skill.php"
 const val TUKANG = "tukang.php"
 const val TUKANG_MESSAGE = "tukangMessage.php"
 const val PROMO = "promo.php"
+const val STORE_STATUS = "storeStatus.php"
+const val BID = "bid.php"
+const val BID_ON_GOING = "0"
+const val BID_VISITED = "1"
+const val VISIT = "visit.php"
 
 // Request Code
 const val ACTIVITY_REQUEST_CODE = "activity_request_code"
@@ -59,6 +64,7 @@ const val TAG_ACTION_MAIN_ACTIVITY = "TAG ACTION MAIN ACTIVITY"
 // Global
 const val TOAST_LONG = Toast.LENGTH_LONG
 const val TOAST_SHORT = Toast.LENGTH_SHORT
+const val MAX_DISTANCE = 0.4
 const val EMPTY_FIELD_VALUE = "Not set"
 
 // Props
@@ -89,6 +95,7 @@ const val CONST_PROMO = "const_promo"
 const val CONST_NEAREST_STORE = "const_nearest_store"
 const val CONST_LIST_COORDINATE = "const_list_coordinate"
 const val CONST_LIST_COORDINATE_NAME = "const_list_coordinate_name"
+const val CONST_LIST_COORDINATE_STATUS = "const_list_coordinate_status"
 
 // Status
 const val LOGGED_IN = true
