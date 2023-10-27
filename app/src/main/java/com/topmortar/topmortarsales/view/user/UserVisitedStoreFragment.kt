@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter
+import com.topmortar.topmortarsales.commons.BID_VISITED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
@@ -45,6 +46,7 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
     private lateinit var sessionManager: SessionManager
     private lateinit var userKind: String
     private lateinit var userCity: String
+    private val userID get() = sessionManager.userID().toString()
     private var userCityParam: String? = ""
     private lateinit var searchModal: SearchModal
     private var selectedCity: ModalSearchModel? = null
@@ -71,7 +73,8 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
         userKind = sessionManager.userKind().toString()
         userCity = sessionManager.userCityID().toString()
 
-        setupSearchBox()
+//        setupSearchBox()
+        getContacts()
 
         return view
     }
@@ -145,14 +148,14 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
             try {
 
                 val apiService: ApiService = HttpClient.create()
-//                val response = apiService.getContacts(cityId = userCity)
-                val response = when (userKind) {
-                    USER_KIND_ADMIN -> {
-                        if (selectedCity != null ) {
-                            if (selectedCity!!.id != "-1") apiService.getContacts(cityId = selectedCity!!.id!!) else apiService.getContacts(cityId = userCityParam!!)
-                        } else apiService.getContacts(cityId = userCityParam!!)
-                    } else -> apiService.getContacts(cityId = userCity)
-                }
+                val response = apiService.getContactsUserBid(userId = userID, visit = BID_VISITED)
+//                val response = when (userKind) {
+//                    USER_KIND_ADMIN -> {
+//                        if (selectedCity != null ) {
+//                            if (selectedCity!!.id != "-1") apiService.getContacts(cityId = selectedCity!!.id!!) else apiService.getContacts(cityId = userCityParam!!)
+//                        } else apiService.getContacts(cityId = userCityParam!!)
+//                    } else -> apiService.getContacts(cityId = userCity)
+//                }
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {

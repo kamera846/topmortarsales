@@ -4,6 +4,7 @@ import com.topmortar.topmortarsales.commons.ADD_CITY
 import com.topmortar.topmortarsales.commons.ADD_USERS
 import com.topmortar.topmortarsales.commons.AUTH
 import com.topmortar.topmortarsales.commons.BID
+import com.topmortar.topmortarsales.commons.BID_ON_GOING
 import com.topmortar.topmortarsales.commons.EDIT_CONTACT
 import com.topmortar.topmortarsales.commons.GET_CITY
 import com.topmortar.topmortarsales.commons.CONTACT
@@ -309,6 +310,7 @@ interface ApiService {
 
     @GET(BID)
     suspend fun getContactsUserBid(
-        @Query("u") userId: String
+        @Query("u") userId: String,
+        @Query("visit") visit: String = BID_ON_GOING
     ): ResponseContactList
 }
