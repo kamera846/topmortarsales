@@ -1241,6 +1241,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 btnNewReport.visibility = View.GONE
             } else if (sessionManager.userKind() == USER_KIND_ADMIN) {
                 reportsTitle.text = "Open Sales Reports"
+                reportOption.visibility = View.GONE
                 btnNewReport.visibility = View.GONE
             }
 

@@ -61,6 +61,11 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
         this.userCityParam = id
     }
 
+    private var userIDParam: String? = ""
+    fun setUserIdParam(id: String?) {
+        this.userIDParam = id
+    }
+
 
     private var listener: CounterItem? = null
     interface CounterItem {
@@ -157,7 +162,7 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getContactsUserBid(userId = userID)
+                val response = apiService.getContactsUserBid(userId = userIDParam!!.ifEmpty { userID })
 //                val response = when (userKind) {
 //                    USER_KIND_ADMIN -> {
 //                        if (selectedCity != null ) {

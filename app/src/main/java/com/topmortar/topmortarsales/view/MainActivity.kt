@@ -375,7 +375,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             cityItem.isVisible = false
             skillItem.isVisible = false
         }
-        if (sessionManager.userKind() != USER_KIND_ADMIN && sessionManager.userKind() != USER_KIND_SALES) {
+        if (sessionManager.userKind() != USER_KIND_SALES) {
             myProfile.isVisible = false
         }
 

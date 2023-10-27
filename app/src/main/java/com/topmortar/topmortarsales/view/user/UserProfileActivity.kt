@@ -209,6 +209,7 @@ class UserProfileActivity : AppCompatActivity() {
             val pagerAdapter = UserProfileViewPagerAdapter(supportFragmentManager) // Create your PagerAdapter
 
             pagerAdapter.setUserCityParam(iLocation)
+            pagerAdapter.setUserIdParam(iUserID)
             viewPager.adapter = pagerAdapter
 
             // Connect TabLayout and ViewPager

@@ -70,6 +70,11 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
         this.userCityParam = id
     }
 
+    private var userIDParam: String? = ""
+    fun setUserIdParam(id: String?) {
+        this.userIDParam = id
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -156,7 +161,7 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getContactsUserBid(userId = userID, visit = BID_VISITED)
+                val response = apiService.getContactsUserBid(userId = userIDParam!!.ifEmpty { userID }, visit = BID_VISITED)
 //                val response = when (userKind) {
 //                    USER_KIND_ADMIN -> {
 //                        if (selectedCity != null ) {

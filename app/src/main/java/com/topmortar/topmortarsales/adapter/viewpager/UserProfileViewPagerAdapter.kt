@@ -13,6 +13,11 @@ class UserProfileViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm
         this.userCityParam = id
     }
 
+    private var userIDParam: String? = ""
+    fun setUserIdParam(id: String?) {
+        this.userIDParam = id
+    }
+
     private var listener: CounterPageItem? = null
     interface CounterPageItem {
         fun counterItem(count: Int, tabIndex: Int)
@@ -28,6 +33,7 @@ class UserProfileViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm
 
                 val fragment = UserOnGoingStoreFragment()
                 fragment.setUserCityParam(userCityParam)
+                fragment.setUserIdParam(userIDParam)
                 fragment.setCounterItem(object : UserOnGoingStoreFragment.CounterItem{
                     override fun counterItem(count: Int) {
                         listener?.counterItem(count, 0)
@@ -40,6 +46,7 @@ class UserProfileViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm
 
                 val fragment = UserVisitedStoreFragment()
                 fragment.setUserCityParam(userCityParam)
+                fragment.setUserIdParam(userIDParam)
                 fragment.setCounterItem(object : UserVisitedStoreFragment.CounterItem{
                     override fun counterItem(count: Int) {
                         listener?.counterItem(count, 1)
