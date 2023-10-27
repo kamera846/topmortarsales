@@ -19,24 +19,39 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAX_DISTANCE
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.SYNC_NOW
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
+import com.topmortar.topmortarsales.commons.utils.PhoneHandler
+import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
+import com.topmortar.topmortarsales.commons.utils.createPartFromString
+import com.topmortar.topmortarsales.commons.utils.handleMessage
+import com.topmortar.topmortarsales.data.ApiService
+import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityNewReportBinding
 import com.topmortar.topmortarsales.view.MapsActivity
+import kotlinx.coroutines.launch
+import retrofit2.http.Part
 
 class NewReportActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityNewReportBinding
+    private lateinit var sessionManager: SessionManager
     private lateinit var customUtility: CustomUtility
     private lateinit var progressDialog: ProgressDialog
 
@@ -45,6 +60,7 @@ class NewReportActivity : AppCompatActivity() {
 
     private var isDistanceToLong = false
     private var id: String = ""
+    private val idUser get() = sessionManager.userID().toString()
     private var name: String = ""
     private var coordinate: String = ""
 
@@ -55,6 +71,7 @@ class NewReportActivity : AppCompatActivity() {
         binding = ActivityNewReportBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        sessionManager = SessionManager(this)
         customUtility = CustomUtility(this)
 
         progressDialog = ProgressDialog(this)
@@ -150,7 +167,7 @@ class NewReportActivity : AppCompatActivity() {
                                 // Calculate Distance
                                 val urlUtility = URLUtility(this)
                                 val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
-                                val shortDistance = "%.3f".format(distance).toDouble()
+                                val shortDistance = "%.3f".format(distance)
 
 //                                if (distance > MAX_DISTANCE) {
 //                                    val builder = AlertDialog.Builder(this)
@@ -195,7 +212,7 @@ class NewReportActivity : AppCompatActivity() {
                                     if (customUtility.isDarkMode()) textColor = getColor(R.color.black_600)
 
                                     binding.etDistance.setTextColor(textColor)
-                                    binding.etDistance.text = shortDistance.toString()
+                                    binding.etDistance.text = shortDistance
                                     binding.icRefreshDistance.visibility = View.VISIBLE
                                     binding.tvDistanceError.visibility = View.GONE
                                     isDistanceToLong = false
@@ -254,7 +271,7 @@ class NewReportActivity : AppCompatActivity() {
 
         val dialog = AlertDialog.Builder(this)
             .setTitle("Konfirmasi Laporan!")
-            .setMessage("Apakah anda yakin ingi mengirim laporan sekarang?")
+            .setMessage("Apakah anda yakin ingin mengirim laporan sekarang?")
             .setNegativeButton("Tidak") { dialog, _ -> dialog.dismiss() }
             .setPositiveButton("Iya") { _, _ -> submitReport() }
             .create()
@@ -288,11 +305,64 @@ class NewReportActivity : AppCompatActivity() {
     private fun submitReport() {
         loadingSubmit(true)
 
-        Handler().postDelayed({
-            loadingSubmit(false)
-            Toast.makeText(this, "Berhasil mengirim laporan", TOAST_SHORT).show()
-            finish()
-        }, 2000)
+        lifecycleScope.launch {
+            try {
+
+                val rbidContact = createPartFromString(id)
+                val rbidUser = createPartFromString(idUser)
+                val rbdistanceVisit = createPartFromString(binding.etDistance.text.toString())
+                val rblaporanVisit = createPartFromString(binding.etMessage.text.toString())
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.makeVisitReport(
+                    idContact = rbidContact,
+                    idUser = rbidUser,
+                    distanceVisit = rbdistanceVisit,
+                    laporanVisit = rblaporanVisit,
+                )
+
+                if (response.isSuccessful) {
+
+                    val responseBody = response.body()!!
+
+                    when (responseBody.status) {
+                        RESPONSE_STATUS_OK -> {
+
+                            loadingSubmit(false)
+                            Toast.makeText(this@NewReportActivity, responseBody.message, TOAST_SHORT).show()
+                            finish()
+
+                        }
+                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+
+                            handleMessage(this@NewReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan! Message: ${ responseBody.message }")
+                            loadingSubmit(false)
+
+                        }
+                        else -> {
+
+                            handleMessage(this@NewReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan!: ${ responseBody.message }")
+                            loadingSubmit(false)
+
+                        }
+                    }
+
+                } else {
+
+                    handleMessage(this@NewReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan! Error: " + response.message())
+                    loadingSubmit(false)
+
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(this@NewReportActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                loadingSubmit(false)
+
+            }
+
+        }
     }
 
     private fun loadingSubmit(state: Boolean) {
