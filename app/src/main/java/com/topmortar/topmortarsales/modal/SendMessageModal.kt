@@ -17,7 +17,9 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.BID_VISITED
 import com.topmortar.topmortarsales.commons.PING_NORMAL
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -50,6 +52,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
     private lateinit var sessionManager: SessionManager
     private val userKind get() = sessionManager.userKind().toString()
+    private val userID get() = sessionManager.userID().toString()
     private lateinit var binding: ModalSendMessageBinding
 
     private var pingStatus: Int? = null
@@ -58,8 +61,9 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
     // Bidding Notice
     private var isBiddingAvailable = true
-    private val currentBidding get() = sessionManager.userID()
-    private val limitBidding get() = sessionManager.userBidLimit()
+    private var isOnBidorVisited = false
+    private var currentBidding = 0
+    private val limitBidding get() = sessionManager.userBidLimit().toString().toInt()
 
     private var item: ContactModel? = null
     fun setItem(data: ContactModel) {
@@ -90,7 +94,9 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
         initVariable()
         initClickHandler()
         etMessageListener()
-        setupBiddingNotice()
+
+        if (userKind == USER_KIND_SALES) getCurrentBid()
+        else setupBiddingNotice()
     }
 
     private fun setLayout() {
@@ -172,21 +178,25 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
         if (userKind == USER_KIND_SALES) {
 
+            binding.contaierCountBidding.visibility = View.VISIBLE
             binding.noticeBidding.visibility = View.VISIBLE
             binding.textTotalBidding.text = "$currentBidding/$limitBidding"
 
             if (isBiddingAvailable) {
-//                binding.inputContainer.visibility = View.VISIBLE
-//                binding.btnSend.visibility = View.VISIBLE
+
                 binding.etMessage.isEnabled = true
                 binding.etMessage.setBackgroundResource(R.drawable.et_background)
                 binding.btnSend.isEnabled = true
                 binding.btnSend.setBackgroundColor(context.getColor(R.color.primary))
-                binding.textTotalBidding.setTextColor(context.getColor(R.color.status_bid))
-                binding.textNotice.text = context.getString(R.string.text_bid_available)
+
+                if (isOnBidorVisited) {
+                    binding.contaierCountBidding.visibility = View.GONE
+                    binding.textNotice.text = context.getString(R.string.text_bid_on_going)
+                } else {
+                    binding.textTotalBidding.setTextColor(context.getColor(R.color.status_bid))
+                    binding.textNotice.text = context.getString(R.string.text_bid_available)
+                }
             } else {
-//                binding.inputContainer.visibility = View.GONE
-//                binding.btnSend.visibility = View.GONE
                 binding.etMessage.isEnabled = false
                 binding.etMessage.setBackgroundResource(R.drawable.et_background_disabled)
                 binding.btnSend.isEnabled = false
@@ -197,6 +207,106 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
         }
 
+    }
+
+    private fun getCurrentBid() {
+        loadingState(true)
+
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.getContactsUserBid(userId = userID)
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        loadingState(false)
+
+                        currentBidding = response.results.size
+                        isBiddingAvailable = currentBidding < limitBidding
+                        for (data in response.results.listIterator()) {
+                            if (data.id_contact == item!!.id_contact) {
+                                isBiddingAvailable = true
+                                isOnBidorVisited = true
+                            }
+                        }
+                        getCurrentVisited()
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        loadingState(false)
+                        currentBidding = 0
+                        isBiddingAvailable = true
+                        getCurrentVisited()
+
+                    }
+                    else -> {
+
+                        handleMessage(context, TAG_RESPONSE_CONTACT, context.getString(R.string.failed_get_data))
+                        loadingState(true)
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(context, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                loadingState(true)
+
+            }
+
+        }
+    }
+
+    private fun getCurrentVisited() {
+        loadingState(true)
+
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.getContactsUserBid(userId = userID, visit = BID_VISITED)
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        loadingState(false)
+
+                        for (data in response.results.listIterator()) {
+                            if (data.id_contact == item!!.id_contact) {
+                                isBiddingAvailable = true
+                                isOnBidorVisited = true
+                            }
+                        }
+                        setupBiddingNotice()
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        loadingState(false)
+                        setupBiddingNotice()
+
+                    }
+                    else -> {
+
+                        handleMessage(context, TAG_RESPONSE_CONTACT, context.getString(R.string.failed_get_data))
+                        loadingState(true)
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(context, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                loadingState(true)
+
+            }
+
+        }
     }
 
     private fun submitHandler() {

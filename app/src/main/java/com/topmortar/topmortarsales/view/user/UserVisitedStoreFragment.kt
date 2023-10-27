@@ -58,6 +58,14 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
     private var previousSearchTerm = ""
     private var isSearchActive = false
 
+    private var listener: CounterItem? = null
+    interface CounterItem {
+        fun counterItem(count: Int)
+    }
+    fun setCounterItem(listener: CounterItem) {
+        this.listener = listener
+    }
+
     fun setUserCityParam(id: String?) {
         this.userCityParam = id
     }
@@ -167,11 +175,13 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
 
 //                        if (userKind == USER_KIND_ADMIN) getCities()
 //                        else loadingState(false)
+                        listener?.counterItem(response.results.size)
                         loadingState(false)
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
+                        listener?.counterItem(0)
                         loadingState(true, "Daftar kontak kosong!")
 
                     }

@@ -9,9 +9,16 @@ import com.topmortar.topmortarsales.view.user.UserVisitedStoreFragment
 class UserProfileViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
 
     private var userCityParam: String? = ""
-
     fun setUserCityParam(id: String?) {
         this.userCityParam = id
+    }
+
+    private var listener: CounterPageItem? = null
+    interface CounterPageItem {
+        fun counterItem(count: Int, tabIndex: Int)
+    }
+    fun setCounterPageItem(listener: CounterPageItem) {
+        this.listener = listener
     }
 
     override fun getItem(position: Int): Fragment {
@@ -21,12 +28,24 @@ class UserProfileViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm
 
                 val fragment = UserOnGoingStoreFragment()
                 fragment.setUserCityParam(userCityParam)
+                fragment.setCounterItem(object : UserOnGoingStoreFragment.CounterItem{
+                    override fun counterItem(count: Int) {
+                        listener?.counterItem(count, 0)
+                    }
+
+                })
                 return fragment
 
             } else -> {
 
                 val fragment = UserVisitedStoreFragment()
                 fragment.setUserCityParam(userCityParam)
+                fragment.setCounterItem(object : UserVisitedStoreFragment.CounterItem{
+                    override fun counterItem(count: Int) {
+                        listener?.counterItem(count, 1)
+                    }
+
+                })
                 return fragment
 
             }
@@ -41,8 +60,8 @@ class UserProfileViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm
     override fun getPageTitle(position: Int): CharSequence? {
         // Set tab titles
         return when (position) {
-            0 -> "On Going"
-            else -> "Visited (85)"
+            0 -> "On Bidding"
+            else -> "Visited"
         }
     }
 }

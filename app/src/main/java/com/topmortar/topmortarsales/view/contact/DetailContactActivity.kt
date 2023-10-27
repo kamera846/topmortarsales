@@ -528,7 +528,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
 
-        itemSendMessage = ContactModel(nama = iName!!, nomorhp = iPhone!!, store_owner = iOwner!!, tgl_lahir = iBirthday!!, maps_url = iMapsUrl!!, id_city = iLocation!!)
+        itemSendMessage = ContactModel(id_contact = iContactId!!, nama = iName!!, nomorhp = iPhone!!, store_owner = iOwner!!, tgl_lahir = iBirthday!!, maps_url = iMapsUrl!!, id_city = iLocation!!)
         setupDialogSendMessage(itemSendMessage)
 
         if (!iContactId.isNullOrEmpty() ) {
@@ -877,6 +877,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         RESPONSE_STATUS_OK -> {
 
                             itemSendMessage = ContactModel(
+                                id_contact = contactId!!,
                                 nomorhp = pPhone,
                                 nama = pName,
                                 store_owner = pOwner,
@@ -1775,6 +1776,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     override fun onSubmitMessage(status: Boolean) {
         getDetailContact(false)
+        setupDialogSendMessage(itemSendMessage)
     }
 
 }

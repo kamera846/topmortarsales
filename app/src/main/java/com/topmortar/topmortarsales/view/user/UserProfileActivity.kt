@@ -2,9 +2,7 @@ package com.topmortar.topmortarsales.view.user
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -15,7 +13,6 @@ import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
-import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.android.material.tabs.TabLayout
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.viewpager.UserProfileViewPagerAdapter
@@ -41,20 +38,16 @@ import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
-import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
-import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
-import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityUserProfileBinding
 import com.topmortar.topmortarsales.modal.ChartSalesPricingModal
 import com.topmortar.topmortarsales.model.ContactModel
-import com.topmortar.topmortarsales.model.UserModel
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
@@ -69,6 +62,8 @@ class UserProfileActivity : AppCompatActivity() {
 
     private var iUserName: String? = null; private var iFullName: String? = null; private var iUserLevel: String? = null
     private var iUserID: String? = null; private var iPhone: String? = null; private var iLocation: String? = null
+
+    private val bidLimit get() = sessionManager.userBidLimit().toString()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -218,6 +213,13 @@ class UserProfileActivity : AppCompatActivity() {
 
             // Connect TabLayout and ViewPager
             tabLayout.setupWithViewPager(viewPager)
+            pagerAdapter.setCounterPageItem(object : UserProfileViewPagerAdapter.CounterPageItem{
+                override fun counterItem(count: Int, tabIndex: Int) {
+                    if (tabIndex == 0) tabLayout.getTabAt(tabIndex)?.text = "On Bid ($count/$bidLimit)"
+                    else tabLayout.getTabAt(tabIndex)?.text = "Visited ($count)"
+                }
+
+            })
 
         }
 
