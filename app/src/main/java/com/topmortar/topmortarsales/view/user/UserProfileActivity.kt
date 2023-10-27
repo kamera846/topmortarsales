@@ -199,7 +199,7 @@ class UserProfileActivity : AppCompatActivity() {
         if (iUserLevel == AUTH_LEVEL_SALES) {
 
             if (sessionManager.userKind() == USER_KIND_ADMIN) binding.titleBarLight.icEdit.visibility = View.VISIBLE
-            binding.priceContainer.visibility = View.VISIBLE
+            binding.priceContainer.visibility = View.GONE
             binding.tabContainer.visibility = View.VISIBLE
 //            binding.counterContainer.visibility = View.VISIBLE
 
@@ -242,7 +242,7 @@ class UserProfileActivity : AppCompatActivity() {
 
                         val dataList = response.results
 
-                        binding.barChartContainer.visibility = View.VISIBLE
+                        binding.barChartContainer.visibility = View.GONE
                         val barChart = binding.storeBarChart
 
                         // Create some sample data

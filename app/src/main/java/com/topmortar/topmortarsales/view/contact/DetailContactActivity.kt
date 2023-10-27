@@ -1281,7 +1281,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 intent.putExtra(CONST_CONTACT_ID, contactId)
                 if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
                 else intent.putExtra(CONST_NAME, tvName.text)
-                if (iMapsUrl.isNullOrEmpty()) intent.putExtra(CONST_MAPS, "")
+                if (iMapsUrl == EMPTY_FIELD_VALUE) intent.putExtra(CONST_MAPS, "")
                 else intent.putExtra(CONST_MAPS, iMapsUrl)
 
                 startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)

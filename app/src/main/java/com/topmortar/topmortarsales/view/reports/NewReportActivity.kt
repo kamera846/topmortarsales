@@ -230,7 +230,7 @@ class NewReportActivity : AppCompatActivity() {
 
                     } else {
                         progressDialog.dismiss()
-                        val message = "Anda tidak dapat membuat laporkan untuk saat ini, silakan hubungi admin untuk memperbarui koordinat toko ini"
+                        val message = "Anda tidak dapat membuat laporan untuk saat ini, silakan hubungi admin untuk memperbarui koordinat toko ini"
                         val actionTitle = "Hubungi Sekarang"
                         customUtility.showPermissionDeniedSnackbar(message, actionTitle) { navigateChatAdmin() }
                     }
