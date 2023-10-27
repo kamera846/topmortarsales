@@ -5,9 +5,11 @@ import android.os.Bundle
 import android.view.View
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.ReportsRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -17,6 +19,7 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityReportsBinding
+import com.topmortar.topmortarsales.modal.DetailReportModal
 import com.topmortar.topmortarsales.model.ReportVisitModel
 import kotlinx.coroutines.launch
 
@@ -51,6 +54,7 @@ class ReportsActivity : AppCompatActivity() {
     }
 
     private fun getList() {
+        loadingState(true)
 
         lifecycleScope.launch {
             try {
@@ -65,30 +69,43 @@ class ReportsActivity : AppCompatActivity() {
                         RESPONSE_STATUS_OK -> {
 
                             setRecyclerView(responseBody.results)
+                            loadingState(false)
+
+                        }
+                        RESPONSE_STATUS_EMPTY -> {
+
+                            loadingState(true, "Belum ada laporan")
 
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(this@ReportsActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat laporan! Message: ${ responseBody.message }")
+                            val message = "Gagal memuat laporan! Message: ${ responseBody.message }"
+                            handleMessage(this@ReportsActivity, TAG_RESPONSE_MESSAGE, message)
+                            loadingState(true, message)
 
                         }
                         else -> {
 
-                            handleMessage(this@ReportsActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat laporan!: ${ responseBody.message }")
+                            val message = "Gagal memuat laporan!: ${ responseBody.message }"
+                            handleMessage(this@ReportsActivity, TAG_RESPONSE_MESSAGE, message)
+                            loadingState(true, message)
 
                         }
                     }
 
                 } else {
 
-                    handleMessage(this@ReportsActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat laporan! Error: " + response.message())
+                    val message = "Gagal memuat laporan! Error: " + response.message()
+                    handleMessage(this@ReportsActivity, TAG_RESPONSE_MESSAGE, message)
+                    loadingState(true, message)
 
                 }
 
-
             } catch (e: Exception) {
 
-                handleMessage(this@ReportsActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                val message = "Failed run service. Exception " + e.message
+                handleMessage(this@ReportsActivity, TAG_RESPONSE_MESSAGE, message)
+                loadingState(true, message)
 
             }
 
@@ -97,16 +114,6 @@ class ReportsActivity : AppCompatActivity() {
     }
 
     private fun setRecyclerView(items: ArrayList<ReportVisitModel>) {
-//        val items = arrayListOf<ReportModel>()
-//
-//        val title = getString(R.string.lorem_title)
-//        val desc = getString(R.string.lorem_desc)
-//        val date = getString(R.string.dummy_date)
-//
-//        for (i in 0..24) {
-//            if (i == 0 || i == 5 || i == 9 || i == 24) items.add(ReportModel(title = title, description = "Kunjungan penagihan periode ke 3", date = date))
-//            else items.add(ReportModel(title = title, description = desc, date = date))
-//        }
 
         val mAdapter = ReportsRecyclerViewAdapter()
         mAdapter.setList(items)
@@ -114,7 +121,34 @@ class ReportsActivity : AppCompatActivity() {
         binding.recyclerView.apply {
             layoutManager = GridLayoutManager(this@ReportsActivity, 2)
             adapter = mAdapter
+
+            mAdapter.setOnItemClickListener(object : ReportsRecyclerViewAdapter.OnItemClickListener{
+                override fun onItemClick(item: ReportVisitModel) {
+                    val modalDetail = DetailReportModal(this@ReportsActivity)
+                    modalDetail.setData(item)
+                    modalDetail.show()
+                }
+
+            })
         }
+    }
+
+    private fun loadingState(state: Boolean, message: String = getString(R.string.txt_loading)) {
+
+        binding.txtLoading.text = message
+
+        if (state) {
+
+            binding.txtLoading.visibility = View.VISIBLE
+            binding.recyclerView.visibility = View.GONE
+
+        } else {
+
+            binding.txtLoading.visibility = View.GONE
+            binding.recyclerView.visibility = View.VISIBLE
+
+        }
+
     }
 
     private fun initClickHandler() {

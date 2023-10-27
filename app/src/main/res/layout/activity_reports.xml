@@ -11,6 +11,16 @@
         android:id="@+id/titleBarDark"
         layout="@layout/component_title_bar"/>
 
+    <TextView
+        android:visibility="gone"
+        android:id="@+id/txt_loading"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:textAlignment="center"
+        android:text="@string/txt_loading"
+        android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
