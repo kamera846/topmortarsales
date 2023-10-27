@@ -356,8 +356,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                                 val originalBitmap = BitmapFactory.decodeResource(resources, iconDrawable)
 
-                                val newWidth = convertDpToPx(32, this)
-                                val newHeight = convertDpToPx(32, this)
+                                val newWidth = convertDpToPx(40, this)
+                                val newHeight = convertDpToPx(40, this)
 
                                 val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
 
@@ -691,12 +691,21 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     private fun setPin(latLng: LatLng, placeName: String, moveCamera: Boolean = true) {
 
+        val iconDrawable = R.drawable.store_location_status_blacklist
+        val originalBitmap = BitmapFactory.decodeResource(resources, iconDrawable)
+
+        val newWidth = convertDpToPx(40, this)
+        val newHeight = convertDpToPx(40, this)
+
+        val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
+
         selectedLocation = latLng
         mMap.clear()
         mMap.addMarker(
             MarkerOptions()
                 .position(latLng)
                 .title(placeName)
+                .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
         )
 
         if (moveCamera) {
