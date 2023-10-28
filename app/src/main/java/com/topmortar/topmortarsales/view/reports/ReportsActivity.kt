@@ -77,7 +77,7 @@ class ReportsActivity : AppCompatActivity() {
                         }
                         RESPONSE_STATUS_EMPTY -> {
 
-                            loadingState(true, "Belum ada laporan")
+                            loadingState(true, "Anda belum pernah membuat laporan.")
 
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {

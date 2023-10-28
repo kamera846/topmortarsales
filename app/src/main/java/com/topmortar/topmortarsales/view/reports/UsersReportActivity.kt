@@ -137,7 +137,7 @@ class UsersReportActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCl
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        loadingState(true, "Daftar user kosong!")
+                        loadingState(true, "Belum ada laporan dari sales untuk toko ini!")
 
                     }
                     else -> {
