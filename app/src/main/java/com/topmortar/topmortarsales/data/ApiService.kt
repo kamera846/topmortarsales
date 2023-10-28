@@ -330,4 +330,10 @@ interface ApiService {
         @Query("u") idUser: String,
         @Query("s") idContact: String
     ): Response<ResponseReportVisit>
+
+    @GET(VISIT)
+    suspend fun listUsersReport(
+        @Query("a") idUser: String,
+        @Query("s") idContact: String
+    ): ResponseUsers
 }
