@@ -100,6 +100,7 @@ import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.reports.NewReportActivity
 import com.topmortar.topmortarsales.view.reports.ReportsActivity
+import com.topmortar.topmortarsales.view.reports.UsersReportActivity
 import com.topmortar.topmortarsales.view.suratJalan.ListSuratJalanActivity
 import com.topmortar.topmortarsales.view.suratJalan.PreviewClosingActivity
 import kotlinx.coroutines.launch
@@ -1240,8 +1241,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 reportOption.visibility = View.GONE
                 btnNewReport.visibility = View.GONE
             } else if (sessionManager.userKind() == USER_KIND_ADMIN) {
-                reportsTitle.text = "Open Sales Reports"
-                reportOption.visibility = View.GONE
+                reportsTitle.text = "Lihat Laporan Sales"
+                reportOption.visibility = View.VISIBLE
                 btnNewReport.visibility = View.GONE
             }
 
@@ -1267,7 +1268,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             } R.id.reportOption -> {
 
-                val intent = Intent(this@DetailContactActivity, ReportsActivity::class.java)
+                var intent = Intent(this@DetailContactActivity, ReportsActivity::class.java)
+
+                if (sessionManager.userKind() == USER_KIND_ADMIN) intent = Intent(this@DetailContactActivity, UsersReportActivity::class.java)
 
                 intent.putExtra(CONST_CONTACT_ID, contactId)
                 if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")

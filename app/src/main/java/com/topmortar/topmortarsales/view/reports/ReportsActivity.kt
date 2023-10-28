@@ -9,6 +9,7 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.ReportsRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
@@ -29,6 +30,7 @@ class ReportsActivity : AppCompatActivity() {
     private lateinit var binding: ActivityReportsBinding
 
     private val userID get() = sessionManager.userID().toString()
+    private var iUserID: String? = null
     private var contactID = ""
     private var contactName = ""
 
@@ -41,12 +43,13 @@ class ReportsActivity : AppCompatActivity() {
 
         sessionManager = SessionManager(this)
 
+        iUserID = intent.getStringExtra(CONST_USER_ID)
         contactID = intent.getStringExtra(CONST_CONTACT_ID).toString()
         contactName = intent.getStringExtra(CONST_NAME).toString()
 
         binding.titleBarDark.tvTitleBar.text = contactName
         binding.titleBarDark.tvTitleBarDescription.visibility = View.VISIBLE
-        binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan saya pada toko ini"
+        binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (iUserID.isNullOrEmpty()) "saya" else ""} pada toko ini"
 
         getList()
         initClickHandler()
@@ -59,7 +62,7 @@ class ReportsActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.listReport(idUser = userID, idContact = contactID)
+                val response = apiService.listReport(idUser = if (iUserID.isNullOrEmpty()) userID else iUserID!!, idContact = contactID)
 
                 if (response.isSuccessful) {
 
@@ -74,7 +77,7 @@ class ReportsActivity : AppCompatActivity() {
                         }
                         RESPONSE_STATUS_EMPTY -> {
 
-                            loadingState(true, "Belum ada laporan")
+                            loadingState(true, "Anda belum pernah membuat laporan.")
 
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
