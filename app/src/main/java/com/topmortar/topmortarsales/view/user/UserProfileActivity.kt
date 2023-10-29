@@ -33,6 +33,7 @@ import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
+import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -49,6 +50,8 @@ import com.topmortar.topmortarsales.databinding.ActivityUserProfileBinding
 import com.topmortar.topmortarsales.modal.ChartSalesPricingModal
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
+import com.topmortar.topmortarsales.view.reports.ReportsActivity
+import com.topmortar.topmortarsales.view.reports.UsersReportActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -170,6 +173,15 @@ class UserProfileActivity : AppCompatActivity() {
 
     }
 
+    private fun navigateSalesReport() {
+
+        val intent = Intent(this@UserProfileActivity, ReportsActivity::class.java)
+        intent.putExtra(CONST_USER_ID, iUserID)
+        intent.putExtra(CONST_FULL_NAME, iFullName)
+        startActivity(intent)
+
+    }
+
     private fun initClickHandler() {
 
         if (sessionManager.userKind() == USER_KIND_ADMIN) {
@@ -179,6 +191,7 @@ class UserProfileActivity : AppCompatActivity() {
         binding.toggleBarChart.setOnClickListener { toggleBarChart() }
         binding.priceContainer.setOnClickListener { modalPricingDetails.show() }
         binding.titleBarLight.icBack.setOnClickListener { finish() }
+        binding.salesReportContainer.setOnClickListener { navigateSalesReport() }
 
     }
 
@@ -187,6 +200,8 @@ class UserProfileActivity : AppCompatActivity() {
         if (iUserID.isNullOrEmpty()) {
             return getUserDetail()
         }
+
+        binding.salesReportContainer.visibility = View.VISIBLE
 
         if (iUserName!!.isNotEmpty()) {
             binding.titleBarLight.tvTitleBar.text = iUserName

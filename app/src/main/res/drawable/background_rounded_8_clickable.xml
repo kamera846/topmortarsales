@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background when is pressed -->
+    <item android:state_pressed="true">
+        <shape>
+            <corners android:radius="8dp" />
+            <solid android:color="@color/light" />
+        </shape>
+    </item>
+    <!-- Default background -->
+    <item>
+        <shape>
+            <solid android:color="@color/light" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+</selector>

@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.ReportsRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -31,8 +32,9 @@ class ReportsActivity : AppCompatActivity() {
 
     private val userID get() = sessionManager.userID().toString()
     private var iUserID: String? = null
-    private var contactID = ""
-    private var contactName = ""
+    private var contactID: String? = null
+    private var contactName: String? = null
+    private var userFullName: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,12 +46,14 @@ class ReportsActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
 
         iUserID = intent.getStringExtra(CONST_USER_ID)
-        contactID = intent.getStringExtra(CONST_CONTACT_ID).toString()
-        contactName = intent.getStringExtra(CONST_NAME).toString()
+        contactID = intent.getStringExtra(CONST_CONTACT_ID)
+        contactName = intent.getStringExtra(CONST_NAME)
+        userFullName = intent.getStringExtra(CONST_FULL_NAME)
 
-        binding.titleBarDark.tvTitleBar.text = contactName
+        binding.titleBarDark.tvTitleBar.text = if (!contactName.isNullOrEmpty()) contactName else "Laporan Sales"
         binding.titleBarDark.tvTitleBarDescription.visibility = View.VISIBLE
-        binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (iUserID.isNullOrEmpty()) "saya" else ""} pada toko ini"
+        if (!contactName.isNullOrEmpty()) binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (iUserID.isNullOrEmpty()) "saya" else ""} pada toko ini"
+        else binding.titleBarDark.tvTitleBarDescription.text = "Daftar semua laporan ${if (userFullName.isNullOrEmpty()) "" else "dari $userFullName"}"
 
         getList()
         initClickHandler()
@@ -62,7 +66,7 @@ class ReportsActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.listReport(idUser = if (iUserID.isNullOrEmpty()) userID else iUserID!!, idContact = contactID)
+                val response = apiService.listReport(idUser = if (iUserID.isNullOrEmpty()) userID else iUserID!!, idContact = if (contactID.isNullOrEmpty()) "-1" else contactID!!)
 
                 if (response.isSuccessful) {
 
