@@ -169,43 +169,43 @@ class NewReportActivity : AppCompatActivity() {
                                 val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
                                 val shortDistance = "%.3f".format(distance)
 
-//                                if (distance > MAX_DISTANCE) {
-//                                    val builder = AlertDialog.Builder(this)
-//                                    builder.setCancelable(false)
-//                                    builder.setOnDismissListener { progressDialog.dismiss() }
-//                                    builder.setOnCancelListener { progressDialog.dismiss() }
-//                                    builder.setTitle("Peringatan!")
-//                                        .setMessage("Titik anda saat ini $shortDistance km dari titik toko. Cobalah untuk lebih dekat dengan toko!")
-//                                        .setPositiveButton("Oke") { dialog, _ ->
-//                                            progressDialog.dismiss()
-//
-//                                            binding.etDistance.setTextColor(getColor(R.color.primary))
-//                                            binding.etDistance.text = shortDistance.toString()
-//                                            binding.icRefreshDistance.visibility = View.VISIBLE
-//                                            binding.tvDistanceError.visibility = View.VISIBLE
-//                                            binding.tvDistanceError.text = "Cobalah untuk lebih dekat dengan titik toko dan refresh jaraknya!"
-//                                            isDistanceToLong = true
-//
-//                                            dialog.dismiss()
-//                                        }
-//                                        .setNegativeButton("Buka Maps") { dialog, _ ->
-//                                            val intent = Intent(this@NewReportActivity, MapsActivity::class.java)
-//                                            intent.putExtra(CONST_MAPS, mapsUrl)
-//                                            startActivity(intent)
-//
-//                                            progressDialog.dismiss()
-//
-//                                            binding.etDistance.setTextColor(getColor(R.color.primary))
-//                                            binding.etDistance.text = shortDistance.toString()
-//                                            binding.icRefreshDistance.visibility = View.VISIBLE
-//                                            binding.tvDistanceError.visibility = View.VISIBLE
-//                                            binding.tvDistanceError.text = "Cobalah untuk lebih dekat dengan titik toko dan refresh jaraknya!"
-//                                            isDistanceToLong = true
-//
-//                                            dialog.dismiss()
-//                                        }
-//                                    builder.show()
-//                                } else {
+                                if (distance > MAX_DISTANCE) {
+                                    val builder = AlertDialog.Builder(this)
+                                    builder.setCancelable(false)
+                                    builder.setOnDismissListener { progressDialog.dismiss() }
+                                    builder.setOnCancelListener { progressDialog.dismiss() }
+                                    builder.setTitle("Peringatan!")
+                                        .setMessage("Titik anda saat ini $shortDistance km dari titik toko. Cobalah untuk lebih dekat dengan toko!")
+                                        .setPositiveButton("Oke") { dialog, _ ->
+                                            progressDialog.dismiss()
+
+                                            binding.etDistance.setTextColor(getColor(R.color.primary))
+                                            binding.etDistance.text = shortDistance
+                                            binding.icRefreshDistance.visibility = View.VISIBLE
+                                            binding.tvDistanceError.visibility = View.VISIBLE
+                                            binding.tvDistanceError.text = "Jarak anda lebih dari $MAX_DISTANCE km. Cobalah untuk lebih dekat dengan titik toko dan refresh jaraknya!"
+                                            isDistanceToLong = true
+
+                                            dialog.dismiss()
+                                        }
+                                        .setNegativeButton("Buka Maps") { dialog, _ ->
+                                            val intent = Intent(this@NewReportActivity, MapsActivity::class.java)
+                                            intent.putExtra(CONST_MAPS, mapsUrl)
+                                            startActivity(intent)
+
+                                            progressDialog.dismiss()
+
+                                            binding.etDistance.setTextColor(getColor(R.color.primary))
+                                            binding.etDistance.text = shortDistance
+                                            binding.icRefreshDistance.visibility = View.VISIBLE
+                                            binding.tvDistanceError.visibility = View.VISIBLE
+                                            binding.tvDistanceError.text = "Cobalah untuk lebih dekat dengan titik toko dan refresh jaraknya!"
+                                            isDistanceToLong = true
+
+                                            dialog.dismiss()
+                                        }
+                                    builder.show()
+                                } else {
                                     progressDialog.dismiss()
 
                                     var textColor = getColor(R.color.black_200)
@@ -216,7 +216,7 @@ class NewReportActivity : AppCompatActivity() {
                                     binding.icRefreshDistance.visibility = View.VISIBLE
                                     binding.tvDistanceError.visibility = View.GONE
                                     isDistanceToLong = false
-//                                }
+                                }
 
                             } else {
                                 progressDialog.dismiss()

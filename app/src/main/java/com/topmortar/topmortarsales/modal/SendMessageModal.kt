@@ -95,8 +95,8 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
         initClickHandler()
         etMessageListener()
 
-        if (userKind == USER_KIND_SALES) getCurrentBid()
-        else setupBiddingNotice()
+//        if (userKind == USER_KIND_SALES) getCurrentBid()
+//        else setupBiddingNotice()
     }
 
     private fun setLayout() {
