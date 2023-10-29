@@ -31,10 +31,23 @@ class UserProfileViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm
         return when (position) {
             0 -> {
 
-                val fragment = UserOnGoingStoreFragment()
+//                val fragment = UserOnGoingStoreFragment()
+//                fragment.setUserCityParam(userCityParam)
+//                fragment.setUserIdParam(userIDParam)
+//                fragment.setCounterItem(object : UserOnGoingStoreFragment.CounterItem{
+//                    override fun counterItem(count: Int) {
+//                        listener?.counterItem(count, 0)
+//                    }
+//
+//                })
+//                return fragment
+//
+//            } 0 -> {
+
+                val fragment = UserVisitedStoreFragment()
                 fragment.setUserCityParam(userCityParam)
                 fragment.setUserIdParam(userIDParam)
-                fragment.setCounterItem(object : UserOnGoingStoreFragment.CounterItem{
+                fragment.setCounterItem(object : UserVisitedStoreFragment.CounterItem{
                     override fun counterItem(count: Int) {
                         listener?.counterItem(count, 0)
                     }
@@ -61,13 +74,14 @@ class UserProfileViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm
 
     override fun getCount(): Int {
         // Return the total number of tabs
-        return 2
+        return 1
     }
 
     override fun getPageTitle(position: Int): CharSequence? {
         // Set tab titles
         return when (position) {
-            0 -> "On Bidding"
+//            0 -> "On Bidding"
+            0 -> "Visited"
             else -> "Visited"
         }
     }

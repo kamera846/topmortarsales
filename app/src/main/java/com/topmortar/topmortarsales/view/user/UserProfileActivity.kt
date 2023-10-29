@@ -216,7 +216,8 @@ class UserProfileActivity : AppCompatActivity() {
             tabLayout.setupWithViewPager(viewPager)
             pagerAdapter.setCounterPageItem(object : UserProfileViewPagerAdapter.CounterPageItem{
                 override fun counterItem(count: Int, tabIndex: Int) {
-                    if (tabIndex == 0) tabLayout.getTabAt(tabIndex)?.text = "On Bid ($count/$bidLimit)"
+//                    if (tabIndex == 0) tabLayout.getTabAt(tabIndex)?.text = "On Bid ($count/$bidLimit)"
+                    if (tabIndex == 0) tabLayout.getTabAt(tabIndex)?.text = "Visited ($count)"
                     else tabLayout.getTabAt(tabIndex)?.text = "Visited ($count)"
                 }
 
