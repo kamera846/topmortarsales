@@ -187,7 +187,7 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
                     RESPONSE_STATUS_EMPTY -> {
 
                         listener?.counterItem(0)
-                        loadingState(true, "Daftar kontak kosong!")
+                        loadingState(true, "Belum ada kunjungan!")
 
                     }
                     else -> {
@@ -247,7 +247,7 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
                         }
                         RESPONSE_STATUS_EMPTY -> {
 
-                            loadingState(true, "Daftar kontak kosong!")
+                            loadingState(true, "Tidak menemukan hasil dari pencarian!")
                             binding.tvFilter.text = "$textFilter (${responseBody.results.size})"
 
                         }

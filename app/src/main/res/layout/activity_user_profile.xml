@@ -112,53 +112,129 @@
                         android:textSize="14sp"
                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
+                    <!-- Sales Report -->
+                    <LinearLayout
+                        android:id="@+id/salesReportContainer"
+                        android:visibility="gone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_card_clickable"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:layout_marginEnd="4dp"
+                            android:src="@drawable/file_flat_list_line_black"
+                            android:contentDescription="Icon Report"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center_vertical"
+                            android:text="Lihat Laporan"
+                            android:layout_marginHorizontal="4dp"
+                            android:textSize="14sp"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                    </LinearLayout>
+
                 </LinearLayout>
 
             </LinearLayout>
 
-            <!-- Graphic Chart -->
+            <!-- Report -->
             <LinearLayout
-                android:id="@+id/barChartContainer"
-                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:padding="8dp"
-                android:background="@drawable/background_rounded_8"
-                android:orientation="vertical">
+                android:layout_marginHorizontal="8dp"
+                android:orientation="horizontal">
 
+                <!-- Graphic Report -->
                 <LinearLayout
-                    android:id="@+id/toggleBarChart"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:id="@+id/barChartContainer"
+                    android:visibility="gone"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginHorizontal="8dp"
+                    android:padding="8dp"
+                    android:background="@drawable/background_rounded_8"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:id="@+id/toggleBarChart"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tvToggleBarChart"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center_vertical"
+                            android:text="Statistik Toko"
+                            android:textSize="14sp"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                        <ImageView
+                            android:id="@+id/iconToggleBarChart"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_marginLeft="16dp"
+                            android:src="@drawable/chevron_down_solid"/>
+
+                    </LinearLayout>
+
+                    <com.github.mikephil.charting.charts.BarChart
+                        android:visibility="gone"
+                        android:id="@+id/storeBarChart"
+                        android:layout_width="match_parent"
+                        android:layout_height="250dp"/>
+
+                </LinearLayout>
+
+                <!-- Sales Report -->
+                <LinearLayout
+                    android:visibility="gone"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginHorizontal="8dp"
+                    android:paddingHorizontal="4dp"
+                    android:paddingVertical="8dp"
+                    android:background="@drawable/background_rounded_8_clickable"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:onClick="navigateSalesReport"
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_marginHorizontal="4dp"
+                        android:src="@drawable/file_flat_list_line_black"
+                        android:contentDescription="Icon Report"/>
+
                     <TextView
-                        android:id="@+id/tvToggleBarChart"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:gravity="center_vertical"
-                        android:text="Statistik Toko"
+                        android:text="Lihat Laporan"
+                        android:layout_marginHorizontal="4dp"
                         android:textSize="14sp"
                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
-                    <ImageView
-                        android:id="@+id/iconToggleBarChart"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:layout_marginLeft="16dp"
-                        android:src="@drawable/chevron_down_solid"/>
-
                 </LinearLayout>
-                
-                <com.github.mikephil.charting.charts.BarChart
-                    android:visibility="gone"
-                    android:id="@+id/storeBarChart"
-                    android:layout_width="match_parent"
-                    android:layout_height="250dp"/>
-                
+
             </LinearLayout>
 
             <!-- Counter Container -->
