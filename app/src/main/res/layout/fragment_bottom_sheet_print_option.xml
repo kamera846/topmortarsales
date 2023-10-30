@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <View
+        android:layout_width="50dp"
+        android:layout_height="5dp"
+        android:layout_marginVertical="16dp"
+        android:layout_gravity="center_horizontal"
+        android:background="@drawable/bg_passive_round"/>
+
+    <!-- List Option -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingVertical="16dp"
+        android:orientation="vertical">
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Pilih Metode Printer"
+            android:paddingHorizontal="16dp"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+        <LinearLayout
+            android:id="@+id/printBluetoothOption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="12dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:onClick="onBottomSheetOptionClick"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackground">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/bluetooth_fill"
+                android:contentDescription="Icon Bluetooth"/>
+
+            <LinearLayout
+                android:id="@+id/printBluetooth"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Thermal Printer"
+                    android:textSize="16sp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Mendukung jenis printer bluetooth"
+                    android:textSize="14sp"
+                    android:textColor="@color/black_500"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/printWifiOption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="12dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:onClick="onBottomSheetOptionClick"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackground">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/wifi_solid"
+                android:contentDescription="Icon Print Wifi"/>
+
+            <LinearLayout
+                android:id="@+id/printWifi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Ink Printer"
+                    android:textSize="16sp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Mendukung jenis printer wifi"
+                    android:textSize="14sp"
+                    android:textColor="@color/black_500"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</LinearLayout>

@@ -42,6 +42,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dantsu.escposprinter.EscPosPrinter
 import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
 import com.dantsu.escposprinter.textparser.PrinterTextParserImg
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.InvoiceOrderRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
@@ -58,6 +59,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.utils.BluetoothPrinterManager
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
@@ -124,6 +126,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     private var currentPhotoUri: Uri? = null
     private var bluetoothAdapter: BluetoothAdapter? = null
     private var printerManager = BluetoothPrinterManager()
+    private lateinit var bottomSheetDialog: BottomSheetDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -217,7 +220,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     private fun initClickHandler() {
         icBack.setOnClickListener { backHandler() }
         icSyncNow.setOnClickListener { getDetail() }
-        btnPrint.setOnClickListener { printNow() }
+        btnPrint.setOnClickListener { showPrintOption() }
 //        btnClosing.setOnClickListener { chooseFile() }
 //        lnrClosing.setOnClickListener { chooseFile() }
         btnClosing.setOnClickListener { getMapsUrl() }
@@ -741,6 +744,26 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         drawable.setBounds(0, 0, width, height)
         drawable.draw(canvas)
         return BitmapDrawable(this.applicationContext.resources, bitmap)
+    }
+
+    private fun showPrintOption() {
+        val bottomSheetLayout = layoutInflater.inflate(R.layout.fragment_bottom_sheet_print_option, null)
+
+        bottomSheetDialog = BottomSheetDialog(this)
+        bottomSheetDialog.setContentView(bottomSheetLayout)
+        bottomSheetDialog.show()
+    }
+
+    fun onBottomSheetOptionClick(view: View) {
+        when (view.id) {
+            R.id.printBluetoothOption -> {
+                printNow()
+                bottomSheetDialog.dismiss()
+            } else -> {
+                Toast.makeText(this@DetailSuratJalanActivity, "Cetak menggunakan printer besar", TOAST_SHORT).show()
+                bottomSheetDialog.dismiss()
+            }
+        }
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
