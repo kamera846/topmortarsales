@@ -761,7 +761,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 icEdit.visibility = View.VISIBLE
                 tvMapsContainer.visibility = View.VISIBLE
                 btnSendMessage.visibility = View.VISIBLE
-                btnInvoice.visibility = View.VISIBLE
+                tooltipStatus.visibility = View.VISIBLE
+                if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
+                else btnInvoice.visibility = View.VISIBLE
 
                 tvTitleBar.text = "Detail Contact"
                 icClose.visibility = View.GONE
