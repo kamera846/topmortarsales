@@ -332,6 +332,11 @@ interface ApiService {
     ): Response<ResponseReportVisit>
 
     @GET(VISIT)
+    suspend fun listReport(
+        @Query("u") idUser: String
+    ): Response<ResponseReportVisit>
+
+    @GET(VISIT)
     suspend fun listUsersReport(
         @Query("a") idUser: String,
         @Query("s") idContact: String

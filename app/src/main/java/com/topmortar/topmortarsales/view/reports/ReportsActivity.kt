@@ -1,8 +1,10 @@
 package com.topmortar.topmortarsales.view.reports
 
+import android.app.DatePickerDialog
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import android.widget.DatePicker
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.topmortar.topmortarsales.R
@@ -16,6 +18,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -24,6 +27,7 @@ import com.topmortar.topmortarsales.databinding.ActivityReportsBinding
 import com.topmortar.topmortarsales.modal.DetailReportModal
 import com.topmortar.topmortarsales.model.ReportVisitModel
 import kotlinx.coroutines.launch
+import java.util.Calendar
 
 class ReportsActivity : AppCompatActivity() {
 
@@ -35,6 +39,9 @@ class ReportsActivity : AppCompatActivity() {
     private var contactID: String? = null
     private var contactName: String? = null
     private var userFullName: String? = null
+
+    private lateinit var datePicker: DatePickerDialog
+    private var selectedDate: Calendar = Calendar.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,18 +62,50 @@ class ReportsActivity : AppCompatActivity() {
         if (!contactName.isNullOrEmpty()) binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (iUserID.isNullOrEmpty()) "saya" else ""} pada toko ini"
         else binding.titleBarDark.tvTitleBarDescription.text = "Daftar semua laporan ${if (userFullName.isNullOrEmpty()) "" else "dari $userFullName"}"
 
-        getList()
+        setDatePickerDialog()
         initClickHandler()
+
+    }
+
+    private fun setDatePickerDialog() {
+
+        datePicker = DatePickerDialog(
+            this,
+            { _, year, month, day ->
+                selectedDate.set(Calendar.YEAR, year)
+                selectedDate.set(Calendar.MONTH, month)
+                selectedDate.set(Calendar.DAY_OF_MONTH, day)
+
+                // Do something with the selected date
+                val formattedDate = DateFormat.format(selectedDate)
+                binding.tvFilter.text = formattedDate
+                getList()
+            },
+            selectedDate.get(Calendar.YEAR),
+            selectedDate.get(Calendar.MONTH),
+            selectedDate.get(Calendar.DAY_OF_MONTH)
+        )
+
+        binding.llFilter.setOnClickListener { datePicker.show() }
+
+        // Set Default Selected Date
+        val formattedDate = DateFormat.format(selectedDate)
+        binding.tvFilter.text = formattedDate
+
+        getList()
 
     }
 
     private fun getList() {
         loadingState(true)
+        binding.llFilter.visibility = View.GONE
 
         lifecycleScope.launch {
             try {
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.listReport(idUser = if (iUserID.isNullOrEmpty()) userID else iUserID!!, idContact = if (contactID.isNullOrEmpty()) "-1" else contactID!!)
+                val response = if (contactID.isNullOrEmpty()) {
+                    apiService.listReport(idUser = if (iUserID.isNullOrEmpty()) userID else iUserID!!)
+                } else apiService.listReport(idUser = if (iUserID.isNullOrEmpty()) userID else iUserID!!, idContact = contactID!!)
 
                 if (response.isSuccessful) {
 
@@ -76,12 +115,14 @@ class ReportsActivity : AppCompatActivity() {
                         RESPONSE_STATUS_OK -> {
 
                             setRecyclerView(responseBody.results)
+//                            binding.llFilter.visibility = View.VISIBLE
                             loadingState(false)
 
                         }
                         RESPONSE_STATUS_EMPTY -> {
 
-                            loadingState(true, "Anda belum pernah membuat laporan.")
+                            loadingState(true, "Belum ada laporan.")
+//                            binding.llFilter.visibility = View.VISIBLE
 
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
@@ -89,6 +130,7 @@ class ReportsActivity : AppCompatActivity() {
                             val message = "Gagal memuat laporan! Message: ${ responseBody.message }"
                             handleMessage(this@ReportsActivity, TAG_RESPONSE_MESSAGE, message)
                             loadingState(true, message)
+                            binding.llFilter.visibility = View.GONE
 
                         }
                         else -> {
@@ -96,6 +138,7 @@ class ReportsActivity : AppCompatActivity() {
                             val message = "Gagal memuat laporan!: ${ responseBody.message }"
                             handleMessage(this@ReportsActivity, TAG_RESPONSE_MESSAGE, message)
                             loadingState(true, message)
+                            binding.llFilter.visibility = View.GONE
 
                         }
                     }
@@ -105,6 +148,7 @@ class ReportsActivity : AppCompatActivity() {
                     val message = "Gagal memuat laporan! Error: " + response.message()
                     handleMessage(this@ReportsActivity, TAG_RESPONSE_MESSAGE, message)
                     loadingState(true, message)
+                    binding.llFilter.visibility = View.GONE
 
                 }
 
@@ -113,6 +157,7 @@ class ReportsActivity : AppCompatActivity() {
                 val message = "Failed run service. Exception " + e.message
                 handleMessage(this@ReportsActivity, TAG_RESPONSE_MESSAGE, message)
                 loadingState(true, message)
+                binding.llFilter.visibility = View.GONE
 
             }
 
@@ -124,6 +169,7 @@ class ReportsActivity : AppCompatActivity() {
 
         val mAdapter = ReportsRecyclerViewAdapter()
         mAdapter.setList(items)
+        if (contactID.isNullOrEmpty()) mAdapter.setWithName(true)
 
         binding.recyclerView.apply {
             layoutManager = GridLayoutManager(this@ReportsActivity, 2)
@@ -133,6 +179,7 @@ class ReportsActivity : AppCompatActivity() {
                 override fun onItemClick(item: ReportVisitModel) {
                     val modalDetail = DetailReportModal(this@ReportsActivity)
                     modalDetail.setData(item)
+                    if (contactID.isNullOrEmpty()) modalDetail.setWithName(true)
                     modalDetail.show()
                 }
 

@@ -18,6 +18,7 @@ import java.util.Locale
 class ReportsRecyclerViewAdapter : RecyclerView.Adapter<ReportsRecyclerViewAdapter.ViewHolder>() {
     private var listItem: ArrayList<ReportVisitModel> = ArrayList()
     private var context: Context? = null
+    private var withName: Boolean? = null
 
     interface OnItemClickListener {
         fun onItemClick(item: ReportVisitModel)
@@ -29,24 +30,29 @@ class ReportsRecyclerViewAdapter : RecyclerView.Adapter<ReportsRecyclerViewAdapt
     fun setList(data: ArrayList<ReportVisitModel>) {
         listItem = data
     }
+    fun setWithName(withName: Boolean?) {
+        this.withName = withName
+    }
 
     inner class ViewHolder(private val binding: ItemReportsBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: ReportVisitModel, position: Int) {
-            binding.title.text = item.distance_visit + " km dari titik"
+            binding.title.text = if (withName == true) item.nama else item.distance_visit + " km dari titik"
             binding.description.text = item.laporan_visit
 
             val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(item.date_visit)
-            if (date != null) {
+            var dateFormat = if (date != null) {
                 val calendar = Calendar.getInstance()
                 val currentYear = calendar.get(Calendar.YEAR)
                 val dateYear = SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
 
-                if (currentYear == dateYear.toInt()) binding.date.text = DateFormat.format(item.date_visit, "yyyy-MM-dd HH:mm:ss", "dd MMMM, HH:mm")
-                else binding.date.text = DateFormat.format(item.date_visit, "yyyy-MM-dd HH:mm:ss", "dd MMMM yyyy, HH:mm")
+                if (currentYear == dateYear.toInt()) DateFormat.format(item.date_visit, "yyyy-MM-dd HH:mm:ss", "dd MMMM, HH:mm")
+                else DateFormat.format(item.date_visit, "yyyy-MM-dd HH:mm:ss", "dd MMMM yyyy, HH:mm")
             } else {
-                binding.date.text = DateFormat.format(item.date_visit, "yyyy-MM-dd HH:mm:ss", "dd MMMM, HH:mm")
+                DateFormat.format(item.date_visit, "yyyy-MM-dd HH:mm:ss", "dd MMMM, HH:mm")
             }
+
+            binding.date.text = if (withName == true) "${item.distance_visit} km\n$dateFormat" else dateFormat
 
             val layoutParams = binding.root.layoutParams as ViewGroup.MarginLayoutParams
             if (position == 0 || position == 1) layoutParams.topMargin = convertDpToPx(16, context as Activity)
