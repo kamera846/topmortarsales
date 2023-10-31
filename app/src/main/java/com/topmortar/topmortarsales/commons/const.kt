@@ -64,7 +64,8 @@ const val TAG_ACTION_MAIN_ACTIVITY = "TAG ACTION MAIN ACTIVITY"
 // Global
 const val TOAST_LONG = Toast.LENGTH_LONG
 const val TOAST_SHORT = Toast.LENGTH_SHORT
-const val MAX_DISTANCE = 0.2
+const val MAX_DISTANCE = 0.4
+const val MAX_REPORT_DISTANCE = 0.2
 const val EMPTY_FIELD_VALUE = "Not set"
 
 // Props

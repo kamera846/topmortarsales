@@ -78,7 +78,8 @@ class DetailReportModal(private val context: Context) : Dialog(context) {
         } else {
             DateFormat.format(data.date_visit, "yyyy-MM-dd HH:mm:ss", "dd MMMM, HH:mm")
         }
-        binding.date.text = "$dateFormat | ${data.distance_visit} km dari titik"
+        binding.date.text = " ${if (data.is_approved == "1") "Approved" else "Menunggu"} | ${data.distance_visit} km dari titik | $dateFormat"
+        if (data.is_approved == "1") binding.icStatus.setImageDrawable(context.getDrawable(R.drawable.checkbox_circle_green))
 
     }
 

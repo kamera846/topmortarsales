@@ -9,17 +9,31 @@
         android:id="@+id/titleBarLight"
         layout="@layout/component_title_bar_light"/>
 
-    <TextView
-        android:id="@+id/date"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:paddingHorizontal="16dp"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:text="@string/dummy_date"
-        android:theme="@style/Theme.TopMortarSales.TextBaseLine"/>
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/icStatus"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/checkbox_circle_light"
+            android:contentDescription="Icon Status Report"/>
+
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="14sp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:text=" Menunggu | 05 Juli 2023"
+            android:theme="@style/Theme.TopMortarSales.TextBaseLine"/>
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/description"

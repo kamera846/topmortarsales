@@ -39,9 +39,10 @@ class ReportsRecyclerViewAdapter : RecyclerView.Adapter<ReportsRecyclerViewAdapt
         fun bind(item: ReportVisitModel, position: Int) {
             binding.title.text = if (withName == true) item.nama else item.distance_visit + " km dari titik"
             binding.description.text = item.laporan_visit
+            if (item.is_approved == "1") binding.icStatus.setImageDrawable(context!!.getDrawable(R.drawable.checkbox_circle_green))
 
             val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(item.date_visit)
-            var dateFormat = if (date != null) {
+            val dateFormat = if (date != null) {
                 val calendar = Calendar.getInstance()
                 val currentYear = calendar.get(Calendar.YEAR)
                 val dateYear = SimpleDateFormat("yyyy", Locale.getDefault()).format(date)

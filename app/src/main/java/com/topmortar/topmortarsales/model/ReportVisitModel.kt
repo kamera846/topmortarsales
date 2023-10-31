@@ -18,4 +18,6 @@ data class ReportVisitModel(
     var ktp_owner: String = "",
     var termin_payment: String = "",
     var id_promo: String = "",
+    var is_approved: String = "",
+    var is_deleted: String = "",
 )
