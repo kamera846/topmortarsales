@@ -70,6 +70,7 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.databinding.ActivityDetailSuratJalanBinding
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.DetailSuratJalanModel
 import com.topmortar.topmortarsales.model.SuratJalanModel
@@ -84,6 +85,7 @@ import java.util.Locale
 class DetailSuratJalanActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
+    private lateinit var binding: ActivityDetailSuratJalanBinding
     private lateinit var customUtility: CustomUtility
 
     private lateinit var icBack: ImageView
@@ -133,8 +135,9 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
         supportActionBar?.hide()
         sessionManager = SessionManager(this)
+        binding = ActivityDetailSuratJalanBinding.inflate(layoutInflater)
 
-        setContentView(R.layout.activity_detail_surat_jalan)
+        setContentView(binding.root)
 
         customUtility = CustomUtility(this@DetailSuratJalanActivity)
 
@@ -220,7 +223,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     private fun initClickHandler() {
         icBack.setOnClickListener { backHandler() }
         icSyncNow.setOnClickListener { getDetail() }
-        btnPrint.setOnClickListener { showPrintOption() }
+        btnPrint.setOnClickListener { printNow() }
+        binding.btnPrintOption.setOnClickListener { showPrintOption() }
 //        btnClosing.setOnClickListener { chooseFile() }
 //        lnrClosing.setOnClickListener { chooseFile() }
         btnClosing.setOnClickListener { getMapsUrl() }
@@ -414,7 +418,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
         } else {
 
-            btnPrint.text = "Print"
+            btnPrint.text = "Print Bluetooth"
             btnPrint.isEnabled = true
 
         }
