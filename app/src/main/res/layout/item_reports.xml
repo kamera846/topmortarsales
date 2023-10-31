@@ -16,17 +16,34 @@
         android:padding="16dp"
         android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/title"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
+            android:gravity="center_vertical"
             android:layout_marginBottom="8dp"
-            android:textStyle="bold"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:text="@string/lorem_title"
-            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/icStatus"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_marginEnd="8dp"
+                android:src="@drawable/checkbox_circle_light"
+                android:contentDescription="Icon Status Report"/>
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text="@string/lorem_title"
+                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/description"
@@ -45,7 +62,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="14sp"
-            android:textStyle="bold"
             android:maxLines="2"
             android:ellipsize="end"
             android:text="@string/dummy_date"
