@@ -72,7 +72,9 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityMainBinding
+import com.topmortar.topmortarsales.modal.FilterTokoModal
 import com.topmortar.topmortarsales.modal.SearchModal
+import com.topmortar.topmortarsales.model.CityModel
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.city.ManageCityActivity
@@ -107,12 +109,14 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
     private lateinit var sessionManager: SessionManager
     private lateinit var binding: ActivityMainBinding
     private lateinit var searchModal: SearchModal
+    private lateinit var filterModal: FilterTokoModal
     private var selectedCity: ModalSearchModel? = null
     private var doubleBackToExitPressedOnce = false
     private lateinit var userCity: String
     private lateinit var userKind: String
     private var userId: String = ""
     private var contacts: ArrayList<ContactModel> = arrayListOf()
+    private var cities: ArrayList<CityModel> = arrayListOf()
 
     // Initialize Search Engine
     private val searchDelayMillis = 500L
@@ -120,6 +124,11 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
     private var searchRunnable: Runnable? = null
     private var previousSearchTerm = ""
     private var isSearchActive = false
+
+    // Setup Filter
+    private var selectedStatusID: String = "-1"
+    private var selectedVisitedID: String = "-1"
+    private var selectedCitiesID: String = "-1"
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -143,8 +152,9 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         initVariable()
         initClickHandler()
         loadingState(true)
-        if (userKind == USER_KIND_ADMIN) getCities()
-        else getContacts()
+//        if (userKind == USER_KIND_ADMIN) getCities()
+//        else getContacts()
+        getCities()
 
     }
 
@@ -192,7 +202,11 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         rlLoading.setOnTouchListener { _, event -> blurSearchBox(event) }
 //        rlParent.setOnTouchListener { _, event -> blurSearchBox(event) }
         rvListChat.setOnTouchListener { _, event -> blurSearchBox(event) }
-        binding.llFilter.setOnClickListener { showSearchModal() }
+//        binding.llFilter.setOnClickListener { showSearchModal() }
+        binding.llFilter.setOnClickListener {
+            setupFilterTokoModal()
+            showFilterModal()
+        }
 //        if (userKind == USER_KIND_ADMIN) {
 //            binding.btnCheckLocation.visibility = View.VISIBLE
 //            binding.btnCheckLocation.setOnClickListener { navigateChecklocation() }
@@ -629,17 +643,18 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        val results = response.results
+                        cities = response.results
                         val items: ArrayList<ModalSearchModel> = ArrayList()
 
                         items.add(ModalSearchModel("-1", "Hapus filter"))
-                        for (i in 0 until results.size) {
-                            val data = results[i]
+                        for (i in 0 until cities.size) {
+                            val data = cities[i]
                             items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
                         }
 
-                        setupFilterContacts(items)
+//                        setupFilterContacts(items)
 
+                        setupFilterTokoModal()
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
@@ -679,10 +694,43 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         searchModal.setOnDismissListener {}
     }
 
+    private fun setupFilterTokoModal() {
+
+        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.background = getDrawable(R.color.black_400)
+        else binding.llFilter.background = getDrawable(R.color.light)
+
+        binding.llFilter.visibility = View.VISIBLE
+
+        filterModal = FilterTokoModal(this)
+        filterModal.setStatuses(selected = selectedStatusID)
+        filterModal.setVisited(selected = selectedVisitedID)
+        filterModal.setCities(cities, selected = selectedCitiesID)
+        filterModal.setSendFilterListener(object: FilterTokoModal.SendFilterListener {
+            override fun onSendFilter(
+                selectedStatusID: String,
+                selectedVisitedID: String,
+                selectedCitiesID: String
+            ) {
+
+                this@MainActivity.selectedStatusID = selectedStatusID
+                this@MainActivity.selectedVisitedID = selectedVisitedID
+                this@MainActivity.selectedCitiesID = selectedCitiesID
+
+                getContacts()
+            }
+
+        })
+    }
+
     private fun showSearchModal() {
         val searchKey = if (selectedCity != null) selectedCity!!.title!! else ""
         if (searchKey.isNotEmpty()) searchModal.setSearchKey(searchKey)
         searchModal.show()
+    }
+
+    private fun showFilterModal() {
+        filterModal.show()
     }
 
     private fun getUserLoggedIn() {
