@@ -59,8 +59,8 @@ class ReportsActivity : AppCompatActivity() {
 
         binding.titleBarDark.tvTitleBar.text = if (!contactName.isNullOrEmpty()) contactName else "Laporan Sales"
         binding.titleBarDark.tvTitleBarDescription.visibility = View.VISIBLE
-        if (!contactName.isNullOrEmpty()) binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (iUserID.isNullOrEmpty()) "saya" else ""} pada toko ini"
-        else binding.titleBarDark.tvTitleBarDescription.text = "Daftar semua laporan ${if (userFullName.isNullOrEmpty()) "" else "dari $userFullName"}"
+        if (!contactName.isNullOrEmpty()) binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (iUserID.isNullOrEmpty()) "saya" else ""} di toko ini"
+        else binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (userFullName.isNullOrEmpty()) "" else "$userFullName"}"
 
         setDatePickerDialog()
         initClickHandler()

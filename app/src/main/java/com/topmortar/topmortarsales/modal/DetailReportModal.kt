@@ -66,6 +66,7 @@ class DetailReportModal(private val context: Context) : Dialog(context) {
 
         binding.description.text = data.laporan_visit
         binding.date.text = data.date_visit
+        binding.tvDistance.text = " ${if (data.is_approved == "1") "Approved" else "Menunggu"} | ${data.distance_visit} km dari titik"
 
         val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(data.date_visit)
         val dateFormat = if (date != null) {
@@ -73,12 +74,11 @@ class DetailReportModal(private val context: Context) : Dialog(context) {
             val currentYear = calendar.get(Calendar.YEAR)
             val dateYear = SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
 
-            if (currentYear == dateYear.toInt()) DateFormat.format(data.date_visit, "yyyy-MM-dd HH:mm:ss", "dd MMMM, HH:mm")
-            else DateFormat.format(data.date_visit, "yyyy-MM-dd HH:mm:ss", "dd MMMM yyyy, HH:mm")
-        } else {
-            DateFormat.format(data.date_visit, "yyyy-MM-dd HH:mm:ss", "dd MMMM, HH:mm")
-        }
-        binding.date.text = " ${if (data.is_approved == "1") "Approved" else "Menunggu"} | ${data.distance_visit} km dari titik | $dateFormat"
+            if (currentYear == dateYear.toInt()) DateFormat.format(data.date_visit, "yyyy-MM-dd HH:mm:ss", "dd MMM, HH:mm")
+            else DateFormat.format(data.date_visit, "yyyy-MM-dd HH:mm:ss", "dd MMM yyyy, HH:mm")
+        } else DateFormat.format(data.date_visit, "yyyy-MM-dd HH:mm:ss", "dd MMM, HH:mm")
+        binding.date.text = " $dateFormat"
+
         if (data.is_approved == "1") binding.icStatus.setImageDrawable(context.getDrawable(R.drawable.checkbox_circle_green))
 
     }
