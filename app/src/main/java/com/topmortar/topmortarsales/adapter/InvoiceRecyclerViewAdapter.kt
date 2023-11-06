@@ -16,6 +16,9 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.INVOICE_PAID
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.InvoiceModel
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 class InvoiceRecyclerViewAdapter(private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<InvoiceRecyclerViewAdapter.ViewHolder>() {
     private var listItem: ArrayList<InvoiceModel> = ArrayList()
@@ -42,7 +45,21 @@ class InvoiceRecyclerViewAdapter(private val itemClickListener: ItemClickListene
 
             ivProfile.setImageResource(R.drawable.invoice_red)
             tvContactName.text = item.no_invoice
-            tvPhoneNumber.text = DateFormat.format(dateString = item.date_invoice!!, input = "yyyy-MM-dd hh:mm:ss", format = "dd MMMM yyyy hh.mm")
+
+            // Date Format
+            val itemDate = item.date_invoice!!
+            val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(itemDate)
+            val dateFormat = if (date != null) {
+                val calendar = Calendar.getInstance()
+                val currentYear = calendar.get(Calendar.YEAR)
+                val dateYear = SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
+
+                if (currentYear == dateYear.toInt()) DateFormat.format(itemDate, "yyyy-MM-dd HH:mm:ss", "dd MMMM, HH:mm")
+                else DateFormat.format(itemDate, "yyyy-MM-dd HH:mm:ss", "dd MMMM yyyy, HH:mm")
+            } else {
+                DateFormat.format(itemDate, "yyyy-MM-dd HH:mm:ss", "dd MMMM, HH:mm")
+            }
+            tvPhoneNumber.text = item.no_surat_jalan + " | " + dateFormat
             when (item.status_invoice) {
                 INVOICE_PAID -> {
                     tooltipStatus.setImageDrawable(context?.let { ContextCompat.getDrawable(it, R.drawable.status_active) })
