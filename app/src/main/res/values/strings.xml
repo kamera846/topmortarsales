@@ -156,4 +156,6 @@
     <string name="text_bid_not_available">Anda telah mencapai limit bidding, selesaikan proses bidding yang berjalan untuk mem-bidding toko lainnya.</string>
     <string name="text_bid_on_going">Anda sedang dalam proses bidding dengan toko ini.</string>
     <string name="bullet">•</string>
+    <string name="filter">Filter:</string>
+    <string name="tidak_ada_filter">Tidak ada filter</string>
 </resources>

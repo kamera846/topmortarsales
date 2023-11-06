@@ -12,6 +12,7 @@
 
     <!-- Status Toko -->
     <LinearLayout
+        android:visibility="gone"
         android:id="@+id/filterStatusesContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -46,6 +47,7 @@
 
     <!-- Filter Visited -->
     <LinearLayout
+        android:visibility="gone"
         android:id="@+id/filterVisitedContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -80,7 +82,7 @@
 
     <!-- Filter City -->
     <LinearLayout
-        android:visibility="visible"
+        android:visibility="gone"
         android:id="@+id/filterCityContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -130,7 +132,18 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginBottom="16dp"
-        android:orientation="vertical">
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnHapusFilter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/light"
+            android:textColor="@color/black_200"
+            android:padding="8dp"
+            android:layout_marginEnd="4dp"
+            android:textSize="14sp"
+            android:text="Bersihkan" />
 
         <Button
             android:id="@+id/btnFilter"
@@ -139,8 +152,9 @@
             android:backgroundTint="@color/primary"
             android:textColor="@color/white"
             android:padding="8dp"
+            android:layout_marginStart="4dp"
             android:textSize="14sp"
-            android:text="Terapkan Filter" />
+            android:text="Terapkan" />
 
     </LinearLayout>
 
