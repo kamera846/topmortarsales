@@ -46,6 +46,10 @@ interface ApiService {
 
     @GET(CONTACT)
     suspend fun getContacts(@Query("c") cityId: String): ResponseContactList
+    @GET(CONTACT)
+    suspend fun getContactsByStatus(@Query("status") status: String): ResponseContactList
+    @GET(CONTACT)
+    suspend fun getContacts(@Query("c") cityId: String, @Query("status") status: String): ResponseContactList
 
     @GET(CONTACT)
     suspend fun getContacts(): ResponseContactList
@@ -108,6 +112,21 @@ interface ApiService {
     @Multipart
     @POST(SEARCH_CONTACT)
     suspend fun searchContact(
+        @Part("id_city") cityId: RequestBody,
+        @Part("key") key: RequestBody
+    ): Response<ResponseContactList>
+
+    @Multipart
+    @POST(SEARCH_CONTACT)
+    suspend fun searchContactByStatus(
+        @Part("status") status: RequestBody,
+        @Part("key") key: RequestBody
+    ): Response<ResponseContactList>
+
+    @Multipart
+    @POST(SEARCH_CONTACT)
+    suspend fun searchContact(
+        @Part("status") status: RequestBody,
         @Part("id_city") cityId: RequestBody,
         @Part("key") key: RequestBody
     ): Response<ResponseContactList>

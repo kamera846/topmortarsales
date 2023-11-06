@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:theme="@style/Theme.TopMortarSales.BaseBackground"
+    android:orientation="vertical">
+
+    <include
+        android:id="@+id/titleBarLight"
+        layout="@layout/component_title_bar_light"/>
+
+    <!-- Status Toko -->
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/filterStatusesContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="16dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_status_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Filter Status Toko"
+            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+            android:layout_marginBottom="8dp"
+            android:textSize="16sp"
+            android:textStyle="bold"/>
+
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/flexboxStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-2dp"
+            android:layout_marginBottom="-2dp"
+            app:flexWrap="wrap"
+            app:flexDirection="row"
+            app:justifyContent="flex_start"
+            app:alignItems="flex_start">
+
+        </com.google.android.flexbox.FlexboxLayout>
+
+    </LinearLayout>
+
+    <!-- Filter Visited -->
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/filterVisitedContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="16dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_visited_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Filter Visited"
+            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+            android:layout_marginBottom="8dp"
+            android:textSize="16sp"
+            android:textStyle="bold"/>
+
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/flexboxVisited"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-2dp"
+            android:layout_marginBottom="-2dp"
+            app:flexWrap="wrap"
+            app:flexDirection="row"
+            app:justifyContent="flex_start"
+            app:alignItems="flex_start">
+
+        </com.google.android.flexbox.FlexboxLayout>
+
+    </LinearLayout>
+
+    <!-- Filter City -->
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/filterCityContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="16dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_city_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Filter City"
+            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+            android:layout_marginBottom="8dp"
+            android:textSize="16sp"
+            android:textStyle="bold"/>
+
+        <com.google.android.flexbox.FlexboxLayout
+            android:id="@+id/flexboxCities"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-2dp"
+            android:layout_marginBottom="-2dp"
+            app:flexWrap="wrap"
+            app:flexDirection="row"
+            app:justifyContent="flex_start"
+            app:alignItems="flex_start">
+
+<!--            <TextView-->
+<!--                android:id="@+id/flexboxCitiesItem"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:text="Malang"-->
+<!--                android:paddingHorizontal="8dp"-->
+<!--                android:paddingVertical="4dp"-->
+<!--                android:layout_margin="2dp"-->
+<!--                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"-->
+<!--                android:background="@drawable/bg_border_round"/>-->
+
+        </com.google.android.flexbox.FlexboxLayout>
+
+    </LinearLayout>
+
+    <!-- Bottom Action -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="16dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnHapusFilter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/light"
+            android:textColor="@color/black_200"
+            android:padding="8dp"
+            android:layout_marginEnd="4dp"
+            android:textSize="14sp"
+            android:text="Bersihkan" />
+
+        <Button
+            android:id="@+id/btnFilter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/primary"
+            android:textColor="@color/white"
+            android:padding="8dp"
+            android:layout_marginStart="4dp"
+            android:textSize="14sp"
+            android:text="Terapkan" />
+
+    </LinearLayout>
+
+</LinearLayout>

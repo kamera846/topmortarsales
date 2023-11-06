@@ -37,7 +37,6 @@ class ReportsRecyclerViewAdapter : RecyclerView.Adapter<ReportsRecyclerViewAdapt
     inner class ViewHolder(private val binding: ItemReportsBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: ReportVisitModel, position: Int) {
-            binding.title.text = if (withName == true) item.nama else item.distance_visit + " km dari titik"
             binding.description.text = item.laporan_visit
             if (item.is_approved == "1") binding.icStatus.setImageDrawable(context!!.getDrawable(R.drawable.checkbox_circle_green))
 
@@ -47,13 +46,16 @@ class ReportsRecyclerViewAdapter : RecyclerView.Adapter<ReportsRecyclerViewAdapt
                 val currentYear = calendar.get(Calendar.YEAR)
                 val dateYear = SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
 
-                if (currentYear == dateYear.toInt()) DateFormat.format(item.date_visit, "yyyy-MM-dd HH:mm:ss", "dd MMMM, HH:mm")
-                else DateFormat.format(item.date_visit, "yyyy-MM-dd HH:mm:ss", "dd MMMM yyyy, HH:mm")
-            } else {
-                DateFormat.format(item.date_visit, "yyyy-MM-dd HH:mm:ss", "dd MMMM, HH:mm")
-            }
+                if (currentYear == dateYear.toInt()) DateFormat.format(item.date_visit, "yyyy-MM-dd HH:mm:ss", "dd MMM, HH:mm")
+                else DateFormat.format(item.date_visit, "yyyy-MM-dd HH:mm:ss", "dd MMM yyyy, HH:mm")
+            } else DateFormat.format(item.date_visit, "yyyy-MM-dd HH:mm:ss", "dd MMM, HH:mm")
 
-            binding.date.text = if (withName == true) "${item.distance_visit} km\n$dateFormat" else dateFormat
+            val distanceFormat = item.distance_visit
+            var stringDistance = "%.2f".format(distanceFormat.toDouble())
+            if (stringDistance.contains(",")) stringDistance = stringDistance.replace(",", ".")
+
+            binding.title.text = if (withName == true) item.nama else stringDistance + " km dari titik"
+            binding.date.text = if (withName == true) "$stringDistance km\n$dateFormat" else dateFormat
 
             val layoutParams = binding.root.layoutParams as ViewGroup.MarginLayoutParams
             if (position == 0 || position == 1) layoutParams.topMargin = convertDpToPx(16, context as Activity)
