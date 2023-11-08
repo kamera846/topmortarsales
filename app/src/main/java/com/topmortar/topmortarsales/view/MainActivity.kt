@@ -317,11 +317,13 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                             val listCoordinate = arrayListOf<String>()
                             val listCoordinateName = arrayListOf<String>()
                             val listCoordinateStatus = arrayListOf<String>()
+                            val listCoordinateCityID = arrayListOf<String>()
 
                             for (item in response.results.listIterator()) {
                                 listCoordinate.add(item.maps_url)
                                 listCoordinateName.add(item.nama)
                                 listCoordinateStatus.add(item.store_status)
+                                listCoordinateCityID.add(item.id_city)
                             }
 
                             val intent = Intent(this@MainActivity, MapsActivity::class.java)
@@ -329,6 +331,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                             intent.putExtra(CONST_NEAREST_STORE, true)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
 
                             progressDialog.dismiss()

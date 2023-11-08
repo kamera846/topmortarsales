@@ -28,6 +28,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
@@ -72,23 +73,36 @@ import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_ACTIVE
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BID
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
+import com.topmortar.topmortarsales.commons.utils.handleMessage
+import com.topmortar.topmortarsales.data.ApiService
+import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityMapsBinding
+import com.topmortar.topmortarsales.modal.FilterTokoModal
+import com.topmortar.topmortarsales.model.CityModel
+import com.topmortar.topmortarsales.model.ModalSearchModel
+import kotlinx.coroutines.launch
 import java.io.IOException
 import java.util.Locale
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private lateinit var sessionManager: SessionManager
+    private val userKind get() = sessionManager.userKind().toString()
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
@@ -101,6 +115,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var listCoordinate: ArrayList<String>? = null
     private var listCoordinateName: ArrayList<String>? = null
     private var listCoordinateStatus: ArrayList<String>? = null
+    private var listCoordinateCityID: ArrayList<String>? = null
 
     private val zoomLevel = 18f
     private val mapsDuration = 2000
@@ -116,6 +131,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private lateinit var icBack: ImageView
     private lateinit var etSearch: EditText
     private lateinit var icClear: ImageView
+    private lateinit var progressDialog: ProgressDialog
+
+    // Setup Filter
+    private lateinit var filterModal: FilterTokoModal
+    private var cities: ArrayList<CityModel> = arrayListOf()
+    private var selectedStatusID: String = "-1"
+    private var selectedVisitedID: String = "-1"
+    private var selectedCitiesID: CityModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -124,6 +147,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         sessionManager = SessionManager(this)
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        progressDialog = ProgressDialog(this)
+        progressDialog.setMessage("Mencari toko terdekat…")
+        progressDialog.setCancelable(false)
 
         checkLocationPermission()
 
@@ -203,6 +230,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         mMap.uiSettings.isZoomGesturesEnabled = true
         mMap.uiSettings.isScrollGesturesEnabledDuringRotateOrZoom = true
 
+//        binding.llFilter.visibility = View.VISIBLE
+        binding.llFilter.setOnClickListener {
+            setupFilterTokoModal()
+            filterModal.show()
+        }
+
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
         if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) {
             mMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style_dark))
@@ -221,12 +254,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location: Location? ->
-                    if (location != null) currentLatLng = LatLng(location.latitude, location.longitude)
+                    if (location != null) currentLatLng = LatLng(-7.952356,112.692583)
                 }
 
             binding.btnGetDirection.setOnClickListener {
                 toggleDirection()
             }
+        } else if (binding.llFilter.isVisible) {
+            mMap.setPadding(0,convertDpToPx(36, this),0,0)
         }
 
         mMap.setOnMapClickListener {
@@ -273,6 +308,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         listCoordinate = intent.getStringArrayListExtra(CONST_LIST_COORDINATE)
         listCoordinateName = intent.getStringArrayListExtra(CONST_LIST_COORDINATE_NAME)
         listCoordinateStatus = intent.getStringArrayListExtra(CONST_LIST_COORDINATE_STATUS)
+        listCoordinateCityID = intent.getStringArrayListExtra(CONST_LIST_COORDINATE_STATUS)
 
         if (isGetCoordinate) {
             binding.btnGetLatLng.visibility = View.VISIBLE
@@ -315,11 +351,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     }
 
     private fun searchCoordinate() {
-        val progressDialog = ProgressDialog(this)
-        progressDialog.setMessage("Mencari toko terdekat…")
-        progressDialog.show()
+        if (!progressDialog.isShowing) progressDialog.show()
 
-        Handler().postDelayed({
+//        Handler().postDelayed({
 
             val urlUtility = URLUtility(this)
             val limitKm = binding.etKm.text.toString().toDouble()
@@ -366,8 +400,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                     .position(latLng)
                                     .title(listCoordinateName?.get(i))
                                     .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
-                                mMap.addMarker(markerOptions)
-                                currentTotal ++
+
+                                if (selectedStatusID != "-1" && listCoordinateStatus!![i] == selectedStatusID.toLowerCase()) {
+                                    mMap.addMarker(markerOptions)
+                                    currentTotal ++
+                                } else if (selectedStatusID == "-1") {
+                                    mMap.addMarker(markerOptions)
+                                    currentTotal ++
+                                }
 
                             }
 
@@ -377,6 +417,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 }
 
             }
+
+            var textFilter = ""
+
+            if (selectedStatusID != "-1" || selectedVisitedID != "-1" || selectedCitiesID != null) {
+                textFilter += if (selectedCitiesID != null && selectedCitiesID?.id_city != "-1") selectedCitiesID?.nama_city else ""
+                textFilter += if (selectedStatusID != "-1") if (textFilter.isNotEmpty()) ", $selectedStatusID" else selectedStatusID else ""
+                textFilter += if (selectedVisitedID != "-1") if (textFilter.isNotEmpty()) ", $selectedVisitedID" else selectedVisitedID else ""
+            } else textFilter = getString(R.string.tidak_ada_filter)
+
+            binding.tvFilter.text = "$textFilter ($currentTotal)"
 
             progressDialog.dismiss()
             if (currentTotal > 0) {
@@ -446,7 +496,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             })
 
-        }, 1000)
+//        }, 1000)
     }
 
     private fun onFindLocation(mapsUrl: String) {
@@ -679,10 +729,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location: Location? ->
                     if (location != null) {
-                        currentLatLng = LatLng(location.latitude, location.longitude)
+                        currentLatLng = LatLng(-7.952356,112.692583)
                         setPin(currentLatLng!!, "Lokasi Saya")
 
-                        if (isNearestStore) searchCoordinate()
+                        if (isNearestStore && binding.llFilter.isVisible) getCities()
+                        else if (isNearestStore) searchCoordinate()
                     }
                 }
         }
@@ -838,6 +889,93 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         binding.recyclerView.visibility = View.GONE
                     }
             } else binding.recyclerView.visibility = View.GONE
+
+        }
+    }
+
+    private fun setupFilterTokoModal() {
+
+        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_SALES) {
+            val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+            if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.background = getDrawable(R.color.black_400)
+            else binding.llFilter.background = getDrawable(R.color.light)
+
+            binding.llFilter.visibility = View.VISIBLE
+
+            filterModal = FilterTokoModal(this)
+            if (userKind == USER_KIND_ADMIN) {
+                filterModal.setStatuses(selected = selectedStatusID)
+                filterModal.setCities(items = cities, selected = selectedCitiesID)
+            } else if (userKind == USER_KIND_SALES) filterModal.setStatuses(selected = selectedStatusID)
+            filterModal.setSendFilterListener(object: FilterTokoModal.SendFilterListener {
+                override fun onSendFilter(
+                    selectedStatusID: String,
+                    selectedVisitedID: String,
+                    selectedCitiesID: CityModel?
+                ) {
+
+                    this@MapsActivity.selectedStatusID = selectedStatusID
+                    this@MapsActivity.selectedVisitedID = selectedVisitedID
+                    this@MapsActivity.selectedCitiesID = selectedCitiesID
+
+//                    handleMessage(this@MapsActivity, "Filter Maps", "$selectedStatusID : $selectedVisitedID : ${selectedCitiesID?.nama_city}")
+                    searchCoordinate()
+
+                }
+
+            })
+        }
+    }
+
+    private fun getCities() {
+
+        progressDialog.show()
+
+        // Get Cities
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.getCities()
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        cities = response.results
+                        val items: ArrayList<ModalSearchModel> = ArrayList()
+
+                        items.add(ModalSearchModel("-1", "Hapus filter"))
+                        for (i in 0 until cities.size) {
+                            val data = cities[i]
+                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                        }
+
+//                        setupFilterContacts(items)
+
+                        setupFilterTokoModal()
+                        searchCoordinate()
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+//                        handleMessage(this@MapsActivity, "LIST CITY", "Daftar kota kosong!")
+                        progressDialog.dismiss()
+
+                    }
+                    else -> {
+
+//                        handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        progressDialog.dismiss()
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+
+//                handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                progressDialog.dismiss()
+
+            }
 
         }
     }
