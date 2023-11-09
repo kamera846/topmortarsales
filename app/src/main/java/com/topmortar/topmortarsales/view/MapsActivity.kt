@@ -66,20 +66,19 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.PlaceAdapter
 import com.topmortar.topmortarsales.commons.CONNECTION_FAILURE_RESOLUTION_REQUEST
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
+import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_CITY_ID
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_STATUS
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
-import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_ACTIVE
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BID
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
-import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
@@ -88,7 +87,6 @@ import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
-import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityMapsBinding
@@ -230,10 +228,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         mMap.uiSettings.isZoomGesturesEnabled = true
         mMap.uiSettings.isScrollGesturesEnabledDuringRotateOrZoom = true
 
-//        binding.llFilter.visibility = View.VISIBLE
-        binding.llFilter.setOnClickListener {
-            setupFilterTokoModal()
-            filterModal.show()
+        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_SALES) {
+            binding.llFilter.visibility = View.VISIBLE
+            binding.llFilter.setOnClickListener {
+                setupFilterTokoModal()
+                filterModal.show()
+            }
         }
 
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
@@ -308,7 +308,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         listCoordinate = intent.getStringArrayListExtra(CONST_LIST_COORDINATE)
         listCoordinateName = intent.getStringArrayListExtra(CONST_LIST_COORDINATE_NAME)
         listCoordinateStatus = intent.getStringArrayListExtra(CONST_LIST_COORDINATE_STATUS)
-        listCoordinateCityID = intent.getStringArrayListExtra(CONST_LIST_COORDINATE_STATUS)
+        listCoordinateCityID = intent.getStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID)
 
         if (isGetCoordinate) {
             binding.btnGetLatLng.visibility = View.VISIBLE
@@ -401,10 +401,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                     .title(listCoordinateName?.get(i))
                                     .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
 
-                                if (selectedStatusID != "-1" && listCoordinateStatus!![i] == selectedStatusID.toLowerCase()) {
+                                val onlyStatus = selectedStatusID != "-1" && selectedCitiesID == null && listCoordinateStatus!![i] == selectedStatusID.toLowerCase()
+                                val onlyCities = selectedCitiesID != null && selectedStatusID == "-1" && listCoordinateCityID!![i] == selectedCitiesID?.id_city
+                                val statusAndCities = selectedStatusID != "-1" && listCoordinateStatus!![i] == selectedStatusID.toLowerCase() && selectedCitiesID != null && listCoordinateCityID!![i] == selectedCitiesID?.id_city
+
+                                if (statusAndCities) {
                                     mMap.addMarker(markerOptions)
                                     currentTotal ++
-                                } else if (selectedStatusID == "-1") {
+                                } else if (onlyStatus) {
+                                    mMap.addMarker(markerOptions)
+                                    currentTotal ++
+                                } else if (onlyCities) {
+                                    mMap.addMarker(markerOptions)
+                                    currentTotal ++
+                                } else if (selectedStatusID == "-1" && selectedCitiesID == null) {
                                     mMap.addMarker(markerOptions)
                                     currentTotal ++
                                 }
@@ -918,7 +928,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     this@MapsActivity.selectedVisitedID = selectedVisitedID
                     this@MapsActivity.selectedCitiesID = selectedCitiesID
 
-//                    handleMessage(this@MapsActivity, "Filter Maps", "$selectedStatusID : $selectedVisitedID : ${selectedCitiesID?.nama_city}")
+//                    handleMessage(this@MapsActivity, "Filter Maps", "$selectedStatusID : $selectedVisitedID : ${selectedCitiesID?.id_city}")
                     searchCoordinate()
 
                 }
