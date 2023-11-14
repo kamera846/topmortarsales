@@ -455,10 +455,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentLatLng!!, responsiveZoom.toFloat())
 
                 mMap.animateCamera(cameraUpdate, durationMs, null)
-                binding.textTotalNearest.text = "$currentTotal toko ditemukan dalam radius $limitKm km"
+                binding.textTotalNearest.text = "$currentTotal toko ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }ditemukan dalam radius $limitKm km"
             } else {
-                showDialog(message = "Tidak menemukan toko di sekitar anda saat ini dalam radius jarak $limitKm km")
-                binding.textTotalNearest.text = "Tidak dapat menemukan toko dalam radius $limitKm km"
+                showDialog(message = "Tidak menemukan toko ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }di sekitar anda saat ini dalam radius jarak $limitKm km")
+                binding.textTotalNearest.text = "Tidak dapat menemukan toko ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }dalam radius $limitKm km"
             }
 
             binding.cardTelusuri.visibility = View.VISIBLE
