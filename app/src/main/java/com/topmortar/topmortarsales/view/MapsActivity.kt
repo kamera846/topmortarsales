@@ -70,6 +70,8 @@ import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_CITY_ID
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_STATUS
 import com.topmortar.topmortarsales.commons.CONST_MAPS
+import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
+import com.topmortar.topmortarsales.commons.CONST_MAPS_STATUS
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
@@ -77,6 +79,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_ACTIVE
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BID
+import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BLACKLIST
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
 import com.topmortar.topmortarsales.commons.TOAST_LONG
@@ -87,6 +90,7 @@ import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
+import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityMapsBinding
@@ -137,6 +141,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var selectedStatusID: String = "-1"
     private var selectedVisitedID: String = "-1"
     private var selectedCitiesID: CityModel? = null
+
+    // Setup Route
+    private var selectedTargetRoute: Marker? = null
+    private var isRouteActive: Boolean = false
+    private var listRouteLines: MutableList<Polyline> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -229,7 +238,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         mMap.uiSettings.isScrollGesturesEnabledDuringRotateOrZoom = true
 
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_SALES) {
-            binding.llFilter.visibility = View.VISIBLE
+            if (isNearestStore) binding.llFilter.visibility = View.VISIBLE
             binding.llFilter.setOnClickListener {
                 setupFilterTokoModal()
                 filterModal.show()
@@ -254,7 +263,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location: Location? ->
-                    if (location != null) currentLatLng = LatLng(-7.952356,112.692583)
+                    if (location != null) currentLatLng = LatLng(location.latitude,location.longitude)
+//                    if (location != null) currentLatLng = LatLng(-7.952356,112.692583)
                 }
 
             binding.btnGetDirection.setOnClickListener {
@@ -266,6 +276,82 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         mMap.setOnMapClickListener {
             if (binding.recyclerView.isVisible) binding.recyclerView.visibility = View.GONE
+        }
+
+        mMap.setOnMarkerClickListener {
+            if (!isGetCoordinate && isNearestStore) {
+                selectedTargetRoute = it
+                selectedLocation = LatLng(it.position.latitude, it.position.longitude)
+                toggleDrawRoute()
+            }
+            return@setOnMarkerClickListener false
+        }
+    }
+
+    private fun toggleDrawRoute() {
+        if (isNearestStore) {
+            if (selectedTargetRoute == null) {
+                binding.cardGetDirection.visibility = View.GONE
+                binding.cardTelusuri.visibility = View.VISIBLE
+            } else {
+                binding.cardGetDirection.visibility = View.VISIBLE
+                binding.cardTelusuri.visibility = View.GONE
+                if (!isRouteActive) {
+                    binding.textTitleTarget.text = "Toko ${selectedTargetRoute?.title}"
+                    binding.textTargetRute.text = "Petunjuk rute menuju ke lokasi"
+
+                    val itemToFind = "${selectedTargetRoute?.position?.latitude},${selectedTargetRoute?.position?.longitude}"
+                    val indexOfItem = listCoordinate!!.indexOf(itemToFind)
+                    val selectedStatus = if (indexOfItem != -1) listCoordinateStatus!![indexOfItem] else ""
+                    val imgDrawable = when (selectedStatus.toLowerCase()) {
+                        STATUS_CONTACT_DATA -> R.drawable.store_location_status_data
+                        STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active
+                        STATUS_CONTACT_PASSIVE -> R.drawable.store_location_status_passive
+                        STATUS_CONTACT_BID -> R.drawable.store_location_status_biding
+                        else -> R.drawable.store_location_status_blacklist
+                    }
+                    binding.imgTargetRoute.setImageDrawable(getDrawable(imgDrawable))
+
+                }
+                binding.btnDrawRoute.setOnClickListener {
+                    toggleBtnDrawRoute()
+                }
+            }
+        }
+    }
+
+    private fun toggleBtnDrawRoute() {
+        if (routeDirections == null) {
+
+            if (currentLatLng == null) showDialog(message = "Gagal menemukan lokasi Anda saat ini. Pastikan lokasi Anda aktif dan coba buka kembali peta")
+            else if (selectedLocation == null) showDialog(message = "Gagal menemukan lokasi target")
+            else {
+                isRouteActive = true
+                getDirections()
+            }
+
+        } else if (routeDirections != null) {
+            routeDirections!!.remove()
+            routeDirections = null
+            selectedTargetRoute = null
+            isRouteActive = false
+
+            // Remove line routes
+            for (polyline in listRouteLines) {
+                polyline.remove()
+            }
+            listRouteLines.clear()
+
+            Handler().postDelayed({
+                val button = binding.btnDrawRoute
+                val img = binding.btnDrawRouteImg
+                val title = binding.btnDrawRouteTitle
+                button.setBackgroundResource(R.drawable.bg_primary_round)
+                img.setImageDrawable(getDrawable(R.drawable.direction_white))
+                title.text = "Aktifkan Navigasi"
+            }, 500)
+
+            toggleDrawRoute()
         }
     }
 
@@ -300,9 +386,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         builder.show()
     }
 
+    @SuppressLint("MissingPermission")
     private fun dataActivityValidation() {
 
         val iMaps = intent.getStringExtra(CONST_MAPS)
+        val iMapsName = intent.getStringExtra(CONST_MAPS_NAME)
+        val iMapsStatus = intent.getStringExtra(CONST_MAPS_STATUS)
         isGetCoordinate = intent.getBooleanExtra(GET_COORDINATE, false)
         isNearestStore = intent.getBooleanExtra(CONST_NEAREST_STORE, false)
         listCoordinate = intent.getStringArrayListExtra(CONST_LIST_COORDINATE)
@@ -314,7 +403,30 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             binding.btnGetLatLng.visibility = View.VISIBLE
             binding.searchBar.visibility = View.VISIBLE
         } else {
-            if (!isNearestStore) binding.btnGetDirection.visibility = View.VISIBLE
+            if (!isNearestStore) {
+                mMap.setPadding(0,0,0, convertDpToPx(125, this))
+
+                fusedLocationClient.lastLocation
+                    .addOnSuccessListener { location: Location? ->
+                        if (location != null) currentLatLng = LatLng(location.latitude,location.longitude)
+//                    if (location != null) currentLatLng = LatLng(-7.952356,112.692583)
+                    }
+                binding.cardGetDirection.visibility = View.VISIBLE
+                binding.textTitleTarget.text = "Toko $iMapsName"
+                binding.textTargetRute.text = "Petunjuk rute menuju ke lokasi"
+
+                val imgDrawable = when (iMapsStatus) {
+                    STATUS_CONTACT_DATA -> R.drawable.store_location_status_data
+                    STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active
+                    STATUS_CONTACT_PASSIVE -> R.drawable.store_location_status_passive
+                    STATUS_CONTACT_BID -> R.drawable.store_location_status_biding
+                    else -> R.drawable.store_location_status_blacklist
+                }
+                binding.imgTargetRoute.setImageDrawable(getDrawable(imgDrawable))
+                binding.btnDrawRoute.setOnClickListener {
+                    toggleBtnDrawRoute()
+                }
+            }
         }
 
         if (!iMaps.isNullOrEmpty()) {
@@ -338,7 +450,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         val latLng = LatLng(latitude, longitude)
                         etSearch.setText(getPlaceNameFromLatLng(latLng))
                         binding.recyclerView.visibility = View.GONE
-                        return initMaps(latLng)
+                        return initMaps(latLng, iMapsName)
                     } else showDialog(message = "Gagal menavigasi koordinat")
                 } else showDialog(message = "Gagal memproses koordinat")
 
@@ -350,6 +462,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     }
 
+    @SuppressLint("SuspiciousIndentation")
     private fun searchCoordinate() {
         if (!progressDialog.isShowing) progressDialog.show()
 
@@ -624,6 +737,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                 for (i in listPolylineOptions.size - 1 downTo 0) {
                     routeDirections = mMap.addPolyline(listPolylineOptions[i])
+                    listRouteLines.add(routeDirections!!)
                 }
 
                 val bounds = LatLngBounds.builder()
@@ -634,9 +748,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 mMap.animateCamera(updateCamera, mapsDuration, null)
 
                 Handler().postDelayed({
-                    val button = binding.btnGetDirection
-                    val img = binding.btnGetDirectionImg
-                    val title = binding.btnGetDirectionTitle
+                    val button = binding.btnDrawRoute
+                    val img = binding.btnDrawRouteImg
+                    val title = binding.btnDrawRouteTitle
                     button.setBackgroundResource(R.drawable.bg_passive_round)
                     img.setImageDrawable(getDrawable(R.drawable.direction_line_white))
                     title.text = "Matikan Navigasi"
@@ -732,14 +846,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
 
     @SuppressLint("MissingPermission")
-    private fun initMaps(latLng: LatLng? = null) {
+    private fun initMaps(latLng: LatLng? = null, latLngName: String? = null) {
 
-        if (latLng != null) setPin(latLng, getPlaceNameFromLatLng(latLng))
+        if (latLng != null) setPin(latLng, latLngName ?: getPlaceNameFromLatLng(latLng))
         else {
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location: Location? ->
                     if (location != null) {
-                        currentLatLng = LatLng(-7.952356,112.692583)
+                        currentLatLng = LatLng(location.latitude, location.longitude)
+//                        currentLatLng = LatLng(-7.952356,112.692583)
                         setPin(currentLatLng!!, "Lokasi Saya")
 
                         if (isNearestStore && binding.llFilter.isVisible) getCities()
@@ -1037,7 +1152,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     override fun onBackPressed() {
         if (!isGetCoordinate && routeDirections != null) {
-            toggleDirection()
+//            toggleDirection()
+            toggleBtnDrawRoute()
         } else super.onBackPressed()
     }
 }

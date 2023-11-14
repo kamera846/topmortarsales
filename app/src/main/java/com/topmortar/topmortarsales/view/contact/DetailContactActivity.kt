@@ -46,6 +46,8 @@ import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
+import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
+import com.topmortar.topmortarsales.commons.CONST_MAPS_STATUS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
@@ -1499,6 +1501,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                     val intent = Intent(this@DetailContactActivity, MapsActivity::class.java)
                     intent.putExtra(CONST_MAPS, iMapsUrl)
+                    intent.putExtra(CONST_MAPS_NAME, tvName.text)
+                    intent.putExtra(CONST_MAPS_STATUS, iStatus)
                     startActivity(intent)
                 } else checkLocationPermission()
             }, animateDuration)
