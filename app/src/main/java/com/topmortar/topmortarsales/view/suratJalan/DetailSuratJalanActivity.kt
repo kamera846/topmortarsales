@@ -699,7 +699,16 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         var textOrders = ""
 
         orders.forEach {
-            textOrders += "[L]${ it.nama_produk }[R]${ it.qty_produk }\n"
+            val originalProductName = it.nama_produk
+            val produkName = if (originalProductName.length > 44) {
+                val firstLine = originalProductName.substring(0, 44)
+                val remainingText = originalProductName.substring(44)
+                "$firstLine\n$remainingText"
+            } else {
+                originalProductName
+            }
+
+            textOrders += "[L]${ produkName }[R]${ it.qty_produk }\n"
             if (it.is_bonus == "1") {
                 textOrders += "[L]${getString(R.string.free)}\n"
             } else if (it.is_bonus == "2") {
