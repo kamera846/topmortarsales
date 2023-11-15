@@ -45,6 +45,7 @@
 
     <fragment
         android:layout_below="@+id/search_bar"
+        android:layout_above="@+id/bottomContent"
         android:id="@+id/map"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -184,207 +185,214 @@
 
     </LinearLayout>
 
-    <androidx.cardview.widget.CardView
-        android:visibility="gone"
-        android:id="@+id/cardGetDirection"
+    <LinearLayout
+        android:id="@+id/bottomContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="-16dp"
-        map:cardCornerRadius="16dp"
         android:layout_alignParentBottom="true"
-        android:theme="@style/Theme.TopMortarSales.CardView">
+        android:orientation="vertical">
 
-        <LinearLayout
+        <androidx.cardview.widget.CardView
+            android:visibility="gone"
+            android:id="@+id/cardGetDirection"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="32dp"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="-16dp"
+            map:cardCornerRadius="16dp"
+            android:theme="@style/Theme.TopMortarSales.CardView">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="16dp"
-                android:orientation="horizontal">
+                android:layout_height="match_parent"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="32dp"
+                android:orientation="vertical">
 
                 <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/textTitleTarget"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:alpha="0.7"
-                        android:text="Petunjuk Rute"
-                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
-
-                    <TextView
-                        android:id="@+id/textTargetRute"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textSize="14sp"
-                        android:text="Petunjuk rute menuju ke lokasi toko"
-                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
-
-                </LinearLayout>
-
-                <ImageView
-                    android:id="@+id/imgTargetRoute"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:src="@drawable/store_location_status_active"/>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_alignParentBottom="true"
-                android:id="@+id/btnDrawRoute"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="12dp"
-                android:background="@drawable/bg_primary_round"
-                android:gravity="center">
-
-                <ImageView
-                    android:id="@+id/btnDrawRouteImg"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_marginEnd="8dp"
-                    android:contentDescription="Invoice Image Button"
-                    android:background="@android:color/transparent"
-                    android:src="@drawable/direction_white" />
-
-                <TextView
-                    android:id="@+id/btnDrawRouteTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Aktifkan Navigasi"
-                    android:textAllCaps="true"
-                    android:textColor="@color/white"
-                    android:background="@android:color/transparent"
-                    android:textStyle="bold"/>
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </androidx.cardview.widget.CardView>
-
-    <androidx.cardview.widget.CardView
-        android:visibility="gone"
-        android:id="@+id/cardTelusuri"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="-16dp"
-        map:cardCornerRadius="16dp"
-        android:layout_alignParentBottom="true"
-        android:theme="@style/Theme.TopMortarSales.CardView">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingHorizontal="16dp"
-            android:paddingTop="16dp"
-            android:paddingBottom="32dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:alpha="0.7"
-                android:text="Penelusuran Toko Terdekat"
-                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
-
-            <TextView
-                android:id="@+id/textTotalNearest"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:text="100 toko ditemukan dalam radius 1 km"
-                android:layout_marginBottom="16dp"
-                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textSize="14sp"
-                    android:layout_marginEnd="8dp"
-                    android:text="Atur radius dari lokasi anda saat ini dalam km (1-100)."
-                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp"
                     android:orientation="horizontal">
 
-                    <ImageButton
-                        android:id="@+id/btnMinusKm"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:scaleType="fitCenter"
-                        android:background="@android:color/transparent"
-                        android:src="@drawable/minus_dark"/>
-
                     <LinearLayout
-                        android:layout_width="48dp"
-                        android:layout_height="24dp"
-                        android:gravity="center_vertical"
-                        android:background="@drawable/bg_outline"
-                        android:orientation="horizontal">
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
 
-                        <EditText
-                            android:id="@+id/etKm"
+                        <TextView
+                            android:id="@+id/textTitleTarget"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:text="1"
+                            android:layout_height="wrap_content"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:alpha="0.7"
+                            android:text="Petunjuk Rute"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                        <TextView
+                            android:id="@+id/textTargetRute"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
                             android:textSize="14sp"
-                            android:gravity="center"
-                            android:inputType="number"
-                            android:background="@android:color/transparent"/>
+                            android:text="Petunjuk rute menuju ke lokasi toko"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
                     </LinearLayout>
 
-                    <ImageButton
-                        android:id="@+id/btnPlusKm"
+                    <ImageView
+                        android:id="@+id/imgTargetRoute"
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:scaleType="fitCenter"
+                        android:src="@drawable/store_location_status_active"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_alignParentBottom="true"
+                    android:id="@+id/btnDrawRoute"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="12dp"
+                    android:background="@drawable/bg_primary_round"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:id="@+id/btnDrawRouteImg"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginEnd="8dp"
+                        android:contentDescription="Invoice Image Button"
                         android:background="@android:color/transparent"
-                        android:src="@drawable/add_dark"/>
+                        android:src="@drawable/direction_white" />
+
+                    <TextView
+                        android:id="@+id/btnDrawRouteTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Aktifkan Navigasi"
+                        android:textAllCaps="true"
+                        android:textColor="@color/white"
+                        android:background="@android:color/transparent"
+                        android:textStyle="bold"/>
 
                 </LinearLayout>
 
             </LinearLayout>
 
-            <Button
-                android:id="@+id/btnTelusuri"
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:visibility="gone"
+            android:id="@+id/cardTelusuri"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="-16dp"
+            map:cardCornerRadius="16dp"
+            android:theme="@style/Theme.TopMortarSales.CardView">
+
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Telusuri Lagi"
-                android:backgroundTint="@color/primary"
-                android:textColor="@color/white"/>
+                android:layout_height="match_parent"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="32dp"
+                android:orientation="vertical">
 
-        </LinearLayout>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:alpha="0.7"
+                    android:text="Penelusuran Toko Terdekat"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
 
-    </androidx.cardview.widget.CardView>
+                <TextView
+                    android:id="@+id/textTotalNearest"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:text="100 toko ditemukan dalam radius 1 km"
+                    android:layout_marginBottom="16dp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="14sp"
+                        android:layout_marginEnd="8dp"
+                        android:text="Atur radius dari lokasi anda saat ini dalam km (1-100)."
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageButton
+                            android:id="@+id/btnMinusKm"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:scaleType="fitCenter"
+                            android:background="@android:color/transparent"
+                            android:src="@drawable/minus_dark"/>
+
+                        <LinearLayout
+                            android:layout_width="48dp"
+                            android:layout_height="24dp"
+                            android:gravity="center_vertical"
+                            android:background="@drawable/bg_outline"
+                            android:orientation="horizontal">
+
+                            <EditText
+                                android:id="@+id/etKm"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:text="1"
+                                android:textSize="14sp"
+                                android:gravity="center"
+                                android:inputType="number"
+                                android:background="@android:color/transparent"/>
+
+                        </LinearLayout>
+
+                        <ImageButton
+                            android:id="@+id/btnPlusKm"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:scaleType="fitCenter"
+                            android:background="@android:color/transparent"
+                            android:src="@drawable/add_dark"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnTelusuri"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Telusuri Lagi"
+                    android:backgroundTint="@color/primary"
+                    android:textColor="@color/white"/>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
 
 </RelativeLayout>

@@ -145,6 +145,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     // Setup Route
     private var selectedTargetRoute: Marker? = null
     private var isRouteActive: Boolean = false
+    private var isCardNavigationShowing: Boolean = false
     private var listRouteLines: MutableList<Polyline> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -280,6 +281,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         mMap.setOnMarkerClickListener {
             if (!isGetCoordinate && isNearestStore) {
+                isCardNavigationShowing = true
                 selectedTargetRoute = it
                 selectedLocation = LatLng(it.position.latitude, it.position.longitude)
                 toggleDrawRoute()
@@ -293,6 +295,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             if (selectedTargetRoute == null) {
                 binding.cardGetDirection.visibility = View.GONE
                 binding.cardTelusuri.visibility = View.VISIBLE
+                isCardNavigationShowing = false
             } else {
                 binding.cardGetDirection.visibility = View.VISIBLE
                 binding.cardTelusuri.visibility = View.GONE
@@ -331,10 +334,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             }
 
         } else if (routeDirections != null) {
-            routeDirections!!.remove()
-            routeDirections = null
-            selectedTargetRoute = null
-            isRouteActive = false
 
             // Remove line routes
             for (polyline in listRouteLines) {
@@ -350,6 +349,25 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 img.setImageDrawable(getDrawable(R.drawable.direction_white))
                 title.text = "Aktifkan Navigasi"
             }, 500)
+
+            val limitKm = binding.etKm.text.toString().toDouble()
+            val responsiveZoom = when {
+                limitKm >= 1 -> when {
+                    limitKm >= 18 -> 10
+                    limitKm >= 13 -> 11
+                    limitKm >= 8 -> 12
+                    limitKm >= 3 -> 13
+                    else -> 14
+                }
+                else -> 15
+            }
+            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(LatLng(selectedLocation!!.latitude, selectedLocation!!.longitude), responsiveZoom.toFloat())
+            mMap.animateCamera(cameraUpdate, 2000, null)
+
+            routeDirections!!.remove()
+            routeDirections = null
+            selectedTargetRoute = null
+            isRouteActive = false
 
             toggleDrawRoute()
         }
@@ -404,7 +422,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             binding.searchBar.visibility = View.VISIBLE
         } else {
             if (!isNearestStore) {
-                mMap.setPadding(0,0,0, convertDpToPx(125, this))
 
                 fusedLocationClient.lastLocation
                     .addOnSuccessListener { location: Location? ->
@@ -415,13 +432,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 binding.textTitleTarget.text = "Toko $iMapsName"
                 binding.textTargetRute.text = "Petunjuk rute menuju ke lokasi"
 
-                val imgDrawable = when (iMapsStatus) {
-                    STATUS_CONTACT_DATA -> R.drawable.store_location_status_data
-                    STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active
-                    STATUS_CONTACT_PASSIVE -> R.drawable.store_location_status_passive
-                    STATUS_CONTACT_BID -> R.drawable.store_location_status_biding
-                    else -> R.drawable.store_location_status_blacklist
-                }
+                val imgDrawable = R.drawable.store_location_status_blacklist
                 binding.imgTargetRoute.setImageDrawable(getDrawable(imgDrawable))
                 binding.btnDrawRoute.setOnClickListener {
                     toggleBtnDrawRoute()
@@ -1151,9 +1162,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     }
 
     override fun onBackPressed() {
-        if (!isGetCoordinate && routeDirections != null) {
-//            toggleDirection()
-            toggleBtnDrawRoute()
+        if (!isGetCoordinate) {
+            if (routeDirections != null) toggleBtnDrawRoute()
+            else if (isCardNavigationShowing) {
+                selectedTargetRoute = null
+                toggleDrawRoute()
+            }
+            else super.onBackPressed()
         } else super.onBackPressed()
     }
 }
