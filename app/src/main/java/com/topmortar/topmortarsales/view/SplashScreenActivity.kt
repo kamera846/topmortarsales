@@ -45,6 +45,7 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.view.courier.CourierActivity
 import com.topmortar.topmortarsales.view.tukang.ListTukangActivity
 import kotlinx.coroutines.launch
 import okhttp3.RequestBody
@@ -260,6 +261,13 @@ class SplashScreenActivity : AppCompatActivity() {
         finish()
 
     }
+    private fun navigateToCourier() {
+
+        val intent = Intent(this, CourierActivity::class.java)
+        startActivity(intent)
+        finish()
+
+    }
 
     private fun checkSession() {
 
@@ -272,6 +280,7 @@ class SplashScreenActivity : AppCompatActivity() {
         else {
             when (userKind) {
                 USER_KIND_BA -> navigateToListTukang()
+                USER_KIND_COURIER -> navigateToCourier()
                 else -> navigateToMain()
             }
         }
@@ -373,6 +382,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
                         when (data.level_user) {
                             AUTH_LEVEL_BA -> navigateToListTukang()
+                            USER_KIND_COURIER -> navigateToCourier()
                             else -> navigateToMain()
                         }
 
