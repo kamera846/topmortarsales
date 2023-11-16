@@ -21,6 +21,7 @@
     <string name="list_chat_contact_description">Lorem ipsum sit dolor amet</string>
     <string name="txt_loading">Memuat…</string>
     <string name="txt_sending">Mengirim…</string>
+    <string name="txt_saving">Menyimpan…</string>
     <string name="message_length">0/200</string>
     <string name="et_label">Label for the input field</string>
     <string name="et_hint">Enter your text here</string>

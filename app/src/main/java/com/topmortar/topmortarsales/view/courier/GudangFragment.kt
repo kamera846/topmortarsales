@@ -206,7 +206,8 @@ class GudangFragment : Fragment() {
 
     private fun navigateFab() {
 
-        // Navigate to Add Gudang Screen
+        val intent = Intent(requireContext(), AddGudangActivity::class.java)
+        (requireContext() as Activity).startActivity(intent)
 
     }
 
