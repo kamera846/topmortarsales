@@ -15,7 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter
+import com.topmortar.topmortarsales.adapter.recyclerview.GudangRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
@@ -29,6 +29,7 @@ import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.CONST_PROMO
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
+import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -41,7 +42,10 @@ import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.FragmentGudangBinding
 import com.topmortar.topmortarsales.model.ContactModel
+import com.topmortar.topmortarsales.model.ReportVisitModel
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
+import com.topmortar.topmortarsales.view.reports.NewReportActivity
+import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -130,9 +134,9 @@ class GudangFragment : Fragment() {
 
     private fun setRecyclerView(listItem: ArrayList<ContactModel>) {
 
-        val rvAdapter = ContactsRecyclerViewAdapter(listItem, object: ContactsRecyclerViewAdapter.ItemClickListener {
+        val rvAdapter = GudangRecyclerViewAdapter(listItem, object: GudangRecyclerViewAdapter.ItemClickListener {
             override fun onItemClick(data: ContactModel?) {
-                navigateDetailContact(data)
+                navigateItemAction(data)
             }
 
         })
@@ -162,27 +166,13 @@ class GudangFragment : Fragment() {
 
     }
 
-    private fun navigateDetailContact(data: ContactModel? = null) {
+    private fun navigateItemAction(data: ContactModel? = null) {
 
-        val intent = Intent(requireContext(), DetailContactActivity::class.java)
-
-        if (data != null) {
-            intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
-            intent.putExtra(CONST_CONTACT_ID, data.id_contact)
-            intent.putExtra(CONST_NAME, data.nama)
-            intent.putExtra(CONST_PHONE, data.nomorhp)
-            intent.putExtra(CONST_BIRTHDAY, data.tgl_lahir)
-            intent.putExtra(CONST_OWNER, data.store_owner)
-            intent.putExtra(CONST_LOCATION, data.id_city)
-            intent.putExtra(CONST_MAPS, data.maps_url)
-            intent.putExtra(CONST_ADDRESS, data.address)
-            intent.putExtra(CONST_STATUS, data.store_status)
-            intent.putExtra(CONST_KTP, data.ktp_owner)
-            intent.putExtra(CONST_TERMIN, data.termin_payment)
-            intent.putExtra(CONST_PROMO, data.id_promo)
-        }
-
-        (requireContext() as Activity).startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
+        val intent = Intent(requireContext(), NewReportActivity::class.java)
+        intent.putExtra(CONST_CONTACT_ID, data?.id_contact)
+        intent.putExtra(CONST_NAME, data?.nama)
+        intent.putExtra(CONST_MAPS, data?.maps_url)
+        (requireContext() as Activity).startActivity(intent)
 
     }
 
