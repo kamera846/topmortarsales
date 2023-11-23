@@ -28,6 +28,7 @@ import com.topmortar.topmortarsales.commons.CONST_DATE_INVOICE
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_NUMBER
 import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.CONST_NO_SURAT_JALAN
 import com.topmortar.topmortarsales.commons.CONST_STATUS_INVOICE
 import com.topmortar.topmortarsales.commons.CONST_TOTAL_INVOICE
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
@@ -35,17 +36,16 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
-import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
-import com.topmortar.topmortarsales.view.invoice.DetailInvoiceActivity
 import com.topmortar.topmortarsales.model.InvoiceModel
 import com.topmortar.topmortarsales.model.SuratJalanModel
 import com.topmortar.topmortarsales.response.ResponseInvoice
+import com.topmortar.topmortarsales.view.invoice.DetailInvoiceActivity
 import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
@@ -439,6 +439,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
         intent.putExtra(CONST_STATUS_INVOICE, data?.status_invoice)
         intent.putExtra(CONST_TOTAL_INVOICE, data?.total_invoice)
         intent.putExtra(CONST_DATE_INVOICE, data?.date_invoice)
+        intent.putExtra(CONST_NO_SURAT_JALAN, data?.no_surat_jalan)
         startActivity(intent)
 
     }

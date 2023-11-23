@@ -39,6 +39,7 @@ import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
+import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_CITY_ID
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_STATUS
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
@@ -72,7 +73,9 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityMainBinding
+import com.topmortar.topmortarsales.modal.FilterTokoModal
 import com.topmortar.topmortarsales.modal.SearchModal
+import com.topmortar.topmortarsales.model.CityModel
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.city.ManageCityActivity
@@ -82,6 +85,7 @@ import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
 import com.topmortar.topmortarsales.view.user.ManageUserActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 @Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchModalListener {
@@ -107,12 +111,14 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
     private lateinit var sessionManager: SessionManager
     private lateinit var binding: ActivityMainBinding
     private lateinit var searchModal: SearchModal
+    private lateinit var filterModal: FilterTokoModal
     private var selectedCity: ModalSearchModel? = null
     private var doubleBackToExitPressedOnce = false
     private lateinit var userCity: String
     private lateinit var userKind: String
     private var userId: String = ""
     private var contacts: ArrayList<ContactModel> = arrayListOf()
+    private var cities: ArrayList<CityModel> = arrayListOf()
 
     // Initialize Search Engine
     private val searchDelayMillis = 500L
@@ -120,6 +126,11 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
     private var searchRunnable: Runnable? = null
     private var previousSearchTerm = ""
     private var isSearchActive = false
+
+    // Setup Filter
+    private var selectedStatusID: String = "-1"
+    private var selectedVisitedID: String = "-1"
+    private var selectedCitiesID: CityModel? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -192,7 +203,11 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         rlLoading.setOnTouchListener { _, event -> blurSearchBox(event) }
 //        rlParent.setOnTouchListener { _, event -> blurSearchBox(event) }
         rvListChat.setOnTouchListener { _, event -> blurSearchBox(event) }
-        binding.llFilter.setOnClickListener { showSearchModal() }
+//        binding.llFilter.setOnClickListener { showSearchModal() }
+        binding.llFilter.setOnClickListener {
+            setupFilterTokoModal()
+            showFilterModal()
+        }
 //        if (userKind == USER_KIND_ADMIN) {
 //            binding.btnCheckLocation.visibility = View.VISIBLE
 //            binding.btnCheckLocation.setOnClickListener { navigateChecklocation() }
@@ -303,11 +318,13 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                             val listCoordinate = arrayListOf<String>()
                             val listCoordinateName = arrayListOf<String>()
                             val listCoordinateStatus = arrayListOf<String>()
+                            val listCoordinateCityID = arrayListOf<String>()
 
                             for (item in response.results.listIterator()) {
                                 listCoordinate.add(item.maps_url)
                                 listCoordinateName.add(item.nama)
                                 listCoordinateStatus.add(item.store_status)
+                                listCoordinateCityID.add(item.id_city)
                             }
 
                             val intent = Intent(this@MainActivity, MapsActivity::class.java)
@@ -316,6 +333,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
 
                             progressDialog.dismiss()
                             startActivity(intent)
@@ -569,15 +587,29 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
                 val apiService: ApiService = HttpClient.create()
                 val response = when (userKind) {
-                    USER_KIND_ADMIN -> {
-                        if (selectedCity != null ) {
-                            if (selectedCity!!.id != "-1") apiService.getContacts(cityId = selectedCity!!.id!!) else apiService.getContacts()
+                    USER_KIND_COURIER -> apiService.getCourierStore(processNumber = "1", courierId = userId)
+                    else -> {
+                        val statusFilter = selectedStatusID.toLowerCase(Locale.ROOT)
+                        val cityID = if (userKind == USER_KIND_ADMIN) selectedCitiesID?.id_city
+                        else userCity
+
+                        if (cityID != null && statusFilter != "-1") {
+                            apiService.getContacts(cityId = cityID, status = statusFilter)
+                        } else if (cityID != null) {
+                            apiService.getContacts(cityId = cityID)
+                        } else if (statusFilter != "-1" ) {
+                            apiService.getContactsByStatus(status = statusFilter)
                         } else apiService.getContacts()
-                    } USER_KIND_COURIER -> apiService.getCourierStore(processNumber = "1", courierId = userId)
-                    else -> apiService.getContacts(cityId = userCity)
+                    }
                 }
 
-                val textFilter = if (selectedCity != null && selectedCity?.id != "-1") selectedCity?.title else getString(R.string.all_cities)
+                var textFilter = ""
+
+                if (selectedStatusID != "-1" || selectedVisitedID != "-1" || selectedCitiesID != null) {
+                    textFilter += if (selectedCitiesID != null && selectedCitiesID?.id_city != "-1") selectedCitiesID?.nama_city else ""
+                    textFilter += if (selectedStatusID != "-1") if (textFilter.isNotEmpty()) ", $selectedStatusID" else selectedStatusID else ""
+                    textFilter += if (selectedVisitedID != "-1") if (textFilter.isNotEmpty()) ", $selectedVisitedID" else selectedVisitedID else ""
+                } else textFilter = getString(R.string.tidak_ada_filter)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -586,6 +618,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                         setRecyclerView(response.results)
                         binding.tvFilter.text = "$textFilter (${response.results.size})"
                         loadingState(false)
+                        setupFilterTokoModal()
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
@@ -629,17 +662,18 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        val results = response.results
+                        cities = response.results
                         val items: ArrayList<ModalSearchModel> = ArrayList()
 
                         items.add(ModalSearchModel("-1", "Hapus filter"))
-                        for (i in 0 until results.size) {
-                            val data = results[i]
+                        for (i in 0 until cities.size) {
+                            val data = cities[i]
                             items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
                         }
 
-                        setupFilterContacts(items)
+//                        setupFilterContacts(items)
 
+                        setupFilterTokoModal()
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
@@ -679,10 +713,50 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         searchModal.setOnDismissListener {}
     }
 
+    private fun setupFilterTokoModal() {
+
+        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_SALES) {
+            val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+            if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.background = getDrawable(R.color.black_400)
+            else binding.llFilter.background = getDrawable(R.color.light)
+
+            binding.llFilter.visibility = View.VISIBLE
+
+            filterModal = FilterTokoModal(this)
+//        filterModal.setStatuses(selected = selectedStatusID)
+//        filterModal.setVisited(selected = selectedVisitedID)
+//        filterModal.setCities(cities, selected = selectedCitiesID)
+            if (userKind == USER_KIND_ADMIN) {
+                filterModal.setStatuses(selected = selectedStatusID)
+                filterModal.setCities(items = cities, selected = selectedCitiesID)
+            } else if (userKind == USER_KIND_SALES) filterModal.setStatuses(selected = selectedStatusID)
+            filterModal.setSendFilterListener(object: FilterTokoModal.SendFilterListener {
+                override fun onSendFilter(
+                    selectedStatusID: String,
+                    selectedVisitedID: String,
+                    selectedCitiesID: CityModel?
+                ) {
+
+                    this@MainActivity.selectedStatusID = selectedStatusID
+                    this@MainActivity.selectedVisitedID = selectedVisitedID
+                    this@MainActivity.selectedCitiesID = selectedCitiesID
+
+                    if (isSearchActive) searchContact()
+                    else getContacts()
+                }
+
+            })
+        }
+    }
+
     private fun showSearchModal() {
         val searchKey = if (selectedCity != null) selectedCity!!.title!! else ""
         if (searchKey.isNotEmpty()) searchModal.setSearchKey(searchKey)
         searchModal.show()
+    }
+
+    private fun showFilterModal() {
+        filterModal.show()
     }
 
     private fun getUserLoggedIn() {
@@ -730,22 +804,31 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             try {
 
                 val searchKey = createPartFromString(key)
-                val searchCity = createPartFromString(userCity)
+
+                val statusFilter = selectedStatusID.toLowerCase(Locale.ROOT)
+                val cityID = if (userKind == USER_KIND_ADMIN) selectedCitiesID?.id_city
+                else userCity
 
                 val apiService: ApiService = HttpClient.create()
-                val response = if (userKind == USER_KIND_ADMIN) {
-                    if (selectedCity != null ) {
-                        if (selectedCity!!.id != "-1") {
-                            val cityId = createPartFromString(selectedCity!!.id!!)
-                            apiService.searchContact(key = searchKey, cityId = cityId)
-                        } else apiService.searchContact(key = searchKey)
-                    } else apiService.searchContact(key = searchKey)
-                } else apiService.searchContact(cityId = searchCity, key = searchKey)
+                val response = if (cityID != null && statusFilter != "-1") {
+                    apiService.searchContact(cityId = createPartFromString(cityID), status = createPartFromString(statusFilter), key = searchKey)
+                } else if (cityID != null) {
+                    apiService.searchContact(cityId = createPartFromString(cityID), key = searchKey)
+                } else if (statusFilter != "-1" ) {
+                    apiService.searchContactByStatus(status = createPartFromString(statusFilter), key = searchKey)
+                } else apiService.searchContact(key = searchKey)
 
                 if (response.isSuccessful) {
 
                     val responseBody = response.body()!!
-                    val textFilter = if (selectedCity != null && selectedCity?.id != "-1") selectedCity?.title else getString(R.string.all_cities)
+
+                    var textFilter = ""
+
+                    if (selectedStatusID != "-1" || selectedVisitedID != "-1" || selectedCitiesID != null) {
+                        textFilter += if (selectedCitiesID != null && selectedCitiesID?.id_city != "-1") selectedCitiesID?.nama_city else ""
+                        textFilter += if (selectedStatusID != "-1") if (textFilter.isNotEmpty()) ", $selectedStatusID" else selectedStatusID else ""
+                        textFilter += if (selectedVisitedID != "-1") if (textFilter.isNotEmpty()) ", $selectedVisitedID" else selectedVisitedID else ""
+                    } else textFilter = getString(R.string.tidak_ada_filter)
 
                     when (responseBody.status) {
                         RESPONSE_STATUS_OK -> {

@@ -10,6 +10,7 @@ import com.topmortar.topmortarsales.commons.GET_CITY
 import com.topmortar.topmortarsales.commons.CONTACT
 import com.topmortar.topmortarsales.commons.SURAT_JALAN
 import com.topmortar.topmortarsales.commons.GET_USERS
+import com.topmortar.topmortarsales.commons.GUDANG
 import com.topmortar.topmortarsales.commons.INVOICE
 import com.topmortar.topmortarsales.commons.PAYMENT
 import com.topmortar.topmortarsales.commons.PROMO
@@ -28,6 +29,7 @@ import com.topmortar.topmortarsales.response.ResponseAuth
 import com.topmortar.topmortarsales.response.ResponseCities
 import com.topmortar.topmortarsales.response.ResponseContactList
 import com.topmortar.topmortarsales.response.ResponseCountStore
+import com.topmortar.topmortarsales.response.ResponseGudang
 import com.topmortar.topmortarsales.response.ResponseInvoice
 import com.topmortar.topmortarsales.response.ResponseSuratJalan
 import com.topmortar.topmortarsales.response.ResponseMessage
@@ -46,6 +48,10 @@ interface ApiService {
 
     @GET(CONTACT)
     suspend fun getContacts(@Query("c") cityId: String): ResponseContactList
+    @GET(CONTACT)
+    suspend fun getContactsByStatus(@Query("status") status: String): ResponseContactList
+    @GET(CONTACT)
+    suspend fun getContacts(@Query("c") cityId: String, @Query("status") status: String): ResponseContactList
 
     @GET(CONTACT)
     suspend fun getContacts(): ResponseContactList
@@ -108,6 +114,21 @@ interface ApiService {
     @Multipart
     @POST(SEARCH_CONTACT)
     suspend fun searchContact(
+        @Part("id_city") cityId: RequestBody,
+        @Part("key") key: RequestBody
+    ): Response<ResponseContactList>
+
+    @Multipart
+    @POST(SEARCH_CONTACT)
+    suspend fun searchContactByStatus(
+        @Part("status") status: RequestBody,
+        @Part("key") key: RequestBody
+    ): Response<ResponseContactList>
+
+    @Multipart
+    @POST(SEARCH_CONTACT)
+    suspend fun searchContact(
+        @Part("status") status: RequestBody,
         @Part("id_city") cityId: RequestBody,
         @Part("key") key: RequestBody
     ): Response<ResponseContactList>
@@ -341,4 +362,26 @@ interface ApiService {
         @Query("a") idUser: String,
         @Query("s") idContact: String
     ): ResponseUsers
+
+    @GET(GUDANG)
+    suspend fun getListGudang(
+        @Query("c") cityId: String
+    ): ResponseGudang
+
+    @Multipart
+    @POST(GUDANG)
+    suspend fun addGudang(
+        @Part("nama_gudang") name: RequestBody,
+        @Part("location_gudang") mapsUrl: RequestBody,
+        @Part("nomorhp_gudang") phone: RequestBody,
+        @Part("id_city") cityId: RequestBody,
+    ): ResponseGudang
+
+    @Multipart
+    @POST(GUDANG)
+    suspend fun addGudang(
+        @Part("nama_gudang") name: RequestBody,
+        @Part("location_gudang") mapsUrl: RequestBody,
+        @Part("id_city") cityId: RequestBody,
+    ): ResponseGudang
 }

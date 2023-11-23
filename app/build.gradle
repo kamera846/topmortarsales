@@ -13,8 +13,8 @@ android {
         applicationId "com.topmortar.topmortarsales"
         minSdk 24
         targetSdk 33
-        versionCode 44
-        versionName "2.7.64"
+        versionCode 47
+        versionName "2.7.67"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -90,9 +90,12 @@ dependencies {
     implementation 'com.google.maps:google-maps-services:0.19.0'
 
     // Event Bus
-    implementation 'org.greenrobot:eventbus:3.2.0'
+    implementation 'org.greenrobot:eventbus:3.3.1'
 
     // MpAndroidChart
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+
+    // Flexbox
+    implementation 'com.google.android.flexbox:flexbox:3.0.0'
 
 }

@@ -8,7 +8,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
@@ -17,6 +16,7 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -25,20 +25,17 @@ import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
-import com.topmortar.topmortarsales.commons.MAX_DISTANCE
+import com.topmortar.topmortarsales.commons.MAX_REPORT_DISTANCE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
-import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
-import com.topmortar.topmortarsales.commons.utils.PhoneHandler
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
-import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -46,7 +43,6 @@ import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityNewReportBinding
 import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
-import retrofit2.http.Part
 
 class NewReportActivity : AppCompatActivity() {
 
@@ -169,7 +165,7 @@ class NewReportActivity : AppCompatActivity() {
                                 val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
                                 val shortDistance = "%.3f".format(distance)
 
-                                if (distance > MAX_DISTANCE) {
+                                if (distance > MAX_REPORT_DISTANCE) {
                                     val builder = AlertDialog.Builder(this)
                                     builder.setCancelable(false)
                                     builder.setOnDismissListener { progressDialog.dismiss() }
@@ -183,7 +179,7 @@ class NewReportActivity : AppCompatActivity() {
                                             binding.etDistance.text = shortDistance
                                             binding.icRefreshDistance.visibility = View.VISIBLE
                                             binding.tvDistanceError.visibility = View.VISIBLE
-                                            binding.tvDistanceError.text = "Jarak anda lebih dari $MAX_DISTANCE km. Cobalah untuk lebih dekat dengan titik toko dan refresh jaraknya!"
+                                            binding.tvDistanceError.text = "Jarak anda lebih dari $MAX_REPORT_DISTANCE km. Cobalah untuk lebih dekat dengan titik toko dan refresh jaraknya!"
                                             isDistanceToLong = true
 
                                             dialog.dismiss()

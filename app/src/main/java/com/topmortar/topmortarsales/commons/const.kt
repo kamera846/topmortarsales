@@ -43,6 +43,7 @@ const val BID = "bid.php"
 const val BID_ON_GOING = "0"
 const val BID_VISITED = "1"
 const val VISIT = "visit.php"
+const val GUDANG = "gudang.php"
 
 // Request Code
 const val ACTIVITY_REQUEST_CODE = "activity_request_code"
@@ -64,7 +65,8 @@ const val TAG_ACTION_MAIN_ACTIVITY = "TAG ACTION MAIN ACTIVITY"
 // Global
 const val TOAST_LONG = Toast.LENGTH_LONG
 const val TOAST_SHORT = Toast.LENGTH_SHORT
-const val MAX_DISTANCE = 0.2
+const val MAX_DISTANCE = 0.4
+const val MAX_REPORT_DISTANCE = 0.2
 const val EMPTY_FIELD_VALUE = "Not set"
 
 // Props
@@ -81,6 +83,8 @@ const val CONST_NAME = "const_name"
 const val CONST_BIRTHDAY = "const_birthday"
 const val CONST_KTP = "const_ktp"
 const val CONST_MAPS = "const_maps"
+const val CONST_MAPS_NAME = "const_maps_name"
+const val CONST_MAPS_STATUS = "const_maps_status"
 const val CONST_STATUS = "const_status"
 const val CONST_TERMIN = "const_termin"
 const val CONST_ADDRESS = "const_address"
@@ -91,11 +95,13 @@ const val CONST_DISTANCE = "const_distance"
 const val CONST_STATUS_INVOICE = "const_status_invoice"
 const val CONST_TOTAL_INVOICE = "const_total_invoice"
 const val CONST_DATE_INVOICE = "const_date_invoice"
+const val CONST_NO_SURAT_JALAN = "const_no_surat_jalan"
 const val CONST_PROMO = "const_promo"
 const val CONST_NEAREST_STORE = "const_nearest_store"
 const val CONST_LIST_COORDINATE = "const_list_coordinate"
 const val CONST_LIST_COORDINATE_NAME = "const_list_coordinate_name"
 const val CONST_LIST_COORDINATE_STATUS = "const_list_coordinate_status"
+const val CONST_LIST_COORDINATE_CITY_ID = "const_list_coordinate_city_id"
 
 // Status
 const val LOGGED_IN = true
