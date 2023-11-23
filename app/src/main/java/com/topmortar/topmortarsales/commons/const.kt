@@ -43,6 +43,7 @@ const val BID = "bid.php"
 const val BID_ON_GOING = "0"
 const val BID_VISITED = "1"
 const val VISIT = "visit.php"
+const val GUDANG = "gudang.php"
 
 // Request Code
 const val ACTIVITY_REQUEST_CODE = "activity_request_code"

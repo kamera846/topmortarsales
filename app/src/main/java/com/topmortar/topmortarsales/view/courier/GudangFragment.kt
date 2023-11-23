@@ -41,7 +41,7 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.FragmentGudangBinding
-import com.topmortar.topmortarsales.model.ContactModel
+import com.topmortar.topmortarsales.model.GudangModel
 import com.topmortar.topmortarsales.model.ReportVisitModel
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import com.topmortar.topmortarsales.view.reports.NewReportActivity
@@ -97,7 +97,7 @@ class GudangFragment : Fragment() {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getCourierStore(processNumber = "1", courierId = userID)
+                val response = apiService.getListGudang(cityId = userCity)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -132,10 +132,10 @@ class GudangFragment : Fragment() {
 
     }
 
-    private fun setRecyclerView(listItem: ArrayList<ContactModel>) {
+    private fun setRecyclerView(listItem: ArrayList<GudangModel>) {
 
         val rvAdapter = GudangRecyclerViewAdapter(listItem, object: GudangRecyclerViewAdapter.ItemClickListener {
-            override fun onItemClick(data: ContactModel?) {
+            override fun onItemClick(data: GudangModel?) {
                 navigateItemAction(data)
             }
 
@@ -166,10 +166,10 @@ class GudangFragment : Fragment() {
 
     }
 
-    private fun navigateItemAction(data: ContactModel? = null) {
+    private fun navigateItemAction(data: GudangModel? = null) {
 
         val intent = Intent(requireContext(), NewReportActivity::class.java)
-        intent.putExtra(CONST_CONTACT_ID, data?.id_contact)
+        intent.putExtra(CONST_CONTACT_ID, data?.id_gudang)
         intent.putExtra(CONST_NAME, data?.nama)
         intent.putExtra(CONST_MAPS, data?.maps_url)
         (requireContext() as Activity).startActivity(intent)

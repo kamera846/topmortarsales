@@ -4,35 +4,46 @@ import android.Manifest
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
 import android.provider.Settings
-import android.text.Editable
-import android.text.TextWatcher
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
+import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
+import com.topmortar.topmortarsales.commons.utils.createPartFromString
+import com.topmortar.topmortarsales.commons.utils.handleMessage
+import com.topmortar.topmortarsales.data.ApiService
+import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityAddGudangBinding
 import com.topmortar.topmortarsales.view.MapsActivity
+import kotlinx.coroutines.launch
 
 class AddGudangActivity : AppCompatActivity() {
 
     private var _binding: ActivityAddGudangBinding? = null
     private val binding get() = _binding!!
+    private lateinit var sessionManager: SessionManager
+    private val userCityID get() = sessionManager.userCityID()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
         _binding = ActivityAddGudangBinding.inflate(layoutInflater)
+        sessionManager = SessionManager(this)
         setContentView(binding.root)
 
         binding.titleBar.tvTitleBar.text = "Tambah Daftar Gudang"
@@ -115,10 +126,70 @@ class AddGudangActivity : AppCompatActivity() {
         loadingState.setMessage(getString(R.string.txt_saving))
         loadingState.show()
 
-        Handler().postDelayed({
-            finish()
-            loadingState.dismiss()
-        }, 1000)
+        val phone = "${ binding.etPhone.text }"
+        val name = "${ binding.etName.text }"
+        val cityId = userCityID.let { if (!it.isNullOrEmpty()) it else "0" }
+        val mapsUrl = "${ binding.etMapsUrl.text }"
+
+        lifecycleScope.launch {
+            try {
+
+                val rbPhone = createPartFromString(PhoneHandler.formatPhoneNumber(phone))
+                val rbName = createPartFromString(name)
+                val rbLocation = createPartFromString(cityId)
+                val rbMapsUrl = createPartFromString(mapsUrl)
+
+                val apiService: ApiService = HttpClient.create()
+                val response = if (phone.isNullOrEmpty()) {
+                    apiService.addGudang(
+                        name = rbName,
+                        cityId = rbLocation,
+                        mapsUrl = rbMapsUrl
+                    )
+                } else {
+                    apiService.addGudang(
+                        name = rbName,
+                        phone = rbPhone,
+                        cityId = rbLocation,
+                        mapsUrl = rbMapsUrl
+                    )
+                }
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        handleMessage(this@AddGudangActivity, TAG_RESPONSE_MESSAGE, "Berhasil menyimpan")
+
+//                        val resultIntent = Intent()
+//                        resultIntent.putExtra("$activityRequestCode", SYNC_NOW)
+//                        setResult(RESULT_OK, resultIntent)
+                        finish()
+                        loadingState.dismiss()
+
+                    }
+                    RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+
+                        handleMessage(this@AddGudangActivity, TAG_RESPONSE_MESSAGE, "Gagal menyimpan gudang: ${ response.message }")
+                        loadingState.dismiss()
+
+                    }
+                    else -> {
+
+                        handleMessage(this@AddGudangActivity, TAG_RESPONSE_MESSAGE, "Gagal menyimpan!")
+                        loadingState.dismiss()
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(this@AddGudangActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                loadingState.dismiss()
+
+            }
+
+        }
     }
 
     private fun isValidForm(): Boolean {

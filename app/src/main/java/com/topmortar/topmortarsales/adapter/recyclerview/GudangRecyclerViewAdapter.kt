@@ -19,13 +19,13 @@ import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BID
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BLACKLIST
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
-import com.topmortar.topmortarsales.model.ContactModel
+import com.topmortar.topmortarsales.model.GudangModel
 
-class GudangRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<GudangRecyclerViewAdapter.ChatViewHolder>() {
+class GudangRecyclerViewAdapter(private val chatList: ArrayList<GudangModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<GudangRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
 
     interface ItemClickListener {
-        fun onItemClick(data: ContactModel? = null)
+        fun onItemClick(data: GudangModel? = null)
     }
 
     inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -34,11 +34,11 @@ class GudangRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>, p
         val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
         val tooltipStatus: ImageView = itemView.findViewById(R.id.tooltip_status)
 
-        fun bind(chatItem: ContactModel) {
+        fun bind(chatItem: GudangModel) {
 
             tvContactName.text = chatItem.nama
-            tvPhoneNumber.text = if (chatItem.nomorhp != "") "+${ chatItem.nomorhp }" else ""
-            setupStatus(chatItem.store_status)
+//            tvPhoneNumber.text = if (chatItem.nomorhp != "") "+${ chatItem.nomorhp }" else ""
+//            setupStatus(chatItem.store_status)
 
         }
 
