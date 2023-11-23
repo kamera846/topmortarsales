@@ -68,6 +68,8 @@ const val TOAST_SHORT = Toast.LENGTH_SHORT
 const val MAX_DISTANCE = 0.4
 const val MAX_REPORT_DISTANCE = 0.2
 const val EMPTY_FIELD_VALUE = "Not set"
+const val PRINT_METHOD_BLUETOOTH = "print_bluetooth"
+const val PRINT_METHOD_WIFI = "print_wifi"
 
 // Props
 const val CONST_CONTACT_ID = "const_contact_id"

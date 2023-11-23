@@ -53,6 +53,8 @@ import com.topmortar.topmortarsales.commons.CONST_URI
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAX_DISTANCE
+import com.topmortar.topmortarsales.commons.PRINT_METHOD_BLUETOOTH
+import com.topmortar.topmortarsales.commons.PRINT_METHOD_WIFI
 import com.topmortar.topmortarsales.commons.REQUEST_BLUETOOTH_PERMISSIONS
 import com.topmortar.topmortarsales.commons.REQUEST_ENABLE_BLUETOOTH
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -130,6 +132,11 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     private var printerManager = BluetoothPrinterManager()
     private lateinit var bottomSheetDialog: BottomSheetDialog
 
+    companion object {
+        private const val PRINT_METHOD_BLUETOOTH_TITLE = "Print Bluetooth"
+        private const val PRINT_METHOD_WIFI_TITLE = "Print Wifi"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -144,6 +151,10 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         initVariable()
         initClickHandler()
         dataActivityValidation()
+
+        val printState = sessionManager.printState()
+        if (printState.isNullOrEmpty()) togglePrintButton(PRINT_METHOD_BLUETOOTH)
+        else togglePrintButton(printState)
 
     }
 
@@ -223,7 +234,10 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     private fun initClickHandler() {
         icBack.setOnClickListener { backHandler() }
         icSyncNow.setOnClickListener { getDetail() }
-        btnPrint.setOnClickListener { printNow() }
+        btnPrint.setOnClickListener {
+            if (sessionManager.printState() == PRINT_METHOD_BLUETOOTH) printNow()
+            else Toast.makeText(this, "Print Menggunakan Wifi", TOAST_SHORT).show()
+        }
         binding.btnPrintOption.setOnClickListener { showPrintOption() }
 //        btnClosing.setOnClickListener { chooseFile() }
 //        lnrClosing.setOnClickListener { chooseFile() }
@@ -770,11 +784,36 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     fun onBottomSheetOptionClick(view: View) {
         when (view.id) {
             R.id.printBluetoothOption -> {
-                printNow()
+                showDialogChangePrintMethod(PRINT_METHOD_BLUETOOTH)
                 bottomSheetDialog.dismiss()
             } else -> {
-                Toast.makeText(this@DetailSuratJalanActivity, "Cetak menggunakan printer besar", TOAST_SHORT).show()
+                showDialogChangePrintMethod(PRINT_METHOD_WIFI)
                 bottomSheetDialog.dismiss()
+            }
+        }
+    }
+
+    private fun showDialogChangePrintMethod(method: String = PRINT_METHOD_BLUETOOTH) {
+        val message = when (method) {
+            PRINT_METHOD_BLUETOOTH -> "Apakah anda yakin ingin berganti ke metode Printer Bluetooth?"
+            else -> "Apakah anda yakin ingin berganti ke metode Printer Wifi?"
+        }
+        AlertDialog.Builder(this)
+            .setTitle("Perhatian!")
+            .setMessage(message)
+            .setPositiveButton("Ganti") { _, _ -> togglePrintButton(method) }
+            .setNegativeButton("Batal") { dialog, _ -> dialog.dismiss() }
+            .show()
+    }
+
+    private fun togglePrintButton(method: String) {
+        when (method) {
+            PRINT_METHOD_BLUETOOTH -> {
+                btnPrint.text = PRINT_METHOD_BLUETOOTH_TITLE
+                sessionManager.printState(PRINT_METHOD_BLUETOOTH)
+            } else -> {
+                btnPrint.text = PRINT_METHOD_WIFI_TITLE
+                sessionManager.printState(PRINT_METHOD_WIFI)
             }
         }
     }
