@@ -67,6 +67,7 @@
     <string name="use_lowercase_character_e_g">Gunakan karakter huruf kecil e.g salesmalang</string>
     <string name="submit">Kirim</string>
     <string name="store_name">Nama Toko</string>
+    <string name="basecamp_name">Nama Basecamp</string>
     <string name="owner_name">Nama Pemilik</string>
     <string name="e_g_john_doe">e.g John Doe</string>
     <string name="date_of_birth">Tanggal Lahir</string>
@@ -159,4 +160,6 @@
     <string name="bullet">•</string>
     <string name="filter">Filter:</string>
     <string name="tidak_ada_filter">Tidak ada filter</string>
+    <string name="laporan_toko_hint">e.g Kunjungan ke toko untuk melakukan penagihan…</string>
+    <string name="laporan_basecamp_hint">e.g Menurunkan material pasir di Gudang Sidoarjo…</string>
 </resources>

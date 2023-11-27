@@ -20,4 +20,8 @@ data class ReportVisitModel(
     var id_promo: String = "",
     var is_approved: String = "",
     var is_deleted: String = "",
+    var id_gudang: String = "",
+    var nama_gudang: String = "",
+    var location_gudang: String = "",
+    var nomorhp_gudang: String = ""
 )

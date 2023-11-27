@@ -382,7 +382,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
                         when (data.level_user) {
                             AUTH_LEVEL_BA -> navigateToListTukang()
-                            USER_KIND_COURIER -> navigateToCourier()
+                            AUTH_LEVEL_COURIER -> navigateToCourier()
                             else -> navigateToMain()
                         }
 

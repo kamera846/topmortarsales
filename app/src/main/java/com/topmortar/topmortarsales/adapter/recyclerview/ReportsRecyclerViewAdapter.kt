@@ -7,7 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.utils.DateFormat
+import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.databinding.ItemReportsBinding
 import com.topmortar.topmortarsales.model.ReportVisitModel
@@ -16,6 +18,8 @@ import java.util.Calendar
 import java.util.Locale
 
 class ReportsRecyclerViewAdapter : RecyclerView.Adapter<ReportsRecyclerViewAdapter.ViewHolder>() {
+    private lateinit var sessionManager: SessionManager
+    private val userKind get() = sessionManager.userKind()
     private var listItem: ArrayList<ReportVisitModel> = ArrayList()
     private var context: Context? = null
     private var withName: Boolean? = null
@@ -54,7 +58,9 @@ class ReportsRecyclerViewAdapter : RecyclerView.Adapter<ReportsRecyclerViewAdapt
             var stringDistance = "%.2f".format(distanceFormat.toDouble())
             if (stringDistance.contains(",")) stringDistance = stringDistance.replace(",", ".")
 
-            binding.title.text = if (withName == true) item.nama else stringDistance + " km dari titik"
+            binding.title.text = if (withName == true){
+                if (userKind == USER_KIND_COURIER) item.nama_gudang else item.nama
+            } else "$stringDistance km dari titik"
             binding.date.text = if (withName == true) "$stringDistance km\n$dateFormat" else dateFormat
 
             val layoutParams = binding.root.layoutParams as ViewGroup.MarginLayoutParams
@@ -71,6 +77,7 @@ class ReportsRecyclerViewAdapter : RecyclerView.Adapter<ReportsRecyclerViewAdapt
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
         val binding = ItemReportsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        sessionManager = SessionManager(parent.context)
         context = parent.context
         return ViewHolder(binding)
 

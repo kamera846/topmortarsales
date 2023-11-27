@@ -4,6 +4,8 @@ import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.PopupMenu
@@ -22,13 +24,18 @@ import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.SEARCH_CLOSE
+import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
+import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityCourierBinding
+import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.SplashScreenActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
@@ -40,6 +47,11 @@ class CourierActivity : AppCompatActivity() {
     private val binding get() = _binding!!
     private lateinit var sessionManager: SessionManager
     private val userId get() = sessionManager.userID()!!
+    private var doubleBackToExitPressedOnce = false
+    private lateinit var tabLayout: TabLayout
+    private lateinit var viewPager: ViewPager
+    private lateinit var pagerAdapter: CourierViewPagerAdapter
+    private var activeTab = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,10 +70,10 @@ class CourierActivity : AppCompatActivity() {
         binding.titleBarDark.icMore.visibility = View.VISIBLE
         binding.titleBarDark.icMore.setOnClickListener { showPopupMenu(it) }
 
-        val tabLayout: TabLayout = binding.tabLayout
-        val viewPager: ViewPager = binding.viewPager
+        tabLayout = binding.tabLayout
+        viewPager = binding.viewPager
 
-        val pagerAdapter = CourierViewPagerAdapter(supportFragmentManager)
+        pagerAdapter = CourierViewPagerAdapter(supportFragmentManager)
         viewPager.adapter = pagerAdapter
 
         // Connect TabLayout and ViewPager
@@ -69,8 +81,18 @@ class CourierActivity : AppCompatActivity() {
         pagerAdapter.setCounterPageItem(object : CourierViewPagerAdapter.CounterPageItem{
             override fun counterItem(count: Int, tabIndex: Int) {
                 if (tabIndex == 0) tabLayout.getTabAt(tabIndex)?.text = "Toko ($count)"
-                else tabLayout.getTabAt(tabIndex)?.text = "Gudang ($count)"
+                else tabLayout.getTabAt(tabIndex)?.text = "Base Camp ($count)"
             }
+
+        })
+        tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener{
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                activeTab = tab?.position!!
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {}
 
         })
 
@@ -223,8 +245,87 @@ class CourierActivity : AppCompatActivity() {
         finish()
     }
 
+    private fun getUserLoggedIn() {
+
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.detailUser(userId = userId)
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        val data = response.results[0]
+
+                        sessionManager.setUserID(data.id_user)
+                        sessionManager.setUserName(data.username)
+                        sessionManager.setFullName(data.full_name)
+                        sessionManager.setUserCityID(data.id_city)
+                        sessionManager.userBidLimit(data.bid_limit)
+
+//                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "Halo, ${ sessionManager.userName() }"}
+                        binding.titleBarDark.tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
+                        binding.titleBarDark.tvTitleBarDescription.visibility = binding.titleBarDark.tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> missingDataHandler()
+                    else -> Log.d("TAG USER LOGGED IN", "Failed get data!")
+                }
+
+
+            } catch (e: Exception) {
+                Log.d("TAG USER LOGGED IN", "Failed run service. Exception " + e.message)
+            }
+
+        }
+
+    }
+
+    private fun missingDataHandler() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Data Tidak Lengkap Terdeteksi")
+            .setMessage("Data login yang tidak lengkap telah terdeteksi, silakan coba login kembali!")
+            .setPositiveButton("Oke") { dialog, _ ->
+
+                dialog.dismiss()
+                logoutHandler()
+
+            }
+        val dialog = builder.create()
+        dialog.show()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
+    }
+
+    override fun onBackPressed() {
+        if (activeTab != 0) tabLayout.getTabAt(0)?.select()
+        else {
+
+            if (doubleBackToExitPressedOnce) {
+                super.onBackPressed()
+                return
+            }
+
+            this@CourierActivity.doubleBackToExitPressedOnce = true
+            handleMessage(this@CourierActivity, TAG_ACTION_MAIN_ACTIVITY, "Tekan sekali lagi untuk keluar!", TOAST_SHORT)
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                doubleBackToExitPressedOnce = false
+            }, 2000)
+
+        }
+    }
+
+    override fun onResume() {
+
+        super.onResume()
+        // Check apps for update
+        AppUpdateHelper.checkForUpdates(this)
+        getUserLoggedIn()
+
     }
 }

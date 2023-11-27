@@ -106,9 +106,17 @@ class ReportsActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val apiService: ApiService = HttpClient.create()
-                val response = if (contactID.isNullOrEmpty()) {
-                    apiService.listReport(idUser = if (iUserID.isNullOrEmpty()) userID else iUserID!!)
-                } else apiService.listReport(idUser = if (iUserID.isNullOrEmpty()) userID else iUserID!!, idContact = contactID!!)
+                val response = when (userKind) {
+                    USER_KIND_COURIER -> {
+                        if (contactID.isNullOrEmpty()) {
+                            apiService.listAllCourierReport(idUser = if (iUserID.isNullOrEmpty()) userID else iUserID!!)
+                        } else apiService.listCourierReport(idUser = if (iUserID.isNullOrEmpty()) userID else iUserID!!, idGudang = contactID!!)
+                    } else -> {
+                        if (contactID.isNullOrEmpty()) {
+                            apiService.listAllReport(idUser = if (iUserID.isNullOrEmpty()) userID else iUserID!!)
+                        } else apiService.listReport(idUser = if (iUserID.isNullOrEmpty()) userID else iUserID!!, idContact = contactID!!)
+                    }
+                }
 
                 if (response.isSuccessful) {
 

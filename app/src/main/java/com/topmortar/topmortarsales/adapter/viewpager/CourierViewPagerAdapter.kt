@@ -4,7 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import com.topmortar.topmortarsales.view.courier.ClosingStoreFragment
-import com.topmortar.topmortarsales.view.courier.GudangFragment
+import com.topmortar.topmortarsales.view.courier.BasecampFragment
 
 class CourierViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
 
@@ -31,8 +31,8 @@ class CourierViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
 
             } else -> {
 
-                val fragment = GudangFragment()
-                fragment.setCounterItem(object : GudangFragment.CounterItem{
+                val fragment = BasecampFragment()
+                fragment.setCounterItem(object : BasecampFragment.CounterItem{
                     override fun counterItem(count: Int) {
                         listener?.counterItem(count, 1)
                     }
@@ -51,7 +51,7 @@ class CourierViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
     override fun getPageTitle(position: Int): CharSequence {
         return when (position) {
             0 -> "Toko"
-            else -> "Gudang"
+            else -> "Base Camp"
         }
     }
 }

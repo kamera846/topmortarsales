@@ -27,13 +27,13 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
-import com.topmortar.topmortarsales.databinding.ActivityAddGudangBinding
+import com.topmortar.topmortarsales.databinding.ActivityAddBaseCampBinding
 import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
 
-class AddGudangActivity : AppCompatActivity() {
+class AddBaseCampActivity : AppCompatActivity() {
 
-    private var _binding: ActivityAddGudangBinding? = null
+    private var _binding: ActivityAddBaseCampBinding? = null
     private val binding get() = _binding!!
     private lateinit var sessionManager: SessionManager
     private val userCityID get() = sessionManager.userCityID()
@@ -42,11 +42,11 @@ class AddGudangActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
-        _binding = ActivityAddGudangBinding.inflate(layoutInflater)
+        _binding = ActivityAddBaseCampBinding.inflate(layoutInflater)
         sessionManager = SessionManager(this)
         setContentView(binding.root)
 
-        binding.titleBar.tvTitleBar.text = "Tambah Daftar Gudang"
+        binding.titleBar.tvTitleBar.text = "Tambah Daftar Base Camp"
         binding.titleBar.icBack.setOnClickListener { finish() }
         binding.btnSubmit.setOnClickListener { submitForm() }
 
@@ -141,13 +141,13 @@ class AddGudangActivity : AppCompatActivity() {
 
                 val apiService: ApiService = HttpClient.create()
                 val response = if (phone.isNullOrEmpty()) {
-                    apiService.addGudang(
+                    apiService.addBaseCamp(
                         name = rbName,
                         cityId = rbLocation,
                         mapsUrl = rbMapsUrl
                     )
                 } else {
-                    apiService.addGudang(
+                    apiService.addBaseCamp(
                         name = rbName,
                         phone = rbPhone,
                         cityId = rbLocation,
@@ -158,7 +158,7 @@ class AddGudangActivity : AppCompatActivity() {
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        handleMessage(this@AddGudangActivity, TAG_RESPONSE_MESSAGE, "Berhasil menyimpan")
+                        handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_MESSAGE, "Berhasil menyimpan")
 
 //                        val resultIntent = Intent()
 //                        resultIntent.putExtra("$activityRequestCode", SYNC_NOW)
@@ -169,13 +169,13 @@ class AddGudangActivity : AppCompatActivity() {
                     }
                     RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                        handleMessage(this@AddGudangActivity, TAG_RESPONSE_MESSAGE, "Gagal menyimpan gudang: ${ response.message }")
+                        handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_MESSAGE, "Gagal menyimpan basecamp: ${ response.message }")
                         loadingState.dismiss()
 
                     }
                     else -> {
 
-                        handleMessage(this@AddGudangActivity, TAG_RESPONSE_MESSAGE, "Gagal menyimpan!")
+                        handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_MESSAGE, "Gagal menyimpan!")
                         loadingState.dismiss()
 
                     }
@@ -184,7 +184,7 @@ class AddGudangActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                handleMessage(this@AddGudangActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState.dismiss()
 
             }
@@ -201,11 +201,11 @@ class AddGudangActivity : AppCompatActivity() {
         }
 
         if (binding.etName.text.isNullOrEmpty()) {
-            binding.etName.error = "Nama gudang wajib diisi!"
+            binding.etName.error = "Nama base camp wajib diisi!"
             binding.etName.requestFocus()
             return false
         } else if (binding.etMapsUrl.text.isNullOrEmpty()) {
-            binding.etMapsUrl.error = "Koordinat gudang wajib diisi!"
+            binding.etMapsUrl.error = "Koordinat base camp wajib diisi!"
             binding.etMapsUrl.requestFocus()
             return false
         }

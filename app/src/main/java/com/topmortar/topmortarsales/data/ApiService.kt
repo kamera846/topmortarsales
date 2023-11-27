@@ -10,7 +10,7 @@ import com.topmortar.topmortarsales.commons.GET_CITY
 import com.topmortar.topmortarsales.commons.CONTACT
 import com.topmortar.topmortarsales.commons.SURAT_JALAN
 import com.topmortar.topmortarsales.commons.GET_USERS
-import com.topmortar.topmortarsales.commons.GUDANG
+import com.topmortar.topmortarsales.commons.BASECAMP
 import com.topmortar.topmortarsales.commons.INVOICE
 import com.topmortar.topmortarsales.commons.PAYMENT
 import com.topmortar.topmortarsales.commons.PROMO
@@ -29,7 +29,7 @@ import com.topmortar.topmortarsales.response.ResponseAuth
 import com.topmortar.topmortarsales.response.ResponseCities
 import com.topmortar.topmortarsales.response.ResponseContactList
 import com.topmortar.topmortarsales.response.ResponseCountStore
-import com.topmortar.topmortarsales.response.ResponseGudang
+import com.topmortar.topmortarsales.response.ResponseBaseCamp
 import com.topmortar.topmortarsales.response.ResponseInvoice
 import com.topmortar.topmortarsales.response.ResponseSuratJalan
 import com.topmortar.topmortarsales.response.ResponseMessage
@@ -339,6 +339,27 @@ interface ApiService {
 
     @Multipart
     @POST(VISIT)
+    suspend fun makeVisitCourierReport(
+        @Part("id_gudang") idGudang: RequestBody,
+        @Part("id_user") idUser: RequestBody,
+        @Part("distance_visit") distanceVisit: RequestBody,
+        @Part("laporan_visit") laporanVisit: RequestBody
+    ): Response<ResponseReportVisit>
+
+    @GET(VISIT)
+    suspend fun listCourierReport(
+        @Query("u") idUser: String,
+        @Query("g") idGudang: String
+    ): Response<ResponseReportVisit>
+
+    @GET(VISIT)
+    suspend fun listAllCourierReport(
+        @Query("u") idUser: String,
+        @Query("cat") category: String = "courier"
+    ): Response<ResponseReportVisit>
+
+    @Multipart
+    @POST(VISIT)
     suspend fun makeVisitReport(
         @Part("id_contact") idContact: RequestBody,
         @Part("id_user") idUser: RequestBody,
@@ -353,8 +374,9 @@ interface ApiService {
     ): Response<ResponseReportVisit>
 
     @GET(VISIT)
-    suspend fun listReport(
-        @Query("u") idUser: String
+    suspend fun listAllReport(
+        @Query("u") idUser: String,
+        @Query("cat") category: String = "sales"
     ): Response<ResponseReportVisit>
 
     @GET(VISIT)
@@ -363,25 +385,25 @@ interface ApiService {
         @Query("s") idContact: String
     ): ResponseUsers
 
-    @GET(GUDANG)
-    suspend fun getListGudang(
+    @GET(BASECAMP)
+    suspend fun getListBaseCamp(
         @Query("c") cityId: String
-    ): ResponseGudang
+    ): ResponseBaseCamp
 
     @Multipart
-    @POST(GUDANG)
-    suspend fun addGudang(
+    @POST(BASECAMP)
+    suspend fun addBaseCamp(
         @Part("nama_gudang") name: RequestBody,
         @Part("location_gudang") mapsUrl: RequestBody,
         @Part("nomorhp_gudang") phone: RequestBody,
         @Part("id_city") cityId: RequestBody,
-    ): ResponseGudang
+    ): ResponseBaseCamp
 
     @Multipart
-    @POST(GUDANG)
-    suspend fun addGudang(
+    @POST(BASECAMP)
+    suspend fun addBaseCamp(
         @Part("nama_gudang") name: RequestBody,
         @Part("location_gudang") mapsUrl: RequestBody,
         @Part("id_city") cityId: RequestBody,
-    ): ResponseGudang
+    ): ResponseBaseCamp
 }

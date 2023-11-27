@@ -43,7 +43,7 @@ const val BID = "bid.php"
 const val BID_ON_GOING = "0"
 const val BID_VISITED = "1"
 const val VISIT = "visit.php"
-const val GUDANG = "gudang.php"
+const val BASECAMP = "gudang.php"
 
 // Request Code
 const val ACTIVITY_REQUEST_CODE = "activity_request_code"
@@ -102,6 +102,7 @@ const val CONST_LIST_COORDINATE = "const_list_coordinate"
 const val CONST_LIST_COORDINATE_NAME = "const_list_coordinate_name"
 const val CONST_LIST_COORDINATE_STATUS = "const_list_coordinate_status"
 const val CONST_LIST_COORDINATE_CITY_ID = "const_list_coordinate_city_id"
+const val CONST_IS_BASE_CAMP = "const_is_base_camp"
 
 // Status
 const val LOGGED_IN = true

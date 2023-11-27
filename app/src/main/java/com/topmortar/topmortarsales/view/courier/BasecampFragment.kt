@@ -1,51 +1,33 @@
 package com.topmortar.topmortarsales.view.courier
 
 import android.app.Activity
-import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.adapter.recyclerview.GudangRecyclerViewAdapter
-import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
-import com.topmortar.topmortarsales.commons.CONST_ADDRESS
-import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
+import com.topmortar.topmortarsales.adapter.recyclerview.BaseCamoRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
-import com.topmortar.topmortarsales.commons.CONST_KTP
-import com.topmortar.topmortarsales.commons.CONST_LOCATION
+import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
-import com.topmortar.topmortarsales.commons.CONST_OWNER
-import com.topmortar.topmortarsales.commons.CONST_PHONE
-import com.topmortar.topmortarsales.commons.CONST_PROMO
-import com.topmortar.topmortarsales.commons.CONST_STATUS
-import com.topmortar.topmortarsales.commons.CONST_TERMIN
-import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
-import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
-import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.FragmentGudangBinding
-import com.topmortar.topmortarsales.model.GudangModel
-import com.topmortar.topmortarsales.model.ReportVisitModel
-import com.topmortar.topmortarsales.view.contact.DetailContactActivity
+import com.topmortar.topmortarsales.model.BaseCampModel
 import com.topmortar.topmortarsales.view.reports.NewReportActivity
-import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -53,7 +35,7 @@ import org.greenrobot.eventbus.Subscribe
 /**
  * A fragment representing a list of Items.
  */
-class GudangFragment : Fragment() {
+class BasecampFragment : Fragment() {
 
     private var _binding: FragmentGudangBinding? = null
     private val binding get() = _binding!!
@@ -97,7 +79,7 @@ class GudangFragment : Fragment() {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getListGudang(cityId = userCity)
+                val response = apiService.getListBaseCamp(cityId = userCity)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -109,7 +91,7 @@ class GudangFragment : Fragment() {
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        loadingState(true, "Daftar kontak kosong!")
+                        loadingState(true, "Belum ada basecamp!")
 
                     }
                     else -> {
@@ -132,10 +114,10 @@ class GudangFragment : Fragment() {
 
     }
 
-    private fun setRecyclerView(listItem: ArrayList<GudangModel>) {
+    private fun setRecyclerView(listItem: ArrayList<BaseCampModel>) {
 
-        val rvAdapter = GudangRecyclerViewAdapter(listItem, object: GudangRecyclerViewAdapter.ItemClickListener {
-            override fun onItemClick(data: GudangModel?) {
+        val rvAdapter = BaseCamoRecyclerViewAdapter(listItem, object: BaseCamoRecyclerViewAdapter.ItemClickListener {
+            override fun onItemClick(data: BaseCampModel?) {
                 navigateItemAction(data)
             }
 
@@ -166,12 +148,13 @@ class GudangFragment : Fragment() {
 
     }
 
-    private fun navigateItemAction(data: GudangModel? = null) {
+    private fun navigateItemAction(data: BaseCampModel? = null) {
 
         val intent = Intent(requireContext(), NewReportActivity::class.java)
+        intent.putExtra(CONST_IS_BASE_CAMP, true)
         intent.putExtra(CONST_CONTACT_ID, data?.id_gudang)
-        intent.putExtra(CONST_NAME, data?.nama)
-        intent.putExtra(CONST_MAPS, data?.maps_url)
+        intent.putExtra(CONST_NAME, data?.nama_gudang)
+        intent.putExtra(CONST_MAPS, data?.location_gudang)
         (requireContext() as Activity).startActivity(intent)
 
     }
@@ -196,7 +179,7 @@ class GudangFragment : Fragment() {
 
     private fun navigateFab() {
 
-        val intent = Intent(requireContext(), AddGudangActivity::class.java)
+        val intent = Intent(requireContext(), AddBaseCampActivity::class.java)
         (requireContext() as Activity).startActivity(intent)
 
     }
