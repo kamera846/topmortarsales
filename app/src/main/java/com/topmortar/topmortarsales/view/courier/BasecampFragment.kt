@@ -19,13 +19,18 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.BaseCampRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
+import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.CONST_PHONE
+import com.topmortar.topmortarsales.commons.EDIT_CONTACT
 import com.topmortar.topmortarsales.commons.REQUEST_BASECAMP_FRAGMENT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.RESULT_BASECAMP_FRAGMENT
+import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -90,7 +95,10 @@ class BasecampFragment : Fragment() {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getListBaseCamp(cityId = userCity)
+                val response = when (userKind) {
+                    USER_KIND_ADMIN -> apiService.getListBaseCamp()
+                    else -> apiService.getListBaseCamp(cityId = userCity)
+                }
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -166,12 +174,25 @@ class BasecampFragment : Fragment() {
 
     private fun navigateItemAction(data: BaseCampModel? = null) {
 
-        val intent = Intent(requireContext(), NewReportActivity::class.java)
-        intent.putExtra(CONST_IS_BASE_CAMP, true)
-        intent.putExtra(CONST_CONTACT_ID, data?.id_gudang)
-        intent.putExtra(CONST_NAME, data?.nama_gudang)
-        intent.putExtra(CONST_MAPS, data?.location_gudang)
-        (requireContext() as Activity).startActivity(intent)
+        if (userKind == USER_KIND_ADMIN) {
+
+            val intent = Intent(requireContext(), AddBaseCampActivity::class.java)
+            intent.putExtra(EDIT_CONTACT, true)
+            intent.putExtra(CONST_CONTACT_ID, data?.id_gudang)
+            intent.putExtra(CONST_PHONE, data?.nomorhp_gudang)
+            intent.putExtra(CONST_NAME, data?.nama_gudang)
+            intent.putExtra(CONST_LOCATION, data?.id_city)
+            intent.putExtra(CONST_MAPS, data?.location_gudang)
+            someActivityResultLauncher.launch(intent)
+        } else {
+
+            val intent = Intent(requireContext(), NewReportActivity::class.java)
+            intent.putExtra(CONST_IS_BASE_CAMP, true)
+            intent.putExtra(CONST_CONTACT_ID, data?.id_gudang)
+            intent.putExtra(CONST_NAME, data?.nama_gudang)
+            intent.putExtra(CONST_MAPS, data?.location_gudang)
+            (requireContext() as Activity).startActivity(intent)
+        }
 
     }
 
@@ -238,7 +259,7 @@ class BasecampFragment : Fragment() {
 
         if (resultCode == RESULT_BASECAMP_FRAGMENT) {
             val data = data?.getStringExtra(REQUEST_BASECAMP_FRAGMENT)
-            if (!data.isNullOrEmpty()) getContacts()
+            if (!data.isNullOrEmpty() && data == SYNC_NOW) getContacts()
         }
     }
 

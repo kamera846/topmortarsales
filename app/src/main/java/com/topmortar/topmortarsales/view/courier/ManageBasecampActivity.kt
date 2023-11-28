@@ -41,4 +41,9 @@ class ManageBasecampActivity : AppCompatActivity() {
         super.onDestroy()
         _binding = null
     }
+
+    override fun onBackPressed() {
+//        super.onBackPressed()
+        finish()
+    }
 }

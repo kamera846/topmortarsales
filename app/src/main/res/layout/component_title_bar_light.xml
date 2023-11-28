@@ -79,4 +79,13 @@
         android:src="@drawable/close_black"
         android:contentDescription="@string/icon_close_black"/>
 
+    <ImageView
+        android:visibility="gone"
+        android:id="@+id/icTrash"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:padding="16dp"
+        android:src="@drawable/trash_black"
+        android:contentDescription="@string/icon_trash_black"/>
+
 </LinearLayout>

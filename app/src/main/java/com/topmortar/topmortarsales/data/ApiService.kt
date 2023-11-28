@@ -386,6 +386,9 @@ interface ApiService {
     ): ResponseUsers
 
     @GET(BASECAMP)
+    suspend fun getListBaseCamp(): ResponseBaseCamp
+
+    @GET(BASECAMP)
     suspend fun getListBaseCamp(
         @Query("c") cityId: String
     ): ResponseBaseCamp
@@ -405,5 +408,21 @@ interface ApiService {
         @Part("nama_gudang") name: RequestBody,
         @Part("location_gudang") mapsUrl: RequestBody,
         @Part("id_city") cityId: RequestBody,
+    ): ResponseBaseCamp
+
+    @Multipart
+    @POST(BASECAMP)
+    suspend fun editBaseCamp(
+        @Part("nama_gudang") name: RequestBody,
+        @Part("location_gudang") mapsUrl: RequestBody,
+        @Part("nomorhp_gudang") phone: RequestBody,
+        @Part("id_city") cityId: RequestBody,
+        @Part("id") idBasecamp: RequestBody,
+    ): ResponseBaseCamp
+
+    @Multipart
+    @POST(BASECAMP)
+    suspend fun deleteBaseCamp(
+        @Part("id") idBasecamp: RequestBody,
     ): ResponseBaseCamp
 }

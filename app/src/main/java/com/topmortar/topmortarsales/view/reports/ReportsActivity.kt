@@ -41,6 +41,7 @@ class ReportsActivity : AppCompatActivity() {
     private var contactID: String? = null
     private var contactName: String? = null
     private var userFullName: String? = null
+    private var isCourier = false
 
     private lateinit var datePicker: DatePickerDialog
     private var selectedDate: Calendar = Calendar.getInstance()
@@ -59,7 +60,9 @@ class ReportsActivity : AppCompatActivity() {
         contactName = intent.getStringExtra(CONST_NAME)
         userFullName = intent.getStringExtra(CONST_FULL_NAME)
 
-        if (userKind == USER_KIND_COURIER) binding.titleBarDark.tvTitleBar.text = if (!contactName.isNullOrEmpty()) contactName else "Laporan Kurir"
+        if (userKind == USER_KIND_COURIER) isCourier = true
+
+        if (isCourier) binding.titleBarDark.tvTitleBar.text = if (!contactName.isNullOrEmpty()) contactName else "Laporan Kurir"
         else binding.titleBarDark.tvTitleBar.text = if (!contactName.isNullOrEmpty()) contactName else "Laporan Sales"
         binding.titleBarDark.tvTitleBarDescription.visibility = View.VISIBLE
         if (!contactName.isNullOrEmpty()) binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (iUserID.isNullOrEmpty()) "saya" else ""} di toko ini"
@@ -106,8 +109,8 @@ class ReportsActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val apiService: ApiService = HttpClient.create()
-                val response = when (userKind) {
-                    USER_KIND_COURIER -> {
+                val response = when (isCourier) {
+                    true -> {
                         if (contactID.isNullOrEmpty()) {
                             apiService.listAllCourierReport(idUser = if (iUserID.isNullOrEmpty()) userID else iUserID!!)
                         } else apiService.listCourierReport(idUser = if (iUserID.isNullOrEmpty()) userID else iUserID!!, idGudang = contactID!!)
@@ -190,6 +193,7 @@ class ReportsActivity : AppCompatActivity() {
                 override fun onItemClick(item: ReportVisitModel) {
                     val modalDetail = DetailReportModal(this@ReportsActivity)
                     modalDetail.setData(item)
+                    modalDetail.setIsCourier(isCourier)
                     if (contactID.isNullOrEmpty()) modalDetail.setWithName(true)
                     modalDetail.show()
                 }

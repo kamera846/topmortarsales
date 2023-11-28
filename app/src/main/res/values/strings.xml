@@ -22,6 +22,7 @@
     <string name="txt_loading">Memuat…</string>
     <string name="txt_sending">Mengirim…</string>
     <string name="txt_saving">Menyimpan…</string>
+    <string name="txt_deleting">Menghapus…</string>
     <string name="message_length">0/200</string>
     <string name="et_label">Label for the input field</string>
     <string name="et_hint">Enter your text here</string>
@@ -111,6 +112,7 @@
     <string name="top_mortar_sales">Top Mortar Sales</string>
     <string name="icon_pencil_black">Icon Pencil Black</string>
     <string name="icon_close_black">Icon Close Black</string>
+    <string name="icon_trash_black">Icon Trash Black</string>
     <string name="list_item">List Item</string>
     <string name="city_name">Nama Kota</string>
     <string name="city_code">Kode Kota</string>
@@ -152,7 +154,6 @@
     <string name="free">Free</string>
     <string name="retur">Retur</string>
     <string name="nearest_store">Cari Toko Terdekat</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="text_pricing_detail">Ini adalah rincian anda pada bulan ini</string>
     <string name="text_bid_available">Dengan mengirim pesan, berarti anda telah mem-bidding toko ini.</string>
@@ -163,4 +164,6 @@
     <string name="tidak_ada_filter">Tidak ada filter</string>
     <string name="laporan_toko_hint">e.g Kunjungan ke toko untuk melakukan penagihan…</string>
     <string name="laporan_basecamp_hint">e.g Menurunkan material pasir di Gudang Sidoarjo…</string>
+    <string name="click_to_select_city">Tekan untuk memilih kota…</string>
+    <string name="select_city">Pilih Kota</string>
 </resources>

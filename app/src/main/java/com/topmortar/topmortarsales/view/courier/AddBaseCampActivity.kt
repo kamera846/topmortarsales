@@ -4,23 +4,40 @@ import android.Manifest
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Typeface
+import android.opengl.Visibility
 import android.os.Bundle
+import android.os.Handler
 import android.provider.Settings
+import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
+import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
+import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.CONST_PHONE
+import com.topmortar.topmortarsales.commons.EDIT_CONTACT
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.MAX_REPORT_DISTANCE
 import com.topmortar.topmortarsales.commons.REQUEST_BASECAMP_FRAGMENT
 import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.RESULT_BASECAMP_FRAGMENT
+import com.topmortar.topmortarsales.commons.SYNC_NOW
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.VISIT
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -30,6 +47,9 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityAddBaseCampBinding
+import com.topmortar.topmortarsales.modal.SearchModal
+import com.topmortar.topmortarsales.model.CityModel
+import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
 
@@ -39,6 +59,14 @@ class AddBaseCampActivity : AppCompatActivity() {
     private val binding get() = _binding!!
     private lateinit var sessionManager: SessionManager
     private val userCityID get() = sessionManager.userCityID()
+    private val userKind get() = sessionManager.userKind()
+    private lateinit var searchModal: SearchModal
+    private var selectedCity: ModalSearchModel? = null
+    private var citiesResults: ArrayList<CityModel> = ArrayList()
+    private var iCities: String? = null
+    private var isEdit = false
+    private var name = ""
+    private var idBasecamp = "-1"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,11 +76,50 @@ class AddBaseCampActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
         setContentView(binding.root)
 
-        binding.titleBar.tvTitleBar.text = "Buat Basecamp Baru"
+        isEdit = intent.getBooleanExtra(EDIT_CONTACT, false)
+        if (isEdit) setDataEdit()
+
+        binding.titleBar.tvTitleBar.text = if (isEdit) "Edit Basecamp" else "Buat Basecamp Baru"
         binding.titleBar.icBack.setOnClickListener { finish() }
         binding.btnSubmit.setOnClickListener { submitForm() }
 
+        if (userKind == USER_KIND_ADMIN) {
+//            binding.titleBar.icTrash.visibility = View.VISIBLE
+//            binding.titleBar.icTrash.setOnClickListener { deleteValidation() }
+            setCitiesOption()
+        }
         setMapsAction()
+    }
+
+    private fun setDataEdit() {
+        idBasecamp = intent.getStringExtra(CONST_CONTACT_ID).toString()
+        name = intent.getStringExtra(CONST_NAME).toString()
+
+        binding.etPhone.setText(intent.getStringExtra(CONST_PHONE))
+        binding.etName.setText(name)
+        binding.etMapsUrl.setText(intent.getStringExtra(CONST_MAPS))
+    }
+
+    private fun setCitiesOption() {
+
+        binding.citiesOptionContainer.visibility = View.VISIBLE
+
+        iCities = intent.getStringExtra(CONST_LOCATION)
+        if (!iCities.isNullOrEmpty()) binding.etCityOption.setText(getString(R.string.txt_loading))
+        else binding.etCityOption.setText("")
+
+        binding.etCityOption.setOnClickListener { showSearchModal() }
+        binding.etCityOption.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                showSearchModal()
+                binding.etCityOption.setSelection(binding.etCityOption.length())
+            } else binding.etCityOption.clearFocus()
+        }
+
+        // Setup Dialog Search
+        setupDialogSearch()
+        getCities()
+
     }
 
     private fun setMapsAction() {
@@ -130,7 +197,10 @@ class AddBaseCampActivity : AppCompatActivity() {
 
         val phone = "${ binding.etPhone.text }"
         val name = "${ binding.etName.text }"
-        val cityId = userCityID.let { if (!it.isNullOrEmpty()) it else "0" }
+        val cityId = when (userKind) {
+            USER_KIND_ADMIN -> selectedCity?.id!!
+            else -> userCityID.let { if (!it.isNullOrEmpty()) it else "0" }
+        }
         val mapsUrl = "${ binding.etMapsUrl.text }"
 
         lifecycleScope.launch {
@@ -140,21 +210,32 @@ class AddBaseCampActivity : AppCompatActivity() {
                 val rbName = createPartFromString(name)
                 val rbLocation = createPartFromString(cityId)
                 val rbMapsUrl = createPartFromString(mapsUrl)
+                val rbIdBasecamp = createPartFromString(idBasecamp)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = if (phone.isNullOrEmpty()) {
-                    apiService.addBaseCamp(
-                        name = rbName,
-                        cityId = rbLocation,
-                        mapsUrl = rbMapsUrl
-                    )
-                } else {
-                    apiService.addBaseCamp(
+                val response = if (isEdit) {
+                    apiService.editBaseCamp(
                         name = rbName,
                         phone = rbPhone,
                         cityId = rbLocation,
-                        mapsUrl = rbMapsUrl
+                        mapsUrl = rbMapsUrl,
+                        idBasecamp = rbIdBasecamp
                     )
+                } else {
+                    if (phone.isNullOrEmpty()) {
+                        apiService.addBaseCamp(
+                            name = rbName,
+                            cityId = rbLocation,
+                            mapsUrl = rbMapsUrl
+                        )
+                    } else {
+                        apiService.addBaseCamp(
+                            name = rbName,
+                            phone = rbPhone,
+                            cityId = rbLocation,
+                            mapsUrl = rbMapsUrl
+                        )
+                    }
                 }
 
                 when (response.status) {
@@ -163,7 +244,7 @@ class AddBaseCampActivity : AppCompatActivity() {
                         handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_MESSAGE, "Berhasil menyimpan")
 
                         val resultIntent = Intent()
-                        resultIntent.putExtra(REQUEST_BASECAMP_FRAGMENT, "new_basecamp")
+                        resultIntent.putExtra(REQUEST_BASECAMP_FRAGMENT, SYNC_NOW)
                         setResult(RESULT_BASECAMP_FRAGMENT, resultIntent)
                         finish()
                         loadingState.dismiss()
@@ -206,6 +287,10 @@ class AddBaseCampActivity : AppCompatActivity() {
             binding.etName.error = "Nama basecamp wajib diisi!"
             binding.etName.requestFocus()
             return false
+        } else if (userKind == USER_KIND_ADMIN && binding.etCityOption.text.isNullOrEmpty()) {
+            binding.etCityOption.error = "Kota wajib dipilih!"
+            binding.etCityOption.requestFocus()
+            return false
         } else if (binding.etMapsUrl.text.isNullOrEmpty()) {
             binding.etMapsUrl.error = "Koordinat basecamp wajib diisi!"
             binding.etMapsUrl.requestFocus()
@@ -217,5 +302,153 @@ class AddBaseCampActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
+    }
+
+    private fun getCities() {
+
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.getCities()
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        citiesResults = response.results
+                        val items: ArrayList<ModalSearchModel> = ArrayList()
+
+                        for (i in 0 until citiesResults.size) {
+                            val data = citiesResults[i]
+                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                        }
+
+                        setupDialogSearch(items)
+
+                        val foundItem = citiesResults.find { it.id_city == iCities }
+                        if (foundItem != null) {
+                            binding.etCityOption.setText("${foundItem.nama_city} - ${foundItem.kode_city}")
+                            selectedCity = ModalSearchModel(foundItem.id_city, foundItem.nama_city)
+                        } else binding.etCityOption.setText("")
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        handleMessage(this@AddBaseCampActivity, "LIST CITY", "Daftar kota kosong!")
+
+                    }
+                    else -> {
+
+                        handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+
+            }
+
+        }
+    }
+
+    private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
+
+        searchModal = SearchModal(this, items)
+        searchModal.setCustomDialogListener(object: SearchModal.SearchModalListener{
+            override fun onDataReceived(data: ModalSearchModel) {
+                binding.etCityOption.setText(data.title)
+                selectedCity = data
+            }
+
+        })
+        searchModal.searchHint = "Masukkan nama kota…"
+        searchModal.setOnDismissListener {
+            binding.etCityOption.clearFocus()
+        }
+
+    }
+
+    private fun showSearchModal() {
+        val searchKey = binding.etCityOption.text.toString()
+        if (searchKey.isNotEmpty()) searchModal.setSearchKey(searchKey)
+        searchModal.show()
+    }
+
+    private fun deleteValidation() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Peringatan!")
+            .setMessage("Apakah anda yakin akan menghapus $name?")
+            .setPositiveButton("Hapus") { dialog, _ ->
+                submitDelete()
+                dialog.dismiss()
+            }
+            .setNegativeButton("Batal") { dialog, _ ->
+                dialog.dismiss()
+            }
+        builder.show()
+    }
+
+    private fun submitDelete() {
+        val loadingState = ProgressDialog(this)
+        loadingState.setCancelable(false)
+        loadingState.setMessage(getString(R.string.txt_deleting))
+        loadingState.show()
+
+        Handler().postDelayed({
+            handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_MESSAGE, "Berhasil menghapus")
+
+            val resultIntent = Intent()
+            resultIntent.putExtra(REQUEST_BASECAMP_FRAGMENT, SYNC_NOW)
+            setResult(RESULT_BASECAMP_FRAGMENT, resultIntent)
+            finish()
+            loadingState.dismiss()
+        }, 1000)
+        return
+
+        lifecycleScope.launch {
+            try {
+                val rbIdBasecamp = createPartFromString(idBasecamp)
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.deleteBaseCamp( idBasecamp = rbIdBasecamp )
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_MESSAGE, "Berhasil menghapus")
+
+                        val resultIntent = Intent()
+                        resultIntent.putExtra(REQUEST_BASECAMP_FRAGMENT, SYNC_NOW)
+                        setResult(RESULT_BASECAMP_FRAGMENT, resultIntent)
+                        finish()
+                        loadingState.dismiss()
+
+                    }
+                    RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+
+                        handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_MESSAGE, "Gagal menghapus basecamp: ${ response.message }")
+                        loadingState.dismiss()
+
+                    }
+                    else -> {
+
+                        handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_MESSAGE, "Gagal menghapus!")
+                        loadingState.dismiss()
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                loadingState.dismiss()
+
+            }
+
+        }
     }
 }

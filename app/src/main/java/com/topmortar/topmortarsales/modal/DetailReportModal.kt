@@ -25,12 +25,16 @@ class DetailReportModal(private val context: Context) : Dialog(context) {
 
     private lateinit var binding: ModalDetailReportBinding
     private lateinit var data: ReportVisitModel
-    private var withName: Boolean? = null
+    private var withName = false
+    private var isCourier = false
 
     fun setData(data: ReportVisitModel) {
         this.data = data
     }
-    fun setWithName(withName: Boolean?) {
+    fun setIsCourier(data: Boolean) {
+        this.isCourier = data
+    }
+    fun setWithName(withName: Boolean) {
         this.withName = withName
     }
 
@@ -57,7 +61,7 @@ class DetailReportModal(private val context: Context) : Dialog(context) {
         window?.attributes = layoutParams as WindowManager.LayoutParams
 
         val titleBar = binding.titleBarLight
-        titleBar.tvTitleBar.text = if (withName == true) data.nama else "Detail Laporan"
+        titleBar.tvTitleBar.text = if (withName) if (isCourier) data.nama_gudang else data.nama else "Detail Laporan"
         titleBar.tvTitleBar.setPadding(convertDpToPx(16, context),0,0,0)
 
         titleBar.icBack.visibility = View.GONE

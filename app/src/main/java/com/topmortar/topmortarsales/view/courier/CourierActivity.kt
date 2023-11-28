@@ -109,6 +109,7 @@ class CourierActivity : AppCompatActivity() {
         val optionUser = popupMenu.menu.findItem(R.id.option_user)
         val optionCity = popupMenu.menu.findItem(R.id.option_city)
         val optionSkill = popupMenu.menu.findItem(R.id.option_skill)
+        val optionBasecamp = popupMenu.menu.findItem(R.id.option_basecamp)
         val optionlogout = popupMenu.menu.findItem(R.id.option_logout)
 
         optionSyncNow.isVisible = false
@@ -118,6 +119,7 @@ class CourierActivity : AppCompatActivity() {
         optionUser.isVisible = false
         optionCity.isVisible = false
         optionSkill.isVisible = false
+        optionBasecamp.isVisible = false
         optionlogout.isVisible = true
 
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
