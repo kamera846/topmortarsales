@@ -214,10 +214,10 @@ class BasecampFragment : Fragment() {
     fun onEventBus(event: EventBusUtils.MessageEvent) {
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
+//    override fun onDestroyView() {
+//        super.onDestroyView()
+//        _binding = null
+//    }
 
     private fun showBadgeRefresh(action: Boolean) {
         val tvTitle = badgeRefresh.findViewById<TextView>(R.id.tvTitle)

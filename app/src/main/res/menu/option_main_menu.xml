@@ -22,6 +22,9 @@
         android:id="@+id/option_skill"
         android:title="@string/manage_skill" />
     <item
+        android:id="@+id/option_basecamp"
+        android:title="@string/manage_basecamp" />
+    <item
         android:id="@+id/option_logout"
         android:title="@string/logout" />
 </menu>
