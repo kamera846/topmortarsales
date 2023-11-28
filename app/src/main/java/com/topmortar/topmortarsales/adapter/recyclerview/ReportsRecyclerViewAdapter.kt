@@ -7,7 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.utils.DateFormat
+import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.databinding.ItemReportsBinding
 import com.topmortar.topmortarsales.model.ReportVisitModel
@@ -19,6 +21,7 @@ class ReportsRecyclerViewAdapter : RecyclerView.Adapter<ReportsRecyclerViewAdapt
     private var listItem: ArrayList<ReportVisitModel> = ArrayList()
     private var context: Context? = null
     private var withName: Boolean? = null
+    private var isCourier = false
 
     interface OnItemClickListener {
         fun onItemClick(item: ReportVisitModel)
@@ -29,6 +32,9 @@ class ReportsRecyclerViewAdapter : RecyclerView.Adapter<ReportsRecyclerViewAdapt
     }
     fun setList(data: ArrayList<ReportVisitModel>) {
         listItem = data
+    }
+    fun setIsCourier(data: Boolean) {
+        isCourier = data
     }
     fun setWithName(withName: Boolean?) {
         this.withName = withName
@@ -54,7 +60,9 @@ class ReportsRecyclerViewAdapter : RecyclerView.Adapter<ReportsRecyclerViewAdapt
             var stringDistance = "%.2f".format(distanceFormat.toDouble())
             if (stringDistance.contains(",")) stringDistance = stringDistance.replace(",", ".")
 
-            binding.title.text = if (withName == true) item.nama else stringDistance + " km dari titik"
+            binding.title.text = if (withName == true){
+                if (isCourier) item.nama_gudang else item.nama
+            } else "$stringDistance km dari titik"
             binding.date.text = if (withName == true) "$stringDistance km\n$dateFormat" else dateFormat
 
             val layoutParams = binding.root.layoutParams as ViewGroup.MarginLayoutParams

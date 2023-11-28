@@ -21,6 +21,8 @@
     <string name="list_chat_contact_description">Lorem ipsum sit dolor amet</string>
     <string name="txt_loading">Memuat…</string>
     <string name="txt_sending">Mengirim…</string>
+    <string name="txt_saving">Menyimpan…</string>
+    <string name="txt_deleting">Menghapus…</string>
     <string name="message_length">0/200</string>
     <string name="et_label">Label for the input field</string>
     <string name="et_hint">Enter your text here</string>
@@ -66,6 +68,7 @@
     <string name="use_lowercase_character_e_g">Gunakan karakter huruf kecil e.g salesmalang</string>
     <string name="submit">Kirim</string>
     <string name="store_name">Nama Toko</string>
+    <string name="basecamp_name">Nama Basecamp</string>
     <string name="owner_name">Nama Pemilik</string>
     <string name="e_g_john_doe">e.g John Doe</string>
     <string name="date_of_birth">Tanggal Lahir</string>
@@ -109,6 +112,7 @@
     <string name="top_mortar_sales">Top Mortar Sales</string>
     <string name="icon_pencil_black">Icon Pencil Black</string>
     <string name="icon_close_black">Icon Close Black</string>
+    <string name="icon_trash_black">Icon Trash Black</string>
     <string name="list_item">List Item</string>
     <string name="city_name">Nama Kota</string>
     <string name="city_code">Kode Kota</string>
@@ -123,6 +127,7 @@
     <string name="icon_upload">Icon Upload</string>
     <string name="icon_printer">Icon Printer</string>
     <string name="manage_skill">Kelola Keahlian</string>
+    <string name="manage_basecamp">Kelola Basecamp</string>
     <string-array name="user_level_spinner_options">
         <item>Pilih Level</item>
         <item>Admin</item>
@@ -149,7 +154,6 @@
     <string name="free">Free</string>
     <string name="retur">Retur</string>
     <string name="nearest_store">Cari Toko Terdekat</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="text_pricing_detail">Ini adalah rincian anda pada bulan ini</string>
     <string name="text_bid_available">Dengan mengirim pesan, berarti anda telah mem-bidding toko ini.</string>
@@ -158,4 +162,8 @@
     <string name="bullet">•</string>
     <string name="filter">Filter:</string>
     <string name="tidak_ada_filter">Tidak ada filter</string>
+    <string name="laporan_toko_hint">e.g Kunjungan ke toko untuk melakukan penagihan…</string>
+    <string name="laporan_basecamp_hint">e.g Menurunkan material pasir di Gudang Sidoarjo…</string>
+    <string name="click_to_select_city">Tekan untuk memilih kota…</string>
+    <string name="select_city">Pilih Kota</string>
 </resources>

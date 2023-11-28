@@ -31,6 +31,8 @@ import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_NO_SURAT_JALAN
 import com.topmortar.topmortarsales.commons.CONST_STATUS_INVOICE
 import com.topmortar.topmortarsales.commons.CONST_TOTAL_INVOICE
+import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -78,6 +80,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
     private var isListActive: String = LIST_SURAT_JALAN
     private var isFilterInvoice: String = FILTER_NONE
     private var doubleBackToExitPressedOnce = false
+    private var isRequestSync = false
     private var contactId: String? = null
     private var iName: String? = null
 
@@ -155,7 +158,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
     private fun initClickHandler() {
 
-        icBack.setOnClickListener { finish() }
+        icBack.setOnClickListener { backHandler() }
         icSyncNow.setOnClickListener { toggleList() }
         icOption.setOnClickListener { showPopupMenu() }
         llFilter.setOnClickListener { showDropdownMenu() }
@@ -426,7 +429,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
         val intent = Intent(this@ListSuratJalanActivity, DetailSuratJalanActivity::class.java)
         intent.putExtra(CONST_INVOICE_ID, data?.id_surat_jalan)
         intent.putExtra(CONST_CONTACT_ID, contactId)
-        startActivity(intent)
+        startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
 
     }
 
@@ -457,6 +460,9 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
             }
 
+        } else if (requestCode == DETAIL_ACTIVITY_REQUEST_CODE) {
+            val resultData = data?.getStringExtra("$DETAIL_ACTIVITY_REQUEST_CODE")
+            if (resultData == SYNC_NOW) isRequestSync = true
         }
 
     }
@@ -466,6 +472,24 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
     }
     override fun onItemInvoiceClick(data: InvoiceModel?) {
         navigateDetailInvoice(data)
+    }
+
+    private fun backHandler() {
+        if (isRequestSync) {
+
+            val resultIntent = Intent()
+            resultIntent.putExtra("$DETAIL_ACTIVITY_REQUEST_CODE", SYNC_NOW)
+            setResult(RESULT_OK, resultIntent)
+
+            finish()
+
+        } else finish()
+
+    }
+
+    override fun onBackPressed() {
+//        super.onBackPressed()
+        backHandler()
     }
 
 }

@@ -28,7 +28,7 @@
     </RelativeLayout>
 
     <LinearLayout
-        android:visibility="visible"
+        android:visibility="gone"
         android:layout_below="@+id/rl_header"
         android:id="@+id/ll_filter"
         android:layout_width="match_parent"
