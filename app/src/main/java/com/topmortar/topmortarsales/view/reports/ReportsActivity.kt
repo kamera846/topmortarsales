@@ -9,10 +9,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.ReportsRecyclerViewAdapter
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
+import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
@@ -41,6 +43,7 @@ class ReportsActivity : AppCompatActivity() {
     private var contactID: String? = null
     private var contactName: String? = null
     private var userFullName: String? = null
+    private var userLevel: String? = null
     private var isCourier = false
 
     private lateinit var datePicker: DatePickerDialog
@@ -59,8 +62,10 @@ class ReportsActivity : AppCompatActivity() {
         contactID = intent.getStringExtra(CONST_CONTACT_ID)
         contactName = intent.getStringExtra(CONST_NAME)
         userFullName = intent.getStringExtra(CONST_FULL_NAME)
+        userLevel = intent.getStringExtra(CONST_USER_LEVEL)
 
         if (userKind == USER_KIND_COURIER) isCourier = true
+        else if (userLevel == AUTH_LEVEL_COURIER) isCourier = true
 
         if (isCourier) binding.titleBarDark.tvTitleBar.text = if (!contactName.isNullOrEmpty()) contactName else "Laporan Kurir"
         else binding.titleBarDark.tvTitleBar.text = if (!contactName.isNullOrEmpty()) contactName else "Laporan Sales"
@@ -183,6 +188,7 @@ class ReportsActivity : AppCompatActivity() {
 
         val mAdapter = ReportsRecyclerViewAdapter()
         mAdapter.setList(items)
+        mAdapter.setIsCourier(isCourier)
         if (contactID.isNullOrEmpty()) mAdapter.setWithName(true)
 
         binding.recyclerView.apply {

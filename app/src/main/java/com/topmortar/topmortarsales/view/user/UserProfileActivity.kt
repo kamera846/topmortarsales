@@ -38,6 +38,7 @@ import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
@@ -67,6 +68,7 @@ class UserProfileActivity : AppCompatActivity() {
     private var iUserID: String? = null; private var iPhone: String? = null; private var iLocation: String? = null
 
     private val bidLimit get() = sessionManager.userBidLimit().toString()
+    private var isRequestSync = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -178,6 +180,7 @@ class UserProfileActivity : AppCompatActivity() {
         val intent = Intent(this@UserProfileActivity, ReportsActivity::class.java)
         intent.putExtra(CONST_USER_ID, iUserID)
         intent.putExtra(CONST_FULL_NAME, iFullName)
+        intent.putExtra(CONST_USER_LEVEL, iUserLevel)
         startActivity(intent)
 
     }
@@ -190,7 +193,7 @@ class UserProfileActivity : AppCompatActivity() {
         }
         binding.toggleBarChart.setOnClickListener { toggleBarChart() }
         binding.priceContainer.setOnClickListener { modalPricingDetails.show() }
-        binding.titleBarLight.icBack.setOnClickListener { finish() }
+        binding.titleBarLight.icBack.setOnClickListener { backHandler() }
         binding.salesReportContainer.setOnClickListener { navigateSalesReport() }
 
     }
@@ -381,6 +384,36 @@ class UserProfileActivity : AppCompatActivity() {
     @Subscribe
     fun onEventBus(event: EventBusUtils.ContactModelEvent) {
         navigateDetailContact(event.data)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == MANAGE_USER_ACTIVITY_REQUEST_CODE) {
+
+            val resultData = data?.getStringExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE")
+
+            if (resultData == SYNC_NOW) {
+
+                isRequestSync = true
+
+            }
+
+        }
+
+    }
+
+    private fun backHandler() {
+        if (isRequestSync) {
+            val resultIntent = Intent()
+            resultIntent.putExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE", SYNC_NOW)
+            setResult(RESULT_OK, resultIntent)
+            finish()
+        } else finish()
+    }
+
+    override fun onBackPressed() {
+        backHandler()
     }
 
 }

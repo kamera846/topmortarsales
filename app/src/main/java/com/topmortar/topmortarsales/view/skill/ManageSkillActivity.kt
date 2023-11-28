@@ -92,7 +92,7 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
         // Set Title Bar
         icBack.visibility = View.VISIBLE
 //        icSearch.visibility = View.VISIBLE
-        titleBar.text = "Manage Skill"
+        titleBar.text = "Kelola Keahlian"
 
     }
 

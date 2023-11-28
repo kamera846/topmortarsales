@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.UsersRecyclerViewAdapter
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
@@ -105,7 +106,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
         // Set Title Bar
         icBack.visibility = View.VISIBLE
 //        icSearch.visibility = View.VISIBLE
-        titleBar.text = "Manage User"
+        titleBar.text = "Kelola Pengguna"
 
     }
 
@@ -242,7 +243,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
     }
 
     override fun onItemClick(data: UserModel?) {
-        if (data?.level_user == AUTH_LEVEL_SALES) navigateDetailUser(data)
+        if (data?.level_user == AUTH_LEVEL_SALES || data?.level_user == AUTH_LEVEL_COURIER) navigateDetailUser(data)
         else navigateAddUser(data)
     }
 

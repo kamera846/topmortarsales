@@ -92,7 +92,7 @@ class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClic
         // Set Title Bar
         icBack.visibility = View.VISIBLE
 //        icSearch.visibility = View.VISIBLE
-        titleBar.text = "Manage City"
+        titleBar.text = "Kelola Kota"
 
     }
 

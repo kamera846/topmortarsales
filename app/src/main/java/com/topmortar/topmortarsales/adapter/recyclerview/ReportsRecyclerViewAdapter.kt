@@ -18,11 +18,10 @@ import java.util.Calendar
 import java.util.Locale
 
 class ReportsRecyclerViewAdapter : RecyclerView.Adapter<ReportsRecyclerViewAdapter.ViewHolder>() {
-    private lateinit var sessionManager: SessionManager
-    private val userKind get() = sessionManager.userKind()
     private var listItem: ArrayList<ReportVisitModel> = ArrayList()
     private var context: Context? = null
     private var withName: Boolean? = null
+    private var isCourier = false
 
     interface OnItemClickListener {
         fun onItemClick(item: ReportVisitModel)
@@ -33,6 +32,9 @@ class ReportsRecyclerViewAdapter : RecyclerView.Adapter<ReportsRecyclerViewAdapt
     }
     fun setList(data: ArrayList<ReportVisitModel>) {
         listItem = data
+    }
+    fun setIsCourier(data: Boolean) {
+        isCourier = data
     }
     fun setWithName(withName: Boolean?) {
         this.withName = withName
@@ -59,7 +61,7 @@ class ReportsRecyclerViewAdapter : RecyclerView.Adapter<ReportsRecyclerViewAdapt
             if (stringDistance.contains(",")) stringDistance = stringDistance.replace(",", ".")
 
             binding.title.text = if (withName == true){
-                if (userKind == USER_KIND_COURIER) item.nama_gudang else item.nama
+                if (isCourier) item.nama_gudang else item.nama
             } else "$stringDistance km dari titik"
             binding.date.text = if (withName == true) "$stringDistance km\n$dateFormat" else dateFormat
 
@@ -77,7 +79,6 @@ class ReportsRecyclerViewAdapter : RecyclerView.Adapter<ReportsRecyclerViewAdapt
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
         val binding = ItemReportsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        sessionManager = SessionManager(parent.context)
         context = parent.context
         return ViewHolder(binding)
 
