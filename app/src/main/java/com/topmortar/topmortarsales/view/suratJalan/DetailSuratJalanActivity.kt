@@ -47,8 +47,12 @@ import com.topmortar.topmortarsales.adapter.InvoiceOrderRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_DISTANCE
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
+import com.topmortar.topmortarsales.commons.CONST_INVOICE_IS_COD
 import com.topmortar.topmortarsales.commons.CONST_MAPS
+import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
+import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_URI
+import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAX_DISTANCE
@@ -56,6 +60,7 @@ import com.topmortar.topmortarsales.commons.REQUEST_BLUETOOTH_PERMISSIONS
 import com.topmortar.topmortarsales.commons.REQUEST_ENABLE_BLUETOOTH
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
@@ -114,6 +119,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     private var invoiceId: String? = null
     private var contactId: String? = null
     private var isClosing: Boolean = false
+    private var isCod: Boolean = false
+    private var isRequestSync: Boolean = false
 
     private var detailContact: ContactModel? = null
     private var shortDistance: Double = -1.0
@@ -208,6 +215,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
         val intent = Intent(this, PreviewClosingActivity::class.java)
         intent.putExtra(CONST_INVOICE_ID, invoiceId)
+        intent.putExtra(CONST_INVOICE_IS_COD, isCod)
         intent.putParcelableArrayListExtra(CONST_URI, uriList)
         intent.putExtra(CONST_DISTANCE, shortDistance)
         startActivityForResult(intent, IMG_PREVIEW_STATE)
@@ -304,6 +312,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
                         val data = response.results[0]
                         isClosing = data.is_closing == "1"
+                        isCod = data.is_cod == "1"
 
                         tvReferenceNumber.text = "${ data.no_surat_jalan }"
 //                        tvDeliveryDate.text = "${ data.dalivery_date }"
@@ -463,6 +472,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                                     .setNegativeButton("Buka Maps") { dialog, _ ->
                                         val intent = Intent(this@DetailSuratJalanActivity, MapsActivity::class.java)
                                         intent.putExtra(CONST_MAPS, mapsUrl)
+                                        intent.putExtra(CONST_MAPS_NAME, detailContact?.nama)
                                         startActivity(intent)
                                         dialog.dismiss()
                                     }
@@ -536,7 +546,15 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     }
 
     private fun backHandler() {
-        finish()
+        if (isRequestSync) {
+
+            val resultIntent = Intent()
+            resultIntent.putExtra("$DETAIL_ACTIVITY_REQUEST_CODE", SYNC_NOW)
+            setResult(RESULT_OK, resultIntent)
+
+            finish()
+
+        } else finish()
     }
 
     private fun printNow() {
@@ -792,6 +810,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
             val resultData = data?.getIntExtra("$IMG_PREVIEW_STATE", 0)
             if (resultData == RESULT_OK ) {
                 getDetail()
+                isRequestSync = true
             }
             // Remove image temp
             currentPhotoUri?.let {

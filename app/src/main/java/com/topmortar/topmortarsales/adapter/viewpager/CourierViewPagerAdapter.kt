@@ -51,7 +51,7 @@ class CourierViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
     override fun getPageTitle(position: Int): CharSequence {
         return when (position) {
             0 -> "Toko"
-            else -> "Base Camp"
+            else -> "Basecamp"
         }
     }
 }

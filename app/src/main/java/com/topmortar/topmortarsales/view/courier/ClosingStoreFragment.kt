@@ -1,6 +1,7 @@
 package com.topmortar.topmortarsales.view.courier
 
 import android.app.Activity
+import android.app.Activity.RESULT_OK
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
@@ -9,7 +10,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -30,8 +35,11 @@ import com.topmortar.topmortarsales.commons.CONST_PROMO
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.REQUEST_BASECAMP_FRAGMENT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.RESULT_BASECAMP_FRAGMENT
+import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
@@ -59,6 +67,8 @@ class ClosingStoreFragment : Fragment() {
     private lateinit var userCity: String
     private lateinit var userID: String
 
+    private lateinit var badgeRefresh: LinearLayout
+
     private var listener: CounterItem? = null
     interface CounterItem {
         fun counterItem(count: Int)
@@ -74,6 +84,8 @@ class ClosingStoreFragment : Fragment() {
         _binding = FragmentClosingStoreBinding.inflate(inflater, container, false)
         val view = binding.root
 
+        badgeRefresh = view.findViewById(R.id.badgeRefresh)
+
         sessionManager = SessionManager(requireContext())
         userKind = sessionManager.userKind().toString()
         userCity = sessionManager.userCityID().toString()
@@ -88,6 +100,7 @@ class ClosingStoreFragment : Fragment() {
     private fun getContacts() {
 
         loadingState(true)
+        showBadgeRefresh(false)
 
         lifecycleScope.launch {
             try {
@@ -100,18 +113,22 @@ class ClosingStoreFragment : Fragment() {
 
                         setRecyclerView(response.results)
                         loadingState(false)
+                        showBadgeRefresh(false)
                         listener?.counterItem(response.results.size)
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        loadingState(true, "Daftar kontak kosong!")
+                        loadingState(true, "Belum ada pengiriman!")
+                        showBadgeRefresh(false)
+                        listener?.counterItem(0)
 
                     }
                     else -> {
 
                         handleMessage(requireContext(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
                         loadingState(true, getString(R.string.failed_request))
+                        showBadgeRefresh(true)
 
                     }
                 }
@@ -121,6 +138,7 @@ class ClosingStoreFragment : Fragment() {
 
                 handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
+                showBadgeRefresh(true)
 
             }
 
@@ -182,7 +200,8 @@ class ClosingStoreFragment : Fragment() {
             intent.putExtra(CONST_PROMO, data.id_promo)
         }
 
-        (requireContext() as Activity).startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
+//        (requireContext() as Activity).startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
+        someActivityResultLauncher.launch(intent)
 
     }
 
@@ -236,6 +255,28 @@ class ClosingStoreFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun showBadgeRefresh(action: Boolean) {
+        val tvTitle = badgeRefresh.findViewById<TextView>(R.id.tvTitle)
+        val icClose = badgeRefresh.findViewById<ImageView>(R.id.icClose)
+        icClose.setOnClickListener { badgeRefresh.visibility = View.GONE }
+
+        if (action) {
+            badgeRefresh.visibility = View.VISIBLE
+            tvTitle.setOnClickListener { getContacts() }
+        } else badgeRefresh.visibility = View.GONE
+    }
+
+    private val someActivityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        // Handle the result
+        val resultCode = result.resultCode
+        val data = result.data
+        // Process the result
+        if (resultCode == RESULT_OK) {
+            val data = data?.getStringExtra("$MAIN_ACTIVITY_REQUEST_CODE")
+            if (!data.isNullOrEmpty() && data == SYNC_NOW) getContacts()
+        }
     }
 
 }

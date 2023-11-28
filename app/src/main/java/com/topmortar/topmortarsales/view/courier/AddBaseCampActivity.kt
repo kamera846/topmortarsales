@@ -14,10 +14,12 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.REQUEST_BASECAMP_FRAGMENT
 import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.RESULT_BASECAMP_FRAGMENT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
@@ -46,7 +48,7 @@ class AddBaseCampActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
         setContentView(binding.root)
 
-        binding.titleBar.tvTitleBar.text = "Tambah Daftar Base Camp"
+        binding.titleBar.tvTitleBar.text = "Buat Basecamp Baru"
         binding.titleBar.icBack.setOnClickListener { finish() }
         binding.btnSubmit.setOnClickListener { submitForm() }
 
@@ -160,9 +162,9 @@ class AddBaseCampActivity : AppCompatActivity() {
 
                         handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_MESSAGE, "Berhasil menyimpan")
 
-//                        val resultIntent = Intent()
-//                        resultIntent.putExtra("$activityRequestCode", SYNC_NOW)
-//                        setResult(RESULT_OK, resultIntent)
+                        val resultIntent = Intent()
+                        resultIntent.putExtra(REQUEST_BASECAMP_FRAGMENT, "new_basecamp")
+                        setResult(RESULT_BASECAMP_FRAGMENT, resultIntent)
                         finish()
                         loadingState.dismiss()
 
@@ -201,11 +203,11 @@ class AddBaseCampActivity : AppCompatActivity() {
         }
 
         if (binding.etName.text.isNullOrEmpty()) {
-            binding.etName.error = "Nama base camp wajib diisi!"
+            binding.etName.error = "Nama basecamp wajib diisi!"
             binding.etName.requestFocus()
             return false
         } else if (binding.etMapsUrl.text.isNullOrEmpty()) {
-            binding.etMapsUrl.error = "Koordinat base camp wajib diisi!"
+            binding.etMapsUrl.error = "Koordinat basecamp wajib diisi!"
             binding.etMapsUrl.requestFocus()
             return false
         }

@@ -24,6 +24,8 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
 import com.topmortar.topmortarsales.commons.CONST_MAPS
+import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
+import com.topmortar.topmortarsales.commons.CONST_MAPS_STATUS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAX_REPORT_DISTANCE
@@ -95,7 +97,7 @@ class NewReportActivity : AppCompatActivity() {
 
         when (isBaseCamp) {
             true -> {
-                reportType = "base camp"
+                reportType = "basecamp"
                 binding.tvNameLabel.text = getString(R.string.basecamp_name)
                 binding.etMessage.hint = getString(R.string.laporan_basecamp_hint)
             }
@@ -204,6 +206,7 @@ class NewReportActivity : AppCompatActivity() {
                                         .setNegativeButton("Buka Maps") { dialog, _ ->
                                             val intent = Intent(this@NewReportActivity, MapsActivity::class.java)
                                             intent.putExtra(CONST_MAPS, mapsUrl)
+                                            intent.putExtra(CONST_MAPS_NAME, name)
                                             startActivity(intent)
 
                                             progressDialog.dismiss()

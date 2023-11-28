@@ -80,8 +80,8 @@ class CourierActivity : AppCompatActivity() {
         tabLayout.setupWithViewPager(viewPager)
         pagerAdapter.setCounterPageItem(object : CourierViewPagerAdapter.CounterPageItem{
             override fun counterItem(count: Int, tabIndex: Int) {
-                if (tabIndex == 0) tabLayout.getTabAt(tabIndex)?.text = "Toko ($count)"
-                else tabLayout.getTabAt(tabIndex)?.text = "Base Camp ($count)"
+                if (tabIndex == 0) tabLayout.getTabAt(tabIndex)?.text = "Toko${if (count != 0) " ($count)" else ""}"
+                else tabLayout.getTabAt(tabIndex)?.text = "Basecamp${if (count != 0) " ($count)" else ""}"
             }
 
         })

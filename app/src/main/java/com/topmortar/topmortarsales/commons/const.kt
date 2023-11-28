@@ -56,6 +56,8 @@ const val IMG_PREVIEW_STATE = 666
 const val LOCATION_PERMISSION_REQUEST_CODE = 777
 const val CONNECTION_FAILURE_RESOLUTION_REQUEST = 888
 const val REQUEST_EDIT_CONTACT_COORDINATE = 999
+const val REQUEST_BASECAMP_FRAGMENT = "request_basecamp_fragment"
+const val RESULT_BASECAMP_FRAGMENT = 101010
 
 // Tag Log
 const val TAG_RESPONSE_CONTACT = "TAG RESPONSE CONTACT"
@@ -74,6 +76,7 @@ const val CONST_CONTACT_ID = "const_contact_id"
 const val CONST_USER_ID = "const_user_id"
 const val CONST_INVOICE_ID = "const_invoice_id"
 const val CONST_INVOICE_NUMBER = "const_invoice_number"
+const val CONST_INVOICE_IS_COD = "const_invoice_is_cod"
 
 const val CONST_OWNER = "const_owner"
 const val CONST_LOCATION = "const_location"

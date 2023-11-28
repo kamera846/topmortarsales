@@ -7,25 +7,31 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.adapter.recyclerview.BaseCamoRecyclerViewAdapter
+import com.topmortar.topmortarsales.adapter.recyclerview.BaseCampRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.REQUEST_BASECAMP_FRAGMENT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.RESULT_BASECAMP_FRAGMENT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
-import com.topmortar.topmortarsales.databinding.FragmentGudangBinding
+import com.topmortar.topmortarsales.databinding.FragmentBasecampBinding
 import com.topmortar.topmortarsales.model.BaseCampModel
 import com.topmortar.topmortarsales.view.reports.NewReportActivity
 import kotlinx.coroutines.launch
@@ -37,13 +43,15 @@ import org.greenrobot.eventbus.Subscribe
  */
 class BasecampFragment : Fragment() {
 
-    private var _binding: FragmentGudangBinding? = null
+    private var _binding: FragmentBasecampBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var sessionManager: SessionManager
     private lateinit var userKind: String
     private lateinit var userCity: String
     private lateinit var userID: String
+
+    private lateinit var badgeRefresh: LinearLayout
 
     private var listener: CounterItem? = null
     interface CounterItem {
@@ -57,8 +65,10 @@ class BasecampFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentGudangBinding.inflate(inflater, container, false)
+        _binding = FragmentBasecampBinding.inflate(inflater, container, false)
         val view = binding.root
+
+        badgeRefresh = view.findViewById(R.id.badgeRefresh)
 
         sessionManager = SessionManager(requireContext())
         userKind = sessionManager.userKind().toString()
@@ -74,6 +84,7 @@ class BasecampFragment : Fragment() {
     private fun getContacts() {
 
         loadingState(true)
+        showBadgeRefresh(false)
 
         lifecycleScope.launch {
             try {
@@ -86,18 +97,22 @@ class BasecampFragment : Fragment() {
 
                         setRecyclerView(response.results)
                         loadingState(false)
+                        showBadgeRefresh(false)
                         listener?.counterItem(response.results.size)
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(true, "Belum ada basecamp!")
+                        showBadgeRefresh(false)
+                        listener?.counterItem(0)
 
                     }
                     else -> {
 
                         handleMessage(requireContext(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
                         loadingState(true, getString(R.string.failed_request))
+                        showBadgeRefresh(true)
 
                     }
                 }
@@ -107,6 +122,7 @@ class BasecampFragment : Fragment() {
 
                 handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
+                showBadgeRefresh(true)
 
             }
 
@@ -116,7 +132,7 @@ class BasecampFragment : Fragment() {
 
     private fun setRecyclerView(listItem: ArrayList<BaseCampModel>) {
 
-        val rvAdapter = BaseCamoRecyclerViewAdapter(listItem, object: BaseCamoRecyclerViewAdapter.ItemClickListener {
+        val rvAdapter = BaseCampRecyclerViewAdapter(listItem, object: BaseCampRecyclerViewAdapter.ItemClickListener {
             override fun onItemClick(data: BaseCampModel?) {
                 navigateItemAction(data)
             }
@@ -180,7 +196,7 @@ class BasecampFragment : Fragment() {
     private fun navigateFab() {
 
         val intent = Intent(requireContext(), AddBaseCampActivity::class.java)
-        (requireContext() as Activity).startActivity(intent)
+        someActivityResultLauncher.launch(intent)
 
     }
 
@@ -201,6 +217,29 @@ class BasecampFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun showBadgeRefresh(action: Boolean) {
+        val tvTitle = badgeRefresh.findViewById<TextView>(R.id.tvTitle)
+        val icClose = badgeRefresh.findViewById<ImageView>(R.id.icClose)
+        icClose.setOnClickListener { badgeRefresh.visibility = View.GONE }
+
+        if (action) {
+            badgeRefresh.visibility = View.VISIBLE
+            tvTitle.setOnClickListener { getContacts() }
+        } else badgeRefresh.visibility = View.GONE
+    }
+
+    private val someActivityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        // Handle the result
+        val resultCode = result.resultCode
+        val data = result.data
+        // Process the result
+
+        if (resultCode == RESULT_BASECAMP_FRAGMENT) {
+            val data = data?.getStringExtra(REQUEST_BASECAMP_FRAGMENT)
+            if (!data.isNullOrEmpty()) getContacts()
+        }
     }
 
 }

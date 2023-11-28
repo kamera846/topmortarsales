@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.model.BaseCampModel
 
-class BaseCamoRecyclerViewAdapter(private val chatList: ArrayList<BaseCampModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<BaseCamoRecyclerViewAdapter.ChatViewHolder>() {
+class BaseCampRecyclerViewAdapter(private val chatList: ArrayList<BaseCampModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<BaseCampRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
 
     interface ItemClickListener {
