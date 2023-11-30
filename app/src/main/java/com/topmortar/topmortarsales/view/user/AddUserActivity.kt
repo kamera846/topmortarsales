@@ -226,7 +226,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         confirmPasswordContainer = findViewById(R.id.confirm_password_container)
 
         // Set Title Bar
-        tvTitleBar.text = "Register New User"
+        tvTitleBar.text = "Buat Pengguna Baru"
 
         // Text View Generated Username
         val usernameGeneratedDescription = "Username akan dibuat menjadi:"

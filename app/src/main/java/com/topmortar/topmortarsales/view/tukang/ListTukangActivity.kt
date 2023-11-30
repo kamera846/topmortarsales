@@ -211,9 +211,11 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         val cityItem = popupMenu.menu.findItem(R.id.option_city)
         val nearestStore = popupMenu.menu.findItem(R.id.nearest_store)
         val myProfile = popupMenu.menu.findItem(R.id.option_my_profile)
+        val basecamp = popupMenu.menu.findItem(R.id.option_basecamp)
 
         searchItem.isVisible = false
         nearestStore.isVisible = false
+        basecamp.isVisible = false
         if (sessionManager.userKind() != USER_KIND_ADMIN) {
             userItem.isVisible = false
             cityItem.isVisible = false

@@ -22,7 +22,10 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
 import com.topmortar.topmortarsales.commons.CONST_MAPS
+import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
+import com.topmortar.topmortarsales.commons.CONST_MAPS_STATUS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAX_REPORT_DISTANCE
@@ -55,6 +58,8 @@ class NewReportActivity : AppCompatActivity() {
     private val msgMaxLength = 500
 
     private var isDistanceToLong = false
+    private var isBaseCamp = false
+    private var reportType: String = "toko"
     private var id: String = ""
     private val idUser get() = sessionManager.userID().toString()
     private var name: String = ""
@@ -88,6 +93,20 @@ class NewReportActivity : AppCompatActivity() {
         id = intent.getStringExtra(CONST_CONTACT_ID).toString()
         name = intent.getStringExtra(CONST_NAME).toString()
         coordinate = intent.getStringExtra(CONST_MAPS).toString()
+        isBaseCamp = intent.getBooleanExtra(CONST_IS_BASE_CAMP, false)
+
+        when (isBaseCamp) {
+            true -> {
+                reportType = "basecamp"
+                binding.tvNameLabel.text = getString(R.string.basecamp_name)
+                binding.etMessage.hint = getString(R.string.laporan_basecamp_hint)
+            }
+            else -> {
+                reportType = "toko"
+                binding.tvNameLabel.text = getString(R.string.store_name)
+                binding.etMessage.hint = getString(R.string.laporan_toko_hint)
+            }
+        }
 
         Handler().postDelayed({
 
@@ -171,7 +190,7 @@ class NewReportActivity : AppCompatActivity() {
                                     builder.setOnDismissListener { progressDialog.dismiss() }
                                     builder.setOnCancelListener { progressDialog.dismiss() }
                                     builder.setTitle("Peringatan!")
-                                        .setMessage("Titik anda saat ini $shortDistance km dari titik toko. Cobalah untuk lebih dekat dengan toko!")
+                                        .setMessage("Titik anda saat ini $shortDistance km dari titik $reportType. Cobalah untuk lebih dekat dengan $reportType!")
                                         .setPositiveButton("Oke") { dialog, _ ->
                                             progressDialog.dismiss()
 
@@ -179,7 +198,7 @@ class NewReportActivity : AppCompatActivity() {
                                             binding.etDistance.text = shortDistance
                                             binding.icRefreshDistance.visibility = View.VISIBLE
                                             binding.tvDistanceError.visibility = View.VISIBLE
-                                            binding.tvDistanceError.text = "Jarak anda lebih dari $MAX_REPORT_DISTANCE km. Cobalah untuk lebih dekat dengan titik toko dan refresh jaraknya!"
+                                            binding.tvDistanceError.text = "Jarak anda lebih dari $MAX_REPORT_DISTANCE km. Cobalah untuk lebih dekat dengan titik $reportType dan refresh jaraknya!"
                                             isDistanceToLong = true
 
                                             dialog.dismiss()
@@ -187,6 +206,7 @@ class NewReportActivity : AppCompatActivity() {
                                         .setNegativeButton("Buka Maps") { dialog, _ ->
                                             val intent = Intent(this@NewReportActivity, MapsActivity::class.java)
                                             intent.putExtra(CONST_MAPS, mapsUrl)
+                                            intent.putExtra(CONST_MAPS_NAME, name)
                                             startActivity(intent)
 
                                             progressDialog.dismiss()
@@ -195,7 +215,7 @@ class NewReportActivity : AppCompatActivity() {
                                             binding.etDistance.text = shortDistance
                                             binding.icRefreshDistance.visibility = View.VISIBLE
                                             binding.tvDistanceError.visibility = View.VISIBLE
-                                            binding.tvDistanceError.text = "Cobalah untuk lebih dekat dengan titik toko dan refresh jaraknya!"
+                                            binding.tvDistanceError.text = "Cobalah untuk lebih dekat dengan titik $reportType dan refresh jaraknya!"
                                             isDistanceToLong = true
 
                                             dialog.dismiss()
@@ -226,7 +246,7 @@ class NewReportActivity : AppCompatActivity() {
 
                     } else {
                         progressDialog.dismiss()
-                        val message = "Anda tidak dapat membuat laporan untuk saat ini, silakan hubungi admin untuk memperbarui koordinat toko ini"
+                        val message = "Anda tidak dapat membuat laporan untuk saat ini, silakan hubungi admin untuk memperbarui koordinat $reportType ini"
                         val actionTitle = "Hubungi Sekarang"
                         customUtility.showPermissionDeniedSnackbar(message, actionTitle) { navigateChatAdmin() }
                     }
@@ -247,7 +267,7 @@ class NewReportActivity : AppCompatActivity() {
 
     private fun navigateChatAdmin() {
         val phoneNumber = getString(R.string.topmortar_wa_number)
-        val message = "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada toko *${ name }*"
+        val message = "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada $reportType *${ name }*"
 
         val intent = Intent(Intent.ACTION_VIEW)
         intent.data = Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")
@@ -283,7 +303,7 @@ class NewReportActivity : AppCompatActivity() {
             return false
         }
         if (isDistanceToLong) {
-            val message = "Anda tidak dapat membuat laporan untuk saat ini, Cobalah untuk lebih dekat dengan titik toko dan refresh jaraknya!"
+            val message = "Anda tidak dapat membuat laporan untuk saat ini, Cobalah untuk lebih dekat dengan titik $reportType dan refresh jaraknya!"
             val actionTitle = "Refresh Sekarang"
             customUtility.showPermissionDeniedSnackbar(message, actionTitle) { calculateDistance() }
             return false
@@ -310,12 +330,19 @@ class NewReportActivity : AppCompatActivity() {
                 val rblaporanVisit = createPartFromString(binding.etMessage.text.toString())
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.makeVisitReport(
-                    idContact = rbidContact,
-                    idUser = rbidUser,
-                    distanceVisit = rbdistanceVisit,
-                    laporanVisit = rblaporanVisit,
-                )
+                val response = when (isBaseCamp) {
+                    true -> apiService.makeVisitCourierReport(
+                        idGudang = rbidContact,
+                        idUser = rbidUser,
+                        distanceVisit = rbdistanceVisit,
+                        laporanVisit = rblaporanVisit,
+                    ) else -> apiService.makeVisitReport(
+                        idContact = rbidContact,
+                        idUser = rbidUser,
+                        distanceVisit = rbdistanceVisit,
+                        laporanVisit = rblaporanVisit,
+                    )
+                }
 
                 if (response.isSuccessful) {
 

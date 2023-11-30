@@ -4,7 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import com.topmortar.topmortarsales.view.courier.ClosingStoreFragment
-import com.topmortar.topmortarsales.view.courier.GudangFragment
+import com.topmortar.topmortarsales.view.courier.BasecampFragment
 
 class CourierViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
 
@@ -15,30 +15,36 @@ class CourierViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
     fun setCounterPageItem(listener: CounterPageItem) {
         this.listener = listener
     }
+    private lateinit var fragmentClosing: ClosingStoreFragment
+    private lateinit var fragmentBasecamp: BasecampFragment
+    fun setSyncAction(index: Int) {
+        if (index == 0) fragmentClosing.syncNow()
+        else if (index == 1) fragmentBasecamp.syncNow()
+    }
 
     override fun getItem(position: Int): Fragment {
         return when (position) {
             0 -> {
 
-                val fragment = ClosingStoreFragment()
-                fragment.setCounterItem(object : ClosingStoreFragment.CounterItem{
+                fragmentClosing = ClosingStoreFragment()
+                fragmentClosing.setCounterItem(object : ClosingStoreFragment.CounterItem{
                     override fun counterItem(count: Int) {
                         listener?.counterItem(count, 0)
                     }
 
                 })
-                return fragment
+                return fragmentClosing
 
             } else -> {
 
-                val fragment = GudangFragment()
-                fragment.setCounterItem(object : GudangFragment.CounterItem{
+                fragmentBasecamp = BasecampFragment()
+                fragmentBasecamp.setCounterItem(object : BasecampFragment.CounterItem{
                     override fun counterItem(count: Int) {
                         listener?.counterItem(count, 1)
                     }
 
                 })
-                return fragment
+                return fragmentBasecamp
 
             }
         }
@@ -51,7 +57,7 @@ class CourierViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
     override fun getPageTitle(position: Int): CharSequence {
         return when (position) {
             0 -> "Toko"
-            else -> "Gudang"
+            else -> "Basecamp"
         }
     }
 }

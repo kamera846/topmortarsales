@@ -15,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.CONST_DISTANCE
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
+import com.topmortar.topmortarsales.commons.CONST_INVOICE_IS_COD
 import com.topmortar.topmortarsales.commons.CONST_URI
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -45,6 +46,7 @@ class PreviewClosingActivity : AppCompatActivity() {
     private var imgUri: Uri? = null
 
     private var isLoading: Boolean = false
+    private var isCod: Boolean = false
     private var invoiceId: String? = null
     private var imagePart: MultipartBody.Part? = null
     private var iDistance: Double = -1.0
@@ -64,7 +66,6 @@ class PreviewClosingActivity : AppCompatActivity() {
     }
 
     private fun executeClosing() {
-
         loadingState(true)
 
         lifecycleScope.launch {
@@ -80,7 +81,18 @@ class PreviewClosingActivity : AppCompatActivity() {
                 when (response.status) {
                     RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
 
-                        createInvoice()
+                        if (!isCod) createInvoice()
+                        else {
+                            val resultIntent = Intent()
+                            resultIntent.putExtra("$IMG_PREVIEW_STATE", RESULT_OK)
+                            setResult(RESULT_OK, resultIntent)
+
+                            handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, response.message)
+                            Handler().postDelayed({
+                                loadingState(false)
+                                finish()
+                            }, 1000)
+                        }
 
                     }
                     else -> {
@@ -169,6 +181,7 @@ class PreviewClosingActivity : AppCompatActivity() {
 
     private fun dataActivityValidation() {
         val invoiceId = intent.getStringExtra(CONST_INVOICE_ID)
+        isCod = intent.getBooleanExtra(CONST_INVOICE_IS_COD, false)
         iDistance = intent.getDoubleExtra(CONST_DISTANCE, -1.0)
 
         if (!invoiceId.isNullOrEmpty()) {

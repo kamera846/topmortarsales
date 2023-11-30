@@ -81,6 +81,7 @@ import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.city.ManageCityActivity
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
+import com.topmortar.topmortarsales.view.courier.ManageBasecampActivity
 import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
 import com.topmortar.topmortarsales.view.user.ManageUserActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
@@ -385,6 +386,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         val cityItem = popupMenu.menu.findItem(R.id.option_city)
         val skillItem = popupMenu.menu.findItem(R.id.option_skill)
         val nearestStoreItem = popupMenu.menu.findItem(R.id.nearest_store)
+        val basecamp = popupMenu.menu.findItem(R.id.option_basecamp)
 
         searchItem.isVisible = false
 //        nearestStoreItem.isVisible = false
@@ -392,6 +394,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             userItem.isVisible = false
             cityItem.isVisible = false
             skillItem.isVisible = false
+            basecamp.isVisible = false
         }
         if (sessionManager.userKind() != USER_KIND_SALES) {
             myProfile.isVisible = false
@@ -426,6 +429,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 }
                 R.id.option_skill -> {
                     startActivity(Intent(this@MainActivity, ManageSkillActivity::class.java))
+                    true
+                }
+                R.id.option_basecamp -> {
+                    startActivity(Intent(this@MainActivity, ManageBasecampActivity::class.java))
                     true
                 }
                 R.id.option_logout -> {
