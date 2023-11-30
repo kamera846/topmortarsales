@@ -65,6 +65,9 @@ class BasecampFragment : Fragment() {
     fun setCounterItem(listener: CounterItem) {
         this.listener = listener
     }
+    fun syncNow() {
+        getContacts()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

@@ -69,6 +69,7 @@ class CourierActivity : AppCompatActivity() {
         binding.titleBarDark.icBack.visibility = View.GONE
         binding.titleBarDark.icMore.visibility = View.VISIBLE
         binding.titleBarDark.icMore.setOnClickListener { showPopupMenu(it) }
+        binding.titleBarDark.vBorder.visibility = View.GONE
 
         tabLayout = binding.tabLayout
         viewPager = binding.viewPager
@@ -95,6 +96,8 @@ class CourierActivity : AppCompatActivity() {
             override fun onTabReselected(tab: TabLayout.Tab?) {}
 
         })
+        tabLayout.setTabTextColors(getColor(R.color.primary_600), getColor(R.color.white))
+        tabLayout.setSelectedTabIndicatorColor(getColor(R.color.white))
 
     }
 
@@ -112,9 +115,11 @@ class CourierActivity : AppCompatActivity() {
         val optionBasecamp = popupMenu.menu.findItem(R.id.option_basecamp)
         val optionlogout = popupMenu.menu.findItem(R.id.option_logout)
 
-        optionSyncNow.isVisible = false
+//        optionSyncNow.isVisible = false
         optionMyProfile.isVisible = true
         optionNearestStore.isVisible = true
+//        optionNearestStore.isVisible = activeTab == 0
+//        optionNearestStore.title = if (activeTab == 0) "Cari Toko Terdekat" else "Cari Basecamp Terdekat"
         optionSearch.isVisible = false
         optionUser.isVisible = false
         optionCity.isVisible = false
@@ -124,6 +129,10 @@ class CourierActivity : AppCompatActivity() {
 
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
+                R.id.option_sync_now -> {
+                    pagerAdapter.setSyncAction(activeTab)
+                    true
+                }
                 R.id.nearest_store -> {
                     navigateChecklocation()
                     true
