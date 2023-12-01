@@ -1106,16 +1106,20 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 //            }
 //        }
 
-        for ((index, item) in data.details.iterator().withIndex()) {
+        val items = data.details.let { if (it.isNullOrEmpty()) arrayListOf() else it }
+
+        for ((index, item) in items.iterator().withIndex()) {
             val i = index + 1
             table2.addCell(Cell().add(getParagraph("$i", TextAlignment.CENTER)))
             table2.addCell(Cell().add(getParagraph("${item.nama_produk} ${if (item.is_bonus == "1" || item.is_bonus == "2") "(Free)" else ""}", paddingLeft = 8f, paddingRight = 8f)))
             table2.addCell(Cell().add(getParagraph("${item.qty_produk}", TextAlignment.CENTER)))
             if (i == 1) {
-                table2.addCell(getCellWithRowspan("", (data.details.size), TextAlignment.LEFT))
-                table2.addCell(getCellWithRowspan("", (data.details.size), TextAlignment.LEFT))
+                table2.addCell(getCellWithRowspan("", (items.size), TextAlignment.LEFT))
+                table2.addCell(getCellWithRowspan("", (items.size), TextAlignment.LEFT))
             }
         }
+
+        if (items.size == 0) table2.addCell(Cell(1,5).add(getParagraph("Tidak ada pesanan", TextAlignment.LEFT)))
 
         //table2 ...5
         document.add(table2)
@@ -1126,7 +1130,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         if (data.is_closing == "1") tableReceived.addCell(getCell(" Telah di closing pada ${data.date_closing}\ndengan jarak ${data.distance} km dari titik toko", TextAlignment.RIGHT))
         document.add(tableReceived)
 
-        val maxRow = 8 - data.details.size
+        val maxRow = items.size.let { if (it == 0) 7 else 8 - it }
         for (i in 0 until maxRow) {
             document.add(getParagraph("\n", fontSize = 8f))
         }
