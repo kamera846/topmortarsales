@@ -16,6 +16,7 @@ import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.viewpager.CourierViewPagerAdapter
+import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_CITY_ID
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
@@ -47,6 +48,7 @@ class CourierActivity : AppCompatActivity() {
     private val binding get() = _binding!!
     private lateinit var sessionManager: SessionManager
     private val userId get() = sessionManager.userID()!!
+    private val userCity get() = sessionManager.userCityID()!!
     private var doubleBackToExitPressedOnce = false
     private lateinit var tabLayout: TabLayout
     private lateinit var viewPager: ViewPager
@@ -117,9 +119,9 @@ class CourierActivity : AppCompatActivity() {
 
 //        optionSyncNow.isVisible = false
         optionMyProfile.isVisible = true
-        optionNearestStore.isVisible = true
+//        optionNearestStore.isVisible = true
 //        optionNearestStore.isVisible = activeTab == 0
-//        optionNearestStore.title = if (activeTab == 0) "Cari Toko Terdekat" else "Cari Basecamp Terdekat"
+        optionNearestStore.title = if (activeTab == 0) "Cari Toko Terdekat" else "Cari Basecamp Terdekat"
         optionSearch.isVisible = false
         optionUser.isVisible = false
         optionCity.isVisible = false
@@ -134,7 +136,8 @@ class CourierActivity : AppCompatActivity() {
                     true
                 }
                 R.id.nearest_store -> {
-                    navigateChecklocation()
+                    if (activeTab == 0) navigateChecklocationStore()
+                    else navigateChecklocationBasecamp()
                     true
                 }
                 R.id.option_my_profile -> {
@@ -152,7 +155,7 @@ class CourierActivity : AppCompatActivity() {
         popupMenu.show()
     }
 
-    private fun navigateChecklocation() {
+    private fun navigateChecklocationStore() {
         val progressDialog = ProgressDialog(this)
         progressDialog.setMessage("Memuat data toko…")
         progressDialog.show()
@@ -183,6 +186,83 @@ class CourierActivity : AppCompatActivity() {
                             val intent = Intent(this@CourierActivity, MapsActivity::class.java)
 
                             intent.putExtra(CONST_NEAREST_STORE, true)
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
+
+                            progressDialog.dismiss()
+                            startActivity(intent)
+
+                        }
+                        RESPONSE_STATUS_EMPTY -> {
+
+                            val listCoordinate = arrayListOf<String>()
+                            val listCoordinateName = arrayListOf<String>()
+
+                            val intent = Intent(this@CourierActivity, MapsActivity::class.java)
+
+                            intent.putExtra(CONST_NEAREST_STORE, true)
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+
+                            progressDialog.dismiss()
+                            startActivity(intent)
+
+                        }
+                        else -> {
+
+                            handleMessage(this@CourierActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                            progressDialog.dismiss()
+
+                        }
+                    }
+
+
+                } catch (e: Exception) {
+
+                    handleMessage(this@CourierActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                    progressDialog.dismiss()
+
+                }
+
+            }
+
+        }, 1000)
+    }
+
+    private fun navigateChecklocationBasecamp() {
+        val progressDialog = ProgressDialog(this)
+        progressDialog.setMessage("Memuat data basecamp…")
+        progressDialog.show()
+
+        Handler().postDelayed({
+
+            lifecycleScope.launch {
+                try {
+
+                    val apiService: ApiService = HttpClient.create()
+                    val response = apiService.getListBaseCamp(userCity)
+
+                    when (response.status) {
+                        RESPONSE_STATUS_OK -> {
+
+                            val listCoordinate = arrayListOf<String>()
+                            val listCoordinateName = arrayListOf<String>()
+                            val listCoordinateStatus = arrayListOf<String>()
+                            val listCoordinateCityID = arrayListOf<String>()
+
+                            for (item in response.results.listIterator()) {
+                                listCoordinate.add(item.location_gudang)
+                                listCoordinateName.add(item.nama_gudang)
+                                listCoordinateStatus.add("blacklist")
+                                listCoordinateCityID.add(item.id_city)
+                            }
+
+                            val intent = Intent(this@CourierActivity, MapsActivity::class.java)
+
+                            intent.putExtra(CONST_NEAREST_STORE, true)
+                            intent.putExtra(CONST_IS_BASE_CAMP, true)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)

@@ -65,6 +65,7 @@ import com.google.maps.model.TravelMode
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.PlaceAdapter
 import com.topmortar.topmortarsales.commons.CONNECTION_FAILURE_RESOLUTION_REQUEST
+import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_CITY_ID
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
@@ -114,6 +115,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     private var isGetCoordinate = false
     private var isNearestStore = false
+    private var isBasecamp = false
     private var listCoordinate: ArrayList<String>? = null
     private var listCoordinateName: ArrayList<String>? = null
     private var listCoordinateStatus: ArrayList<String>? = null
@@ -156,8 +158,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        isBasecamp = intent.getBooleanExtra(CONST_IS_BASE_CAMP, false)
+
         progressDialog = ProgressDialog(this)
-        progressDialog.setMessage("Mencari toko terdekat…")
+        progressDialog.setMessage("Mencari ${if (isBasecamp) "basecamp" else "toko"} terdekat…")
         progressDialog.setCancelable(false)
 
         checkLocationPermission()
@@ -300,7 +304,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 binding.cardGetDirection.visibility = View.VISIBLE
                 binding.cardTelusuri.visibility = View.GONE
                 if (!isRouteActive) {
-                    binding.textTitleTarget.text = "Toko ${selectedTargetRoute?.title}"
+                    binding.textTitleTarget.text = "${if (isBasecamp) "Basecamp" else "Toko"} ${selectedTargetRoute?.title}"
                     binding.textTargetRute.text = "Petunjuk rute menuju ke lokasi"
 
                     val itemToFind = "${selectedTargetRoute?.position?.latitude},${selectedTargetRoute?.position?.longitude}"
@@ -429,7 +433,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 //                    if (location != null) currentLatLng = LatLng(-7.952356,112.692583)
                     }
                 binding.cardGetDirection.visibility = View.VISIBLE
-                binding.textTitleTarget.text = "Toko $iMapsName"
+                binding.textTitleTarget.text = "${if (isBasecamp) "Basecamp" else "Toko"} $iMapsName"
                 binding.textTargetRute.text = "Petunjuk rute menuju ke lokasi"
 
                 val imgDrawable = R.drawable.store_location_status_blacklist
@@ -579,10 +583,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentLatLng!!, responsiveZoom.toFloat())
 
                 mMap.animateCamera(cameraUpdate, durationMs, null)
-                binding.textTotalNearest.text = "$currentTotal toko ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }ditemukan dalam radius $limitKm km"
+                binding.textTitleTotalNearest.text = "Penelusuran ${if (isBasecamp) "Basecamp" else "Toko"} Terdekat"
+                binding.textTotalNearest.text = "$currentTotal ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }ditemukan dalam radius $limitKm km"
             } else {
-                showDialog(message = "Tidak menemukan toko ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }di sekitar anda saat ini dalam radius jarak $limitKm km")
-                binding.textTotalNearest.text = "Tidak dapat menemukan toko ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }dalam radius $limitKm km"
+                showDialog(message = "Tidak menemukan ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }di sekitar anda saat ini dalam radius jarak $limitKm km")
+                binding.textTitleTotalNearest.text = "Penelusuran ${if (isBasecamp) "Basecamp" else "Toko"} Terdekat"
+                binding.textTotalNearest.text = "Tidak dapat menemukan ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }dalam radius $limitKm km"
             }
 
             binding.cardTelusuri.visibility = View.VISIBLE
