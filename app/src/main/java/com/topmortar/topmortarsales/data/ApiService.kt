@@ -11,6 +11,7 @@ import com.topmortar.topmortarsales.commons.CONTACT
 import com.topmortar.topmortarsales.commons.SURAT_JALAN
 import com.topmortar.topmortarsales.commons.GET_USERS
 import com.topmortar.topmortarsales.commons.BASECAMP
+import com.topmortar.topmortarsales.commons.DISTRIBUTOR
 import com.topmortar.topmortarsales.commons.INVOICE
 import com.topmortar.topmortarsales.commons.PAYMENT
 import com.topmortar.topmortarsales.commons.PROMO
@@ -30,6 +31,7 @@ import com.topmortar.topmortarsales.response.ResponseCities
 import com.topmortar.topmortarsales.response.ResponseContactList
 import com.topmortar.topmortarsales.response.ResponseCountStore
 import com.topmortar.topmortarsales.response.ResponseBaseCamp
+import com.topmortar.topmortarsales.response.ResponseDistributor
 import com.topmortar.topmortarsales.response.ResponseGudang
 import com.topmortar.topmortarsales.response.ResponseInvoice
 import com.topmortar.topmortarsales.response.ResponseSuratJalan
@@ -141,6 +143,7 @@ interface ApiService {
     @POST(ADD_CITY)
     suspend fun addCity(
         @Part("nama_city") name: RequestBody,
+        @Part("id_distributor") distributorID: RequestBody,
         @Part("kode_city") code: RequestBody
     ): Response<ResponseMessage>
 
@@ -467,4 +470,7 @@ interface ApiService {
     suspend fun deleteGudang(
         @Part("id") idGudang: RequestBody,
     ): ResponseGudang
+
+    @GET(DISTRIBUTOR)
+    suspend fun getListDistributor(): ResponseDistributor
 }
