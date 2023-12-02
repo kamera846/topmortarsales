@@ -13,4 +13,5 @@ data class ContactModel(
     var ktp_owner: String = "",
     var termin_payment: String = "",
     var id_promo: String = "",
+    var reputation: String = "",
 )

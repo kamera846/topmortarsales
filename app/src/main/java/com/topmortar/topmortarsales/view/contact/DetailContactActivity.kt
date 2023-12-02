@@ -52,6 +52,7 @@ import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.CONST_PROMO
+import com.topmortar.topmortarsales.commons.CONST_REPUTATION
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.CONST_URI
@@ -142,6 +143,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private lateinit var statusContainer: LinearLayout
     private lateinit var terminContainer: LinearLayout
+    private lateinit var reputationContainer: LinearLayout
     private lateinit var promoContainer: LinearLayout
     private lateinit var addressContainer: LinearLayout
 
@@ -178,10 +180,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private lateinit var tvStatus: TextView
     private lateinit var tvTermin: TextView
+    private lateinit var tvReputation: TextView
     private lateinit var tvPromo: TextView
     private lateinit var etPromo: EditText
     private lateinit var spinStatus: Spinner
     private lateinit var spinTermin: Spinner
+    private lateinit var spinReputation: Spinner
     private lateinit var etAddress: EditText
 
     private lateinit var btnSendMessage: Button
@@ -199,8 +203,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private var statusItem: List<String> = listOf("Pilih Status", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
     private var terminItem: List<String> = listOf("Pilih Termin Payment", "COD", "COD + Transfer", "COD + Tunai", "30 Hari", "45 Hari", "60 Hari")
+    private var reputationItem: List<String> = listOf("Pilih Reputasi Toko", "Good", "Bad")
     private var selectedStatus: String = ""
     private var selectedTermin: String = ""
+    private var selectedReputation: String = ""
     private var cameraPermissionLauncher: ActivityResultLauncher<String>? = null
     private var imagePicker: ActivityResultLauncher<Intent>? = null
     private var selectedUri: Uri? = null
@@ -209,6 +215,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var iLocation: String? = null
     private var iStatus: String? = null
     private var iTermin: String? = null
+    private var iReputation: String? = null
     private var iAddress: String? = null
     private var iMapsUrl: String? = null
     private var iKtp: String? = null
@@ -266,6 +273,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         statusContainer = findViewById(R.id.status_container)
         terminContainer = findViewById(R.id.termin_container)
+        reputationContainer = findViewById(R.id.reputation_container)
         promoContainer = findViewById(R.id.promo_container)
         addressContainer = findViewById(R.id.address_container)
 
@@ -299,9 +307,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         tvStatus = findViewById(R.id.tv_status)
         spinStatus = findViewById(R.id.spin_status)
         tvTermin = findViewById(R.id.tv_termin)
+        tvReputation = findViewById(R.id.tv_reputation)
         tvPromo = findViewById(R.id.tv_promo)
         etPromo = findViewById(R.id.et_promo)
         spinTermin = findViewById(R.id.spin_termin)
+        spinReputation = findViewById(R.id.spin_reputation)
         etAddress = findViewById(R.id.et_address)
 
         btnSendMessage = findViewById(R.id.btn_send_message)
@@ -521,6 +531,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         iMapsUrl = intent.getStringExtra(CONST_MAPS)
         iStatus = intent.getStringExtra(CONST_STATUS)
         iTermin = intent.getStringExtra(CONST_TERMIN)
+        iReputation = intent.getStringExtra(CONST_REPUTATION)
 //        if (!iStatus.isNullOrEmpty()) {
             tooltipStatus.visibility = View.VISIBLE
             if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
@@ -605,6 +616,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         // Set Spinner
         setupStatusSpinner()
         setupTerminSpinner()
+        setupReputationSpinner()
 
     }
 
@@ -684,6 +696,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 terminContainer.setBackgroundResource(R.drawable.et_background)
                 tvTermin.visibility = View.GONE
                 spinTermin.visibility = View.VISIBLE
+                reputationContainer.setBackgroundResource(R.drawable.et_background)
+                tvReputation.visibility = View.GONE
+                spinReputation.visibility = View.VISIBLE
                 tvPromo.visibility = View.GONE
                 etPromo.visibility = View.VISIBLE
                 promoContainer.setBackgroundResource(R.drawable.et_background)
@@ -753,6 +768,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 terminContainer.setBackgroundResource(R.drawable.background_rounded_16)
                 tvTermin.visibility = View.VISIBLE
                 spinTermin.visibility = View.GONE
+                reputationContainer.setBackgroundResource(R.drawable.background_rounded_16)
+                tvReputation.visibility = View.VISIBLE
+                spinReputation.visibility = View.GONE
                 tvPromo.visibility = View.VISIBLE
                 etPromo.visibility = View.GONE
                 promoContainer.setBackgroundResource(R.drawable.background_rounded_16)
@@ -814,6 +832,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 else -> "-1"
             }
         }
+        val pReputation = if (selectedReputation.isNullOrEmpty()) "-1" else {
+            when (selectedReputation) {
+                reputationItem[1] -> "good"
+                reputationItem[2] -> "bad"
+                else -> "-1"
+            }
+        }
 
         var imagePart: MultipartBody.Part? = null
 
@@ -838,7 +863,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         loadingState(true)
 
 //        Handler().postDelayed({
-//            handleMessage(this, "TAG SAVE", "${contactId!!}, ${formatPhoneNumber(pPhone)}, $pName, $pOwner, $pBirthday, $pMapsUrl, ${pCityID!!}, $pAddress, $pStatus, $imagePart, $pTermin, $pPromoID")
+//            handleMessage(this, "TAG SAVE", "${contactId!!}, ${formatPhoneNumber(pPhone)}, $pName, $pOwner, $pBirthday, $pMapsUrl, ${pCityID!!}, $pAddress, $pStatus, $imagePart, $pTermin, $pReputation, $pPromoID")
 //            loadingState(false)
 //        }, 1000)
 //
@@ -857,6 +882,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbAddress = createPartFromString(pAddress)
                 val rbStatus = createPartFromString(pStatus)
                 val rbTermin = createPartFromString(pTermin)
+                val rbReputation = createPartFromString(pReputation)
                 val rbPromoId = createPartFromString(pPromoID!!)
 
                 val apiService: ApiService = HttpClient.create()
@@ -871,6 +897,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     address = rbAddress,
                     status = rbStatus,
                     termin = rbTermin,
+                    reputation = rbReputation,
                     promoId = rbPromoId,
                     ktp = imagePart?.let { imagePart }
                 )
@@ -924,6 +951,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             } else tvPromo.text = EMPTY_FIELD_VALUE
 
                             iStatus = if (!pStatus.isNullOrEmpty()) pStatus else null
+                            iReputation = if (!pReputation.isNullOrEmpty()) pReputation else null
 ////                            if (!iStatus.isNullOrEmpty()) {
 //                                if (iStatus == STATUS_CONTACT_BLACKL) {
 //                                    btnInvoice.visibility = View.GONE
@@ -1013,6 +1041,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                                 setupStatus(iStatus)
                                 setupTermin(iTermin)
+                                setupReputation(iReputation)
                             } else {
 
                                 if (data.store_status == STATUS_CONTACT_BLACKLIST) {
@@ -1605,6 +1634,23 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
     }
 
+    private fun setupReputation(reputation: String? = null) {
+        when (reputation) {
+            "good" -> {
+                tvReputation.text = reputationItem[1]
+                spinReputation.setSelection(1)
+            }
+            "bad" -> {
+                tvReputation.text = reputationItem[2]
+                spinReputation.setSelection(2)
+            }
+            else -> {
+                tvReputation.text = EMPTY_FIELD_VALUE
+                spinReputation.setSelection(0)
+            }
+        }
+    }
+
     private fun setupStatusSpinner() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, statusItem)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -1651,6 +1697,30 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             else -> "-1"
         }
         setupTermin(iTermin)
+    }
+
+    private fun setupReputationSpinner() {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, reputationItem)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        spinReputation.adapter = adapter
+        spinReputation.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedReputation = if (position != 0) reputationItem[position]
+                else ""
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+        }
+
+        selectedReputation = when (iReputation) {
+             "good" -> reputationItem[1]
+             "bad" -> reputationItem[2]
+            else -> "-1"
+        }
+        setupReputation(iReputation)
     }
 
     private fun setupNetworkIndicator() {
