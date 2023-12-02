@@ -55,6 +55,7 @@ class BasecampFragment : Fragment() {
     private lateinit var userKind: String
     private lateinit var userCity: String
     private lateinit var userID: String
+    private val userDistributorid get() = sessionManager.userDistributor().toString()
 
     private lateinit var badgeRefresh: LinearLayout
 
@@ -99,8 +100,8 @@ class BasecampFragment : Fragment() {
 
                 val apiService: ApiService = HttpClient.create()
                 val response = when (userKind) {
-                    USER_KIND_ADMIN -> apiService.getListBaseCamp()
-                    else -> apiService.getListBaseCamp(cityId = userCity)
+                    USER_KIND_ADMIN -> apiService.getListBaseCamp(distributorID = userDistributorid)
+                    else -> apiService.getListBaseCamp(distributorID = userDistributorid, cityId = userCity)
                 }
 
                 when (response.status) {

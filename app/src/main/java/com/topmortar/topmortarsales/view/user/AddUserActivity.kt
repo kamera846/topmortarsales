@@ -73,6 +73,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
     // Global
     private lateinit var sessionManager: SessionManager
+    private val userDistributorId get() = sessionManager.userDistributor().toString()
     private lateinit var searchModal: SearchModal
 
     private var isLoaded = false
@@ -151,13 +152,14 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                 val rbUsername = createPartFromString(username)
                 val rbFullName = createPartFromString(fullName)
                 val rbPassword = createPartFromString(password)
+                val rbDistributorId = createPartFromString(userDistributorId)
 
                 val apiService: ApiService = HttpClient.create()
                 val response = if (userID == null) {
-                    apiService.addUser(level = rbLevel, cityId = rbCityId, phone = rbPhone, username = rbUsername, fullName = rbFullName, password = rbPassword)
+                    apiService.addUser(level = rbLevel, cityId = rbCityId, phone = rbPhone, username = rbUsername, fullName = rbFullName, password = rbPassword, distributorID = rbDistributorId)
                 } else {
                     val rbUserID = createPartFromString(userID!!)
-                    apiService.editUser(ID = rbUserID, level = rbLevel, cityId = rbCityId, phone = rbPhone, username = rbUsername, fullName = rbFullName)
+                    apiService.editUser(ID = rbUserID, level = rbLevel, cityId = rbCityId, phone = rbPhone, username = rbUsername, fullName = rbFullName, distributorID = rbDistributorId)
                 }
 
                 if (response.isSuccessful) {
@@ -498,7 +500,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getCities()
+                val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {

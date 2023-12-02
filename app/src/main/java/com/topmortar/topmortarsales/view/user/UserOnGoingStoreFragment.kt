@@ -43,6 +43,7 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
     private val binding get() = _binding!!
 
     private lateinit var sessionManager: SessionManager
+    private val userDistributorId get() = sessionManager.userDistributor().toString()
     private lateinit var userKind: String
     private lateinit var userCity: String
     private lateinit var userID: String
@@ -225,10 +226,10 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
                     if (selectedCity != null ) {
                         if (selectedCity!!.id != "-1") {
                             val cityId = createPartFromString(selectedCity!!.id!!)
-                            apiService.searchContact(key = searchKey, cityId = cityId)
-                        } else apiService.searchContact(key = searchKey, cityId = searchCity)
-                    } else apiService.searchContact(key = searchKey, cityId = searchCity)
-                } else apiService.searchContact(cityId = searchCity, key = searchKey)
+                            apiService.searchContact(key = searchKey, cityId = cityId, distributorID = userDistributorId)
+                        } else apiService.searchContact(key = searchKey, cityId = searchCity, distributorID = userDistributorId)
+                    } else apiService.searchContact(key = searchKey, cityId = searchCity, distributorID = userDistributorId)
+                } else apiService.searchContact(cityId = searchCity, key = searchKey, distributorID = userDistributorId)
 
                 if (response.isSuccessful) {
 
@@ -288,7 +289,7 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getCities()
+                val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {

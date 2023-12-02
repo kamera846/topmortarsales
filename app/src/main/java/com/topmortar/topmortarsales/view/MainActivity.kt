@@ -674,7 +674,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getCities()
+                val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -829,12 +829,12 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
                 val apiService: ApiService = HttpClient.create()
                 val response = if (cityID != null && statusFilter != "-1") {
-                    apiService.searchContact(cityId = createPartFromString(cityID), status = createPartFromString(statusFilter), key = searchKey)
+                    apiService.searchContact(cityId = createPartFromString(cityID), status = createPartFromString(statusFilter), key = searchKey, distributorID = userDistributorId)
                 } else if (cityID != null) {
-                    apiService.searchContact(cityId = createPartFromString(cityID), key = searchKey)
+                    apiService.searchContact(cityId = createPartFromString(cityID), key = searchKey, distributorID = userDistributorId)
                 } else if (statusFilter != "-1" ) {
-                    apiService.searchContactByStatus(status = createPartFromString(statusFilter), key = searchKey)
-                } else apiService.searchContact(key = searchKey)
+                    apiService.searchContactByStatus(status = createPartFromString(statusFilter), key = searchKey, distributorID = userDistributorId)
+                } else apiService.searchContact(key = searchKey, distributorID = userDistributorId)
 
                 if (response.isSuccessful) {
 

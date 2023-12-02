@@ -60,6 +60,7 @@ class FormGudangActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private val userCityID get() = sessionManager.userCityID()
     private val userKind get() = sessionManager.userKind()
+    private val userDistributorId get() = sessionManager.userDistributor().toString()
     private lateinit var searchModal: SearchModal
     private var selectedCity: ModalSearchModel? = null
     private var citiesResults: ArrayList<CityModel> = ArrayList()
@@ -310,7 +311,7 @@ class FormGudangActivity : AppCompatActivity() {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getCities()
+                val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {

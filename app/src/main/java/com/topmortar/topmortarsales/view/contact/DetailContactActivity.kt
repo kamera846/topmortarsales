@@ -124,6 +124,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     PingUtility.PingResultInterface, SendMessageModal.SendMessageModalInterface {
 
     private lateinit var sessionManager: SessionManager
+    private val userDistributorId get() = sessionManager.userDistributor().toString()
 
     private lateinit var tvPhoneContainer: LinearLayout
     private lateinit var etPhoneContainer: LinearLayout
@@ -1363,7 +1364,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getCities()
+                val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {

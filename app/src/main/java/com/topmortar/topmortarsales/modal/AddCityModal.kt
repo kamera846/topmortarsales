@@ -22,6 +22,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -33,6 +34,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 class AddCityModal(private val context: Context, private val lifecycleScope: CoroutineScope) : Dialog(context) {
+
+    private lateinit var sessionManager: SessionManager
+    private val userDistributorId get() = sessionManager.userDistributor().toString()
 
     private lateinit var titleBar: LinearLayout
     private lateinit var icBack: ImageView
@@ -61,11 +65,13 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
         super.onCreate(savedInstanceState)
         setContentView(R.layout.modal_add_city)
 
+        sessionManager = SessionManager(context)
+
         setLayout()
         initVariable()
         initClickHandler()
         setSpinner()
-        getListDistributor()
+//        getListDistributor()
     }
 
     private fun setLayout() {
@@ -138,7 +144,7 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
 
                 val cityName = createPartFromString("${ etCityName.text }")
                 val cityCode = createPartFromString("${ etCityCode.text }")
-                val distributorID = createPartFromString(selectedDistributor.id_distributor)
+                val distributorID = createPartFromString(userDistributorId)
 
                 val apiService: ApiService = HttpClient.create()
                 val response = apiService.addCity(name = cityName, code = cityCode, distributorID = distributorID)
@@ -203,11 +209,11 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
             etCityCode.error = "Kode wajib diisi!"
             etCityCode.requestFocus()
             false
-        } else if (selectedDistributor.id_distributor == "-1") {
-            etCityCode.error = null
-            etCityCode.clearFocus()
-            handleMessage(context, "Error Form", "Distributor wajib dipilih!")
-            false
+//        } else if (selectedDistributor.id_distributor == "-1") {
+//            etCityCode.error = null
+//            etCityCode.clearFocus()
+//            handleMessage(context, "Error Form", "Distributor wajib dipilih!")
+//            false
         } else {
             etCityName.error = null
             etCityName.clearFocus()

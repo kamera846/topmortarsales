@@ -113,21 +113,24 @@ interface ApiService {
     @Multipart
     @POST(SEARCH_CONTACT)
     suspend fun searchContact(
-        @Part("key") key: RequestBody
+        @Part("key") key: RequestBody,
+        @Query("dst") distributorID: String
     ): Response<ResponseContactList>
 
     @Multipart
     @POST(SEARCH_CONTACT)
     suspend fun searchContact(
         @Part("id_city") cityId: RequestBody,
-        @Part("key") key: RequestBody
+        @Part("key") key: RequestBody,
+        @Query("dst") distributorID: String
     ): Response<ResponseContactList>
 
     @Multipart
     @POST(SEARCH_CONTACT)
     suspend fun searchContactByStatus(
         @Part("status") status: RequestBody,
-        @Part("key") key: RequestBody
+        @Part("key") key: RequestBody,
+        @Query("dst") distributorID: String
     ): Response<ResponseContactList>
 
     @Multipart
@@ -135,11 +138,12 @@ interface ApiService {
     suspend fun searchContact(
         @Part("status") status: RequestBody,
         @Part("id_city") cityId: RequestBody,
-        @Part("key") key: RequestBody
+        @Part("key") key: RequestBody,
+        @Query("dst") distributorID: String
     ): Response<ResponseContactList>
 
     @GET(GET_CITY)
-    suspend fun getCities(): ResponseCities
+    suspend fun getCities(@Query("dst") distributorID: String): ResponseCities
 
     @Multipart
     @POST(ADD_CITY)
@@ -157,7 +161,7 @@ interface ApiService {
     ): ResponseAuth
 
     @GET(GET_USERS)
-    suspend fun getUsers(): ResponseUsers
+    suspend fun getUsers(@Query("dst") distributorID: String): ResponseUsers
 
     @GET(GET_USERS)
     suspend fun detailUser(@Query("id") userId: String): ResponseUsers
@@ -170,6 +174,7 @@ interface ApiService {
         @Part("phone_user") phone: RequestBody,
         @Part("username") username: RequestBody,
         @Part("full_name") fullName: RequestBody,
+        @Part("id_distributor") distributorID: RequestBody,
         @Part("password") password: RequestBody
     ): Response<ResponseMessage>
 
@@ -181,6 +186,7 @@ interface ApiService {
         @Part("id_city") cityId: RequestBody,
         @Part("phone_user") phone: RequestBody,
         @Part("username") username: RequestBody,
+        @Part("id_distributor") distributorID: RequestBody,
         @Part("full_name") fullName: RequestBody
     ): Response<ResponseMessage>
 
@@ -260,12 +266,13 @@ interface ApiService {
      ): ResponseInvoice
 
     @GET(SKILL)
-    suspend fun getSkills(): ResponseSkills
+    suspend fun getSkills(@Query("dst") distributorID: String): ResponseSkills
 
     @Multipart
     @POST(SKILL)
     suspend fun addSkill(
         @Part("nama_skill") name: RequestBody,
+        @Part("id_distributor") distributorID: RequestBody,
         @Part("kode_skill") code: RequestBody
     ): Response<ResponseMessage>
 
@@ -274,6 +281,7 @@ interface ApiService {
     suspend fun editSkill(
         @Part("id") id: RequestBody,
         @Part("nama_skill") name: RequestBody,
+        @Part("id_distributor") distributorID: RequestBody,
         @Part("kode_skill") code: RequestBody
     ): Response<ResponseMessage>
 
@@ -392,11 +400,12 @@ interface ApiService {
     ): ResponseUsers
 
     @GET(BASECAMP)
-    suspend fun getListBaseCamp(): ResponseBaseCamp
+    suspend fun getListBaseCamp(@Query("dst") distributorID: String): ResponseBaseCamp
 
     @GET(BASECAMP)
     suspend fun getListBaseCamp(
-        @Query("c") cityId: String
+        @Query("c") cityId: String,
+        @Query("dst") distributorID: String
     ): ResponseBaseCamp
 
     @Multipart
@@ -406,6 +415,7 @@ interface ApiService {
         @Part("location_gudang") mapsUrl: RequestBody,
         @Part("nomorhp_gudang") phone: RequestBody,
         @Part("id_city") cityId: RequestBody,
+        @Part("id_distributor") distributorID: RequestBody,
     ): ResponseBaseCamp
 
     @Multipart
@@ -414,6 +424,7 @@ interface ApiService {
         @Part("nama_gudang") name: RequestBody,
         @Part("location_gudang") mapsUrl: RequestBody,
         @Part("id_city") cityId: RequestBody,
+        @Part("id_distributor") distributorID: RequestBody,
     ): ResponseBaseCamp
 
     @Multipart
@@ -424,6 +435,7 @@ interface ApiService {
         @Part("nomorhp_gudang") phone: RequestBody,
         @Part("id_city") cityId: RequestBody,
         @Part("id") idBasecamp: RequestBody,
+        @Part("id_distributor") distributorID: RequestBody,
     ): ResponseBaseCamp
 
     @Multipart
