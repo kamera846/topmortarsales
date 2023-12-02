@@ -82,6 +82,7 @@ import com.topmortar.topmortarsales.view.city.ManageCityActivity
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
 import com.topmortar.topmortarsales.view.courier.ManageBasecampActivity
+import com.topmortar.topmortarsales.view.gudang.ManageGudangActivity
 import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
 import com.topmortar.topmortarsales.view.user.ManageUserActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
@@ -387,15 +388,18 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         val skillItem = popupMenu.menu.findItem(R.id.option_skill)
         val nearestStoreItem = popupMenu.menu.findItem(R.id.nearest_store)
         val basecamp = popupMenu.menu.findItem(R.id.option_basecamp)
+        val gudang = popupMenu.menu.findItem(R.id.option_gudang)
 
         searchItem.isVisible = false
 //        nearestStoreItem.isVisible = false
-        if (sessionManager.userKind() != USER_KIND_ADMIN) {
-            userItem.isVisible = false
-            cityItem.isVisible = false
-            skillItem.isVisible = false
-            basecamp.isVisible = false
+        if (sessionManager.userKind() == USER_KIND_ADMIN) {
+            userItem.isVisible = true
+            cityItem.isVisible = true
+            skillItem.isVisible = true
+            basecamp.isVisible = true
+//            gudang.isVisible = true
         }
+
         if (sessionManager.userKind() != USER_KIND_SALES) {
             myProfile.isVisible = false
         }
@@ -433,6 +437,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 }
                 R.id.option_basecamp -> {
                     startActivity(Intent(this@MainActivity, ManageBasecampActivity::class.java))
+                    true
+                }
+                R.id.option_gudang -> {
+                    startActivity(Intent(this@MainActivity, ManageGudangActivity::class.java))
                     true
                 }
                 R.id.option_logout -> {

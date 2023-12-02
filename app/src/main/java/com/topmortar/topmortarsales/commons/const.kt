@@ -44,6 +44,7 @@ const val BID_ON_GOING = "0"
 const val BID_VISITED = "1"
 const val VISIT = "visit.php"
 const val BASECAMP = "gudang.php"
+const val DISTRIBUTOR = "distributor.php"
 
 // Request Code
 const val ACTIVITY_REQUEST_CODE = "activity_request_code"
