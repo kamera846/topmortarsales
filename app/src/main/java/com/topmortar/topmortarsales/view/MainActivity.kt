@@ -119,6 +119,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
     private lateinit var userCity: String
     private lateinit var userKind: String
     private var userId: String = ""
+    private var userDistributorId: String = ""
     private var contacts: ArrayList<ContactModel> = arrayListOf()
     private var cities: ArrayList<CityModel> = arrayListOf()
 
@@ -144,9 +145,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         userKind = sessionManager.userKind()!!
 
         userId = sessionManager.userID()!!
+        userDistributorId = sessionManager.userDistributor()!!
         val isLoggedIn = sessionManager.isLoggedIn()
 
-        if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()) return missingDataHandler()
+        if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()|| userDistributorId.isEmpty()) return missingDataHandler()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -309,9 +311,9 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
                     val apiService: ApiService = HttpClient.create()
                     val response = when (userKind) {
-                        USER_KIND_ADMIN -> apiService.getContacts()
+                        USER_KIND_ADMIN -> apiService.getContactsByDistributor(distributorID = userDistributorId)
                         USER_KIND_COURIER -> apiService.getCourierStore(processNumber = "1", courierId = userId)
-                        else -> apiService.getContacts(cityId = userCity)
+                        else -> apiService.getContacts(cityId = userCity, distributorID = userDistributorId)
                     }
 
                     when (response.status) {
@@ -609,12 +611,12 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                         else userCity
 
                         if (cityID != null && statusFilter != "-1") {
-                            apiService.getContacts(cityId = cityID, status = statusFilter)
+                            apiService.getContacts(cityId = cityID, status = statusFilter, distributorID = userDistributorId)
                         } else if (cityID != null) {
-                            apiService.getContacts(cityId = cityID)
+                            apiService.getContacts(cityId = cityID, distributorID = userDistributorId)
                         } else if (statusFilter != "-1" ) {
-                            apiService.getContactsByStatus(status = statusFilter)
-                        } else apiService.getContacts()
+                            apiService.getContactsByStatus(status = statusFilter, distributorID = userDistributorId)
+                        } else apiService.getContactsByDistributor(distributorID = userDistributorId)
                     }
                 }
 
@@ -792,6 +794,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                         sessionManager.setFullName(data.full_name)
                         sessionManager.setUserCityID(data.id_city)
                         sessionManager.userBidLimit(data.bid_limit)
+                        sessionManager.userDistributor(data.id_distributor)
 
 //                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "Halo, ${ sessionManager.userName() }"}
                         tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
@@ -952,6 +955,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         sessionManager.setUserName("")
         sessionManager.setFullName("")
         sessionManager.setUserCityID("")
+        sessionManager.userBidLimit("")
+        sessionManager.userDistributor("")
 
         val intent = Intent(this@MainActivity, SplashScreenActivity::class.java)
         startActivity(intent)

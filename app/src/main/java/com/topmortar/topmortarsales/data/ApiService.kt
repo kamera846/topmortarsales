@@ -50,14 +50,16 @@ import retrofit2.http.*
 interface ApiService {
 
     @GET(CONTACT)
-    suspend fun getContacts(@Query("c") cityId: String): ResponseContactList
+    suspend fun getContacts(@Query("c") cityId: String, @Query("dst") distributorID: String): ResponseContactList
     @GET(CONTACT)
-    suspend fun getContactsByStatus(@Query("status") status: String): ResponseContactList
-    @GET(CONTACT)
-    suspend fun getContacts(@Query("c") cityId: String, @Query("status") status: String): ResponseContactList
+    suspend fun getContacts(@Query("c") cityId: String, @Query("status") status: String, @Query("dst") distributorID: String): ResponseContactList
 
+//    @GET(CONTACT)
+//    suspend fun getContacts(): ResponseContactList
     @GET(CONTACT)
-    suspend fun getContacts(): ResponseContactList
+    suspend fun getContactsByDistributor(@Query("dst") distributorID: String): ResponseContactList
+    @GET(CONTACT)
+    suspend fun getContactsByStatus(@Query("status") status: String, @Query("dst") distributorID: String): ResponseContactList
 
     @GET(CONTACT)
     suspend fun getContactDetail(@Query("id") contactId: String): Response<ResponseContactList>

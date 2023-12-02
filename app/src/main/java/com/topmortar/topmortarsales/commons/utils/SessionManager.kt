@@ -77,4 +77,13 @@ class SessionManager(context: Context) {
     fun userBidLimit(): String? {
         return sharedPreferences.getString("userBidLimit", "0")
     }
+
+    fun userDistributor(userDistributor: String) {
+        editor.putString("userDistributor", userDistributor)
+        editor.apply()
+    }
+
+    fun userDistributor(): String? {
+        return sharedPreferences.getString("userDistributor", "0")
+    }
 }
