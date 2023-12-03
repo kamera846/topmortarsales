@@ -14,4 +14,5 @@ data class ContactModel(
     var termin_payment: String = "",
     var id_promo: String = "",
     var reputation: String = "",
+    var is_birthday: String = "",
 )

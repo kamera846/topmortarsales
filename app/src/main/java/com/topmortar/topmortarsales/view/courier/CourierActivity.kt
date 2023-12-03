@@ -49,6 +49,7 @@ class CourierActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private val userId get() = sessionManager.userID()!!
     private val userCity get() = sessionManager.userCityID()!!
+    private val userDistributorId get() = sessionManager.userDistributor()!!
     private var doubleBackToExitPressedOnce = false
     private lateinit var tabLayout: TabLayout
     private lateinit var viewPager: ViewPager
@@ -242,7 +243,7 @@ class CourierActivity : AppCompatActivity() {
                 try {
 
                     val apiService: ApiService = HttpClient.create()
-                    val response = apiService.getListBaseCamp(userCity)
+                    val response = apiService.getListBaseCamp(cityId = userCity, distributorID = userDistributorId)
 
                     when (response.status) {
                         RESPONSE_STATUS_OK -> {
