@@ -19,6 +19,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -29,6 +30,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 class AddSkillModal(private val context: Context, private val lifecycleScope: CoroutineScope) : Dialog(context) {
+
+    private lateinit var sessionManager: SessionManager
+    private val userDistributorId get() = sessionManager.userDistributor().toString()
 
     private lateinit var titleBar: LinearLayout
     private lateinit var icBack: ImageView
@@ -68,6 +72,7 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.modal_add_city)
+        sessionManager = SessionManager(context)
 
         setLayout()
         initVariable()
@@ -150,14 +155,15 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
 
                 val skillName = createPartFromString("${ etSkillName.text }")
                 val skillCode = createPartFromString("${ etSkillCode.text }")
+                val distributorId = createPartFromString(userDistributorId)
 
 //                handleMessage(context, "SUBMIT SKILL", "Name: $skillName, Code: $skillCode")
 //                return@launch
 
                 val apiService: ApiService = HttpClient.create()
                 val response = isEdit.let {
-                    if (it) apiService.editSkill(id = createPartFromString("$skillID"), name = skillName, code = skillCode)
-                    else apiService.addSkill(name = skillName, code = skillCode)
+                    if (it) apiService.editSkill(id = createPartFromString("$skillID"), name = skillName, code = skillCode, distributorID = distributorId)
+                    else apiService.addSkill(name = skillName, code = skillCode, distributorID = distributorId)
                 }
 
                 if (response.isSuccessful) {

@@ -6,9 +6,11 @@ import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -17,9 +19,12 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.print.PrintAttributes
+import android.print.PrintManager
 import android.provider.MediaStore
 import android.provider.Settings
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Button
@@ -42,6 +47,27 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dantsu.escposprinter.EscPosPrinter
 import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
 import com.dantsu.escposprinter.textparser.PrinterTextParserImg
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.itextpdf.io.image.ImageDataFactory
+import com.itextpdf.io.source.ByteArrayOutputStream
+import com.itextpdf.kernel.geom.PageSize
+import com.itextpdf.kernel.pdf.PdfDocument
+import com.itextpdf.kernel.pdf.PdfWriter
+import com.itextpdf.layout.Document
+import com.itextpdf.layout.border.Border
+import com.itextpdf.layout.element.Cell
+import com.itextpdf.layout.element.Image
+import com.itextpdf.layout.element.Paragraph
+import com.itextpdf.layout.element.Table
+import com.itextpdf.layout.property.HorizontalAlignment
+import com.itextpdf.layout.property.TextAlignment
+import com.itextpdf.layout.property.UnitValue
+import com.karumi.dexter.Dexter
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.PermissionDeniedResponse
+import com.karumi.dexter.listener.PermissionGrantedResponse
+import com.karumi.dexter.listener.PermissionRequest
+import com.karumi.dexter.listener.single.PermissionListener
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.InvoiceOrderRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
@@ -56,6 +82,8 @@ import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAX_DISTANCE
+import com.topmortar.topmortarsales.commons.PRINT_METHOD_BLUETOOTH
+import com.topmortar.topmortarsales.commons.PRINT_METHOD_WIFI
 import com.topmortar.topmortarsales.commons.REQUEST_BLUETOOTH_PERMISSIONS
 import com.topmortar.topmortarsales.commons.REQUEST_ENABLE_BLUETOOTH
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -63,7 +91,10 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.printUtils.Comman
+import com.topmortar.topmortarsales.commons.printUtils.PdfDocumentAdapter
 import com.topmortar.topmortarsales.commons.utils.BluetoothPrinterManager
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -73,12 +104,14 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.databinding.ActivityDetailSuratJalanBinding
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.DetailSuratJalanModel
 import com.topmortar.topmortarsales.model.SuratJalanModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -87,6 +120,7 @@ import java.util.Locale
 class DetailSuratJalanActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
+    private lateinit var binding: ActivityDetailSuratJalanBinding
     private lateinit var customUtility: CustomUtility
 
     private lateinit var icBack: ImageView
@@ -131,14 +165,23 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     private var currentPhotoUri: Uri? = null
     private var bluetoothAdapter: BluetoothAdapter? = null
     private var printerManager = BluetoothPrinterManager()
+    private lateinit var bottomSheetDialog: BottomSheetDialog
+
+    companion object {
+        private const val PRINT_METHOD_BLUETOOTH_TITLE = "Print Bluetooth"
+        private const val PRINT_METHOD_WIFI_TITLE = "Print Wifi"
+    }
+
+    var fileName : String = "Surat Jalan.pdf"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
         sessionManager = SessionManager(this)
+        binding = ActivityDetailSuratJalanBinding.inflate(layoutInflater)
 
-        setContentView(R.layout.activity_detail_surat_jalan)
+        setContentView(binding.root)
 
         customUtility = CustomUtility(this@DetailSuratJalanActivity)
 
@@ -146,6 +189,77 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         initClickHandler()
         dataActivityValidation()
 
+        val printState = sessionManager.printState()
+        if (printState.isNullOrEmpty()) togglePrintButton(PRINT_METHOD_BLUETOOTH)
+        else togglePrintButton(printState)
+
+    }
+
+    private fun createPDF() {
+        Dexter.withContext(this)
+            .withPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            .withListener(object: PermissionListener {
+                override fun onPermissionGranted(p0: PermissionGrantedResponse?) {
+//                    btnPrint.setOnClickListener {
+                    if (sessionManager.printState() == PRINT_METHOD_WIFI) {
+                        printingState(true)
+
+                        lifecycleScope.launch {
+                            try {
+
+                                val apiService: ApiService = HttpClient.create()
+                                val response = apiService.printInvoice(invoiceId = createPartFromString(invoiceId!!))
+
+                                when (response.status) {
+                                    RESPONSE_STATUS_OK -> {
+
+                                        val data = response.results[0]
+
+                                        fileName = "Surat Jalan ${data.no_surat_jalan}.pdf"
+                                        File(Comman.getAppPath(this@DetailSuratJalanActivity)).mkdirs()
+                                        createPDFFile(Comman.getAppPath(this@DetailSuratJalanActivity) + fileName, data)
+                                        printingState(false)
+
+                                    }
+                                    RESPONSE_STATUS_EMPTY -> {
+
+                                        handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal mencetak: Detail surat jalan kosong!")
+                                        printingState(false)
+
+                                    }
+                                    else -> {
+
+                                        handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal mencetak")
+                                        printingState(false)
+
+                                    }
+                                }
+
+                            } catch (e: Exception) {
+
+                                handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                                printingState(false)
+
+                            }
+
+                        }
+                    }
+//                    }
+                }
+
+                override fun onPermissionDenied(p0: PermissionDeniedResponse?) {
+
+                }
+
+                override fun onPermissionRationaleShouldBeShown(
+                    p0: PermissionRequest?,
+                    p1: PermissionToken?
+                ) {
+
+                }
+
+            })
+            .check()
     }
 
     private fun initVariable() {
@@ -225,7 +339,11 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     private fun initClickHandler() {
         icBack.setOnClickListener { backHandler() }
         icSyncNow.setOnClickListener { getDetail() }
-        btnPrint.setOnClickListener { printNow() }
+        btnPrint.setOnClickListener {
+            if (sessionManager.printState() == PRINT_METHOD_BLUETOOTH) printNow()
+            else createPDF()
+        }
+        binding.btnPrintOption.setOnClickListener { showPrintOption() }
 //        btnClosing.setOnClickListener { chooseFile() }
 //        lnrClosing.setOnClickListener { chooseFile() }
         btnClosing.setOnClickListener { getMapsUrl() }
@@ -420,7 +538,10 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
         } else {
 
-            btnPrint.text = "Print"
+            btnPrint.text = when (sessionManager.printState()) {
+                PRINT_METHOD_BLUETOOTH -> PRINT_METHOD_BLUETOOTH_TITLE
+                else -> PRINT_METHOD_WIFI_TITLE
+            }
             btnPrint.isEnabled = true
 
         }
@@ -770,6 +891,51 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         return BitmapDrawable(this.applicationContext.resources, bitmap)
     }
 
+    private fun showPrintOption() {
+        val bottomSheetLayout = layoutInflater.inflate(R.layout.fragment_bottom_sheet_print_option, null)
+
+        bottomSheetDialog = BottomSheetDialog(this)
+        bottomSheetDialog.setContentView(bottomSheetLayout)
+        bottomSheetDialog.show()
+    }
+
+    fun onBottomSheetOptionClick(view: View) {
+        when (view.id) {
+            R.id.printBluetoothOption -> {
+                showDialogChangePrintMethod(PRINT_METHOD_BLUETOOTH)
+                bottomSheetDialog.dismiss()
+            } else -> {
+                showDialogChangePrintMethod(PRINT_METHOD_WIFI)
+                bottomSheetDialog.dismiss()
+            }
+        }
+    }
+
+    private fun showDialogChangePrintMethod(method: String = PRINT_METHOD_BLUETOOTH) {
+        val message = when (method) {
+            PRINT_METHOD_BLUETOOTH -> "Apakah anda yakin ingin berganti ke metode Printer Bluetooth?"
+            else -> "Apakah anda yakin ingin berganti ke metode Printer Wifi?"
+        }
+        AlertDialog.Builder(this)
+            .setTitle("Perhatian!")
+            .setMessage(message)
+            .setPositiveButton("Ganti") { _, _ -> togglePrintButton(method) }
+            .setNegativeButton("Batal") { dialog, _ -> dialog.dismiss() }
+            .show()
+    }
+
+    private fun togglePrintButton(method: String) {
+        when (method) {
+            PRINT_METHOD_BLUETOOTH -> {
+                btnPrint.text = PRINT_METHOD_BLUETOOTH_TITLE
+                sessionManager.printState(PRINT_METHOD_BLUETOOTH)
+            } else -> {
+                btnPrint.text = PRINT_METHOD_WIFI_TITLE
+                sessionManager.printState(PRINT_METHOD_WIFI)
+            }
+        }
+    }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
@@ -823,6 +989,171 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     override fun onBackPressed() {
         backHandler()
     }
+
+    /*
+    Start Generate & Print PDF
+     */
+
+    private fun getCell(textLeft: String?, alignment: TextAlignment?): Cell? {
+        val cell = Cell().add(Paragraph(textLeft).setFontSize(9f))
+        cell.setPadding(0f)
+        cell.setTextAlignment(alignment)
+        cell.setBorder(Border.NO_BORDER)
+        return cell
+    }
+
+    private fun getParagraph(text: String = "", alignment: TextAlignment = TextAlignment.LEFT, fontSize: Float = 9f, paddingLeft: Float = 0f, paddingTop: Float = 0f, paddingRight: Float = 0f, paddingBottom: Float = 0f): Paragraph {
+        val paragraph = Paragraph(text).setTextAlignment(alignment)
+        paragraph.setFontSize(fontSize)
+        paragraph.paddingLeft = paddingLeft
+        paragraph.paddingTop = paddingTop
+        paragraph.paddingRight = paddingRight
+        paragraph.paddingBottom = paddingBottom
+        return paragraph
+    }
+
+    private fun getCellWithRowspan(content: String, rowspan: Int, alignment: TextAlignment): Cell {
+        return Cell(rowspan, 1).apply {
+            add(getParagraph(content, alignment))
+        }
+    }
+
+    private fun createPDFFile(path: String, data: SuratJalanModel) {
+        if (File(path).exists())
+            File(path).delete()
+        try {
+            val pdf = PdfDocument(PdfWriter(path))
+            val document = Document(pdf, PageSize.A4)
+
+//            for (i in 0 until 3) {
+//                data.details.add(data.details[0])
+//                data.details.add(data.details[1])
+//            }
+
+            drawPdf(document, data)
+            document.add(Paragraph("\n\n\n\n"))
+            drawPdf(document, data).close()
+
+            printPDF()
+        } catch (e: FileNotFoundException) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun drawPdf(document: Document, data: SuratJalanModel): Document {
+        val bitmap: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.logo_retina)
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+        val byteArray = byteArrayOutputStream.toByteArray()
+
+        val logoImage = Image(ImageDataFactory.create(byteArray))
+        logoImage.width = UnitValue.createPercentValue(50f)
+        logoImage.setHorizontalAlignment(HorizontalAlignment.LEFT)
+
+        val tableu = Table(3)
+        val cell = Cell().add(logoImage)
+        cell.setPadding(0f)
+        cell.setBorder(Border.NO_BORDER)
+
+        tableu.addCell(cell)
+        tableu.addCell(getCell(" Distributor Indonesia\nPT. TOP MORTAR INDONESIA", TextAlignment.CENTER))
+        tableu.addCell(getCell(" SURAT JALAN\n${data.no_surat_jalan}", TextAlignment.RIGHT))
+
+        document.add(tableu)
+        document.add(getParagraph("\n", fontSize = 4f))
+
+        val tableShipDel = Table(2)
+        tableShipDel.addCell(getCell(" Shipped to: ${data.ship_to_name}", TextAlignment.LEFT))
+        tableShipDel.addCell(getCell(" Delivery Date: ${data.dalivery_date}", TextAlignment.RIGHT))
+        document.add(tableShipDel)
+        val tableShipDelValue = Table(2)
+        tableShipDelValue.addCell(getCell(" ${data.ship_to_address}", TextAlignment.LEFT))
+        tableShipDelValue.addCell(getCell(" Printed Date: ${data.date_printed}", TextAlignment.RIGHT))
+        document.add(tableShipDelValue)
+
+        val tablex = Table(1)
+        tablex.addCell(getCell("\n Daftar Pesanan: \n", TextAlignment.LEFT))
+        document.add(tablex)
+//        document.add(getParagraph("\n", fontSize = 1f))
+        val table2 = Table(
+            UnitValue.createPercentArray(
+                floatArrayOf(
+                    1f,
+                    7f,
+                    1f,
+                    1f,
+                    1f,
+                )
+            )
+        ).useAllAvailableWidth()
+
+        // table2 ...01
+        table2.addCell(Cell().add(getParagraph("No.", TextAlignment.CENTER)))
+        table2.addCell(Cell().add(getParagraph("Nama", TextAlignment.CENTER)))
+        table2.addCell(Cell().add(getParagraph("Qty", TextAlignment.CENTER)))
+        table2.addCell(Cell().add(getParagraph("Pengirim", TextAlignment.CENTER)))
+        table2.addCell(Cell().add(getParagraph("Penerima", TextAlignment.CENTER)))
+
+//        val items = 9
+//
+//        for (i in 1 until items) {
+//            table2.addCell(Cell().add(getParagraph("$i", TextAlignment.CENTER)))
+//            table2.addCell(Cell().add(getParagraph("TOP MORTAR THINBED ${if (i == 2 || i == 4) "(Free)" else ""}", paddingLeft = 8f, paddingRight = 8f)))
+//            table2.addCell(Cell().add(getParagraph("${if (i == 2 || i == 4) "2" else "50"}", TextAlignment.CENTER)))
+//            if (i == 1) {
+//                table2.addCell(getCellWithRowspan("", (items - 1), TextAlignment.LEFT))
+//                table2.addCell(getCellWithRowspan("", (items - 1), TextAlignment.LEFT))
+//            }
+//        }
+
+        val items = data.details.let { if (it.isNullOrEmpty()) arrayListOf() else it }
+
+        for ((index, item) in items.iterator().withIndex()) {
+            val i = index + 1
+            table2.addCell(Cell().add(getParagraph("$i", TextAlignment.CENTER)))
+            table2.addCell(Cell().add(getParagraph("${item.nama_produk} ${if (item.is_bonus == "1" || item.is_bonus == "2") "(Free)" else ""}", paddingLeft = 8f, paddingRight = 8f)))
+            table2.addCell(Cell().add(getParagraph("${item.qty_produk}", TextAlignment.CENTER)))
+            if (i == 1) {
+                table2.addCell(getCellWithRowspan("", (items.size), TextAlignment.LEFT))
+                table2.addCell(getCellWithRowspan("", (items.size), TextAlignment.LEFT))
+            }
+        }
+
+        if (items.size == 0) table2.addCell(Cell(1,5).add(getParagraph("Tidak ada pesanan", TextAlignment.LEFT)))
+
+        //table2 ...5
+        document.add(table2)
+        document.add(getParagraph("\n", fontSize = 1f))
+
+        val tableReceived = Table(2)
+        tableReceived.addCell(getCell(" Kurir: ${data.courier_name}\nKendaraan: ${data.nama_kendaraan}\nNo.Polisi: ${data.nopol_kendaraan}", TextAlignment.LEFT))
+        if (data.is_closing == "1") tableReceived.addCell(getCell(" Telah di closing pada ${data.date_closing}\ndengan jarak ${data.distance} km dari titik toko", TextAlignment.RIGHT))
+        document.add(tableReceived)
+
+        val maxRow = items.size.let { if (it == 0) 7 else 8 - it }
+        for (i in 0 until maxRow) {
+            document.add(getParagraph("\n", fontSize = 8f))
+        }
+
+        return document
+    }
+
+
+    private fun printPDF() {
+        val printManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
+
+        try {
+            val printAdapter = PdfDocumentAdapter(this,Comman.getAppPath(this) + fileName, fileName)
+            printManager.print("Documents",printAdapter, PrintAttributes.Builder().build())
+        }catch (e:Exception){
+            Log.e("TOP Mortar - Print PDF",""+e.message)
+        }
+
+    }
+
+    /*
+    End Generate & Print PDF
+     */
 
 
 }

@@ -13,8 +13,8 @@ android {
         applicationId "com.topmortar.topmortarsales"
         minSdk 24
         targetSdk 33
-        versionCode 48
-        versionName "2.7.68"
+        versionCode 49
+        versionName "2.7.69"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -97,5 +97,11 @@ dependencies {
 
     // Flexbox
     implementation 'com.google.android.flexbox:flexbox:3.0.0'
+
+    // Generate & Print PDF
+    implementation 'com.itextpdf:io:7.0.2'
+    implementation 'com.itextpdf:kernel:7.0.2'
+    implementation 'com.itextpdf:layout:7.0.2'
+    implementation 'com.karumi:dexter:6.2.3'
 
 }

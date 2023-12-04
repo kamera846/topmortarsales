@@ -316,6 +316,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
                         sessionManager.setFullName(data.full_name)
                         sessionManager.setUserCityID(data.id_city)
                         sessionManager.userBidLimit(data.bid_limit)
+                        sessionManager.userDistributor(data.id_distributor)
 
 //                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "Halo, ${ sessionManager.userName() }"}
                         tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
@@ -400,6 +401,8 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         sessionManager.setUserName("")
         sessionManager.setFullName("")
         sessionManager.setUserCityID("")
+        sessionManager.userBidLimit("")
+        sessionManager.userDistributor("")
 
         val intent = Intent(this@ListTukangActivity, SplashScreenActivity::class.java)
         startActivity(intent)

@@ -20,6 +20,9 @@ import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BLACKLIST
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
 import com.topmortar.topmortarsales.model.ContactModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<ContactsRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
@@ -33,9 +36,12 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
         val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
         val tooltipStatus: ImageView = itemView.findViewById(R.id.tooltip_status)
+        val icCake: ImageView = itemView.findViewById(R.id.icCake)
 
         fun bind(chatItem: ContactModel) {
 
+            if (chatItem.is_birthday == "1") icCake.visibility = View.VISIBLE
+            else icCake.visibility = View.GONE
             tvContactName.text = chatItem.nama
             tvPhoneNumber.text = if (chatItem.nomorhp != "") "+${ chatItem.nomorhp }" else ""
             setupStatus(chatItem.store_status)
@@ -91,6 +97,11 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
 
         val chatItem = chatList[position]
+
+        val dateNow = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        val dateBirthday = chatItem.tgl_lahir
+
+        if (dateNow == dateBirthday) chatItem.is_birthday = "1"
 
         holder.bind(chatItem)
         holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))

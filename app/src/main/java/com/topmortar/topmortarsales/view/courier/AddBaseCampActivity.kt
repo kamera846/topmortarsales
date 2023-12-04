@@ -60,6 +60,7 @@ class AddBaseCampActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private val userCityID get() = sessionManager.userCityID()
     private val userKind get() = sessionManager.userKind()
+    private val userDistributorId get() = sessionManager.userDistributor().toString()
     private lateinit var searchModal: SearchModal
     private var selectedCity: ModalSearchModel? = null
     private var citiesResults: ArrayList<CityModel> = ArrayList()
@@ -211,6 +212,7 @@ class AddBaseCampActivity : AppCompatActivity() {
                 val rbLocation = createPartFromString(cityId)
                 val rbMapsUrl = createPartFromString(mapsUrl)
                 val rbIdBasecamp = createPartFromString(idBasecamp)
+                val rbDistributorId = createPartFromString(userDistributorId)
 
                 val apiService: ApiService = HttpClient.create()
                 val response = if (isEdit) {
@@ -219,21 +221,24 @@ class AddBaseCampActivity : AppCompatActivity() {
                         phone = rbPhone,
                         cityId = rbLocation,
                         mapsUrl = rbMapsUrl,
-                        idBasecamp = rbIdBasecamp
+                        idBasecamp = rbIdBasecamp,
+                        distributorID = rbDistributorId
                     )
                 } else {
                     if (phone.isNullOrEmpty()) {
                         apiService.addBaseCamp(
                             name = rbName,
                             cityId = rbLocation,
-                            mapsUrl = rbMapsUrl
+                            mapsUrl = rbMapsUrl,
+                            distributorID = rbDistributorId
                         )
                     } else {
                         apiService.addBaseCamp(
                             name = rbName,
                             phone = rbPhone,
                             cityId = rbLocation,
-                            mapsUrl = rbMapsUrl
+                            mapsUrl = rbMapsUrl,
+                            distributorID = rbDistributorId
                         )
                     }
                 }
@@ -310,7 +315,7 @@ class AddBaseCampActivity : AppCompatActivity() {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getCities()
+                val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {

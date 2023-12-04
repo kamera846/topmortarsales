@@ -30,14 +30,88 @@
             android:id="@+id/bottom_action"
             android:layout_alignParentBottom="true"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="80dp"
             android:paddingVertical="16dp"
             android:paddingHorizontal="8dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
+            <LinearLayout
+                android:visibility="visible"
+                android:id="@+id/lnr_print"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginHorizontal="8dp"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_primary_round_8"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_print_invoice"
+                    android:visibility="visible"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="14sp"
+                    android:textColor="@color/white"
+                    android:background="@android:color/transparent"
+                    android:text="Print Bluetooth" />
+
+                <LinearLayout
+                    android:visibility="gone"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:padding="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:contentDescription="Invoice Image Button"
+                        android:src="@drawable/bluetooth_fill" />
+
+                    <TextView
+                        android:id="@+id/tvTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Print"
+                        android:textStyle="bold"
+                        android:textAllCaps="true"
+                        android:textSize="18sp"
+                        android:textColor="@color/white"
+                        android:layout_marginLeft="8dp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                </LinearLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/light"/>
+
+                <LinearLayout
+                    android:id="@+id/btn_print_option"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:paddingHorizontal="12dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:contentDescription="Invoice Image Button"
+                        android:src="@drawable/up_down_white" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
             <Button
-                android:id="@+id/btn_print_invoice"
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -47,18 +121,27 @@
                 android:textStyle="bold"
                 android:text="Print" />
 
-            <Button
-                android:id="@+id/btn_closing"
+            <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_marginHorizontal="8dp"
-                android:padding="12dp"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/black_200"
-                android:backgroundTint="@color/light"
-                android:drawableLeft="@drawable/button_img_camera_lens_black"
-                android:text="Closing" />
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_light_round_8"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_closing"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginHorizontal="8dp"
+                    android:padding="8dp"
+                    android:textSize="14sp"
+                    android:textColor="@color/black_200"
+                    android:background="@android:color/transparent"
+                    android:drawableLeft="@drawable/button_img_camera_lens_black"
+                    android:text="Closing" />
+
+            </LinearLayout>
 
             <LinearLayout
                 android:visibility="gone"

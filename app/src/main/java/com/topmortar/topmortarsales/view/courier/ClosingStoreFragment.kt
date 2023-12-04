@@ -32,6 +32,7 @@ import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.CONST_PROMO
+import com.topmortar.topmortarsales.commons.CONST_REPUTATION
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
@@ -201,6 +202,7 @@ class ClosingStoreFragment : Fragment() {
             intent.putExtra(CONST_KTP, data.ktp_owner)
             intent.putExtra(CONST_TERMIN, data.termin_payment)
             intent.putExtra(CONST_PROMO, data.id_promo)
+            intent.putExtra(CONST_REPUTATION, data.reputation)
         }
 
 //        (requireContext() as Activity).startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)

@@ -79,6 +79,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
     private lateinit var spinnerSearchBox: AutoCompleteTextView
 
     private lateinit var sessionManager: SessionManager
+    private val userDistributorId get() = sessionManager.userDistributor().toString()
 
     private lateinit var spinnerAdapter: ArrayAdapter<CharSequence>
     private lateinit var datePicker: DatePickerDialog
@@ -585,7 +586,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getSkills()
+                val response = apiService.getSkills(distributorID = userDistributorId)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {

@@ -1,6 +1,7 @@
 package com.topmortar.topmortarsales.commons.utils
 
 import android.content.Context
+import com.topmortar.topmortarsales.commons.PRINT_METHOD_BLUETOOTH
 
 class SessionManager(context: Context) {
     private val sharedPreferences = context.getSharedPreferences("Session", Context.MODE_PRIVATE)
@@ -76,5 +77,23 @@ class SessionManager(context: Context) {
 
     fun userBidLimit(): String? {
         return sharedPreferences.getString("userBidLimit", "0")
+    }
+
+    fun printState(printState: String) {
+        editor.putString("printState", printState)
+        editor.apply()
+    }
+
+    fun printState(): String? {
+        return sharedPreferences.getString("printState", PRINT_METHOD_BLUETOOTH)
+    }
+
+    fun userDistributor(userDistributor: String) {
+        editor.putString("userDistributor", userDistributor)
+        editor.apply()
+    }
+
+    fun userDistributor(): String? {
+        return sharedPreferences.getString("userDistributor", "0")
     }
 }
