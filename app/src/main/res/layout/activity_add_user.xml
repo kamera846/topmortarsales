@@ -264,7 +264,7 @@
                         android:layout_height="48dp"
                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                         android:textColorHint="@color/black_600"
-                        android:inputType="text"
+                        android:inputType="textCapWords"
                         android:textSize="14sp"
                         android:hint="@string/e_g_john_doe"
                         android:autofillHints="@string/e_g_john_doe"

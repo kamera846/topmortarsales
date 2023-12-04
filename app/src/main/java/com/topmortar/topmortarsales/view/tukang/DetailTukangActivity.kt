@@ -107,6 +107,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
     PingUtility.PingResultInterface {
 
     private lateinit var sessionManager: SessionManager
+    private val userDistributorId get() = sessionManager.userDistributor().toString()
     private lateinit var binding: ActivityDetailContactBinding
 
     private lateinit var tvPhoneContainer: LinearLayout
@@ -1137,7 +1138,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getCities()
+                val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -1195,7 +1196,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getSkills()
+                val response = apiService.getSkills(distributorID = userDistributorId)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {

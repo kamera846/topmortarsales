@@ -275,8 +275,9 @@ class SplashScreenActivity : AppCompatActivity() {
         val userId = sessionManager.userID()!!
         val userCity = sessionManager.userCityID()!!
         val userKind = sessionManager.userKind()!!
+        val userDistributor = sessionManager.userDistributor()!!
 
-        if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()) showCardLogin()
+        if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty() || userDistributor.isEmpty()) showCardLogin()
         else {
             when (userKind) {
                 USER_KIND_BA -> navigateToListTukang()
@@ -377,6 +378,8 @@ class SplashScreenActivity : AppCompatActivity() {
                         sessionManager.setUserName(data.username)
                         sessionManager.setFullName(data.full_name)
                         sessionManager.setUserCityID(data.id_city)
+                        sessionManager.userBidLimit(data.bid_limit)
+                        sessionManager.userDistributor(data.id_distributor)
 
                         sessionManager.setLoggedIn(LOGGED_IN)
 

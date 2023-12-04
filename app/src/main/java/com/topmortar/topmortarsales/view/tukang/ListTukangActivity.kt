@@ -44,6 +44,7 @@ import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -212,6 +213,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         val nearestStore = popupMenu.menu.findItem(R.id.nearest_store)
         val myProfile = popupMenu.menu.findItem(R.id.option_my_profile)
         val basecamp = popupMenu.menu.findItem(R.id.option_basecamp)
+        val skill = popupMenu.menu.findItem(R.id.option_skill)
 
         searchItem.isVisible = false
         nearestStore.isVisible = false
@@ -223,6 +225,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         if (sessionManager.userKind() != USER_KIND_ADMIN && sessionManager.userKind() != USER_KIND_SALES) {
             myProfile.isVisible = false
         }
+        if (sessionManager.userKind() == USER_KIND_BA) skill.isVisible = true
 
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
@@ -313,6 +316,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
                         sessionManager.setFullName(data.full_name)
                         sessionManager.setUserCityID(data.id_city)
                         sessionManager.userBidLimit(data.bid_limit)
+                        sessionManager.userDistributor(data.id_distributor)
 
 //                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "Halo, ${ sessionManager.userName() }"}
                         tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
@@ -397,6 +401,8 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         sessionManager.setUserName("")
         sessionManager.setFullName("")
         sessionManager.setUserCityID("")
+        sessionManager.userBidLimit("")
+        sessionManager.userDistributor("")
 
         val intent = Intent(this@ListTukangActivity, SplashScreenActivity::class.java)
         startActivity(intent)

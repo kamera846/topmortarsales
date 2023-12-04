@@ -51,6 +51,7 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
 
     // Global
     private lateinit var sessionManager: SessionManager
+    private val userDistributorId get() = sessionManager.userDistributor().toString()
     private lateinit var addCityModal: AddSkillModal
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -113,7 +114,7 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getSkills()
+                val response = apiService.getSkills(distributorID = userDistributorId)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {

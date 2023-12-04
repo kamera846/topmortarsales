@@ -87,4 +87,13 @@ class SessionManager(context: Context) {
     fun printState(): String? {
         return sharedPreferences.getString("printState", PRINT_METHOD_BLUETOOTH)
     }
+
+    fun userDistributor(userDistributor: String) {
+        editor.putString("userDistributor", userDistributor)
+        editor.apply()
+    }
+
+    fun userDistributor(): String? {
+        return sharedPreferences.getString("userDistributor", "0")
+    }
 }

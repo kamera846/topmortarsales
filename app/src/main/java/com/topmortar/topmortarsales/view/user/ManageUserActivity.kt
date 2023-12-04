@@ -61,6 +61,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
 
     // Global
     private lateinit var sessionManager: SessionManager
+    private val userDistributorId get() = sessionManager.userDistributor().toString()
     private var doubleBackToExitPressedOnce = false
 
     // Initialize Search Engine
@@ -125,7 +126,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getUsers()
+                val response = apiService.getUsers(distributorID = userDistributorId)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {

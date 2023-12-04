@@ -1,22 +1,17 @@
-package com.topmortar.topmortarsales.view.courier
+package com.topmortar.topmortarsales.view.gudang
 
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.fragment.app.Fragment
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.adapter.recyclerview.BaseCampRecyclerViewAdapter
+import com.topmortar.topmortarsales.adapter.recyclerview.GudangRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
@@ -24,70 +19,41 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.EDIT_CONTACT
-import com.topmortar.topmortarsales.commons.REQUEST_BASECAMP_FRAGMENT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
-import com.topmortar.topmortarsales.commons.RESULT_BASECAMP_FRAGMENT
-import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
-import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
-import com.topmortar.topmortarsales.databinding.FragmentBasecampBinding
-import com.topmortar.topmortarsales.model.BaseCampModel
+import com.topmortar.topmortarsales.databinding.ActivityManageGudangBinding
+import com.topmortar.topmortarsales.model.GudangModel
 import com.topmortar.topmortarsales.view.reports.NewReportActivity
 import kotlinx.coroutines.launch
-import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
 
-/**
- * A fragment representing a list of Items.
- */
-class BasecampFragment : Fragment() {
-
-    private var _binding: FragmentBasecampBinding? = null
-    private val binding get() = _binding!!
+class ManageGudangActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
-    private lateinit var userKind: String
-    private lateinit var userCity: String
-    private lateinit var userID: String
-    private val userDistributorid get() = sessionManager.userDistributor().toString()
+    private var _binding: ActivityManageGudangBinding? = null
+    private val binding get() = _binding!!
+    private val userKind get() = sessionManager.userKind()!!
+    private val userCity get() = sessionManager.userCityID()!!
 
-    private lateinit var badgeRefresh: LinearLayout
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-    private var listener: CounterItem? = null
-    interface CounterItem {
-        fun counterItem(count: Int)
-    }
-    fun setCounterItem(listener: CounterItem) {
-        this.listener = listener
-    }
-    fun syncNow() {
-        getContacts()
-    }
+        supportActionBar?.hide()
+        sessionManager = SessionManager(this)
+        _binding = ActivityManageGudangBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentBasecampBinding.inflate(inflater, container, false)
-        val view = binding.root
-
-        badgeRefresh = view.findViewById(R.id.badgeRefresh)
-
-        sessionManager = SessionManager(requireContext())
-        userKind = sessionManager.userKind().toString()
-        userCity = sessionManager.userCityID().toString()
-        userID = sessionManager.userID().toString()
+        binding.titleBarDark.tvTitleBar.text = "Kelola Gudang"
+        binding.titleBarDark.icBack.setOnClickListener { finish() }
         binding.btnFabAdd.setOnClickListener { navigateFab() }
 
         getContacts()
 
-        return view
     }
 
     private fun getContacts() {
@@ -100,8 +66,8 @@ class BasecampFragment : Fragment() {
 
                 val apiService: ApiService = HttpClient.create()
                 val response = when (userKind) {
-                    USER_KIND_ADMIN -> apiService.getListBaseCamp(distributorID = userDistributorid)
-                    else -> apiService.getListBaseCamp(distributorID = userDistributorid, cityId = userCity)
+                    USER_KIND_ADMIN -> apiService.getListGudang()
+                    else -> apiService.getListGudang(cityId = userCity)
                 }
 
                 when (response.status) {
@@ -110,29 +76,26 @@ class BasecampFragment : Fragment() {
                         setRecyclerView(response.results)
                         loadingState(false)
                         showBadgeRefresh(false)
-                        listener?.counterItem(response.results.size)
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(true, "Belum ada basecamp!")
                         showBadgeRefresh(false)
-                        listener?.counterItem(0)
 
                     }
                     else -> {
 
-                        handleMessage(requireContext(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(this@ManageGudangActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
                         loadingState(true, getString(R.string.failed_request))
                         showBadgeRefresh(true)
 
                     }
                 }
 
-
             } catch (e: Exception) {
 
-                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@ManageGudangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
 
@@ -142,16 +105,16 @@ class BasecampFragment : Fragment() {
 
     }
 
-    private fun setRecyclerView(listItem: ArrayList<BaseCampModel>) {
+    private fun setRecyclerView(listItem: ArrayList<GudangModel>) {
 
-        val rvAdapter = BaseCampRecyclerViewAdapter(listItem, object: BaseCampRecyclerViewAdapter.ItemClickListener {
-            override fun onItemClick(data: BaseCampModel?) {
+        val rvAdapter = GudangRecyclerViewAdapter(listItem, object: GudangRecyclerViewAdapter.ItemClickListener {
+            override fun onItemClick(data: GudangModel?) {
                 navigateItemAction(data)
             }
 
         })
 
-        binding.rvChatList.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvChatList.layoutManager = LinearLayoutManager(this@ManageGudangActivity)
         binding.rvChatList.adapter = rvAdapter
         binding.rvChatList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             private var lastScrollPosition = 0
@@ -176,26 +139,26 @@ class BasecampFragment : Fragment() {
 
     }
 
-    private fun navigateItemAction(data: BaseCampModel? = null) {
+    private fun navigateItemAction(data: GudangModel? = null) {
 
         if (userKind == USER_KIND_ADMIN) {
 
-            val intent = Intent(requireContext(), AddBaseCampActivity::class.java)
+            val intent = Intent(this@ManageGudangActivity, FormGudangActivity::class.java)
             intent.putExtra(EDIT_CONTACT, true)
             intent.putExtra(CONST_CONTACT_ID, data?.id_gudang)
             intent.putExtra(CONST_PHONE, data?.nomorhp_gudang)
             intent.putExtra(CONST_NAME, data?.nama_gudang)
             intent.putExtra(CONST_LOCATION, data?.id_city)
             intent.putExtra(CONST_MAPS, data?.location_gudang)
-            someActivityResultLauncher.launch(intent)
+            startActivity(intent)
         } else {
 
-            val intent = Intent(requireContext(), NewReportActivity::class.java)
+            val intent = Intent(this@ManageGudangActivity, NewReportActivity::class.java)
             intent.putExtra(CONST_IS_BASE_CAMP, true)
             intent.putExtra(CONST_CONTACT_ID, data?.id_gudang)
             intent.putExtra(CONST_NAME, data?.nama_gudang)
             intent.putExtra(CONST_MAPS, data?.location_gudang)
-            (requireContext() as Activity).startActivity(intent)
+            (this@ManageGudangActivity as Activity).startActivity(intent)
         }
 
     }
@@ -220,33 +183,15 @@ class BasecampFragment : Fragment() {
 
     private fun navigateFab() {
 
-        val intent = Intent(requireContext(), AddBaseCampActivity::class.java)
-        someActivityResultLauncher.launch(intent)
+        val intent = Intent(this@ManageGudangActivity, FormGudangActivity::class.java)
+        startActivity(intent)
 
     }
-
-    override fun onStart() {
-        super.onStart()
-        EventBus.getDefault().register(this)
-    }
-
-    override fun onStop() {
-        EventBus.getDefault().unregister(this)
-        super.onStop()
-    }
-
-    @Subscribe
-    fun onEventBus(event: EventBusUtils.MessageEvent) {
-    }
-
-//    override fun onDestroyView() {
-//        super.onDestroyView()
-//        _binding = null
-//    }
 
     private fun showBadgeRefresh(action: Boolean) {
-        val tvTitle = badgeRefresh.findViewById<TextView>(R.id.tvTitle)
-        val icClose = badgeRefresh.findViewById<ImageView>(R.id.icClose)
+        val badgeRefresh = findViewById<LinearLayout>(R.id.badgeRefresh)
+        val tvTitle = binding.badgeRefresh.tvTitle
+        val icClose = binding.badgeRefresh.icClose
         icClose.setOnClickListener { badgeRefresh.visibility = View.GONE }
 
         if (action) {
@@ -255,16 +200,7 @@ class BasecampFragment : Fragment() {
         } else badgeRefresh.visibility = View.GONE
     }
 
-    private val someActivityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        // Handle the result
-        val resultCode = result.resultCode
-        val data = result.data
-        // Process the result
-
-        if (resultCode == RESULT_BASECAMP_FRAGMENT) {
-            val data = data?.getStringExtra(REQUEST_BASECAMP_FRAGMENT)
-            if (!data.isNullOrEmpty() && data == SYNC_NOW) getContacts()
-        }
+    override fun onBackPressed() {
+        finish()
     }
-
 }

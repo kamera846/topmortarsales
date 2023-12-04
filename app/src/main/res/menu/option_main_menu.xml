@@ -14,16 +14,24 @@
         android:title="@string/search" />
     <item
         android:id="@+id/option_user"
-        android:title="@string/manage_user" />
+        android:title="@string/manage_user"
+        android:visible="false"/>
     <item
         android:id="@+id/option_city"
-        android:title="@string/manage_city" />
+        android:title="@string/manage_city"
+        android:visible="false"/>
     <item
         android:id="@+id/option_skill"
-        android:title="@string/manage_skill" />
+        android:title="@string/manage_skill"
+        android:visible="false"/>
     <item
         android:id="@+id/option_basecamp"
-        android:title="@string/manage_basecamp" />
+        android:title="@string/manage_basecamp"
+        android:visible="false"/>
+    <item
+        android:id="@+id/option_gudang"
+        android:title="@string/manage_gudang"
+        android:visible="false"/>
     <item
         android:id="@+id/option_logout"
         android:title="@string/logout" />

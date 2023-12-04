@@ -1,4 +1,4 @@
-package com.topmortar.topmortarsales.view.courier
+package com.topmortar.topmortarsales.view.gudang
 
 import android.Manifest
 import android.app.ProgressDialog
@@ -46,16 +46,16 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
-import com.topmortar.topmortarsales.databinding.ActivityAddBaseCampBinding
+import com.topmortar.topmortarsales.databinding.ActivityFormGudangBinding
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.CityModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
 
-class AddBaseCampActivity : AppCompatActivity() {
+class FormGudangActivity : AppCompatActivity() {
 
-    private var _binding: ActivityAddBaseCampBinding? = null
+    private var _binding: ActivityFormGudangBinding? = null
     private val binding get() = _binding!!
     private lateinit var sessionManager: SessionManager
     private val userCityID get() = sessionManager.userCityID()
@@ -67,20 +67,20 @@ class AddBaseCampActivity : AppCompatActivity() {
     private var iCities: String? = null
     private var isEdit = false
     private var name = ""
-    private var idBasecamp = "-1"
+    private var idGudang = "-1"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
-        _binding = ActivityAddBaseCampBinding.inflate(layoutInflater)
+        _binding = ActivityFormGudangBinding.inflate(layoutInflater)
         sessionManager = SessionManager(this)
         setContentView(binding.root)
 
         isEdit = intent.getBooleanExtra(EDIT_CONTACT, false)
         if (isEdit) setDataEdit()
 
-        binding.titleBar.tvTitleBar.text = if (isEdit) "Edit Basecamp" else "Buat Basecamp Baru"
+        binding.titleBar.tvTitleBar.text = if (isEdit) "Edit Gudang" else "Buat Gudang Baru"
         binding.titleBar.icBack.setOnClickListener { finish() }
         binding.btnSubmit.setOnClickListener { submitForm() }
 
@@ -93,7 +93,7 @@ class AddBaseCampActivity : AppCompatActivity() {
     }
 
     private fun setDataEdit() {
-        idBasecamp = intent.getStringExtra(CONST_CONTACT_ID).toString()
+        idGudang = intent.getStringExtra(CONST_CONTACT_ID).toString()
         name = intent.getStringExtra(CONST_NAME).toString()
 
         binding.etPhone.setText(intent.getStringExtra(CONST_PHONE))
@@ -211,34 +211,30 @@ class AddBaseCampActivity : AppCompatActivity() {
                 val rbName = createPartFromString(name)
                 val rbLocation = createPartFromString(cityId)
                 val rbMapsUrl = createPartFromString(mapsUrl)
-                val rbIdBasecamp = createPartFromString(idBasecamp)
-                val rbDistributorId = createPartFromString(userDistributorId)
+                val rbIdGudang = createPartFromString(idGudang)
 
                 val apiService: ApiService = HttpClient.create()
                 val response = if (isEdit) {
-                    apiService.editBaseCamp(
+                    apiService.editGudang(
                         name = rbName,
                         phone = rbPhone,
                         cityId = rbLocation,
                         mapsUrl = rbMapsUrl,
-                        idBasecamp = rbIdBasecamp,
-                        distributorID = rbDistributorId
+                        idGudang = rbIdGudang
                     )
                 } else {
                     if (phone.isNullOrEmpty()) {
-                        apiService.addBaseCamp(
+                        apiService.addGudang(
                             name = rbName,
                             cityId = rbLocation,
-                            mapsUrl = rbMapsUrl,
-                            distributorID = rbDistributorId
+                            mapsUrl = rbMapsUrl
                         )
                     } else {
-                        apiService.addBaseCamp(
+                        apiService.addGudang(
                             name = rbName,
                             phone = rbPhone,
                             cityId = rbLocation,
-                            mapsUrl = rbMapsUrl,
-                            distributorID = rbDistributorId
+                            mapsUrl = rbMapsUrl
                         )
                     }
                 }
@@ -246,7 +242,7 @@ class AddBaseCampActivity : AppCompatActivity() {
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_MESSAGE, "Berhasil menyimpan")
+                        handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, "Berhasil menyimpan")
 
                         val resultIntent = Intent()
                         resultIntent.putExtra(REQUEST_BASECAMP_FRAGMENT, SYNC_NOW)
@@ -257,13 +253,13 @@ class AddBaseCampActivity : AppCompatActivity() {
                     }
                     RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                        handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_MESSAGE, "Gagal menyimpan basecamp: ${ response.message }")
+                        handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, "Gagal menyimpan gudang: ${ response.message }")
                         loadingState.dismiss()
 
                     }
                     else -> {
 
-                        handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_MESSAGE, "Gagal menyimpan!")
+                        handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, "Gagal menyimpan!")
                         loadingState.dismiss()
 
                     }
@@ -272,7 +268,7 @@ class AddBaseCampActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState.dismiss()
 
             }
@@ -289,7 +285,7 @@ class AddBaseCampActivity : AppCompatActivity() {
         }
 
         if (binding.etName.text.isNullOrEmpty()) {
-            binding.etName.error = "Nama basecamp wajib diisi!"
+            binding.etName.error = "Nama gudang wajib diisi!"
             binding.etName.requestFocus()
             return false
         } else if (userKind == USER_KIND_ADMIN && binding.etCityOption.text.isNullOrEmpty()) {
@@ -297,7 +293,7 @@ class AddBaseCampActivity : AppCompatActivity() {
             binding.etCityOption.requestFocus()
             return false
         } else if (binding.etMapsUrl.text.isNullOrEmpty()) {
-            binding.etMapsUrl.error = "Koordinat basecamp wajib diisi!"
+            binding.etMapsUrl.error = "Koordinat gudang wajib diisi!"
             binding.etMapsUrl.requestFocus()
             return false
         }
@@ -339,12 +335,12 @@ class AddBaseCampActivity : AppCompatActivity() {
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        handleMessage(this@AddBaseCampActivity, "LIST CITY", "Daftar kota kosong!")
+                        handleMessage(this@FormGudangActivity, "LIST CITY", "Daftar kota kosong!")
 
                     }
                     else -> {
 
-                        handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(this@FormGudangActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
 
                     }
                 }
@@ -352,7 +348,7 @@ class AddBaseCampActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@FormGudangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
 
             }
 
@@ -403,7 +399,7 @@ class AddBaseCampActivity : AppCompatActivity() {
         loadingState.show()
 
         Handler().postDelayed({
-            handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_MESSAGE, "Berhasil menghapus")
+            handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, "Berhasil menghapus")
 
             val resultIntent = Intent()
             resultIntent.putExtra(REQUEST_BASECAMP_FRAGMENT, SYNC_NOW)
@@ -415,15 +411,15 @@ class AddBaseCampActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                val rbIdBasecamp = createPartFromString(idBasecamp)
+                val rbIdGudang = createPartFromString(idGudang)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.deleteBaseCamp( idBasecamp = rbIdBasecamp )
+                val response = apiService.deleteGudang( idGudang = rbIdGudang )
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_MESSAGE, "Berhasil menghapus")
+                        handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, "Berhasil menghapus")
 
                         val resultIntent = Intent()
                         resultIntent.putExtra(REQUEST_BASECAMP_FRAGMENT, SYNC_NOW)
@@ -434,13 +430,13 @@ class AddBaseCampActivity : AppCompatActivity() {
                     }
                     RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                        handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_MESSAGE, "Gagal menghapus basecamp: ${ response.message }")
+                        handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, "Gagal menghapus gudang: ${ response.message }")
                         loadingState.dismiss()
 
                     }
                     else -> {
 
-                        handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_MESSAGE, "Gagal menghapus!")
+                        handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, "Gagal menghapus!")
                         loadingState.dismiss()
 
                     }
@@ -449,7 +445,7 @@ class AddBaseCampActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState.dismiss()
 
             }

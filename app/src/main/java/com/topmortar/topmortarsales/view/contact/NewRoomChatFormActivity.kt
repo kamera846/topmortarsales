@@ -89,6 +89,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
     private lateinit var spinnerSearchBox: AutoCompleteTextView
 
     private lateinit var sessionManager: SessionManager
+    private val userDistributorId get() = sessionManager.userDistributor().toString()
 
     private lateinit var spinnerAdapter: ArrayAdapter<CharSequence>
     private lateinit var datePicker: DatePickerDialog
@@ -225,13 +226,13 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim pesan: ${ responseBody.message }")
+                            handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, message.let { if (!it.isNullOrEmpty()) "Gagal mengirim pesan: ${ responseBody.message }" else "Gagal menyimpan kontak: ${ responseBody.message }" })
                             loadingState(false)
 
                         }
                         else -> {
 
-                            handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim pesan!")
+                            handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, message.let { if (!it.isNullOrEmpty()) "Gagal mengirim pesan" else "Gagal menyimpan kontak" })
                             loadingState(false)
 
                         }
@@ -239,7 +240,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
                 } else {
 
-                    handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim pesan. Error: " + response.message())
+                    handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, message.let { if (!it.isNullOrEmpty()) "Gagal mengirim pesan. Error: " + response.message() else "Gagal menyimpan kontak. Error: " + response.message() })
                     loadingState(false)
 
                 }
@@ -612,7 +613,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getCities()
+                val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
