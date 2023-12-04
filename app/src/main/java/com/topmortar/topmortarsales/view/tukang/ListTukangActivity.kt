@@ -82,6 +82,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
     private lateinit var userCity: String
     private lateinit var userKind: String
     private var userId: String = ""
+    private var userDistributorId: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -93,9 +94,10 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         userKind = sessionManager.userKind()!!
 
         userId = sessionManager.userID()!!
+        userDistributorId = sessionManager.userDistributor()!!
         val isLoggedIn = sessionManager.isLoggedIn()
 
-        if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()) return missingDataHandler()
+        if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()|| userDistributorId.isEmpty()) return missingDataHandler()
 
         setContentView(R.layout.activity_list_tukang)
 
@@ -382,9 +384,9 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
 
     private fun missingDataHandler() {
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Incomplete Data Detected")
-            .setMessage("An incomplete login data has been detected, please try to log in again!")
-            .setPositiveButton("Yes") { dialog, _ ->
+        builder.setTitle("Data Tidak Lengkap Terdeteksi")
+            .setMessage("Data login yang tidak lengkap telah terdeteksi, silakan coba login kembali!")
+            .setPositiveButton("Oke") { dialog, _ ->
 
                 dialog.dismiss()
                 logoutHandler()

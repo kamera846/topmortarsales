@@ -47,6 +47,7 @@ class CourierActivity : AppCompatActivity() {
     private var _binding: ActivityCourierBinding? = null
     private val binding get() = _binding!!
     private lateinit var sessionManager: SessionManager
+    private val userKind get() = sessionManager.userKind()!!
     private val userId get() = sessionManager.userID()!!
     private val userCity get() = sessionManager.userCityID()!!
     private val userDistributorId get() = sessionManager.userDistributor()!!
@@ -62,6 +63,9 @@ class CourierActivity : AppCompatActivity() {
         supportActionBar?.hide()
         _binding = ActivityCourierBinding.inflate(layoutInflater)
         sessionManager = SessionManager(this@CourierActivity)
+        val isLoggedIn = sessionManager.isLoggedIn()
+
+        if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()|| userDistributorId.isEmpty()) return missingDataHandler()
 
         setContentView(binding.root)
 
