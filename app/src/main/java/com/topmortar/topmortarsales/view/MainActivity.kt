@@ -831,12 +831,12 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
                 val apiService: ApiService = HttpClient.create()
                 val response = if (cityID != null && statusFilter != "-1") {
-                    apiService.searchContact(cityId = createPartFromString(cityID), status = createPartFromString(statusFilter), key = searchKey, distributorID = userDistributorId)
+                    apiService.searchContact(cityId = createPartFromString(cityID), status = createPartFromString(statusFilter), key = searchKey, distributorID = createPartFromString(userDistributorId))
                 } else if (cityID != null) {
-                    apiService.searchContact(cityId = createPartFromString(cityID), key = searchKey, distributorID = userDistributorId)
+                    apiService.searchContact(cityId = createPartFromString(cityID), key = searchKey, distributorID = createPartFromString(userDistributorId))
                 } else if (statusFilter != "-1" ) {
-                    apiService.searchContactByStatus(status = createPartFromString(statusFilter), key = searchKey, distributorID = userDistributorId)
-                } else apiService.searchContact(key = searchKey, distributorID = userDistributorId)
+                    apiService.searchContactByStatus(status = createPartFromString(statusFilter), key = searchKey, distributorID = createPartFromString(userDistributorId))
+                } else apiService.searchContact(key = searchKey, distributorID = createPartFromString(userDistributorId))
 
                 if (response.isSuccessful) {
 

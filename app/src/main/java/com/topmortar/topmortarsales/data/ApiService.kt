@@ -115,7 +115,7 @@ interface ApiService {
     @POST(SEARCH_CONTACT)
     suspend fun searchContact(
         @Part("key") key: RequestBody,
-        @Query("dst") distributorID: String
+        @Part("dst") distributorID: RequestBody
     ): Response<ResponseContactList>
 
     @Multipart
@@ -123,7 +123,7 @@ interface ApiService {
     suspend fun searchContact(
         @Part("id_city") cityId: RequestBody,
         @Part("key") key: RequestBody,
-        @Query("dst") distributorID: String
+        @Part("dst") distributorID: RequestBody
     ): Response<ResponseContactList>
 
     @Multipart
@@ -131,7 +131,7 @@ interface ApiService {
     suspend fun searchContactByStatus(
         @Part("status") status: RequestBody,
         @Part("key") key: RequestBody,
-        @Query("dst") distributorID: String
+        @Part("dst") distributorID: RequestBody
     ): Response<ResponseContactList>
 
     @Multipart
@@ -140,7 +140,7 @@ interface ApiService {
         @Part("status") status: RequestBody,
         @Part("id_city") cityId: RequestBody,
         @Part("key") key: RequestBody,
-        @Query("dst") distributorID: String
+        @Part("dst") distributorID: RequestBody
     ): Response<ResponseContactList>
 
     @GET(GET_CITY)

@@ -220,16 +220,17 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
 
                 val searchKey = createPartFromString(key)
                 val searchCity = createPartFromString(userCityParam!!.ifEmpty { userCity })
+                val distributorId = createPartFromString(userDistributorId)
 
                 val apiService: ApiService = HttpClient.create()
                 val response = if (userKind == USER_KIND_ADMIN) {
                     if (selectedCity != null ) {
                         if (selectedCity!!.id != "-1") {
                             val cityId = createPartFromString(selectedCity!!.id!!)
-                            apiService.searchContact(key = searchKey, cityId = cityId, distributorID = userDistributorId)
-                        } else apiService.searchContact(key = searchKey, cityId = searchCity, distributorID = userDistributorId)
-                    } else apiService.searchContact(key = searchKey, cityId = searchCity, distributorID = userDistributorId)
-                } else apiService.searchContact(cityId = searchCity, key = searchKey, distributorID = userDistributorId)
+                            apiService.searchContact(key = searchKey, cityId = cityId, distributorID = distributorId)
+                        } else apiService.searchContact(key = searchKey, cityId = searchCity, distributorID = distributorId)
+                    } else apiService.searchContact(key = searchKey, cityId = searchCity, distributorID = distributorId)
+                } else apiService.searchContact(cityId = searchCity, key = searchKey, distributorID = distributorId)
 
                 if (response.isSuccessful) {
 
