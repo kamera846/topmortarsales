@@ -384,6 +384,7 @@ class CourierActivity : AppCompatActivity() {
     private fun missingDataHandler() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Data Tidak Lengkap Terdeteksi")
+            .setCancelable(false)
             .setMessage("Data login yang tidak lengkap telah terdeteksi, silakan coba login kembali!")
             .setPositiveButton("Oke") { dialog, _ ->
 

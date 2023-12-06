@@ -17,6 +17,7 @@ import android.graphics.drawable.Drawable
 import android.location.LocationManager
 import android.net.Uri
 import android.os.Build
+import android.os.Build.VERSION
 import android.os.Bundle
 import android.os.Handler
 import android.print.PrintAttributes
@@ -197,122 +198,17 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     }
 
     private fun createPDF() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            if (sessionManager.printState() == PRINT_METHOD_WIFI) {
-                printingState(true)
-
-                lifecycleScope.launch {
-                    try {
-
-                        val apiService: ApiService = HttpClient.create()
-                        val response = apiService.printInvoice(invoiceId = createPartFromString(invoiceId!!))
-
-                        when (response.status) {
-                            RESPONSE_STATUS_OK -> {
-
-                                val data = response.results[0]
-
-                                fileName = "Surat Jalan ${data.no_surat_jalan}.pdf"
-                                File(Comman.getAppPath(this@DetailSuratJalanActivity)).mkdirs()
-                                createPDFFile(Comman.getAppPath(this@DetailSuratJalanActivity) + fileName, data)
-                                printingState(false)
-
-                            }
-                            RESPONSE_STATUS_EMPTY -> {
-
-                                handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal mencetak: Detail surat jalan kosong!")
-                                printingState(false)
-
-                            }
-                            else -> {
-
-                                handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal mencetak")
-                                printingState(false)
-
-                            }
-                        }
-
-                    } catch (e: Exception) {
-
-                        handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
-                        printingState(false)
-
-                    }
-
-                }
+        if (VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                executeInkPrinter()
+            } else {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                    REQUEST_STORAGE_PERMISSION
+                )
             }
-        } else {
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                REQUEST_STORAGE_PERMISSION
-            )
-        }
-//        Dexter.withContext(this)
-//            .withPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-//            .withListener(object: PermissionListener {
-//                override fun onPermissionGranted(p0: PermissionGrantedResponse?) {
-////                    btnPrint.setOnClickListener {
-//                    if (sessionManager.printState() == PRINT_METHOD_WIFI) {
-//                        printingState(true)
-//
-//                        lifecycleScope.launch {
-//                            try {
-//
-//                                val apiService: ApiService = HttpClient.create()
-//                                val response = apiService.printInvoice(invoiceId = createPartFromString(invoiceId!!))
-//
-//                                when (response.status) {
-//                                    RESPONSE_STATUS_OK -> {
-//
-//                                        val data = response.results[0]
-//
-//                                        fileName = "Surat Jalan ${data.no_surat_jalan}.pdf"
-//                                        File(Comman.getAppPath(this@DetailSuratJalanActivity)).mkdirs()
-//                                        createPDFFile(Comman.getAppPath(this@DetailSuratJalanActivity) + fileName, data)
-//                                        printingState(false)
-//
-//                                    }
-//                                    RESPONSE_STATUS_EMPTY -> {
-//
-//                                        handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal mencetak: Detail surat jalan kosong!")
-//                                        printingState(false)
-//
-//                                    }
-//                                    else -> {
-//
-//                                        handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal mencetak")
-//                                        printingState(false)
-//
-//                                    }
-//                                }
-//
-//                            } catch (e: Exception) {
-//
-//                                handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
-//                                printingState(false)
-//
-//                            }
-//
-//                        }
-//                    }
-////                    }
-//                }
-//
-//                override fun onPermissionDenied(p0: PermissionDeniedResponse?) {
-//                    customUtility.showPermissionDeniedDialog("Izin penyimpanan diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
-//                }
-//
-//                override fun onPermissionRationaleShouldBeShown(
-//                    p0: PermissionRequest?,
-//                    p1: PermissionToken?
-//                ) {
-//                    val message = "Izin penyimpanan diperlukan untuk fitur ini. Izinkan aplikasi mengakses penyimpanan pada perangkat."
-//                    customUtility.showPermissionDeniedSnackbar(message) { requestBluetoothPermissions() }
-//                }
-//
-//            })
-//            .check()
+        } else executeInkPrinter()
     }
 
     private fun initVariable() {
@@ -734,7 +630,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     private fun printNow() {
 
         if (bluetoothAdapter != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 if (hasBluetoothPermissions()) {
                     if (bluetoothAdapter!!.isEnabled) {
                         if (checkPermission()) {
@@ -851,6 +747,52 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
             }
 
+        }
+    }
+
+    private fun executeInkPrinter() {
+        if (sessionManager.printState() == PRINT_METHOD_WIFI) {
+            printingState(true)
+
+            lifecycleScope.launch {
+                try {
+
+                    val apiService: ApiService = HttpClient.create()
+                    val response = apiService.printInvoice(invoiceId = createPartFromString(invoiceId!!))
+
+                    when (response.status) {
+                        RESPONSE_STATUS_OK -> {
+
+                            val data = response.results[0]
+
+                            fileName = "Surat Jalan ${data.no_surat_jalan}.pdf"
+                            File(Comman.getAppPath(this@DetailSuratJalanActivity)).mkdirs()
+                            createPDFFile(Comman.getAppPath(this@DetailSuratJalanActivity) + fileName, data)
+                            printingState(false)
+
+                        }
+                        RESPONSE_STATUS_EMPTY -> {
+
+                            handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal mencetak: Detail surat jalan kosong!")
+                            printingState(false)
+
+                        }
+                        else -> {
+
+                            handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal mencetak")
+                            printingState(false)
+
+                        }
+                    }
+
+                } catch (e: Exception) {
+
+                    handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                    printingState(false)
+
+                }
+
+            }
         }
     }
 
