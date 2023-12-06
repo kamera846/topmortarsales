@@ -1,5 +1,6 @@
 package com.topmortar.topmortarsales.view.city
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -18,8 +19,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.CityRecyclerViewAdapter
+import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
@@ -53,6 +57,7 @@ class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClic
     private lateinit var sessionManager: SessionManager
     private val userDistributorId get() = sessionManager.userDistributor().toString()
     private lateinit var addCityModal: AddCityModal
+    private var isRequestSync = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -98,7 +103,7 @@ class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClic
     }
 
     private fun initClickHandler() {
-        icBack.setOnClickListener { finish() }
+        icBack.setOnClickListener { backHandler() }
         btnFab.setOnClickListener { addCityModal.show() }
     }
 
@@ -197,7 +202,23 @@ class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClic
     }
 
     override fun onSubmit(status: Boolean) {
-        if (status) getList()
+        if (status) {
+            getList()
+            isRequestSync = true
+        }
+    }
+
+    private fun backHandler() {
+        if (isRequestSync) {
+            val resultIntent = Intent()
+            resultIntent.putExtra("$MAIN_ACTIVITY_REQUEST_CODE", SYNC_NOW)
+            setResult(RESULT_OK, resultIntent)
+            finish()
+        } else finish()
+    }
+
+    override fun onBackPressed() {
+        backHandler()
     }
 
 }

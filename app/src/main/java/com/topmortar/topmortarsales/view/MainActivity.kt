@@ -411,7 +411,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
                 R.id.option_sync_now -> {
-                    getContacts()
+                    if (userKind == USER_KIND_ADMIN) getCities()
+                    else getContacts()
                     true
                 }
                 R.id.nearest_store -> {
@@ -432,7 +433,9 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                     true
                 }
                 R.id.option_city -> {
-                    startActivity(Intent(this@MainActivity, ManageCityActivity::class.java))
+                    val intent = Intent(this@MainActivity, ManageCityActivity::class.java)
+                    intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
+                    startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
                     true
                 }
                 R.id.option_skill -> {
@@ -975,7 +978,12 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
             if (resultData == SYNC_NOW) {
 
-                if (isSearchActive) searchContact() else getContacts()
+                if (isSearchActive) {
+                    searchContact()
+                } else {
+                    if (userKind == USER_KIND_ADMIN) getCities()
+                    else getContacts()
+                }
 
             }
 

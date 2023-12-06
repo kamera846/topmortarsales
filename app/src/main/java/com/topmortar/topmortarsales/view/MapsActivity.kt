@@ -310,8 +310,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 binding.cardGetDirection.visibility = View.VISIBLE
                 binding.cardTelusuri.visibility = View.GONE
                 if (!isRouteActive) {
-                    binding.textTitleTarget.text = "${if (isBasecamp) "Basecamp" else "Toko"} ${selectedTargetRoute?.title}"
-                    binding.textTargetRute.text = "Petunjuk rute menuju ke lokasi"
+                    binding.textTitleTarget.text = selectedTargetRoute?.title
+                    binding.textTargetRute.text = "Petunjuk rute menuju ke lokasi ${if (isBasecamp) "basecamp" else "toko"}"
 
                     val itemToFind = "${selectedTargetRoute?.position?.latitude},${selectedTargetRoute?.position?.longitude}"
                     val indexOfItem = listCoordinate!!.indexOf(itemToFind)
@@ -439,8 +439,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 //                    if (location != null) currentLatLng = LatLng(-7.952356,112.692583)
                     }
                 binding.cardGetDirection.visibility = View.VISIBLE
-                binding.textTitleTarget.text = "${if (isBasecamp) "Basecamp" else "Toko"} $iMapsName"
-                binding.textTargetRute.text = "Petunjuk rute menuju ke lokasi"
+                binding.textTitleTarget.text = iMapsName
+                binding.textTargetRute.text = "Petunjuk rute menuju ke lokasi ${if (isBasecamp) "basecamp" else "toko"}"
 
                 val imgDrawable = R.drawable.store_location_status_blacklist
                 binding.imgTargetRoute.setImageDrawable(getDrawable(imgDrawable))

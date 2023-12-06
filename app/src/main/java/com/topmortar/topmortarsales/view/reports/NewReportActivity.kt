@@ -205,6 +205,7 @@ class NewReportActivity : AppCompatActivity() {
                                         }
                                         .setNegativeButton("Buka Maps") { dialog, _ ->
                                             val intent = Intent(this@NewReportActivity, MapsActivity::class.java)
+                                            intent.putExtra(CONST_IS_BASE_CAMP, reportType == "basecamp")
                                             intent.putExtra(CONST_MAPS, mapsUrl)
                                             intent.putExtra(CONST_MAPS_NAME, name)
                                             startActivity(intent)
