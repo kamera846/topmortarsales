@@ -98,7 +98,10 @@ import com.topmortar.topmortarsales.databinding.ActivityMapsBinding
 import com.topmortar.topmortarsales.modal.FilterTokoModal
 import com.topmortar.topmortarsales.model.CityModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.util.Locale
 
@@ -162,6 +165,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         isBasecamp = intent.getBooleanExtra(CONST_IS_BASE_CAMP, false)
 
         progressDialog = ProgressDialog(this)
+//        progressDialog.setTitle("Mencari ${if (isBasecamp) "basecamp" else "toko"} terdekat")
+//        progressDialog.setMessage("Sedang memuat…")
         progressDialog.setMessage("Mencari ${if (isBasecamp) "basecamp" else "toko"} terdekat…")
         progressDialog.setCancelable(false)
 
@@ -480,9 +485,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     @SuppressLint("SuspiciousIndentation")
     private fun searchCoordinate() {
-        if (!progressDialog.isShowing) progressDialog.show()
+        if (!progressDialog.isShowing) {
+            progressDialog.show()
+//            Handler().postDelayed({
+//                progressDialog.setMessage("Sedang memuat lebih banyak data ${if (isBasecamp) "basecamp" else "toko"}…")
+//            }, 1000)
+        }
 
-//        Handler().postDelayed({
+        Handler().postDelayed({
 
             val urlUtility = URLUtility(this)
             val limitKm = binding.etKm.text.toString().toDouble()
@@ -490,154 +500,160 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             mMap.clear()
 
-            for ((i, item) in listCoordinate!!.iterator().withIndex()) {
+            CoroutineScope(Dispatchers.Default).launch {
+                withContext(Dispatchers.Main) {
+                    // Start For Loop
+                    for ((i, item) in listCoordinate!!.iterator().withIndex()) {
 
-                if (!urlUtility.isUrl(item)) {
+                        if (!urlUtility.isUrl(item)) {
 
-                    val coordinates = item.trim().split(",")
-                    if (coordinates.size == 2) {
-                        val latitude = coordinates[0].toDoubleOrNull()
-                        val longitude = coordinates[1].toDoubleOrNull()
+                            val coordinates = item.trim().split(",")
+                            if (coordinates.size == 2) {
+                                val latitude = coordinates[0].toDoubleOrNull()
+                                val longitude = coordinates[1].toDoubleOrNull()
 
-                        if (latitude != null && longitude != null) {
+                                if (latitude != null && longitude != null) {
 
-                            val urlUtility = URLUtility(this)
-                            val distance = urlUtility.calculateDistance(currentLatLng!!.latitude, currentLatLng!!.longitude, latitude, longitude)
+                                    val urlUtility = URLUtility(this@MapsActivity)
+                                    val distance = urlUtility.calculateDistance(currentLatLng!!.latitude, currentLatLng!!.longitude, latitude, longitude)
 
-                            if (distance < limitKm) {
+                                    if (distance < limitKm) {
 
-                                val latLng = LatLng(latitude, longitude)
-                                binding.recyclerView.visibility = View.GONE
+                                        val latLng = LatLng(latitude, longitude)
+                                        binding.recyclerView.visibility = View.GONE
 
-                                val iconDrawable = when (listCoordinateStatus?.get(i)) {
-                                    STATUS_CONTACT_DATA -> R.drawable.store_location_status_data
-                                    STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active
-                                    STATUS_CONTACT_PASSIVE -> R.drawable.store_location_status_passive
-                                    STATUS_CONTACT_BID -> R.drawable.store_location_status_biding
-                                    else -> R.drawable.store_location_status_blacklist
+                                        val iconDrawable = when (listCoordinateStatus?.get(i)) {
+                                            STATUS_CONTACT_DATA -> R.drawable.store_location_status_data
+                                            STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active
+                                            STATUS_CONTACT_PASSIVE -> R.drawable.store_location_status_passive
+                                            STATUS_CONTACT_BID -> R.drawable.store_location_status_biding
+                                            else -> R.drawable.store_location_status_blacklist
+                                        }
+
+                                        val originalBitmap = BitmapFactory.decodeResource(resources, iconDrawable)
+
+                                        val newWidth = convertDpToPx(40, this@MapsActivity)
+                                        val newHeight = convertDpToPx(40, this@MapsActivity)
+
+                                        val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
+
+                                        selectedLocation = latLng
+                                        val markerOptions = MarkerOptions()
+                                            .position(latLng)
+                                            .title(listCoordinateName?.get(i))
+                                            .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
+
+                                        val onlyStatus = selectedStatusID != "-1" && selectedCitiesID == null && listCoordinateStatus!![i] == selectedStatusID.toLowerCase()
+                                        val onlyCities = selectedCitiesID != null && selectedStatusID == "-1" && listCoordinateCityID!![i] == selectedCitiesID?.id_city
+                                        val statusAndCities = selectedStatusID != "-1" && listCoordinateStatus!![i] == selectedStatusID.toLowerCase() && selectedCitiesID != null && listCoordinateCityID!![i] == selectedCitiesID?.id_city
+
+                                        if (statusAndCities) {
+                                            mMap.addMarker(markerOptions)
+                                            currentTotal ++
+                                        } else if (onlyStatus) {
+                                            mMap.addMarker(markerOptions)
+                                            currentTotal ++
+                                        } else if (onlyCities) {
+                                            mMap.addMarker(markerOptions)
+                                            currentTotal ++
+                                        } else if (selectedStatusID == "-1" && selectedCitiesID == null) {
+                                            mMap.addMarker(markerOptions)
+                                            currentTotal ++
+                                        }
+
+                                    }
+
                                 }
-
-                                val originalBitmap = BitmapFactory.decodeResource(resources, iconDrawable)
-
-                                val newWidth = convertDpToPx(40, this)
-                                val newHeight = convertDpToPx(40, this)
-
-                                val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
-
-                                selectedLocation = latLng
-                                val markerOptions = MarkerOptions()
-                                    .position(latLng)
-                                    .title(listCoordinateName?.get(i))
-                                    .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
-
-                                val onlyStatus = selectedStatusID != "-1" && selectedCitiesID == null && listCoordinateStatus!![i] == selectedStatusID.toLowerCase()
-                                val onlyCities = selectedCitiesID != null && selectedStatusID == "-1" && listCoordinateCityID!![i] == selectedCitiesID?.id_city
-                                val statusAndCities = selectedStatusID != "-1" && listCoordinateStatus!![i] == selectedStatusID.toLowerCase() && selectedCitiesID != null && listCoordinateCityID!![i] == selectedCitiesID?.id_city
-
-                                if (statusAndCities) {
-                                    mMap.addMarker(markerOptions)
-                                    currentTotal ++
-                                } else if (onlyStatus) {
-                                    mMap.addMarker(markerOptions)
-                                    currentTotal ++
-                                } else if (onlyCities) {
-                                    mMap.addMarker(markerOptions)
-                                    currentTotal ++
-                                } else if (selectedStatusID == "-1" && selectedCitiesID == null) {
-                                    mMap.addMarker(markerOptions)
-                                    currentTotal ++
-                                }
-
                             }
 
                         }
+
+                    } // End For Loop
+
+                    var textFilter = ""
+
+                    if (selectedStatusID != "-1" || selectedVisitedID != "-1" || selectedCitiesID != null) {
+                        textFilter += if (selectedCitiesID != null && selectedCitiesID?.id_city != "-1") selectedCitiesID?.nama_city else ""
+                        textFilter += if (selectedStatusID != "-1") if (textFilter.isNotEmpty()) ", $selectedStatusID" else selectedStatusID else ""
+                        textFilter += if (selectedVisitedID != "-1") if (textFilter.isNotEmpty()) ", $selectedVisitedID" else selectedVisitedID else ""
+                    } else textFilter = getString(R.string.tidak_ada_filter)
+
+                    binding.tvFilter.text = "$textFilter ($currentTotal)"
+
+                    progressDialog.dismiss()
+//                    progressDialog.setMessage("Sedang memuat…")
+                    if (currentTotal > 0) {
+                        val durationMs = 2000
+                        val responsiveZoom = when {
+                            limitKm >= 1 -> when {
+                                limitKm >= 18 -> 10
+                                limitKm >= 13 -> 11
+                                limitKm >= 8 -> 12
+                                limitKm >= 3 -> 13
+                                else -> 14
+                            }
+                            else -> 15
+                        }
+
+                        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentLatLng!!, responsiveZoom.toFloat())
+
+                        mMap.animateCamera(cameraUpdate, durationMs, null)
+                        binding.textTitleTotalNearest.text = "Penelusuran ${if (isBasecamp) "Basecamp" else "Toko"} Terdekat"
+                        binding.textTotalNearest.text = "$currentTotal ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }ditemukan dalam radius $limitKm km"
+                    } else {
+                        showDialog(message = "Tidak menemukan ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }di sekitar anda saat ini dalam radius jarak $limitKm km")
+                        binding.textTitleTotalNearest.text = "Penelusuran ${if (isBasecamp) "Basecamp" else "Toko"} Terdekat"
+                        binding.textTotalNearest.text = "Tidak dapat menemukan ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }dalam radius $limitKm km"
                     }
 
-                }
-
-            }
-
-            var textFilter = ""
-
-            if (selectedStatusID != "-1" || selectedVisitedID != "-1" || selectedCitiesID != null) {
-                textFilter += if (selectedCitiesID != null && selectedCitiesID?.id_city != "-1") selectedCitiesID?.nama_city else ""
-                textFilter += if (selectedStatusID != "-1") if (textFilter.isNotEmpty()) ", $selectedStatusID" else selectedStatusID else ""
-                textFilter += if (selectedVisitedID != "-1") if (textFilter.isNotEmpty()) ", $selectedVisitedID" else selectedVisitedID else ""
-            } else textFilter = getString(R.string.tidak_ada_filter)
-
-            binding.tvFilter.text = "$textFilter ($currentTotal)"
-
-            progressDialog.dismiss()
-            if (currentTotal > 0) {
-                val durationMs = 2000
-                val responsiveZoom = when {
-                    limitKm >= 1 -> when {
-                        limitKm >= 18 -> 10
-                        limitKm >= 13 -> 11
-                        limitKm >= 8 -> 12
-                        limitKm >= 3 -> 13
-                        else -> 14
+                    binding.cardTelusuri.visibility = View.VISIBLE
+                    binding.btnTelusuri.setOnClickListener {
+                        if (binding.etKm.toString().isNotEmpty()) {
+                            binding.etKm.error = null
+                            binding.etKm.clearFocus()
+                            searchCoordinate()
+                        } else {
+                            binding.etKm.error = "1-100"
+                            binding.etKm.requestFocus()
+                        }
                     }
-                    else -> 15
-                }
-
-                val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentLatLng!!, responsiveZoom.toFloat())
-
-                mMap.animateCamera(cameraUpdate, durationMs, null)
-                binding.textTitleTotalNearest.text = "Penelusuran ${if (isBasecamp) "Basecamp" else "Toko"} Terdekat"
-                binding.textTotalNearest.text = "$currentTotal ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }ditemukan dalam radius $limitKm km"
-            } else {
-                showDialog(message = "Tidak menemukan ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }di sekitar anda saat ini dalam radius jarak $limitKm km")
-                binding.textTitleTotalNearest.text = "Penelusuran ${if (isBasecamp) "Basecamp" else "Toko"} Terdekat"
-                binding.textTotalNearest.text = "Tidak dapat menemukan ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }dalam radius $limitKm km"
-            }
-
-            binding.cardTelusuri.visibility = View.VISIBLE
-            binding.btnTelusuri.setOnClickListener {
-                if (binding.etKm.toString().isNotEmpty()) {
-                    binding.etKm.error = null
-                    binding.etKm.clearFocus()
-                    searchCoordinate()
-                } else {
-                    binding.etKm.error = "1-100"
-                    binding.etKm.requestFocus()
-                }
-            }
-            binding.btnMinusKm.setOnClickListener {
-                binding.etKm.clearFocus()
-                binding.etKm.error = null
-                val etKm = binding.etKm.text.toString().toInt()
-                if (etKm > 1) binding.etKm.setText("${etKm - 1}")
-            }
-            binding.btnPlusKm.setOnClickListener {
-                binding.etKm.clearFocus()
-                binding.etKm.error = null
-                val etKm = binding.etKm.text.toString().toInt()
-                if (etKm < 100) binding.etKm.setText("${etKm + 1}")
-            }
-            binding.etKm.addTextChangedListener(object: TextWatcher {
-                override fun beforeTextChanged(
-                    s: CharSequence?,
-                    start: Int,
-                    count: Int,
-                    after: Int
-                ) {
-                }
-
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                }
-
-                override fun afterTextChanged(s: Editable?) {
-                    val etKm = s.toString()
-                    if (etKm.isNotEmpty()) {
-                        if (etKm.toInt() < 1) binding.etKm.setText("${1}")
-                        else if (etKm.toInt() > 100) binding.etKm.setText("${100}")
+                    binding.btnMinusKm.setOnClickListener {
+                        binding.etKm.clearFocus()
+                        binding.etKm.error = null
+                        val etKm = binding.etKm.text.toString().toInt()
+                        if (etKm > 1) binding.etKm.setText("${etKm - 1}")
                     }
+                    binding.btnPlusKm.setOnClickListener {
+                        binding.etKm.clearFocus()
+                        binding.etKm.error = null
+                        val etKm = binding.etKm.text.toString().toInt()
+                        if (etKm < 100) binding.etKm.setText("${etKm + 1}")
+                    }
+                    binding.etKm.addTextChangedListener(object: TextWatcher {
+                        override fun beforeTextChanged(
+                            s: CharSequence?,
+                            start: Int,
+                            count: Int,
+                            after: Int
+                        ) {
+                        }
+
+                        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                        }
+
+                        override fun afterTextChanged(s: Editable?) {
+                            val etKm = s.toString()
+                            if (etKm.isNotEmpty()) {
+                                if (etKm.toInt() < 1) binding.etKm.setText("${1}")
+                                else if (etKm.toInt() > 100) binding.etKm.setText("${100}")
+                            }
+                        }
+
+                    })
                 }
+            }
 
-            })
-
-//        }, 1000)
+        }, 100)
     }
 
     private fun onFindLocation(mapsUrl: String) {
