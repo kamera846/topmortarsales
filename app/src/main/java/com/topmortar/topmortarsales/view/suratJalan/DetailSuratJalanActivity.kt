@@ -198,7 +198,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     }
 
     private fun createPDF() {
-        if (VERSION.SDK_INT < Build.VERSION_CODES.S) {
+        if (VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                 executeInkPrinter()
             } else {
