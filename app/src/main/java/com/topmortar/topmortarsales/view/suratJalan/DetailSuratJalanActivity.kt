@@ -1035,7 +1035,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 //            }
 
             drawPdf(document, data)
-            document.add(Paragraph("\n\n\n"))
+            document.add(Paragraph("\n\n"))
             drawPdf(document, data).close()
 
             printPDF()
@@ -1085,8 +1085,6 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                     1f,
                     7f,
                     1f,
-                    1f,
-                    1f,
                 )
             )
         ).useAllAvailableWidth()
@@ -1095,8 +1093,6 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         table2.addCell(Cell().add(getParagraph("No.", TextAlignment.CENTER)))
         table2.addCell(Cell().add(getParagraph("Nama", TextAlignment.CENTER)))
         table2.addCell(Cell().add(getParagraph("Qty", TextAlignment.CENTER)))
-        table2.addCell(Cell().add(getParagraph("Pengirim", TextAlignment.CENTER)))
-        table2.addCell(Cell().add(getParagraph("Penerima", TextAlignment.CENTER)))
 
 //        val items = 9
 //
@@ -1117,10 +1113,6 @@ class DetailSuratJalanActivity : AppCompatActivity() {
             table2.addCell(Cell().add(getParagraph("$i", TextAlignment.CENTER)))
             table2.addCell(Cell().add(getParagraph("${item.nama_produk} ${if (item.is_bonus == "1" || item.is_bonus == "2") "(Free)" else ""}", paddingLeft = 8f, paddingRight = 8f)))
             table2.addCell(Cell().add(getParagraph("${item.qty_produk}", TextAlignment.CENTER)))
-            if (i == 1) {
-                table2.addCell(getCellWithRowspan("", (items.size), TextAlignment.LEFT))
-                table2.addCell(getCellWithRowspan("", (items.size), TextAlignment.LEFT))
-            }
         }
 
         if (items.size == 0) table2.addCell(Cell(1,5).add(getParagraph("Tidak ada pesanan", TextAlignment.LEFT)))
@@ -1133,6 +1125,13 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         tableReceived.addCell(getCell(" Kurir: ${data.courier_name}\nKendaraan: ${data.nama_kendaraan}\nNo.Polisi: ${data.nopol_kendaraan}", TextAlignment.LEFT))
         if (data.is_closing == "1") tableReceived.addCell(getCell(" Telah di closing pada ${data.date_closing}\ndengan jarak ${data.distance} km dari titik toko", TextAlignment.RIGHT))
         document.add(tableReceived)
+        document.add(getParagraph("\n", fontSize = 1f))
+
+        val tableTtd = Table(3)
+        tableTtd.addCell(getCell("Dibuat", TextAlignment.CENTER))
+        tableTtd.addCell(getCell("Diterima", TextAlignment.CENTER))
+        tableTtd.addCell(getCell("Dikirim", TextAlignment.CENTER))
+        document.add(tableTtd)
 
         val maxRow = items.size.let { if (it == 0) 7 else 8 - it }
         for (i in 0 until maxRow) {
