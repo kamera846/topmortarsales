@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:theme="@style/Theme.TopMortarSales.BaseBackground">
+
+    <include
+        android:id="@+id/title_bar"
+        layout="@layout/component_title_bar_light"/>
+
+    <ScrollView
+        android:layout_below="@+id/title_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:orientation="vertical">
+
+            <!-- Voucher 1 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tvVoucher1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Voucher 1"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                        android:textSize="16sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:visibility="gone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="@string/required_sign"
+                        android:textColor="@color/primary"/>
+
+                </LinearLayout>
+
+                <EditText
+                    android:labelFor="@+id/tvVoucher1"
+                    android:id="@+id/etVoucher1"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                    android:textColorHint="@color/black_600"
+                    android:hint="Masukkan Kode Voucher"
+                    android:inputType="textCapWords"
+                    android:textSize="14sp"
+                    android:background="@drawable/et_background"
+                    android:padding="12dp"
+                    android:outlineProvider="none"/>
+
+            </LinearLayout>
+
+            <!-- Voucher 2 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tvVoucher2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Voucher 2"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                        android:textSize="16sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:visibility="gone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="@string/required_sign"
+                        android:textColor="@color/primary"/>
+
+                </LinearLayout>
+
+                <EditText
+                    android:labelFor="@+id/tvVoucher2"
+                    android:id="@+id/etVoucher2"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                    android:textColorHint="@color/black_600"
+                    android:hint="Masukkan Kode Voucher"
+                    android:inputType="textCapWords"
+                    android:textSize="14sp"
+                    android:background="@drawable/et_background"
+                    android:padding="12dp"
+                    android:outlineProvider="none"/>
+
+            </LinearLayout>
+
+            <!-- Voucher 3 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tvVoucher3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Voucher 3"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                        android:textSize="16sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:visibility="gone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="@string/required_sign"
+                        android:textColor="@color/primary"/>
+
+                </LinearLayout>
+
+                <EditText
+                    android:labelFor="@+id/tvVoucher3"
+                    android:id="@+id/etVoucher3"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                    android:textColorHint="@color/black_600"
+                    android:hint="Masukkan Kode Voucher"
+                    android:inputType="textCapWords"
+                    android:textSize="14sp"
+                    android:background="@drawable/et_background"
+                    android:padding="12dp"
+                    android:outlineProvider="none"/>
+
+            </LinearLayout>
+
+            <!-- Voucher 4 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tvVoucher4"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Voucher 4"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                        android:textSize="16sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:visibility="gone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="@string/required_sign"
+                        android:textColor="@color/primary"/>
+
+                </LinearLayout>
+
+                <EditText
+                    android:labelFor="@+id/tvVoucher4"
+                    android:id="@+id/etVoucher4"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                    android:textColorHint="@color/black_600"
+                    android:hint="Masukkan Kode Voucher"
+                    android:inputType="textCapWords"
+                    android:textSize="14sp"
+                    android:background="@drawable/et_background"
+                    android:padding="12dp"
+                    android:outlineProvider="none"/>
+
+            </LinearLayout>
+
+            <!-- Voucher 5 -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tvVoucher5"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Voucher 5"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                        android:textSize="16sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:visibility="gone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="@string/required_sign"
+                        android:textColor="@color/primary"/>
+
+                </LinearLayout>
+
+                <EditText
+                    android:labelFor="@+id/tvVoucher5"
+                    android:id="@+id/etVoucher5"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                    android:textColorHint="@color/black_600"
+                    android:hint="Masukkan Kode Voucher"
+                    android:inputType="textCapWords"
+                    android:textSize="14sp"
+                    android:background="@drawable/et_background"
+                    android:padding="12dp"
+                    android:outlineProvider="none"/>
+
+            </LinearLayout>
+
+            <!-- Bottom Action -->
+            <LinearLayout
+                android:layout_alignParentBottom="true"
+                android:id="@+id/bottom_action"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/btn_submit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="@color/primary"
+                    android:textColor="@color/white"
+                    android:padding="12dp"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:text="@string/submit" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+</RelativeLayout>

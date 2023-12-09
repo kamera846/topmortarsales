@@ -25,6 +25,7 @@ import com.topmortar.topmortarsales.commons.TUKANG_MESSAGE
 import com.topmortar.topmortarsales.commons.UPDATE_PASSWORD
 import com.topmortar.topmortarsales.commons.VERIFY_OTP
 import com.topmortar.topmortarsales.commons.VISIT
+import com.topmortar.topmortarsales.commons.VOUCHER
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.response.ResponseAuth
 import com.topmortar.topmortarsales.response.ResponseCities
@@ -492,4 +493,11 @@ interface ApiService {
 
     @GET(DISTRIBUTOR)
     suspend fun getListDistributor(): ResponseDistributor
+
+    @Multipart
+    @POST(VOUCHER)
+    suspend fun addVoucher(
+        @Part("id_contact") idContact: RequestBody,
+        @Part("no_voucher") noVoucher: RequestBody,
+    ): ResponseMessage
 }

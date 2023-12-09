@@ -14,6 +14,8 @@ import android.provider.OpenableColumns
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.Gravity
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
@@ -23,6 +25,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.PopupMenu
 import android.widget.RelativeLayout
 import android.widget.Spinner
 import android.widget.TextView
@@ -96,6 +99,8 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.modal.AddCityModal
+import com.topmortar.topmortarsales.modal.AddVoucherModal
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.modal.SendMessageModal
 import com.topmortar.topmortarsales.model.ContactModel
@@ -357,6 +362,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private fun initClickHandler() {
 
         icBack.setOnClickListener { backHandler() }
+//        icEdit.setOnClickListener { if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_SALES) showMoreOption() else toggleEdit(true) }
         icEdit.setOnClickListener { toggleEdit(true) }
         icClose.setOnClickListener { toggleEdit(false) }
 //        btnSendMessage.setOnClickListener { navigateAddNewRoom() }
@@ -1858,6 +1864,33 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     override fun onSubmitMessage(status: Boolean) {
         getDetailContact(false)
         setupDialogSendMessage(itemSendMessage)
+    }
+
+    private fun showMoreOption() {
+        val titleBar = findViewById<ImageView>(R.id.ic_edit)
+        val popupMenu = PopupMenu(this, titleBar, Gravity.END)
+        popupMenu.menuInflater.inflate(R.menu.option_detail_contact, popupMenu.menu)
+
+        popupMenu.setOnMenuItemClickListener { item: MenuItem? ->
+            when (item?.itemId) {
+                R.id.option_edit -> {
+                    toggleEdit(true)
+                    return@setOnMenuItemClickListener  true
+                }
+                R.id.option_voucher -> {
+                    showFormVoucherModal()
+                    return@setOnMenuItemClickListener  true
+                }
+                else -> return@setOnMenuItemClickListener false
+            }
+        }
+
+        popupMenu.show()
+    }
+
+    private fun showFormVoucherModal() {
+        val modal = AddVoucherModal(this, contactId.toString(), lifecycleScope)
+        modal.show()
     }
 
 }
