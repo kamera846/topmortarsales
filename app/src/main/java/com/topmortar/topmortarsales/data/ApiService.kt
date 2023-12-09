@@ -353,7 +353,7 @@ interface ApiService {
     @GET(BID)
     suspend fun getContactsUserBid(
         @Query("u") userId: String,
-        @Query("bulan") month: String = currenMonth.toString(),
+        @Query("m") month: String = currenMonth.toString(),
         @Query("visit") visit: String = BID_ON_GOING
     ): ResponseContactList
 
