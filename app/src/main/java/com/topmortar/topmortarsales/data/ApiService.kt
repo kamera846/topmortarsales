@@ -25,6 +25,7 @@ import com.topmortar.topmortarsales.commons.TUKANG_MESSAGE
 import com.topmortar.topmortarsales.commons.UPDATE_PASSWORD
 import com.topmortar.topmortarsales.commons.VERIFY_OTP
 import com.topmortar.topmortarsales.commons.VISIT
+import com.topmortar.topmortarsales.commons.VOUCHER
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.response.ResponseAuth
 import com.topmortar.topmortarsales.response.ResponseCities
@@ -46,8 +47,11 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.*
+import java.util.Calendar
 
 interface ApiService {
+
+    val currenMonth: Int get() = Calendar.getInstance().get(Calendar.MONTH) + 1
 
     @GET(CONTACT)
     suspend fun getContacts(@Query("c") cityId: String, @Query("dst") distributorID: String): ResponseContactList
@@ -349,6 +353,7 @@ interface ApiService {
     @GET(BID)
     suspend fun getContactsUserBid(
         @Query("u") userId: String,
+        @Query("m") month: String = currenMonth.toString(),
         @Query("visit") visit: String = BID_ON_GOING
     ): ResponseContactList
 
@@ -488,4 +493,11 @@ interface ApiService {
 
     @GET(DISTRIBUTOR)
     suspend fun getListDistributor(): ResponseDistributor
+
+    @Multipart
+    @POST(VOUCHER)
+    suspend fun addVoucher(
+        @Part("id_contact") idContact: RequestBody,
+        @Part("no_voucher") noVoucher: RequestBody,
+    ): ResponseMessage
 }

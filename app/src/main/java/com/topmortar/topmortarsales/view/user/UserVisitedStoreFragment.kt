@@ -6,9 +6,12 @@ import android.os.Handler
 import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -30,9 +33,11 @@ import com.topmortar.topmortarsales.databinding.FragmentUserVisitedStoreBinding
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
+import com.topmortar.topmortarsales.view.suratJalan.ListSuratJalanActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
+import java.util.Calendar
 
 /**
  * A fragment representing a list of Items.
@@ -58,6 +63,11 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
     private var searchRunnable: Runnable? = null
     private var previousSearchTerm = ""
     private var isSearchActive = false
+
+    // Initialize Filter Month
+    private val listMonthInt = arrayListOf(0,1,2,3,4,5,6,7,8,9,10,11,12)
+    private val listMonthString = arrayListOf("Tidak ada filter","Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember")
+    private var selectedMonth = 0
 
     private var listener: CounterItem? = null
     interface CounterItem {
@@ -87,8 +97,16 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
         userKind = sessionManager.userKind().toString()
         userCity = sessionManager.userCityID().toString()
 
+        // Get the current theme mode (light or dark)
+        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.filterBox.background = requireContext().getDrawable(R.color.black_400)
+        else binding.filterBox.background = requireContext().getDrawable(R.color.light)
+        binding.filterBox.setOnClickListener { showDropdownMenu() }
+
+        toggleFilter(Calendar.getInstance().get(Calendar.MONTH)+1)
+
 //        setupSearchBox()
-        getContacts()
+//        getContacts()
 
         return view
     }
@@ -162,7 +180,7 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getContactsUserBid(userId = userIDParam!!.ifEmpty { userID }, visit = BID_VISITED)
+                val response = apiService.getContactsUserBid(userId = userIDParam!!.ifEmpty { userID }, visit = BID_VISITED, month = selectedMonth.toString())
 //                val response = when (userKind) {
 //                    USER_KIND_ADMIN -> {
 //                        if (selectedCity != null ) {
@@ -422,6 +440,73 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
 
             }
         }
+    }
+
+    private fun showDropdownMenu() {
+        val popupMenu = PopupMenu(requireContext(), binding.filterBox, Gravity.END)
+        popupMenu.menuInflater.inflate(R.menu.option_list_month, popupMenu.menu)
+
+        popupMenu.setOnMenuItemClickListener { item: MenuItem? ->
+            when (item?.itemId) {
+                R.id.option_januari -> {
+                    toggleFilter(1)
+                    return@setOnMenuItemClickListener  true
+                }
+                R.id.option_februari -> {
+                    toggleFilter(2)
+                    return@setOnMenuItemClickListener  true
+                }
+                R.id.option_maret -> {
+                    toggleFilter(3)
+                    return@setOnMenuItemClickListener  true
+                }
+                R.id.option_april -> {
+                    toggleFilter(4)
+                    return@setOnMenuItemClickListener  true
+                }
+                R.id.option_mei -> {
+                    toggleFilter(5)
+                    return@setOnMenuItemClickListener  true
+                }
+                R.id.option_juni -> {
+                    toggleFilter(6)
+                    return@setOnMenuItemClickListener  true
+                }
+                R.id.option_juli -> {
+                    toggleFilter(7)
+                    return@setOnMenuItemClickListener  true
+                }
+                R.id.option_agustus -> {
+                    toggleFilter(8)
+                    return@setOnMenuItemClickListener  true
+                }
+                R.id.option_september -> {
+                    toggleFilter(9)
+                    return@setOnMenuItemClickListener  true
+                }
+                R.id.option_oktober -> {
+                    toggleFilter(10)
+                    return@setOnMenuItemClickListener  true
+                }
+                R.id.option_november -> {
+                    toggleFilter(11)
+                    return@setOnMenuItemClickListener  true
+                }
+                R.id.option_desember -> {
+                    toggleFilter(12)
+                    return@setOnMenuItemClickListener  true
+                }
+                else -> return@setOnMenuItemClickListener false
+            }
+        }
+
+        popupMenu.show()
+    }
+
+    private fun toggleFilter(month: Int = 0) {
+        selectedMonth = listMonthInt[month]
+        binding.tvFilter.text = listMonthString[month]
+        getContacts()
     }
 
 }
