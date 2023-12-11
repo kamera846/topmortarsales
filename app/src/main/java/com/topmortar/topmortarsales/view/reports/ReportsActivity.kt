@@ -1,14 +1,14 @@
 package com.topmortar.topmortarsales.view.reports
 
 import android.app.DatePickerDialog
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.DatePicker
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.ReportsRecyclerViewAdapter
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
@@ -20,6 +20,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -45,6 +46,7 @@ class ReportsActivity : AppCompatActivity() {
     private var userFullName: String? = null
     private var userLevel: String? = null
     private var isCourier = false
+    private var isBA = false
 
     private lateinit var datePicker: DatePickerDialog
     private var selectedDate: Calendar = Calendar.getInstance()
@@ -67,7 +69,11 @@ class ReportsActivity : AppCompatActivity() {
         if (userKind == USER_KIND_COURIER) isCourier = true
         else if (userLevel == AUTH_LEVEL_COURIER) isCourier = true
 
+        if (userKind == USER_KIND_BA) isBA = true
+        else if (userLevel == AUTH_LEVEL_BA) isBA = true
+
         if (isCourier) binding.titleBarDark.tvTitleBar.text = if (!contactName.isNullOrEmpty()) contactName else "Laporan Kurir"
+        else if (isBA) binding.titleBarDark.tvTitleBar.text = if (!contactName.isNullOrEmpty()) contactName else "Laporan BA"
         else binding.titleBarDark.tvTitleBar.text = if (!contactName.isNullOrEmpty()) contactName else "Laporan Sales"
         binding.titleBarDark.tvTitleBarDescription.visibility = View.VISIBLE
         if (!contactName.isNullOrEmpty()) binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (iUserID.isNullOrEmpty()) "saya" else ""} di toko ini"
@@ -114,7 +120,7 @@ class ReportsActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val apiService: ApiService = HttpClient.create()
-                val response = when (isCourier) {
+                val response = when (isCourier || isBA) {
                     true -> {
                         if (contactID.isNullOrEmpty()) {
                             apiService.listAllCourierReport(idUser = if (iUserID.isNullOrEmpty()) userID else iUserID!!)
@@ -188,7 +194,8 @@ class ReportsActivity : AppCompatActivity() {
 
         val mAdapter = ReportsRecyclerViewAdapter()
         mAdapter.setList(items)
-        mAdapter.setIsCourier(isCourier)
+        if (isCourier || isBA) mAdapter.setIsCourier(true)
+        else mAdapter.setIsCourier(false)
         if (contactID.isNullOrEmpty()) mAdapter.setWithName(true)
 
         binding.recyclerView.apply {
@@ -199,7 +206,8 @@ class ReportsActivity : AppCompatActivity() {
                 override fun onItemClick(item: ReportVisitModel) {
                     val modalDetail = DetailReportModal(this@ReportsActivity)
                     modalDetail.setData(item)
-                    modalDetail.setIsCourier(isCourier)
+                    if (isCourier || isBA) mAdapter.setIsCourier(true)
+                    else mAdapter.setIsCourier(false)
                     if (contactID.isNullOrEmpty()) modalDetail.setWithName(true)
                     modalDetail.show()
                 }
