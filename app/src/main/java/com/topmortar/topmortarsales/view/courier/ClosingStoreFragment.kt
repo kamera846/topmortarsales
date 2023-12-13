@@ -1,6 +1,5 @@
 package com.topmortar.topmortarsales.view.courier
 
-import android.app.Activity
 import android.app.Activity.RESULT_OK
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -36,10 +35,8 @@ import com.topmortar.topmortarsales.commons.CONST_REPUTATION
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
-import com.topmortar.topmortarsales.commons.REQUEST_BASECAMP_FRAGMENT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
-import com.topmortar.topmortarsales.commons.RESULT_BASECAMP_FRAGMENT
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
@@ -229,7 +226,8 @@ class ClosingStoreFragment : Fragment() {
     }
 
     private fun navigateChatAdmin() {
-        val phoneNumber = getString(R.string.topmortar_wa_number)
+        val distributorNumber = sessionManager.userDistributorNumber()!!
+        val phoneNumber = if (distributorNumber.isNotEmpty()) distributorNumber else getString(R.string.topmortar_wa_number)
         val message = "*#Courier Service*\nHalo admin, tolong bantu saya [KETIK PESAN ANDA]"
 
         val intent = Intent(Intent.ACTION_VIEW)

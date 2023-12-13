@@ -569,7 +569,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     }
 
     private fun navigateChatAdmin() {
-        val phoneNumber = getString(R.string.topmortar_wa_number)
+        val distributorNumber = sessionManager.userDistributorNumber()!!
+        val phoneNumber = if (distributorNumber.isNotEmpty()) distributorNumber else getString(R.string.topmortar_wa_number)
         val message = "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada toko *${ detailContact!!.nama }*"
 
         val intent = Intent(Intent.ACTION_VIEW)

@@ -96,4 +96,13 @@ class SessionManager(context: Context) {
     fun userDistributor(): String? {
         return sharedPreferences.getString("userDistributor", "0")
     }
+
+    fun userDistributorNumber(userDistributorNumber: String) {
+        editor.putString("userDistributorNumber", userDistributorNumber)
+        editor.apply()
+    }
+
+    fun userDistributorNumber(): String? {
+        return sharedPreferences.getString("userDistributorNumber", "0")
+    }
 }

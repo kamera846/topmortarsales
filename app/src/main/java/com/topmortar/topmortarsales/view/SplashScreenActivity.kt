@@ -375,6 +375,7 @@ class SplashScreenActivity : AppCompatActivity() {
                         sessionManager.setUserCityID(data.id_city)
                         sessionManager.userBidLimit(data.bid_limit)
                         sessionManager.userDistributor(data.id_distributor)
+                        sessionManager.userDistributorNumber(data.nomorhp_distributor)
 
                         sessionManager.setLoggedIn(LOGGED_IN)
 
