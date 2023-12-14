@@ -1,15 +1,19 @@
 package com.topmortar.topmortarsales.view.user
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.Gravity
+import android.view.MenuItem
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.PopupMenu
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -19,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.UsersRecyclerViewAdapter
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
@@ -28,6 +33,7 @@ import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
+import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -37,6 +43,7 @@ import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.databinding.ActivityManageUserBinding
 import com.topmortar.topmortarsales.model.UserModel
 import kotlinx.coroutines.launch
 
@@ -44,6 +51,7 @@ import kotlinx.coroutines.launch
 class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemClickListener {
 
     private lateinit var scaleAnimation: Animation
+    private lateinit var binding: ActivityManageUserBinding
 
     private lateinit var rlLoading: RelativeLayout
     private lateinit var rlParent: RelativeLayout
@@ -63,6 +71,8 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
     private lateinit var sessionManager: SessionManager
     private val userDistributorId get() = sessionManager.userDistributor().toString()
     private var doubleBackToExitPressedOnce = false
+    private var users: ArrayList<UserModel> = arrayListOf()
+    private var activeFilter = EMPTY_FIELD_VALUE
 
     // Initialize Search Engine
     private val searchDelayMillis = 500L
@@ -77,10 +87,16 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
 
         supportActionBar?.hide()
         sessionManager = SessionManager(this)
+        binding = ActivityManageUserBinding.inflate(layoutInflater)
 
-        setContentView(R.layout.activity_manage_user)
+        setContentView(binding.root)
 
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
+
+        // Get the current theme mode (light or dark)
+        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background = getDrawable(R.color.black_400)
+        else binding.llFilter.componentFilter.background = getDrawable(R.color.light)
 
         initVariable()
         initClickHandler()
@@ -115,6 +131,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
 
         btnFab.setOnClickListener { navigateAddUser() }
         icBack.setOnClickListener { finish() }
+        binding.llFilter.componentFilter.setOnClickListener { showFilterMenu() }
 
     }
 
@@ -131,14 +148,20 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        setRecyclerView(response.results)
+                        binding.llFilter.tvFilter.text = getString(R.string.tidak_ada_filter)
+                        activeFilter = EMPTY_FIELD_VALUE
+                        val includeFilter = findViewById<LinearLayout>(R.id.ll_filter)
+                        includeFilter.visibility = View.VISIBLE
+
+                        users = response.results
+                        setRecyclerView(users)
                         loadingState(false)
 //                        loadingState(true, "Success get data!")
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        loadingState(true, "Daftar kontak kosong!")
+                        loadingState(true, "Daftar pengguna kosong!")
 
                     }
                     else -> {
@@ -263,6 +286,57 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
 
         }
 
+    }
+
+    private fun showFilterMenu() {
+
+        val popupMenu = PopupMenu(this, binding.llFilter.componentFilter, Gravity.END)
+        popupMenu.menuInflater.inflate(R.menu.option_level_user, popupMenu.menu)
+
+        popupMenu.setOnMenuItemClickListener { item: MenuItem? ->
+            when (item?.itemId) {
+                R.id.option_none -> {
+                    activeFilter = EMPTY_FIELD_VALUE
+                    synchFilter()
+                    return@setOnMenuItemClickListener  true
+                } R.id.option_admin -> {
+                    activeFilter = AUTH_LEVEL_ADMIN
+                    synchFilter()
+                    return@setOnMenuItemClickListener  true
+                } R.id.option_sales -> {
+                    activeFilter = AUTH_LEVEL_SALES
+                    synchFilter()
+                    return@setOnMenuItemClickListener  true
+                } R.id.option_courier -> {
+                    activeFilter = AUTH_LEVEL_COURIER
+                    synchFilter()
+                    return@setOnMenuItemClickListener  true
+                } R.id.option_ba -> {
+                    activeFilter = AUTH_LEVEL_BA
+                    synchFilter()
+                    return@setOnMenuItemClickListener  true
+                } else -> return@setOnMenuItemClickListener false
+            }
+        }
+
+        popupMenu.show()
+    }
+
+    private fun synchFilter() {
+        if (activeFilter == EMPTY_FIELD_VALUE) getList()
+        else {
+            binding.llFilter.tvFilter.text = "Level $activeFilter"
+            loadingState(true)
+            Handler().postDelayed({
+                val usersDummy = arrayListOf<UserModel>()
+                for (item in users.iterator()) {
+                    if (item.level_user == activeFilter) usersDummy.add(item)
+                }
+
+                setRecyclerView(usersDummy)
+                loadingState(false)
+            }, 500)
+        }
     }
 
 }

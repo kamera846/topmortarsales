@@ -27,18 +27,27 @@
 
     </RelativeLayout>
 
+    <!-- Component Filter -->
+    <include
+        android:visibility="gone"
+        android:id="@+id/ll_filter"
+        android:layout_below="@+id/rl_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/component_filter"/>
+
     <!-- Chat List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_chat_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:listitem="@layout/item_chat_room"
-        android:layout_below="@id/rl_header"/>
+        android:layout_below="@id/ll_filter"/>
 
     <RelativeLayout
         android:visibility="gone"
         android:id="@+id/rl_loading"
-        android:layout_below="@+id/rl_header"
+        android:layout_below="@+id/ll_filter"
         android:padding="16dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
