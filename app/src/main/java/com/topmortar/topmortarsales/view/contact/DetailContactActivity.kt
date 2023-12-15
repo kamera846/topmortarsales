@@ -66,6 +66,9 @@ import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.PING_HOST
+import com.topmortar.topmortarsales.commons.PING_MEDIUM
+import com.topmortar.topmortarsales.commons.PING_NORMAL
 import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
@@ -133,6 +136,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var sessionManager: SessionManager
     private val userDistributorId get() = sessionManager.userDistributor().toString()
     private lateinit var binding: ActivityDetailContactBinding
+    private var pingUtility: PingUtility? = null
 
     private lateinit var tvPhoneContainer: LinearLayout
     private lateinit var etPhoneContainer: LinearLayout
@@ -1390,7 +1394,32 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         if (item != null) sendMessageModal.setItem(item)
 
         // Setup Indicator
-        setupNetworkIndicator()
+        // setupNetworkIndicator()
+
+        // Panggil layanan untuk memulai operasi ping di latar belakang
+        if (pingUtility == null) {
+            pingUtility = PingUtility()
+            pingUtility!!.startPingMonitoring(host = PING_HOST, listener = object: PingUtility.PingResultListener {
+                override fun onPingResult(result: Long) {
+                    if (result > 200) {
+                        binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_primary_round)
+                        sendMessageModal.setPingStatus(PING_MEDIUM)
+                    }
+                    else if (result > 100) {
+                        binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_data_round)
+                        sendMessageModal.setPingStatus(PING_MEDIUM)
+                    }
+                    else if (result > 0) {
+                        binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_active_round)
+                        sendMessageModal.setPingStatus(PING_NORMAL)
+                    } else {
+                        binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_primary_round)
+                        sendMessageModal.setPingStatus(PING_MEDIUM)
+                    }
+                }
+
+            })
+        }
     }
 
     private fun showSearchModal() {
@@ -1906,6 +1935,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private fun showFormVoucherModal() {
         val modal = AddVoucherModal(this, contactId.toString(), lifecycleScope)
         modal.show()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (pingUtility != null) pingUtility!!.stopPingMonitoring()
     }
 
 }

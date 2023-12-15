@@ -16,7 +16,6 @@ import android.text.TextWatcher
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.webkit.URLUtil.isValidUrl
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -40,6 +39,7 @@ import com.topmortar.topmortarsales.commons.BASE_URL
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_DATE
 import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
@@ -54,6 +54,9 @@ import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.PING_HOST
+import com.topmortar.topmortarsales.commons.PING_MEDIUM
+import com.topmortar.topmortarsales.commons.PING_NORMAL
 import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
@@ -74,7 +77,6 @@ import com.topmortar.topmortarsales.commons.utils.PhoneHandler
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.PingUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
-import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -82,8 +84,8 @@ import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityDetailContactBinding
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.modal.SendMessageTukangModal
-import com.topmortar.topmortarsales.model.TukangModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
+import com.topmortar.topmortarsales.model.TukangModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.contact.PreviewKtpActivity
 import com.topmortar.topmortarsales.view.suratJalan.ListSuratJalanActivity
@@ -109,6 +111,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
     private lateinit var sessionManager: SessionManager
     private val userDistributorId get() = sessionManager.userDistributor().toString()
     private lateinit var binding: ActivityDetailContactBinding
+    private var pingUtility: PingUtility? = null
 
     private lateinit var tvPhoneContainer: LinearLayout
     private lateinit var etPhoneContainer: LinearLayout
@@ -306,6 +309,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         terminContainer.visibility = View.GONE
         ownerSection.visibility = View.GONE
         binding.promoContainer.visibility = View.GONE
+        binding.reputationContainer.visibility = View.GONE
 
         // Setup Date Picker Dialog
         setDatePickerDialog()
@@ -497,6 +501,18 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         val iOwner = intent.getStringExtra(CONST_OWNER)
         val iName = intent.getStringExtra(CONST_NAME)
         val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
+        val iDate = intent.getStringExtra(CONST_DATE)
+
+        if (iDate.isNullOrEmpty()) {
+            binding.dateSeparator.visibility = View.GONE
+            binding.line.visibility = View.VISIBLE
+        } else {
+            val date = DateFormat.format(iDate, format = "dd MMM yyyy")
+
+            binding.tvDate.text = date
+            binding.dateSeparator.visibility = View.VISIBLE
+            binding.line.visibility = View.GONE
+        }
 
         iKtp = intent.getStringExtra(CONST_KTP)
         iMapsUrl = intent.getStringExtra(CONST_MAPS)
@@ -1111,10 +1127,34 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         sendMessageModal = SendMessageTukangModal(this, lifecycleScope)
         if (item != null) sendMessageModal.setItem(item)
 
-
         // Setup Indicator
-        setupNetworkIndicator()
+        // setupNetworkIndicator()
 
+        // Panggil layanan untuk memulai operasi ping di latar belakang
+        if (pingUtility == null) {
+            pingUtility = PingUtility()
+            binding.titleBar.indicatorView.visibility = View.VISIBLE
+            pingUtility!!.startPingMonitoring(host = PING_HOST, listener = object: PingUtility.PingResultListener {
+                override fun onPingResult(result: Long) {
+                    if (result > 200) {
+                        binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_primary_round)
+                        sendMessageModal.setPingStatus(PING_MEDIUM)
+                    }
+                    else if (result > 100) {
+                        binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_data_round)
+                        sendMessageModal.setPingStatus(PING_MEDIUM)
+                    }
+                    else if (result > 0) {
+                        binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_active_round)
+                        sendMessageModal.setPingStatus(PING_NORMAL)
+                    } else {
+                        binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_primary_round)
+                        sendMessageModal.setPingStatus(PING_MEDIUM)
+                    }
+                }
+
+            })
+        }
     }
 
     private fun showSearchModal() {
@@ -1461,6 +1501,11 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
     override fun onPingResult(pingResult: Int?) {
         sendMessageModal.setPingStatus(pingResult)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (pingUtility != null) pingUtility!!.stopPingMonitoring()
     }
 
 }
