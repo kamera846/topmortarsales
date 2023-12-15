@@ -15,4 +15,5 @@ data class ContactModel(
     var id_promo: String = "",
     var reputation: String = "",
     var is_birthday: String = "",
+    var created_at: String = "",
 )

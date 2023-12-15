@@ -46,6 +46,7 @@ import com.topmortar.topmortarsales.commons.BASE_URL
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_DATE
 import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
@@ -99,7 +100,7 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
-import com.topmortar.topmortarsales.modal.AddCityModal
+import com.topmortar.topmortarsales.databinding.ActivityDetailContactBinding
 import com.topmortar.topmortarsales.modal.AddVoucherModal
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.modal.SendMessageModal
@@ -131,6 +132,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private lateinit var sessionManager: SessionManager
     private val userDistributorId get() = sessionManager.userDistributor().toString()
+    private lateinit var binding: ActivityDetailContactBinding
 
     private lateinit var tvPhoneContainer: LinearLayout
     private lateinit var etPhoneContainer: LinearLayout
@@ -241,8 +243,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         supportActionBar?.hide()
         sessionManager = SessionManager(this)
+        binding = ActivityDetailContactBinding.inflate(layoutInflater)
 
-        setContentView(R.layout.activity_detail_contact)
+        setContentView(binding.root)
 
         initVariable()
         initClickHandler()
@@ -532,6 +535,18 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val iOwner = intent.getStringExtra(CONST_OWNER)
         val iName = intent.getStringExtra(CONST_NAME)
         val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
+        val iDate = intent.getStringExtra(CONST_DATE)
+
+        if (iDate.isNullOrEmpty()) {
+            binding.dateSeparator.visibility = View.GONE
+            binding.line.visibility = View.VISIBLE
+        } else {
+            val date = DateFormat.format(iDate, format = "dd MMM yyyy")
+
+            binding.tvDate.text = date
+            binding.dateSeparator.visibility = View.VISIBLE
+            binding.line.visibility = View.GONE
+        }
 
         iKtp = intent.getStringExtra(CONST_KTP)
         iMapsUrl = intent.getStringExtra(CONST_MAPS)
