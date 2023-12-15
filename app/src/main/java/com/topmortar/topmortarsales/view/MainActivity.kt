@@ -37,6 +37,7 @@ import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_DATE
 import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_CITY_ID
@@ -239,7 +240,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
     }
 
     private fun navigateChatAdmin() {
-        val phoneNumber = getString(R.string.topmortar_wa_number)
+        val distributorNumber = sessionManager.userDistributorNumber()!!
+        val phoneNumber = if (distributorNumber.isNotEmpty()) distributorNumber else getString(R.string.topmortar_wa_number)
         val message = "*#Courier Service*\nHalo admin, tolong bantu saya [KETIK PESAN ANDA]"
 
         val intent = Intent(Intent.ACTION_VIEW)
@@ -295,6 +297,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             intent.putExtra(CONST_TERMIN, data.termin_payment)
             intent.putExtra(CONST_PROMO, data.id_promo)
             intent.putExtra(CONST_REPUTATION, data.reputation)
+            intent.putExtra(CONST_DATE, data.created_at)
         }
 
         startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)

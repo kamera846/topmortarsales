@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/option_none"
+        android:title="None" />
+    <item
+        android:id="@+id/option_admin"
+        android:title="Admin" />
+    <item
+        android:id="@+id/option_sales"
+        android:title="Sales" />
+    <item
+        android:id="@+id/option_courier"
+        android:title="Kurir" />
+    <item
+        android:id="@+id/option_ba"
+        android:title="Brand Ambassador" />
+</menu>
