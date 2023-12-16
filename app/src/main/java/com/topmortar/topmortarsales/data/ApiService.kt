@@ -330,7 +330,7 @@ interface ApiService {
     suspend fun sendMessageTukang(
         @Part("nama") name: RequestBody,
         @Part("nomorhp") phone: RequestBody,
-//        @Part("nama_lengkap") namaLengkap: RequestBody,
+        @Part("id_user") userId: RequestBody,
         @Part("tgl_lahir") birthday: RequestBody,
         @Part("id_city") cityId: RequestBody,
         @Part("id_skill") skillId: RequestBody,

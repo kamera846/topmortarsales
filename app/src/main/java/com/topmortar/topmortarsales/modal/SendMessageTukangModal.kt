@@ -200,13 +200,12 @@ class SendMessageTukangModal(private val context: Context, private val lifecycle
                 val response = apiService.sendMessageTukang(
                     name = rbName,
                     phone = rbPhone,
-//                    namaLengkap = rbOwner,
                     birthday = rbBirthday,
                     cityId = rbLocation,
                     skillId = rbSkill,
                     mapsUrl = rbMapsUrl,
                     currentName = rbCurrentName,
-//                    userId = rbUserId,
+                    userId = rbUserId,
                     message = rbMessage)
 
                 if (response.isSuccessful) {
