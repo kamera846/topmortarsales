@@ -1401,19 +1401,43 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             pingUtility = PingUtility()
             pingUtility!!.startPingMonitoring(host = PING_HOST, listener = object: PingUtility.PingResultListener {
                 override fun onPingResult(result: Long) {
-                    if (result > 200) {
+
+                    binding.titleBar.tvIndicatorView.text = "$result ms"
+
+                    if (result > 999) {
                         binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_primary_round)
+                        binding.titleBar.indicatorView.visibility = View.GONE
+                        binding.titleBar.tvIndicatorView.text = "999+ ms"
+                        binding.titleBar.tvIndicatorView.setTextColor(getColor(R.color.primary))
+                        binding.titleBar.tvIndicatorView.visibility = View.VISIBLE
                         sendMessageModal.setPingStatus(PING_MEDIUM)
                     }
-                    else if (result > 100) {
+                    else if (result > 350) {
+                        binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_primary_round)
+                        binding.titleBar.indicatorView.visibility = View.GONE
+                        binding.titleBar.tvIndicatorView.setTextColor(getColor(R.color.primary))
+                        binding.titleBar.tvIndicatorView.visibility = View.VISIBLE
+                        sendMessageModal.setPingStatus(PING_MEDIUM)
+                    }
+                    else if (result > 300) {
                         binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_data_round)
+                        binding.titleBar.indicatorView.visibility = View.GONE
+                        binding.titleBar.tvIndicatorView.setTextColor(getColor(R.color.status_data))
+                        binding.titleBar.tvIndicatorView.visibility = View.VISIBLE
                         sendMessageModal.setPingStatus(PING_MEDIUM)
                     }
                     else if (result > 0) {
                         binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_active_round)
+                        binding.titleBar.indicatorView.visibility = View.VISIBLE
+                        binding.titleBar.tvIndicatorView.setTextColor(getColor(R.color.status_active))
+                        binding.titleBar.tvIndicatorView.visibility = View.GONE
                         sendMessageModal.setPingStatus(PING_NORMAL)
                     } else {
                         binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_primary_round)
+                        binding.titleBar.indicatorView.visibility = View.GONE
+                        binding.titleBar.tvIndicatorView.text = "999+ ms"
+                        binding.titleBar.tvIndicatorView.setTextColor(getColor(R.color.primary))
+                        binding.titleBar.tvIndicatorView.visibility = View.VISIBLE
                         sendMessageModal.setPingStatus(PING_MEDIUM)
                     }
                 }
@@ -1600,7 +1624,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
     }
 
-    private fun tooltipHandler(content: ImageView, text: String) {
+    private fun tooltipHandler(content: View, text: String) {
         content.setOnClickListener {
             TooltipCompat.setTooltipText(content, text)
         }
