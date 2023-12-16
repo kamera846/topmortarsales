@@ -44,14 +44,37 @@
 
     </LinearLayout>
 
-    <View
-        android:visibility="gone"
-        android:id="@+id/indicatorView"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:layout_margin="16dp"
-        android:background="@drawable/bg_primary_round"
-    />
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <View
+            android:visibility="gone"
+            android:id="@+id/indicatorView"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginVertical="8dp"
+            android:layout_centerInParent="true"
+            android:background="@drawable/bg_primary_round"
+            />
+
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/tvIndicatorView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginVertical="8dp"
+            android:text="999+ ms"
+            android:textSize="12sp"
+            android:textColor="@color/primary"
+            android:layout_centerInParent="true"
+            android:theme="@style/Theme.TopMortarSales.TextBaseLine"/>
+
+    </RelativeLayout>
 
     <ImageView
         android:visibility="gone"
