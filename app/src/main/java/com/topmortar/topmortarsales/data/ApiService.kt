@@ -3,15 +3,14 @@ package com.topmortar.topmortarsales.data
 import com.topmortar.topmortarsales.commons.ADD_CITY
 import com.topmortar.topmortarsales.commons.ADD_USERS
 import com.topmortar.topmortarsales.commons.AUTH
+import com.topmortar.topmortarsales.commons.BASECAMP
 import com.topmortar.topmortarsales.commons.BID
 import com.topmortar.topmortarsales.commons.BID_ON_GOING
+import com.topmortar.topmortarsales.commons.CONTACT
+import com.topmortar.topmortarsales.commons.DISTRIBUTOR
 import com.topmortar.topmortarsales.commons.EDIT_CONTACT
 import com.topmortar.topmortarsales.commons.GET_CITY
-import com.topmortar.topmortarsales.commons.CONTACT
-import com.topmortar.topmortarsales.commons.SURAT_JALAN
 import com.topmortar.topmortarsales.commons.GET_USERS
-import com.topmortar.topmortarsales.commons.BASECAMP
-import com.topmortar.topmortarsales.commons.DISTRIBUTOR
 import com.topmortar.topmortarsales.commons.INVOICE
 import com.topmortar.topmortarsales.commons.PAYMENT
 import com.topmortar.topmortarsales.commons.PROMO
@@ -20,6 +19,7 @@ import com.topmortar.topmortarsales.commons.SEARCH_CONTACT
 import com.topmortar.topmortarsales.commons.SEND_MESSAGE
 import com.topmortar.topmortarsales.commons.SKILL
 import com.topmortar.topmortarsales.commons.STORE_STATUS
+import com.topmortar.topmortarsales.commons.SURAT_JALAN
 import com.topmortar.topmortarsales.commons.TUKANG
 import com.topmortar.topmortarsales.commons.TUKANG_MESSAGE
 import com.topmortar.topmortarsales.commons.UPDATE_PASSWORD
@@ -28,19 +28,19 @@ import com.topmortar.topmortarsales.commons.VISIT
 import com.topmortar.topmortarsales.commons.VOUCHER
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.response.ResponseAuth
+import com.topmortar.topmortarsales.response.ResponseBaseCamp
 import com.topmortar.topmortarsales.response.ResponseCities
 import com.topmortar.topmortarsales.response.ResponseContactList
 import com.topmortar.topmortarsales.response.ResponseCountStore
-import com.topmortar.topmortarsales.response.ResponseBaseCamp
 import com.topmortar.topmortarsales.response.ResponseDistributor
 import com.topmortar.topmortarsales.response.ResponseGudang
 import com.topmortar.topmortarsales.response.ResponseInvoice
-import com.topmortar.topmortarsales.response.ResponseSuratJalan
 import com.topmortar.topmortarsales.response.ResponseMessage
 import com.topmortar.topmortarsales.response.ResponsePayment
 import com.topmortar.topmortarsales.response.ResponsePromo
 import com.topmortar.topmortarsales.response.ResponseReportVisit
 import com.topmortar.topmortarsales.response.ResponseSkills
+import com.topmortar.topmortarsales.response.ResponseSuratJalan
 import com.topmortar.topmortarsales.response.ResponseTukangList
 import com.topmortar.topmortarsales.response.ResponseUsers
 import okhttp3.MultipartBody
@@ -322,7 +322,8 @@ interface ApiService {
         @Part("id_city") cityId: RequestBody,
         @Part("id_skill") skillId: RequestBody,
         @Part("mapsUrl") mapsUrl: RequestBody,
-        @Part("full_name") currentName: RequestBody
+        @Part("full_name") currentName: RequestBody,
+        @Part("id_user") userId: RequestBody,
     ): Response<ResponseMessage>
 
     @Multipart
@@ -330,12 +331,13 @@ interface ApiService {
     suspend fun sendMessageTukang(
         @Part("nama") name: RequestBody,
         @Part("nomorhp") phone: RequestBody,
-        @Part("id_user") userId: RequestBody,
+//        @Part("nama_lengkap") namaLengkap: RequestBody,
         @Part("tgl_lahir") birthday: RequestBody,
         @Part("id_city") cityId: RequestBody,
         @Part("id_skill") skillId: RequestBody,
         @Part("mapsUrl") mapsUrl: RequestBody,
         @Part("full_name") currentName: RequestBody,
+        @Part("id_user") userId: RequestBody,
         @Part("message_body") message: RequestBody,
     ): Response<ResponseMessage>
 

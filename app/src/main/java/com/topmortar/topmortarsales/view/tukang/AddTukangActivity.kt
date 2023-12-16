@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
@@ -172,6 +171,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                             cityId = rbLocation,
                             skillId = rbSkill,
                             mapsUrl = rbMapsUrl,
+                            userId = rbUserId,
                             currentName = rbCurrentName)
                     } else {
                         apiService.sendMessageTukang(
@@ -183,6 +183,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                             skillId = rbSkill,
                             mapsUrl = rbMapsUrl,
                             currentName = rbCurrentName,
+                            userId = rbUserId,
                             message = rbMessage)
                     }
                 }
