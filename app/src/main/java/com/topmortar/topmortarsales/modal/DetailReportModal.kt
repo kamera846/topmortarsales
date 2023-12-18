@@ -6,13 +6,7 @@ import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.WindowManager
-import androidx.core.content.ContextCompat
-import com.github.mikephil.charting.data.PieData
-import com.github.mikephil.charting.data.PieDataSet
-import com.github.mikephil.charting.data.PieEntry
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.commons.utils.CurrencyFormat
-import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.databinding.ModalDetailReportBinding
@@ -71,6 +65,7 @@ class DetailReportModal(private val context: Context) : Dialog(context) {
         binding.description.text = data.laporan_visit
         binding.date.text = data.date_visit
         binding.tvDistance.text = " ${if (data.is_approved == "1") "Approved" else "Menunggu"} | ${data.distance_visit} km dari titik"
+        binding.approveMessage.text = data.approve_message.let { if (!it.isNullOrEmpty()) it else "Tidak ada feedback" }
 
         val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(data.date_visit)
         val dateFormat = if (date != null) {
