@@ -162,6 +162,15 @@
                 android:src="@drawable/status_active"
                 android:contentDescription="@string/icon_tooltip_information"/>
 
+            <ImageView
+                android:visibility="gone"
+                android:id="@+id/checklist"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:padding="16dp"
+                android:src="@drawable/active_circle_check"
+                android:contentDescription="Icon Checklist"/>
+
         </LinearLayout>
 
         <View
