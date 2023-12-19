@@ -17,6 +17,7 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityVoucherBinding
+import com.topmortar.topmortarsales.modal.AddVoucherModal
 import com.topmortar.topmortarsales.model.VoucherModel
 import kotlinx.coroutines.launch
 
@@ -25,6 +26,7 @@ class VoucherActivity : AppCompatActivity() {
     private lateinit var binding: ActivityVoucherBinding
     private lateinit var apiService: ApiService
     private var idContact = ""
+    private lateinit var voucherModal: AddVoucherModal
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,6 +41,16 @@ class VoucherActivity : AppCompatActivity() {
 
         binding.titleBarDark.icBack.setOnClickListener { finish() }
         binding.titleBarDark.tvTitleBar.text = "Daftar Voucher"
+
+        voucherModal = AddVoucherModal(this, lifecycleScope)
+        voucherModal.setEditCase(true)
+        voucherModal.initializeInterface(object: AddVoucherModal.AddVoucherModalInterface {
+            override fun onSubmit(status: Boolean) {
+                // Do Something
+                if (status) getList()
+            }
+
+        })
 
         getList()
 
@@ -88,6 +100,8 @@ class VoucherActivity : AppCompatActivity() {
         val rvAdapter = VoucherRecyclerViewAdapter(listItem, object: VoucherRecyclerViewAdapter.ItemClickListener {
             override fun onItemClick(data: VoucherModel?) {
                 // Do Something
+                voucherModal.setVoucherId(data?.id_voucher ?: "")
+                voucherModal.show()
             }
 
         })

@@ -1965,7 +1965,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     }
 
     private fun showFormVoucherModal() {
-        val modal = AddVoucherModal(this, contactId.toString(), lifecycleScope)
+        val modal = AddVoucherModal(this, lifecycleScope)
+        modal.setVoucherId(contactId.toString())
         modal.show()
     }
 

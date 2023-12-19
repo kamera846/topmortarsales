@@ -504,6 +504,13 @@ interface ApiService {
         @Part("no_voucher") noVoucher: RequestBody,
     ): ResponseMessage
 
+    @Multipart
+    @POST(VOUCHER)
+    suspend fun editNoFisikVoucher(
+        @Part("id_voucher") idVoucher: RequestBody,
+        @Part("no_fisik") noFisik: RequestBody,
+    ): ResponseMessage
+
     @GET(VOUCHER)
     suspend fun listVoucher(
         @Query("c") idContact: String

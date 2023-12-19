@@ -37,13 +37,13 @@
                         android:id="@+id/tvVoucher1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Voucher 1"
+                        android:text="Nomor Fisik"
                         android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
                         android:textSize="16sp"
                         android:textStyle="bold"/>
 
                     <TextView
-                        android:visibility="gone"
+                        android:visibility="visible"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
@@ -60,7 +60,9 @@
                     android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                     android:textColorHint="@color/black_600"
                     android:hint="Masukkan Kode Voucher"
-                    android:inputType="textCapWords"
+                    android:maxLength="5"
+                    android:maxLines="1"
+                    android:inputType="number"
                     android:textSize="14sp"
                     android:background="@drawable/et_background"
                     android:padding="12dp"
@@ -70,6 +72,7 @@
 
             <!-- Voucher 2 -->
             <LinearLayout
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -118,6 +121,7 @@
 
             <!-- Voucher 3 -->
             <LinearLayout
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -166,6 +170,7 @@
 
             <!-- Voucher 4 -->
             <LinearLayout
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -214,6 +219,7 @@
 
             <!-- Voucher 5 -->
             <LinearLayout
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -262,7 +268,6 @@
 
             <!-- Bottom Action -->
             <LinearLayout
-                android:layout_alignParentBottom="true"
                 android:id="@+id/bottom_action"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
