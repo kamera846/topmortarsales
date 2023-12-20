@@ -106,6 +106,7 @@ class AddVoucherModal(private val context: Context, private val lifecycleScope: 
         tvTitleBar.setPadding(convertDpToPx(16, context),0, convertDpToPx(16, context), 0)
 
         if (isEdit && data != null) binding.etVoucher1.setText(data!!.no_fisik)
+//        handleMessage(context, TAG_RESPONSE_MESSAGE, "$isEdit : $data")
     }
 
     private fun initClickHandler() {
@@ -161,7 +162,6 @@ class AddVoucherModal(private val context: Context, private val lifecycleScope: 
                 val idVoucher = createPartFromString(contactId)
                 val noFisik = createPartFromString(voucher1.toString())
 
-                handleMessage(context, TAG_RESPONSE_MESSAGE, "$contactId : $voucher1")
 
                 val apiService: ApiService = HttpClient.create()
                 val response = apiService.editNoFisikVoucher(idVoucher = idVoucher, noFisik = noFisik)
