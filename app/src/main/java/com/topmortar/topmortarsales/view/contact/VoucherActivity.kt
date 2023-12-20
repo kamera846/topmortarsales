@@ -28,7 +28,7 @@ class VoucherActivity : AppCompatActivity() {
     private lateinit var apiService: ApiService
     private var idContact = ""
     private var contactName = ""
-    private lateinit var voucherModal: AddVoucherModal
+    private var voucherModal: AddVoucherModal? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,15 +47,15 @@ class VoucherActivity : AppCompatActivity() {
         binding.titleBarDark.tvTitleBarDescription.text = "Toko $contactName"
         binding.titleBarDark.tvTitleBarDescription.visibility = if (!contactName.isNullOrEmpty()) View.VISIBLE else View.GONE
 
-        voucherModal = AddVoucherModal(this, lifecycleScope)
-        voucherModal.setEditCase(true)
-        voucherModal.initializeInterface(object: AddVoucherModal.AddVoucherModalInterface {
-            override fun onSubmit(status: Boolean) {
-                // Do Something
-                if (status) getList()
-            }
-
-        })
+//        voucherModal = AddVoucherModal(this, lifecycleScope)
+//        voucherModal.setEditCase(true)
+//        voucherModal.initializeInterface(object: AddVoucherModal.AddVoucherModalInterface {
+//            override fun onSubmit(status: Boolean) {
+//                // Do Something
+//                if (status) getList()
+//            }
+//
+//        })
 
         getList()
 
@@ -105,8 +105,18 @@ class VoucherActivity : AppCompatActivity() {
         val rvAdapter = VoucherRecyclerViewAdapter(listItem, object: VoucherRecyclerViewAdapter.ItemClickListener {
             override fun onItemClick(data: VoucherModel?) {
                 // Do Something
-                voucherModal.setVoucherId(data?.id_voucher ?: "")
-                voucherModal.show()
+                voucherModal = null
+                voucherModal = AddVoucherModal(this@VoucherActivity, lifecycleScope)
+                voucherModal!!.setEditCase(true, data)
+                voucherModal!!.setVoucherId(data?.id_voucher ?: "")
+                voucherModal!!.initializeInterface(object: AddVoucherModal.AddVoucherModalInterface {
+                    override fun onSubmit(status: Boolean) {
+                        // Do Something
+                        if (status) getList()
+                    }
+
+                })
+                voucherModal!!.show()
             }
 
         })
