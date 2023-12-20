@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.VoucherRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
@@ -26,6 +27,7 @@ class VoucherActivity : AppCompatActivity() {
     private lateinit var binding: ActivityVoucherBinding
     private lateinit var apiService: ApiService
     private var idContact = ""
+    private var contactName = ""
     private lateinit var voucherModal: AddVoucherModal
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,9 +40,12 @@ class VoucherActivity : AppCompatActivity() {
         apiService = HttpClient.create()
 
         idContact = intent.getStringExtra(CONST_CONTACT_ID).toString()
+        contactName = intent.getStringExtra(CONST_NAME).toString()
 
         binding.titleBarDark.icBack.setOnClickListener { finish() }
         binding.titleBarDark.tvTitleBar.text = "Daftar Voucher"
+        binding.titleBarDark.tvTitleBarDescription.text = "Toko $contactName"
+        binding.titleBarDark.tvTitleBarDescription.visibility = if (!contactName.isNullOrEmpty()) View.VISIBLE else View.GONE
 
         voucherModal = AddVoucherModal(this, lifecycleScope)
         voucherModal.setEditCase(true)

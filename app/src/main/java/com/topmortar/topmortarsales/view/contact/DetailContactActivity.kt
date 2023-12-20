@@ -1319,7 +1319,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             R.id.voucherOption -> {
 
                 val intent = Intent(this@DetailContactActivity, VoucherActivity::class.java)
+
                 intent.putExtra(CONST_CONTACT_ID, contactId)
+                if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
+                else intent.putExtra(CONST_NAME, tvName.text)
+
                 startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
 
             } R.id.suratJalanOption, R.id.invoiceOption -> {

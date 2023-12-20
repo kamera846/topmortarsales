@@ -27,14 +27,23 @@ class VoucherRecyclerViewAdapter(private val chatList: ArrayList<VoucherModel>, 
         val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
         private val imgChecklist: ImageView = itemView.findViewById(R.id.checklist)
+        private val textVerified: TextView = itemView.findViewById(R.id.textVerified)
 
         fun bind(item: VoucherModel) {
 
             imgIcon.setImageResource(R.drawable.voucher_primary)
             tvContactName.text = item.no_fisik.let { if (!it.isNullOrEmpty()) it else "Belum ada nomor fisik" }
-            tvPhoneNumber.text = item.no_voucher + " | Dibuat pada " + DateFormat.format(item.date_voucher, format = "dd MMM yyyy")
-            if (item.is_claimed == "1") imgChecklist.visibility = View.VISIBLE
-            else imgChecklist.visibility = View.GONE
+            tvPhoneNumber.text = "Dibuat pada " + DateFormat.format(item.date_voucher, format = "dd MMM yyyy")
+//            tvPhoneNumber.text = item.no_voucher + " | Dibuat pada " + DateFormat.format(item.date_voucher, format = "dd MMM yyyy")
+            if (item.is_claimed == "1") {
+//                imgChecklist.visibility = View.VISIBLE
+                textVerified.visibility = View.VISIBLE
+                textVerified.text = "Diklaim"
+            } else {
+//                imgChecklist.visibility = View.GONE
+                textVerified.visibility = View.GONE
+                textVerified.text = ""
+            }
 
         }
 
