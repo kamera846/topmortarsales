@@ -1294,11 +1294,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             val reportOption = bottomSheetLayout.findViewById<LinearLayout>(R.id.reportOption)
             val btnNewReport = bottomSheetLayout.findViewById<Button>(R.id.btnNewReport)
             val reportsTitle = bottomSheetLayout.findViewById<TextView>(R.id.reportsTitle)
+            val voucherOption = bottomSheetLayout.findViewById<LinearLayout>(R.id.voucherOption)
 
             if (sessionManager.userKind() == USER_KIND_COURIER) {
                 invoiceOption.visibility = View.GONE
                 reportOption.visibility = View.GONE
                 btnNewReport.visibility = View.GONE
+                voucherOption.visibility = View.GONE
             } else if (sessionManager.userKind() == USER_KIND_ADMIN) {
                 reportsTitle.text = "Lihat Laporan Sales"
                 reportOption.visibility = View.VISIBLE
@@ -1314,7 +1316,17 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     fun onBottomSheetOptionClick(view: View) {
 
         when (view.id) {
-            R.id.suratJalanOption, R.id.invoiceOption -> {
+            R.id.voucherOption -> {
+
+                val intent = Intent(this@DetailContactActivity, VoucherActivity::class.java)
+
+                intent.putExtra(CONST_CONTACT_ID, contactId)
+                if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
+                else intent.putExtra(CONST_NAME, tvName.text)
+
+                startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+
+            } R.id.suratJalanOption, R.id.invoiceOption -> {
 
                 val intent = Intent(this@DetailContactActivity, ListSuratJalanActivity::class.java)
 
@@ -1957,7 +1969,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     }
 
     private fun showFormVoucherModal() {
-        val modal = AddVoucherModal(this, contactId.toString(), lifecycleScope)
+        val modal = AddVoucherModal(this, lifecycleScope)
+        modal.setVoucherId(contactId.toString())
         modal.show()
     }
 

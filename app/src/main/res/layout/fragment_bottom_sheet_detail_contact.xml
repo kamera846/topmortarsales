@@ -20,6 +20,36 @@
         android:orientation="vertical">
 
         <LinearLayout
+            android:id="@+id/voucherOption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="12dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:onClick="onBottomSheetOptionClick"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackground">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/voucher_black"
+                android:contentDescription="Icon Voucher"/>
+
+            <TextView
+                android:id="@+id/voucherTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Voucher"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/suratJalanOption"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

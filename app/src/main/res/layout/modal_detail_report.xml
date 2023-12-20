@@ -74,4 +74,49 @@
         android:text="@string/lorem_desc"
         android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+
+        <!-- Date Separator -->
+        <LinearLayout
+            android:id="@+id/date_separator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Feedback"
+                android:layout_marginEnd="8dp"
+                android:textSize="14sp"
+                android:theme="@style/Theme.TopMortarSales.TextBaseLine" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:theme="@style/Theme.TopMortarSales.BaseLine"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/approveMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="16dp"
+            android:layout_marginTop="8dp"
+            android:textSize="16sp"
+            android:text="@string/lorem_desc"
+            android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+    </LinearLayout>
+
 </LinearLayout>

@@ -35,6 +35,7 @@ import com.topmortar.topmortarsales.response.ResponseCountStore
 import com.topmortar.topmortarsales.response.ResponseDistributor
 import com.topmortar.topmortarsales.response.ResponseGudang
 import com.topmortar.topmortarsales.response.ResponseInvoice
+import com.topmortar.topmortarsales.response.ResponseList
 import com.topmortar.topmortarsales.response.ResponseMessage
 import com.topmortar.topmortarsales.response.ResponsePayment
 import com.topmortar.topmortarsales.response.ResponsePromo
@@ -502,4 +503,16 @@ interface ApiService {
         @Part("id_contact") idContact: RequestBody,
         @Part("no_voucher") noVoucher: RequestBody,
     ): ResponseMessage
+
+    @Multipart
+    @POST(VOUCHER)
+    suspend fun editNoFisikVoucher(
+        @Part("id_voucher") idVoucher: RequestBody,
+        @Part("no_fisik") noFisik: RequestBody,
+    ): ResponseMessage
+
+    @GET(VOUCHER)
+    suspend fun listVoucher(
+        @Query("c") idContact: String
+    ): ResponseList.ResponseVoucher
 }
