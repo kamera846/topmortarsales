@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -103,5 +104,8 @@ dependencies {
     implementation 'com.itextpdf:kernel:7.0.2'
     implementation 'com.itextpdf:layout:7.0.2'
     implementation 'com.karumi:dexter:6.2.3'
+
+    // Firebase
+    implementation 'com.google.firebase:firebase-database:20.3.0'
 
 }
