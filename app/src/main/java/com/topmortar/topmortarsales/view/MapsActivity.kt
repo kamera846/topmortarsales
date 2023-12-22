@@ -15,6 +15,7 @@ import android.location.Location
 import android.location.LocationListener
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
@@ -33,7 +34,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -55,6 +58,10 @@ import com.google.android.libraries.places.api.net.FetchPlaceResponse
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
 import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.maps.DirectionsApi
 import com.google.maps.GeoApiContext
 import com.google.maps.PendingResult
@@ -80,7 +87,6 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_ACTIVE
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BID
-import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BLACKLIST
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
 import com.topmortar.topmortarsales.commons.TOAST_LONG
@@ -154,6 +160,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var isCardNavigationShowing: Boolean = false
     private var listRouteLines: MutableList<Polyline> = mutableListOf()
 
+    data class DriverLatLng(
+        var lat: Double = 0.0,
+        var lng: Double = 0.0
+    ) {
+        constructor() : this(0.0, 0.0)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -197,6 +210,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         mapFragment.getMapAsync(this)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        // Test Live Location Update with Firebase Realtime Database
+//        firebaseconfig()
 
         if (!Places.isInitialized()) {
             Places.initialize(applicationContext, getString(R.string.maps_key))
@@ -316,7 +332,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     val itemToFind = "${selectedTargetRoute?.position?.latitude},${selectedTargetRoute?.position?.longitude}"
                     val indexOfItem = listCoordinate!!.indexOf(itemToFind)
                     val selectedStatus = if (indexOfItem != -1) listCoordinateStatus!![indexOfItem] else ""
-                    val imgDrawable = when (selectedStatus.toLowerCase()) {
+                    val imgDrawable = when (selectedStatus.lowercase(Locale.getDefault())) {
                         STATUS_CONTACT_DATA -> R.drawable.store_location_status_data
                         STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active
                         STATUS_CONTACT_PASSIVE -> R.drawable.store_location_status_passive
@@ -543,9 +559,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                             .title(listCoordinateName?.get(i))
                                             .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
 
-                                        val onlyStatus = selectedStatusID != "-1" && selectedCitiesID == null && listCoordinateStatus!![i] == selectedStatusID.toLowerCase()
+                                        val onlyStatus = selectedStatusID != "-1" && selectedCitiesID == null && listCoordinateStatus!![i] == selectedStatusID.lowercase(Locale.getDefault())
                                         val onlyCities = selectedCitiesID != null && selectedStatusID == "-1" && listCoordinateCityID!![i] == selectedCitiesID?.id_city
-                                        val statusAndCities = selectedStatusID != "-1" && listCoordinateStatus!![i] == selectedStatusID.toLowerCase() && selectedCitiesID != null && listCoordinateCityID!![i] == selectedCitiesID?.id_city
+                                        val statusAndCities = selectedStatusID != "-1" && listCoordinateStatus!![i] == selectedStatusID.lowercase(Locale.getDefault()) && selectedCitiesID != null && listCoordinateCityID!![i] == selectedCitiesID?.id_city
 
                                         if (statusAndCities) {
                                             mMap.addMarker(markerOptions)
@@ -1193,5 +1209,51 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             }
             else super.onBackPressed()
         } else super.onBackPressed()
+    }
+
+    private fun firebaseconfig() {
+
+        val database = FirebaseDatabase.getInstance()
+        val locationRef = database.getReference("locations")
+
+        val locationRequest = LocationRequest.create()
+            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+            .setInterval(1000) // 1 Second
+
+        val locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+
+                val driverLocation = locationResult.lastLocation!!
+                locationRef.child("driver_0001").setValue(DriverLatLng(driverLocation.latitude, driverLocation.longitude))
+
+            }
+        }
+
+        // Listener From Firebase
+        val locationListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val driverLocation = dataSnapshot.getValue(DriverLatLng::class.java)
+                if (driverLocation != null) setPin(LatLng(driverLocation.lat, driverLocation.lng), "Driver")
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                handleMessage(this@MapsActivity, "MAPS LISTENER", "Failed listening location update: $databaseError")
+            }
+        }
+        locationRef.child("driver_0001").addValueEventListener(locationListener)
+
+        // Request location updates
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+
     }
 }
