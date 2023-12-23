@@ -25,18 +25,17 @@ import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
-import com.topmortar.topmortarsales.commons.SEARCH_CLOSE
 import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
+import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityCourierBinding
-import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.SplashScreenActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
@@ -103,8 +102,17 @@ class CourierActivity : AppCompatActivity() {
             override fun onTabReselected(tab: TabLayout.Tab?) {}
 
         })
-        tabLayout.setTabTextColors(getColor(R.color.primary_600), getColor(R.color.white))
-        tabLayout.setSelectedTabIndicatorColor(getColor(R.color.white))
+
+        if (CustomUtility(this).isDarkMode()) {
+            tabLayout.setBackgroundColor(getColor(R.color.black_300))
+            tabLayout.setTabTextColors(getColor(R.color.black_600), getColor(R.color.primary))
+            tabLayout.setSelectedTabIndicatorColor(getColor(R.color.primary))
+        }
+        else {
+            tabLayout.setBackgroundColor(getColor(R.color.primary))
+            tabLayout.setTabTextColors(getColor(R.color.primary_600), getColor(R.color.white))
+            tabLayout.setSelectedTabIndicatorColor(getColor(R.color.white))
+        }
 
     }
 
