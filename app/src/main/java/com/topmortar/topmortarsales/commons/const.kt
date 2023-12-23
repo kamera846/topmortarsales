@@ -10,6 +10,12 @@ const val BASE_URL = "https://dev-saleswa.topmortarindonesia.com/" // Developmen
 //const val PING_HOST = "saleswa.topmortarindonesia.com" // Production
 const val PING_HOST = "dev-saleswa.topmortarindonesia.com" // Development
 
+// Firebase Realtime Database
+const val FIREBASE_REFERENCE = "db_dev"
+//const val FIREBASE_REFERENCE = "db_prod"
+const val FIREBASE_CHILD_AUTH = "auth"
+const val FIREBASE_CHILD_DELIVERY = "delivery"
+
 const val PING_NORMAL = 0
 const val PING_MEDIUM = 2
 

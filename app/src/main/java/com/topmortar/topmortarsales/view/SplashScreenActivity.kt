@@ -1,6 +1,7 @@
 package com.topmortar.topmortarsales.view
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.text.Editable
@@ -19,10 +20,13 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.google.firebase.database.FirebaseDatabase
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
+import com.topmortar.topmortarsales.commons.FIREBASE_REFERENCE
 import com.topmortar.topmortarsales.commons.LOGGED_IN
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
@@ -34,6 +38,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.KeyboardHandler
 import com.topmortar.topmortarsales.commons.utils.KeyboardHandler.showKeyboard
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -383,6 +388,15 @@ class SplashScreenActivity : AppCompatActivity() {
                             AUTH_LEVEL_BA -> navigateToListTukang()
                             AUTH_LEVEL_COURIER -> navigateToCourier()
                             else -> navigateToMain()
+                        }
+
+                        // Firebase Auth Session
+                        val database = FirebaseDatabase.getInstance().getReference(FIREBASE_REFERENCE)
+                        val authChild = database.child(FIREBASE_CHILD_AUTH)
+                        val userChild = authChild.child(data.username + data.id_user)
+                        userChild.setValue(data)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            userChild.child("datetime").setValue(DateFormat.now())
                         }
 
                         loadingState(false)

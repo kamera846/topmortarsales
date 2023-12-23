@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
+import com.google.firebase.database.FirebaseDatabase
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.viewpager.BAViewPagerAdapter
 import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
@@ -22,6 +23,8 @@ import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_CITY_ID
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_STATUS
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
+import com.topmortar.topmortarsales.commons.FIREBASE_REFERENCE
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -338,6 +341,13 @@ class BrandAmbassadorActivity : AppCompatActivity() {
     }
 
     private fun logoutHandler() {
+
+        // Firebase Auth Session
+        val database = FirebaseDatabase.getInstance().getReference(FIREBASE_REFERENCE)
+        val authChild = database.child(FIREBASE_CHILD_AUTH)
+        val userChild = authChild.child(sessionManager.userName() + sessionManager.userID())
+        userChild.removeValue()
+
         sessionManager.setLoggedIn(LOGGED_OUT)
         sessionManager.setUserKind("")
         sessionManager.setUserID("")

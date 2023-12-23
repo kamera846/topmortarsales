@@ -20,6 +20,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.database.FirebaseDatabase
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.TukangRecyclerViewAdapter
 import com.topmortar.topmortarsales.adapter.TukangRecyclerViewAdapter.ItemClickListener
@@ -35,6 +36,8 @@ import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.CONST_SKILL
 import com.topmortar.topmortarsales.commons.CONST_STATUS
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
+import com.topmortar.topmortarsales.commons.FIREBASE_REFERENCE
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -398,6 +401,13 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
     }
 
     private fun logoutHandler() {
+
+        // Firebase Auth Session
+        val database = FirebaseDatabase.getInstance().getReference(FIREBASE_REFERENCE)
+        val authChild = database.child(FIREBASE_CHILD_AUTH)
+        val userChild = authChild.child(sessionManager.userName() + sessionManager.userID())
+        userChild.removeValue()
+
         sessionManager.setLoggedIn(LOGGED_OUT)
         sessionManager.setUserKind("")
         sessionManager.setUserID("")
