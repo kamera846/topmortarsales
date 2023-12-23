@@ -1619,6 +1619,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     intent.putExtra(CONST_MAPS, iMapsUrl)
                     intent.putExtra(CONST_MAPS_NAME, tvName.text)
                     intent.putExtra(CONST_MAPS_STATUS, iStatus)
+                    intent.putExtra(CONST_CONTACT_ID, contactId)
                     startActivity(intent)
                 } else checkLocationPermission()
             }, animateDuration)
