@@ -9,4 +9,5 @@ data class DetailSuratJalanModel(
     var nama_produk : String = "",
     var id_city : String = "",
     var harga_produk : String = "",
+    var no_voucher : String? = null,
 )

@@ -63,12 +63,6 @@ import com.itextpdf.layout.element.Table
 import com.itextpdf.layout.property.HorizontalAlignment
 import com.itextpdf.layout.property.TextAlignment
 import com.itextpdf.layout.property.UnitValue
-import com.karumi.dexter.Dexter
-import com.karumi.dexter.PermissionToken
-import com.karumi.dexter.listener.PermissionDeniedResponse
-import com.karumi.dexter.listener.PermissionGrantedResponse
-import com.karumi.dexter.listener.PermissionRequest
-import com.karumi.dexter.listener.single.PermissionListener
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.InvoiceOrderRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
@@ -77,7 +71,6 @@ import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_IS_COD
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
-import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_URI
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
@@ -93,7 +86,6 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
-import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.printUtils.Comman
 import com.topmortar.topmortarsales.commons.printUtils.PdfDocumentAdapter
@@ -101,7 +93,6 @@ import com.topmortar.topmortarsales.commons.utils.BluetoothPrinterManager
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
-import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -843,12 +834,18 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                 originalProductName
             }
 
-            textOrders += "[L]${ produkName }[R]${ it.qty_produk }\n"
+            textOrders += "[L]<b>$produkName</b>[R]<b>[${ it.qty_produk }]</b>\n"
+
+            if (!it.no_voucher.isNullOrEmpty()) {
+                textOrders += "[L]Nomor voucher ${it.no_voucher}\n"
+            }
+
             if (it.is_bonus == "1") {
                 textOrders += "[L]${getString(R.string.free)}\n"
             } else if (it.is_bonus == "2") {
                 textOrders += "[L]${getString(R.string.free)}\n"
             }
+
             textOrders += "[L]\n"
         }
 
@@ -1084,7 +1081,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
             UnitValue.createPercentArray(
                 floatArrayOf(
                     1f,
-                    7f,
+                    4f,
+                    4f,
                     1f,
                 )
             )
@@ -1093,6 +1091,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         // table2 ...01
         table2.addCell(Cell().add(getParagraph("No.", TextAlignment.CENTER)))
         table2.addCell(Cell().add(getParagraph("Nama", TextAlignment.CENTER)))
+        table2.addCell(Cell().add(getParagraph("Nomor Voucher", TextAlignment.CENTER)))
         table2.addCell(Cell().add(getParagraph("Qty", TextAlignment.CENTER)))
 
 //        val items = 9
@@ -1112,8 +1111,9 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         for ((index, item) in items.iterator().withIndex()) {
             val i = index + 1
             table2.addCell(Cell().add(getParagraph("$i", TextAlignment.CENTER)))
-            table2.addCell(Cell().add(getParagraph("${item.nama_produk} ${if (item.is_bonus == "1" || item.is_bonus == "2") "(Free)" else ""}", paddingLeft = 8f, paddingRight = 8f)))
-            table2.addCell(Cell().add(getParagraph("${item.qty_produk}", TextAlignment.CENTER)))
+            table2.addCell(Cell().add(getParagraph(item.nama_produk + if (item.is_bonus == "1" || item.is_bonus == "2") " (Free)" else "", paddingLeft = 8f, paddingRight = 8f)))
+            table2.addCell(Cell().add(getParagraph(if (!item.no_voucher.isNullOrEmpty()) item.no_voucher!! else "-", paddingLeft = 8f, paddingRight = 8f)))
+            table2.addCell(Cell().add(getParagraph(item.qty_produk, TextAlignment.CENTER)))
         }
 
         if (items.size == 0) table2.addCell(Cell(1,5).add(getParagraph("Tidak ada pesanan", TextAlignment.LEFT)))

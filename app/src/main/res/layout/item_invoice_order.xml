@@ -27,6 +27,7 @@
             android:layout_weight="1"
             android:paddingRight="8dp"
             android:textSize="16sp"
+            android:textStyle="bold"
             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
             android:text="Not Set"/>
 
@@ -35,10 +36,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="16sp"
+            android:textStyle="bold"
             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
             android:text="Not Set"/>
 
     </LinearLayout>
+
+    <TextView
+        android:visibility="gone"
+        android:id="@+id/tv_voucher"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+        android:text="10101"/>
 
     <TextView
         android:visibility="gone"
