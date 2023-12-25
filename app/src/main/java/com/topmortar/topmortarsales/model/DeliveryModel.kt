@@ -13,7 +13,7 @@ object DeliveryModel {
         var courier: Courier? = null,
         var store: Store? = null,
     ) {
-        constructor() : this("")
+//        constructor() : this("")
     }
     data class Courier (
         var id: String = "",

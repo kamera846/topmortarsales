@@ -129,6 +129,7 @@
     <string name="manage_skill">Kelola Keahlian</string>
     <string name="manage_basecamp">Kelola Basecamp</string>
     <string name="manage_gudang">Kelola Gudang</string>
+    <string name="manage_delivery">Pengiriman</string>
     <string-array name="user_level_spinner_options">
         <item>Pilih Level</item>
         <item>Admin</item>

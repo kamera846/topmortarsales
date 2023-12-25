@@ -399,6 +399,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         val nearestStoreItem = popupMenu.menu.findItem(R.id.nearest_store)
         val basecamp = popupMenu.menu.findItem(R.id.option_basecamp)
         val gudang = popupMenu.menu.findItem(R.id.option_gudang)
+        val delivery = popupMenu.menu.findItem(R.id.option_delivery)
 
         searchItem.isVisible = false
 //        nearestStoreItem.isVisible = false
@@ -407,6 +408,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             cityItem.isVisible = true
             skillItem.isVisible = true
             basecamp.isVisible = true
+            delivery.isVisible = true
 //            gudang.isVisible = true
         }
 
@@ -454,6 +456,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 }
                 R.id.option_gudang -> {
                     startActivity(Intent(this@MainActivity, ManageGudangActivity::class.java))
+                    true
+                }
+                R.id.option_delivery -> {
+                    startActivity(Intent(this@MainActivity, DeliveryActivity::class.java))
                     true
                 }
                 R.id.option_logout -> {
