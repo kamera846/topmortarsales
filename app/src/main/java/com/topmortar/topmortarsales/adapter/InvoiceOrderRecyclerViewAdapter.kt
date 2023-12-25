@@ -1,12 +1,10 @@
 package com.topmortar.topmortarsales.adapter
 
 import android.content.Context
-import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
@@ -26,12 +24,14 @@ class InvoiceOrderRecyclerViewAdapter() : RecyclerView.Adapter<InvoiceOrderRecyc
         private val tvQtyNumber: TextView = itemView.findViewById(R.id.tv_qty_number)
         private val tvProductName: TextView = itemView.findViewById(R.id.tv_product_name)
         private val tvProductSerialNumber: TextView = itemView.findViewById(R.id.tv_product_serial_number)
+        private val tvVoucher: TextView = itemView.findViewById(R.id.tv_voucher)
 
         fun bind(item: DetailSuratJalanModel) {
 
             tvProductId.text = item.id_produk
-            tvQtyNumber.text = item.qty_produk
+            tvQtyNumber.text = "[${item.qty_produk}]"
             tvProductName.text = item.nama_produk
+
             if (item.is_bonus == "1") {
                 tvProductSerialNumber.text = context?.getString(R.string.free)
                 tvProductSerialNumber.visibility = View.VISIBLE
@@ -39,6 +39,11 @@ class InvoiceOrderRecyclerViewAdapter() : RecyclerView.Adapter<InvoiceOrderRecyc
                 tvProductSerialNumber.text = context?.getString(R.string.free)
                 tvProductSerialNumber.visibility = View.VISIBLE
             }
+
+            if (!item.no_voucher.isNullOrEmpty()) {
+                tvVoucher.text = "Nomor voucher: " + item.no_voucher
+                tvVoucher.visibility = View.VISIBLE
+            } else tvVoucher.visibility = View.GONE
 
         }
 

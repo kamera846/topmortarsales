@@ -8,4 +8,5 @@ data class VoucherModel(
     var point_voucher: String = "",
     var date_voucher: String = "",
     var is_claimed: String = "",
+    var exp_date: String? = null,
 )
