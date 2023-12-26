@@ -105,18 +105,20 @@ class VoucherActivity : AppCompatActivity() {
         val rvAdapter = VoucherRecyclerViewAdapter(listItem, object: VoucherRecyclerViewAdapter.ItemClickListener {
             override fun onItemClick(data: VoucherModel?) {
                 // Do Something
-                voucherModal = null
-                voucherModal = AddVoucherModal(this@VoucherActivity, lifecycleScope)
-                voucherModal!!.setEditCase(true, data)
-                voucherModal!!.setVoucherId(data?.id_voucher ?: "")
-                voucherModal!!.initializeInterface(object: AddVoucherModal.AddVoucherModalInterface {
-                    override fun onSubmit(status: Boolean) {
-                        // Do Something
-                        if (status) getList()
-                    }
+                if (data?.is_claimed == "0") {
+                    voucherModal = null
+                    voucherModal = AddVoucherModal(this@VoucherActivity, lifecycleScope)
+                    voucherModal!!.setEditCase(true, data)
+                    voucherModal!!.setVoucherId(data?.id_voucher ?: "")
+                    voucherModal!!.initializeInterface(object: AddVoucherModal.AddVoucherModalInterface {
+                        override fun onSubmit(status: Boolean) {
+                            // Do Something
+                            if (status) getList()
+                        }
 
-                })
-                voucherModal!!.show()
+                    })
+                    voucherModal!!.show()
+                }
             }
 
         })
