@@ -85,6 +85,7 @@ const val PRINT_METHOD_WIFI = "print_wifi"
 // Props
 const val CONST_CONTACT_ID = "const_contact_id"
 const val CONST_USER_ID = "const_user_id"
+const val CONST_DELIVERY_ID = "const_delivery_id"
 const val CONST_INVOICE_ID = "const_invoice_id"
 const val CONST_INVOICE_NUMBER = "const_invoice_number"
 const val CONST_INVOICE_IS_COD = "const_invoice_is_cod"
@@ -119,6 +120,7 @@ const val CONST_LIST_COORDINATE_NAME = "const_list_coordinate_name"
 const val CONST_LIST_COORDINATE_STATUS = "const_list_coordinate_status"
 const val CONST_LIST_COORDINATE_CITY_ID = "const_list_coordinate_city_id"
 const val CONST_IS_BASE_CAMP = "const_is_base_camp"
+const val CONST_IS_TRACKING = "const_is_tracking"
 
 // Status
 const val LOGGED_IN = true

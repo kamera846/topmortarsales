@@ -79,7 +79,9 @@ import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.CONNECTION_FAILURE_RESOLUTION_REQUEST
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_DELIVERY_ID
 import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
+import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_CITY_ID
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
@@ -98,6 +100,7 @@ import com.topmortar.topmortarsales.commons.STATUS_CONTACT_ACTIVE
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BID
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
@@ -140,10 +143,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private lateinit var placesClient: PlacesClient
     private var routeDirections: Polyline? = null
 
-    private var iMaps = ""
-    private var iMapsName = ""
-    private var iMapsStatus = ""
-    private var iContactID = ""
+    private var iMaps: String? = null
+    private var iMapsName: String? = null
+    private var iMapsStatus: String? = null
+    private var iContactID: String? = null
     private var isGetCoordinate = false
     private var isNearestStore = false
     private var isBasecamp = false
@@ -186,7 +189,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var childDelivery: DatabaseReference? = null
     private var childDriver: DatabaseReference? = null
     private var locationCallback: LocationCallback? = null
+    private var locationListener: ValueEventListener? = null
     private var courierMarker: Marker? = null
+    private var isTracking = false
+    private var deliveryID: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -393,8 +399,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 img.setImageDrawable(getDrawable(R.drawable.direction_white))
                 title.text = "Aktifkan Navigasi"
 
-                // Test Live Location Update with Firebase Realtime Database
-//                stopTracking()
+                // Live Location Update with Firebase Realtime Database
+                stopTracking()
             }, 500)
 
             val limitKm = binding.etKm.text.toString().toDouble()
@@ -454,12 +460,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     @SuppressLint("MissingPermission")
     private fun dataActivityValidation() {
 
-        iMaps = intent.getStringExtra(CONST_MAPS).toString()
-        iMapsName = intent.getStringExtra(CONST_MAPS_NAME).toString()
-        iMapsStatus = intent.getStringExtra(CONST_MAPS_STATUS).toString()
-        iContactID = intent.getStringExtra(CONST_CONTACT_ID).toString()
+        iMaps = intent.getStringExtra(CONST_MAPS)
+        iMapsName = intent.getStringExtra(CONST_MAPS_NAME)
+        iMapsStatus = intent.getStringExtra(CONST_MAPS_STATUS)
+        iContactID = intent.getStringExtra(CONST_CONTACT_ID)
+        deliveryID = intent.getStringExtra(CONST_DELIVERY_ID)
         isGetCoordinate = intent.getBooleanExtra(GET_COORDINATE, false)
         isNearestStore = intent.getBooleanExtra(CONST_NEAREST_STORE, false)
+        isTracking = intent.getBooleanExtra(CONST_IS_TRACKING, false)
         listCoordinate = intent.getStringArrayListExtra(CONST_LIST_COORDINATE)
         listCoordinateName = intent.getStringArrayListExtra(CONST_LIST_COORDINATE_NAME)
         listCoordinateStatus = intent.getStringArrayListExtra(CONST_LIST_COORDINATE_STATUS)
@@ -469,7 +477,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             binding.btnGetLatLng.visibility = View.VISIBLE
             binding.searchBar.visibility = View.VISIBLE
         } else {
-            if (!isNearestStore) {
+            if (!isNearestStore && !isTracking) {
 
                 fusedLocationClient.lastLocation
                     .addOnSuccessListener { location: Location? ->
@@ -492,15 +500,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             val urlUtility = URLUtility(this)
 
-            if (urlUtility.isUrl(iMaps)) {
+            if (urlUtility.isUrl(iMaps!!)) {
                 val mapsUrlPattern1 = Regex("https://goo\\.gl/maps/\\w+")
                 val mapsUrlPattern2 = Regex("https://maps\\.app\\.goo\\.gl/\\w+")
 
-                if (mapsUrlPattern1.matches(iMaps) || mapsUrlPattern2.matches(iMaps)) return onFindLocation(iMaps)
+                if (mapsUrlPattern1.matches(iMaps!!) || mapsUrlPattern2.matches(iMaps!!)) return onFindLocation(iMaps!!)
                 else showDialog(message = "Gagal memproses maps url")
             } else {
 
-                val coordinates = iMaps.trim().split(",")
+                val coordinates = iMaps!!.trim().split(",")
                 if (coordinates.size == 2) {
                     val latitude = coordinates[0].toDoubleOrNull()
                     val longitude = coordinates[1].toDoubleOrNull()
@@ -827,8 +835,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     img.setImageDrawable(getDrawable(R.drawable.direction_line_white))
                     title.text = "Matikan Navigasi"
 
-                    // Test Live Location Update with Firebase Realtime Database
-//                    startTracking()
+                    // Live Location Update with Firebase Realtime Database
+                    startTracking()
                 }, 500)
 
             } else {
@@ -930,7 +938,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     if (location != null) {
                         currentLatLng = LatLng(location.latitude, location.longitude)
 //                        currentLatLng = LatLng(-7.952356,112.692583)
-                        setPin(currentLatLng!!, "Lokasi Saya")
+                        if (isTracking) setupTracking()
+                        else setPin(currentLatLng!!, "Lokasi Saya")
 
                         if (isNearestStore && binding.llFilter.isVisible) getCities()
                         else if (isNearestStore) searchCoordinate()
@@ -1244,9 +1253,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             USER_KIND_BA -> AUTH_LEVEL_BA
             else -> AUTH_LEVEL_SALES
         }
+
+        val deliveryId = "$userLevel$userID"
         database = FirebaseDatabase.getInstance().getReference(FIREBASE_REFERENCE)
         childDelivery = database?.child(FIREBASE_CHILD_DELIVERY)
-        childDriver = childDelivery?.child("$userLevel$userID")
+        childDriver = childDelivery?.child(deliveryId)
 
         val courierModel = DeliveryModel.Courier(
             id = userID,
@@ -1254,11 +1265,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         )
 
         val storeModel = DeliveryModel.Store(
-            id = iContactID,
-            name = iMapsName
+            id = iContactID!!,
+            name = iMapsName!!,
+            lat = selectedLocation!!.latitude,
+            lng = selectedLocation!!.longitude,
         )
 
         val deliveryModel = DeliveryModel.Delivery(
+            id = deliveryId,
             start_datetime = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) DateFormat.now() else "",
             start_lat = currentLatLng!!.latitude,
             start_lng = currentLatLng!!.longitude,
@@ -1283,7 +1297,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         }
 
         // Listener From Firebase
-        val locationListener = object : ValueEventListener {
+        locationListener = object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val driver = dataSnapshot.getValue(DeliveryModel.Delivery::class.java)
                 if (driver != null) {
@@ -1297,7 +1311,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
 //                    val courierMarker = MarkerOptions()
 //                        .position(LatLng(driver.lat, driver.lng))
-//                        .title("Driver")
+//                        .title("Kurir)
 //                        .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
 //                    mMap.addMarker(courierMarker)
 
@@ -1318,17 +1332,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         courierMarker = mMap.addMarker(
                             MarkerOptions()
                                 .position(latLng)
-                                .title("Driver")
+                                .title("Kurir")
                                 .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
                         )
                     } else courierMarker?.position = latLng
 
-                    val bounds = LatLngBounds.builder()
-                        .include(latLng)
-                        .include(selectedLocation ?: return)
-                        .build()
-                    val updateCamera = CameraUpdateFactory.newLatLngBounds(bounds, 100)
-                    mMap.animateCamera(updateCamera, mapsDuration, null)
+//                    val bounds = LatLngBounds.builder()
+//                        .include(latLng)
+//                        .include(selectedLocation ?: return)
+//                        .build()
+//                    val updateCamera = CameraUpdateFactory.newLatLngBounds(bounds, 100)
+//                    mMap.animateCamera(updateCamera, mapsDuration, null)
                 }
             }
 
@@ -1336,7 +1350,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 handleMessage(this@MapsActivity, "MAPS LISTENER", "Failed listening location update: $databaseError")
             }
         }
-        childDriver?.addValueEventListener(locationListener)
+        childDriver?.addValueEventListener(locationListener!!)
 
         // Request location updates
         if (ActivityCompat.checkSelfPermission(
@@ -1365,16 +1379,143 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         }
         if (locationCallback != null) {
             courierMarker?.remove()
+            childDriver?.removeEventListener(locationListener!!)
             fusedLocationClient.removeLocationUpdates(locationCallback!!)
             mMap.isMyLocationEnabled = true
+
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location: Location? ->
+                    childDriver!!.child("end_lat").setValue(location?.latitude)
+                    childDriver!!.child("end_lng").setValue(location?.longitude)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        childDriver!!.child("end_datetime").setValue(DateFormat.now())
+                    }
+                }
         }
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location: Location? ->
-                childDriver!!.child("end_lat").setValue(location?.latitude)
-                childDriver!!.child("end_lng").setValue(location?.longitude)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    childDriver!!.child("end_datetime").setValue(DateFormat.now())
+    }
+
+    private fun setupTracking() {
+
+        database = FirebaseDatabase.getInstance().getReference(FIREBASE_REFERENCE)
+        childDelivery = database?.child(FIREBASE_CHILD_DELIVERY)
+        childDriver = childDelivery?.child(deliveryID.toString())
+
+        val courierDrawable = R.drawable.store_location_status_biding
+        val storeDrawable = R.drawable.store_location_status_blacklist
+        var delivery: DeliveryModel.Delivery? = null
+
+        childDriver?.addValueEventListener(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+
+                if (delivery == null) {
+
+                    delivery = snapshot.getValue(DeliveryModel.Delivery::class.java)
+
+                    val startLatLng = LatLng(delivery!!.start_lat, delivery!!.start_lng)
+                    val courierLatLng = LatLng(delivery!!.lat, delivery!!.lng)
+                    val destinationLatLng = LatLng(delivery!!.store!!.lat, delivery!!.store!!.lng)
+
+                    courierMarker = mMap.addMarker(
+                        MarkerOptions()
+                            .position(courierLatLng)
+                            .title(delivery!!.courier?.name ?: "Kurir")
+                            .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap(courierDrawable)))
+                    )
+                    mMap.addMarker(
+                        MarkerOptions()
+                            .position(destinationLatLng)
+                            .title(delivery!!.store?.name ?: "Toko")
+                            .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap(storeDrawable)))
+                    )
+
+                    val directions = DirectionsApi.newRequest(getGeoContext())
+                        .mode(TravelMode.DRIVING) // Ganti dengan mode perjalanan yang sesuai
+                        .origin(com.google.maps.model.LatLng(startLatLng.latitude, startLatLng.longitude))
+                        .destination(com.google.maps.model.LatLng(destinationLatLng.latitude, destinationLatLng.longitude))
+                        .optimizeWaypoints(true)
+                        .alternatives(true)
+
+                    try {
+                        val result = directions.await()
+
+                        if (result.routes.isNotEmpty()) {
+                            val listPolylineOptions = arrayListOf<PolylineOptions>()
+
+                            // Gambar rute pada peta
+                            for (i in 0..result.routes.size) {
+                                if (i < result.routes.size && i < 3) {
+                                    val route = result.routes[i]
+                                    val overviewPolyline = route.overviewPolyline.decodePath()
+                                    val polylineOptions = PolylineOptions()
+                                    polylineOptions.width(15f)
+                                    polylineOptions.color(getColor(lineColor[i]))
+                                    for (latLng in overviewPolyline) {
+                                        polylineOptions.add(LatLng(latLng.lat, latLng.lng))
+                                    }
+                                    listPolylineOptions.add(polylineOptions)
+                                }
+                            }
+
+                            for (i in listPolylineOptions.size - 1 downTo 0) {
+                                routeDirections = mMap.addPolyline(listPolylineOptions[i])
+                                listRouteLines.add(routeDirections!!)
+                            }
+
+                            val bounds = LatLngBounds.builder()
+                                .include(startLatLng)
+                                .include(destinationLatLng)
+                                .build()
+                            val updateCamera = CameraUpdateFactory.newLatLngBounds(bounds, 100)
+                            mMap.animateCamera(updateCamera, mapsDuration, null)
+
+                        } else {
+                            Toast.makeText(this@MapsActivity, "Tidak ada rute ditemukan", Toast.LENGTH_SHORT).show()
+                        }
+                    } catch (e: ApiException) {
+                        Toast.makeText(this@MapsActivity, "Gagal memuat navigasi", Toast.LENGTH_SHORT).show()
+                        e.printStackTrace()
+                    } catch (e: InterruptedException) {
+                        Toast.makeText(this@MapsActivity, "Gagal memuat navigasi", Toast.LENGTH_SHORT).show()
+                        e.printStackTrace()
+                    } catch (e: IOException) {
+                        Toast.makeText(this@MapsActivity, "Gagal memuat navigasi", Toast.LENGTH_SHORT).show()
+                        e.printStackTrace()
+                    }
+                }
+                else {
+
+                    delivery = snapshot.getValue(DeliveryModel.Delivery::class.java)
+
+                    val courierLatLng = LatLng(delivery!!.lat, delivery!!.lng)
+                    if (courierMarker == null) {
+                        courierMarker = mMap.addMarker(
+                            MarkerOptions()
+                                .position(courierLatLng)
+                                .title(delivery!!.courier?.name ?: "Kurir")
+                                .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap(courierDrawable)))
+                        )
+                    } else courierMarker?.position = courierLatLng
                 }
             }
+
+            override fun onCancelled(error: DatabaseError) {
+                handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
+                    "Failed run service. Exception $error"
+                )
+            }
+
+        })
+
+        return
+    }
+
+    private fun resizedBitmap(drawable: Int): Bitmap {
+
+        val originalBitmap = BitmapFactory.decodeResource(resources, drawable)
+
+        val newWidth = convertDpToPx(40, this@MapsActivity)
+        val newHeight = convertDpToPx(40, this@MapsActivity)
+
+        return Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
     }
 }

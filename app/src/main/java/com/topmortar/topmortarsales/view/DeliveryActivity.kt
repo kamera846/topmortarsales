@@ -1,5 +1,6 @@
 package com.topmortar.topmortarsales.view
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -13,8 +14,11 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.DeliveryRecyclerViewAdapter
+import com.topmortar.topmortarsales.commons.CONST_DELIVERY_ID
+import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
 import com.topmortar.topmortarsales.commons.FIREBASE_REFERENCE
+import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -55,7 +59,7 @@ class DeliveryActivity : AppCompatActivity() {
         val myRef: DatabaseReference = database.getReference("$FIREBASE_REFERENCE/$FIREBASE_CHILD_DELIVERY")
 
         // Add a ValueEventListener to retrieve the data
-        myRef.addValueEventListener(object : ValueEventListener {
+        myRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 // The dataSnapshot contains the data from the database
                 val deliveryList = arrayListOf<DeliveryModel.Delivery>()
@@ -78,7 +82,9 @@ class DeliveryActivity : AppCompatActivity() {
 
             override fun onCancelled(databaseError: DatabaseError) {
                 // Handle errors
-                handleMessage(this@DeliveryActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + databaseError)
+                handleMessage(this@DeliveryActivity, TAG_RESPONSE_CONTACT,
+                    "Failed run service. Exception $databaseError"
+                )
                 loadingState(true, getString(R.string.failed_request))
             }
         })
@@ -89,6 +95,10 @@ class DeliveryActivity : AppCompatActivity() {
         val rvAdapter = DeliveryRecyclerViewAdapter(listItem, object: DeliveryRecyclerViewAdapter.ItemClickListener {
             override fun onItemClick(data: DeliveryModel.Delivery?) {
                 // Do Something
+                val intent = Intent(this@DeliveryActivity, MapsActivity::class.java)
+                intent.putExtra(CONST_IS_TRACKING, true)
+                intent.putExtra(CONST_DELIVERY_ID, data?.id)
+                startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
             }
 
         })
