@@ -2,19 +2,39 @@ package com.topmortar.topmortarsales.commons
 
 import android.widget.Toast
 
-// Services
+/*
+    Services
+ */
 //const val BASE_URL = "https://saleswa.topmortarindonesia.com/" // Production
 const val BASE_URL = "https://dev-saleswa.topmortarindonesia.com/" // Development
 
-// Ping Host
+/*
+    Ping Host
+ */
 //const val PING_HOST = "saleswa.topmortarindonesia.com" // Production
 const val PING_HOST = "dev-saleswa.topmortarindonesia.com" // Development
 
-// Firebase Realtime Database
-const val FIREBASE_REFERENCE = "db_dev"
-//const val FIREBASE_REFERENCE = "db_prod"
+/*
+    Firebase Realtime Database
+ */
+//const val FIREBASE_REFERENCE = "db_prod" // Production
+const val FIREBASE_REFERENCE = "db_dev" // Development
 const val FIREBASE_CHILD_AUTH = "auth"
 const val FIREBASE_CHILD_DELIVERY = "delivery"
+
+/*
+    Global
+ */
+const val TOAST_LONG = Toast.LENGTH_LONG
+const val TOAST_SHORT = Toast.LENGTH_SHORT
+
+const val MAX_DISTANCE = 0.4
+const val MAX_REPORT_DISTANCE = 0.3
+
+const val EMPTY_FIELD_VALUE = "Not set"
+
+const val PRINT_METHOD_BLUETOOTH = "print_bluetooth"
+const val PRINT_METHOD_WIFI = "print_wifi"
 
 const val PING_NORMAL = 0
 const val PING_MEDIUM = 2
@@ -53,7 +73,9 @@ const val BASECAMP = "gudang.php"
 const val DISTRIBUTOR = "distributor.php"
 const val VOUCHER = "voucher.php"
 
-// Request Code
+/*
+    Request Code
+ */
 const val ACTIVITY_REQUEST_CODE = "activity_request_code"
 const val MAIN_ACTIVITY_REQUEST_CODE = 111
 const val DETAIL_ACTIVITY_REQUEST_CODE = 222
@@ -68,21 +90,16 @@ const val REQUEST_BASECAMP_FRAGMENT = "request_basecamp_fragment"
 const val RESULT_BASECAMP_FRAGMENT = 101010
 const val REQUEST_STORAGE_PERMISSION = 111111
 
-// Tag Log
+/*
+    Tag Log
+ */
 const val TAG_RESPONSE_CONTACT = "TAG RESPONSE CONTACT"
 const val TAG_RESPONSE_MESSAGE = "TAG RESPONSE MESSAGE"
 const val TAG_ACTION_MAIN_ACTIVITY = "TAG ACTION MAIN ACTIVITY"
 
-// Global
-const val TOAST_LONG = Toast.LENGTH_LONG
-const val TOAST_SHORT = Toast.LENGTH_SHORT
-const val MAX_DISTANCE = 0.4
-const val MAX_REPORT_DISTANCE = 0.3
-const val EMPTY_FIELD_VALUE = "Not set"
-const val PRINT_METHOD_BLUETOOTH = "print_bluetooth"
-const val PRINT_METHOD_WIFI = "print_wifi"
-
-// Props
+/*
+    Props
+ */
 const val CONST_CONTACT_ID = "const_contact_id"
 const val CONST_USER_ID = "const_user_id"
 const val CONST_DELIVERY_ID = "const_delivery_id"
@@ -122,7 +139,9 @@ const val CONST_LIST_COORDINATE_CITY_ID = "const_list_coordinate_city_id"
 const val CONST_IS_BASE_CAMP = "const_is_base_camp"
 const val CONST_IS_TRACKING = "const_is_tracking"
 
-// Status
+/*
+    Status
+ */
 const val LOGGED_IN = true
 const val LOGGED_OUT = false
 const val SEARCH_OPEN = "search_open"
@@ -144,7 +163,9 @@ const val STATUS_TERMIN_60 = "60"
 const val INVOICE_PAID = "paid"
 const val GET_COORDINATE = "get_coordinate"
 
-// User Kind
+/*
+    User Kind
+ */
 const val USER_KIND_ADMIN = "user_kind_admin"
 const val USER_KIND_SALES = "user_kind_sales"
 const val USER_KIND_COURIER = "user_kind_courier"
