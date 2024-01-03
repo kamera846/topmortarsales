@@ -1,9 +1,12 @@
 package com.topmortar.topmortarsales.view.courier
 
+import android.Manifest
 import android.app.Activity.RESULT_OK
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -14,6 +17,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -35,12 +40,14 @@ import com.topmortar.topmortarsales.commons.CONST_PROMO
 import com.topmortar.topmortarsales.commons.CONST_REPUTATION
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
+import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -93,6 +100,44 @@ class ClosingStoreFragment : Fragment() {
         userCity = sessionManager.userCityID().toString()
         userID = sessionManager.userID().toString()
         binding.btnFabAdmin.setOnClickListener { navigateChatAdmin() }
+        binding.btnStartDelivery.setOnClickListener {
+            // Memeriksa izin
+            if (ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED
+            ) {
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    // Meminta izin background location
+                    if (ContextCompat.checkSelfPermission(
+                            requireActivity(),
+                            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
+                        // Memulai layanan jika izin sudah diberikan
+                        val serviceIntent = Intent(requireActivity(), TrackingService::class.java)
+                        requireActivity().startService(serviceIntent)
+                    } else {
+                        // Jika izin belum diberikan, tampilkan dialog permintaan izin
+                        ActivityCompat.requestPermissions(
+                            requireActivity(),
+                            arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                            LOCATION_PERMISSION_REQUEST_CODE
+                        )
+                    }
+                }
+            } else {
+                // Meminta izin lokasi jika belum diberikan
+                ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    LOCATION_PERMISSION_REQUEST_CODE
+                )
+            }
+        }
+        binding.btnStopDelivery.setOnClickListener {
+            val serviceIntent = Intent(requireActivity(), TrackingService::class.java)
+            requireActivity().stopService(serviceIntent)
+        }
 
         getContacts()
 
