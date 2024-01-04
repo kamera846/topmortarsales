@@ -191,7 +191,7 @@ class ManageGudangActivity : AppCompatActivity() {
     private fun navigateFab() {
 
         val intent = Intent(this@ManageGudangActivity, FormGudangActivity::class.java)
-        startActivity(intent)
+        startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
 
     }
 
