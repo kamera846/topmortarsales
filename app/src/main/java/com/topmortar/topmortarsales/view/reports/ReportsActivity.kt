@@ -206,8 +206,8 @@ class ReportsActivity : AppCompatActivity() {
                 override fun onItemClick(item: ReportVisitModel) {
                     val modalDetail = DetailReportModal(this@ReportsActivity)
                     modalDetail.setData(item)
-                    if (isCourier || isBA) mAdapter.setIsCourier(true)
-                    else mAdapter.setIsCourier(false)
+                    if (isCourier || isBA) modalDetail.setIsCourier(true)
+                    else modalDetail.setIsCourier(false)
                     if (contactID.isNullOrEmpty()) modalDetail.setWithName(true)
                     modalDetail.show()
                 }
