@@ -46,6 +46,7 @@ const val VISIT = "visit.php"
 const val BASECAMP = "gudang.php"
 const val DISTRIBUTOR = "distributor.php"
 const val VOUCHER = "voucher.php"
+const val WAREHOUSE = "warehouse.php"
 
 // Request Code
 const val ACTIVITY_REQUEST_CODE = "activity_request_code"

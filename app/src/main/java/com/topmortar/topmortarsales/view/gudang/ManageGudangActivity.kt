@@ -13,14 +13,19 @@ import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.GudangRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_DATE
 import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.EDIT_CONTACT
+import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.REQUEST_BASECAMP_FRAGMENT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_SUCCESS
+import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -39,6 +44,7 @@ class ManageGudangActivity : AppCompatActivity() {
     private val binding get() = _binding!!
     private val userKind get() = sessionManager.userKind()!!
     private val userCity get() = sessionManager.userCityID()!!
+    private val userDistributorId get() = sessionManager.userDistributor()!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,11 +58,11 @@ class ManageGudangActivity : AppCompatActivity() {
         binding.titleBarDark.icBack.setOnClickListener { finish() }
         binding.btnFabAdd.setOnClickListener { navigateFab() }
 
-        getContacts()
+        getList()
 
     }
 
-    private fun getContacts() {
+    private fun getList() {
 
         loadingState(true)
         showBadgeRefresh(false)
@@ -66,12 +72,12 @@ class ManageGudangActivity : AppCompatActivity() {
 
                 val apiService: ApiService = HttpClient.create()
                 val response = when (userKind) {
-                    USER_KIND_ADMIN -> apiService.getListGudang()
-                    else -> apiService.getListGudang(cityId = userCity)
+                    USER_KIND_ADMIN -> apiService.getListGudang(distributorID = userDistributorId)
+                    else -> apiService.getListGudang(cityId = userCity, distributorID = userDistributorId)
                 }
 
                 when (response.status) {
-                    RESPONSE_STATUS_OK -> {
+                    RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
 
                         setRecyclerView(response.results)
                         loadingState(false)
@@ -80,7 +86,7 @@ class ManageGudangActivity : AppCompatActivity() {
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        loadingState(true, "Belum ada basecamp!")
+                        loadingState(true, "Belum ada gudang!")
                         showBadgeRefresh(false)
 
                     }
@@ -145,19 +151,20 @@ class ManageGudangActivity : AppCompatActivity() {
 
             val intent = Intent(this@ManageGudangActivity, FormGudangActivity::class.java)
             intent.putExtra(EDIT_CONTACT, true)
-            intent.putExtra(CONST_CONTACT_ID, data?.id_gudang)
-            intent.putExtra(CONST_PHONE, data?.nomorhp_gudang)
-            intent.putExtra(CONST_NAME, data?.nama_gudang)
+            intent.putExtra(CONST_CONTACT_ID, data?.id_warehouse)
+            intent.putExtra(CONST_PHONE, data?.nomorhp_warehouse)
+            intent.putExtra(CONST_NAME, data?.nama_warehouse)
             intent.putExtra(CONST_LOCATION, data?.id_city)
-            intent.putExtra(CONST_MAPS, data?.location_gudang)
-            startActivity(intent)
+            intent.putExtra(CONST_MAPS, data?.location_warehouse)
+            intent.putExtra(CONST_DATE, data?.created_at)
+            startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
         } else {
 
             val intent = Intent(this@ManageGudangActivity, NewReportActivity::class.java)
             intent.putExtra(CONST_IS_BASE_CAMP, true)
-            intent.putExtra(CONST_CONTACT_ID, data?.id_gudang)
-            intent.putExtra(CONST_NAME, data?.nama_gudang)
-            intent.putExtra(CONST_MAPS, data?.location_gudang)
+            intent.putExtra(CONST_CONTACT_ID, data?.id_warehouse)
+            intent.putExtra(CONST_NAME, data?.nama_warehouse)
+            intent.putExtra(CONST_MAPS, data?.location_warehouse)
             (this@ManageGudangActivity as Activity).startActivity(intent)
         }
 
@@ -196,11 +203,25 @@ class ManageGudangActivity : AppCompatActivity() {
 
         if (action) {
             badgeRefresh.visibility = View.VISIBLE
-            tvTitle.setOnClickListener { getContacts() }
+            tvTitle.setOnClickListener { getList() }
         } else badgeRefresh.visibility = View.GONE
     }
 
     override fun onBackPressed() {
         finish()
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == MAIN_ACTIVITY_REQUEST_CODE) {
+            val resultData = data?.getStringExtra(REQUEST_BASECAMP_FRAGMENT)
+
+            if (resultData == SYNC_NOW) {
+
+                getList()
+
+            }
+        }
+    }
+
 }

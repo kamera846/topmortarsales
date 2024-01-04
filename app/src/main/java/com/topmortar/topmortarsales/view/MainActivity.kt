@@ -404,7 +404,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             cityItem.isVisible = true
             skillItem.isVisible = true
             basecamp.isVisible = true
-//            gudang.isVisible = true
+            gudang.isVisible = true
         }
 
         if (sessionManager.userKind() != USER_KIND_SALES) {
