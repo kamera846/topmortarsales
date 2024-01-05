@@ -78,11 +78,12 @@ import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_SUCCESS
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_ACTIVE
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BID
-import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BLACKLIST
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
@@ -96,7 +97,9 @@ import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityMapsBinding
 import com.topmortar.topmortarsales.modal.FilterTokoModal
+import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.CityModel
+import com.topmortar.topmortarsales.model.GudangModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -153,6 +156,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var isRouteActive: Boolean = false
     private var isCardNavigationShowing: Boolean = false
     private var listRouteLines: MutableList<Polyline> = mutableListOf()
+
+    private var listGudang: ArrayList<GudangModel> = arrayListOf()
+    private var selectedCenterPoint: ModalSearchModel? = null
+    private lateinit var searchModal: SearchModal
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -263,14 +270,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         }
 
         if (binding.btnGetLatLng.isVisible) {
-            mMap.setPadding(0,0,0, convertDpToPx(72, this))
+            mMap.setPadding(0,0,0, convertDpToPx(80, this))
             mMap.setOnMapLongClickListener { latLng -> setPin(latLng, getPlaceNameFromLatLng(latLng), moveCamera = false) }
             if (!sessionManager.pinMapHint()) {
                 showDialog(message = "Tekan dan tahan pada peta untuk menandai lokasi")
                 sessionManager.pinMapHint(true)
             }
         } else if (binding.btnGetDirection.isVisible) {
-            mMap.setPadding(0,0,0, convertDpToPx(72, this))
+            mMap.setPadding(0,0,0, convertDpToPx(80, this))
 
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location: Location? ->
@@ -302,6 +309,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     private fun toggleDrawRoute() {
         if (isNearestStore) {
+            if (binding.llFilter.isVisible) mMap.setPadding(0, convertDpToPx(32, this@MapsActivity),0, convertDpToPx(16, this@MapsActivity))
+            else mMap.setPadding(0,0,0, convertDpToPx(16, this@MapsActivity))
             if (selectedTargetRoute == null) {
                 binding.cardGetDirection.visibility = View.GONE
                 binding.cardTelusuri.visibility = View.VISIBLE
@@ -439,6 +448,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 //                    if (location != null) currentLatLng = LatLng(-7.952356,112.692583)
                     }
                 binding.cardGetDirection.visibility = View.VISIBLE
+                if (binding.llFilter.isVisible) mMap.setPadding(0, convertDpToPx(32, this@MapsActivity),0, convertDpToPx(16, this@MapsActivity))
+                else mMap.setPadding(0,0,0, convertDpToPx(16, this@MapsActivity))
                 binding.textTitleTarget.text = iMapsName
                 binding.textTargetRute.text = "Petunjuk rute menuju ke lokasi ${if (isBasecamp) "basecamp" else "toko"}"
 
@@ -500,6 +511,31 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             mMap.clear()
 
+            var centerPointLatLng = currentLatLng
+            println(selectedCenterPoint)
+            if (selectedCenterPoint != null && selectedCenterPoint?.id != "-1") {
+                val coordinates = selectedCenterPoint?.etc!!.trim().split(",")
+                centerPointLatLng = if (coordinates.size == 2) {
+                    val latitude = coordinates[0].toDoubleOrNull()
+                    val longitude = coordinates[1].toDoubleOrNull()
+                    LatLng(latitude!!, longitude!!)
+                } else currentLatLng
+
+                val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.gudang)
+
+                val newWidth = convertDpToPx(50, this@MapsActivity)
+                val newHeight = convertDpToPx(50, this@MapsActivity)
+
+                val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
+
+                val markerOptions = MarkerOptions()
+                    .position(centerPointLatLng!!)
+                    .title(selectedCenterPoint?.title!!)
+                    .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
+
+                mMap.addMarker(markerOptions)
+            }
+
             CoroutineScope(Dispatchers.Default).launch {
                 withContext(Dispatchers.Main) {
                     // Start For Loop
@@ -515,7 +551,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                 if (latitude != null && longitude != null) {
 
                                     val urlUtility = URLUtility(this@MapsActivity)
-                                    val distance = urlUtility.calculateDistance(currentLatLng!!.latitude, currentLatLng!!.longitude, latitude, longitude)
+                                    val distance = urlUtility.calculateDistance(centerPointLatLng!!.latitude, centerPointLatLng.longitude, latitude, longitude)
 
                                     if (distance < limitKm) {
 
@@ -582,22 +618,22 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                     progressDialog.dismiss()
 //                    progressDialog.setMessage("Sedang memuat…")
-                    if (currentTotal > 0) {
-                        val durationMs = 2000
-                        val responsiveZoom = when {
-                            limitKm >= 1 -> when {
-                                limitKm >= 18 -> 10
-                                limitKm >= 13 -> 11
-                                limitKm >= 8 -> 12
-                                limitKm >= 3 -> 13
-                                else -> 14
-                            }
-                            else -> 15
+
+                    val durationMs = 2000
+                    val responsiveZoom = when {
+                        limitKm >= 1 -> when {
+                            limitKm >= 18 -> 10
+                            limitKm >= 13 -> 11
+                            limitKm >= 8 -> 12
+                            limitKm >= 3 -> 13
+                            else -> 14
                         }
+                        else -> 15
+                    }
+                    val cameraUpdate = CameraUpdateFactory.newLatLngZoom(centerPointLatLng!!, responsiveZoom.toFloat())
+                    mMap.animateCamera(cameraUpdate, durationMs, null)
 
-                        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(currentLatLng!!, responsiveZoom.toFloat())
-
-                        mMap.animateCamera(cameraUpdate, durationMs, null)
+                    if (currentTotal > 0) {
                         binding.textTitleTotalNearest.text = "Penelusuran ${if (isBasecamp) "Basecamp" else "Toko"} Terdekat"
                         binding.textTotalNearest.text = "$currentTotal ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }ditemukan dalam radius $limitKm km"
                     } else {
@@ -607,6 +643,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     }
 
                     binding.cardTelusuri.visibility = View.VISIBLE
+                    if (userKind == USER_KIND_ADMIN) {
+                        binding.centerPointContainer.visibility = View.VISIBLE
+                        binding.centerPointMore.setOnClickListener {
+                            searchModal.show()
+                        }
+                    }
+                    if (binding.llFilter.isVisible) mMap.setPadding(0, convertDpToPx(32, this@MapsActivity),0, convertDpToPx(16, this@MapsActivity))
+                    else mMap.setPadding(0,0,0, convertDpToPx(16, this@MapsActivity))
                     binding.btnTelusuri.setOnClickListener {
                         if (binding.etKm.toString().isNotEmpty()) {
                             binding.etKm.error = null
@@ -891,8 +935,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 //                        currentLatLng = LatLng(-7.952356,112.692583)
                         setPin(currentLatLng!!, "Lokasi Saya")
 
-                        if (isNearestStore && binding.llFilter.isVisible) getCities()
-                        else if (isNearestStore) searchCoordinate()
+                        if (isNearestStore && binding.llFilter.isVisible) {
+                            getCities()
+                            if (userKind == USER_KIND_ADMIN) getListGudang()
+                        } else if (isNearestStore) {
+                            searchCoordinate()
+                            if (userKind == USER_KIND_ADMIN) getListGudang()
+                        }
                     }
                 }
         }
@@ -1193,5 +1242,79 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             }
             else super.onBackPressed()
         } else super.onBackPressed()
+    }
+
+    private fun getListGudang() {
+
+        binding.centerPointLoading.visibility = View.VISIBLE
+        binding.centerPointTitle.visibility = View.GONE
+        binding.centerPointMoreIcon.visibility = View.GONE
+
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = when (userKind) {
+                    USER_KIND_ADMIN -> apiService.getListGudang(distributorID = userDistributorId)
+                    else -> apiService.getListGudang(distributorID = userDistributorId)
+//                    else -> apiService.getListGudang(cityId = userCity, distributorID = userDistributorId)
+                }
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS, RESPONSE_STATUS_EMPTY -> {
+
+                        listGudang = response.results
+                        listGudang.add(0, GudangModel("-1", "Lokasi Saya", "${currentLatLng!!.latitude},${currentLatLng!!.longitude}"))
+                        selectedCenterPoint = ModalSearchModel(listGudang[0].id_warehouse, listGudang[0].nama_warehouse, listGudang[0].location_warehouse)
+                        binding.centerPointTitle.text = selectedCenterPoint?.title
+
+                        binding.centerPointLoading.visibility = View.GONE
+                        binding.centerPointTitle.visibility = View.VISIBLE
+                        binding.centerPointMoreIcon.visibility = View.VISIBLE
+
+                        val items: ArrayList<ModalSearchModel> = ArrayList()
+                        for (i in 0 until listGudang.size) {
+                            val data = listGudang[i]
+                            items.add(ModalSearchModel(data.id_warehouse, data.nama_warehouse, data.location_warehouse))
+                        }
+                        setupDialogSearch(items)
+
+                    } else -> {
+
+                        handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        binding.centerPointTitle.visibility = View.GONE
+                        binding.centerPointMoreIcon.visibility = View.GONE
+                        binding.centerPointLoading.visibility = View.VISIBLE
+                        binding.centerPointLoading.text = getString(R.string.failed_get_data)
+
+                    }
+                }
+
+            } catch (e: Exception) {
+
+                handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                binding.centerPointTitle.visibility = View.GONE
+                binding.centerPointMoreIcon.visibility = View.GONE
+                binding.centerPointLoading.visibility = View.VISIBLE
+                binding.centerPointLoading.text = getString(R.string.failed_get_data)
+
+            }
+
+        }
+    }
+
+    private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
+
+        searchModal = SearchModal(this, items)
+        searchModal.setCustomDialogListener(object: SearchModal.SearchModalListener {
+            override fun onDataReceived(data: ModalSearchModel) {
+                selectedCenterPoint = data
+                binding.centerPointTitle.text = selectedCenterPoint?.title
+            }
+
+        })
+
+        searchModal.label = "Pilih Opsi Gudang"
+        searchModal.searchHint = "Ketik untuk mencari…"
     }
 }
