@@ -102,9 +102,6 @@
             android:name=".view.invoice.DetailInvoiceActivity"
             android:exported="false" />
         <activity
-            android:name=".view.TestMapsDistanceActivity"
-            android:exported="false" />
-        <activity
             android:name=".view.contact.PreviewKtpActivity"
             android:exported="false" />
         <activity
@@ -133,9 +130,6 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <activity
-            android:name=".view.TestPrintActivity"
-            android:exported="false" />
         <activity
             android:name=".view.suratJalan.DetailSuratJalanActivity"
             android:exported="false" />
