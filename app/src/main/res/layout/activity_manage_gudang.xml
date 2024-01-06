@@ -4,11 +4,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".view.courier.ManageGudangActivity">
+    tools:context=".view.gudang.ManageGudangActivity">
 
     <include
         android:id="@+id/titleBarDark"
         layout="@layout/component_title_bar"/>
+
+    <include
+        android:id="@+id/llFilter"
+        layout="@layout/component_filter"/>
 
     <RelativeLayout
         android:layout_width="match_parent"

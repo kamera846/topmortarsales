@@ -26,6 +26,7 @@ import com.topmortar.topmortarsales.commons.UPDATE_PASSWORD
 import com.topmortar.topmortarsales.commons.VERIFY_OTP
 import com.topmortar.topmortarsales.commons.VISIT
 import com.topmortar.topmortarsales.commons.VOUCHER
+import com.topmortar.topmortarsales.commons.WAREHOUSE
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.response.ResponseAuth
 import com.topmortar.topmortarsales.response.ResponseBaseCamp
@@ -453,43 +454,55 @@ interface ApiService {
         @Part("id") idBasecamp: RequestBody,
     ): ResponseBaseCamp
 
-    @GET(BASECAMP)
-    suspend fun getListGudang(): ResponseGudang
-
-    @GET(BASECAMP)
+    @GET(WAREHOUSE)
     suspend fun getListGudang(
-        @Query("c") cityId: String
+        @Query("dst") distributorID: String
+    ): ResponseGudang
+
+    @GET(WAREHOUSE)
+    suspend fun getListGudang(
+        @Query("c") cityId: String,
+        @Query("dst") distributorID: String
     ): ResponseGudang
 
     @Multipart
-    @POST(BASECAMP)
+    @POST(WAREHOUSE)
     suspend fun addGudang(
-        @Part("nama_gudang") name: RequestBody,
-        @Part("location_gudang") mapsUrl: RequestBody,
-        @Part("nomorhp_gudang") phone: RequestBody,
+        @Part("nama_warehouse") name: RequestBody,
+        @Part("location_warehouse") mapsUrl: RequestBody,
+        @Part("nomorhp_warehouse") phone: RequestBody,
         @Part("id_city") cityId: RequestBody,
     ): ResponseGudang
 
     @Multipart
-    @POST(BASECAMP)
+    @POST(WAREHOUSE)
     suspend fun addGudang(
-        @Part("nama_gudang") name: RequestBody,
-        @Part("location_gudang") mapsUrl: RequestBody,
+        @Part("nama_warehouse") name: RequestBody,
+        @Part("location_warehouse") mapsUrl: RequestBody,
         @Part("id_city") cityId: RequestBody,
     ): ResponseGudang
 
     @Multipart
-    @POST(BASECAMP)
+    @POST(WAREHOUSE)
     suspend fun editGudang(
-        @Part("nama_gudang") name: RequestBody,
-        @Part("location_gudang") mapsUrl: RequestBody,
-        @Part("nomorhp_gudang") phone: RequestBody,
+        @Part("nama_warehouse") name: RequestBody,
+        @Part("location_warehouse") mapsUrl: RequestBody,
+        @Part("nomorhp_warehouse") phone: RequestBody,
         @Part("id_city") cityId: RequestBody,
         @Part("id") idGudang: RequestBody,
     ): ResponseGudang
 
     @Multipart
-    @POST(BASECAMP)
+    @POST(WAREHOUSE)
+    suspend fun editGudang(
+        @Part("nama_warehouse") name: RequestBody,
+        @Part("location_warehouse") mapsUrl: RequestBody,
+        @Part("id_city") cityId: RequestBody,
+        @Part("id") idGudang: RequestBody,
+    ): ResponseGudang
+
+    @Multipart
+    @POST(WAREHOUSE)
     suspend fun deleteGudang(
         @Part("id") idGudang: RequestBody,
     ): ResponseGudang

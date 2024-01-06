@@ -21,6 +21,47 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <!-- Date Separator -->
+            <LinearLayout
+                android:id="@+id/date_separator"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="32dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_weight="1"
+                    android:theme="@style/Theme.TopMortarSales.BaseLine"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ditambahkan"
+                    android:layout_marginStart="8dp"
+                    android:textSize="14sp"
+                    android:theme="@style/Theme.TopMortarSales.TextBaseLine" />
+
+                <TextView
+                    android:id="@+id/tv_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="15 November 2023"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:textSize="14sp"
+                    android:theme="@style/Theme.TopMortarSales.TextBaseLine" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_weight="1"
+                    android:theme="@style/Theme.TopMortarSales.BaseLine"/>
+
+            </LinearLayout>
+
             <LinearLayout
                 android:id="@+id/form_input"
                 android:layout_width="match_parent"
@@ -273,18 +314,10 @@
 
                 </LinearLayout>
 
-            </LinearLayout>
-
-            <!-- Submit -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:orientation="vertical">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
                     android:orientation="horizontal">
 
                     <TextView
@@ -307,6 +340,15 @@
                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
                 </LinearLayout>
+
+            </LinearLayout>
+
+            <!-- Submit -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:orientation="vertical">
 
                 <Button
                     android:id="@+id/btn_submit"

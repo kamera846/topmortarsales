@@ -11,6 +11,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.GudangModel
 
 class GudangRecyclerViewAdapter(private val chatList: ArrayList<GudangModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<GudangRecyclerViewAdapter.ChatViewHolder>() {
@@ -28,8 +29,8 @@ class GudangRecyclerViewAdapter(private val chatList: ArrayList<GudangModel>, pr
 
         fun bind(chatItem: GudangModel) {
 
-            tvContactName.text = chatItem.nama_gudang
-            tvPhoneNumber.text = if (chatItem.nomorhp_gudang != "") "+${ chatItem.nomorhp_gudang }" else ""
+            tvContactName.text = chatItem.nama_warehouse
+            tvPhoneNumber.text = "Ditambahkan pada ${DateFormat.format(chatItem.created_at, format = "dd MMM yyyy")}"
 
         }
 

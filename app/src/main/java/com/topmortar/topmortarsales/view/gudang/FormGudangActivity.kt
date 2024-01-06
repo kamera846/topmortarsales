@@ -4,8 +4,6 @@ import android.Manifest
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Typeface
-import android.opengl.Visibility
 import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
@@ -17,28 +15,28 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_DATE
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
-import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.EDIT_CONTACT
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
-import com.topmortar.topmortarsales.commons.MAX_REPORT_DISTANCE
 import com.topmortar.topmortarsales.commons.REQUEST_BASECAMP_FRAGMENT
 import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_SUCCESS
 import com.topmortar.topmortarsales.commons.RESULT_BASECAMP_FRAGMENT
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
-import com.topmortar.topmortarsales.commons.VISIT
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
@@ -78,6 +76,7 @@ class FormGudangActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         isEdit = intent.getBooleanExtra(EDIT_CONTACT, false)
+        val iDate = intent.getStringExtra(CONST_DATE)
         if (isEdit) setDataEdit()
 
         binding.titleBar.tvTitleBar.text = if (isEdit) "Edit Gudang" else "Buat Gudang Baru"
@@ -89,6 +88,12 @@ class FormGudangActivity : AppCompatActivity() {
 //            binding.titleBar.icTrash.setOnClickListener { deleteValidation() }
             setCitiesOption()
         }
+
+        if (isEdit) {
+            binding.dateSeparator.visibility = View.VISIBLE
+            binding.tvDate.text = iDate?.let { DateFormat.format(it, format = "dd MMM yyyy") }
+        } else binding.dateSeparator.visibility = View.GONE
+
         setMapsAction()
     }
 
@@ -215,13 +220,22 @@ class FormGudangActivity : AppCompatActivity() {
 
                 val apiService: ApiService = HttpClient.create()
                 val response = if (isEdit) {
-                    apiService.editGudang(
-                        name = rbName,
-                        phone = rbPhone,
-                        cityId = rbLocation,
-                        mapsUrl = rbMapsUrl,
-                        idGudang = rbIdGudang
-                    )
+                    if (phone.isEmpty()) {
+                        apiService.editGudang(
+                            name = rbName,
+                            cityId = rbLocation,
+                            mapsUrl = rbMapsUrl,
+                            idGudang = rbIdGudang
+                        )
+                    } else {
+                        apiService.editGudang(
+                            name = rbName,
+                            phone = rbPhone,
+                            cityId = rbLocation,
+                            mapsUrl = rbMapsUrl,
+                            idGudang = rbIdGudang
+                        )
+                    }
                 } else {
                     if (phone.isNullOrEmpty()) {
                         apiService.addGudang(
@@ -240,20 +254,20 @@ class FormGudangActivity : AppCompatActivity() {
                 }
 
                 when (response.status) {
-                    RESPONSE_STATUS_OK -> {
+                    RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
 
-                        handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, "Berhasil menyimpan")
+                        handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, response.message)
 
                         val resultIntent = Intent()
                         resultIntent.putExtra(REQUEST_BASECAMP_FRAGMENT, SYNC_NOW)
-                        setResult(RESULT_BASECAMP_FRAGMENT, resultIntent)
+                        setResult(RESULT_OK, resultIntent)
                         finish()
                         loadingState.dismiss()
 
                     }
                     RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                        handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, "Gagal menyimpan gudang: ${ response.message }")
+                        handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, response.message)
                         loadingState.dismiss()
 
                     }
