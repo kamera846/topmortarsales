@@ -306,6 +306,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             }
             return@setOnMarkerClickListener false
         }
+
+        binding.cardBack.visibility = View.VISIBLE
+        binding.cardBack.setOnClickListener { backHandler() }
     }
 
     private fun toggleDrawRoute() {
@@ -1242,14 +1245,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     }
 
     override fun onBackPressed() {
-        if (!isGetCoordinate) {
-            if (routeDirections != null) toggleBtnDrawRoute()
-            else if (isCardNavigationShowing) {
-                selectedTargetRoute = null
-                toggleDrawRoute()
-            }
-            else super.onBackPressed()
-        } else super.onBackPressed()
+        backHandler()
     }
 
     private fun getListGudang() {
@@ -1329,5 +1325,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         searchModal.label = "Pilih Opsi Gudang"
         searchModal.searchHint = "Ketik untuk mencari…"
+    }
+
+    private fun backHandler() {
+        if (!isGetCoordinate) {
+            if (routeDirections != null) toggleBtnDrawRoute()
+            else if (isCardNavigationShowing) {
+                selectedTargetRoute = null
+                toggleDrawRoute()
+            }
+            else super.onBackPressed()
+        } else super.onBackPressed()
     }
 }
