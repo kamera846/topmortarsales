@@ -331,7 +331,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             }
         } else if (binding.llFilter.isVisible) {
             mMap.setPadding(0,convertDpToPx(36, this),0,0)
-        }
+        } else mMap.setPadding(0,0,0,convertDpToPx(16, this))
 
         mMap.setOnMapClickListener {
             if (binding.recyclerView.isVisible) binding.recyclerView.visibility = View.GONE
@@ -1378,13 +1378,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     }
 
     private fun backHandler() {
-        if (!isGetCoordinate) {
+        if (!isGetCoordinate && !isTracking) {
             if (routeDirections != null) toggleBtnDrawRoute()
             else if (isCardNavigationShowing) {
                 selectedTargetRoute = null
                 toggleDrawRoute()
-            }
-            else super.onBackPressed()
+            } else super.onBackPressed()
         } else super.onBackPressed()
     }
 
