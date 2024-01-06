@@ -113,6 +113,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private lateinit var sessionManager: SessionManager
     private val userKind get() = sessionManager.userKind().toString()
     private val userDistributorId get() = sessionManager.userDistributor().toString()
+    private val userCity get() = sessionManager.userCityID().toString()
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
@@ -330,7 +331,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active
                         STATUS_CONTACT_PASSIVE -> R.drawable.store_location_status_passive
                         STATUS_CONTACT_BID -> R.drawable.store_location_status_biding
-                        else -> R.drawable.store_location_status_blacklist
+                        else -> {
+                            if (selectedCenterPoint != null && selectedCenterPoint?.etc == itemToFind) {
+                                binding.textTargetRute.text = "Petunjuk rute menuju ke lokasi gudang"
+                                R.drawable.gudang
+                            } else R.drawable.store_location_status_blacklist
+                        }
                     }
                     binding.imgTargetRoute.setImageDrawable(getDrawable(imgDrawable))
 
@@ -643,12 +649,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     }
 
                     binding.cardTelusuri.visibility = View.VISIBLE
-                    if (userKind == USER_KIND_ADMIN) {
+                    if (listGudang.isNotEmpty()) {
                         binding.centerPointContainer.visibility = View.VISIBLE
                         binding.centerPointMore.setOnClickListener {
                             searchModal.show()
                         }
-                    }
+                    } else binding.centerPointContainer.visibility = View.GONE
                     if (binding.llFilter.isVisible) mMap.setPadding(0, convertDpToPx(32, this@MapsActivity),0, convertDpToPx(16, this@MapsActivity))
                     else mMap.setPadding(0,0,0, convertDpToPx(16, this@MapsActivity))
                     binding.btnTelusuri.setOnClickListener {
@@ -937,10 +943,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                         if (isNearestStore && binding.llFilter.isVisible) {
                             getCities()
-                            if (userKind == USER_KIND_ADMIN) getListGudang()
+                            getListGudang()
+//                            if (userKind == USER_KIND_ADMIN) getListGudang()
                         } else if (isNearestStore) {
                             searchCoordinate()
-                            if (userKind == USER_KIND_ADMIN) getListGudang()
+                            getListGudang()
+//                            if (userKind == USER_KIND_ADMIN) getListGudang()
                         }
                     }
                 }
@@ -1256,12 +1264,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 val apiService: ApiService = HttpClient.create()
                 val response = when (userKind) {
                     USER_KIND_ADMIN -> apiService.getListGudang(distributorID = userDistributorId)
-                    else -> apiService.getListGudang(distributorID = userDistributorId)
-//                    else -> apiService.getListGudang(cityId = userCity, distributorID = userDistributorId)
+//                    else -> apiService.getListGudang(distributorID = userDistributorId)
+                    else -> apiService.getListGudang(cityId = userCity, distributorID = userDistributorId)
                 }
 
                 when (response.status) {
-                    RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS, RESPONSE_STATUS_EMPTY -> {
+                    RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
 
                         listGudang = response.results
                         listGudang.add(0, GudangModel("-1", "Lokasi Saya", "${currentLatLng!!.latitude},${currentLatLng!!.longitude}"))
@@ -1275,9 +1283,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         val items: ArrayList<ModalSearchModel> = ArrayList()
                         for (i in 0 until listGudang.size) {
                             val data = listGudang[i]
-                            items.add(ModalSearchModel(data.id_warehouse, data.nama_warehouse, data.location_warehouse))
+                            val title = data.nama_warehouse + if (data.kode_city.isNotEmpty()) " - " + data.kode_city else ""
+                            items.add(ModalSearchModel(data.id_warehouse, title, data.location_warehouse))
                         }
                         setupDialogSearch(items)
+
+                    } RESPONSE_STATUS_EMPTY -> {
+
+                        binding.centerPointContainer.visibility = View.GONE
 
                     } else -> {
 

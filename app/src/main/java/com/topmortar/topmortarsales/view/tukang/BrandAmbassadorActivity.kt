@@ -304,6 +304,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
                             val intent = Intent(this@BrandAmbassadorActivity, MapsActivity::class.java)
 
                             intent.putExtra(CONST_NEAREST_STORE, true)
+                            intent.putExtra(CONST_IS_BASE_CAMP, true)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
 

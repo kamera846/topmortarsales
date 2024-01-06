@@ -7,4 +7,7 @@ data class GudangModel(
     var nomorhp_warehouse: String = "",
     var id_city: String = "",
     var created_at: String = "",
+    var nama_city: String = "",
+    var kode_city: String = "",
+    var id_distributor: String = "",
 )

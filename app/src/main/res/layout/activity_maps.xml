@@ -287,7 +287,7 @@
         </androidx.cardview.widget.CardView>
 
         <androidx.cardview.widget.CardView
-            android:visibility="visible"
+            android:visibility="gone"
             android:id="@+id/cardTelusuri"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -391,7 +391,7 @@
                     </LinearLayout>
 
                     <LinearLayout
-                        android:visibility="visible"
+                        android:visibility="gone"
                         android:id="@+id/centerPointContainer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -417,9 +417,11 @@
                             android:clickable="true"
                             android:focusable="true"
                             android:background="@drawable/bg_border_clickable"
+                            android:gravity="center_vertical"
                             android:orientation="horizontal">
 
                             <TextView
+                                android:visibility="visible"
                                 android:id="@+id/centerPointLoading"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
