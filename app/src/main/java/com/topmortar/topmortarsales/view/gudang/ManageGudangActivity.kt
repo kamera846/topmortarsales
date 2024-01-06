@@ -2,6 +2,7 @@ package com.topmortar.topmortarsales.view.gudang
 
 import android.app.Activity
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -64,6 +65,10 @@ class ManageGudangActivity : AppCompatActivity() {
         binding.titleBarDark.tvTitleBar.text = "Kelola Gudang"
         binding.titleBarDark.icBack.setOnClickListener { finish() }
         binding.btnFabAdd.setOnClickListener { navigateFab() }
+
+        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background = getDrawable(R.color.black_400)
+        else binding.llFilter.componentFilter.background = getDrawable(R.color.light)
         binding.llFilter.componentFilter.visibility = View.GONE
         binding.llFilter.componentFilter.setOnClickListener {
             searchModal.show()
