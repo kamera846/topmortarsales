@@ -33,7 +33,10 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityManageGudangBinding
+import com.topmortar.topmortarsales.modal.SearchModal
+import com.topmortar.topmortarsales.model.CityModel
 import com.topmortar.topmortarsales.model.GudangModel
+import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.reports.NewReportActivity
 import kotlinx.coroutines.launch
 
@@ -46,6 +49,10 @@ class ManageGudangActivity : AppCompatActivity() {
     private val userCity get() = sessionManager.userCityID()!!
     private val userDistributorId get() = sessionManager.userDistributor()!!
 
+    private lateinit var searchModal: SearchModal
+    private var selectedCity: ModalSearchModel? = null
+    private var citiesResults: ArrayList<CityModel> = arrayListOf()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -57,8 +64,13 @@ class ManageGudangActivity : AppCompatActivity() {
         binding.titleBarDark.tvTitleBar.text = "Kelola Gudang"
         binding.titleBarDark.icBack.setOnClickListener { finish() }
         binding.btnFabAdd.setOnClickListener { navigateFab() }
+        binding.llFilter.componentFilter.visibility = View.GONE
+        binding.llFilter.componentFilter.setOnClickListener {
+            searchModal.show()
+        }
 
         getList()
+        getCities()
 
     }
 
@@ -72,8 +84,10 @@ class ManageGudangActivity : AppCompatActivity() {
 
                 val apiService: ApiService = HttpClient.create()
                 val response = when (userKind) {
-                    USER_KIND_ADMIN -> apiService.getListGudang(distributorID = userDistributorId)
-                    else -> apiService.getListGudang(cityId = userCity, distributorID = userDistributorId)
+                    USER_KIND_ADMIN -> {
+                        if (selectedCity != null) apiService.getListGudang(cityId = selectedCity?.id!!, distributorID = userDistributorId)
+                        else apiService.getListGudang(distributorID = userDistributorId)
+                    } else -> apiService.getListGudang(cityId = userCity, distributorID = userDistributorId)
                 }
 
                 when (response.status) {
@@ -222,6 +236,72 @@ class ManageGudangActivity : AppCompatActivity() {
 
             }
         }
+    }
+
+    private fun getCities() {
+
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.getCities(distributorID = userDistributorId)
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        citiesResults = response.results
+                        val items: ArrayList<ModalSearchModel> = ArrayList()
+
+                        for (i in 0 until citiesResults.size) {
+                            val data = citiesResults[i]
+                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                        }
+                        items.add(0, ModalSearchModel("-1", "Hapus Filter"))
+
+                        setupDialogSearch(items)
+                        binding.llFilter.componentFilter.visibility = View.VISIBLE
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        handleMessage(this@ManageGudangActivity, "LIST CITY", "Daftar kota kosong!")
+
+                    }
+                    else -> {
+
+                        handleMessage(this@ManageGudangActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(this@ManageGudangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+
+            }
+
+        }
+    }
+
+    private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
+
+        searchModal = SearchModal(this, items)
+        searchModal.setCustomDialogListener(object: SearchModal.SearchModalListener{
+            override fun onDataReceived(data: ModalSearchModel) {
+                if (data.id == "-1") {
+                    selectedCity = null
+                    binding.llFilter.tvFilter.text = getString(R.string.tidak_ada_filter)
+                } else {
+                    selectedCity = data
+                    binding.llFilter.tvFilter.text = data.title
+                }
+                getList()
+            }
+
+        })
+        searchModal.searchHint = "Ketik untuk mencari…"
+
     }
 
 }
