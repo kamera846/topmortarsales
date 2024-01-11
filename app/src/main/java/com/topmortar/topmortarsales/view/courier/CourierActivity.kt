@@ -14,7 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.DatabaseReference
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.viewpager.CourierViewPagerAdapter
 import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
@@ -24,7 +24,6 @@ import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_STATUS
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
-import com.topmortar.topmortarsales.commons.FIREBASE_REFERENCE
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -33,6 +32,7 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -48,11 +48,15 @@ class CourierActivity : AppCompatActivity() {
 
     private var _binding: ActivityCourierBinding? = null
     private val binding get() = _binding!!
+
     private lateinit var sessionManager: SessionManager
     private val userKind get() = sessionManager.userKind()!!
     private val userId get() = sessionManager.userID()!!
     private val userCity get() = sessionManager.userCityID()!!
     private val userDistributorId get() = sessionManager.userDistributor()!!
+
+    private lateinit var firebaseReference : DatabaseReference
+
     private var doubleBackToExitPressedOnce = false
     private lateinit var tabLayout: TabLayout
     private lateinit var viewPager: ViewPager
@@ -70,6 +74,8 @@ class CourierActivity : AppCompatActivity() {
         if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()|| userDistributorId.isEmpty()) return missingDataHandler()
 
         setContentView(binding.root)
+
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
 
         binding.titleBarDark.tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
         binding.titleBarDark.tvTitleBarDescription.visibility = binding.titleBarDark.tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
@@ -343,8 +349,7 @@ class CourierActivity : AppCompatActivity() {
     private fun logoutHandler() {
 
         // Firebase Auth Session
-        val database = FirebaseDatabase.getInstance().getReference(FIREBASE_REFERENCE)
-        val authChild = database.child(FIREBASE_CHILD_AUTH)
+        val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
         val userChild = authChild.child(sessionManager.userName() + sessionManager.userID())
         userChild.removeValue()
 

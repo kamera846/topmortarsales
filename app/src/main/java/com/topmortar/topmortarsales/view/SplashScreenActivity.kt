@@ -20,13 +20,12 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.DatabaseReference
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
-import com.topmortar.topmortarsales.commons.FIREBASE_REFERENCE
 import com.topmortar.topmortarsales.commons.LOGGED_IN
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
@@ -39,6 +38,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.DateFormat
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.KeyboardHandler
 import com.topmortar.topmortarsales.commons.utils.KeyboardHandler.showKeyboard
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -83,6 +83,7 @@ class SplashScreenActivity : AppCompatActivity() {
     private lateinit var listOtpInput: List<EditText>
 
     private lateinit var sessionManager: SessionManager
+    private lateinit var firebaseReference: DatabaseReference
 
     private val splashScreenDuration = 2000L
     private var isPasswordShow = false
@@ -391,8 +392,9 @@ class SplashScreenActivity : AppCompatActivity() {
                         }
 
                         // Firebase Auth Session
-                        val database = FirebaseDatabase.getInstance().getReference(FIREBASE_REFERENCE)
-                        val authChild = database.child(FIREBASE_CHILD_AUTH)
+
+                        firebaseReference = FirebaseUtils().getReference(distributorId = data.id_distributor)
+                        val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
                         val userChild = authChild.child(data.username + data.id_user)
                         userChild.setValue(data)
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

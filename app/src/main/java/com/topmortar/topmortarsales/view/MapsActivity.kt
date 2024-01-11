@@ -62,7 +62,6 @@ import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.maps.DirectionsApi
 import com.google.maps.GeoApiContext
@@ -91,7 +90,6 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
 import com.topmortar.topmortarsales.commons.CONST_MAPS_STATUS
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
-import com.topmortar.topmortarsales.commons.FIREBASE_REFERENCE
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -110,6 +108,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
@@ -189,7 +188,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var listRouteLines: MutableList<Polyline> = mutableListOf()
 
     // Tracking
-    private var database: DatabaseReference? = null
+    private var firebaseReference: DatabaseReference? = null
     private var childDelivery: DatabaseReference? = null
     private var childDriver: DatabaseReference? = null
     private var locationCallback: LocationCallback? = null
@@ -418,7 +417,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 title.text = "Aktifkan Navigasi"
 
                 // Live Location Update with Firebase Realtime Database
-                stopTracking()
+                if (userKind == USER_KIND_COURIER) stopTracking()
             }, 500)
 
             val limitKm = binding.etKm.text.toString().toDouble()
@@ -889,7 +888,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     title.text = "Matikan Navigasi"
 
                     // Live Location Update with Firebase Realtime Database
-                    startTracking()
+                    if (userKind == USER_KIND_COURIER) startTracking()
                 }, 500)
 
             } else {
@@ -1397,8 +1396,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         }
 
         val deliveryId = "$userLevel$userID"
-        database = FirebaseDatabase.getInstance().getReference(FIREBASE_REFERENCE)
-        childDelivery = database?.child(FIREBASE_CHILD_DELIVERY)
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
+        childDelivery = firebaseReference?.child(FIREBASE_CHILD_DELIVERY)
         childDriver = childDelivery?.child(deliveryId)
 
         val courierModel = DeliveryModel.Courier(
@@ -1423,6 +1422,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         )
 
         childDriver?.setValue(deliveryModel)
+
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                childDriver?.child("start_lat")?.setValue(location!!.latitude)
+                childDriver?.child("start_lng")?.setValue(location!!.longitude)
+            }
 
         val locationRequest = LocationRequest.create()
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
@@ -1538,8 +1543,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     private fun setupTracking() {
 
-        database = FirebaseDatabase.getInstance().getReference(FIREBASE_REFERENCE)
-        childDelivery = database?.child(FIREBASE_CHILD_DELIVERY)
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
+        childDelivery = firebaseReference?.child(FIREBASE_CHILD_DELIVERY)
         childDriver = childDelivery?.child(deliveryID.toString())
 
         val courierDrawable = R.drawable.store_location_status_biding

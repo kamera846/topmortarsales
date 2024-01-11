@@ -10,16 +10,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.DeliveryRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_DELIVERY_ID
 import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
-import com.topmortar.topmortarsales.commons.FIREBASE_REFERENCE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -31,8 +30,10 @@ import com.topmortar.topmortarsales.model.DeliveryModel
 class DeliveryActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
+    private val userDistributorId get() = sessionManager.userDistributor()
     private lateinit var binding: ActivityDeliveryBinding
     private lateinit var apiService: ApiService
+    private lateinit var firebaseReference : DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +46,8 @@ class DeliveryActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId!!)
+
         binding.titleBarDark.icBack.setOnClickListener { finish() }
 
         getList()
@@ -55,8 +58,7 @@ class DeliveryActivity : AppCompatActivity() {
         loadingState(true)
 
         // Get a reference to your database
-        val database: FirebaseDatabase = FirebaseDatabase.getInstance()
-        val myRef: DatabaseReference = database.getReference("$FIREBASE_REFERENCE/$FIREBASE_CHILD_DELIVERY")
+        val myRef: DatabaseReference = firebaseReference.child(FIREBASE_CHILD_DELIVERY)
 
         // Add a ValueEventListener to retrieve the data
         myRef.addListenerForSingleValueEvent(object : ValueEventListener {

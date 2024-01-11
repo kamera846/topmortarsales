@@ -30,7 +30,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.DatabaseReference
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter
 import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter.ItemClickListener
@@ -55,7 +55,6 @@ import com.topmortar.topmortarsales.commons.CONST_REPUTATION
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
-import com.topmortar.topmortarsales.commons.FIREBASE_REFERENCE
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -71,6 +70,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -127,6 +127,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
     private var userDistributorId: String = ""
     private var contacts: ArrayList<ContactModel> = arrayListOf()
     private var cities: ArrayList<CityModel> = arrayListOf()
+    private lateinit var firebaseReference: DatabaseReference
 
     // Initialize Search Engine
     private val searchDelayMillis = 500L
@@ -159,6 +160,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         setContentView(binding.root)
 
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
 
         initVariable()
         initClickHandler()
@@ -970,8 +972,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
     private fun logoutHandler() {
 
         // Firebase Auth Session
-        val database = FirebaseDatabase.getInstance().getReference(FIREBASE_REFERENCE)
-        val authChild = database.child(FIREBASE_CHILD_AUTH)
+        val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
         val userChild = authChild.child(sessionManager.userName() + sessionManager.userID())
         userChild.removeValue()
 
