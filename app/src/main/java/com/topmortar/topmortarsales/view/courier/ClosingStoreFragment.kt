@@ -48,6 +48,7 @@ import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.services.TrackingService
+import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -102,7 +103,10 @@ class ClosingStoreFragment : Fragment() {
         binding.btnFabAdmin.setOnClickListener { navigateChatAdmin() }
         binding.btnStartDelivery.setOnClickListener {
             // Memeriksa izin
-            if (ContextCompat.checkSelfPermission(requireActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
+            if (ContextCompat.checkSelfPermission(
+                    requireActivity(),
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                )
                 == PackageManager.PERMISSION_GRANTED
             ) {
 
@@ -118,11 +122,20 @@ class ClosingStoreFragment : Fragment() {
                         requireActivity().startService(serviceIntent)
                     } else {
                         // Jika izin belum diberikan, tampilkan dialog permintaan izin
-                        ActivityCompat.requestPermissions(
-                            requireActivity(),
-                            arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
-                            LOCATION_PERMISSION_REQUEST_CODE
-                        )
+                        val message = "Izin background lokasi diperlukan untuk fitur ini. Mohon untuk memilih opsi berikut \"${getString(R.string.yes_bg_location)}\""
+                        val customUtility = CustomUtility(requireActivity())
+                        customUtility.showPermissionDeniedDialog(message) {
+//                        customUtility.showPermissionDeniedSnackbar(message) {
+//
+                            ActivityCompat.requestPermissions(
+                                requireActivity(),
+                                arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                                LOCATION_PERMISSION_REQUEST_CODE
+                            )
+//
+//                        }
+                        }
+
                     }
                 }
             } else {

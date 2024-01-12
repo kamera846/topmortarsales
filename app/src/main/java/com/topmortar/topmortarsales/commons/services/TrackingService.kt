@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -21,6 +22,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.view.courier.CourierActivity
 
 class TrackingService : Service() {
 
@@ -66,8 +68,18 @@ class TrackingService : Service() {
                 ""
             }
 
+        val notificationIntent = Intent(this, CourierActivity::class.java)
+        notificationIntent.putExtra("notif_intent", "Notifikasi clicked!")
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            notificationIntent,
+            PendingIntent.FLAG_IMMUTABLE
+        )
+
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
         val notification = notificationBuilder.setOngoing(true)
+            .setContentIntent(pendingIntent)
             .setSmallIcon(R.mipmap.favicon)
             .setContentTitle("My App is running in the background")
             .setPriority(NotificationManager.IMPORTANCE_MIN)
