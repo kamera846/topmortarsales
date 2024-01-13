@@ -79,10 +79,10 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
     // Global
     private lateinit var sessionManager: SessionManager
     private var doubleBackToExitPressedOnce = false
-    private lateinit var userCity: String
-    private lateinit var userKind: String
-    private var userId: String = ""
-    private var userDistributorId: String = ""
+    private val userCity get() = sessionManager.userCityID().toString()
+    private val userKind get() = sessionManager.userKind().toString()
+    private val userId get() = sessionManager.userID().toString()
+    private val userDistributorId get() = sessionManager.userDistributor().toString()
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -90,11 +90,6 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
 
         supportActionBar?.hide()
         sessionManager = SessionManager(this@ListTukangActivity)
-        userCity = sessionManager.userCityID()!!
-        userKind = sessionManager.userKind()!!
-
-        userId = sessionManager.userID()!!
-        userDistributorId = sessionManager.userDistributor()!!
         val isLoggedIn = sessionManager.isLoggedIn()
 
         if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()|| userDistributorId.isEmpty()) return missingDataHandler()
@@ -312,13 +307,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
                     RESPONSE_STATUS_OK -> {
 
                         val data = response.results[0]
-
-                        sessionManager.setUserID(data.id_user)
-                        sessionManager.setUserName(data.username)
-                        sessionManager.setFullName(data.full_name)
-                        sessionManager.setUserCityID(data.id_city)
-                        sessionManager.userBidLimit(data.bid_limit)
-                        sessionManager.userDistributor(data.id_distributor)
+                        sessionManager.setUserLoggedIn(data)
 
 //                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "Halo, ${ sessionManager.userName() }"}
                         tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
@@ -399,13 +388,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
 
     private fun logoutHandler() {
         sessionManager.setLoggedIn(LOGGED_OUT)
-        sessionManager.setUserKind("")
-        sessionManager.setUserID("")
-        sessionManager.setUserName("")
-        sessionManager.setFullName("")
-        sessionManager.setUserCityID("")
-        sessionManager.userBidLimit("")
-        sessionManager.userDistributor("")
+        sessionManager.setUserLoggedIn(null)
 
         val intent = Intent(this@ListTukangActivity, SplashScreenActivity::class.java)
         startActivity(intent)

@@ -1,7 +1,17 @@
 package com.topmortar.topmortarsales.commons.utils
 
 import android.content.Context
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN_CITY
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.PRINT_METHOD_BLUETOOTH
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
+import com.topmortar.topmortarsales.commons.USER_KIND_BA
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
+import com.topmortar.topmortarsales.model.UserModel
 
 class SessionManager(context: Context) {
     private val sharedPreferences = context.getSharedPreferences("Session", Context.MODE_PRIVATE)
@@ -104,5 +114,34 @@ class SessionManager(context: Context) {
 
     fun userDistributorNumber(): String? {
         return sharedPreferences.getString("userDistributorNumber", "0")
+    }
+
+    fun setUserLoggedIn(data: UserModel?) {
+        if (data != null) {
+            data.level_user = when (data.level_user) {
+                AUTH_LEVEL_ADMIN -> USER_KIND_ADMIN
+                AUTH_LEVEL_ADMIN_CITY -> USER_KIND_ADMIN_CITY
+                AUTH_LEVEL_COURIER -> USER_KIND_COURIER
+                AUTH_LEVEL_BA -> USER_KIND_BA
+                else -> USER_KIND_SALES
+            }
+            setUserID(data.id_user)
+            setUserKind(data.level_user)
+            setUserName(data.username)
+            setFullName(data.full_name)
+            setUserCityID(data.id_city)
+            userBidLimit(data.bid_limit)
+            userDistributor(data.id_distributor)
+            userDistributorNumber(data.nomorhp_distributor)
+        } else {
+            setUserID("")
+            setUserKind("")
+            setUserName("")
+            setFullName("")
+            setUserCityID("")
+            userBidLimit("")
+            userDistributor("")
+            userDistributorNumber("")
+        }
     }
 }
