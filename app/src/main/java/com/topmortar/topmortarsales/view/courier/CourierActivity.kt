@@ -339,13 +339,7 @@ class CourierActivity : AppCompatActivity() {
 
     private fun logoutHandler() {
         sessionManager.setLoggedIn(LOGGED_OUT)
-        sessionManager.setUserKind("")
-        sessionManager.setUserID("")
-        sessionManager.setUserName("")
-        sessionManager.setFullName("")
-        sessionManager.setUserCityID("")
-        sessionManager.userBidLimit("")
-        sessionManager.userDistributor("")
+        sessionManager.setUserLoggedIn(null)
 
         val intent = Intent(this@CourierActivity, SplashScreenActivity::class.java)
         startActivity(intent)
@@ -364,13 +358,7 @@ class CourierActivity : AppCompatActivity() {
                     RESPONSE_STATUS_OK -> {
 
                         val data = response.results[0]
-
-                        sessionManager.setUserID(data.id_user)
-                        sessionManager.setUserName(data.username)
-                        sessionManager.setFullName(data.full_name)
-                        sessionManager.setUserCityID(data.id_city)
-                        sessionManager.userBidLimit(data.bid_limit)
-                        sessionManager.userDistributor(data.id_distributor)
+                        sessionManager.setUserLoggedIn(data)
 
 //                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "Halo, ${ sessionManager.userName() }"}
                         binding.titleBarDark.tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}

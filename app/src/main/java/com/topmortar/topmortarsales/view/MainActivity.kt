@@ -119,10 +119,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
     private lateinit var filterModal: FilterTokoModal
     private var selectedCity: ModalSearchModel? = null
     private var doubleBackToExitPressedOnce = false
-    private lateinit var userCity: String
-    private lateinit var userKind: String
-    private var userId: String = ""
-    private var userDistributorId: String = ""
+    private val userCity get() = sessionManager.userCityID().toString()
+    private val userKind get() = sessionManager.userKind().toString()
+    private val userId get() = sessionManager.userID().toString()
+    private val userDistributorId get() = sessionManager.userDistributor().toString()
     private var contacts: ArrayList<ContactModel> = arrayListOf()
     private var cities: ArrayList<CityModel> = arrayListOf()
 
@@ -144,11 +144,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
         supportActionBar?.hide()
         sessionManager = SessionManager(this@MainActivity)
-        userCity = sessionManager.userCityID()!!
-        userKind = sessionManager.userKind()!!
-
-        userId = sessionManager.userID()!!
-        userDistributorId = sessionManager.userDistributor()!!
         val isLoggedIn = sessionManager.isLoggedIn()
 
         if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()|| userDistributorId.isEmpty()) return missingDataHandler()
@@ -423,8 +418,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
                 R.id.option_sync_now -> {
-                    if (userKind == USER_KIND_ADMIN) getCities()
-                    else getContacts()
+                    getUserLoggedIn()
                     true
                 }
                 R.id.nearest_store -> {
@@ -679,8 +673,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
         }
 
-        getUserLoggedIn()
-
     }
 
     private fun getCities() {
@@ -793,7 +785,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         filterModal.show()
     }
 
-    private fun getUserLoggedIn() {
+    private fun getUserLoggedIn(onlySession: Boolean = false) {
 
         lifecycleScope.launch {
             try {
@@ -805,20 +797,22 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                     RESPONSE_STATUS_OK -> {
 
                         val data = response.results[0]
-
-                        sessionManager.setUserID(data.id_user)
-                        sessionManager.setUserName(data.username)
-                        sessionManager.setFullName(data.full_name)
-                        sessionManager.setUserCityID(data.id_city)
-                        sessionManager.userBidLimit(data.bid_limit)
-                        sessionManager.userDistributor(data.id_distributor)
+                        sessionManager.setUserLoggedIn(data)
 
 //                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "Halo, ${ sessionManager.userName() }"}
                         tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
                         tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
 
-                    }
-                    RESPONSE_STATUS_EMPTY -> missingDataHandler()
+                        if (!onlySession) {
+                            if (isSearchActive) {
+                                searchContact()
+                            } else {
+                                if (userKind == USER_KIND_ADMIN) getCities()
+                                else getContacts()
+                            }
+                        }
+
+                    } RESPONSE_STATUS_EMPTY -> missingDataHandler()
                     else -> Log.d("TAG USER LOGGED IN", "Failed get data!")
                 }
 
@@ -968,13 +962,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
     private fun logoutHandler() {
         sessionManager.setLoggedIn(LOGGED_OUT)
-        sessionManager.setUserKind("")
-        sessionManager.setUserID("")
-        sessionManager.setUserName("")
-        sessionManager.setFullName("")
-        sessionManager.setUserCityID("")
-        sessionManager.userBidLimit("")
-        sessionManager.userDistributor("")
+        sessionManager.setUserLoggedIn(null)
 
         val intent = Intent(this@MainActivity, SplashScreenActivity::class.java)
         startActivity(intent)
@@ -990,12 +978,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
             if (resultData == SYNC_NOW) {
 
-                if (isSearchActive) {
-                    searchContact()
-                } else {
-                    if (userKind == USER_KIND_ADMIN) getCities()
-                    else getContacts()
-                }
+                getUserLoggedIn()
 
             }
 
@@ -1033,8 +1016,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         super.onResume()
         // Check apps for update
         AppUpdateHelper.checkForUpdates(this)
-        getUserLoggedIn()
-
+        getUserLoggedIn(true)
     }
 
     override fun onDataReceived(data: ModalSearchModel) {
