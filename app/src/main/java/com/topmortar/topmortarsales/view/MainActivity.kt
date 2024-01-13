@@ -65,6 +65,7 @@ import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
@@ -399,12 +400,20 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
         searchItem.isVisible = false
 //        nearestStoreItem.isVisible = false
-        if (sessionManager.userKind() == USER_KIND_ADMIN) {
-            userItem.isVisible = true
-            cityItem.isVisible = true
-            skillItem.isVisible = true
-            basecamp.isVisible = true
-            gudang.isVisible = true
+        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
+            if (userKind == USER_KIND_ADMIN) {
+                userItem.isVisible = true
+                cityItem.isVisible = true
+                skillItem.isVisible = true
+                basecamp.isVisible = true
+                gudang.isVisible = true
+            } else {
+                userItem.isVisible = true
+//                cityItem.isVisible = true
+//                skillItem.isVisible = true
+                basecamp.isVisible = true
+                gudang.isVisible = true
+            }
         }
 
         if (sessionManager.userKind() != USER_KIND_SALES) {
@@ -740,7 +749,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
     private fun setupFilterTokoModal() {
 
-        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_SALES) {
+        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY || userKind == USER_KIND_SALES) {
             val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
             if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.background = getDrawable(R.color.black_400)
             else binding.llFilter.background = getDrawable(R.color.light)
@@ -754,7 +763,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             if (userKind == USER_KIND_ADMIN) {
                 filterModal.setStatuses(selected = selectedStatusID)
                 filterModal.setCities(items = cities, selected = selectedCitiesID)
-            } else if (userKind == USER_KIND_SALES) filterModal.setStatuses(selected = selectedStatusID)
+            } else if (userKind == USER_KIND_SALES || userKind == USER_KIND_ADMIN_CITY) filterModal.setStatuses(selected = selectedStatusID)
             filterModal.setSendFilterListener(object: FilterTokoModal.SendFilterListener {
                 override fun onSendFilter(
                     selectedStatusID: String,

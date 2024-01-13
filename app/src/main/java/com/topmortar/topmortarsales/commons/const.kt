@@ -139,10 +139,12 @@ const val GET_COORDINATE = "get_coordinate"
 
 // User Kind
 const val USER_KIND_ADMIN = "user_kind_admin"
+const val USER_KIND_ADMIN_CITY = "user_kind_admin_city"
 const val USER_KIND_SALES = "user_kind_sales"
 const val USER_KIND_COURIER = "user_kind_courier"
 const val USER_KIND_BA = "user_kind_ba"
 const val AUTH_LEVEL_ADMIN = "admin"
+const val AUTH_LEVEL_ADMIN_CITY = "admin_c"
 const val AUTH_LEVEL_SALES = "sales"
 const val AUTH_LEVEL_COURIER = "courier"
 const val AUTH_LEVEL_BA = "ba"

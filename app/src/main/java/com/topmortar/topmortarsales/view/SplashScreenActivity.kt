@@ -21,6 +21,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.LOGGED_IN
@@ -31,6 +32,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
@@ -364,6 +366,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
                         when (data.level_user) {
                             AUTH_LEVEL_ADMIN -> sessionManager.setUserKind(USER_KIND_ADMIN)
+                            AUTH_LEVEL_ADMIN_CITY -> sessionManager.setUserKind(USER_KIND_ADMIN_CITY)
                             AUTH_LEVEL_COURIER -> sessionManager.setUserKind(USER_KIND_COURIER)
                             AUTH_LEVEL_BA -> sessionManager.setUserKind(USER_KIND_BA)
                             else -> sessionManager.setUserKind(USER_KIND_SALES)

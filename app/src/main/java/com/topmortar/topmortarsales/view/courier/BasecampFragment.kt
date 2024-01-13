@@ -31,6 +31,7 @@ import com.topmortar.topmortarsales.commons.RESULT_BASECAMP_FRAGMENT
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -178,7 +179,7 @@ class BasecampFragment : Fragment() {
 
     private fun navigateItemAction(data: BaseCampModel? = null) {
 
-        if (userKind == USER_KIND_ADMIN) {
+        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
 
             val intent = Intent(requireContext(), AddBaseCampActivity::class.java)
             intent.putExtra(EDIT_CONTACT, true)

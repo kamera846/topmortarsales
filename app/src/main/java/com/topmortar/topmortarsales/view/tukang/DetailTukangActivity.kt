@@ -70,6 +70,7 @@ import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
 import com.topmortar.topmortarsales.commons.utils.DateFormat
@@ -1287,7 +1288,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                         }
 
                         // Admin Access
-                        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_BA) {
+                        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY || sessionManager.userKind() == USER_KIND_BA) {
                             icEdit.visibility = View.VISIBLE
                             tvKtpContainer.visibility = View.VISIBLE
                         }

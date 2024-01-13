@@ -11,7 +11,10 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN_CITY
 import com.topmortar.topmortarsales.model.UserModel
+import java.util.Locale
 
 class UsersRecyclerViewAdapter(private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<UsersRecyclerViewAdapter.ViewHolder>() {
     private var listItem: ArrayList<UserModel> = ArrayList()
@@ -38,9 +41,15 @@ class UsersRecyclerViewAdapter(private val itemClickListener: ItemClickListener)
 
         fun bind(item: UserModel) {
 
+            val userLevel = item.level_user.let {
+                if (it == AUTH_LEVEL_ADMIN || it == AUTH_LEVEL_ADMIN_CITY) "admin"
+                else it.lowercase(Locale.getDefault())
+            }
+            val userCity = item.kode_city.lowercase(Locale.getDefault())
+
             ivProfile.setImageResource(R.drawable.person_red)
             tvContactName.text = item.full_name
-            tvPhoneNumber.text = if (!isListReport) "${ item.level_user.toLowerCase() } - ${ item.kode_city.toLowerCase() }" else "+${item.phone_user}"
+            tvPhoneNumber.text = if (!isListReport) "$userLevel - $userCity" else "+${item.phone_user}"
 
         }
 
