@@ -21,7 +21,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
@@ -39,20 +39,18 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
-import com.topmortar.topmortarsales.commons.utils.DateFormat
-import com.topmortar.topmortarsales.commons.utils.SessionManager
-import com.topmortar.topmortarsales.commons.utils.convertDpToPx
-import com.topmortar.topmortarsales.commons.utils.createPartFromString
-import com.topmortar.topmortarsales.commons.utils.handleMessage
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.phoneValidation
+import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.createPartFromString
+import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.CityModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import kotlinx.coroutines.launch
-import org.w3c.dom.Text
 
 @SuppressLint("SetTextI18n")
 class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
@@ -61,6 +59,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
     private lateinit var tvTitleBar: TextView
     private lateinit var btnSubmit: Button
     private lateinit var spinLevel: Spinner
+    private lateinit var cityContainer: LinearLayout
     private lateinit var etUserCity: EditText
     private lateinit var etUsername: EditText
     private lateinit var tvUsernameGenerated: TextView
@@ -74,6 +73,8 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
     // Global
     private lateinit var sessionManager: SessionManager
     private val userDistributorId get() = sessionManager.userDistributor().toString()
+    private val userKind get() = sessionManager.userKind().toString()
+    private val userCityID get() = sessionManager.userCityID().toString()
     private lateinit var searchModal: SearchModal
 
     private var isLoaded = false
@@ -217,6 +218,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         tvTitleBar = findViewById(R.id.tv_title_bar)
         btnSubmit = findViewById(R.id.btn_submit)
         spinLevel = findViewById(R.id.spin_level)
+        cityContainer = findViewById(R.id.cityContainer)
         etUserCity = findViewById(R.id.et_user_city)
         etPhone = findViewById(R.id.et_phone)
         etUsername = findViewById(R.id.et_username)
@@ -297,6 +299,8 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         val iFullName = intent.getStringExtra(CONST_FULL_NAME)
         iUserLevel = intent.getStringExtra(CONST_USER_LEVEL)
         iLocation = intent.getStringExtra(CONST_LOCATION)
+
+        if (userKind == USER_KIND_ADMIN_CITY) cityContainer.visibility = View.GONE
 
         if (!iUserID.isNullOrEmpty()) {
             userID = iUserID
@@ -437,7 +441,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         spinLevel.adapter = adapter
 
         val userLevel = when (iUserLevel) {
-            AUTH_LEVEL_ADMIN ->  1
+            AUTH_LEVEL_ADMIN_CITY ->  1
             AUTH_LEVEL_SALES ->  2
             AUTH_LEVEL_COURIER ->  3
             AUTH_LEVEL_BA ->  4
@@ -452,7 +456,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                 // Get the selected item value (e.g., "admin" or "sales")
                 selectedLevel = when (position) {
                     0 -> null
-                    1 -> AUTH_LEVEL_ADMIN
+                    1 -> AUTH_LEVEL_ADMIN_CITY
                     2 -> AUTH_LEVEL_SALES
                     3 -> AUTH_LEVEL_COURIER
                     4 -> AUTH_LEVEL_BA
@@ -463,7 +467,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             override fun onNothingSelected(parent: AdapterView<*>) {
                 // Do nothing here
                 selectedLevel = when (iUserLevel) {
-                    AUTH_LEVEL_ADMIN -> AUTH_LEVEL_ADMIN
+                    AUTH_LEVEL_ADMIN_CITY -> AUTH_LEVEL_ADMIN_CITY
                     AUTH_LEVEL_SALES -> AUTH_LEVEL_SALES
                     AUTH_LEVEL_COURIER -> AUTH_LEVEL_COURIER
                     AUTH_LEVEL_BA -> AUTH_LEVEL_BA
@@ -515,7 +519,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
                         setupDialogSearch(items)
 
-                        val foundItem = citiesResults.find { it.id_city == iLocation }
+                        val foundItem = citiesResults.find { it.id_city == if (userKind == USER_KIND_ADMIN_CITY) userCityID else iLocation }
                         if (foundItem != null) {
                             etUserCity.setText("${foundItem.nama_city} - ${foundItem.kode_city}")
                             selectedCity = ModalSearchModel(foundItem.id_city, foundItem.nama_city)

@@ -24,6 +24,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.UsersRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
@@ -39,6 +40,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -70,6 +72,8 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
     // Global
     private lateinit var sessionManager: SessionManager
     private val userDistributorId get() = sessionManager.userDistributor().toString()
+    private val userKind get() = sessionManager.userKind().toString()
+    private val userCityID get() = sessionManager.userCityID().toString()
     private var doubleBackToExitPressedOnce = false
     private var users: ArrayList<UserModel> = arrayListOf()
     private var activeFilter = EMPTY_FIELD_VALUE
@@ -143,17 +147,22 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getUsers(distributorID = userDistributorId)
+                val response = when (userKind) {
+                    USER_KIND_ADMIN -> apiService.getUsers(distributorID = userDistributorId)
+                    else -> apiService.getUsers(cityId = userCityID, distributorID = userDistributorId)
+                }
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
                         binding.llFilter.tvFilter.text = getString(R.string.tidak_ada_filter)
                         activeFilter = EMPTY_FIELD_VALUE
+
                         val includeFilter = findViewById<LinearLayout>(R.id.ll_filter)
                         includeFilter.visibility = View.VISIBLE
 
                         users = response.results
+                        users.removeIf { it.level_user == AUTH_LEVEL_ADMIN }
                         setRecyclerView(users)
                         loadingState(false)
 //                        loadingState(true, "Success get data!")
@@ -300,7 +309,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
                     synchFilter()
                     return@setOnMenuItemClickListener  true
                 } R.id.option_admin -> {
-                    activeFilter = AUTH_LEVEL_ADMIN
+                    activeFilter = AUTH_LEVEL_ADMIN_CITY
                     synchFilter()
                     return@setOnMenuItemClickListener  true
                 } R.id.option_sales -> {
@@ -325,7 +334,11 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
     private fun synchFilter() {
         if (activeFilter == EMPTY_FIELD_VALUE) getList()
         else {
-            binding.llFilter.tvFilter.text = "Level $activeFilter"
+            val textActiveFilter = "Level " + when (activeFilter) {
+                AUTH_LEVEL_ADMIN_CITY -> "admin"
+                else -> activeFilter
+            }
+            binding.llFilter.tvFilter.text = textActiveFilter
             loadingState(true)
             Handler().postDelayed({
                 val usersDummy = arrayListOf<UserModel>()

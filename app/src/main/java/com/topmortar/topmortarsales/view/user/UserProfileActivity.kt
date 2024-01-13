@@ -43,6 +43,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -191,7 +192,7 @@ class UserProfileActivity : AppCompatActivity() {
 
     private fun initClickHandler() {
 
-        if (sessionManager.userKind() == USER_KIND_ADMIN) {
+        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) {
             binding.titleBarLight.icEdit.visibility = View.VISIBLE
             binding.titleBarLight.icEdit.setOnClickListener { navigateEditUser() }
         }
@@ -220,7 +221,7 @@ class UserProfileActivity : AppCompatActivity() {
 
         if (iUserLevel == AUTH_LEVEL_SALES) {
 
-            if (sessionManager.userKind() == USER_KIND_ADMIN) binding.titleBarLight.icEdit.visibility = View.VISIBLE
+            if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) binding.titleBarLight.icEdit.visibility = View.VISIBLE
             binding.priceContainer.visibility = View.GONE
             binding.tabContainer.visibility = View.VISIBLE
 //            binding.counterContainer.visibility = View.VISIBLE
