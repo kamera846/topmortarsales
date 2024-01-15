@@ -104,8 +104,8 @@ import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
-import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_BA
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
@@ -1016,7 +1016,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     @SuppressLint("MissingPermission")
     private fun initMaps(latLng: LatLng? = null, latLngName: String? = null) {
 
-        if (latLng != null) setPin(latLng, latLngName ?: "")
+        if (latLng != null) {
+            if (isTracking && userKind == USER_KIND_COURIER) {
+                if (currentLatLng == null) showDialog(message = "Gagal menemukan lokasi Anda saat ini. Pastikan lokasi Anda aktif dan coba buka kembali peta")
+                else if (selectedLocation == null) showDialog(message = "Gagal menemukan lokasi target")
+                else {
+                    isRouteActive = true
+                    getDirections()
+                }
+            }
+            setPin(latLng, latLngName ?: "")
+        }
 //        if (latLng != null) setPin(latLng, latLngName ?: getPlaceNameFromLatLng(latLng))
         else {
             fusedLocationClient.lastLocation

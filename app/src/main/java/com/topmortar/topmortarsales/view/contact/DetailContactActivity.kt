@@ -47,6 +47,7 @@ import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_DATE
+import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING
 import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
@@ -136,6 +137,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private lateinit var sessionManager: SessionManager
     private val userDistributorId get() = sessionManager.userDistributor().toString()
+    private val userKind get() = sessionManager.userKind().toString()
     private lateinit var binding: ActivityDetailContactBinding
     private var pingUtility: PingUtility? = null
 
@@ -259,7 +261,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         // Get List City
         getCities()
-
+        if (userKind == USER_KIND_COURIER) {
+            binding.deliveryAction.visibility = View.VISIBLE
+            binding.contactAction.visibility = View.GONE
+            setupDelivery()
+        } else {
+            binding.deliveryAction.visibility = View.GONE
+            binding.contactAction.visibility = View.VISIBLE
+        }
     }
 
     private fun initVariable() {
@@ -1601,7 +1610,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
     }
 
-    private fun mapsActionHandler() {
+    private fun mapsActionHandler(isTracking: Boolean = false) {
         if (tvMaps.text != EMPTY_FIELD_VALUE && !isEdit) {
             val animateDuration = 200L
 
@@ -1618,6 +1627,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                     val intent = Intent(this@DetailContactActivity, MapsActivity::class.java)
+                    if (isTracking) intent.putExtra(CONST_IS_TRACKING, true)
                     intent.putExtra(CONST_MAPS, iMapsUrl)
                     intent.putExtra(CONST_MAPS_NAME, tvName.text)
                     intent.putExtra(CONST_MAPS_STATUS, iStatus)
@@ -1980,6 +1990,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     override fun onDestroy() {
         super.onDestroy()
         if (pingUtility != null) pingUtility!!.stopPingMonitoring()
+    }
+
+    private fun setupDelivery() {
+        binding.btnDelivery.setOnClickListener { mapsActionHandler(true) }
     }
 
 }
