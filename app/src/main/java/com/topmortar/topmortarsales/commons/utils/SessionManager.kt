@@ -118,21 +118,22 @@ class SessionManager(context: Context) {
 
     fun setUserLoggedIn(data: UserModel?) {
         if (data != null) {
-            data.level_user = when (data.level_user) {
+            val tempData = data.copy()
+            tempData.level_user = when (tempData.level_user) {
                 AUTH_LEVEL_ADMIN -> USER_KIND_ADMIN
                 AUTH_LEVEL_ADMIN_CITY -> USER_KIND_ADMIN_CITY
                 AUTH_LEVEL_COURIER -> USER_KIND_COURIER
                 AUTH_LEVEL_BA -> USER_KIND_BA
                 else -> USER_KIND_SALES
             }
-            setUserID(data.id_user)
-            setUserKind(data.level_user)
-            setUserName(data.username)
-            setFullName(data.full_name)
-            setUserCityID(data.id_city)
-            userBidLimit(data.bid_limit)
-            userDistributor(data.id_distributor)
-            userDistributorNumber(data.nomorhp_distributor)
+            setUserID(tempData.id_user)
+            setUserKind(tempData.level_user)
+            setUserName(tempData.username)
+            setFullName(tempData.full_name)
+            setUserCityID(tempData.id_city)
+            userBidLimit(tempData.bid_limit)
+            userDistributor(tempData.id_distributor)
+            userDistributorNumber(tempData.nomorhp_distributor)
         } else {
             setUserID("")
             setUserKind("")
