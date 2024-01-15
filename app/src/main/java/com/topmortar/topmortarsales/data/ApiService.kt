@@ -171,6 +171,9 @@ interface ApiService {
     suspend fun getUsers(@Query("dst") distributorID: String): ResponseUsers
 
     @GET(GET_USERS)
+    suspend fun getUsers(@Query("c") cityId: String, @Query("dst") distributorID: String): ResponseUsers
+
+    @GET(GET_USERS)
     suspend fun detailUser(@Query("id") userId: String): ResponseUsers
 
     @Multipart

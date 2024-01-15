@@ -35,7 +35,6 @@ import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
-import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -43,6 +42,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -54,7 +54,6 @@ import com.topmortar.topmortarsales.modal.ChartSalesPricingModal
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import com.topmortar.topmortarsales.view.reports.ReportsActivity
-import com.topmortar.topmortarsales.view.reports.UsersReportActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -110,6 +109,7 @@ class UserProfileActivity : AppCompatActivity() {
                         RESPONSE_STATUS_OK -> {
 
                             val data = response.results[0]
+                            sessionManager.setUserLoggedIn(data)
 
                             iUserID = data.id_user
                             iPhone = data.phone_user
@@ -117,12 +117,6 @@ class UserProfileActivity : AppCompatActivity() {
                             iFullName = data.full_name
                             iUserLevel = data.level_user
                             iLocation = data.id_city
-
-                            sessionManager.setUserID(data.id_user)
-                            sessionManager.setUserName(data.username)
-                            sessionManager.setFullName(data.full_name)
-                            sessionManager.setUserCityID(data.id_city)
-                            sessionManager.userBidLimit(data.bid_limit)
 
                             dataActivityValidation()
 
@@ -191,7 +185,7 @@ class UserProfileActivity : AppCompatActivity() {
 
     private fun initClickHandler() {
 
-        if (sessionManager.userKind() == USER_KIND_ADMIN) {
+        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) {
             binding.titleBarLight.icEdit.visibility = View.VISIBLE
             binding.titleBarLight.icEdit.setOnClickListener { navigateEditUser() }
         }
@@ -220,7 +214,7 @@ class UserProfileActivity : AppCompatActivity() {
 
         if (iUserLevel == AUTH_LEVEL_SALES) {
 
-            if (sessionManager.userKind() == USER_KIND_ADMIN) binding.titleBarLight.icEdit.visibility = View.VISIBLE
+            if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) binding.titleBarLight.icEdit.visibility = View.VISIBLE
             binding.priceContainer.visibility = View.GONE
             binding.tabContainer.visibility = View.VISIBLE
 //            binding.counterContainer.visibility = View.VISIBLE

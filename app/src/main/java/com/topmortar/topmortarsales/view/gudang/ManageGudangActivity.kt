@@ -29,6 +29,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_SUCCESS
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -75,7 +76,7 @@ class ManageGudangActivity : AppCompatActivity() {
         }
 
         getList()
-        getCities()
+        if (userKind == USER_KIND_ADMIN) getCities()
 
     }
 
@@ -166,7 +167,7 @@ class ManageGudangActivity : AppCompatActivity() {
 
     private fun navigateItemAction(data: GudangModel? = null) {
 
-        if (userKind == USER_KIND_ADMIN) {
+        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
 
             val intent = Intent(this@ManageGudangActivity, FormGudangActivity::class.java)
             intent.putExtra(EDIT_CONTACT, true)

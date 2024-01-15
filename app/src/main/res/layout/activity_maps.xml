@@ -116,6 +116,26 @@
         tools:listitem="@layout/item_place"
         android:theme="@style/Theme.TopMortarSales.BaseBackground"/>
 
+    <LinearLayout
+        android:visibility="gone"
+        android:layout_below="@id/search_bar"
+        android:id="@+id/rvLoading"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:theme="@style/Theme.TopMortarSales.BaseBackground">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/txt_loading"
+            android:textSize="14sp"
+            android:padding="8dp"
+            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+    </LinearLayout>
+
     <Button
         android:visibility="gone"
         android:layout_alignParentBottom="true"

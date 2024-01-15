@@ -18,6 +18,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
@@ -223,7 +224,7 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
                 val distributorId = createPartFromString(userDistributorId)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = if (userKind == USER_KIND_ADMIN) {
+                val response = if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
                     if (selectedCity != null ) {
                         if (selectedCity!!.id != "-1") {
                             val cityId = createPartFromString(selectedCity!!.id!!)

@@ -103,8 +103,9 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
-import com.topmortar.topmortarsales.commons.USER_KIND_BA
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
@@ -296,7 +297,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         mMap.uiSettings.isZoomGesturesEnabled = true
         mMap.uiSettings.isScrollGesturesEnabledDuringRotateOrZoom = true
 
-        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_SALES) {
+        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY || userKind == USER_KIND_SALES) {
             if (isNearestStore) binding.llFilter.visibility = View.VISIBLE
             binding.llFilter.setOnClickListener {
                 setupFilterTokoModal()
@@ -335,7 +336,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         } else mMap.setPadding(0,0,0,convertDpToPx(16, this))
 
         mMap.setOnMapClickListener {
-            if (binding.recyclerView.isVisible) binding.recyclerView.visibility = View.GONE
+            if (binding.recyclerView.isVisible) {
+                binding.recyclerView.visibility = View.GONE
+                binding.rvLoading.visibility = View.GONE
+            }
         }
 
         mMap.setOnMarkerClickListener {
@@ -539,6 +543,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         etSearch.setText("")
 //                        etSearch.setText(getPlaceNameFromLatLng(latLng))
                         binding.recyclerView.visibility = View.GONE
+                        binding.rvLoading.visibility = View.GONE
                         return initMaps(latLng, iMapsName)
                     } else showDialog(message = "Gagal menavigasi koordinat")
                 } else showDialog(message = "Gagal memproses koordinat")
@@ -614,6 +619,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                                         val latLng = LatLng(latitude, longitude)
                                         binding.recyclerView.visibility = View.GONE
+                                        binding.rvLoading.visibility = View.GONE
 
                                         val iconDrawable = when (listCoordinateStatus?.get(i)) {
                                             STATUS_CONTACT_DATA -> R.drawable.store_location_status_data
@@ -771,6 +777,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     if (!placeName.isNullOrEmpty()) {
                         etSearch.setText(placeName)
                         binding.recyclerView.visibility = View.GONE
+                        binding.rvLoading.visibility = View.GONE
                         searchLocation(placeName)
                     } else showDialog(message = "Gagal menemukan koordinatnya. Silakan pilih manual di peta!")
 
@@ -1061,6 +1068,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         }
         binding.recyclerView.visibility = View.GONE
+        binding.rvLoading.visibility = View.GONE
 
     }
 
@@ -1132,13 +1140,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             val location = "${ etSearch.text }"
 
-            if (!location.isNullOrEmpty()) {
-                val request = FindAutocompletePredictionsRequest.builder()
-                    .setQuery(location)
-                    .build()
+            if (location.isNotEmpty()) {
+                if (!binding.recyclerView.isVisible) binding.rvLoading.visibility = View.VISIBLE
 
-                placesClient.findAutocompletePredictions(request)
-                    .addOnSuccessListener { response: FindAutocompletePredictionsResponse ->
+                GlobalScope.launch(Dispatchers.IO) {
+                    val request = FindAutocompletePredictionsRequest.builder()
+                        .setQuery(location)
+                        .build()
+
+                    val result = placesClient.findAutocompletePredictions(request)
+
+                    withContext(Dispatchers.Main) {
+                        result.addOnSuccessListener { response: FindAutocompletePredictionsResponse ->
 
                         val predictions = response.autocompletePredictions
                         val placeIds = predictions.map { prediction: AutocompletePrediction -> prediction.placeId }
@@ -1160,37 +1173,50 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                                         if (latLng != null) setPin(latLng, placeNames[position])
                                         else {
-                                            Toast.makeText(this, "Gagal menampilkan koordinat", TOAST_SHORT).show()
+                                            Toast.makeText(this@MapsActivity, "Gagal menampilkan koordinat", TOAST_SHORT).show()
                                             binding.recyclerView.visibility = View.GONE
+                                            binding.rvLoading.visibility = View.GONE
                                         }
 
                                     }
                                     .addOnFailureListener { _: Exception ->
-                                        Toast.makeText(this, "Gagal menampilkan lokasi", TOAST_SHORT).show()
+                                        Toast.makeText(this@MapsActivity, "Gagal menampilkan lokasi", TOAST_SHORT).show()
                                         binding.recyclerView.visibility = View.GONE
+                                        binding.rvLoading.visibility = View.GONE
                                     }
                             }
 
                             binding.recyclerView.apply {
                                 layoutManager = LinearLayoutManager(this@MapsActivity)
                                 adapter = placeAdapter
-                                if (isGetCoordinate) this.visibility = View.VISIBLE
+                                if (isGetCoordinate) {
+                                    this.visibility = View.VISIBLE
+                                    binding.rvLoading.visibility = View.GONE
+                                }
                             }
-                        } else binding.recyclerView.visibility = View.GONE
+                        } else {
+                            binding.recyclerView.visibility = View.GONE
+                            binding.rvLoading.visibility = View.GONE
+                        }
 
+                    }.addOnFailureListener {
+                            Toast.makeText(this@MapsActivity, "Gagal menemukan lokasi", TOAST_SHORT).show()
+                            binding.recyclerView.visibility = View.GONE
+                            binding.rvLoading.visibility = View.GONE
+                        }
                     }
-                    .addOnFailureListener {
-                        Toast.makeText(this, "Gagal menemukan lokasi", TOAST_SHORT).show()
-                        binding.recyclerView.visibility = View.GONE
-                    }
-            } else binding.recyclerView.visibility = View.GONE
+                }
+            } else {
+                binding.recyclerView.visibility = View.GONE
+                binding.rvLoading.visibility = View.GONE
+            }
 
         }
     }
 
     private fun setupFilterTokoModal() {
 
-        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_SALES) {
+        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY || userKind == USER_KIND_SALES) {
             val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
             if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.background = getDrawable(R.color.black_400)
             else binding.llFilter.background = getDrawable(R.color.light)
@@ -1201,7 +1227,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             if (userKind == USER_KIND_ADMIN) {
                 filterModal.setStatuses(selected = selectedStatusID)
                 filterModal.setCities(items = cities, selected = selectedCitiesID)
-            } else if (userKind == USER_KIND_SALES) filterModal.setStatuses(selected = selectedStatusID)
+            } else if (userKind == USER_KIND_SALES || userKind == USER_KIND_ADMIN_CITY) filterModal.setStatuses(selected = selectedStatusID)
             filterModal.setSendFilterListener(object: FilterTokoModal.SendFilterListener {
                 override fun onSendFilter(
                     selectedStatusID: String,

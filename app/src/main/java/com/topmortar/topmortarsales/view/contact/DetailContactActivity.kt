@@ -89,6 +89,7 @@ import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
@@ -677,7 +678,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         if (isEdit) {
 
-            if (sessionManager.userKind() == USER_KIND_ADMIN) {
+            if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) {
                 // Hide Case
                 icEdit.visibility = View.GONE
 
@@ -702,7 +703,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 etPhoneContainer.visibility = View.VISIBLE
                 etOwnerContainer.visibility = View.VISIBLE
-                etLocationContainer.visibility = View.VISIBLE
+                if (sessionManager.userKind() == USER_KIND_ADMIN_CITY) etLocationContainer.visibility = View.GONE
+                else etLocationContainer.visibility = View.VISIBLE
                 etMapsContainer.visibility = View.VISIBLE
                 etBirthdayContainer.visibility = View.VISIBLE
                 etKtpContainer.visibility = View.VISIBLE
@@ -746,7 +748,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         } else {
 
-            if (sessionManager.userKind() == USER_KIND_ADMIN) {
+            if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) {
                 // Show Case
                 icEdit.visibility = View.VISIBLE
 
@@ -1301,7 +1303,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 reportOption.visibility = View.GONE
                 btnNewReport.visibility = View.GONE
                 voucherOption.visibility = View.GONE
-            } else if (sessionManager.userKind() == USER_KIND_ADMIN) {
+            } else if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) {
                 reportsTitle.text = "Lihat Laporan Sales"
                 reportOption.visibility = View.VISIBLE
                 btnNewReport.visibility = View.GONE
@@ -1341,7 +1343,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 var intent = Intent(this@DetailContactActivity, ReportsActivity::class.java)
 
-                if (sessionManager.userKind() == USER_KIND_ADMIN) intent = Intent(this@DetailContactActivity, UsersReportActivity::class.java)
+                if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) intent = Intent(this@DetailContactActivity, UsersReportActivity::class.java)
 
                 intent.putExtra(CONST_CONTACT_ID, contactId)
                 if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
@@ -1570,11 +1572,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         }
 
                         // Admin Access
-                        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_SALES) {
+                        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY || sessionManager.userKind() == USER_KIND_SALES) {
                             icEdit.visibility = View.VISIBLE
                             val indicatorImageView = findViewById<View>(R.id.indicatorView)
                             indicatorImageView.visibility = View.VISIBLE
-                            if (sessionManager.userKind() == USER_KIND_ADMIN) tvKtpContainer.visibility = View.VISIBLE
+                            if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) tvKtpContainer.visibility = View.VISIBLE
                         }
                     }
                     RESPONSE_STATUS_EMPTY -> {

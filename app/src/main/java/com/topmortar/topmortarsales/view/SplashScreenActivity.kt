@@ -22,7 +22,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.database.DatabaseReference
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
@@ -33,7 +32,6 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
-import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
@@ -368,21 +366,7 @@ class SplashScreenActivity : AppCompatActivity() {
                         val results = response.results
                         val data = results[0]
 
-                        when (data.level_user) {
-                            AUTH_LEVEL_ADMIN -> sessionManager.setUserKind(USER_KIND_ADMIN)
-                            AUTH_LEVEL_COURIER -> sessionManager.setUserKind(USER_KIND_COURIER)
-                            AUTH_LEVEL_BA -> sessionManager.setUserKind(USER_KIND_BA)
-                            else -> sessionManager.setUserKind(USER_KIND_SALES)
-                        }
-
-                        sessionManager.setUserID(data.id_user)
-                        sessionManager.setUserName(data.username)
-                        sessionManager.setFullName(data.full_name)
-                        sessionManager.setUserCityID(data.id_city)
-                        sessionManager.userBidLimit(data.bid_limit)
-                        sessionManager.userDistributor(data.id_distributor)
-                        sessionManager.userDistributorNumber(data.nomorhp_distributor)
-
+                        sessionManager.setUserLoggedIn(data)
                         sessionManager.setLoggedIn(LOGGED_IN)
 
                         when (data.level_user) {
