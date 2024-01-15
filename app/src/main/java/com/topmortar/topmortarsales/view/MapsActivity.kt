@@ -1012,42 +1012,37 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     }
 
-
     @SuppressLint("MissingPermission")
     private fun initMaps(latLng: LatLng? = null, latLngName: String? = null) {
 
-        if (latLng != null) {
-            if (isTracking && userKind == USER_KIND_COURIER) {
-                if (currentLatLng == null) showDialog(message = "Gagal menemukan lokasi Anda saat ini. Pastikan lokasi Anda aktif dan coba buka kembali peta")
-                else if (selectedLocation == null) showDialog(message = "Gagal menemukan lokasi target")
-                else {
-                    isRouteActive = true
-                    getDirections()
-                }
-            }
-            setPin(latLng, latLngName ?: "")
-        }
-//        if (latLng != null) setPin(latLng, latLngName ?: getPlaceNameFromLatLng(latLng))
-        else {
-            fusedLocationClient.lastLocation
-                .addOnSuccessListener { location: Location? ->
-                    if (location != null) {
-                        currentLatLng = LatLng(location.latitude, location.longitude)
-//                        currentLatLng = LatLng(-7.952356,112.692583)
-                        if (isTracking) setupTracking()
-                        else setPin(currentLatLng!!, "Lokasi Saya")
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+            if (location != null) {
+                currentLatLng = LatLng(location.latitude, location.longitude)
 
-                        if (isNearestStore && binding.llFilter.isVisible) {
-                            getCities()
-                            getListGudang()
-//                            if (userKind == USER_KIND_ADMIN) getListGudang()
-                        } else if (isNearestStore) {
-                            searchCoordinate()
-                            getListGudang()
-//                            if (userKind == USER_KIND_ADMIN) getListGudang()
+                if (latLng != null) {
+                    if (isTracking && userKind == USER_KIND_COURIER) {
+                        selectedLocation = latLng
+                        if (currentLatLng == null) showDialog(message = "Gagal menemukan lokasi Anda saat ini. Pastikan lokasi Anda aktif dan coba buka kembali peta")
+                        else {
+                            isRouteActive = true
+                            getDirections()
                         }
                     }
+                    setPin(latLng, latLngName ?: "")
+                } else {
+                    if (isTracking) setupTracking()
+                    else setPin(currentLatLng!!, "Lokasi Saya")
+
+                    if (isNearestStore && binding.llFilter.isVisible) {
+                        getCities()
+                        getListGudang()
+                    } else if (isNearestStore) {
+                        searchCoordinate()
+                        getListGudang()
+                    }
                 }
+            } else showDialog(message = "Gagal menemukan lokasi Anda saat ini. Pastikan lokasi Anda aktif dan coba buka kembali peta")
         }
 
     }
