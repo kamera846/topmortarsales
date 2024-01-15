@@ -6,7 +6,7 @@ import android.app.ProgressDialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.LocationManager
+import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -20,6 +20,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
@@ -64,6 +66,8 @@ class NewReportActivity : AppCompatActivity() {
     private var name: String = ""
     private var coordinate: String = ""
 
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -84,6 +88,7 @@ class NewReportActivity : AppCompatActivity() {
 
     private fun initContent() {
         binding.titleBarLight.tvTitleBar.text = "Buat Laporan"
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         loadingContent(true)
 
@@ -162,10 +167,7 @@ class NewReportActivity : AppCompatActivity() {
                     urlUtility.requestLocationUpdate()
 
                     if (!urlUtility.isUrl(mapsUrl) && !mapsUrl.isNullOrEmpty()) {
-                        val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
-                        val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-
-                        if (location != null) {
+                        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location ->
 
                             // Courier Location
                             val currentLatitude = location.latitude
@@ -239,9 +241,10 @@ class NewReportActivity : AppCompatActivity() {
                                 Toast.makeText(this, "Gagal memproses koordinat", TOAST_SHORT).show()
                             }
 
-                        } else {
+                        }.addOnFailureListener {
                             progressDialog.dismiss()
-                            Toast.makeText(this, "Tidak dapat mengakses lokasi, kembali dan coba lagi", TOAST_SHORT).show()
+                            handleMessage(this, "LOG REPORT", "Gagal mendapatkan lokasi anda. Err: " + it.message)
+//                            Toast.makeText(this, "Gagal mendapatkan lokasi anda", TOAST_SHORT).show()
                         }
 
                     } else {
