@@ -10,10 +10,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.location.Location
 import android.os.Build
 import android.os.IBinder
 import android.os.Looper
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -21,7 +21,11 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.firebase.database.DatabaseReference
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
+import com.topmortar.topmortarsales.commons.utils.DateFormat
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.view.courier.CourierActivity
 
 class TrackingService : Service() {
@@ -29,29 +33,18 @@ class TrackingService : Service() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
+    private lateinit var firebaseReference: DatabaseReference
+    private lateinit var childDelivery: DatabaseReference
+    private lateinit var childDriver: DatabaseReference
 
     override fun onCreate() {
         super.onCreate()
-        // Inisialisasi fusedLocationClient, locationRequest, dan locationCallback di sini
-        // Sesuaikan dengan implementasi di aktivitas atau fragmen Anda
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        locationRequest = LocationRequest.create()
-            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-            .setInterval(1000)
-        locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
-
-                val location = locationResult.lastLocation!!
-                println("Update location: " + location.latitude + " " + location.longitude)
-
-            }
-        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        Log.d("Service", "On Start Service")
+//        Log.d("Service", "On Start Service")
         startForegroundService()
-        startLocationUpdates()
+        startLocationUpdates(intent)
         return START_STICKY
     }
 
@@ -106,31 +99,55 @@ class TrackingService : Service() {
         }
     }
 
-    private fun startLocationUpdates() {
-        // Memulai permintaan pembaruan lokasi di sini
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return
+    private fun startLocationUpdates(intent: Intent?) {
+
+        val userDistributorId = intent?.getStringExtra("userDistributorId").toString()
+        val deliveryId = intent?.getStringExtra("deliveryId").toString()
+
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
+        childDelivery = firebaseReference.child(FIREBASE_CHILD_DELIVERY)
+        childDriver = childDelivery.child(deliveryId)
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        locationRequest = LocationRequest.create()
+            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+            .setInterval(3000)
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+
+                val driverLocation = locationResult.lastLocation!!
+                childDriver.child("lat").setValue(driverLocation.latitude)
+                childDriver.child("lng").setValue(driverLocation.longitude)
+
+            }
         }
+
+        // Memulai permintaan pembaruan lokasi di sini
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+            &&
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        ) return
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
     }
 
     private fun stopLocationUpdates() {
         // Memberhentikan pembaruan lokasi di sini
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+            &&
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        ) return
         fusedLocationClient.removeLocationUpdates(locationCallback)
+//        childDriver.removeValue()
+
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                childDriver.child("end_lat").setValue(location?.latitude)
+                childDriver.child("end_lng").setValue(location?.longitude)
+                childDriver.child("tracking_mode").setValue(false)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    childDriver.child("end_datetime").setValue(DateFormat.now())
+                }
+            }
     }
 
     override fun onBind(intent: Intent?): IBinder? {

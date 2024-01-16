@@ -6,7 +6,9 @@ import android.app.Activity
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Location
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.provider.MediaStore
@@ -14,6 +16,7 @@ import android.provider.OpenableColumns
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.Gravity
 import android.view.MenuItem
 import android.view.View
@@ -39,7 +42,16 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.BASE_URL
@@ -47,6 +59,7 @@ import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_DATE
+import com.topmortar.topmortarsales.commons.CONST_DELIVERY_ID
 import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING
 import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
@@ -63,6 +76,7 @@ import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.CONST_URI
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
@@ -93,9 +107,11 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
+import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.PingUtility
@@ -110,6 +126,7 @@ import com.topmortar.topmortarsales.modal.AddVoucherModal
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.modal.SendMessageModal
 import com.topmortar.topmortarsales.model.ContactModel
+import com.topmortar.topmortarsales.model.DeliveryModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.reports.NewReportActivity
@@ -136,8 +153,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     PingUtility.PingResultInterface, SendMessageModal.SendMessageModalInterface {
 
     private lateinit var sessionManager: SessionManager
-    private val userDistributorId get() = sessionManager.userDistributor().toString()
     private val userKind get() = sessionManager.userKind().toString()
+    private val userID get() = sessionManager.userID().toString()
+    private val username get() = sessionManager.userName().toString()
+    private val fulllName get() = sessionManager.fullName().toString()
+    private val userCityID get() = sessionManager.userCityID().toString()
+    private val userDistributorId get() = sessionManager.userDistributor().toString()
+    private val userCity get() = sessionManager.userCityID().toString()
     private lateinit var binding: ActivityDetailContactBinding
     private var pingUtility: PingUtility? = null
 
@@ -244,6 +266,18 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var sendMessageModal: SendMessageModal
     private lateinit var bottomSheetDialog: BottomSheetDialog
 
+    // Tracking
+    private var isDeliveryLoading = false
+    private var firebaseReference: DatabaseReference? = null
+    private var childDelivery: DatabaseReference? = null
+    private var childDriver: DatabaseReference? = null
+    private var locationCallback: LocationCallback? = null
+    private var locationListener: ValueEventListener? = null
+    private var courierMarker: Marker? = null
+    private var isTracking = false
+    private var deliveryId: String = ""
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -262,11 +296,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         // Get List City
         getCities()
         if (userKind == USER_KIND_COURIER) {
-            binding.deliveryAction.visibility = View.VISIBLE
-            binding.contactAction.visibility = View.GONE
             setupDelivery()
         } else {
-            binding.deliveryAction.visibility = View.GONE
+            binding.btnDeliveryContainer.visibility = View.GONE
             binding.contactAction.visibility = View.VISIBLE
         }
     }
@@ -373,6 +405,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
 
         bottomSheetDialog = BottomSheetDialog(this)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
     }
 
@@ -1612,7 +1645,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
     }
 
-    private fun mapsActionHandler(isTracking: Boolean = false) {
+    private fun mapsActionHandler() {
         if (tvMaps.text != EMPTY_FIELD_VALUE && !isEdit) {
             val animateDuration = 200L
 
@@ -1629,7 +1662,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                     val intent = Intent(this@DetailContactActivity, MapsActivity::class.java)
-                    if (isTracking) intent.putExtra(CONST_IS_TRACKING, true)
                     intent.putExtra(CONST_MAPS, iMapsUrl)
                     intent.putExtra(CONST_MAPS_NAME, tvName.text)
                     intent.putExtra(CONST_MAPS_STATUS, iStatus)
@@ -1995,7 +2027,184 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     }
 
     private fun setupDelivery() {
-        binding.btnDelivery.setOnClickListener { mapsActionHandler(true) }
+
+        binding.btnDeliveryContainer.visibility = View.VISIBLE
+        binding.contactAction.visibility = View.GONE
+
+//        val userLevel = when (sessionManager.userKind()) {
+//            USER_KIND_ADMIN -> AUTH_LEVEL_ADMIN
+//            USER_KIND_COURIER -> AUTH_LEVEL_COURIER
+//            USER_KIND_BA -> AUTH_LEVEL_BA
+//            else -> AUTH_LEVEL_SALES
+//        }
+//        deliveryId = "$userLevel$userID"
+        deliveryId = "store$contactId"
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
+        childDelivery = firebaseReference?.child(FIREBASE_CHILD_DELIVERY)
+        childDriver = childDelivery?.child(deliveryId)
+
+        childDriver?.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    val endTimeChild = snapshot.child("end_datetime")
+                    if (endTimeChild.exists()) {
+                        val endTime = endTimeChild.value as String
+                        if (endTime.isEmpty()) {
+                            binding.btnDeliveryContainer.visibility = View.GONE
+                            binding.contactAction.visibility = View.VISIBLE
+                            binding.textDelivery.visibility = View.VISIBLE
+                            binding.btnDirection.visibility = View.VISIBLE
+                            binding.btnDirection.setOnClickListener {
+                                val intent = Intent(this@DetailContactActivity, MapsActivity::class.java)
+                                intent.putExtra(CONST_IS_TRACKING, true)
+                                intent.putExtra(CONST_DELIVERY_ID, deliveryId)
+                                startActivity(intent)
+                            }
+                            val trackingMode = snapshot.child("tracking_mode").value as Boolean
+                            if (trackingMode) {
+                                val serviceIntent = Intent(this@DetailContactActivity, TrackingService::class.java)
+                                serviceIntent.putExtra("userDistributorId", userDistributorId)
+                                serviceIntent.putExtra("deliveryId", deliveryId)
+                                this@DetailContactActivity.startService(serviceIntent)
+                            }
+                        } else {
+                            binding.btnDeliveryContainer.visibility = View.GONE
+                            binding.contactAction.visibility = View.GONE
+                        }
+                    }
+                } else {
+                    if (!isDeliveryLoading) {
+                        binding.btnDeliveryContainer.setOnClickListener {
+                            if (ContextCompat.checkSelfPermission(this@DetailContactActivity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                                // Meminta izin background location
+                                if (ContextCompat.checkSelfPermission(this@DetailContactActivity, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+                                    startDelivery()
+
+                                } else {
+                                    val message = "Izin background lokasi diperlukan untuk fitur ini. Mohon untuk memilih opsi berikut \"${getString(R.string.yes_bg_location)}\""
+                                    val customUtility = CustomUtility(this@DetailContactActivity)
+                                    customUtility.showPermissionDeniedDialog(message) {
+                                        ActivityCompat.requestPermissions(this@DetailContactActivity, arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+                                    }
+                                }
+                            } else {
+                                // Meminta izin lokasi jika belum diberikan
+                                ActivityCompat.requestPermissions(this@DetailContactActivity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+                            }
+                        }
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                handleMessage(this@DetailContactActivity, "onSetupDelivery", "Failed get delivery child")
+                Log.e("onSetupDelivery", error.message)
+            }
+
+        })
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun startDelivery() {
+
+        val targetLatLng = latLngConverter(iMapsUrl!!)
+        if (targetLatLng != null) {
+
+            isDeliveryLoading = true
+
+            val btnDelivery = binding.btnDeliveryTitle
+            btnDelivery.text = getString(R.string.txt_loading)
+            Handler().postDelayed({
+                fusedLocationClient.lastLocation
+                    .addOnSuccessListener { currentLatLng: Location ->
+
+                        val courierModel = DeliveryModel.Courier(
+                            id = userID,
+                            name = fulllName
+                        )
+
+                        val storeModel = DeliveryModel.Store(
+                            id = contactId!!,
+                            name = "${tvName.text}",
+                            lat = targetLatLng.latitude,
+                            lng = targetLatLng.longitude,
+                        )
+
+                        val deliveryModel = DeliveryModel.Delivery(
+                            id = deliveryId,
+                            start_datetime = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) DateFormat.now() else "",
+                            start_lat = currentLatLng.latitude,
+                            start_lng = currentLatLng.longitude,
+                            tracking_mode = true,
+                            store = storeModel,
+                            courier = courierModel
+                        )
+
+                        childDriver?.setValue(deliveryModel)
+
+                        // Start background service
+                        val serviceIntent = Intent(this, TrackingService::class.java)
+                        serviceIntent.putExtra("userDistributorId", userDistributorId)
+                        serviceIntent.putExtra("deliveryId", deliveryId)
+                        this.startService(serviceIntent)
+
+                        // Change state
+                        isDeliveryLoading = false
+                        binding.btnDeliveryContainer.visibility = View.GONE
+                        binding.contactAction.visibility = View.VISIBLE
+                        binding.textDelivery.visibility = View.VISIBLE
+                        binding.btnDirection.visibility = View.VISIBLE
+                        binding.btnDirection.setOnClickListener {
+                            val intent = Intent(this@DetailContactActivity, MapsActivity::class.java)
+                            intent.putExtra(CONST_IS_TRACKING, true)
+                            intent.putExtra(CONST_DELIVERY_ID, deliveryId)
+                            startActivity(intent)
+                        }
+
+                    }.addOnFailureListener {
+                        isDeliveryLoading = false
+                        handleMessage(this, "onStartDelivery", "Failed get user lastLocation")
+                        Log.e("onStartDelivery", "Failed get user lastLocation: $it")
+                        btnDelivery.text = getString(R.string.start_delivery)
+                    }
+            }, 500)
+        } else {
+            handleMessage(this, "onStartDelivery", "Latitude Longitude converter has returned null")
+        }
+    }
+
+    private fun latLngConverter(stringLatLng: String): LatLng? {
+        return if (stringLatLng.isNotEmpty()) {
+
+            val urlUtility = URLUtility(this)
+
+            if (!urlUtility.isUrl(stringLatLng)) {
+
+                val coordinates = stringLatLng.trim().split(",")
+                return if (coordinates.size == 2) {
+                    val latitude = coordinates[0].toDoubleOrNull()
+                    val longitude = coordinates[1].toDoubleOrNull()
+
+                    if (latitude != null && longitude != null) {
+                        LatLng(latitude, longitude)
+                    } else {
+                        handleMessage(this, "latLngConverter", "Null latitude or longitude")
+                        null
+                    }
+                } else {
+                    handleMessage(this, "latLngConverter", "Failed processed coordinate")
+                    null
+                }
+            } else {
+                handleMessage(this, "latLngConverter", "Wrong coordinate value")
+                null
+            }
+
+        } else {
+            handleMessage(this, "latLngConverter", "Parameter is empty")
+            null
+        }
     }
 
 }

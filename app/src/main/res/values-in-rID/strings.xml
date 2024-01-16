@@ -169,6 +169,7 @@
     <string name="laporan_basecamp_hint">e.g Menurunkan material pasir di Gudang Sidoarjo…</string>
     <string name="click_to_select_city">Tekan untuk memilih kota…</string>
     <string name="select_city">Pilih Kota</string>
+    <string name="start_delivery">Proses Pengiriman</string>
 
     <!-- Test Language Resource -->
     <string name="yes_bg_location">Izinkan sepanjang waktu!</string>

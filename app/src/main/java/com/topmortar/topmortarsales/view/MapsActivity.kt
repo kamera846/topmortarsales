@@ -1013,23 +1013,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     }
 
     @SuppressLint("MissingPermission")
-    private fun initMaps(latLng: LatLng? = null, latLngName: String? = null) {
+    private fun initMaps(targetLatLng: LatLng? = null, targetLatLngName: String? = null) {
 
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location: Location? ->
             if (location != null) {
                 currentLatLng = LatLng(location.latitude, location.longitude)
 
-                if (latLng != null) {
-                    if (isTracking && userKind == USER_KIND_COURIER) {
-                        selectedLocation = latLng
-                        if (currentLatLng == null) showDialog(message = "Gagal menemukan lokasi Anda saat ini. Pastikan lokasi Anda aktif dan coba buka kembali peta")
-                        else {
-                            isRouteActive = true
-                            getDirections()
-                        }
-                    }
-                    setPin(latLng, latLngName ?: "")
+                if (targetLatLng != null) {
+//                    if (isTracking && userKind == USER_KIND_COURIER) {
+//                        selectedLocation = targetLatLng
+//                        if (currentLatLng == null) showDialog(message = "Gagal menemukan lokasi Anda saat ini. Pastikan lokasi Anda aktif dan coba buka kembali peta")
+//                        else {
+//                            isRouteActive = true
+//                            getDirections()
+//                        }
+//                    }
+                    setPin(targetLatLng, targetLatLngName ?: "")
                 } else {
                     if (isTracking) setupTracking()
                     else setPin(currentLatLng!!, "Lokasi Saya")

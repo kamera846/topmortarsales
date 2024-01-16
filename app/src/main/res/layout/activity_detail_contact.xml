@@ -948,34 +948,34 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:text="Reputasi Toko"
                             android:layout_marginHorizontal="16dp"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="4dp"
+                            android:gravity="center_vertical"
+                            android:text="Reputasi Toko"
                             android:textSize="14sp"
                             android:textStyle="bold"
                             android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
 
                         <TextView
-                            android:visibility="visible"
                             android:id="@+id/tv_reputation"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:gravity="center_vertical"
-                            android:text="Good"
                             android:layout_marginHorizontal="16dp"
                             android:layout_marginBottom="16dp"
+                            android:gravity="center_vertical"
+                            android:text="Good"
                             android:textSize="14sp"
-                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                            android:visibility="visible" />
 
                         <Spinner
-                            android:visibility="gone"
                             android:id="@+id/spin_reputation"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="12dp"
-                            android:layout_marginBottom="16dp"/>
+                            android:layout_marginBottom="16dp"
+                            android:visibility="gone" />
 
                     </LinearLayout>
 
@@ -1093,9 +1093,36 @@
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingVertical="16dp"
-        android:paddingHorizontal="8dp"
+        android:padding="8dp"
         android:orientation="vertical">
+
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/textDelivery"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textTitleTarget"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:alpha="0.7"
+                android:text="Pengiriman berlangsung!"
+                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+            <TextView
+                android:id="@+id/textTargetRute"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:text="Selesaikan closing untuk mengakhiri pengiriman"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+        </LinearLayout>
 
         <LinearLayout
             android:visibility="gone"
@@ -1110,9 +1137,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginHorizontal="8dp"
+                android:layout_marginRight="8dp"
                 android:padding="12dp"
-                android:textSize="18sp"
+                android:textSize="14sp"
                 android:textStyle="bold"
                 android:text="@string/send_message" />
 
@@ -1120,7 +1147,6 @@
                 android:id="@+id/btn_invoice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="8dp"
                 android:padding="12dp"
                 android:gravity="center"
                 android:background="@drawable/circular_border_black"
@@ -1131,6 +1157,25 @@
                     android:layout_height="24dp"
                     android:contentDescription="Invoice Image Button"
                     android:src="@drawable/file_list_black" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/btnDirection"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:padding="12dp"
+                android:gravity="center"
+                android:background="@drawable/circular_border_black"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:contentDescription="Direction Image"
+                    android:src="@drawable/direction_white" />
 
             </LinearLayout>
 
@@ -1150,21 +1195,33 @@
 
         <LinearLayout
             android:visibility="gone"
-            android:id="@+id/deliveryAction"
+            android:id="@+id/btnDeliveryContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:layout_marginHorizontal="8dp"
+            android:padding="12dp"
+            android:background="@drawable/bg_primary_round"
+            android:gravity="center">
 
-            <Button
-                android:id="@+id/btnDelivery"
-                android:layout_width="match_parent"
+            <ImageView
+                android:id="@+id/btnDeliveryImg"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="8dp"
+                android:contentDescription="Direction Image Button"
+                android:background="@android:color/transparent"
+                android:src="@drawable/direction_white" />
+
+            <TextView
+                android:id="@+id/btnDeliveryTitle"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginHorizontal="8dp"
-                android:padding="12dp"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:text="Mulai Pengiriman" />
+                android:text="@string/start_delivery"
+                android:textAllCaps="true"
+                android:textColor="@color/white"
+                android:background="@android:color/transparent"
+                android:textStyle="bold"/>
 
         </LinearLayout>
 
