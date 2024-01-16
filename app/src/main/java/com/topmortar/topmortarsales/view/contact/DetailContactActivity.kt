@@ -725,6 +725,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 etAddress.isEnabled = true
                 if (iAddress.isNullOrEmpty()) etAddress.setText("")
 
+                statusContainer.visibility = View.GONE
                 statusContainer.setBackgroundResource(R.drawable.et_background)
                 tooltipStatus.visibility = View.GONE
                 tvStatus.visibility = View.GONE
@@ -793,6 +794,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 etAddress.isEnabled = false
                 if (iAddress.isNullOrEmpty()) etAddress.setText(EMPTY_FIELD_VALUE)
 
+                statusContainer.visibility = View.VISIBLE
                 statusContainer.setBackgroundResource(R.drawable.background_rounded_16)
 //            if (!iStatus.isNullOrEmpty()) {
                 tooltipStatus.visibility = View.VISIBLE
