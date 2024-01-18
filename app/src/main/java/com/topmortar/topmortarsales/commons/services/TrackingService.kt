@@ -10,8 +10,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.location.Location
 import android.os.Build
+import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import androidx.core.app.ActivityCompat
@@ -24,7 +24,6 @@ import com.google.android.gms.location.LocationServices
 import com.google.firebase.database.DatabaseReference
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
-import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.view.courier.CourierActivity
 
@@ -42,7 +41,7 @@ class TrackingService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-//        Log.d("Service", "On Start Service")
+//        Log.d("Tracking Service", "On Start Service")
         startForegroundService()
         startLocationUpdates(intent)
         return START_STICKY
@@ -56,7 +55,7 @@ class TrackingService : Service() {
     private fun startForegroundService() {
         val channelId =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                createNotificationChannel("my_service", "My Background Service")
+                createNotificationChannel("tracking_service", "Tracking Background Service")
             } else {
                 ""
             }
@@ -73,8 +72,9 @@ class TrackingService : Service() {
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
         val notification = notificationBuilder.setOngoing(true)
             .setContentIntent(pendingIntent)
-            .setSmallIcon(R.mipmap.favicon)
-            .setContentTitle("My App is running in the background")
+            .setSmallIcon(R.mipmap.ic_launcher_round)
+            .setContentTitle("Selesaikan semua pengiriman!")
+            .setContentText("Ketuk untuk melihat")
             .setPriority(NotificationManager.IMPORTANCE_MIN)
             .setCategory(Notification.CATEGORY_SERVICE)
             .build()
@@ -137,17 +137,19 @@ class TrackingService : Service() {
             ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
         ) return
         fusedLocationClient.removeLocationUpdates(locationCallback)
-//        childDriver.removeValue()
+//        fusedLocationClient.lastLocation
+//            .addOnSuccessListener { location: Location? ->
+//                childDriver.child("end_lat").setValue(location?.latitude)
+//                childDriver.child("end_lng").setValue(location?.longitude)
+//                childDriver.child("tracking_mode").setValue(false)
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                    childDriver.child("end_datetime").setValue(DateFormat.now())
+//                }
+//            }
 
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location: Location? ->
-                childDriver.child("end_lat").setValue(location?.latitude)
-                childDriver.child("end_lng").setValue(location?.longitude)
-                childDriver.child("tracking_mode").setValue(false)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    childDriver.child("end_datetime").setValue(DateFormat.now())
-                }
-            }
+        Handler().postDelayed({
+            childDriver.removeValue()
+        }, 200)
     }
 
     override fun onBind(intent: Intent?): IBinder? {

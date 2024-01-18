@@ -1,7 +1,9 @@
 package com.topmortar.topmortarsales.commons.utils
 
 import android.app.Activity
+import android.app.ActivityManager
 import android.content.Context
+import android.content.Context.ACTIVITY_SERVICE
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
@@ -45,5 +47,15 @@ class CustomUtility(private val context: Context) {
 
     fun isDarkMode(): Boolean {
         return (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+    }
+
+    fun isServiceRunning(serviceClass: Class<*>): Boolean {
+        val manager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager?
+        for (service in manager?.getRunningServices(Int.MAX_VALUE) ?: emptyList()) {
+            if (serviceClass.name == service.service.className) {
+                return true
+            }
+        }
+        return false
     }
 }

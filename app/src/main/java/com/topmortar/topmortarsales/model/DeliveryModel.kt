@@ -11,7 +11,6 @@ object DeliveryModel {
         var start_datetime: String = "",
         var start_lat: Double = 0.0,
         var start_lng: Double = 0.0,
-        var tracking_mode: Boolean = false,
         var courier: Courier? = null,
         var store: Store? = null,
     ) {

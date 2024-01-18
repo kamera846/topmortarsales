@@ -274,7 +274,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var locationCallback: LocationCallback? = null
     private var locationListener: ValueEventListener? = null
     private var courierMarker: Marker? = null
-    private var isTracking = false
     private var deliveryId: String = ""
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
@@ -2060,8 +2059,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 intent.putExtra(CONST_DELIVERY_ID, deliveryId)
                                 startActivity(intent)
                             }
-                            val trackingMode = snapshot.child("tracking_mode").value as Boolean
-                            if (trackingMode) {
+                            val isTracking = CustomUtility(this@DetailContactActivity).isServiceRunning(TrackingService::class.java)
+                            if (!isTracking) {
                                 val serviceIntent = Intent(this@DetailContactActivity, TrackingService::class.java)
                                 serviceIntent.putExtra("userDistributorId", userDistributorId)
                                 serviceIntent.putExtra("deliveryId", deliveryId)
@@ -2136,7 +2135,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             start_datetime = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) DateFormat.now() else "",
                             start_lat = currentLatLng.latitude,
                             start_lng = currentLatLng.longitude,
-                            tracking_mode = true,
                             store = storeModel,
                             courier = courierModel
                         )

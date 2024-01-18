@@ -17,17 +17,18 @@ import com.topmortar.topmortarsales.commons.CONST_DISTANCE
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_IS_COD
 import com.topmortar.topmortarsales.commons.CONST_URI
-import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_SUCCESS
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil.compressImage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.view.courier.CourierActivity
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -82,22 +83,17 @@ class PreviewClosingActivity : AppCompatActivity() {
                     RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
 
                         if (!isCod) createInvoice()
-                        else {
-                            val resultIntent = Intent()
-                            resultIntent.putExtra("$IMG_PREVIEW_STATE", RESULT_OK)
-                            setResult(RESULT_OK, resultIntent)
-
-                            handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, response.message)
-                            Handler().postDelayed({
-                                loadingState(false)
-                                finish()
-                            }, 1000)
-                        }
+                        else onClosingFinished(response.message)
 
                     }
+
                     else -> {
 
-                        handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, "Gagal closing. Error: ${response.message}")
+                        handleMessage(
+                            this@PreviewClosingActivity,
+                            TAG_RESPONSE_CONTACT,
+                            "Gagal closing. Error: ${response.message}"
+                        )
                         loadingState(false)
 
                     }
@@ -105,7 +101,11 @@ class PreviewClosingActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(
+                    this@PreviewClosingActivity,
+                    TAG_RESPONSE_CONTACT,
+                    "Failed run service. Exception " + e.message
+                )
                 loadingState(false)
 
             }
@@ -127,20 +127,17 @@ class PreviewClosingActivity : AppCompatActivity() {
                 when (response.status) {
                     RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
 
-                        val resultIntent = Intent()
-                        resultIntent.putExtra("$IMG_PREVIEW_STATE", RESULT_OK)
-                        setResult(RESULT_OK, resultIntent)
-
-                        handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, response.message)
-                        Handler().postDelayed({
-                            loadingState(false)
-                            finish()
-                        }, 1000)
+                        onClosingFinished(response.message)
 
                     }
+
                     else -> {
 
-                        handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, "Gagal closing. Error: ${response.message}")
+                        handleMessage(
+                            this@PreviewClosingActivity,
+                            TAG_RESPONSE_CONTACT,
+                            "Gagal closing. Error: ${response.message}"
+                        )
                         loadingState(false)
 
                     }
@@ -148,7 +145,11 @@ class PreviewClosingActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(
+                    this@PreviewClosingActivity,
+                    TAG_RESPONSE_CONTACT,
+                    "Failed run service. Exception " + e.message
+                )
                 loadingState(false)
 
             }
@@ -175,6 +176,7 @@ class PreviewClosingActivity : AppCompatActivity() {
 
     private fun initClickHandler() {
         icBack.setOnClickListener { onBackHandler() }
+//        btnUpload.setOnClickListener { onClosingFinished("Success to closing delivery!") }
         btnUpload.setOnClickListener { executeClosing() }
 
     }
@@ -200,7 +202,8 @@ class PreviewClosingActivity : AppCompatActivity() {
             val byteArray = inputStream?.readBytes()
 
             if (byteArray != null) {
-                val requestFile: RequestBody = RequestBody.create("image/*".toMediaTypeOrNull(), byteArray)
+                val requestFile: RequestBody =
+                    RequestBody.create("image/*".toMediaTypeOrNull(), byteArray)
                 imagePart = MultipartBody.Part.createFormData("pic", "image.jpg", requestFile)
             } else handleMessage(this, TAG_RESPONSE_CONTACT, "Gambar tidak ditemukan")
 
@@ -238,6 +241,27 @@ class PreviewClosingActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         onBackHandler()
+
+    }
+
+    private fun onClosingFinished(message: String) {
+
+        val serviceIntent = Intent(this, TrackingService::class.java)
+        this.stopService(serviceIntent)
+        val intent = Intent(this, CourierActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+
+        handleMessage(
+            this@PreviewClosingActivity,
+            TAG_RESPONSE_CONTACT,
+            message
+        )
+
+        Handler().postDelayed({
+            loadingState(false)
+            startActivity(intent)
+            finish()
+        }, 1000)
 
     }
 }
