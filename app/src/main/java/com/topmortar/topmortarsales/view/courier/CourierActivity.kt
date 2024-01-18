@@ -30,6 +30,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
@@ -355,6 +356,12 @@ class CourierActivity : AppCompatActivity() {
 
         sessionManager.setLoggedIn(LOGGED_OUT)
         sessionManager.setUserLoggedIn(null)
+
+        val isTracking = CustomUtility(this).isServiceRunning(TrackingService::class.java)
+        if (isTracking) {
+            val serviceIntent = Intent(this, TrackingService::class.java)
+            this.stopService(serviceIntent)
+        }
 
         val intent = Intent(this@CourierActivity, SplashScreenActivity::class.java)
         startActivity(intent)

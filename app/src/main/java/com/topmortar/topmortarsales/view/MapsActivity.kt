@@ -20,6 +20,7 @@ import android.os.Looper
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -423,7 +424,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 title.text = "Aktifkan Navigasi"
 
                 // Live Location Update with Firebase Realtime Database
-                if (userKind == USER_KIND_COURIER) stopTracking()
+//                if (userKind == USER_KIND_COURIER) stopTracking()
             }, 500)
 
             val limitKm = binding.etKm.text.toString().toDouble()
@@ -913,7 +914,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                             title.text = "Matikan Navigasi"
 
                             // Live Location Update with Firebase Realtime Database
-                            if (userKind == USER_KIND_COURIER) startTracking()
+//                            if (userKind == USER_KIND_COURIER) startTracking()
                             progressDialog.dismiss()
                         }, 500)
 
@@ -1463,19 +1464,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             name = fulllName
         )
 
-        val storeModel = DeliveryModel.Store(
+        val storeModel = arrayListOf<DeliveryModel.Store>()
+        storeModel.add(DeliveryModel.Store(
             id = iContactID!!,
             name = iMapsName!!,
             lat = selectedLocation!!.latitude,
             lng = selectedLocation!!.longitude,
-        )
+            startDatetime = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) DateFormat.now() else "",
+            startLat = currentLatLng!!.latitude,
+            startLng = currentLatLng!!.longitude,
+        ))
 
         val deliveryModel = DeliveryModel.Delivery(
             id = deliveryId,
-            start_datetime = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) DateFormat.now() else "",
-            start_lat = currentLatLng!!.latitude,
-            start_lng = currentLatLng!!.longitude,
-            store = storeModel,
+//            stores = storeModel,
             courier = courierModel
         )
 
@@ -1483,8 +1485,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location: Location? ->
-                childDriver?.child("start_lat")?.setValue(location!!.latitude)
-                childDriver?.child("start_lng")?.setValue(location!!.longitude)
+                childDriver?.child("startLat")?.setValue(location!!.latitude)
+                childDriver?.child("startLng")?.setValue(location!!.longitude)
             }
 
         val locationRequest = LocationRequest.create()
@@ -1590,120 +1592,231 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location: Location? ->
-                    childDriver!!.child("end_lat").setValue(location?.latitude)
-                    childDriver!!.child("end_lng").setValue(location?.longitude)
+                    childDriver!!.child("endLat").setValue(location?.latitude)
+                    childDriver!!.child("endLng").setValue(location?.longitude)
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        childDriver!!.child("end_datetime").setValue(DateFormat.now())
+                        childDriver!!.child("endDatetime").setValue(DateFormat.now())
                     }
                 }
         }
     }
 
     private fun setupTracking() {
+        val progressDialog = ProgressDialog(this)
+        progressDialog.setCancelable(false)
+        progressDialog.setMessage("Mencarikan rute…")
+        progressDialog.show()
 
         firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
         childDelivery = firebaseReference?.child(FIREBASE_CHILD_DELIVERY)
-        childDriver = childDelivery?.child(deliveryID.toString())
+        childDriver = childDelivery?.child(deliveryID!!)
+        val childStores = childDriver?.child("stores/$iContactID")
+        var deliveryData: DeliveryModel.Delivery? = null
 
         val courierDrawable = R.drawable.store_location_status_biding
         val storeDrawable = R.drawable.store_location_status_blacklist
-        var delivery: DeliveryModel.Delivery? = null
 
-        childDriver?.addValueEventListener(object: ValueEventListener {
+        childDriver?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    if (deliveryData == null) {
+                        deliveryData = snapshot.getValue(DeliveryModel.Delivery::class.java)
+                        val courierLatLng = LatLng(deliveryData!!.lat, deliveryData!!.lng)
 
-                if (delivery == null) {
+                        childStores?.addListenerForSingleValueEvent(object :
+                            ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
 
-                    delivery = snapshot.getValue(DeliveryModel.Delivery::class.java)
+                                if (snapshot.exists()) {
+                                    val store = snapshot.getValue(DeliveryModel.Store::class.java)!!
 
-                    val startLatLng = LatLng(delivery!!.start_lat, delivery!!.start_lng)
-                    val courierLatLng = LatLng(delivery!!.lat, delivery!!.lng)
-                    val destinationLatLng = LatLng(delivery!!.store!!.lat, delivery!!.store!!.lng)
+                                    val startLatLng =
+                                        LatLng(store.startLat, store.startLng)
+                                    val destinationLatLng =
+                                        LatLng(store.lat, store.lng)
 
-                    courierMarker = mMap.addMarker(
-                        MarkerOptions()
-                            .position(courierLatLng)
-                            .title(delivery!!.courier?.name ?: "Kurir")
-                            .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap(courierDrawable)))
-                    )
-                    mMap.addMarker(
-                        MarkerOptions()
-                            .position(destinationLatLng)
-                            .title(delivery!!.store?.name ?: "Toko")
-                            .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap(storeDrawable)))
-                    )
+                                    courierMarker = mMap.addMarker(
+                                        MarkerOptions()
+                                            .position(courierLatLng)
+                                            .title(deliveryData!!.courier?.name ?: "Kurir")
+                                            .icon(
+                                                BitmapDescriptorFactory.fromBitmap(
+                                                    resizedBitmap(courierDrawable)
+                                                )
+                                            )
+                                    )
+                                    mMap.addMarker(
+                                        MarkerOptions()
+                                            .position(destinationLatLng)
+                                            .title(store.name)
+                                            .icon(
+                                                BitmapDescriptorFactory.fromBitmap(
+                                                    resizedBitmap(storeDrawable)
+                                                )
+                                            )
+                                    )
 
-                    val directions = DirectionsApi.newRequest(getGeoContext())
-                        .mode(TravelMode.DRIVING) // Ganti dengan mode perjalanan yang sesuai
-                        .origin(com.google.maps.model.LatLng(startLatLng.latitude, startLatLng.longitude))
-                        .destination(com.google.maps.model.LatLng(destinationLatLng.latitude, destinationLatLng.longitude))
-                        .optimizeWaypoints(true)
-                        .alternatives(true)
+                                    val directions =
+                                        DirectionsApi.newRequest(getGeoContext())
+                                            .mode(TravelMode.DRIVING) // Ganti dengan mode perjalanan yang sesuai
+                                            .origin(
+                                                com.google.maps.model.LatLng(
+                                                    startLatLng.latitude,
+                                                    startLatLng.longitude
+                                                )
+                                            )
+                                            .destination(
+                                                com.google.maps.model.LatLng(
+                                                    destinationLatLng.latitude,
+                                                    destinationLatLng.longitude
+                                                )
+                                            )
+                                            .optimizeWaypoints(true)
+                                            .alternatives(true)
 
-                    try {
-                        val result = directions.await()
+                                    try {
+                                        val result = directions.await()
 
-                        if (result.routes.isNotEmpty()) {
-                            val listPolylineOptions = arrayListOf<PolylineOptions>()
+                                        if (result.routes.isNotEmpty()) {
+                                            val listPolylineOptions =
+                                                arrayListOf<PolylineOptions>()
 
-                            // Gambar rute pada peta
-                            for (i in 0..result.routes.size) {
-                                if (i < result.routes.size && i < 3) {
-                                    val route = result.routes[i]
-                                    val overviewPolyline = route.overviewPolyline.decodePath()
-                                    val polylineOptions = PolylineOptions()
-                                    polylineOptions.width(15f)
-                                    polylineOptions.color(getColor(lineColor[i]))
-                                    for (latLng in overviewPolyline) {
-                                        polylineOptions.add(LatLng(latLng.lat, latLng.lng))
+                                            // Gambar rute pada peta
+                                            for (i in 0..result.routes.size) {
+                                                if (i < result.routes.size && i < 3) {
+                                                    val route = result.routes[i]
+                                                    val overviewPolyline =
+                                                        route.overviewPolyline.decodePath()
+                                                    val polylineOptions =
+                                                        PolylineOptions()
+                                                    polylineOptions.width(15f)
+                                                    polylineOptions.color(
+                                                        getColor(
+                                                            lineColor[i]
+                                                        )
+                                                    )
+                                                    for (latLng in overviewPolyline) {
+                                                        polylineOptions.add(
+                                                            LatLng(
+                                                                latLng.lat,
+                                                                latLng.lng
+                                                            )
+                                                        )
+                                                    }
+                                                    listPolylineOptions.add(
+                                                        polylineOptions
+                                                    )
+                                                }
+                                            }
+
+                                            for (i in listPolylineOptions.size - 1 downTo 0) {
+                                                routeDirections =
+                                                    mMap.addPolyline(listPolylineOptions[i])
+                                                listRouteLines.add(routeDirections!!)
+                                            }
+
+                                            val bounds = LatLngBounds.builder()
+                                                .include(startLatLng)
+                                                .include(destinationLatLng)
+                                                .build()
+                                            val updateCamera =
+                                                CameraUpdateFactory.newLatLngBounds(
+                                                    bounds,
+                                                    100
+                                                )
+                                            mMap.animateCamera(
+                                                updateCamera,
+                                                mapsDuration,
+                                                null
+                                            )
+
+                                            Handler().postDelayed({
+                                                progressDialog.dismiss()
+                                            }, 500)
+
+                                        } else {
+                                            progressDialog.dismiss()
+                                            Toast.makeText(
+                                                this@MapsActivity,
+                                                "Tidak ada rute ditemukan",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    } catch (e: ApiException) {
+                                        progressDialog.dismiss()
+                                        Toast.makeText(
+                                            this@MapsActivity,
+                                            "Gagal memuat navigasi",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        e.printStackTrace()
+                                    } catch (e: InterruptedException) {
+                                        progressDialog.dismiss()
+                                        Toast.makeText(
+                                            this@MapsActivity,
+                                            "Gagal memuat navigasi",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        e.printStackTrace()
+                                    } catch (e: IOException) {
+                                        progressDialog.dismiss()
+                                        Toast.makeText(
+                                            this@MapsActivity,
+                                            "Gagal memuat navigasi",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        e.printStackTrace()
                                     }
-                                    listPolylineOptions.add(polylineOptions)
+                                } else {
+                                    progressDialog.dismiss()
+                                    Log.d(TAG_RESPONSE_CONTACT, "Child Store Error!")
+                                    handleMessage(
+                                        this@MapsActivity, TAG_RESPONSE_CONTACT,
+                                        "Failed run service. Exception child store not found"
+                                    )
                                 }
                             }
 
-                            for (i in listPolylineOptions.size - 1 downTo 0) {
-                                routeDirections = mMap.addPolyline(listPolylineOptions[i])
-                                listRouteLines.add(routeDirections!!)
+                            override fun onCancelled(error: DatabaseError) {
+                                progressDialog.dismiss()
+                                Log.d(TAG_RESPONSE_CONTACT, "Child Stores Error!")
+                                handleMessage(
+                                    this@MapsActivity, TAG_RESPONSE_CONTACT,
+                                    "Failed run service. Exception $error"
+                                )
                             }
 
-                            val bounds = LatLngBounds.builder()
-                                .include(startLatLng)
-                                .include(destinationLatLng)
-                                .build()
-                            val updateCamera = CameraUpdateFactory.newLatLngBounds(bounds, 100)
-                            mMap.animateCamera(updateCamera, mapsDuration, null)
+                        })
+                    } else {
 
+                        deliveryData = snapshot.getValue(DeliveryModel.Delivery::class.java)
+                        val courierLatLng = LatLng(deliveryData!!.lat, deliveryData!!.lng)
+
+                        if (courierMarker == null) {
+                            courierMarker = mMap.addMarker(
+                                MarkerOptions()
+                                    .position(courierLatLng)
+                                    .title(
+                                        deliveryData!!.courier?.name ?: "Kurir"
+                                    )
+                                    .icon(
+                                        BitmapDescriptorFactory.fromBitmap(
+                                            resizedBitmap(courierDrawable)
+                                        )
+                                    )
+                            )
+                            progressDialog.dismiss()
                         } else {
-                            Toast.makeText(this@MapsActivity, "Tidak ada rute ditemukan", Toast.LENGTH_SHORT).show()
+                            progressDialog.dismiss()
+                            courierMarker?.position = courierLatLng
                         }
-                    } catch (e: ApiException) {
-                        Toast.makeText(this@MapsActivity, "Gagal memuat navigasi", Toast.LENGTH_SHORT).show()
-                        e.printStackTrace()
-                    } catch (e: InterruptedException) {
-                        Toast.makeText(this@MapsActivity, "Gagal memuat navigasi", Toast.LENGTH_SHORT).show()
-                        e.printStackTrace()
-                    } catch (e: IOException) {
-                        Toast.makeText(this@MapsActivity, "Gagal memuat navigasi", Toast.LENGTH_SHORT).show()
-                        e.printStackTrace()
                     }
-                }
-                else {
-
-                    delivery = snapshot.getValue(DeliveryModel.Delivery::class.java)
-
-                    val courierLatLng = LatLng(delivery!!.lat, delivery!!.lng)
-                    if (courierMarker == null) {
-                        courierMarker = mMap.addMarker(
-                            MarkerOptions()
-                                .position(courierLatLng)
-                                .title(delivery!!.courier?.name ?: "Kurir")
-                                .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap(courierDrawable)))
-                        )
-                    } else courierMarker?.position = courierLatLng
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
+                progressDialog.dismiss()
+                Log.d(TAG_RESPONSE_CONTACT, "Child Driver Error!")
                 handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
                     "Failed run service. Exception $error"
                 )
@@ -1711,7 +1824,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         })
 
-        return
     }
 
     private fun resizedBitmap(drawable: Int): Bitmap {

@@ -30,6 +30,7 @@ import com.google.firebase.database.ValueEventListener
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
@@ -176,44 +177,61 @@ class ClosingStoreFragment : Fragment() {
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        // Get a reference to your database
+//                        response.results[0].id_contact = "606"
+//                        response.results[0].nama = "Toko Ple MLG"
 
+                        val contacts = response.results
+
+                        // Get a reference to your database
+                        val deliveryId = AUTH_LEVEL_COURIER + userID
                         val firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorID!!)
-                        val myRef: DatabaseReference = firebaseReference.child(
-                            FIREBASE_CHILD_DELIVERY
-                        )
+                        val myRef: DatabaseReference = firebaseReference.child("$FIREBASE_CHILD_DELIVERY/$deliveryId")
 
                         // Add a ValueEventListener to retrieve the data
                         myRef.addListenerForSingleValueEvent(object : ValueEventListener {
                             override fun onDataChange(dataSnapshot: DataSnapshot) {
                                 // The dataSnapshot contains the data from the database
-                                val deliveryList = arrayListOf<DeliveryModel.Delivery>()
+                                if (dataSnapshot.exists()) {
+                                    myRef.child("stores").addListenerForSingleValueEvent(object : ValueEventListener {
+                                        override fun onDataChange(snapshot: DataSnapshot) {
+                                            val deliveryStore = arrayListOf<DeliveryModel.Store>()
+                                            for (item in snapshot.children) {
+                                                val data = item.getValue(DeliveryModel.Store::class.java)!!
+                                                deliveryStore.add(data)
+                                            }
 
-                                for (childSnapshot in dataSnapshot.children) {
-                                    // Convert each child node to a Delivery object
-                                    val delivery = childSnapshot.getValue(DeliveryModel.Delivery::class.java)
-                                    delivery?.let {
-                                        if (it.courier?.id == userID) deliveryList.add(it)
-                                    }
+                                            for ((i, contact) in contacts.withIndex()) {
+                                                val findItem = deliveryStore.find { it.id == contact.id_contact }
+                                                if (findItem != null) {
+                                                    contacts[i].deliveryStatus = "Pengiriman sedang berlangsung!"
+                                                }
+                                            }
+                                            setRecyclerView(contacts)
+                                            loadingState(false)
+                                            showBadgeRefresh(false)
+                                            listener?.counterItem(response.results.size)
+                                        }
+
+                                        override fun onCancelled(error: DatabaseError) {
+                                            setRecyclerView(contacts)
+                                            loadingState(false)
+                                            showBadgeRefresh(false)
+                                            listener?.counterItem(response.results.size)
+                                        }
+
+                                    })
+
+                                } else {
+                                    setRecyclerView(contacts)
+                                    loadingState(false)
+                                    showBadgeRefresh(false)
+                                    listener?.counterItem(response.results.size)
                                 }
-
-                                val contacts = response.results
-                                for ((i, contact) in contacts.withIndex()) {
-                                    val findItem = deliveryList.find { it.store?.id == contact.id_contact }
-                                    if (findItem != null) {
-                                        contacts[i].deliveryStatus = "Pengiriman sedang berlangsung!"
-                                    }
-                                }
-
-                                setRecyclerView(contacts)
-                                loadingState(false)
-                                showBadgeRefresh(false)
-                                listener?.counterItem(response.results.size)
                             }
 
                             override fun onCancelled(databaseError: DatabaseError) {
                                 // Handle errors
-                                setRecyclerView(response.results)
+                                setRecyclerView(contacts)
                                 loadingState(false)
                                 showBadgeRefresh(false)
                                 listener?.counterItem(response.results.size)

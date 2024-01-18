@@ -11,7 +11,6 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
-import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import androidx.core.app.ActivityCompat
@@ -132,24 +131,24 @@ class TrackingService : Service() {
 
     private fun stopLocationUpdates() {
         // Memberhentikan pembaruan lokasi di sini
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-            &&
-            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
-        ) return
+//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+//            &&
+//            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+//        ) return
         fusedLocationClient.removeLocationUpdates(locationCallback)
 //        fusedLocationClient.lastLocation
 //            .addOnSuccessListener { location: Location? ->
-//                childDriver.child("end_lat").setValue(location?.latitude)
-//                childDriver.child("end_lng").setValue(location?.longitude)
+//                childDriver.child("endLat").setValue(location?.latitude)
+//                childDriver.child("endLng").setValue(location?.longitude)
 //                childDriver.child("tracking_mode").setValue(false)
 //                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                    childDriver.child("end_datetime").setValue(DateFormat.now())
+//                    childDriver.child("endDatetime").setValue(DateFormat.now())
 //                }
 //            }
 
-        Handler().postDelayed({
-            childDriver.removeValue()
-        }, 200)
+//        Handler().postDelayed({
+//            childDriver.removeValue()
+//        }, 200)
     }
 
     override fun onBind(intent: Intent?): IBinder? {

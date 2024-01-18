@@ -1094,102 +1094,113 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="8dp"
+        android:layout_marginBottom="-2dp"
+        android:layout_marginHorizontal="-2dp"
+        android:background="@drawable/bg_bottom_sheet"
         android:orientation="vertical">
-
-        <LinearLayout
-            android:visibility="gone"
-            android:id="@+id/textDelivery"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/textTitleTarget"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:alpha="0.7"
-                android:text="Pengiriman berlangsung!"
-                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
-
-            <TextView
-                android:id="@+id/textTargetRute"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:text="Selesaikan closing untuk mengakhiri pengiriman"
-                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
-
-        </LinearLayout>
 
         <LinearLayout
             android:visibility="gone"
             android:id="@+id/contactAction"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/btn_send_message"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginRight="8dp"
-                android:padding="12dp"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                android:text="@string/send_message" />
+            android:layout_margin="8dp"
+            android:orientation="vertical">
 
             <LinearLayout
-                android:id="@+id/btn_invoice"
+                android:visibility="gone"
+                android:id="@+id/textDelivery"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="12dp"
-                android:gravity="center"
-                android:background="@drawable/circular_border_black"
-                android:orientation="horizontal">
+                android:layout_marginBottom="8dp"
+                android:orientation="vertical">
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:contentDescription="Invoice Image Button"
-                    android:src="@drawable/file_list_black" />
+                <TextView
+                    android:id="@+id/textTitleTarget"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:alpha="0.7"
+                    android:text="Pengiriman berlangsung!"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                <TextView
+                    android:id="@+id/textTargetRute"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:text="Closing kiriman untuk mengakhiri."
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
             </LinearLayout>
 
             <LinearLayout
-                android:visibility="gone"
-                android:id="@+id/btnDirection"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="8dp"
-                android:padding="12dp"
-                android:gravity="center"
-                android:background="@drawable/circular_border_black"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:contentDescription="Direction Image"
-                    android:src="@drawable/direction_white" />
-
-            </LinearLayout>
-
-            <Button
-                android:visibility="gone"
-                android:id="@+id/btn_save_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginHorizontal="8dp"
-                android:padding="12dp"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:text="@string/save" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_send_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginRight="8dp"
+                    android:padding="12dp"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:text="@string/send_message" />
+
+                <LinearLayout
+                    android:id="@+id/btn_invoice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp"
+                    android:gravity="center"
+                    android:background="@drawable/circular_border_black"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:contentDescription="Invoice Image Button"
+                        android:src="@drawable/file_list_black" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:visibility="gone"
+                    android:id="@+id/btnDirection"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:padding="12dp"
+                    android:gravity="center"
+                    android:background="@drawable/circular_border_black"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:contentDescription="Direction Image"
+                        android:src="@drawable/direction_white" />
+
+                </LinearLayout>
+
+                <Button
+                    android:visibility="gone"
+                    android:id="@+id/btn_save_edit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginHorizontal="8dp"
+                    android:padding="12dp"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:text="@string/save" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -1199,7 +1210,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginHorizontal="8dp"
+            android:layout_margin="8dp"
             android:padding="12dp"
             android:background="@drawable/bg_primary_round"
             android:gravity="center">

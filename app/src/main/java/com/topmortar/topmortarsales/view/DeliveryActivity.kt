@@ -13,6 +13,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.DeliveryRecyclerViewAdapter
+import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_DELIVERY_ID
 import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
@@ -64,19 +65,26 @@ class DeliveryActivity : AppCompatActivity() {
         myRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 // The dataSnapshot contains the data from the database
-                val deliveryList = arrayListOf<DeliveryModel.Delivery>()
+                if (dataSnapshot.exists()) {
+                    val storeList = arrayListOf<DeliveryModel.Store>()
 
-                for (childSnapshot in dataSnapshot.children) {
-                    // Convert each child node to a Delivery object
-                    val delivery = childSnapshot.getValue(DeliveryModel.Delivery::class.java)
-                    delivery?.let {
-                        deliveryList.add(it)
+                    for (delivery in dataSnapshot.children) {
+                        if (delivery.child("stores").exists()) {
+                            for (store in delivery.child("stores").children) {
+                                val storeData = store.getValue(DeliveryModel.Store::class.java)!!
+                                storeData.courier = delivery.child("courier").getValue(DeliveryModel.Courier::class.java)!!
+                                storeData.deliveryId = delivery.child("id").getValue(String::class.java)!!
+                                storeList.add(storeData)
+                            }
+                        }
                     }
-                }
 
-                if (deliveryList.isNotEmpty()) {
-                    setRecyclerView(deliveryList)
-                    loadingState(false)
+                    if (storeList.isNotEmpty()) {
+                        setRecyclerView(storeList)
+                        loadingState(false)
+                    } else {
+                        loadingState(true, "Belum ada pengiriman yang berjalan!")
+                    }
                 } else {
                     loadingState(true, "Belum ada pengiriman yang berjalan!")
                 }
@@ -93,13 +101,14 @@ class DeliveryActivity : AppCompatActivity() {
 
     }
 
-    private fun setRecyclerView(listItem: ArrayList<DeliveryModel.Delivery>) {
+    private fun setRecyclerView(listItem: ArrayList<DeliveryModel.Store>) {
         val rvAdapter = DeliveryRecyclerViewAdapter(listItem, object: DeliveryRecyclerViewAdapter.ItemClickListener {
-            override fun onItemClick(data: DeliveryModel.Delivery?) {
+            override fun onItemClick(data: DeliveryModel.Store?) {
                 // Do Something
                 val intent = Intent(this@DeliveryActivity, MapsActivity::class.java)
                 intent.putExtra(CONST_IS_TRACKING, true)
-                intent.putExtra(CONST_DELIVERY_ID, data?.id)
+                intent.putExtra(CONST_DELIVERY_ID, data?.deliveryId)
+                intent.putExtra(CONST_CONTACT_ID, data?.id)
                 startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
             }
 

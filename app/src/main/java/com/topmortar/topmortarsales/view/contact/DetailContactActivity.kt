@@ -43,10 +43,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -54,6 +52,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.BASE_URL
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
@@ -154,8 +153,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private lateinit var sessionManager: SessionManager
     private val userKind get() = sessionManager.userKind().toString()
+//    private val userID = "8"
     private val userID get() = sessionManager.userID().toString()
     private val username get() = sessionManager.userName().toString()
+//    private val fulllName = "Ple Courier"
     private val fulllName get() = sessionManager.fullName().toString()
     private val userCityID get() = sessionManager.userCityID().toString()
     private val userDistributorId get() = sessionManager.userDistributor().toString()
@@ -271,9 +272,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var firebaseReference: DatabaseReference? = null
     private var childDelivery: DatabaseReference? = null
     private var childDriver: DatabaseReference? = null
-    private var locationCallback: LocationCallback? = null
-    private var locationListener: ValueEventListener? = null
-    private var courierMarker: Marker? = null
     private var deliveryId: String = ""
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
@@ -2026,10 +2024,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     }
 
     private fun setupDelivery() {
-
-        binding.btnDeliveryContainer.visibility = View.VISIBLE
-        binding.contactAction.visibility = View.GONE
-
 //        val userLevel = when (sessionManager.userKind()) {
 //            USER_KIND_ADMIN -> AUTH_LEVEL_ADMIN
 //            USER_KIND_COURIER -> AUTH_LEVEL_COURIER
@@ -2037,7 +2031,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 //            else -> AUTH_LEVEL_SALES
 //        }
 //        deliveryId = "$userLevel$userID"
-        deliveryId = "store$contactId"
+        deliveryId = "$AUTH_LEVEL_COURIER$userID"
         firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
         childDelivery = firebaseReference?.child(FIREBASE_CHILD_DELIVERY)
         childDriver = childDelivery?.child(deliveryId)
@@ -2045,59 +2039,47 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         childDriver?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
-                    val endTimeChild = snapshot.child("end_datetime")
-                    if (endTimeChild.exists()) {
-                        val endTime = endTimeChild.value as String
-                        if (endTime.isEmpty()) {
-                            binding.btnDeliveryContainer.visibility = View.GONE
-                            binding.contactAction.visibility = View.VISIBLE
-                            binding.textDelivery.visibility = View.VISIBLE
-                            binding.btnDirection.visibility = View.VISIBLE
-                            binding.btnDirection.setOnClickListener {
-                                val intent = Intent(this@DetailContactActivity, MapsActivity::class.java)
-                                intent.putExtra(CONST_IS_TRACKING, true)
-                                intent.putExtra(CONST_DELIVERY_ID, deliveryId)
-                                startActivity(intent)
-                            }
-                            val isTracking = CustomUtility(this@DetailContactActivity).isServiceRunning(TrackingService::class.java)
-                            if (!isTracking) {
-                                val serviceIntent = Intent(this@DetailContactActivity, TrackingService::class.java)
-                                serviceIntent.putExtra("userDistributorId", userDistributorId)
-                                serviceIntent.putExtra("deliveryId", deliveryId)
-                                this@DetailContactActivity.startService(serviceIntent)
-                            }
-                        } else {
-                            binding.btnDeliveryContainer.visibility = View.GONE
-                            binding.contactAction.visibility = View.GONE
-                        }
-                    }
-                } else {
-                    if (!isDeliveryLoading) {
-                        binding.btnDeliveryContainer.setOnClickListener {
-                            if (ContextCompat.checkSelfPermission(this@DetailContactActivity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                                // Meminta izin background location
-                                if (ContextCompat.checkSelfPermission(this@DetailContactActivity, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-                                    startDelivery()
-
-                                } else {
-                                    val message = "Izin background lokasi diperlukan untuk fitur ini. Mohon untuk memilih opsi berikut \"${getString(R.string.yes_bg_location)}\""
-                                    val customUtility = CustomUtility(this@DetailContactActivity)
-                                    customUtility.showPermissionDeniedDialog(message) {
-                                        ActivityCompat.requestPermissions(this@DetailContactActivity, arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+                    childDriver?.child("stores")?.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            if (snapshot.exists()) {
+                                var isStoreAvailable = false
+                                for (item in snapshot.children) {
+                                    val data = item.getValue(DeliveryModel.Store::class.java)!!
+                                    if (data.id == contactId) {
+                                        isStoreAvailable = true
+                                        break
                                     }
                                 }
-                            } else {
-                                // Meminta izin lokasi jika belum diberikan
-                                ActivityCompat.requestPermissions(this@DetailContactActivity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
-                            }
+                                if (isStoreAvailable) {
+                                    binding.btnDeliveryContainer.visibility = View.GONE
+                                    binding.contactAction.visibility = View.VISIBLE
+                                    binding.textDelivery.visibility = View.VISIBLE
+                                    binding.btnDirection.visibility = View.VISIBLE
+                                    binding.btnDirection.setOnClickListener {
+                                        val intent = Intent(this@DetailContactActivity, MapsActivity::class.java)
+                                        intent.putExtra(CONST_IS_TRACKING, true)
+                                        intent.putExtra(CONST_DELIVERY_ID, deliveryId)
+                                        intent.putExtra(CONST_CONTACT_ID, contactId)
+                                        startActivity(intent)
+                                    }
+                                    checkServiceStatus()
+                                } else setupBtnDelivery()
+                            } else setupBtnDelivery()
                         }
-                    }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            handleMessage(this@DetailContactActivity, "onSetupDelivery", "Failed get store child")
+                            Log.e("onSetupDelivery", error.message)
+                        }
+
+                    })
+                } else {
+                    setupBtnDelivery()
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                handleMessage(this@DetailContactActivity, "onSetupDelivery", "Failed get delivery child")
+                handleMessage(this@DetailContactActivity, "onSetupDelivery", "Failed get driver child")
                 Log.e("onSetupDelivery", error.message)
             }
 
@@ -2123,29 +2105,29 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             name = fulllName
                         )
 
-                        val storeModel = DeliveryModel.Store(
+                        val store = DeliveryModel.Store(
                             id = contactId!!,
                             name = "${tvName.text}",
                             lat = targetLatLng.latitude,
                             lng = targetLatLng.longitude,
+                            startDatetime = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) DateFormat.now() else "",
+                            startLat = currentLatLng.latitude,
+                            startLng = currentLatLng.longitude,
                         )
 
-                        val deliveryModel = DeliveryModel.Delivery(
-                            id = deliveryId,
-                            start_datetime = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) DateFormat.now() else "",
-                            start_lat = currentLatLng.latitude,
-                            start_lng = currentLatLng.longitude,
-                            store = storeModel,
-                            courier = courierModel
-                        )
+//                        val deliveryModel = DeliveryModel.Delivery(
+//                            id = deliveryId,
+////                            stores = deliveryStores,
+//                            courier = courierModel
+//                        )
 
-                        childDriver?.setValue(deliveryModel)
+                        childDriver?.child("id")?.setValue(deliveryId)
+                        childDriver?.child("lat")?.setValue(currentLatLng.latitude)
+                        childDriver?.child("lng")?.setValue(currentLatLng.longitude)
+                        childDriver?.child("courier")?.setValue(courierModel)
+                        childDriver?.child("stores/${store.id}")?.setValue(store)
 
-                        // Start background service
-                        val serviceIntent = Intent(this, TrackingService::class.java)
-                        serviceIntent.putExtra("userDistributorId", userDistributorId)
-                        serviceIntent.putExtra("deliveryId", deliveryId)
-                        this.startService(serviceIntent)
+                        checkServiceStatus()
 
                         // Change state
                         isDeliveryLoading = false
@@ -2157,6 +2139,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             val intent = Intent(this@DetailContactActivity, MapsActivity::class.java)
                             intent.putExtra(CONST_IS_TRACKING, true)
                             intent.putExtra(CONST_DELIVERY_ID, deliveryId)
+                            intent.putExtra(CONST_CONTACT_ID, contactId)
                             startActivity(intent)
                         }
 
@@ -2204,6 +2187,44 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         } else {
             handleMessage(this, "latLngConverter", "Parameter is empty")
             null
+        }
+    }
+
+    private fun setupBtnDelivery() {
+
+        binding.btnDeliveryContainer.visibility = View.VISIBLE
+        binding.contactAction.visibility = View.GONE
+
+        if (!isDeliveryLoading) {
+            binding.btnDeliveryContainer.setOnClickListener {
+                if (ContextCompat.checkSelfPermission(this@DetailContactActivity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    // Meminta izin background location
+                    if (ContextCompat.checkSelfPermission(this@DetailContactActivity, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+                        startDelivery()
+
+                    } else {
+                        val message = "Izin background lokasi diperlukan untuk fitur ini. Mohon untuk memilih opsi berikut \"${getString(R.string.yes_bg_location)}\""
+                        val customUtility = CustomUtility(this@DetailContactActivity)
+                        customUtility.showPermissionDeniedDialog(message) {
+                            ActivityCompat.requestPermissions(this@DetailContactActivity, arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+                        }
+                    }
+                } else {
+                    // Meminta izin lokasi jika belum diberikan
+                    ActivityCompat.requestPermissions(this@DetailContactActivity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+                }
+            }
+        }
+    }
+
+    private fun checkServiceStatus() {
+        val isTracking = CustomUtility(this@DetailContactActivity).isServiceRunning(TrackingService::class.java)
+        if (!isTracking) {
+            val serviceIntent = Intent(this@DetailContactActivity, TrackingService::class.java)
+            serviceIntent.putExtra("userDistributorId", userDistributorId)
+            serviceIntent.putExtra("deliveryId", deliveryId)
+            this@DetailContactActivity.startService(serviceIntent)
         }
     }
 

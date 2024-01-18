@@ -13,11 +13,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.model.DeliveryModel
 
-class DeliveryRecyclerViewAdapter(private val chatList: ArrayList<DeliveryModel.Delivery>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<DeliveryRecyclerViewAdapter.ChatViewHolder>() {
+class DeliveryRecyclerViewAdapter(private val chatList: ArrayList<DeliveryModel.Store>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<DeliveryRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
 
     interface ItemClickListener {
-        fun onItemClick(data: DeliveryModel.Delivery? = null)
+        fun onItemClick(data: DeliveryModel.Store? = null)
     }
 
     inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -26,10 +26,10 @@ class DeliveryRecyclerViewAdapter(private val chatList: ArrayList<DeliveryModel.
         val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
 
-        fun bind(item: DeliveryModel.Delivery) {
+        fun bind(item: DeliveryModel.Store) {
 
-            tvContactName.text = item.courier?.name
-            tvPhoneNumber.text = "Tujuan pengiriman ke toko " + item.store?.name
+            tvContactName.text = item.name
+            tvPhoneNumber.text = "Dikirim oleh " + item.courier?.name
 
         }
 
