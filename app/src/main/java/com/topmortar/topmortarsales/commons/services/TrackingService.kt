@@ -61,7 +61,7 @@ class TrackingService : Service() {
             }
 
         val notificationIntent = Intent(this, CourierActivity::class.java)
-        notificationIntent.putExtra("notif_intent", "Notifikasi clicked!")
+        notificationIntent.putExtra("notif_intent", true)
         val pendingIntent = PendingIntent.getActivity(
             this,
             0,
@@ -72,14 +72,14 @@ class TrackingService : Service() {
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
         val notification = notificationBuilder.setOngoing(true)
             .setContentIntent(pendingIntent)
-            .setSmallIcon(R.mipmap.ic_launcher_round)
+            .setSmallIcon(R.mipmap.favicon_round)
             .setContentTitle("Selesaikan semua pengiriman!")
             .setContentText("Ketuk untuk melihat")
             .setPriority(NotificationManager.IMPORTANCE_MIN)
             .setCategory(Notification.CATEGORY_SERVICE)
             .build()
 
-        startForeground(101, notification)
+        startForeground(1010, notification)
     }
 
     private fun createNotificationChannel(channelId: String, channelName: String): String {

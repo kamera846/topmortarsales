@@ -23,6 +23,10 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
@@ -40,6 +44,7 @@ import com.topmortar.topmortarsales.commons.CONST_PROMO
 import com.topmortar.topmortarsales.commons.CONST_REPUTATION
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -50,12 +55,14 @@ import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.FragmentClosingStoreBinding
 import com.topmortar.topmortarsales.model.ContactModel
+import com.topmortar.topmortarsales.model.DeliveryModel
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
@@ -70,9 +77,10 @@ class ClosingStoreFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var sessionManager: SessionManager
-    private lateinit var userKind: String
-    private lateinit var userCity: String
-    private lateinit var userID: String
+    private val userID get() = sessionManager.userID().toString()
+    private val userKind get() = sessionManager.userKind().toString()
+    private val userCity get() = sessionManager.userCityID().toString()
+    private val userDistributorID get() = sessionManager.userDistributor().toString()
 
     private lateinit var badgeRefresh: LinearLayout
 
@@ -97,9 +105,6 @@ class ClosingStoreFragment : Fragment() {
         badgeRefresh = view.findViewById(R.id.badgeRefresh)
 
         sessionManager = SessionManager(requireContext())
-        userKind = sessionManager.userKind().toString()
-        userCity = sessionManager.userCityID().toString()
-        userID = sessionManager.userID().toString()
         binding.btnFabAdmin.setOnClickListener { navigateChatAdmin() }
         binding.btnStartDelivery.setOnClickListener {
             // Memeriksa izin
@@ -171,10 +176,49 @@ class ClosingStoreFragment : Fragment() {
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        setRecyclerView(response.results)
-                        loadingState(false)
-                        showBadgeRefresh(false)
-                        listener?.counterItem(response.results.size)
+                        // Get a reference to your database
+
+                        val firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorID!!)
+                        val myRef: DatabaseReference = firebaseReference.child(
+                            FIREBASE_CHILD_DELIVERY
+                        )
+
+                        // Add a ValueEventListener to retrieve the data
+                        myRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                // The dataSnapshot contains the data from the database
+                                val deliveryList = arrayListOf<DeliveryModel.Delivery>()
+
+                                for (childSnapshot in dataSnapshot.children) {
+                                    // Convert each child node to a Delivery object
+                                    val delivery = childSnapshot.getValue(DeliveryModel.Delivery::class.java)
+                                    delivery?.let {
+                                        if (it.courier?.id == userID) deliveryList.add(it)
+                                    }
+                                }
+
+                                val contacts = response.results
+                                for ((i, contact) in contacts.withIndex()) {
+                                    val findItem = deliveryList.find { it.store?.id == contact.id_contact }
+                                    if (findItem != null) {
+                                        contacts[i].deliveryStatus = "Pengiriman sedang berlangsung!"
+                                    }
+                                }
+
+                                setRecyclerView(contacts)
+                                loadingState(false)
+                                showBadgeRefresh(false)
+                                listener?.counterItem(response.results.size)
+                            }
+
+                            override fun onCancelled(databaseError: DatabaseError) {
+                                // Handle errors
+                                setRecyclerView(response.results)
+                                loadingState(false)
+                                showBadgeRefresh(false)
+                                listener?.counterItem(response.results.size)
+                            }
+                        })
 
                     }
                     RESPONSE_STATUS_EMPTY -> {

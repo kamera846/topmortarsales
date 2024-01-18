@@ -13,7 +13,6 @@ import androidx.appcompat.widget.TooltipCompat
 import androidx.core.content.ContextCompat.getDrawable
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_ACTIVE
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BID
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BLACKLIST
@@ -43,7 +42,11 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
             if (chatItem.is_birthday == "1") icCake.visibility = View.VISIBLE
             else icCake.visibility = View.GONE
             tvContactName.text = chatItem.nama
-            tvPhoneNumber.text = if (chatItem.nomorhp != "") "+${ chatItem.nomorhp }" else ""
+            tvPhoneNumber.text = if (chatItem.deliveryStatus.isNotEmpty()) {
+                chatItem.deliveryStatus
+            } else {
+                if (chatItem.nomorhp.isNotEmpty()) "+${ chatItem.nomorhp }" else chatItem.created_at
+            }
             setupStatus(chatItem.store_status)
 
         }

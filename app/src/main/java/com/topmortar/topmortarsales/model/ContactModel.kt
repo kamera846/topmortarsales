@@ -16,4 +16,5 @@ data class ContactModel(
     var reputation: String = "",
     var is_birthday: String = "",
     var created_at: String = "",
+    var deliveryStatus: String = "",
 )

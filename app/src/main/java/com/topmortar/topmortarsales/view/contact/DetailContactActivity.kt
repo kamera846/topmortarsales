@@ -2160,6 +2160,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             startActivity(intent)
                         }
 
+                        hasEdited = true
+
                     }.addOnFailureListener {
                         isDeliveryLoading = false
                         handleMessage(this, "onStartDelivery", "Failed get user lastLocation")
