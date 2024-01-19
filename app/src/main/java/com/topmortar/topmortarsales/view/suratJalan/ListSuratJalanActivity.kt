@@ -32,7 +32,7 @@ import com.topmortar.topmortarsales.commons.CONST_NO_SURAT_JALAN
 import com.topmortar.topmortarsales.commons.CONST_STATUS_INVOICE
 import com.topmortar.topmortarsales.commons.CONST_TOTAL_INVOICE
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
-import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.IS_CLOSING
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -81,6 +81,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
     private var isFilterInvoice: String = FILTER_NONE
     private var doubleBackToExitPressedOnce = false
     private var isRequestSync = false
+    private var isClosingAction = false
     private var contactId: String? = null
     private var iName: String? = null
 
@@ -462,6 +463,8 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
         } else if (requestCode == DETAIL_ACTIVITY_REQUEST_CODE) {
             val resultData = data?.getStringExtra("$DETAIL_ACTIVITY_REQUEST_CODE")
+            isClosingAction = data?.getBooleanExtra(IS_CLOSING, false) ?: false
+
             if (resultData == SYNC_NOW) isRequestSync = true
         }
 
@@ -479,6 +482,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
             val resultIntent = Intent()
             resultIntent.putExtra("$DETAIL_ACTIVITY_REQUEST_CODE", SYNC_NOW)
+            resultIntent.putExtra(IS_CLOSING, isClosingAction)
             setResult(RESULT_OK, resultIntent)
 
             finish()

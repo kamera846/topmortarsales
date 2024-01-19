@@ -78,6 +78,7 @@ import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
+import com.topmortar.topmortarsales.commons.IS_CLOSING
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.PING_HOST
@@ -233,6 +234,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var contactId: String? = null
     private var isEdit: Boolean = false
     private var hasEdited: Boolean = false
+    private var isClosingAction: Boolean = false
     private var selectedDate: Calendar = Calendar.getInstance()
     private var selectedCity: ModalSearchModel? = null
     private var selectedPromo: ModalSearchModel? = null
@@ -1934,7 +1936,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         if (requestCode == DETAIL_ACTIVITY_REQUEST_CODE) {
 
             val resultData = data?.getStringExtra("$DETAIL_ACTIVITY_REQUEST_CODE")
+            isClosingAction = data?.getBooleanExtra(IS_CLOSING, false) ?: false
 
+            if (isClosingAction) setupDelivery()
             if (resultData == SYNC_NOW) hasEdited = true
 
         } else if (requestCode == REQUEST_EDIT_CONTACT_COORDINATE) {
@@ -2024,13 +2028,19 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     }
 
     private fun setupDelivery() {
-//        val userLevel = when (sessionManager.userKind()) {
-//            USER_KIND_ADMIN -> AUTH_LEVEL_ADMIN
-//            USER_KIND_COURIER -> AUTH_LEVEL_COURIER
-//            USER_KIND_BA -> AUTH_LEVEL_BA
-//            else -> AUTH_LEVEL_SALES
-//        }
-//        deliveryId = "$userLevel$userID"
+
+        if (isClosingAction) {
+            isDeliveryLoading = false
+            binding.btnDeliveryContainer.visibility = View.GONE
+            binding.contactAction.visibility = View.VISIBLE
+            binding.textDelivery.visibility = View.VISIBLE
+            binding.btnDirection.visibility = View.GONE
+
+            binding.textDeliveryTitle.text = "Berhasil Closing"
+            binding.textDeliveryDesc.text = "Segera selesaikan pengiriman lainnya."
+            return
+        }
+
         deliveryId = "$AUTH_LEVEL_COURIER$userID"
         firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
         childDelivery = firebaseReference?.child(FIREBASE_CHILD_DELIVERY)
@@ -2198,18 +2208,31 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         if (!isDeliveryLoading) {
             binding.btnDeliveryContainer.setOnClickListener {
                 if (ContextCompat.checkSelfPermission(this@DetailContactActivity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    // Meminta izin background location
-                    if (ContextCompat.checkSelfPermission(this@DetailContactActivity, Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        // Meminta izin background location
+                        if (ContextCompat.checkSelfPermission(
+                                this@DetailContactActivity,
+                                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                            ) == PackageManager.PERMISSION_GRANTED
+                        ) {
 
-                        startDelivery()
+                            startDelivery()
 
-                    } else {
-                        val message = "Izin background lokasi diperlukan untuk fitur ini. Mohon untuk memilih opsi berikut \"${getString(R.string.yes_bg_location)}\""
-                        val customUtility = CustomUtility(this@DetailContactActivity)
-                        customUtility.showPermissionDeniedDialog(message) {
-                            ActivityCompat.requestPermissions(this@DetailContactActivity, arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+                        } else {
+                            val message =
+                                "Izin background lokasi diperlukan untuk fitur ini. Mohon untuk memilih opsi berikut \"${
+                                    getString(R.string.yes_bg_location)
+                                }\""
+                            val customUtility = CustomUtility(this@DetailContactActivity)
+                            customUtility.showPermissionDeniedDialog(message) {
+                                ActivityCompat.requestPermissions(
+                                    this@DetailContactActivity,
+                                    arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                                    LOCATION_PERMISSION_REQUEST_CODE
+                                )
+                            }
                         }
-                    }
+                    } else startDelivery()
                 } else {
                     // Meminta izin lokasi jika belum diberikan
                     ActivityCompat.requestPermissions(this@DetailContactActivity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)

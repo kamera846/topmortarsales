@@ -74,6 +74,7 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
 import com.topmortar.topmortarsales.commons.CONST_URI
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
+import com.topmortar.topmortarsales.commons.IS_CLOSING
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAX_DISTANCE
 import com.topmortar.topmortarsales.commons.PRINT_METHOD_BLUETOOTH
@@ -146,6 +147,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     private var invoiceId: String? = null
     private var contactId: String? = null
     private var isClosing: Boolean = false
+    private var isClosingAction: Boolean = false
     private var isCod: Boolean = false
     private var isRequestSync: Boolean = false
 
@@ -269,6 +271,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
         val intent = Intent(this, PreviewClosingActivity::class.java)
         intent.putExtra(CONST_INVOICE_ID, invoiceId)
+        intent.putExtra(CONST_CONTACT_ID, contactId)
         intent.putExtra(CONST_INVOICE_IS_COD, isCod)
         intent.putParcelableArrayListExtra(CONST_URI, uriList)
         intent.putExtra(CONST_DISTANCE, shortDistance)
@@ -612,6 +615,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
             val resultIntent = Intent()
             resultIntent.putExtra("$DETAIL_ACTIVITY_REQUEST_CODE", SYNC_NOW)
+            resultIntent.putExtra(IS_CLOSING, isClosingAction)
             setResult(RESULT_OK, resultIntent)
 
             finish()
@@ -976,6 +980,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
             else Toast.makeText(this, "Bluetooth belum diaktifkan", TOAST_SHORT).show()
         } else if (requestCode == IMG_PREVIEW_STATE || "$requestCode" == "$IMG_PREVIEW_STATE") {
             val resultData = data?.getIntExtra("$IMG_PREVIEW_STATE", 0)
+            isClosingAction = data?.getBooleanExtra(IS_CLOSING, false) ?: false
+
             if (resultData == RESULT_OK ) {
                 getDetail()
                 isRequestSync = true

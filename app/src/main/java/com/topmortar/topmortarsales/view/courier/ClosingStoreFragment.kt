@@ -177,14 +177,14 @@ class ClosingStoreFragment : Fragment() {
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-//                        response.results[0].id_contact = "606"
-//                        response.results[0].nama = "Toko Ple MLG"
+//                        response.results[0].id_contact = "909"
+//                        response.results[0].nama = "Toko Rafli"
 
                         val contacts = response.results
 
                         // Get a reference to your database
                         val deliveryId = AUTH_LEVEL_COURIER + userID
-                        val firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorID!!)
+                        val firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorID)
                         val myRef: DatabaseReference = firebaseReference.child("$FIREBASE_CHILD_DELIVERY/$deliveryId")
 
                         // Add a ValueEventListener to retrieve the data
@@ -203,7 +203,7 @@ class ClosingStoreFragment : Fragment() {
                                             for ((i, contact) in contacts.withIndex()) {
                                                 val findItem = deliveryStore.find { it.id == contact.id_contact }
                                                 if (findItem != null) {
-                                                    contacts[i].deliveryStatus = "Pengiriman sedang berlangsung!"
+                                                    contacts[i].deliveryStatus = "Pengiriman sedang berlangsung"
                                                 }
                                             }
                                             setRecyclerView(contacts)
