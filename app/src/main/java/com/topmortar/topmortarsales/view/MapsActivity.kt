@@ -1613,7 +1613,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         val childStores = childDriver?.child("stores/$iContactID")
         var deliveryData: DeliveryModel.Delivery? = null
 
-        val courierDrawable = R.drawable.store_location_status_biding
+        val courierDrawable = R.drawable.pin_truck
         val storeDrawable = R.drawable.store_location_status_blacklist
 
         childDriver?.addValueEventListener(object : ValueEventListener {
@@ -1731,6 +1731,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                             )
 
                                             Handler().postDelayed({
+                                                binding.cardDelivery.visibility = View.VISIBLE
                                                 progressDialog.dismiss()
                                             }, 500)
 

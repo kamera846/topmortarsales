@@ -1184,7 +1184,7 @@
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:contentDescription="Direction Image"
-                        android:src="@drawable/direction_white" />
+                        android:src="@drawable/direction_black" />
 
                 </LinearLayout>
 
@@ -1222,7 +1222,7 @@
                 android:layout_marginEnd="8dp"
                 android:contentDescription="Direction Image Button"
                 android:background="@android:color/transparent"
-                android:src="@drawable/direction_white" />
+                android:src="@drawable/truck_ramp_box_white" />
 
             <TextView
                 android:id="@+id/btnDeliveryTitle"
