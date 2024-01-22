@@ -1099,6 +1099,16 @@
         android:background="@drawable/bg_bottom_sheet"
         android:orientation="vertical">
 
+        <TextView
+            android:visibility="visible"
+            android:id="@+id/textLoading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:layout_marginHorizontal="8dp"
+            android:text="@string/txt_loading"
+            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
         <LinearLayout
             android:visibility="gone"
             android:id="@+id/contactAction"

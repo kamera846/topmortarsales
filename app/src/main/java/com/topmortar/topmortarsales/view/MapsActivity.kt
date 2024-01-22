@@ -89,9 +89,12 @@ import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_STATUS
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
 import com.topmortar.topmortarsales.commons.CONST_MAPS_STATUS
+import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
+import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
+import com.topmortar.topmortarsales.commons.IS_CLOSING
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -100,6 +103,7 @@ import com.topmortar.topmortarsales.commons.STATUS_CONTACT_ACTIVE
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BID
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
+import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
@@ -124,6 +128,7 @@ import com.topmortar.topmortarsales.model.CityModel
 import com.topmortar.topmortarsales.model.DeliveryModel
 import com.topmortar.topmortarsales.model.GudangModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
+import com.topmortar.topmortarsales.view.suratJalan.ListSuratJalanActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -1732,7 +1737,28 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                                             Handler().postDelayed({
                                                 binding.cardDelivery.visibility = View.VISIBLE
+                                                binding.deliveryCourier.text = deliveryData!!.courier?.name
+                                                binding.deliveryStore.text = store.name
+                                                binding.deliveryDate.text = "Diproses pada " + store.startDatetime
+                                                binding.btnSuratJalan.setOnClickListener {
+                                                    val intent = Intent(this@MapsActivity, ListSuratJalanActivity::class.java)
+                                                    intent.putExtra(CONST_CONTACT_ID, store.id)
+                                                    intent.putExtra(CONST_NAME, "")
+                                                    startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+                                                }
+                                                binding.courierContainer.setOnClickListener { changeFocusCamera(courierLatLng) }
+                                                binding.storeContainer.setOnClickListener { changeFocusCamera(destinationLatLng) }
                                                 progressDialog.dismiss()
+
+                                                if (ActivityCompat.checkSelfPermission(
+                                                        this@MapsActivity,
+                                                        Manifest.permission.ACCESS_FINE_LOCATION
+                                                    ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                                                        this@MapsActivity,
+                                                        Manifest.permission.ACCESS_COARSE_LOCATION
+                                                    ) != PackageManager.PERMISSION_GRANTED
+                                                ) return@postDelayed
+                                                mMap.isMyLocationEnabled = false
                                             }, 500)
 
                                         } else {
@@ -1835,5 +1861,32 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         val newHeight = convertDpToPx(40, this@MapsActivity)
 
         return Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
+    }
+
+    private fun changeFocusCamera(latLng: LatLng, zoom: Float? = null) {
+        val zoomLvl = zoom ?: zoomLevel
+        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoomLvl)
+        mMap.animateCamera(cameraUpdate, mapsDuration, null)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == DETAIL_ACTIVITY_REQUEST_CODE) {
+
+            val resultData = data?.getStringExtra("$DETAIL_ACTIVITY_REQUEST_CODE")
+            val isClosingAction = data?.getBooleanExtra(IS_CLOSING, false) ?: false
+
+            if (resultData == SYNC_NOW) {
+                val resultIntent = Intent()
+                resultIntent.putExtra("$DETAIL_ACTIVITY_REQUEST_CODE", SYNC_NOW)
+                resultIntent.putExtra(IS_CLOSING, isClosingAction)
+                setResult(RESULT_OK, resultIntent)
+
+                finish()
+            }
+
+        }
+
     }
 }

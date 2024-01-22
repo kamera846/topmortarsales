@@ -247,6 +247,7 @@
                 android:paddingHorizontal="16dp"
                 android:paddingTop="16dp"
                 android:paddingBottom="32dp"
+                android:background="@drawable/bg_bottom_sheet"
                 android:orientation="vertical">
 
                 <LinearLayout
@@ -336,177 +337,166 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
+                android:paddingTop="16dp"
+                android:paddingBottom="32dp"
+                android:paddingHorizontal="16dp"
+                android:background="@drawable/bg_bottom_sheet"
                 android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textTitleTotalNearest"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:alpha="0.7"
+                    android:text="Penelusuran Toko Terdekat"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                <TextView
+                    android:id="@+id/textTotalNearest"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:text="100 toko ditemukan dalam radius 1 km"
+                    android:layout_marginBottom="16dp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="32dp"
-                    android:orientation="vertical">
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
                     <TextView
-                        android:id="@+id/textTitleTotalNearest"
-                        android:layout_width="match_parent"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:paddingHorizontal="16dp"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:alpha="0.7"
-                        android:text="Penelusuran Toko Terdekat"
-                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
-
-                    <TextView
-                        android:id="@+id/textTotalNearest"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingHorizontal="16dp"
+                        android:layout_weight="1"
                         android:textSize="14sp"
-                        android:text="100 toko ditemukan dalam radius 1 km"
-                        android:layout_marginBottom="16dp"
+                        android:layout_marginEnd="8dp"
+                        android:text="Atur radius dari lokasi anda saat ini dalam km (1-100)."
                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
                     <LinearLayout
-                        android:layout_width="match_parent"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:paddingHorizontal="16dp"
-                        android:layout_marginBottom="8dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:textSize="14sp"
-                            android:layout_marginEnd="8dp"
-                            android:text="Atur radius dari lokasi anda saat ini dalam km (1-100)."
-                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+                        <ImageButton
+                            android:id="@+id/btnMinusKm"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:scaleType="fitCenter"
+                            android:background="@android:color/transparent"
+                            android:src="@drawable/minus_dark"/>
 
                         <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_width="48dp"
+                            android:layout_height="24dp"
                             android:gravity="center_vertical"
+                            android:background="@drawable/bg_outline"
                             android:orientation="horizontal">
 
-                            <ImageButton
-                                android:id="@+id/btnMinusKm"
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:scaleType="fitCenter"
-                                android:background="@android:color/transparent"
-                                android:src="@drawable/minus_dark"/>
-
-                            <LinearLayout
-                                android:layout_width="48dp"
-                                android:layout_height="24dp"
-                                android:gravity="center_vertical"
-                                android:background="@drawable/bg_outline"
-                                android:orientation="horizontal">
-
-                                <EditText
-                                    android:id="@+id/etKm"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:text="1"
-                                    android:textSize="14sp"
-                                    android:gravity="center"
-                                    android:inputType="number"
-                                    android:background="@android:color/transparent"/>
-
-                            </LinearLayout>
-
-                            <ImageButton
-                                android:id="@+id/btnPlusKm"
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:scaleType="fitCenter"
-                                android:background="@android:color/transparent"
-                                android:src="@drawable/add_dark"/>
+                            <EditText
+                                android:id="@+id/etKm"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:text="1"
+                                android:textSize="14sp"
+                                android:gravity="center"
+                                android:inputType="number"
+                                android:background="@android:color/transparent"/>
 
                         </LinearLayout>
 
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:visibility="gone"
-                        android:id="@+id/centerPointContainer"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:paddingHorizontal="16dp"
-                            android:text="Titik tengah penelusuran"
-                            android:textSize="14sp"
-                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
-
-                        <LinearLayout
-                            android:id="@+id/centerPointMore"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:layout_marginEnd="16dp"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:background="@drawable/bg_border_clickable"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <TextView
-                                android:visibility="visible"
-                                android:id="@+id/centerPointLoading"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="@string/txt_loading"
-                                android:textSize="14sp"
-                                android:paddingHorizontal="12dp"
-                                android:paddingVertical="6dp"
-                                android:background="@android:color/transparent"
-                                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
-
-                            <TextView
-                                android:visibility="gone"
-                                android:id="@+id/centerPointTitle"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Lokasi Anda"
-                                android:textSize="14sp"
-                                android:paddingStart="12dp"
-                                android:paddingVertical="6dp"
-                                android:background="@android:color/transparent"
-                                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
-
-                            <ImageView
-                                android:visibility="gone"
-                                android:id="@+id/centerPointMoreIcon"
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:padding="4dp"
-                                android:paddingEnd="12dp"
-                                android:background="@android:color/transparent"
-                                android:src="@drawable/up_down_black"/>
-
-                        </LinearLayout>
+                        <ImageButton
+                            android:id="@+id/btnPlusKm"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:scaleType="fitCenter"
+                            android:background="@android:color/transparent"
+                            android:src="@drawable/add_dark"/>
 
                     </LinearLayout>
-
-                    <Button
-                        android:id="@+id/btnTelusuri"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginHorizontal="16dp"
-                        android:text="Telusuri Lagi"
-                        android:backgroundTint="@color/primary"
-                        android:textColor="@color/white"/>
 
                 </LinearLayout>
+
+                <LinearLayout
+                    android:visibility="gone"
+                    android:id="@+id/centerPointContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Titik tengah penelusuran"
+                        android:textSize="14sp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                    <LinearLayout
+                        android:id="@+id/centerPointMore"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="@drawable/bg_border_clickable"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:visibility="visible"
+                            android:id="@+id/centerPointLoading"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/txt_loading"
+                            android:textSize="14sp"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="6dp"
+                            android:background="@android:color/transparent"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                        <TextView
+                            android:visibility="gone"
+                            android:id="@+id/centerPointTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Lokasi Anda"
+                            android:textSize="14sp"
+                            android:paddingStart="12dp"
+                            android:paddingVertical="6dp"
+                            android:background="@android:color/transparent"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                        <ImageView
+                            android:visibility="gone"
+                            android:id="@+id/centerPointMoreIcon"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:padding="4dp"
+                            android:paddingEnd="12dp"
+                            android:background="@android:color/transparent"
+                            android:src="@drawable/up_down_black"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <Button
+                    android:id="@+id/btnTelusuri"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Telusuri Lagi"
+                    android:backgroundTint="@color/primary"
+                    android:textColor="@color/white"/>
 
             </LinearLayout>
 
@@ -527,6 +517,7 @@
                 android:paddingHorizontal="16dp"
                 android:paddingTop="16dp"
                 android:paddingBottom="32dp"
+                android:background="@drawable/bg_bottom_sheet"
                 android:orientation="vertical">
 
                 <TextView
@@ -542,23 +533,26 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    android:padding="8dp"
                     android:gravity="center_vertical"
                     android:background="@drawable/bg_delivery_round_8"
                     android:orientation="horizontal">
 
                     <LinearLayout
+                        android:id="@+id/courierContainer"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:background="@android:color/transparent"
+                        android:padding="8dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="@drawable/bg_light_clickable_round_8"
                         android:orientation="vertical">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textStyle="bold"
-                            android:textSize="14sp"
+                            android:textSize="12sp"
                             android:alpha="0.7"
                             android:text="Kurir"
                             android:background="@android:color/transparent"
@@ -568,33 +562,38 @@
                             android:id="@+id/deliveryCourier"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textSize="14sp"
+                            android:textSize="12sp"
                             android:alpha="0.9"
-                            android:text="Raple"
+                            android:ellipsize="end"
                             android:background="@android:color/transparent"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
                     </LinearLayout>
 
                     <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
+                        android:layout_marginHorizontal="8dp"
                         android:background="@android:color/transparent"
                         android:src="@drawable/truck_fast_black"/>
 
                     <LinearLayout
+                        android:id="@+id/storeContainer"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:padding="8dp"
                         android:gravity="end"
-                        android:background="@android:color/transparent"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="@drawable/bg_light_clickable_round_8"
                         android:orientation="vertical">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textStyle="bold"
-                            android:textSize="14sp"
+                            android:textSize="12sp"
                             android:alpha="0.7"
                             android:text="Toko"
                             android:background="@android:color/transparent"
@@ -604,9 +603,9 @@
                             android:id="@+id/deliveryStore"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textSize="14sp"
+                            android:textSize="12sp"
                             android:alpha="0.9"
-                            android:text="TB Ple Store"
+                            android:ellipsize="end"
                             android:background="@android:color/transparent"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
@@ -635,7 +634,7 @@
                         android:maxLines="1"
                         android:ellipsize="end"
                         android:layout_marginStart="8dp"
-                        android:text="Diproses pada 05 Juli 2023, 23:00"
+                        android:text="Diproses pada"
                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
                 </LinearLayout>
