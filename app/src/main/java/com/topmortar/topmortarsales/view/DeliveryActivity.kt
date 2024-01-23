@@ -83,10 +83,10 @@ class DeliveryActivity : AppCompatActivity() {
                         setRecyclerView(storeList)
                         loadingState(false)
                     } else {
-                        loadingState(true, "Belum ada pengiriman yang berjalan!")
+                        loadingState(true, "Belum ada pengiriman yang berlangsung.")
                     }
                 } else {
-                    loadingState(true, "Belum ada pengiriman yang berjalan!")
+                    loadingState(true, "Belum ada pengiriman yang berlangsung.")
                 }
             }
 

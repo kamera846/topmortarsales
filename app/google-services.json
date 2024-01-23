@@ -1,66 +1,27 @@
 {
   "project_info": {
-    "project_number": "806505600489",
-    "firebase_url": "https://crud-4f6d6.firebaseio.com",
-    "project_id": "crud-4f6d6",
-    "storage_bucket": "crud-4f6d6.appspot.com"
+    "project_number": "832163354410",
+    "firebase_url": "https://top-mortar-sales-f3ab0-default-rtdb.firebaseio.com",
+    "project_id": "top-mortar-sales-f3ab0",
+    "storage_bucket": "top-mortar-sales-f3ab0.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:806505600489:android:b456b3a7beffbba5dee778",
-        "android_client_info": {
-          "package_name": "com.example.crud"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "806505600489-qqika89eslst0ud8b0p747u6ohi2mhj7.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBHTbuqkm75cuY1vnuqg26RV8JtHyIMnRw"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "806505600489-qqika89eslst0ud8b0p747u6ohi2mhj7.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:806505600489:android:f221d62232476eeddee778",
+        "mobilesdk_app_id": "1:832163354410:android:901c0f4b45df325ff93053",
         "android_client_info": {
           "package_name": "com.topmortar.topmortarsales"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "806505600489-qqika89eslst0ud8b0p747u6ohi2mhj7.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBHTbuqkm75cuY1vnuqg26RV8JtHyIMnRw"
+          "current_key": "AIzaSyCyt3OG04ka-ynsMhUSj_27ZyeNrDmolJI"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "806505600489-qqika89eslst0ud8b0p747u6ohi2mhj7.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
