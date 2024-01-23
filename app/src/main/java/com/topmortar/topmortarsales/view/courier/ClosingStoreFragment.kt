@@ -1,12 +1,9 @@
 package com.topmortar.topmortarsales.view.courier
 
-import android.Manifest
 import android.app.Activity.RESULT_OK
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,8 +14,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -46,7 +41,6 @@ import com.topmortar.topmortarsales.commons.CONST_REPUTATION
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
-import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -107,56 +101,6 @@ class ClosingStoreFragment : Fragment() {
 
         sessionManager = SessionManager(requireContext())
         binding.btnFabAdmin.setOnClickListener { navigateChatAdmin() }
-        binding.btnStartDelivery.setOnClickListener {
-            // Memeriksa izin
-            if (ContextCompat.checkSelfPermission(
-                    requireActivity(),
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                )
-                == PackageManager.PERMISSION_GRANTED
-            ) {
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    // Meminta izin background location
-                    if (ContextCompat.checkSelfPermission(
-                            requireActivity(),
-                            Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                        ) == PackageManager.PERMISSION_GRANTED
-                    ) {
-                        // Memulai layanan jika izin sudah diberikan
-                        val serviceIntent = Intent(requireActivity(), TrackingService::class.java)
-                        requireActivity().startService(serviceIntent)
-                    } else {
-                        // Jika izin belum diberikan, tampilkan dialog permintaan izin
-                        val message = "Izin background lokasi diperlukan untuk fitur ini. Mohon untuk memilih opsi berikut \"${getString(R.string.yes_bg_location)}\""
-                        val customUtility = CustomUtility(requireActivity())
-                        customUtility.showPermissionDeniedDialog(message) {
-//                        customUtility.showPermissionDeniedSnackbar(message) {
-//
-                            ActivityCompat.requestPermissions(
-                                requireActivity(),
-                                arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
-                                LOCATION_PERMISSION_REQUEST_CODE
-                            )
-//
-//                        }
-                        }
-
-                    }
-                }
-            } else {
-                // Meminta izin lokasi jika belum diberikan
-                ActivityCompat.requestPermissions(
-                    requireActivity(),
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                    LOCATION_PERMISSION_REQUEST_CODE
-                )
-            }
-        }
-        binding.btnStopDelivery.setOnClickListener {
-            val serviceIntent = Intent(requireActivity(), TrackingService::class.java)
-            requireActivity().stopService(serviceIntent)
-        }
 
         getContacts()
 
@@ -200,12 +144,26 @@ class ClosingStoreFragment : Fragment() {
                                                 deliveryStore.add(data)
                                             }
 
+                                            var deliveryCount = 0
                                             for ((i, contact) in contacts.withIndex()) {
                                                 val findItem = deliveryStore.find { it.id == contact.id_contact }
                                                 if (findItem != null) {
                                                     contacts[i].deliveryStatus = "Pengiriman sedang berlangsung"
+                                                    deliveryCount ++
                                                 }
                                             }
+
+                                            val isTracking = CustomUtility(requireContext()).isServiceRunning(TrackingService::class.java)
+                                            if (deliveryCount > 0 && !isTracking) {
+                                                val serviceIntent = Intent(requireContext(), TrackingService::class.java)
+                                                serviceIntent.putExtra("userDistributorId", userDistributorID)
+                                                serviceIntent.putExtra("deliveryId", deliveryId)
+                                                requireContext().startService(serviceIntent)
+                                            } else if (deliveryCount <= 0 && isTracking) {
+                                                val serviceIntent = Intent(requireContext(), TrackingService::class.java)
+                                                requireContext().stopService(serviceIntent)
+                                            }
+
                                             setRecyclerView(contacts)
                                             loadingState(false)
                                             showBadgeRefresh(false)
