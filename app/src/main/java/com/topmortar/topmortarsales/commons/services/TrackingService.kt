@@ -27,6 +27,10 @@ class TrackingService : Service() {
     private lateinit var childDelivery: DatabaseReference
     private lateinit var childDriver: DatabaseReference
 
+    companion object {
+        const val NOTIFICATION_ID = 1010
+    }
+
     override fun onCreate() {
         super.onCreate()
     }
@@ -53,7 +57,7 @@ class TrackingService : Service() {
             .setContentText("Ketuk untuk melihat pengiriman")
             .build()
 
-        startForeground(1010, notification)
+        startForeground(NOTIFICATION_ID, notification)
     }
 
     private fun startLocationUpdates(intent: Intent?) {

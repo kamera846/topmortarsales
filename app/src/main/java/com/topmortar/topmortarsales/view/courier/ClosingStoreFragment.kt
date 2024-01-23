@@ -144,24 +144,18 @@ class ClosingStoreFragment : Fragment() {
                                                 deliveryStore.add(data)
                                             }
 
-                                            var deliveryCount = 0
                                             for ((i, contact) in contacts.withIndex()) {
                                                 val findItem = deliveryStore.find { it.id == contact.id_contact }
                                                 if (findItem != null) {
                                                     contacts[i].deliveryStatus = "Pengiriman sedang berlangsung"
-                                                    deliveryCount ++
+                                                    val isTracking = CustomUtility(requireContext()).isServiceRunning(TrackingService::class.java)
+                                                    if (!isTracking) {
+                                                        val serviceIntent = Intent(requireContext(), TrackingService::class.java)
+                                                        serviceIntent.putExtra("userDistributorId", userDistributorID)
+                                                        serviceIntent.putExtra("deliveryId", deliveryId)
+                                                        requireContext().startService(serviceIntent)
+                                                    }
                                                 }
-                                            }
-
-                                            val isTracking = CustomUtility(requireContext()).isServiceRunning(TrackingService::class.java)
-                                            if (deliveryCount > 0 && !isTracking) {
-                                                val serviceIntent = Intent(requireContext(), TrackingService::class.java)
-                                                serviceIntent.putExtra("userDistributorId", userDistributorID)
-                                                serviceIntent.putExtra("deliveryId", deliveryId)
-                                                requireContext().startService(serviceIntent)
-                                            } else if (deliveryCount <= 0 && isTracking) {
-                                                val serviceIntent = Intent(requireContext(), TrackingService::class.java)
-                                                requireContext().stopService(serviceIntent)
                                             }
 
                                             setRecyclerView(contacts)
