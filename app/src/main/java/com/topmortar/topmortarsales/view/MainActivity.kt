@@ -24,8 +24,10 @@ import android.widget.PopupMenu
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -164,6 +166,9 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         if (userKind == USER_KIND_ADMIN) getCities()
         else getContacts()
 
+        if (userKind == USER_KIND_ADMIN) setupDrawer()
+        else icMore.setOnClickListener { showPopupMenu() }
+
     }
 
     private fun initVariable() {
@@ -203,7 +208,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
         btnFab.setOnClickListener { navigateAddNewRoom() }
         btnFabAdmin.setOnClickListener { navigateChatAdmin() }
-        icMore.setOnClickListener { showPopupMenu() }
         icSearch.setOnClickListener { toggleSearchEvent(SEARCH_OPEN) }
         icCloseSearch.setOnClickListener { toggleSearchEvent(SEARCH_CLOSE) }
         icClearSearch.setOnClickListener { etSearchBox.setText("") }
@@ -475,6 +479,131 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             }
         }
         popupMenu.show()
+    }
+
+    private fun setupDrawer() {
+        val toggle = ActionBarDrawerToggle(
+            this,
+            binding.mainDrawerLayout,
+            R.string.navigation_drawer_open,
+            R.string.navigation_drawer_close
+        )
+
+        binding.mainDrawerLayout.addDrawerListener(toggle)
+        toggle.syncState()
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        val navigationView = binding.mainNavigationView
+        val drawerMenu = navigationView.menu
+
+        val searchItem = drawerMenu.findItem(R.id.option_search)
+        val userItem = drawerMenu.findItem(R.id.option_user)
+        val myProfile = drawerMenu.findItem(R.id.option_my_profile)
+        val cityItem = drawerMenu.findItem(R.id.option_city)
+        val skillItem = drawerMenu.findItem(R.id.option_skill)
+        val nearestStoreItem = drawerMenu.findItem(R.id.nearest_store)
+        val basecamp = drawerMenu.findItem(R.id.option_basecamp)
+        val gudang = drawerMenu.findItem(R.id.option_gudang)
+        val delivery = drawerMenu.findItem(R.id.option_delivery)
+
+        searchItem.isVisible = false
+//        nearestStoreItem.isVisible = false
+        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
+            if (userKind == USER_KIND_ADMIN) {
+                userItem.isVisible = true
+                cityItem.isVisible = true
+                skillItem.isVisible = true
+                basecamp.isVisible = true
+                gudang.isVisible = true
+                delivery.isVisible = true
+            } else {
+                userItem.isVisible = true
+//                cityItem.isVisible = true
+//                skillItem.isVisible = true
+                basecamp.isVisible = true
+                gudang.isVisible = true
+            }
+        }
+
+        if (sessionManager.userKind() != USER_KIND_SALES) {
+            myProfile.isVisible = false
+        }
+
+        navigationView.setNavigationItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.option_sync_now -> {
+                    getUserLoggedIn()
+                    closeDrawer()
+                    true
+                }
+                R.id.nearest_store -> {
+                    navigateChecklocation()
+                    closeDrawer()
+                    true
+                }
+                R.id.option_my_profile -> {
+                    val intent = Intent(this@MainActivity, UserProfileActivity::class.java)
+                    startActivity(intent)
+                    closeDrawer()
+                    true
+                }
+                R.id.option_search -> {
+                    toggleSearchEvent(SEARCH_OPEN)
+                    closeDrawer()
+                    true
+                }
+                R.id.option_user -> {
+                    startActivity(Intent(this@MainActivity, ManageUserActivity::class.java))
+                    closeDrawer()
+                    true
+                }
+                R.id.option_city -> {
+                    val intent = Intent(this@MainActivity, ManageCityActivity::class.java)
+                    intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
+                    startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
+                    closeDrawer()
+                    true
+                }
+                R.id.option_skill -> {
+                    startActivity(Intent(this@MainActivity, ManageSkillActivity::class.java))
+                    closeDrawer()
+                    true
+                }
+                R.id.option_basecamp -> {
+                    startActivity(Intent(this@MainActivity, ManageBasecampActivity::class.java))
+                    closeDrawer()
+                    true
+                }
+                R.id.option_gudang -> {
+                    startActivity(Intent(this@MainActivity, ManageGudangActivity::class.java))
+                    closeDrawer()
+                    true
+                }
+                R.id.option_delivery -> {
+                    startActivity(Intent(this@MainActivity, DeliveryActivity::class.java))
+                    closeDrawer()
+                    true
+                }
+                R.id.option_logout -> {
+                    logoutConfirmation()
+                    closeDrawer()
+                    true
+                }
+                else -> false
+            }
+        }
+
+        icMore.setOnClickListener { openDrawer() }
+
+    }
+
+    private fun openDrawer() {
+        binding.mainDrawerLayout.openDrawer(GravityCompat.END)
+    }
+
+    private fun closeDrawer() {
+        binding.mainDrawerLayout.closeDrawer(GravityCompat.END)
     }
 
     private fun blurSearchBox(event: MotionEvent): Boolean {
