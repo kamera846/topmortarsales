@@ -152,134 +152,130 @@ import java.util.TimerTask
 class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListener,
     PingUtility.PingResultInterface, SendMessageModal.SendMessageModalInterface {
 
-    companion object {
+    private lateinit var sessionManager: SessionManager
+    private val userKind get() = sessionManager.userKind().toString()
+    //    private val userID = "8"
+    private val userID get() = sessionManager.userID().toString()
+    private val username get() = sessionManager.userName().toString()
+    //    private val fulllName = "Ple Courier"
+    private val fulllName get() = sessionManager.fullName().toString()
+    private val userCityID get() = sessionManager.userCityID().toString()
+    private val userDistributorId get() = sessionManager.userDistributor().toString()
+    private val userCity get() = sessionManager.userCityID().toString()
+    private lateinit var binding: ActivityDetailContactBinding
+    private var pingUtility: PingUtility? = null
 
-        private lateinit var sessionManager: SessionManager
-        private val userKind get() = sessionManager.userKind().toString()
-        //    private val userID = "8"
-        private val userID get() = sessionManager.userID().toString()
-        private val username get() = sessionManager.userName().toString()
-        //    private val fulllName = "Ple Courier"
-        private val fulllName get() = sessionManager.fullName().toString()
-        private val userCityID get() = sessionManager.userCityID().toString()
-        private val userDistributorId get() = sessionManager.userDistributor().toString()
-        private val userCity get() = sessionManager.userCityID().toString()
-        private lateinit var binding: ActivityDetailContactBinding
-        private var pingUtility: PingUtility? = null
+    private lateinit var tvPhoneContainer: LinearLayout
+    private lateinit var etPhoneContainer: LinearLayout
+    private lateinit var tvBirthdayContainer: LinearLayout
+    private lateinit var etBirthdayContainer: LinearLayout
+    private lateinit var tvKtpContainer: LinearLayout
+    private lateinit var etKtpContainer: LinearLayout
+    private lateinit var tvLocationContainer: LinearLayout
+    private lateinit var etLocationContainer: LinearLayout
+    private lateinit var tvOwnerContainer: LinearLayout
+    private lateinit var etOwnerContainer: LinearLayout
+    private lateinit var tvMapsContainer: RelativeLayout
+    private lateinit var etMapsContainer: LinearLayout
+    private lateinit var overlayMaps: View
 
-        private lateinit var tvPhoneContainer: LinearLayout
-        private lateinit var etPhoneContainer: LinearLayout
-        private lateinit var tvBirthdayContainer: LinearLayout
-        private lateinit var etBirthdayContainer: LinearLayout
-        private lateinit var tvKtpContainer: LinearLayout
-        private lateinit var etKtpContainer: LinearLayout
-        private lateinit var tvLocationContainer: LinearLayout
-        private lateinit var etLocationContainer: LinearLayout
-        private lateinit var tvOwnerContainer: LinearLayout
-        private lateinit var etOwnerContainer: LinearLayout
-        private lateinit var tvMapsContainer: RelativeLayout
-        private lateinit var etMapsContainer: LinearLayout
-        private lateinit var overlayMaps: View
+    private lateinit var statusContainer: LinearLayout
+    private lateinit var terminContainer: LinearLayout
+    private lateinit var reputationContainer: LinearLayout
+    private lateinit var promoContainer: LinearLayout
+    private lateinit var addressContainer: LinearLayout
 
-        private lateinit var statusContainer: LinearLayout
-        private lateinit var terminContainer: LinearLayout
-        private lateinit var reputationContainer: LinearLayout
-        private lateinit var promoContainer: LinearLayout
-        private lateinit var addressContainer: LinearLayout
+    private lateinit var icBack: ImageView
+    private lateinit var icEdit: ImageView
+    private lateinit var icClose: ImageView
 
-        private lateinit var icBack: ImageView
-        private lateinit var icEdit: ImageView
-        private lateinit var icClose: ImageView
+    private lateinit var tooltipPhone: ImageView
+    private lateinit var tooltipOwner: ImageView
+    private lateinit var tooltipBirthday: ImageView
+    private lateinit var tooltipKtp: ImageView
+    private lateinit var tooltipLocation: ImageView
+    private lateinit var tooltipMaps: ImageView
 
-        private lateinit var tooltipPhone: ImageView
-        private lateinit var tooltipOwner: ImageView
-        private lateinit var tooltipBirthday: ImageView
-        private lateinit var tooltipKtp: ImageView
-        private lateinit var tooltipLocation: ImageView
-        private lateinit var tooltipMaps: ImageView
+    private lateinit var tooltipStatus: ImageView
 
-        private lateinit var tooltipStatus: ImageView
+    private lateinit var tvTitleBar: TextView
+    private lateinit var tvName: TextView
+    private lateinit var tvDescription: TextView
+    private lateinit var tvPhone: TextView
+    private lateinit var tvBirthday: TextView
+    private lateinit var tvKtp: TextView
+    private lateinit var tvSelectedKtp: TextView
+    private lateinit var tvLocation: TextView
+    private lateinit var tvOwner: TextView
+    private lateinit var tvMaps: TextView
+    private lateinit var etName: EditText
+    private lateinit var etOwner: EditText
+    private lateinit var etPhone: EditText
+    private lateinit var etBirthday: EditText
+    private lateinit var etKtp: EditText
+    private lateinit var etLocation: EditText
+    private lateinit var etMaps: EditText
 
-        private lateinit var tvTitleBar: TextView
-        private lateinit var tvName: TextView
-        private lateinit var tvDescription: TextView
-        private lateinit var tvPhone: TextView
-        private lateinit var tvBirthday: TextView
-        private lateinit var tvKtp: TextView
-        private lateinit var tvSelectedKtp: TextView
-        private lateinit var tvLocation: TextView
-        private lateinit var tvOwner: TextView
-        private lateinit var tvMaps: TextView
-        private lateinit var etName: EditText
-        private lateinit var etOwner: EditText
-        private lateinit var etPhone: EditText
-        private lateinit var etBirthday: EditText
-        private lateinit var etKtp: EditText
-        private lateinit var etLocation: EditText
-        private lateinit var etMaps: EditText
+    private lateinit var tvStatus: TextView
+    private lateinit var tvTermin: TextView
+    private lateinit var tvReputation: TextView
+    private lateinit var tvPromo: TextView
+    private lateinit var etPromo: EditText
+    private lateinit var spinStatus: Spinner
+    private lateinit var spinTermin: Spinner
+    private lateinit var spinReputation: Spinner
+    private lateinit var etAddress: EditText
 
-        private lateinit var tvStatus: TextView
-        private lateinit var tvTermin: TextView
-        private lateinit var tvReputation: TextView
-        private lateinit var tvPromo: TextView
-        private lateinit var etPromo: EditText
-        private lateinit var spinStatus: Spinner
-        private lateinit var spinTermin: Spinner
-        private lateinit var spinReputation: Spinner
-        private lateinit var etAddress: EditText
+    private lateinit var btnSendMessage: Button
+    private lateinit var btnSaveEdit: Button
+    private lateinit var btnInvoice: LinearLayout
 
-        private lateinit var btnSendMessage: Button
-        private lateinit var btnSaveEdit: Button
-        private lateinit var btnInvoice: LinearLayout
+    private var activityRequestCode = MAIN_ACTIVITY_REQUEST_CODE
+    private var contactId: String? = null
+    private var isEdit: Boolean = false
+    private var hasEdited: Boolean = false
+    private var isClosingAction: Boolean = false
+    private var selectedDate: Calendar = Calendar.getInstance()
+    private var selectedCity: ModalSearchModel? = null
+    private var selectedPromo: ModalSearchModel? = null
+    private var itemSendMessage: ContactModel? = null
 
-        private var activityRequestCode = MAIN_ACTIVITY_REQUEST_CODE
-        private var contactId: String? = null
-        private var isEdit: Boolean = false
-        private var hasEdited: Boolean = false
-        private var isClosingAction: Boolean = false
-        private var selectedDate: Calendar = Calendar.getInstance()
-        private var selectedCity: ModalSearchModel? = null
-        private var selectedPromo: ModalSearchModel? = null
-        private var itemSendMessage: ContactModel? = null
+    private var statusItem: List<String> = listOf("Pilih Status", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
+    private var terminItem: List<String> = listOf("Pilih Termin Payment", "COD", "COD + Transfer", "COD + Tunai", "30 Hari", "45 Hari", "60 Hari")
+    private var reputationItem: List<String> = listOf("Pilih Reputasi Toko", "Good", "Bad")
+    private var selectedStatus: String = ""
+    private var selectedTermin: String = ""
+    private var selectedReputation: String = ""
+    private var cameraPermissionLauncher: ActivityResultLauncher<String>? = null
+    private var imagePicker: ActivityResultLauncher<Intent>? = null
+    private var selectedUri: Uri? = null
+    private var currentPhotoUri: Uri? = null
 
-        private var statusItem: List<String> = listOf("Pilih Status", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
-        private var terminItem: List<String> = listOf("Pilih Termin Payment", "COD", "COD + Transfer", "COD + Tunai", "30 Hari", "45 Hari", "60 Hari")
-        private var reputationItem: List<String> = listOf("Pilih Reputasi Toko", "Good", "Bad")
-        private var selectedStatus: String = ""
-        private var selectedTermin: String = ""
-        private var selectedReputation: String = ""
-        private var cameraPermissionLauncher: ActivityResultLauncher<String>? = null
-        private var imagePicker: ActivityResultLauncher<Intent>? = null
-        private var selectedUri: Uri? = null
-        private var currentPhotoUri: Uri? = null
+    private var iLocation: String? = null
+    private var iStatus: String? = null
+    private var iTermin: String? = null
+    private var iReputation: String? = null
+    private var iAddress: String? = null
+    private var iMapsUrl: String? = null
+    private var iKtp: String? = null
+    private var iPromo: String? = null
 
-        private var iLocation: String? = null
-        private var iStatus: String? = null
-        private var iTermin: String? = null
-        private var iReputation: String? = null
-        private var iAddress: String? = null
-        private var iMapsUrl: String? = null
-        private var iKtp: String? = null
-        private var iPromo: String? = null
+    private var isSearchCity = false
+    private var isSearchPromo = false
 
-        private var isSearchCity = false
-        private var isSearchPromo = false
+    private lateinit var datePicker: DatePickerDialog
+    private lateinit var searchModal: SearchModal
+    private lateinit var searchPromoModal: SearchModal
+    private lateinit var sendMessageModal: SendMessageModal
+    private lateinit var bottomSheetDialog: BottomSheetDialog
 
-        private lateinit var datePicker: DatePickerDialog
-        private lateinit var searchModal: SearchModal
-        private lateinit var searchPromoModal: SearchModal
-        private lateinit var sendMessageModal: SendMessageModal
-        private lateinit var bottomSheetDialog: BottomSheetDialog
-
-        // Tracking
-        private var isDeliveryLoading = false
-        private var firebaseReference: DatabaseReference? = null
-        private var childDelivery: DatabaseReference? = null
-        private var childDriver: DatabaseReference? = null
-        private var deliveryId: String = ""
-        private lateinit var fusedLocationClient: FusedLocationProviderClient
-
-    }
+    // Tracking
+    private var isDeliveryLoading = false
+    private var firebaseReference: DatabaseReference? = null
+    private var childDelivery: DatabaseReference? = null
+    private var childDriver: DatabaseReference? = null
+    private var deliveryId: String = ""
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
