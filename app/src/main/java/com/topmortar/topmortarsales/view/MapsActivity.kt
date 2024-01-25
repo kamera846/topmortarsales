@@ -1739,7 +1739,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                                 binding.cardDelivery.visibility = View.VISIBLE
                                                 binding.deliveryCourier.text = deliveryData!!.courier?.name
                                                 binding.deliveryStore.text = store.name
-                                                binding.deliveryDate.text = "Diproses pada " + store.startDatetime
+                                                binding.deliveryDate.text = "Diproses pada " + DateFormat.format(store.startDatetime, "yyyy-MM-dd hh:mm:ss", "dd MMM YYYY, hh.mm")
                                                 binding.btnSuratJalan.setOnClickListener {
                                                     val intent = Intent(this@MapsActivity, ListSuratJalanActivity::class.java)
                                                     intent.putExtra(CONST_CONTACT_ID, store.id)

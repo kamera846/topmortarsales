@@ -5,6 +5,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -138,30 +139,77 @@ class ClosingStoreFragment : Fragment() {
                                 if (dataSnapshot.exists()) {
                                     myRef.child("stores").addListenerForSingleValueEvent(object : ValueEventListener {
                                         override fun onDataChange(snapshot: DataSnapshot) {
-                                            val deliveryStore = arrayListOf<DeliveryModel.Store>()
-                                            for (item in snapshot.children) {
-                                                val data = item.getValue(DeliveryModel.Store::class.java)!!
-                                                deliveryStore.add(data)
-                                            }
+                                            if (snapshot.exists()) {
+                                                val deliveryStore = arrayListOf<DeliveryModel.Store>()
+                                                for (item in snapshot.children) {
+                                                    val data = item.getValue(DeliveryModel.Store::class.java)!!
+                                                    deliveryStore.add(data)
+                                                }
 
-                                            for ((i, contact) in contacts.withIndex()) {
-                                                val findItem = deliveryStore.find { it.id == contact.id_contact }
-                                                if (findItem != null) {
-                                                    contacts[i].deliveryStatus = "Pengiriman sedang berlangsung"
-                                                    val isTracking = CustomUtility(requireContext()).isServiceRunning(TrackingService::class.java)
-                                                    if (!isTracking) {
-                                                        val serviceIntent = Intent(requireContext(), TrackingService::class.java)
-                                                        serviceIntent.putExtra("userDistributorId", userDistributorID)
-                                                        serviceIntent.putExtra("deliveryId", deliveryId)
-                                                        requireContext().startService(serviceIntent)
+                                                var deliveryCount = 0
+                                                for ((i, contact) in contacts.withIndex()) {
+                                                    val findItem = deliveryStore.find { it.id == contact.id_contact }
+                                                    if (findItem != null) {
+                                                        contacts[i].deliveryStatus = "Pengiriman sedang berlangsung"
+                                                        deliveryCount ++
                                                     }
                                                 }
-                                            }
 
-                                            setRecyclerView(contacts)
-                                            loadingState(false)
-                                            showBadgeRefresh(false)
-                                            listener?.counterItem(response.results.size)
+                                                val isTracking = CustomUtility(requireContext()).isServiceRunning(TrackingService::class.java)
+                                                if (deliveryCount > 0) {
+                                                    if (!isTracking) {
+                                                        val serviceIntent = Intent(
+                                                            requireContext(),
+                                                            TrackingService::class.java
+                                                        )
+                                                        serviceIntent.putExtra(
+                                                            "userDistributorId",
+                                                            userDistributorID
+                                                        )
+                                                        serviceIntent.putExtra("deliveryId", deliveryId)
+                                                        requireContext().startService(serviceIntent)
+                                                    } else {
+                                                        val serviceIntent = Intent(
+                                                            requireContext(),
+                                                            TrackingService::class.java
+                                                        )
+                                                        requireContext().stopService(serviceIntent)
+                                                        Handler().postDelayed({
+                                                            serviceIntent.putExtra(
+                                                                "userDistributorId",
+                                                                userDistributorID
+                                                            )
+                                                            serviceIntent.putExtra(
+                                                                "deliveryId",
+                                                                deliveryId
+                                                            )
+                                                            requireContext().startService(serviceIntent)
+                                                        }, 1000)
+                                                    }
+                                                } else {
+                                                    val serviceIntent = Intent(
+                                                        requireContext(),
+                                                        TrackingService::class.java
+                                                    )
+                                                    requireContext().stopService(serviceIntent)
+                                                }
+
+                                                setRecyclerView(contacts)
+                                                loadingState(false)
+                                                showBadgeRefresh(false)
+                                                listener?.counterItem(response.results.size)
+                                            } else {
+                                                val serviceIntent = Intent(
+                                                    requireContext(),
+                                                    TrackingService::class.java
+                                                )
+                                                requireContext().stopService(serviceIntent)
+
+                                                setRecyclerView(contacts)
+                                                loadingState(false)
+                                                showBadgeRefresh(false)
+                                                listener?.counterItem(response.results.size)
+                                            }
                                         }
 
                                         override fun onCancelled(error: DatabaseError) {
