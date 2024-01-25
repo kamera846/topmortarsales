@@ -1,13 +1,14 @@
 package com.topmortar.topmortarsales.commons.utils
 
 import android.app.Activity
+import android.app.ActivityManager
 import android.content.Context
+import android.content.Context.ACTIVITY_SERVICE
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
 import android.provider.Settings
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat.startActivity
 import com.google.android.material.snackbar.Snackbar
 
 class CustomUtility(private val context: Context) {
@@ -21,11 +22,11 @@ class CustomUtility(private val context: Context) {
             .show()
     }
 
-    fun showPermissionDeniedDialog(message: String) {
+    fun showPermissionDeniedDialog(message: String, unit: (() -> Unit)? = null) {
         AlertDialog.Builder(context)
             .setTitle("Izin Diperlukan")
             .setMessage(message)
-            .setPositiveButton("Pengaturan aplikasi") { _, _ -> openAppSettings() }
+            .setPositiveButton("Pengaturan aplikasi") { _, _ -> if (unit != null) unit() else openAppSettings() }
             .setNegativeButton("Batal") { dialog, _ -> dialog.dismiss() }
             .show()
     }
@@ -46,5 +47,15 @@ class CustomUtility(private val context: Context) {
 
     fun isDarkMode(): Boolean {
         return (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+    }
+
+    fun isServiceRunning(serviceClass: Class<*>): Boolean {
+        val manager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager?
+        for (service in manager?.getRunningServices(Int.MAX_VALUE) ?: emptyList()) {
+            if (serviceClass.name == service.service.className) {
+                return true
+            }
+        }
+        return false
     }
 }

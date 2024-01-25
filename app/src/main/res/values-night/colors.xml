@@ -20,6 +20,8 @@
     <color name="mixed_600">#868585</color>
     <color name="white">#FFFFFFFF</color>
     <color name="light">#d0d6dd</color>
+    <color name="darkLight">#BCC2C9</color>
+    <color name="veryLight">#E4EAF1</color>
     <color name="status_data">#F9D923</color>
     <color name="status_passive">@color/black_600</color>
     <color name="status_active">#36AE7C</color>

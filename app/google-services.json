@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "832163354410",
+    "firebase_url": "https://top-mortar-sales-f3ab0-default-rtdb.firebaseio.com",
+    "project_id": "top-mortar-sales-f3ab0",
+    "storage_bucket": "top-mortar-sales-f3ab0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:832163354410:android:901c0f4b45df325ff93053",
+        "android_client_info": {
+          "package_name": "com.topmortar.topmortarsales"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCyt3OG04ka-ynsMhUSj_27ZyeNrDmolJI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

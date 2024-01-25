@@ -33,6 +33,10 @@
         android:title="@string/manage_gudang"
         android:visible="false"/>
     <item
+        android:id="@+id/option_delivery"
+        android:title="@string/manage_delivery"
+        android:visible="false"/>
+    <item
         android:id="@+id/option_logout"
         android:title="@string/logout" />
 </menu>

@@ -20,6 +20,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.database.DatabaseReference
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.TukangRecyclerViewAdapter
 import com.topmortar.topmortarsales.adapter.TukangRecyclerViewAdapter.ItemClickListener
@@ -35,6 +36,7 @@ import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.CONST_SKILL
 import com.topmortar.topmortarsales.commons.CONST_STATUS
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -47,6 +49,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -77,6 +80,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
     private lateinit var tvTitleBarDescription: TextView
 
     // Global
+    private lateinit var firebaseReference: DatabaseReference
     private lateinit var sessionManager: SessionManager
     private var doubleBackToExitPressedOnce = false
     private val userCity get() = sessionManager.userCityID().toString()
@@ -97,6 +101,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         setContentView(R.layout.activity_list_tukang)
 
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
 
         initVariable()
         initClickHandler()
@@ -387,6 +392,12 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
     }
 
     private fun logoutHandler() {
+
+        // Firebase Auth Session
+        val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
+        val userChild = authChild.child(sessionManager.userName() + sessionManager.userID())
+        userChild.removeValue()
+
         sessionManager.setLoggedIn(LOGGED_OUT)
         sessionManager.setUserLoggedIn(null)
 

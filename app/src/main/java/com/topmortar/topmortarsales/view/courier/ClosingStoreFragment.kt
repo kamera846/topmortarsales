@@ -5,6 +5,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,9 +19,14 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
@@ -35,19 +41,24 @@ import com.topmortar.topmortarsales.commons.CONST_PROMO
 import com.topmortar.topmortarsales.commons.CONST_REPUTATION
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.services.TrackingService
+import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.FragmentClosingStoreBinding
 import com.topmortar.topmortarsales.model.ContactModel
+import com.topmortar.topmortarsales.model.DeliveryModel
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
@@ -62,9 +73,10 @@ class ClosingStoreFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var sessionManager: SessionManager
-    private lateinit var userKind: String
-    private lateinit var userCity: String
-    private lateinit var userID: String
+    private val userID get() = sessionManager.userID().toString()
+    private val userKind get() = sessionManager.userKind().toString()
+    private val userCity get() = sessionManager.userCityID().toString()
+    private val userDistributorID get() = sessionManager.userDistributor().toString()
 
     private lateinit var badgeRefresh: LinearLayout
 
@@ -89,9 +101,6 @@ class ClosingStoreFragment : Fragment() {
         badgeRefresh = view.findViewById(R.id.badgeRefresh)
 
         sessionManager = SessionManager(requireContext())
-        userKind = sessionManager.userKind().toString()
-        userCity = sessionManager.userCityID().toString()
-        userID = sessionManager.userID().toString()
         binding.btnFabAdmin.setOnClickListener { navigateChatAdmin() }
 
         getContacts()
@@ -113,10 +122,121 @@ class ClosingStoreFragment : Fragment() {
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        setRecyclerView(response.results)
-                        loadingState(false)
-                        showBadgeRefresh(false)
-                        listener?.counterItem(response.results.size)
+//                        response.results[0].id_contact = "909"
+//                        response.results[0].nama = "Toko Rafli"
+
+                        val contacts = response.results
+
+                        // Get a reference to your database
+                        val deliveryId = AUTH_LEVEL_COURIER + userID
+                        val firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorID)
+                        val myRef: DatabaseReference = firebaseReference.child("$FIREBASE_CHILD_DELIVERY/$deliveryId")
+
+                        // Add a ValueEventListener to retrieve the data
+                        myRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                // The dataSnapshot contains the data from the database
+                                if (dataSnapshot.exists()) {
+                                    myRef.child("stores").addListenerForSingleValueEvent(object : ValueEventListener {
+                                        override fun onDataChange(snapshot: DataSnapshot) {
+                                            if (snapshot.exists()) {
+                                                val deliveryStore = arrayListOf<DeliveryModel.Store>()
+                                                for (item in snapshot.children) {
+                                                    val data = item.getValue(DeliveryModel.Store::class.java)!!
+                                                    deliveryStore.add(data)
+                                                }
+
+                                                var deliveryCount = 0
+                                                for ((i, contact) in contacts.withIndex()) {
+                                                    val findItem = deliveryStore.find { it.id == contact.id_contact }
+                                                    if (findItem != null) {
+                                                        contacts[i].deliveryStatus = "Pengiriman sedang berlangsung"
+                                                        deliveryCount ++
+                                                    }
+                                                }
+
+                                                val isTracking = CustomUtility(requireContext()).isServiceRunning(TrackingService::class.java)
+                                                if (deliveryCount > 0) {
+                                                    if (!isTracking) {
+                                                        val serviceIntent = Intent(
+                                                            requireContext(),
+                                                            TrackingService::class.java
+                                                        )
+                                                        serviceIntent.putExtra(
+                                                            "userDistributorId",
+                                                            userDistributorID
+                                                        )
+                                                        serviceIntent.putExtra("deliveryId", deliveryId)
+                                                        requireContext().startService(serviceIntent)
+                                                    } else {
+                                                        val serviceIntent = Intent(
+                                                            requireContext(),
+                                                            TrackingService::class.java
+                                                        )
+                                                        requireContext().stopService(serviceIntent)
+                                                        Handler().postDelayed({
+                                                            serviceIntent.putExtra(
+                                                                "userDistributorId",
+                                                                userDistributorID
+                                                            )
+                                                            serviceIntent.putExtra(
+                                                                "deliveryId",
+                                                                deliveryId
+                                                            )
+                                                            requireContext().startService(serviceIntent)
+                                                        }, 1000)
+                                                    }
+                                                } else {
+                                                    val serviceIntent = Intent(
+                                                        requireContext(),
+                                                        TrackingService::class.java
+                                                    )
+                                                    requireContext().stopService(serviceIntent)
+                                                }
+
+                                                setRecyclerView(contacts)
+                                                loadingState(false)
+                                                showBadgeRefresh(false)
+                                                listener?.counterItem(response.results.size)
+                                            } else {
+                                                val serviceIntent = Intent(
+                                                    requireContext(),
+                                                    TrackingService::class.java
+                                                )
+                                                requireContext().stopService(serviceIntent)
+
+                                                setRecyclerView(contacts)
+                                                loadingState(false)
+                                                showBadgeRefresh(false)
+                                                listener?.counterItem(response.results.size)
+                                            }
+                                        }
+
+                                        override fun onCancelled(error: DatabaseError) {
+                                            setRecyclerView(contacts)
+                                            loadingState(false)
+                                            showBadgeRefresh(false)
+                                            listener?.counterItem(response.results.size)
+                                        }
+
+                                    })
+
+                                } else {
+                                    setRecyclerView(contacts)
+                                    loadingState(false)
+                                    showBadgeRefresh(false)
+                                    listener?.counterItem(response.results.size)
+                                }
+                            }
+
+                            override fun onCancelled(databaseError: DatabaseError) {
+                                // Handle errors
+                                setRecyclerView(contacts)
+                                loadingState(false)
+                                showBadgeRefresh(false)
+                                listener?.counterItem(response.results.size)
+                            }
+                        })
 
                     }
                     RESPONSE_STATUS_EMPTY -> {

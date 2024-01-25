@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Top Mortar Sales</string>
+    <string name="lorem_title">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</string>
+    <string name="lorem_desc">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.</string>
+    <string name="list_chat">Top Mortar Sales</string>
+    <string name="new_chat_room">New Chat Room</string>
+    <string name="logo_horizontal">Logo Horizontal</string>
+    <string name="logo_square">Logo Square</string>
+    <string name="more">More</string>
+    <string name="icon_sync">Icon Sync</string>
+    <string name="btn_submit_new_chat_room">Kirim Sekarang</string>
+    <string name="input_message_label">Pesan</string>
+    <string name="input_name_label">Nama</string>
+    <string name="input_phone_number_label">Nomor Telpon (WA)</string>
+    <string name="input_message_placeholder">Halo!</string>
+    <string name="input_name_placeholder">TB BAROKAH MAJU JAYA</string>
+    <string name="input_phone_number_placeholder">e.g 628XXXXXXXXX</string>
+    <string name="fab_label">Create new chat room</string>
+    <string name="fab_description">Navigate to page create new chat room</string>
+    <string name="list_chat_contact_name">Nama Kontak</string>
+    <string name="list_chat_contact_description">Lorem ipsum sit dolor amet</string>
+    <string name="txt_loading">Memuat…</string>
+    <string name="txt_sending">Mengirim…</string>
+    <string name="txt_saving">Menyimpan…</string>
+    <string name="txt_deleting">Menghapus…</string>
+    <string name="message_length">0/200</string>
+    <string name="et_label">Label for the input field</string>
+    <string name="et_hint">Enter your text here</string>
+    <string name="sync_now">Refresh</string>
+    <string name="my_profile">Profil Saya</string>
+    <string name="search">Cari</string>
+    <string name="logout">Logout</string>
+    <string name="search_contact">Masukkan nama toko…</string>
+    <string name="failed_request">Permintaan ke server gagal!</string>
+    <string name="failed_get_data">Gagal memuat data!</string>
+    <string name="card_auth_title">Authentication</string>
+    <string name="text_email">Email</string>
+    <string name="text_password">Kata Sandi</string>
+    <string name="text_login">Login</string>
+    <string name="text_copyright">© 2023 Top Mortar Sales</string>
+    <string name="manage_user">Kelola Pengguna</string>
+    <string name="manage_city">Kelola Kota</string>
+    <string name="hey_nlogin_now">Hey, \nLogin Now</string>
+    <string name="enter_username">Masukkan username</string>
+    <string name="enter_password">Masukkan kata sandi</string>
+    <string name="icon_toggle_hide_password">Icon Toggle Hide Password</string>
+    <string name="icon_toggle_show_password">Icon Toggle Show Password</string>
+    <string name="forgot_your_password">Lupa kata sandi?</string>
+    <string name="reset_it">Setel ulang!</string>
+    <string name="enter_your_phone_number_to_get_otp">Masukkan nomor telepon Anda untuk mendapatkan OTP</string>
+    <string name="otp_1">OTP 1</string>
+    <string name="otp_2">OTP 2</string>
+    <string name="otp_3">OTP 3</string>
+    <string name="otp_4">OTP 4</string>
+    <string name="otp_5">OTP 5</string>
+    <string name="otp_6">OTP 6</string>
+    <string name="enter_new_password">Masukkan kata sandi baru Anda</string>
+    <string name="icon_toggle_hide_new_password">Icon Toggle Hide New Password</string>
+    <string name="icon_toggle_show_new_password">Icon Toggle Show New Password</string>
+    <string name="fab_user_description">Navigate to create new user account</string>
+    <string name="user_level_label">Level Pengguna</string>
+    <string name="required_sign">*</string>
+    <string name="user_city_label">Kota Pengguna</string>
+    <string name="username_label">Nama Pengguna</string>
+    <string name="user_password_label">Kata Sandi</string>
+    <string name="confirm_user_password_label">Konfirmasi Kata Sandi</string>
+    <string name="choose_customer_city">Pilih Kota Pelanggan</string>
+    <string name="use_lowercase_character_e_g">Gunakan karakter huruf kecil e.g salesmalang</string>
+    <string name="submit">Kirim</string>
+    <string name="store_name">Nama Toko</string>
+    <string name="basecamp_name">Nama Basecamp</string>
+    <string name="owner_name">Nama Pemilik</string>
+    <string name="e_g_john_doe">e.g John Doe</string>
+    <string name="date_of_birth">Tanggal Lahir</string>
+    <string name="choose_owner_birthday">Pilih Tanggal Lahir Pemilik</string>
+    <string name="customer_city">Kota Pelanggan</string>
+    <string name="et_hint_city">e.g Sidoarjo</string>
+    <string name="et_hint_store_name">e.g TB BAROKAH MAJU JAYA MLG</string>
+    <string name="maps_url">Maps URL</string>
+    <string name="et_hint_maps_url">e.g https://goo.gl/maps/CBKN6mU3cjQkuruB8</string>
+    <string name="send_now">Kirim Sekarang</string>
+    <string name="image_profile_top_mortar">Image Profile Top Mortar</string>
+    <string name="image_background_profile_top_mortar">Image Background Profile Top Mortar</string>
+    <string name="enter_store_name">Masukkan Nama Toko</string>
+    <string name="top_mortar_customer">Top Mortar Customer</string>
+    <string name="icon_phone_black">Icon Phone Black</string>
+    <string name="phone_dummy">+628000000000</string>
+    <string name="icon_tooltip_information">Icon Tooltip Information</string>
+    <string name="icon_person_black">Icon Person Black</string>
+    <string name="enter_owner_name">Masukkan Nama Pemilik</string>
+    <string name="icon_location_black">Icon Location Black</string>
+    <string name="maps_coordinates">Koordinat Maps</string>
+    <string name="enter_maps_coordinates_url">Koordinat Maps</string>
+    <string name="icon_city_black">Icon City Black</string>
+    <string name="dummy_city">Sidoarjo</string>
+    <string name="dummy_date">05 Juli 2023</string>
+    <string name="icon_date_black">Icon Date Black</string>
+    <string name="other_information">Informasi Lainnya</string>
+    <string name="address">Alamat</string>
+    <string name="enter_address">Masukkan Alamat</string>
+    <string name="dummy_address">Jl. TB Simatupang, RT.9/RW.3, Rambutan, Ciracas, Kota Jakarta Timur, Daerah Khusus Ibukota Jakarta 13830</string>
+    <string name="send_message">Kirim Pesan</string>
+    <string name="save">Simpan</string>
+    <string name="icon_back_baseline">Icon Back Baseline</string>
+    <string name="icon_close_baseline">Icon Close Baseline</string>
+    <string name="icon_back_white">Icon Back White</string>
+    <string name="dummy_welcome_message">Halo, superadmin</string>
+    <string name="icon_search_white">Icon Search White</string>
+    <string name="icon_sync_white">Icon Sync White</string>
+    <string name="icon_more_white">Icon More White</string>
+    <string name="icon_back_black">Icon Back Black</string>
+    <string name="top_mortar_sales">Top Mortar Sales</string>
+    <string name="icon_pencil_black">Icon Pencil Black</string>
+    <string name="icon_close_black">Icon Close Black</string>
+    <string name="icon_trash_black">Icon Trash Black</string>
+    <string name="list_item">List Item</string>
+    <string name="city_name">Nama Kota</string>
+    <string name="city_code">Kode Kota</string>
+    <string name="dummy_city_code">e.g SDA</string>
+    <string name="select_city_option">Pilih Opsi Kota</string>
+    <string name="enter_key">Masukkan untuk mencari…</string>
+    <string name="status">Status</string>
+    <string name="active">Active</string>
+    <string name="full_name">Nama Lengkap</string>
+    <string name="description_username_forgot">Kode OTP akan dikirimkan ke nomor telepon yang terdaftar di akun Anda.</string>
+    <string name="invoice">Invoice</string>
+    <string name="icon_upload">Icon Upload</string>
+    <string name="icon_printer">Icon Printer</string>
+    <string name="manage_skill">Kelola Keahlian</string>
+    <string name="manage_basecamp">Kelola Basecamp</string>
+    <string name="manage_gudang">Kelola Gudang</string>
+    <string name="manage_delivery">Pengiriman</string>
+    <string-array name="user_level_spinner_options">
+        <item>Pilih Level</item>
+        <item>Admin</item>
+        <item>Sales</item>
+        <item>Courier</item>
+        <item>Brand Ambassador</item>
+    </string-array>
+    <string-array name="termin_spinner_options">
+        <item>Pilih Termin Payment</item>
+        <item>COD</item>
+        <item>COD + Transfer</item>
+        <item>COD + Tunai</item>
+        <item>30 Hari</item>
+        <item>45 Hari</item>
+        <item>60 Hari</item>
+    </string-array>
+    <string name="title_activity_maps">MapsActivity</string>
+    <string name="maps_key">AIzaSyDLMtfb0qTk0lNWo22mn8hblqCl5OnDELA</string>
+    <string name="topmortar_wa_number">+6287826210888</string>
+    <string name="tidak_ada_promo">Tidak ada promo</string>
+    <string name="filter_by">Filter berdasarkan:</string>
+    <string name="none">None</string>
+    <string name="all_cities">Semua Kota</string>
+    <string name="free">Free</string>
+    <string name="retur">Retur</string>
+    <string name="nearest_store">Cari Toko Terdekat</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="text_pricing_detail">Ini adalah rincian anda pada bulan ini</string>
+    <string name="text_bid_available">Dengan mengirim pesan, berarti anda telah mem-bidding toko ini.</string>
+    <string name="text_bid_not_available">Anda telah mencapai limit bidding, selesaikan proses bidding yang berjalan untuk mem-bidding toko lainnya.</string>
+    <string name="text_bid_on_going">Anda sedang dalam proses bidding dengan toko ini.</string>
+    <string name="bullet">•</string>
+    <string name="filter">Filter:</string>
+    <string name="tidak_ada_filter">Tidak ada filter</string>
+    <string name="laporan_toko_hint">e.g Kunjungan ke toko untuk melakukan penagihan…</string>
+    <string name="laporan_basecamp_hint">e.g Menurunkan material pasir di Gudang Sidoarjo…</string>
+    <string name="click_to_select_city">Tekan untuk memilih kota…</string>
+    <string name="select_city">Pilih Kota</string>
+    <string name="start_delivery">Proses Pengiriman</string>
+
+    <!-- Test Language Resource -->
+    <string name="yes_bg_location">Izinkan sepanjang waktu!</string>
+</resources>

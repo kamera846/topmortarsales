@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
+import com.google.firebase.database.DatabaseReference
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.viewpager.BAViewPagerAdapter
 import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
@@ -22,6 +23,7 @@ import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_CITY_ID
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_STATUS
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -46,11 +48,15 @@ class BrandAmbassadorActivity : AppCompatActivity() {
 
     private var _binding: ActivityBrandAmbassadorBinding? = null
     private val binding get() = _binding!!
+
     private lateinit var sessionManager: SessionManager
     private val userKind get() = sessionManager.userKind()!!
     private val userId get() = sessionManager.userID()!!
     private val userCity get() = sessionManager.userCityID()!!
     private val userDistributorId get() = sessionManager.userDistributor()!!
+
+    private lateinit var firebaseReference: DatabaseReference
+
     private var doubleBackToExitPressedOnce = false
     private lateinit var tabLayout: TabLayout
     private lateinit var viewPager: ViewPager
@@ -349,6 +355,12 @@ class BrandAmbassadorActivity : AppCompatActivity() {
     }
 
     private fun logoutHandler() {
+
+        // Firebase Auth Session
+        val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
+        val userChild = authChild.child(sessionManager.userName() + sessionManager.userID())
+        userChild.removeValue()
+
         sessionManager.setLoggedIn(LOGGED_OUT)
         sessionManager.setUserLoggedIn(null)
 

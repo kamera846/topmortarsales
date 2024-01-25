@@ -12,17 +12,28 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
+import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_DISTANCE
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_IS_COD
 import com.topmortar.topmortarsales.commons.CONST_URI
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
+import com.topmortar.topmortarsales.commons.IS_CLOSING
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_SUCCESS
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil.compressImage
+import com.topmortar.topmortarsales.commons.utils.CustomUtility
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -43,13 +54,22 @@ class PreviewClosingActivity : AppCompatActivity() {
     private lateinit var btnUpload: Button
 
     private lateinit var sessionManager: SessionManager
+    private val userID get() = sessionManager.userID()
+    private val userDistributorId get() = sessionManager.userDistributor()
     private var imgUri: Uri? = null
 
     private var isLoading: Boolean = false
     private var isCod: Boolean = false
     private var invoiceId: String? = null
+    private var contactId: String? = null
     private var imagePart: MultipartBody.Part? = null
     private var iDistance: Double = -1.0
+
+    // Tracking
+    private var firebaseReference: DatabaseReference? = null
+    private var childDelivery: DatabaseReference? = null
+    private var childDriver: DatabaseReference? = null
+    private var deliveryId: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,22 +102,17 @@ class PreviewClosingActivity : AppCompatActivity() {
                     RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
 
                         if (!isCod) createInvoice()
-                        else {
-                            val resultIntent = Intent()
-                            resultIntent.putExtra("$IMG_PREVIEW_STATE", RESULT_OK)
-                            setResult(RESULT_OK, resultIntent)
-
-                            handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, response.message)
-                            Handler().postDelayed({
-                                loadingState(false)
-                                finish()
-                            }, 1000)
-                        }
+                        else onClosingFinished(response.message)
 
                     }
+
                     else -> {
 
-                        handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, "Gagal closing. Error: ${response.message}")
+                        handleMessage(
+                            this@PreviewClosingActivity,
+                            TAG_RESPONSE_CONTACT,
+                            "Gagal closing. Error: ${response.message}"
+                        )
                         loadingState(false)
 
                     }
@@ -105,7 +120,11 @@ class PreviewClosingActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(
+                    this@PreviewClosingActivity,
+                    TAG_RESPONSE_CONTACT,
+                    "Failed run service. Exception " + e.message
+                )
                 loadingState(false)
 
             }
@@ -127,20 +146,17 @@ class PreviewClosingActivity : AppCompatActivity() {
                 when (response.status) {
                     RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
 
-                        val resultIntent = Intent()
-                        resultIntent.putExtra("$IMG_PREVIEW_STATE", RESULT_OK)
-                        setResult(RESULT_OK, resultIntent)
-
-                        handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, response.message)
-                        Handler().postDelayed({
-                            loadingState(false)
-                            finish()
-                        }, 1000)
+                        onClosingFinished(response.message)
 
                     }
+
                     else -> {
 
-                        handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, "Gagal closing. Error: ${response.message}")
+                        handleMessage(
+                            this@PreviewClosingActivity,
+                            TAG_RESPONSE_CONTACT,
+                            "Gagal closing. Error: ${response.message}"
+                        )
                         loadingState(false)
 
                     }
@@ -148,7 +164,11 @@ class PreviewClosingActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(
+                    this@PreviewClosingActivity,
+                    TAG_RESPONSE_CONTACT,
+                    "Failed run service. Exception " + e.message
+                )
                 loadingState(false)
 
             }
@@ -175,12 +195,14 @@ class PreviewClosingActivity : AppCompatActivity() {
 
     private fun initClickHandler() {
         icBack.setOnClickListener { onBackHandler() }
-        btnUpload.setOnClickListener { executeClosing() }
+        btnUpload.setOnClickListener { onClosingFinished("Success to closing delivery!") }
+//        btnUpload.setOnClickListener { executeClosing() }
 
     }
 
     private fun dataActivityValidation() {
         val invoiceId = intent.getStringExtra(CONST_INVOICE_ID)
+        contactId = intent.getStringExtra(CONST_CONTACT_ID)
         isCod = intent.getBooleanExtra(CONST_INVOICE_IS_COD, false)
         iDistance = intent.getDoubleExtra(CONST_DISTANCE, -1.0)
 
@@ -200,7 +222,8 @@ class PreviewClosingActivity : AppCompatActivity() {
             val byteArray = inputStream?.readBytes()
 
             if (byteArray != null) {
-                val requestFile: RequestBody = RequestBody.create("image/*".toMediaTypeOrNull(), byteArray)
+                val requestFile: RequestBody =
+                    RequestBody.create("image/*".toMediaTypeOrNull(), byteArray)
                 imagePart = MultipartBody.Part.createFormData("pic", "image.jpg", requestFile)
             } else handleMessage(this, TAG_RESPONSE_CONTACT, "Gambar tidak ditemukan")
 
@@ -238,6 +261,71 @@ class PreviewClosingActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         onBackHandler()
+
+    }
+
+    private fun onClosingFinished(message: String) {
+
+        deliveryId = "$AUTH_LEVEL_COURIER$userID"
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId!!)
+        childDelivery = firebaseReference?.child(FIREBASE_CHILD_DELIVERY)
+        childDriver = childDelivery?.child(deliveryId)
+
+        childDriver?.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+
+                if (snapshot.exists()) {
+
+                    val stores = snapshot.child("stores/$contactId")
+                    if (stores.exists()) {
+                        childDelivery?.child("$deliveryId/stores/$contactId")?.removeValue()
+
+                        childDriver?.child("stores")?.addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                val isTracking = CustomUtility(this@PreviewClosingActivity).isServiceRunning(TrackingService::class.java)
+                                if (!dataSnapshot.exists() && isTracking) {
+                                    val serviceIntent = Intent(this@PreviewClosingActivity, TrackingService::class.java)
+                                    this@PreviewClosingActivity.stopService(serviceIntent)
+                                }
+                                finishClosing(message)
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {
+                                finishClosing(message)
+                            }
+
+                        })
+
+                    } else {
+                        finishClosing(message)
+                    }
+
+                } else {
+                    finishClosing(message)
+                }
+
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                finishClosing(message)
+            }
+
+        })
+
+    }
+
+    private fun finishClosing(message: String) {
+
+        val resultIntent = Intent()
+        resultIntent.putExtra("$IMG_PREVIEW_STATE", RESULT_OK)
+        resultIntent.putExtra(IS_CLOSING, true)
+        setResult(RESULT_OK, resultIntent)
+
+        handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, message)
+        Handler().postDelayed({
+            loadingState(false)
+            finish()
+        }, 1000)
 
     }
 }

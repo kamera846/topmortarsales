@@ -30,6 +30,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.database.DatabaseReference
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter
 import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter.ItemClickListener
@@ -53,6 +54,7 @@ import com.topmortar.topmortarsales.commons.CONST_PROMO
 import com.topmortar.topmortarsales.commons.CONST_REPUTATION
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -69,6 +71,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -125,6 +128,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
     private val userDistributorId get() = sessionManager.userDistributor().toString()
     private var contacts: ArrayList<ContactModel> = arrayListOf()
     private var cities: ArrayList<CityModel> = arrayListOf()
+    private lateinit var firebaseReference: DatabaseReference
 
     // Initialize Search Engine
     private val searchDelayMillis = 500L
@@ -152,6 +156,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         setContentView(binding.root)
 
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
 
         initVariable()
         initClickHandler()
@@ -392,6 +397,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         val nearestStoreItem = popupMenu.menu.findItem(R.id.nearest_store)
         val basecamp = popupMenu.menu.findItem(R.id.option_basecamp)
         val gudang = popupMenu.menu.findItem(R.id.option_gudang)
+        val delivery = popupMenu.menu.findItem(R.id.option_delivery)
 
         searchItem.isVisible = false
 //        nearestStoreItem.isVisible = false
@@ -402,6 +408,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 skillItem.isVisible = true
                 basecamp.isVisible = true
                 gudang.isVisible = true
+                delivery.isVisible = true
             } else {
                 userItem.isVisible = true
 //                cityItem.isVisible = true
@@ -454,6 +461,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 }
                 R.id.option_gudang -> {
                     startActivity(Intent(this@MainActivity, ManageGudangActivity::class.java))
+                    true
+                }
+                R.id.option_delivery -> {
+                    startActivity(Intent(this@MainActivity, DeliveryActivity::class.java))
                     true
                 }
                 R.id.option_logout -> {
@@ -961,6 +972,12 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
     }
 
     private fun logoutHandler() {
+
+        // Firebase Auth Session
+        val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
+        val userChild = authChild.child(sessionManager.userName() + sessionManager.userID())
+        userChild.removeValue()
+
         sessionManager.setLoggedIn(LOGGED_OUT)
         sessionManager.setUserLoggedIn(null)
 

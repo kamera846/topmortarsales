@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Top Mortar Sales</string>
     <string name="lorem_title">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</string>
@@ -129,6 +130,7 @@
     <string name="manage_skill">Kelola Keahlian</string>
     <string name="manage_basecamp">Kelola Basecamp</string>
     <string name="manage_gudang">Kelola Gudang</string>
+    <string name="manage_delivery">Pengiriman</string>
     <string-array name="user_level_spinner_options">
         <item>Pilih Level</item>
         <item>Admin</item>
@@ -167,4 +169,8 @@
     <string name="laporan_basecamp_hint">e.g Menurunkan material pasir di Gudang Sidoarjo…</string>
     <string name="click_to_select_city">Tekan untuk memilih kota…</string>
     <string name="select_city">Pilih Kota</string>
+    <string name="start_delivery">Proses Pengiriman</string>
+
+    <!-- Test Language Resource -->
+    <string name="yes_bg_location">Allow all the time!</string>
 </resources>

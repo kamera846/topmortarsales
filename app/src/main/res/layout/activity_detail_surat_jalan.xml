@@ -53,7 +53,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textSize="14sp"
+                    android:textSize="12sp"
                     android:textColor="@color/white"
                     android:background="@android:color/transparent"
                     android:text="Print Bluetooth" />
@@ -135,7 +135,7 @@
                     android:layout_height="match_parent"
                     android:layout_marginHorizontal="8dp"
                     android:padding="8dp"
-                    android:textSize="14sp"
+                    android:textSize="12sp"
                     android:textColor="@color/black_200"
                     android:background="@android:color/transparent"
                     android:drawableLeft="@drawable/button_img_camera_lens_black"

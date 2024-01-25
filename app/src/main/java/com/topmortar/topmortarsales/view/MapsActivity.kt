@@ -13,11 +13,14 @@ import android.location.Address
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationListener
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -33,7 +36,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -55,6 +60,10 @@ import com.google.android.libraries.places.api.net.FetchPlaceResponse
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
 import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.google.maps.DirectionsApi
 import com.google.maps.GeoApiContext
 import com.google.maps.PendingResult
@@ -64,8 +73,15 @@ import com.google.maps.model.DirectionsRoute
 import com.google.maps.model.TravelMode
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.PlaceAdapter
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.CONNECTION_FAILURE_RESOLUTION_REQUEST
+import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_DELIVERY_ID
 import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
+import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_CITY_ID
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
@@ -73,8 +89,12 @@ import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_STATUS
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
 import com.topmortar.topmortarsales.commons.CONST_MAPS_STATUS
+import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
+import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
+import com.topmortar.topmortarsales.commons.IS_CLOSING
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -83,14 +103,18 @@ import com.topmortar.topmortarsales.commons.STATUS_CONTACT_ACTIVE
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BID
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
+import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
+import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
+import com.topmortar.topmortarsales.commons.utils.DateFormat
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
@@ -101,8 +125,10 @@ import com.topmortar.topmortarsales.databinding.ActivityMapsBinding
 import com.topmortar.topmortarsales.modal.FilterTokoModal
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.CityModel
+import com.topmortar.topmortarsales.model.DeliveryModel
 import com.topmortar.topmortarsales.model.GudangModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
+import com.topmortar.topmortarsales.view.suratJalan.ListSuratJalanActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -115,6 +141,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     private lateinit var sessionManager: SessionManager
     private val userKind get() = sessionManager.userKind().toString()
+    private val userID get() = sessionManager.userID().toString()
+    private val username get() = sessionManager.userName().toString()
+    private val fulllName get() = sessionManager.fullName().toString()
+    private val userCityID get() = sessionManager.userCityID().toString()
     private val userDistributorId get() = sessionManager.userDistributor().toString()
     private val userCity get() = sessionManager.userCityID().toString()
 
@@ -124,6 +154,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private lateinit var placesClient: PlacesClient
     private var routeDirections: Polyline? = null
 
+    private var iMaps: String? = null
+    private var iMapsName: String? = null
+    private var iMapsStatus: String? = null
+    private var iContactID: String? = null
     private var isGetCoordinate = false
     private var isNearestStore = false
     private var isBasecamp = false
@@ -160,6 +194,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var isRouteActive: Boolean = false
     private var isCardNavigationShowing: Boolean = false
     private var listRouteLines: MutableList<Polyline> = mutableListOf()
+
+    // Tracking
+    private var firebaseReference: DatabaseReference? = null
+    private var childDelivery: DatabaseReference? = null
+    private var childDriver: DatabaseReference? = null
+    private var locationCallback: LocationCallback? = null
+    private var locationListener: ValueEventListener? = null
+    private var courierMarker: Marker? = null
+    private var isTracking = false
+    private var deliveryID: String? = null
 
     private var listGudang: ArrayList<GudangModel> = arrayListOf()
     private var selectedCenterPoint: ModalSearchModel? = null
@@ -295,7 +339,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             }
         } else if (binding.llFilter.isVisible) {
             mMap.setPadding(0,convertDpToPx(36, this),0,0)
-        }
+        } else mMap.setPadding(0,0,0,convertDpToPx(16, this))
 
         mMap.setOnMapClickListener {
             if (binding.recyclerView.isVisible) {
@@ -336,7 +380,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     val itemToFind = "${selectedTargetRoute?.position?.latitude},${selectedTargetRoute?.position?.longitude}"
                     val indexOfItem = listCoordinate!!.indexOf(itemToFind)
                     val selectedStatus = if (indexOfItem != -1) listCoordinateStatus!![indexOfItem] else ""
-                    val imgDrawable = when (selectedStatus.toLowerCase()) {
+                    val imgDrawable = when (selectedStatus.lowercase(Locale.getDefault())) {
                         STATUS_CONTACT_DATA -> R.drawable.store_location_status_data
                         STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active
                         STATUS_CONTACT_PASSIVE -> R.drawable.store_location_status_passive
@@ -383,6 +427,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 button.setBackgroundResource(R.drawable.bg_primary_round)
                 img.setImageDrawable(getDrawable(R.drawable.direction_white))
                 title.text = "Aktifkan Navigasi"
+
+                // Live Location Update with Firebase Realtime Database
+//                if (userKind == USER_KIND_COURIER) stopTracking()
             }, 500)
 
             val limitKm = binding.etKm.text.toString().toDouble()
@@ -442,11 +489,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     @SuppressLint("MissingPermission")
     private fun dataActivityValidation() {
 
-        val iMaps = intent.getStringExtra(CONST_MAPS)
-        val iMapsName = intent.getStringExtra(CONST_MAPS_NAME)
-        val iMapsStatus = intent.getStringExtra(CONST_MAPS_STATUS)
+        iMaps = intent.getStringExtra(CONST_MAPS)
+        iMapsName = intent.getStringExtra(CONST_MAPS_NAME)
+        iMapsStatus = intent.getStringExtra(CONST_MAPS_STATUS)
+        iContactID = intent.getStringExtra(CONST_CONTACT_ID)
+        deliveryID = intent.getStringExtra(CONST_DELIVERY_ID)
         isGetCoordinate = intent.getBooleanExtra(GET_COORDINATE, false)
         isNearestStore = intent.getBooleanExtra(CONST_NEAREST_STORE, false)
+        isTracking = intent.getBooleanExtra(CONST_IS_TRACKING, false)
         listCoordinate = intent.getStringArrayListExtra(CONST_LIST_COORDINATE)
         listCoordinateName = intent.getStringArrayListExtra(CONST_LIST_COORDINATE_NAME)
         listCoordinateStatus = intent.getStringArrayListExtra(CONST_LIST_COORDINATE_STATUS)
@@ -456,7 +506,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             binding.btnGetLatLng.visibility = View.VISIBLE
             binding.searchBar.visibility = View.VISIBLE
         } else {
-            if (!isNearestStore) {
+            if (!isNearestStore && !isTracking) {
 
                 fusedLocationClient.lastLocation
                     .addOnSuccessListener { location: Location? ->
@@ -481,15 +531,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             val urlUtility = URLUtility(this)
 
-            if (urlUtility.isUrl(iMaps)) {
+            if (urlUtility.isUrl(iMaps!!)) {
                 val mapsUrlPattern1 = Regex("https://goo\\.gl/maps/\\w+")
                 val mapsUrlPattern2 = Regex("https://maps\\.app\\.goo\\.gl/\\w+")
 
-                if (mapsUrlPattern1.matches(iMaps) || mapsUrlPattern2.matches(iMaps)) return onFindLocation(iMaps)
+                if (mapsUrlPattern1.matches(iMaps!!) || mapsUrlPattern2.matches(iMaps!!)) return onFindLocation(iMaps!!)
                 else showDialog(message = "Gagal memproses maps url")
             } else {
 
-                val coordinates = iMaps.trim().split(",")
+                val coordinates = iMaps!!.trim().split(",")
                 if (coordinates.size == 2) {
                     val latitude = coordinates[0].toDoubleOrNull()
                     val longitude = coordinates[1].toDoubleOrNull()
@@ -598,9 +648,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                             .title(listCoordinateName?.get(i))
                                             .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
 
-                                        val onlyStatus = selectedStatusID != "-1" && selectedCitiesID == null && listCoordinateStatus!![i] == selectedStatusID.toLowerCase()
+                                        val onlyStatus = selectedStatusID != "-1" && selectedCitiesID == null && listCoordinateStatus!![i] == selectedStatusID.lowercase(Locale.getDefault())
                                         val onlyCities = selectedCitiesID != null && selectedStatusID == "-1" && listCoordinateCityID!![i] == selectedCitiesID?.id_city
-                                        val statusAndCities = selectedStatusID != "-1" && listCoordinateStatus!![i] == selectedStatusID.toLowerCase() && selectedCitiesID != null && listCoordinateCityID!![i] == selectedCitiesID?.id_city
+                                        val statusAndCities = selectedStatusID != "-1" && listCoordinateStatus!![i] == selectedStatusID.lowercase(Locale.getDefault()) && selectedCitiesID != null && listCoordinateCityID!![i] == selectedCitiesID?.id_city
 
                                         if (statusAndCities) {
                                             mMap.addMarker(markerOptions)
@@ -868,6 +918,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                             img.setImageDrawable(getDrawable(R.drawable.direction_line_white))
                             title.text = "Matikan Navigasi"
 
+                            // Live Location Update with Firebase Realtime Database
+//                            if (userKind == USER_KIND_COURIER) startTracking()
                             progressDialog.dismiss()
                         }, 500)
 
@@ -966,31 +1018,37 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     }
 
-
     @SuppressLint("MissingPermission")
-    private fun initMaps(latLng: LatLng? = null, latLngName: String? = null) {
+    private fun initMaps(targetLatLng: LatLng? = null, targetLatLngName: String? = null) {
 
-        if (latLng != null) setPin(latLng, latLngName ?: "")
-//        if (latLng != null) setPin(latLng, latLngName ?: getPlaceNameFromLatLng(latLng))
-        else {
-            fusedLocationClient.lastLocation
-                .addOnSuccessListener { location: Location? ->
-                    if (location != null) {
-                        currentLatLng = LatLng(location.latitude, location.longitude)
-//                        currentLatLng = LatLng(-7.952356,112.692583)
-                        setPin(currentLatLng!!, "Lokasi Saya")
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+            if (location != null) {
+                currentLatLng = LatLng(location.latitude, location.longitude)
 
-                        if (isNearestStore && binding.llFilter.isVisible) {
-                            getCities()
-                            getListGudang()
-//                            if (userKind == USER_KIND_ADMIN) getListGudang()
-                        } else if (isNearestStore) {
-                            searchCoordinate()
-                            getListGudang()
-//                            if (userKind == USER_KIND_ADMIN) getListGudang()
-                        }
+                if (targetLatLng != null) {
+//                    if (isTracking && userKind == USER_KIND_COURIER) {
+//                        selectedLocation = targetLatLng
+//                        if (currentLatLng == null) showDialog(message = "Gagal menemukan lokasi Anda saat ini. Pastikan lokasi Anda aktif dan coba buka kembali peta")
+//                        else {
+//                            isRouteActive = true
+//                            getDirections()
+//                        }
+//                    }
+                    setPin(targetLatLng, targetLatLngName ?: "")
+                } else {
+                    if (isTracking) setupTracking()
+                    else setPin(currentLatLng!!, "Lokasi Saya")
+
+                    if (isNearestStore && binding.llFilter.isVisible) {
+                        getCities()
+                        getListGudang()
+                    } else if (isNearestStore) {
+                        searchCoordinate()
+                        getListGudang()
                     }
                 }
+            } else showDialog(message = "Gagal menemukan lokasi Anda saat ini. Pastikan lokasi Anda aktif dan coba buka kembali peta")
         }
 
     }
@@ -1383,13 +1441,452 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     }
 
     private fun backHandler() {
-        if (!isGetCoordinate) {
+        if (!isGetCoordinate && !isTracking) {
             if (routeDirections != null) toggleBtnDrawRoute()
             else if (isCardNavigationShowing) {
                 selectedTargetRoute = null
                 toggleDrawRoute()
-            }
-            else super.onBackPressed()
+            } else super.onBackPressed()
         } else super.onBackPressed()
+    }
+
+    private fun startTracking() {
+
+        val userLevel = when (sessionManager.userKind()) {
+            USER_KIND_ADMIN -> AUTH_LEVEL_ADMIN
+            USER_KIND_COURIER -> AUTH_LEVEL_COURIER
+            USER_KIND_BA -> AUTH_LEVEL_BA
+            else -> AUTH_LEVEL_SALES
+        }
+
+        val deliveryId = "$userLevel$userID"
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
+        childDelivery = firebaseReference?.child(FIREBASE_CHILD_DELIVERY)
+        childDriver = childDelivery?.child(deliveryId)
+
+        val courierModel = DeliveryModel.Courier(
+            id = userID,
+            name = fulllName
+        )
+
+        val storeModel = arrayListOf<DeliveryModel.Store>()
+        storeModel.add(DeliveryModel.Store(
+            id = iContactID!!,
+            name = iMapsName!!,
+            lat = selectedLocation!!.latitude,
+            lng = selectedLocation!!.longitude,
+            startDatetime = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) DateFormat.now() else "",
+            startLat = currentLatLng!!.latitude,
+            startLng = currentLatLng!!.longitude,
+        ))
+
+        val deliveryModel = DeliveryModel.Delivery(
+            id = deliveryId,
+//            stores = storeModel,
+            courier = courierModel
+        )
+
+        childDriver?.setValue(deliveryModel)
+
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                childDriver?.child("startLat")?.setValue(location!!.latitude)
+                childDriver?.child("startLng")?.setValue(location!!.longitude)
+            }
+
+        val locationRequest = LocationRequest.create()
+            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+            .setInterval(mapsDuration.toLong())
+
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+
+                val driverLocation = locationResult.lastLocation!!
+                childDriver!!.child("lat").setValue(driverLocation.latitude)
+                childDriver!!.child("lng").setValue(driverLocation.longitude)
+
+            }
+        }
+
+        // Listener From Firebase
+        locationListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val driver = dataSnapshot.getValue(DeliveryModel.Delivery::class.java)
+                if (driver != null) {
+                    val iconDrawable = R.drawable.store_location_status_biding
+                    val originalBitmap = BitmapFactory.decodeResource(resources, iconDrawable)
+
+                    val newWidth = convertDpToPx(40, this@MapsActivity)
+                    val newHeight = convertDpToPx(40, this@MapsActivity)
+
+                    val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
+
+//                    val courierMarker = MarkerOptions()
+//                        .position(LatLng(driver.lat, driver.lng))
+//                        .title("Kurir)
+//                        .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
+//                    mMap.addMarker(courierMarker)
+
+                    val latLng = LatLng(driver.lat, driver.lng)
+
+                    if (courierMarker == null) {
+                        if (ActivityCompat.checkSelfPermission(
+                                this@MapsActivity,
+                                Manifest.permission.ACCESS_FINE_LOCATION
+                            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                                this@MapsActivity,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                            ) != PackageManager.PERMISSION_GRANTED
+                        ) {
+                            return
+                        }
+                        mMap.isMyLocationEnabled = false
+                        courierMarker = mMap.addMarker(
+                            MarkerOptions()
+                                .position(latLng)
+                                .title("Kurir")
+                                .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
+                        )
+                    } else courierMarker?.position = latLng
+
+//                    val bounds = LatLngBounds.builder()
+//                        .include(latLng)
+//                        .include(selectedLocation ?: return)
+//                        .build()
+//                    val updateCamera = CameraUpdateFactory.newLatLngBounds(bounds, 100)
+//                    mMap.animateCamera(updateCamera, mapsDuration, null)
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                handleMessage(this@MapsActivity, "MAPS LISTENER", "Failed listening location update: $databaseError")
+            }
+        }
+        childDriver?.addValueEventListener(locationListener!!)
+
+        // Request location updates
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback!!, Looper.getMainLooper())
+    }
+
+    private fun stopTracking() {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        if (locationCallback != null) {
+            courierMarker?.remove()
+            childDriver?.removeEventListener(locationListener!!)
+            fusedLocationClient.removeLocationUpdates(locationCallback!!)
+            mMap.isMyLocationEnabled = true
+
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location: Location? ->
+                    childDriver!!.child("endLat").setValue(location?.latitude)
+                    childDriver!!.child("endLng").setValue(location?.longitude)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        childDriver!!.child("endDatetime").setValue(DateFormat.now())
+                    }
+                }
+        }
+    }
+
+    private fun setupTracking() {
+        val progressDialog = ProgressDialog(this)
+        progressDialog.setCancelable(false)
+        progressDialog.setMessage("Mencarikan rute…")
+        progressDialog.show()
+
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
+        childDelivery = firebaseReference?.child(FIREBASE_CHILD_DELIVERY)
+        childDriver = childDelivery?.child(deliveryID!!)
+        val childStores = childDriver?.child("stores/$iContactID")
+        var deliveryData: DeliveryModel.Delivery? = null
+
+        val courierDrawable = R.drawable.pin_truck
+        val storeDrawable = R.drawable.store_location_status_blacklist
+
+        childDriver?.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    if (deliveryData == null) {
+                        deliveryData = snapshot.getValue(DeliveryModel.Delivery::class.java)
+                        val courierLatLng = LatLng(deliveryData!!.lat, deliveryData!!.lng)
+
+                        childStores?.addListenerForSingleValueEvent(object :
+                            ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
+
+                                if (snapshot.exists()) {
+                                    val store = snapshot.getValue(DeliveryModel.Store::class.java)!!
+
+                                    val startLatLng =
+                                        LatLng(store.startLat, store.startLng)
+                                    val destinationLatLng =
+                                        LatLng(store.lat, store.lng)
+
+                                    courierMarker = mMap.addMarker(
+                                        MarkerOptions()
+                                            .position(courierLatLng)
+                                            .title(deliveryData!!.courier?.name ?: "Kurir")
+                                            .icon(
+                                                BitmapDescriptorFactory.fromBitmap(
+                                                    resizedBitmap(courierDrawable)
+                                                )
+                                            )
+                                    )
+                                    mMap.addMarker(
+                                        MarkerOptions()
+                                            .position(destinationLatLng)
+                                            .title(store.name)
+                                            .icon(
+                                                BitmapDescriptorFactory.fromBitmap(
+                                                    resizedBitmap(storeDrawable)
+                                                )
+                                            )
+                                    )
+
+                                    val directions =
+                                        DirectionsApi.newRequest(getGeoContext())
+                                            .mode(TravelMode.DRIVING) // Ganti dengan mode perjalanan yang sesuai
+                                            .origin(
+                                                com.google.maps.model.LatLng(
+                                                    startLatLng.latitude,
+                                                    startLatLng.longitude
+                                                )
+                                            )
+                                            .destination(
+                                                com.google.maps.model.LatLng(
+                                                    destinationLatLng.latitude,
+                                                    destinationLatLng.longitude
+                                                )
+                                            )
+                                            .optimizeWaypoints(true)
+                                            .alternatives(true)
+
+                                    try {
+                                        val result = directions.await()
+
+                                        if (result.routes.isNotEmpty()) {
+                                            val listPolylineOptions =
+                                                arrayListOf<PolylineOptions>()
+
+                                            // Gambar rute pada peta
+                                            for (i in 0..result.routes.size) {
+                                                if (i < result.routes.size && i < 3) {
+                                                    val route = result.routes[i]
+                                                    val overviewPolyline =
+                                                        route.overviewPolyline.decodePath()
+                                                    val polylineOptions =
+                                                        PolylineOptions()
+                                                    polylineOptions.width(15f)
+                                                    polylineOptions.color(
+                                                        getColor(
+                                                            lineColor[i]
+                                                        )
+                                                    )
+                                                    for (latLng in overviewPolyline) {
+                                                        polylineOptions.add(
+                                                            LatLng(
+                                                                latLng.lat,
+                                                                latLng.lng
+                                                            )
+                                                        )
+                                                    }
+                                                    listPolylineOptions.add(
+                                                        polylineOptions
+                                                    )
+                                                }
+                                            }
+
+                                            for (i in listPolylineOptions.size - 1 downTo 0) {
+                                                routeDirections =
+                                                    mMap.addPolyline(listPolylineOptions[i])
+                                                listRouteLines.add(routeDirections!!)
+                                            }
+
+                                            val bounds = LatLngBounds.builder()
+                                                .include(startLatLng)
+                                                .include(destinationLatLng)
+                                                .build()
+                                            val updateCamera =
+                                                CameraUpdateFactory.newLatLngBounds(
+                                                    bounds,
+                                                    100
+                                                )
+                                            mMap.animateCamera(
+                                                updateCamera,
+                                                mapsDuration,
+                                                null
+                                            )
+
+                                            Handler().postDelayed({
+                                                binding.cardDelivery.visibility = View.VISIBLE
+                                                binding.deliveryCourier.text = deliveryData!!.courier?.name
+                                                binding.deliveryStore.text = store.name
+                                                binding.deliveryDate.text = "Diproses pada " + DateFormat.format(store.startDatetime, "yyyy-MM-dd hh:mm:ss", "dd MMM YYYY, hh.mm")
+                                                binding.btnSuratJalan.setOnClickListener {
+                                                    val intent = Intent(this@MapsActivity, ListSuratJalanActivity::class.java)
+                                                    intent.putExtra(CONST_CONTACT_ID, store.id)
+                                                    intent.putExtra(CONST_NAME, "")
+                                                    startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+                                                }
+                                                binding.courierContainer.setOnClickListener { changeFocusCamera(courierLatLng) }
+                                                binding.storeContainer.setOnClickListener { changeFocusCamera(destinationLatLng) }
+                                                progressDialog.dismiss()
+
+                                                if (ActivityCompat.checkSelfPermission(
+                                                        this@MapsActivity,
+                                                        Manifest.permission.ACCESS_FINE_LOCATION
+                                                    ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                                                        this@MapsActivity,
+                                                        Manifest.permission.ACCESS_COARSE_LOCATION
+                                                    ) != PackageManager.PERMISSION_GRANTED
+                                                ) return@postDelayed
+                                                mMap.isMyLocationEnabled = false
+                                            }, 500)
+
+                                        } else {
+                                            progressDialog.dismiss()
+                                            Toast.makeText(
+                                                this@MapsActivity,
+                                                "Tidak ada rute ditemukan",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    } catch (e: ApiException) {
+                                        progressDialog.dismiss()
+                                        Toast.makeText(
+                                            this@MapsActivity,
+                                            "Gagal memuat navigasi",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        e.printStackTrace()
+                                    } catch (e: InterruptedException) {
+                                        progressDialog.dismiss()
+                                        Toast.makeText(
+                                            this@MapsActivity,
+                                            "Gagal memuat navigasi",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        e.printStackTrace()
+                                    } catch (e: IOException) {
+                                        progressDialog.dismiss()
+                                        Toast.makeText(
+                                            this@MapsActivity,
+                                            "Gagal memuat navigasi",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        e.printStackTrace()
+                                    }
+                                } else {
+                                    progressDialog.dismiss()
+                                    Log.d(TAG_RESPONSE_CONTACT, "Child Store Error!")
+                                    handleMessage(
+                                        this@MapsActivity, TAG_RESPONSE_CONTACT,
+                                        "Failed run service. Exception child store not found"
+                                    )
+                                }
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {
+                                progressDialog.dismiss()
+                                Log.d(TAG_RESPONSE_CONTACT, "Child Stores Error!")
+                                handleMessage(
+                                    this@MapsActivity, TAG_RESPONSE_CONTACT,
+                                    "Failed run service. Exception $error"
+                                )
+                            }
+
+                        })
+                    } else {
+
+                        deliveryData = snapshot.getValue(DeliveryModel.Delivery::class.java)
+                        val courierLatLng = LatLng(deliveryData!!.lat, deliveryData!!.lng)
+
+                        if (courierMarker == null) {
+                            courierMarker = mMap.addMarker(
+                                MarkerOptions()
+                                    .position(courierLatLng)
+                                    .title(
+                                        deliveryData!!.courier?.name ?: "Kurir"
+                                    )
+                                    .icon(
+                                        BitmapDescriptorFactory.fromBitmap(
+                                            resizedBitmap(courierDrawable)
+                                        )
+                                    )
+                            )
+                            progressDialog.dismiss()
+                        } else {
+                            progressDialog.dismiss()
+                            courierMarker?.position = courierLatLng
+                        }
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                progressDialog.dismiss()
+                Log.d(TAG_RESPONSE_CONTACT, "Child Driver Error!")
+                handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
+                    "Failed run service. Exception $error"
+                )
+            }
+
+        })
+
+    }
+
+    private fun resizedBitmap(drawable: Int): Bitmap {
+
+        val originalBitmap = BitmapFactory.decodeResource(resources, drawable)
+
+        val newWidth = convertDpToPx(40, this@MapsActivity)
+        val newHeight = convertDpToPx(40, this@MapsActivity)
+
+        return Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
+    }
+
+    private fun changeFocusCamera(latLng: LatLng, zoom: Float? = null) {
+        val zoomLvl = zoom ?: zoomLevel
+        val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoomLvl)
+        mMap.animateCamera(cameraUpdate, mapsDuration, null)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == DETAIL_ACTIVITY_REQUEST_CODE) {
+
+            val resultData = data?.getStringExtra("$DETAIL_ACTIVITY_REQUEST_CODE")
+            val isClosingAction = data?.getBooleanExtra(IS_CLOSING, false) ?: false
+
+            if (resultData == SYNC_NOW) {
+                val resultIntent = Intent()
+                resultIntent.putExtra("$DETAIL_ACTIVITY_REQUEST_CODE", SYNC_NOW)
+                resultIntent.putExtra(IS_CLOSING, isClosingAction)
+                setResult(RESULT_OK, resultIntent)
+
+                finish()
+            }
+
+        }
+
     }
 }
