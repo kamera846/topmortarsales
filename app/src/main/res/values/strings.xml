@@ -172,5 +172,14 @@
     <string name="start_delivery">Proses Pengiriman</string>
 
     <!-- Test Language Resource -->
-    <string name="yes_bg_location">Allow all the time!</string>
+    <string name="open_settings">Open Settings</string>
+    <string name="cancel">Cancel</string>
+    <string name="bg_service_location_permission_title">Important Notices and Consent!</string>
+    <string name="bg_service_location_permission_message">Permission Required: Background location permission is required for this feature. The location will be used when the application is closed to support background functions.\n
+        \nFeatures that Use Location in the Background:\n
+        1. Automatic update of user location.\n
+        2. Notifications related to geolocation.\n
+        \nPlease select the "Always Allow!" option in the settings
+    </string>
+
 </resources>

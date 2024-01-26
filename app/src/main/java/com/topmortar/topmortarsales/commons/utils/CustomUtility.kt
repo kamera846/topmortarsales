@@ -10,6 +10,7 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.snackbar.Snackbar
+import com.topmortar.topmortarsales.R
 
 class CustomUtility(private val context: Context) {
     fun showPermissionDeniedSnackbar(message: String, actionTitle: String = "Coba Lagi", unit: () -> Unit) {
@@ -22,12 +23,14 @@ class CustomUtility(private val context: Context) {
             .show()
     }
 
-    fun showPermissionDeniedDialog(message: String, unit: (() -> Unit)? = null) {
+    fun showPermissionDeniedDialog(message: String, title: String = "Izin Diperlukan", unit: (() -> Unit)? = null) {
+        val openSettings = context.getString(R.string.open_settings)
+        val textCancel = context.getString(R.string.cancel)
         AlertDialog.Builder(context)
-            .setTitle("Izin Diperlukan")
+            .setTitle(title)
             .setMessage(message)
-            .setPositiveButton("Pengaturan aplikasi") { _, _ -> if (unit != null) unit() else openAppSettings() }
-            .setNegativeButton("Batal") { dialog, _ -> dialog.dismiss() }
+            .setPositiveButton(openSettings) { _, _ -> if (unit != null) unit() else openAppSettings() }
+            .setNegativeButton(textCancel) { dialog, _ -> dialog.dismiss() }
             .show()
     }
 

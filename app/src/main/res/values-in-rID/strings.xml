@@ -172,5 +172,13 @@
     <string name="start_delivery">Proses Pengiriman</string>
 
     <!-- Test Language Resource -->
-    <string name="yes_bg_location">Izinkan sepanjang waktu!</string>
+    <string name="open_settings">Buka Pengaturan</string>
+    <string name="cancel">Batal</string>
+    <string name="bg_service_location_permission_title">Pemberitahuan dan Persetujuan Penting!</string>
+    <string name="bg_service_location_permission_message">Izin Diperlukan: Izin lokasi latar belakang diperlukan untuk fitur ini. Lokasi akan digunakan ketika aplikasi ditutup untuk mendukung fungsi latar belakang.\n
+        \nFitur yang Menggunakan Lokasi di Latar Belakang:\n
+        1. Pembaruan otomatis lokasi pengguna.\n
+        2. Notifikasi terkait geolokasi.\n
+        \nMohon untuk memilih opsi "Izinkan Selalu!" pada pengaturan
+    </string>
 </resources>
