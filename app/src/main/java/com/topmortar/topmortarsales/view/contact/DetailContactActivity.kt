@@ -2225,12 +2225,18 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             startDelivery()
 
                         } else {
-                            val message =
-                                "Izin background lokasi diperlukan untuk fitur ini. Mohon untuk memilih opsi berikut \"${
-                                    getString(R.string.yes_bg_location)
-                                }\""
+//                            val message =
+//                                "Izin Diperlukan: Izin lokasi latar belakang diperlukan untuk fitur ini. Lokasi akan digunakan ketika aplikasi ditutup untuk mendukung fungsi latar belakang.\n" +
+//                                "\n" +
+//                                "Fitur yang Menggunakan Lokasi di Latar Belakang:\n" +
+//                                "1. Pembaruan otomatis lokasi pengguna.\n" +
+//                                "2. Notifikasi terkait geolokasi.\n" +
+//                                "\n" +
+//                                "Mohon untuk memilih opsi berikut: \"${ getString(R.string.yes_bg_location) }\""
+                            val message = getString(R.string.bg_service_location_permission_message)
+                            val title = getString(R.string.bg_service_location_permission_title)
                             val customUtility = CustomUtility(this@DetailContactActivity)
-                            customUtility.showPermissionDeniedDialog(message) {
+                            customUtility.showPermissionDeniedDialog(title = title, message = message) {
                                 ActivityCompat.requestPermissions(
                                     this@DetailContactActivity,
                                     arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
