@@ -195,8 +195,8 @@ class PreviewClosingActivity : AppCompatActivity() {
 
     private fun initClickHandler() {
         icBack.setOnClickListener { onBackHandler() }
-        btnUpload.setOnClickListener { onClosingFinished("Success to closing delivery!") }
-//        btnUpload.setOnClickListener { executeClosing() }
+//        btnUpload.setOnClickListener { onClosingFinished("Success to closing delivery!") }
+        btnUpload.setOnClickListener { executeClosing() }
 
     }
 
