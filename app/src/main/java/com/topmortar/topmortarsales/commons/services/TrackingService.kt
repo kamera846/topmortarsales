@@ -53,7 +53,7 @@ class TrackingService : Service() {
             .setIntent(notificationIntent)
             .setChannelId("topmortar_delivery_notification")
             .setChannelName("Topmortar Delivery Notification")
-            .setContentTitle("Selesaiakan Semua Pengiriman")
+            .setContentTitle("Selesaikan Semua Pengiriman")
             .setContentText("Ketuk untuk melihat pengiriman")
             .build()
 

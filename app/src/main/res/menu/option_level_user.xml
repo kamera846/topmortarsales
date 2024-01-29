@@ -15,4 +15,7 @@
     <item
         android:id="@+id/option_ba"
         android:title="Brand Ambassador" />
+    <item
+        android:id="@+id/option_marketing"
+        android:title="Marketing" />
 </menu>

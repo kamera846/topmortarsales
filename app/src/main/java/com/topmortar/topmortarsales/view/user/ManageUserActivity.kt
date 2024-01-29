@@ -27,6 +27,7 @@ import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_MARKETING
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
@@ -322,6 +323,10 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
                     return@setOnMenuItemClickListener  true
                 } R.id.option_ba -> {
                     activeFilter = AUTH_LEVEL_BA
+                    synchFilter()
+                    return@setOnMenuItemClickListener  true
+                } R.id.option_marketing -> {
+                    activeFilter = AUTH_LEVEL_MARKETING
                     synchFilter()
                     return@setOnMenuItemClickListener  true
                 } else -> return@setOnMenuItemClickListener false

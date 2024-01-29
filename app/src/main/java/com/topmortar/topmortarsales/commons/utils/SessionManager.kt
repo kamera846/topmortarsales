@@ -5,11 +5,13 @@ import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_MARKETING
 import com.topmortar.topmortarsales.commons.PRINT_METHOD_BLUETOOTH
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_MARKETING
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.model.UserModel
 
@@ -124,6 +126,7 @@ class SessionManager(context: Context) {
                 AUTH_LEVEL_ADMIN_CITY -> USER_KIND_ADMIN_CITY
                 AUTH_LEVEL_COURIER -> USER_KIND_COURIER
                 AUTH_LEVEL_BA -> USER_KIND_BA
+                AUTH_LEVEL_MARKETING -> USER_KIND_MARKETING
                 else -> USER_KIND_SALES
             }
             setUserID(tempData.id_user)

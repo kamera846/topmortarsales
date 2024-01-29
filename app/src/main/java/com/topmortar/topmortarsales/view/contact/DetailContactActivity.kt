@@ -106,6 +106,7 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_MARKETING
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
@@ -1323,7 +1324,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun navigateToDetailInvoice() {
 
-        if (sessionManager.userKind() == USER_KIND_COURIER) {
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_MARKETING) {
 
             val intent = Intent(this@DetailContactActivity, ListSuratJalanActivity::class.java)
 

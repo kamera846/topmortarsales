@@ -137,6 +137,7 @@
         <item>Sales</item>
         <item>Courier</item>
         <item>Brand Ambassador</item>
+        <item>Marketing</item>
     </string-array>
     <string-array name="termin_spinner_options">
         <item>Pilih Termin Payment</item>

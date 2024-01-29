@@ -68,6 +68,7 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
+import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
@@ -752,7 +753,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
     private fun setupFilterTokoModal() {
 
-        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY || userKind == USER_KIND_SALES) {
+        if (userKind != USER_KIND_COURIER && userKind != USER_KIND_BA) {
             val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
             if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.background = getDrawable(R.color.black_400)
             else binding.llFilter.background = getDrawable(R.color.light)
