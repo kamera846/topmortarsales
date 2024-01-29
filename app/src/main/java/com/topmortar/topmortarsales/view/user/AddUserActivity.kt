@@ -24,6 +24,7 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_MARKETING
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
@@ -90,6 +91,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
     private var txtSubmit = ""
     private var txtSave = ""
+    private var onSubmit = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -122,6 +124,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
     }
 
     private fun submit() {
+        onSubmit = true
 
         val level = selectedLevel
         var city = "${ etUserCity.text }"
@@ -140,6 +143,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 //        Handler().postDelayed({
 //            handleMessage(this, "Add User", "$level : $city : $phone : $username : $password : $confirmPassword")
 //            loadingState(false)
+//            onSubmit = false
 //        }, 1000)
 //
 //        return
@@ -172,6 +176,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
                             handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Successfully ${ if (userID == null) "added" else "edit" } data!")
                             loadingState(false)
+                            onSubmit = false
 
                             val resultIntent = Intent()
                             resultIntent.putExtra("$activityRequestCode", SYNC_NOW)
@@ -183,12 +188,14 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
                             handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Failed to ${ if (userID == null) "added" else "edit" }! Message: ${ responseBody.message }")
                             loadingState(false)
+                            onSubmit = false
 
                         }
                         else -> {
 
                             handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Failed ${ if (userID == null) "added" else "edit" } data!: ${ responseBody.message }")
                             loadingState(false)
+                            onSubmit = false
 
                         }
                     }
@@ -197,6 +204,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
                     handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Failed ${ if (userID == null) "added" else "edit" } data! Error: " + response.message())
                     loadingState(false)
+                    onSubmit = false
 
                 }
 
@@ -205,6 +213,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
                 handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
+                onSubmit = false
 
             }
 
@@ -261,34 +270,38 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         icBack.setOnClickListener { finish() }
         btnSubmit.setOnClickListener { if (isLoaded) submit() }
-        etUserCity.setOnClickListener { showSearchModal() }
+        etUserCity.setOnClickListener {
+            showSearchModal()
+        }
 
         // Focus Listener
         etUserCity.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                showSearchModal()
-                etUserCity.setSelection(etUserCity.length())
+                if (!onSubmit) {
+                    showSearchModal()
+                    etUserCity.setSelection(etUserCity.length())
+                }
             } else etUserCity.clearFocus()
         }
 
         // Change Listener
-        etUserCity.addTextChangedListener (object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-                if (isLoaded) {
-                    if (s.toString().isNotEmpty()) etUserCity.error = null
-                    showSearchModal()
-                }
-            }
-
-        })
+//        etUserCity.addTextChangedListener (object : TextWatcher {
+//            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+//
+//            }
+//
+//            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+//
+//            }
+//
+//            override fun afterTextChanged(s: Editable?) {
+//                if (isLoaded) {
+//                    if (s.toString().isNotEmpty()) etUserCity.error = null
+//                    showSearchModal()
+//                }
+//            }
+//
+//        })
 
     }
 
@@ -445,6 +458,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             AUTH_LEVEL_SALES ->  2
             AUTH_LEVEL_COURIER ->  3
             AUTH_LEVEL_BA ->  4
+            AUTH_LEVEL_MARKETING ->  5
             else -> 0
         }
 
@@ -460,6 +474,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                     2 -> AUTH_LEVEL_SALES
                     3 -> AUTH_LEVEL_COURIER
                     4 -> AUTH_LEVEL_BA
+                    5 -> AUTH_LEVEL_MARKETING
                     else -> null
                 }
             }
@@ -471,6 +486,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                     AUTH_LEVEL_SALES -> AUTH_LEVEL_SALES
                     AUTH_LEVEL_COURIER -> AUTH_LEVEL_COURIER
                     AUTH_LEVEL_BA -> AUTH_LEVEL_BA
+                    AUTH_LEVEL_MARKETING -> AUTH_LEVEL_MARKETING
                     else -> null
                 }
             }
@@ -491,8 +507,8 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
     }
 
     private fun showSearchModal() {
-        val searchKey = etUserCity.text.toString()
-        if (searchKey.isNotEmpty()) searchModal.setSearchKey(searchKey)
+//        val searchKey = etUserCity.text.toString()
+//        if (searchKey.isNotEmpty()) searchModal.setSearchKey(searchKey)
         searchModal.show()
     }
 
