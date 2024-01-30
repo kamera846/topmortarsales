@@ -101,8 +101,9 @@ class PreviewClosingActivity : AppCompatActivity() {
                 when (response.status) {
                     RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
 
-                        if (!isCod) createInvoice()
-                        else onClosingFinished(response.message)
+                        createInvoice()
+//                        if (!isCod) createInvoice()
+//                        else onClosingFinished(response.message)
 
                     }
 
