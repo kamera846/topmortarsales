@@ -118,6 +118,15 @@ class SessionManager(context: Context) {
         return sharedPreferences.getString("userDistributorNumber", "0")
     }
 
+    fun deviceUUID(deviceUUID: String) {
+        editor.putString("deviceUUID", deviceUUID)
+        editor.apply()
+    }
+
+    fun deviceUUID(): String? {
+        return sharedPreferences.getString("deviceUUID", "0")
+    }
+
     fun setUserLoggedIn(data: UserModel?) {
         if (data != null) {
             val tempData = data.copy()

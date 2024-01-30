@@ -1,9 +1,12 @@
 package com.topmortar.topmortarsales.view.tukang
 
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
@@ -49,6 +52,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
@@ -391,12 +395,29 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         dialog.show()
     }
 
+    @SuppressLint("HardwareIds")
     private fun logoutHandler() {
 
         // Firebase Auth Session
-        val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
-        val userChild = authChild.child(sessionManager.userName() + sessionManager.userID())
-        userChild.removeValue()
+        try {
+            val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+            val model = Build.MODEL
+            val manufacturer = Build.MANUFACTURER
+
+            val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
+            val userChild = authChild.child(sessionManager.userName() + sessionManager.userID())
+            val userDevices = userChild.child("devices")
+            var userDeviceText = "$manufacturer$model$androidId"
+            userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
+            val userDevice = userDevices.child(userDeviceText)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                userDevice.child("logout_at").setValue(DateFormat.now())
+            } else userDevice.child("logout_at").setValue("")
+            userDevice.child("login_at").setValue("")
+        } catch (e: Exception) {
+            Log.d("Firebase Auth", "$e")
+        }
 
         sessionManager.setLoggedIn(LOGGED_OUT)
         sessionManager.setUserLoggedIn(null)
