@@ -1,15 +1,20 @@
 package com.topmortar.topmortarsales.view
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.provider.Settings
 import android.text.Editable
 import android.text.InputType
 import android.text.TextUtils
 import android.text.TextWatcher
 import android.text.method.PasswordTransformationMethod
+import android.util.DisplayMetrics
+import android.util.Log
 import android.view.View
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -20,10 +25,17 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_MARKETING
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
 import com.topmortar.topmortarsales.commons.LOGGED_IN
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -32,9 +44,11 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
-import com.topmortar.topmortarsales.commons.USER_KIND_SALES
+import com.topmortar.topmortarsales.commons.USER_KIND_MARKETING
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.KeyboardHandler
@@ -44,9 +58,11 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.model.DeviceModel
 import com.topmortar.topmortarsales.view.courier.CourierActivity
 import com.topmortar.topmortarsales.view.tukang.BrandAmbassadorActivity
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class SplashScreenActivity : AppCompatActivity() {
 
@@ -272,12 +288,78 @@ class SplashScreenActivity : AppCompatActivity() {
 
         val isLoggedIn = sessionManager.isLoggedIn()
         val userId = sessionManager.userID()!!
+        val username = sessionManager.userName()!!
+        val userFullName = sessionManager.fullName()!!
         val userCity = sessionManager.userCityID()!!
         val userKind = sessionManager.userKind()!!
         val userDistributor = sessionManager.userDistributor()!!
+        val userDistributoNumber = sessionManager.userDistributorNumber()!!
+        val userBidLimit = sessionManager.userBidLimit()!!
 
         if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty() || userDistributor.isEmpty()) showCardLogin()
         else {
+            val userlevel = when (userKind) {
+                USER_KIND_ADMIN -> AUTH_LEVEL_ADMIN
+                USER_KIND_ADMIN_CITY -> AUTH_LEVEL_ADMIN_CITY
+                USER_KIND_COURIER -> AUTH_LEVEL_COURIER
+                USER_KIND_BA -> AUTH_LEVEL_BA
+                USER_KIND_MARKETING -> AUTH_LEVEL_MARKETING
+                else -> AUTH_LEVEL_SALES
+            }
+
+            // Firebase Auth Session
+            try {
+                firebaseReference = FirebaseUtils().getReference(distributorId = userDistributor)
+                val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
+                val userChild = authChild.child(username + userId)
+                val userDevicesChild = userChild.child("devices")
+
+                userChild.child("id_user").setValue(userId)
+                userChild.child("username").setValue(username)
+                userChild.child("id_city").setValue(userCity)
+                userChild.child("level_user").setValue(userlevel)
+                userChild.child("id_distributor").setValue(userDistributor)
+                userChild.child("full_name").setValue(userFullName)
+                userChild.child("nomorhp_distributor").setValue(userDistributoNumber)
+                userChild.child("bid_limit").setValue(userBidLimit)
+
+                userDevicesChild.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (snapshot.exists()) {
+                            for (item in snapshot.children) {
+                                val device = item.getValue(DeviceModel::class.java)?.let { it }
+                                var userDeviceText = "${device?.manufacture}${device?.model}${device?.id}"
+                                userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
+                                val userDevice = userDevicesChild.child(userDeviceText)
+                                userDevice.child("id").setValue(device?.id)
+                                userDevice.child("model").setValue(device?.model)
+                                userDevice.child("manufacture").setValue(device?.manufacture)
+                                userDevice.child("device").setValue(device?.device)
+                                userDevice.child("product").setValue(device?.product)
+                                userDevice.child("sdk_version").setValue(device?.sdk_version)
+                                userDevice.child("version_release").setValue(device?.version_release)
+                                userDevice.child("screen_width").setValue(device?.screen_width)
+                                userDevice.child("screen_height").setValue(device?.screen_height)
+                                userDevice.child("density").setValue(device?.density)
+                                userDevice.child("login_at").setValue(device?.login_at)
+                                userDevice.child("logout_at").setValue(device?.logout_at)
+                            }
+
+                            userDevice(userChild)
+                        } else {
+                            userDevice(userChild)
+                        }
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        userDevice(userChild)
+                    }
+
+                })
+            } catch (e: Exception) {
+                Log.e("Firebase Auth", "$e")
+            }
+
             when (userKind) {
                 USER_KIND_BA -> navigateToListTukang()
                 USER_KIND_COURIER -> navigateToCourier()
@@ -369,20 +451,70 @@ class SplashScreenActivity : AppCompatActivity() {
                         sessionManager.setUserLoggedIn(data)
                         sessionManager.setLoggedIn(LOGGED_IN)
 
+                        // Firebase Auth Session
+                        try {
+                            firebaseReference = FirebaseUtils().getReference(distributorId = data.id_distributor)
+                            val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
+                            val userChild = authChild.child(data.username + data.id_user)
+                            val userDevicesChild = userChild.child("devices")
+
+                            userChild.child("id_user").setValue(data.id_user)
+                            userChild.child("phone_user").setValue(data.phone_user)
+                            userChild.child("username").setValue(data.username)
+                            userChild.child("password").setValue(data.password)
+                            userChild.child("level_user").setValue(data.level_user)
+                            userChild.child("id_city").setValue(data.id_city)
+                            userChild.child("nama_city").setValue(data.nama_city)
+                            userChild.child("kode_city").setValue(data.kode_city)
+                            userChild.child("bid_limit").setValue(data.bid_limit)
+                            userChild.child("full_name").setValue(data.full_name)
+                            userChild.child("id_distributor").setValue(data.id_distributor)
+                            userChild.child("nama_distributor").setValue(data.nama_distributor)
+                            userChild.child("nomorhp_distributor").setValue(data.nomorhp_distributor)
+                            userChild.child("alamat_distributor").setValue(data.alamat_distributor)
+                            userChild.child("jenis_distributor").setValue(data.jenis_distributor)
+
+                            userDevicesChild.addListenerForSingleValueEvent(object : ValueEventListener {
+                                override fun onDataChange(snapshot: DataSnapshot) {
+                                    if (snapshot.exists()) {
+                                        for (item in snapshot.children) {
+                                            val device = item.getValue(DeviceModel::class.java)?.let { it }
+                                            var userDeviceText = "${device?.manufacture}${device?.model}${device?.id}"
+                                            userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
+                                            val userDevice = userDevicesChild.child(userDeviceText)
+                                            userDevice.child("id").setValue(device?.id)
+                                            userDevice.child("model").setValue(device?.model)
+                                            userDevice.child("manufacture").setValue(device?.manufacture)
+                                            userDevice.child("device").setValue(device?.device)
+                                            userDevice.child("product").setValue(device?.product)
+                                            userDevice.child("sdk_version").setValue(device?.sdk_version)
+                                            userDevice.child("version_release").setValue(device?.version_release)
+                                            userDevice.child("screen_width").setValue(device?.screen_width)
+                                            userDevice.child("screen_height").setValue(device?.screen_height)
+                                            userDevice.child("density").setValue(device?.density)
+                                            userDevice.child("login_at").setValue(device?.login_at)
+                                            userDevice.child("logout_at").setValue(device?.logout_at)
+                                        }
+
+                                        userDevice(userChild)
+                                    } else {
+                                        userDevice(userChild)
+                                    }
+                                }
+
+                                override fun onCancelled(error: DatabaseError) {
+                                    userDevice(userChild)
+                                }
+
+                            })
+                        } catch (e: Exception) {
+                            Log.e("Firebase Auth", "$e")
+                        }
+
                         when (data.level_user) {
                             AUTH_LEVEL_BA -> navigateToListTukang()
                             AUTH_LEVEL_COURIER -> navigateToCourier()
                             else -> navigateToMain()
-                        }
-
-                        // Firebase Auth Session
-
-                        firebaseReference = FirebaseUtils().getReference(distributorId = data.id_distributor)
-                        val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
-                        val userChild = authChild.child(data.username + data.id_user)
-                        userChild.setValue(data)
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            userChild.child("datetime").setValue(DateFormat.now())
                         }
 
                         loadingState(false)
@@ -797,6 +929,62 @@ class SplashScreenActivity : AppCompatActivity() {
         } else {
             super.onBackPressed()
         }
+    }
+
+    @SuppressLint("HardwareIds")
+    private fun userDevice(userChild: DatabaseReference) {
+        // Detail Device
+        val model = Build.MODEL
+        val manufacturer = Build.MANUFACTURER
+        val device = Build.DEVICE
+        val product = Build.PRODUCT
+        val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+        val deviceUUID = sessionManager.deviceUUID() ?: UUID.randomUUID().toString()
+        sessionManager.deviceUUID(deviceUUID)
+
+        val version = Build.VERSION.SDK_INT
+        val versionRelease = Build.VERSION.RELEASE
+
+        val displayMetrics = DisplayMetrics()
+        val windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+        windowManager.defaultDisplay.getMetrics(displayMetrics)
+
+        val screenWidth = displayMetrics.widthPixels
+        val screenHeight = displayMetrics.heightPixels
+        val density = displayMetrics.density
+
+        // User Device Detail
+        val userDevices = userChild.child("devices")
+        var userDeviceText = "$manufacturer$model$androidId"
+        userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
+        val userDevice = userDevices.child(userDeviceText)
+        userDevice.child("id").setValue(androidId)
+        userDevice.child("model").setValue(model)
+        userDevice.child("manufacture").setValue(manufacturer)
+        userDevice.child("device").setValue(device)
+        userDevice.child("product").setValue(product)
+        userDevice.child("sdk_version").setValue("$version")
+        userDevice.child("version_release").setValue(versionRelease)
+        userDevice.child("screen_width").setValue("$screenWidth px")
+        userDevice.child("screen_height").setValue("$screenHeight px")
+        userDevice.child("density").setValue("$density")
+
+        // User Loged In Datetime
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            userDevice.child("login_at").addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val loginTime = snapshot.getValue(String::class.java)
+                    if (loginTime.isNullOrEmpty()) userDevice.child("login_at").setValue(DateFormat.now())
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    // Do something
+                }
+
+            })
+        } else userDevice.child("login_at").setValue("")
+        userDevice.child("logout_at").setValue("")
+
     }
 
 }
