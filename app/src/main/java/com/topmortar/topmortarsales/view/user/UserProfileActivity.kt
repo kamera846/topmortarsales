@@ -17,6 +17,7 @@ import com.google.android.material.tabs.TabLayout
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.viewpager.UserProfileViewPagerAdapter
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
@@ -53,6 +54,7 @@ import com.topmortar.topmortarsales.databinding.ActivityUserProfileBinding
 import com.topmortar.topmortarsales.modal.ChartSalesPricingModal
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
+import com.topmortar.topmortarsales.view.delivery.HistoryDeliveryFragment
 import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
@@ -90,6 +92,25 @@ class UserProfileActivity : AppCompatActivity() {
 
         customUtility = CustomUtility(this)
         modalPricingDetails = ChartSalesPricingModal(this)
+
+        if (iUserLevel == AUTH_LEVEL_COURIER) {
+            binding.deliveryContainer.visibility = View.VISIBLE
+
+            /*
+            Call Fragment
+             */
+            val fragmentManager = supportFragmentManager
+            val fragmentTransaction = fragmentManager.beginTransaction()
+
+            val myFragment = HistoryDeliveryFragment()
+            fragmentTransaction.replace(R.id.historyDeliveryFragmentContainer, myFragment)
+            fragmentTransaction.addToBackStack(null)
+
+            fragmentTransaction.commit()
+            /*
+            End Call Fragment
+             */
+        }
 
         dataActivityValidation()
 

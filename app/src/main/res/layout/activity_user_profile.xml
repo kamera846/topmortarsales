@@ -339,6 +339,7 @@
 
             </LinearLayout>
 
+            <!-- Visited Container -->
             <LinearLayout
                 android:visibility="gone"
                 android:id="@+id/tabContainer"
@@ -357,6 +358,46 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+            </LinearLayout>
+
+            <!-- Delivery Container -->
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/deliveryContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/date_separator"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Riwayat Pengiriman"
+                        android:textSize="14sp"
+                        android:layout_marginEnd="16dp"
+                        android:theme="@style/Theme.TopMortarSales.TextBaseLine" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_weight="1"
+                        android:theme="@style/Theme.TopMortarSales.BaseLine"/>
+
+                </LinearLayout>
+
+                <androidx.fragment.app.FragmentContainerView
+                    android:id="@+id/historyDeliveryFragmentContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:name="com.topmortar.topmortarsales.view.delivery.HistoryDeliveryFragment"/>
 
             </LinearLayout>
 
