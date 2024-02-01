@@ -1,10 +1,15 @@
-package com.topmortar.topmortarsales.view
+package com.topmortar.topmortarsales.view.delivery
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import androidx.appcompat.app.AppCompatActivity
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TextView
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.database.DataSnapshot
@@ -17,46 +22,60 @@ import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_DELIVERY_ID
 import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
-import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
-import com.topmortar.topmortarsales.data.ApiService
-import com.topmortar.topmortarsales.data.HttpClient
-import com.topmortar.topmortarsales.databinding.ActivityDeliveryBinding
+import com.topmortar.topmortarsales.databinding.FragmentDeliveryProgressBinding
 import com.topmortar.topmortarsales.model.DeliveryModel
+import com.topmortar.topmortarsales.view.MapsActivity
 
+/**
+ * A fragment representing a list of Items.
+ */
+class DeliveryProgressFragment : Fragment() {
 
-class DeliveryActivity : AppCompatActivity() {
+    private var _binding: FragmentDeliveryProgressBinding? = null
+    private val binding get() = _binding!!
 
-    private lateinit var sessionManager: SessionManager
-    private val userDistributorId get() = sessionManager.userDistributor()
-    private lateinit var binding: ActivityDeliveryBinding
-    private lateinit var apiService: ApiService
     private lateinit var firebaseReference : DatabaseReference
+    private lateinit var sessionManager: SessionManager
+    private val userDistributorId get() = sessionManager.userDistributor().toString()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    private lateinit var badgeRefresh: LinearLayout
 
-        supportActionBar?.hide()
+    private var listener: CounterItem? = null
+    interface CounterItem {
+        fun counterItem(count: Int)
+    }
+    fun setCounterItem(listener: CounterItem) {
+        this.listener = listener
+    }
+    fun syncNow() {
+        getList()
+    }
 
-        sessionManager = SessionManager(this)
-        binding = ActivityDeliveryBinding.inflate(layoutInflater)
-        apiService = HttpClient.create()
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentDeliveryProgressBinding.inflate(inflater, container, false)
+        val view = binding.root
 
-        setContentView(binding.root)
+        badgeRefresh = view.findViewById(R.id.badgeRefresh)
 
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId!!)
-
-        binding.titleBarDark.icBack.setOnClickListener { finish() }
+        sessionManager = SessionManager(requireContext())
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
 
         getList()
+
+        return view
     }
 
     private fun getList() {
 
         loadingState(true)
+        showBadgeRefresh(false)
 
         // Get a reference to your database
         val myRef: DatabaseReference = firebaseReference.child(FIREBASE_CHILD_DELIVERY)
@@ -80,22 +99,29 @@ class DeliveryActivity : AppCompatActivity() {
                     }
 
                     if (storeList.isNotEmpty()) {
+                        listener?.counterItem(storeList.size)
                         setRecyclerView(storeList)
                         loadingState(false)
+                        showBadgeRefresh(false)
                     } else {
+                        listener?.counterItem(0)
                         loadingState(true, "Belum ada pengiriman yang berlangsung.")
+                        showBadgeRefresh(false)
                     }
                 } else {
+                    listener?.counterItem(0)
                     loadingState(true, "Belum ada pengiriman yang berlangsung.")
+                    showBadgeRefresh(false)
                 }
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
                 // Handle errors
-                handleMessage(this@DeliveryActivity, TAG_RESPONSE_CONTACT,
+                handleMessage(requireContext(), TAG_RESPONSE_CONTACT,
                     "Failed run service. Exception $databaseError"
                 )
                 loadingState(true, getString(R.string.failed_request))
+                showBadgeRefresh(true)
             }
         })
 
@@ -105,39 +131,38 @@ class DeliveryActivity : AppCompatActivity() {
         val rvAdapter = DeliveryRecyclerViewAdapter(listItem, object: DeliveryRecyclerViewAdapter.ItemClickListener {
             override fun onItemClick(data: DeliveryModel.Store?) {
                 // Do Something
-                val intent = Intent(this@DeliveryActivity, MapsActivity::class.java)
+                val intent = Intent(requireContext(), MapsActivity::class.java)
                 intent.putExtra(CONST_IS_TRACKING, true)
                 intent.putExtra(CONST_DELIVERY_ID, data?.deliveryId)
                 intent.putExtra(CONST_CONTACT_ID, data?.id)
-                startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
+                startActivity(intent)
             }
 
         })
 
-        binding.rvList.apply {
-            layoutManager = LinearLayoutManager(this@DeliveryActivity)
-            adapter = rvAdapter
-            addOnScrollListener(object : RecyclerView.OnScrollListener() {
-                private var lastScrollPosition = 0
+        binding.recyclerview.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerview.adapter = rvAdapter
+        binding.recyclerview.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            private var lastScrollPosition = 0
 
-                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    if (dy < 0) {
-                        // Scrolled up
-                        val firstVisibleItemPosition =
-                            (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-                        if (lastScrollPosition != firstVisibleItemPosition) {
-                            recyclerView.findViewHolderForAdapterPosition(firstVisibleItemPosition)?.itemView?.startAnimation(
-                                AnimationUtils.loadAnimation(
-                                    recyclerView.context,
-                                    R.anim.rv_item_fade_slide_down
-                                )
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (dy < 0) {
+                    // Scrolled up
+                    val firstVisibleItemPosition =
+                        (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                    if (lastScrollPosition != firstVisibleItemPosition) {
+                        recyclerView.findViewHolderForAdapterPosition(firstVisibleItemPosition)?.itemView?.startAnimation(
+                            AnimationUtils.loadAnimation(
+                                recyclerView.context,
+                                R.anim.rv_item_fade_slide_down
                             )
-                            lastScrollPosition = firstVisibleItemPosition
-                        }
-                    } else lastScrollPosition = -1
-                }
-            })
-        }
+                        )
+                        lastScrollPosition = firstVisibleItemPosition
+                    }
+                } else lastScrollPosition = -1
+            }
+        })
+
     }
 
     private fun loadingState(state: Boolean, message: String = getString(R.string.txt_loading)) {
@@ -147,14 +172,25 @@ class DeliveryActivity : AppCompatActivity() {
         if (state) {
 
             binding.txtLoading.visibility = View.VISIBLE
-            binding.rvList.visibility = View.GONE
+            binding.recyclerview.visibility = View.GONE
 
         } else {
 
             binding.txtLoading.visibility = View.GONE
-            binding.rvList.visibility = View.VISIBLE
+            binding.recyclerview.visibility = View.VISIBLE
 
         }
 
     }
+    private fun showBadgeRefresh(action: Boolean) {
+        val tvTitle = badgeRefresh.findViewById<TextView>(R.id.tvTitle)
+        val icClose = badgeRefresh.findViewById<ImageView>(R.id.icClose)
+        icClose.setOnClickListener { badgeRefresh.visibility = View.GONE }
+
+        if (action) {
+            badgeRefresh.visibility = View.VISIBLE
+            tvTitle.setOnClickListener { getList() }
+        } else badgeRefresh.visibility = View.GONE
+    }
+
 }

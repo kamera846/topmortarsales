@@ -93,6 +93,7 @@ import com.topmortar.topmortarsales.view.city.ManageCityActivity
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
 import com.topmortar.topmortarsales.view.courier.ManageBasecampActivity
+import com.topmortar.topmortarsales.view.delivery.DeliveryActivity
 import com.topmortar.topmortarsales.view.gudang.ManageGudangActivity
 import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
 import com.topmortar.topmortarsales.view.user.ManageUserActivity

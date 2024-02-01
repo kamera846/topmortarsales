@@ -63,7 +63,7 @@
             android:enabled="true"
             android:exported="false" />
         <activity
-            android:name=".view.DeliveryActivity"
+            android:name=".view.delivery.DeliveryActivity"
             android:exported="false" />
         <activity
             android:name=".view.contact.VoucherActivity"
