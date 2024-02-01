@@ -123,7 +123,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         val iStatusInvoice = intent.getStringExtra(CONST_STATUS_INVOICE)
                         if (!iStatusInvoice.isNullOrEmpty()) {
                             if (iStatusInvoice == INVOICE_PAID) {
-                                tvDateInvoice.text = DateFormat.format(dateString = dateLastPayment, input = "yyyy-MM-dd hh:mm:ss", format = "EEEE, dd MMMM yyyy")
+                                tvDateInvoice.text = DateFormat.format(dateString = dateLastPayment, input = "yyyy-MM-dd HH:mm:ss", format = "EEEE, dd MMMM yyyy")
                                 tvStatus.text = "paid".uppercase(Locale.ROOT)
                                 tvStatus.setTextColor(getColor(R.color.white))
                                 tvStatus.setBackgroundDrawable(getDrawable(R.drawable.bg_active_round))
