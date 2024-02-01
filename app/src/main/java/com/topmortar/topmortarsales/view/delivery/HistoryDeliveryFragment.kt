@@ -1,7 +1,5 @@
 package com.topmortar.topmortarsales.view.delivery
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.view.LayoutInflater
@@ -11,34 +9,30 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.HistoryDeliveryRecyclerViewAdapter
-import com.topmortar.topmortarsales.commons.REQUEST_BASECAMP_FRAGMENT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
-import com.topmortar.topmortarsales.commons.RESULT_BASECAMP_FRAGMENT
-import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
-import com.topmortar.topmortarsales.databinding.FragmentDeliveryEndedBinding
+import com.topmortar.topmortarsales.databinding.FragmentHistoryDeliveryBinding
 import com.topmortar.topmortarsales.model.BaseCampModel
 import kotlinx.coroutines.launch
 
 /**
  * A fragment representing a list of Items.
  */
-class DeliveryEndedFragment : Fragment() {
+class HistoryDeliveryFragment : Fragment() {
 
-    private var _binding: FragmentDeliveryEndedBinding? = null
+    private var _binding: FragmentHistoryDeliveryBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var sessionManager: SessionManager
@@ -64,7 +58,7 @@ class DeliveryEndedFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentDeliveryEndedBinding.inflate(inflater, container, false)
+        _binding = FragmentHistoryDeliveryBinding.inflate(inflater, container, false)
         val view = binding.root
 
         badgeRefresh = view.findViewById(R.id.badgeRefresh)
@@ -73,6 +67,7 @@ class DeliveryEndedFragment : Fragment() {
         userKind = sessionManager.userKind().toString()
         userCity = sessionManager.userCityID().toString()
         userID = sessionManager.userID().toString()
+
         getList()
 
         return view
@@ -84,7 +79,7 @@ class DeliveryEndedFragment : Fragment() {
         showBadgeRefresh(false)
 
         Handler().postDelayed({
-            loadingState(true, "Belum ada pengiriman yang diselesaikan!")
+            loadingState(true, "Belum ada riwayat pengiriman!")
         }, 1000)
 
         return
@@ -140,7 +135,7 @@ class DeliveryEndedFragment : Fragment() {
 
         val rvAdapter = HistoryDeliveryRecyclerViewAdapter(listItem, object: HistoryDeliveryRecyclerViewAdapter.ItemClickListener {
             override fun onItemClick(data: BaseCampModel?) {
-                navigateItemAction()
+                /// Do something
             }
 
         })
@@ -167,13 +162,6 @@ class DeliveryEndedFragment : Fragment() {
                 } else lastScrollPosition = -1
             }
         })
-
-    }
-
-    private fun navigateItemAction() {
-
-        val intent = Intent(requireContext(), HistoryDeliveryActivity::class.java)
-        (requireContext() as Activity).startActivity(intent)
 
     }
 
@@ -204,18 +192,6 @@ class DeliveryEndedFragment : Fragment() {
             badgeRefresh.visibility = View.VISIBLE
             tvTitle.setOnClickListener { getList() }
         } else badgeRefresh.visibility = View.GONE
-    }
-
-    private val someActivityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        // Handle the result
-        val resultCode = result.resultCode
-        val data = result.data
-        // Process the result
-
-        if (resultCode == RESULT_BASECAMP_FRAGMENT) {
-            val data = data?.getStringExtra(REQUEST_BASECAMP_FRAGMENT)
-            if (!data.isNullOrEmpty() && data == SYNC_NOW) getList()
-        }
     }
 
 }

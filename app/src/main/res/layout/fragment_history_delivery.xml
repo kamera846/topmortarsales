@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/progressDeliveryFragment">
+    android:id="@+id/historyDeliveryFragment">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -19,7 +19,7 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:layout_below="@+id/badgeRefresh"
-            android:id="@+id/recyclerview"
+            android:id="@+id/rv_chat_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             tools:listitem="@layout/item_chat_room"/>
