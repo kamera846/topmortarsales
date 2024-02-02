@@ -16,4 +16,5 @@ data class UserModel(
     var nomorhp_distributor: String = "",
     var alamat_distributor: String = "",
     var jenis_distributor: String = "",
+    var is_notify: String = "",
 )

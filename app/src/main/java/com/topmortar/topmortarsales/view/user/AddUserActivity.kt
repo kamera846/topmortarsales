@@ -27,6 +27,7 @@ import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_MARKETING
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
+import com.topmortar.topmortarsales.commons.CONST_IS_NOTIFY
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_PHONE
@@ -48,6 +49,7 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.databinding.ActivityAddUserBinding
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.CityModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
@@ -72,6 +74,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
     private lateinit var confirmPasswordContainer: LinearLayout
 
     // Global
+    private lateinit var binding: ActivityAddUserBinding
     private lateinit var sessionManager: SessionManager
     private val userDistributorId get() = sessionManager.userDistributor().toString()
     private val userKind get() = sessionManager.userKind().toString()
@@ -99,8 +102,9 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         supportActionBar?.hide()
         sessionManager = SessionManager(this)
+        binding = ActivityAddUserBinding.inflate(layoutInflater)
 
-        setContentView(R.layout.activity_add_user)
+        setContentView(binding.root)
 
         txtSubmit = getString(R.string.submit)
         txtSave = getString(R.string.save)
@@ -133,6 +137,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         val fullName = "${ etFullName.text }"
         val password = "${ etPassword.text }"
         val confirmPassword = "${ etConfirmPassword.text }"
+        val isNotify = binding.isNotifyCheckbox.isChecked.let { if (it) "1" else "0" }
 
         if (!formValidation(level = level, city = city, phone = phone, username = username, fullName = fullName, password = password, confirmPassword = confirmPassword)) return
 
@@ -158,13 +163,14 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                 val rbFullName = createPartFromString(fullName)
                 val rbPassword = createPartFromString(password)
                 val rbDistributorId = createPartFromString(userDistributorId)
+                val rbIsNotify = createPartFromString(isNotify)
 
                 val apiService: ApiService = HttpClient.create()
                 val response = if (userID == null) {
-                    apiService.addUser(level = rbLevel, cityId = rbCityId, phone = rbPhone, username = rbUsername, fullName = rbFullName, password = rbPassword, distributorID = rbDistributorId)
+                    apiService.addUser(level = rbLevel, cityId = rbCityId, phone = rbPhone, username = rbUsername, fullName = rbFullName, password = rbPassword, distributorID = rbDistributorId, isNotify = rbIsNotify)
                 } else {
                     val rbUserID = createPartFromString(userID!!)
-                    apiService.editUser(ID = rbUserID, level = rbLevel, cityId = rbCityId, phone = rbPhone, username = rbUsername, fullName = rbFullName, distributorID = rbDistributorId)
+                    apiService.editUser(ID = rbUserID, level = rbLevel, cityId = rbCityId, phone = rbPhone, username = rbUsername, fullName = rbFullName, distributorID = rbDistributorId, isNotify = rbIsNotify)
                 }
 
                 if (response.isSuccessful) {
@@ -284,25 +290,6 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             } else etUserCity.clearFocus()
         }
 
-        // Change Listener
-//        etUserCity.addTextChangedListener (object : TextWatcher {
-//            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-//
-//            }
-//
-//            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-//
-//            }
-//
-//            override fun afterTextChanged(s: Editable?) {
-//                if (isLoaded) {
-//                    if (s.toString().isNotEmpty()) etUserCity.error = null
-//                    showSearchModal()
-//                }
-//            }
-//
-//        })
-
     }
 
     private fun dataActivityHandler() {
@@ -310,6 +297,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         val iPhone = intent.getStringExtra(CONST_PHONE)
         val iName = intent.getStringExtra(CONST_NAME)
         val iFullName = intent.getStringExtra(CONST_FULL_NAME)
+        val iIsNotify = intent.getStringExtra(CONST_IS_NOTIFY)
         iUserLevel = intent.getStringExtra(CONST_USER_LEVEL)
         iLocation = intent.getStringExtra(CONST_LOCATION)
 
@@ -337,6 +325,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         if (!iFullName.isNullOrEmpty()) etFullName.setText(iFullName)
         if (!iLocation.isNullOrEmpty()) etUserCity.setText(getString(R.string.txt_loading))
         else etUserCity.setText("")
+        binding.isNotifyCheckbox.isChecked = iIsNotify == "1"
     }
 
     private fun loadingState(state: Boolean) {

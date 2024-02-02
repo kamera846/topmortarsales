@@ -23,6 +23,7 @@ import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_DATE
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
+import com.topmortar.topmortarsales.commons.CONST_IS_NOTIFY
 import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
@@ -67,6 +68,7 @@ class UserProfileActivity : AppCompatActivity() {
 
     private var iUserName: String? = null; private var iFullName: String? = null; private var iUserLevel: String? = null
     private var iUserID: String? = null; private var iPhone: String? = null; private var iLocation: String? = null
+    private var iIsNotify: String? = null
 
     private val bidLimit get() = sessionManager.userBidLimit().toString()
     private var isRequestSync = false
@@ -87,6 +89,7 @@ class UserProfileActivity : AppCompatActivity() {
         iFullName = intent.getStringExtra(CONST_FULL_NAME)
         iUserLevel = intent.getStringExtra(CONST_USER_LEVEL)
         iLocation = intent.getStringExtra(CONST_LOCATION)
+        iIsNotify = intent.getStringExtra(CONST_IS_NOTIFY)
 
         customUtility = CustomUtility(this)
         modalPricingDetails = ChartSalesPricingModal(this)
@@ -142,6 +145,7 @@ class UserProfileActivity : AppCompatActivity() {
         intent.putExtra(CONST_USER_LEVEL, iUserLevel)
         intent.putExtra(CONST_LOCATION, iLocation)
         intent.putExtra(CONST_FULL_NAME, iFullName)
+        intent.putExtra(CONST_IS_NOTIFY, iIsNotify)
 
         startActivityForResult(intent, MANAGE_USER_ACTIVITY_REQUEST_CODE)
 

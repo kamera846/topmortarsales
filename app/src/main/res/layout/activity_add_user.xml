@@ -380,6 +380,13 @@
                 android:padding="16dp"
                 android:orientation="vertical">
 
+                <CheckBox
+                    android:id="@+id/isNotifyCheckbox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="14sp"
+                    android:text="Centang jika ingin mengirimkan notif ke pengguna." />
+
                 <Button
                     android:id="@+id/btn_submit"
                     android:layout_width="match_parent"

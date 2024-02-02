@@ -185,7 +185,8 @@ interface ApiService {
         @Part("username") username: RequestBody,
         @Part("full_name") fullName: RequestBody,
         @Part("id_distributor") distributorID: RequestBody,
-        @Part("password") password: RequestBody
+        @Part("password") password: RequestBody,
+        @Part("is_notify") isNotify: RequestBody
     ): Response<ResponseMessage>
 
     @Multipart
@@ -197,7 +198,8 @@ interface ApiService {
         @Part("phone_user") phone: RequestBody,
         @Part("username") username: RequestBody,
         @Part("id_distributor") distributorID: RequestBody,
-        @Part("full_name") fullName: RequestBody
+        @Part("full_name") fullName: RequestBody,
+        @Part("is_notify") isNotify: RequestBody
     ): Response<ResponseMessage>
 
     @Multipart
