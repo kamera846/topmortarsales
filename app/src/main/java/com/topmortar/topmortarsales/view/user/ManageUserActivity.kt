@@ -30,6 +30,7 @@ import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_MARKETING
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
+import com.topmortar.topmortarsales.commons.CONST_IS_NOTIFY
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_PHONE
@@ -253,6 +254,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
             intent.putExtra(CONST_USER_LEVEL, data.level_user)
             intent.putExtra(CONST_LOCATION, data.id_city)
             intent.putExtra(CONST_FULL_NAME, data.full_name)
+            intent.putExtra(CONST_IS_NOTIFY, data.is_notify)
         }
 
         startActivityForResult(intent, MANAGE_USER_ACTIVITY_REQUEST_CODE)
@@ -270,6 +272,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
             intent.putExtra(CONST_USER_LEVEL, data.level_user)
             intent.putExtra(CONST_LOCATION, data.id_city)
             intent.putExtra(CONST_FULL_NAME, data.full_name)
+            intent.putExtra(CONST_IS_NOTIFY, data.is_notify)
         }
 
         startActivityForResult(intent, MANAGE_USER_ACTIVITY_REQUEST_CODE)

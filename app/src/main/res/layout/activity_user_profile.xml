@@ -12,6 +12,7 @@
         layout="@layout/component_title_bar_light"/>
 
     <androidx.core.widget.NestedScrollView
+        android:id="@+id/container"
         android:layout_below="@+id/titleBarLight"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -350,7 +351,7 @@
                     android:id="@+id/tabLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:tabBackground="@color/baseBackground"/>
+                    android:background="@android:color/transparent"/>
 
                 <androidx.viewpager.widget.ViewPager
                     android:id="@+id/viewPager"

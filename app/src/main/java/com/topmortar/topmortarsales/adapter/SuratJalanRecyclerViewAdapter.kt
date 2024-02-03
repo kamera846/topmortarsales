@@ -42,7 +42,7 @@ class SuratJalanRecyclerViewAdapter(private val itemClickListener: ItemClickList
             ivProfile.setImageResource(R.drawable.file_list_red)
             tvContactName.text = item.no_surat_jalan
 //            tvPhoneNumber.text = "${ item.order_number } - ${ DateFormat.format(item.delivery_date) }"
-            tvPhoneNumber.text = DateFormat.format(dateString = item.dalivery_date, input = "yyyy-MM-dd hh:mm:ss", format = "dd MMMM yyyy hh.mm")
+            tvPhoneNumber.text = DateFormat.format(dateString = item.dalivery_date, input = "yyyy-MM-dd HH:mm:ss", format = "dd MMMM yyyy HH.mm")
 
         }
 
