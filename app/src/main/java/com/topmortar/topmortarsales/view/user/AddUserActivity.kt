@@ -137,7 +137,9 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         val fullName = "${ etFullName.text }"
         val password = "${ etPassword.text }"
         val confirmPassword = "${ etConfirmPassword.text }"
-        val isNotify = binding.isNotifyCheckbox.isChecked.let { if (it) "1" else "0" }
+        val isNotify = if (selectedLevel == AUTH_LEVEL_SALES) {
+            binding.isNotifyCheckbox.isChecked.let { if (it) "1" else "0" }
+        } else "0"
 
         if (!formValidation(level = level, city = city, phone = phone, username = username, fullName = fullName, password = password, confirmPassword = confirmPassword)) return
 
@@ -325,7 +327,13 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         if (!iFullName.isNullOrEmpty()) etFullName.setText(iFullName)
         if (!iLocation.isNullOrEmpty()) etUserCity.setText(getString(R.string.txt_loading))
         else etUserCity.setText("")
-        binding.isNotifyCheckbox.isChecked = iIsNotify == "1"
+        if (iUserLevel == AUTH_LEVEL_SALES) {
+            binding.isNotifyCheckbox.visibility = View.VISIBLE
+            binding.isNotifyCheckbox.isChecked = iIsNotify == "1"
+        } else {
+            binding.isNotifyCheckbox.visibility = View.GONE
+            binding.isNotifyCheckbox.isChecked = false
+        }
     }
 
     private fun loadingState(state: Boolean) {
@@ -466,6 +474,11 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                     5 -> AUTH_LEVEL_MARKETING
                     else -> null
                 }
+                if (selectedLevel == AUTH_LEVEL_SALES) binding.isNotifyCheckbox.visibility = View.VISIBLE
+                else {
+                    binding.isNotifyCheckbox.isChecked = false
+                    binding.isNotifyCheckbox.visibility = View.GONE
+                }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>) {
@@ -477,6 +490,12 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                     AUTH_LEVEL_BA -> AUTH_LEVEL_BA
                     AUTH_LEVEL_MARKETING -> AUTH_LEVEL_MARKETING
                     else -> null
+                }
+
+                if (selectedLevel == AUTH_LEVEL_SALES) binding.isNotifyCheckbox.visibility = View.VISIBLE
+                else {
+                    binding.isNotifyCheckbox.isChecked = false
+                    binding.isNotifyCheckbox.visibility = View.GONE
                 }
             }
         }
