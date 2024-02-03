@@ -81,8 +81,6 @@ class UserProfileActivity : AppCompatActivity() {
         binding = ActivityUserProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        initClickHandler()
-
         iUserID = intent.getStringExtra(CONST_USER_ID)
         iPhone = intent.getStringExtra(CONST_PHONE)
         iUserName = intent.getStringExtra(CONST_NAME)
@@ -94,38 +92,45 @@ class UserProfileActivity : AppCompatActivity() {
         customUtility = CustomUtility(this)
         modalPricingDetails = ChartSalesPricingModal(this)
 
+        initClickHandler()
         dataActivityValidation()
 
     }
 
-    private fun getUserDetail() {
+    private fun getUserDetail(isRequestSync: Boolean = false) {
         binding.titleBarLight.tvTitleBar.text = getString(R.string.txt_loading)
         binding.tvFullName.text = getString(R.string.txt_loading)
+        binding.container.visibility = View.GONE
 
         lifecycleScope.launch {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                sessionManager.userID()?.let {
-                    val response = apiService.detailUser(userId = it)
-                    when (response.status) {
-                        RESPONSE_STATUS_OK -> {
+                val userId = when (isRequestSync) {
+                    true -> iUserID.toString()
+                    else -> sessionManager.userID().toString()
+                }
+                val response = apiService.detailUser(userId = userId)
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
 
-                            val data = response.results[0]
-                            sessionManager.setUserLoggedIn(data)
+                        val data = response.results[0]
+                        if (!isRequestSync) sessionManager.setUserLoggedIn(data)
 
-                            iUserID = data.id_user
-                            iPhone = data.phone_user
-                            iUserName = data.username
-                            iFullName = data.full_name
-                            iUserLevel = data.level_user
-                            iLocation = data.id_city
+                        iUserID = data.id_user
+                        iPhone = data.phone_user
+                        iUserName = data.username
+                        iFullName = data.full_name
+                        iUserLevel = data.level_user
+                        iLocation = data.id_city
+                        iIsNotify = data.is_notify
+                        binding.container.visibility = View.VISIBLE
 
-                            dataActivityValidation()
+                        initClickHandler()
+                        dataActivityValidation()
 
-                        } RESPONSE_STATUS_EMPTY -> handleMessage(this@UserProfileActivity, "GET USER DETAIL", "Gagal memuat detail pengguna: ${response.message}")
-                        else -> handleMessage(this@UserProfileActivity, "GET USER DETAIL", "Gagal memuat data. Error: ${response.message}")
-                    }
+                    } RESPONSE_STATUS_EMPTY -> handleMessage(this@UserProfileActivity, "GET USER DETAIL", "Gagal memuat detail pengguna: ${response.message}")
+                    else -> handleMessage(this@UserProfileActivity, "GET USER DETAIL", "Gagal memuat data. Error: ${response.message}")
                 }
 
             } catch (e: Exception) {
@@ -243,7 +248,7 @@ class UserProfileActivity : AppCompatActivity() {
 
             })
 
-        }
+        } else binding.tabContainer.visibility = View.GONE
 
         setupBarChart()
 
@@ -398,6 +403,7 @@ class UserProfileActivity : AppCompatActivity() {
             if (resultData == SYNC_NOW) {
 
                 isRequestSync = true
+                getUserDetail(true)
 
             }
 
