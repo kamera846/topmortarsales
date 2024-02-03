@@ -21,6 +21,7 @@ const val PING_HOST = "dev-saleswa.topmortarindonesia.com" // Development
 const val FIREBASE_REFERENCE = "db_dev" // Development
 const val FIREBASE_CHILD_AUTH = "auth"
 const val FIREBASE_CHILD_DELIVERY = "delivery"
+const val FIREBASE_CHILD_ABSENT = "absent"
 const val FIREBASE_CHILD_DISTRIBUTOR = "distributor"
 
 /*

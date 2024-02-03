@@ -1,8 +1,10 @@
 package com.topmortar.topmortarsales.view.courier
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -14,10 +16,15 @@ import android.view.View
 import android.widget.PopupMenu
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.viewpager.CourierViewPagerAdapter
 import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
@@ -26,7 +33,9 @@ import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_CITY_ID
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_STATUS
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
+import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -57,6 +66,8 @@ class CourierActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private val userKind get() = sessionManager.userKind()!!
     private val userId get() = sessionManager.userID()!!
+    private val username get() = sessionManager.userName()!!
+    private val fullname get() = sessionManager.fullName()!!
     private val userCity get() = sessionManager.userCityID()!!
     private val userDistributorId get() = sessionManager.userDistributor()!!
 
@@ -127,6 +138,8 @@ class CourierActivity : AppCompatActivity() {
             tabLayout.setTabTextColors(getColor(R.color.primary_600), getColor(R.color.white))
             tabLayout.setSelectedTabIndicatorColor(getColor(R.color.white))
         }
+
+        checkUserAbsent()
 
     }
 
@@ -468,4 +481,89 @@ class CourierActivity : AppCompatActivity() {
         getUserLoggedIn()
 
     }
+
+    private fun checkUserAbsent() {
+        val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+        val userChild = absentChild.child(userId)
+
+        userChild.addListenerForSingleValueEvent(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    // Do something
+                    val absentDateTime = snapshot.child("morningDateTime").getValue(String::class.java)
+                    if (!absentDateTime.isNullOrEmpty()) {
+                        val date = DateFormat.format(absentDateTime, "yyyy-MM-dd HH:mm:ss", "HH.mm")
+                        binding.titleBarDark.tvTitleBarDescription.text = "Halo $username, anda telah absen pada $date hari ini."
+                    }
+                } else {
+                    showDialogAbsent(userChild)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Do something
+                showDialogAbsent(userChild)
+            }
+
+        })
+
+    }
+
+    private fun showDialogAbsent(userChild: DatabaseReference) {
+        AlertDialog.Builder(this)
+            .setCancelable(false)
+            .setTitle("Absen Sekarang")
+            .setMessage("Data absen akan terekam, mohon untuk melakukan absen tepat waktu.")
+            .setPositiveButton("Absen Sekarang") { dialog, _ ->
+                userChild.child("id").setValue(userId)
+                userChild.child("username").setValue(username)
+                userChild.child("fullname").setValue(fullname)
+                userChild.child("lat").setValue("")
+                userChild.child("lng").setValue("")
+                userChild.child("eveningDateTime").setValue("")
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    val absentDateTime = DateFormat.now()
+                    userChild.child("morningDateTime").setValue(absentDateTime)
+
+                    val date = DateFormat.format(absentDateTime, "yyyy-MM-dd HH:mm:ss", "HH.mm")
+                    binding.titleBarDark.tvTitleBarDescription.text = "Halo $username, anda telah absen pada $date hari ini."
+                } else userChild.child("morningDateTime").setValue("")
+
+                dialog.dismiss()
+                return@setPositiveButton
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        // Meminta izin background location
+                        if (ContextCompat.checkSelfPermission(
+                                this,
+                                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                            ) == PackageManager.PERMISSION_GRANTED
+                        ) {
+
+                            dialog.dismiss()
+
+                        } else {
+                            val message = getString(R.string.bg_service_location_permission_message)
+                            val title = getString(R.string.bg_service_location_permission_title)
+                            val customUtility = CustomUtility(this)
+                            customUtility.showPermissionDeniedDialog(title = title, message = message) {
+                                ActivityCompat.requestPermissions(
+                                    this,
+                                    arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                                    LOCATION_PERMISSION_REQUEST_CODE
+                                )
+                            }
+                        }
+                    } else dialog.dismiss()
+                } else {
+                    // Meminta izin lokasi jika belum diberikan
+                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+                }
+
+            }
+            .setNegativeButton("Tutup Aplikasi") { _, _ -> finish() }
+            .show()
+    }
+
 }
