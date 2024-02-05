@@ -14,6 +14,7 @@ import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.PopupMenu
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -27,6 +28,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.viewpager.CourierViewPagerAdapter
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_CITY_ID
@@ -70,6 +72,7 @@ class CourierActivity : AppCompatActivity() {
     private val fullname get() = sessionManager.fullName()!!
     private val userCity get() = sessionManager.userCityID()!!
     private val userDistributorId get() = sessionManager.userDistributor()!!
+    private val userAbsentDateTime get() = sessionManager.absentDateTime()!!
 
     private lateinit var firebaseReference : DatabaseReference
 
@@ -78,6 +81,8 @@ class CourierActivity : AppCompatActivity() {
     private lateinit var viewPager: ViewPager
     private lateinit var pagerAdapter: CourierViewPagerAdapter
     private var activeTab = 0
+
+    private lateinit var absentProgressDialog: ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,44 +107,13 @@ class CourierActivity : AppCompatActivity() {
         binding.titleBarDark.icMore.setOnClickListener { showPopupMenu(it) }
         binding.titleBarDark.vBorder.visibility = View.GONE
 
-        tabLayout = binding.tabLayout
-        viewPager = binding.viewPager
+        absentProgressDialog = ProgressDialog(this)
+        absentProgressDialog.setCancelable(false)
+        absentProgressDialog.setMessage(getString(R.string.txt_loading))
 
-        pagerAdapter = CourierViewPagerAdapter(supportFragmentManager)
-        viewPager.adapter = pagerAdapter
-
-        // Connect TabLayout and ViewPager
-        tabLayout.setupWithViewPager(viewPager)
-        pagerAdapter.setCounterPageItem(object : CourierViewPagerAdapter.CounterPageItem{
-            override fun counterItem(count: Int, tabIndex: Int) {
-                if (tabIndex == 0) tabLayout.getTabAt(tabIndex)?.text = "Toko${if (count != 0) " ($count)" else ""}"
-                else tabLayout.getTabAt(tabIndex)?.text = "Basecamp${if (count != 0) " ($count)" else ""}"
-            }
-
-        })
-        tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener{
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                activeTab = tab?.position!!
-            }
-
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
-
-        })
-
-        if (CustomUtility(this).isDarkMode()) {
-            tabLayout.setBackgroundColor(getColor(R.color.black_300))
-            tabLayout.setTabTextColors(getColor(R.color.black_600), getColor(R.color.primary))
-            tabLayout.setSelectedTabIndicatorColor(getColor(R.color.primary))
-        }
-        else {
-            tabLayout.setBackgroundColor(getColor(R.color.primary))
-            tabLayout.setTabTextColors(getColor(R.color.primary_600), getColor(R.color.white))
-            tabLayout.setSelectedTabIndicatorColor(getColor(R.color.white))
-        }
-
-        checkUserAbsent()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            checkUserAbsent()
+        } else initLayout()
 
     }
 
@@ -419,6 +393,9 @@ class CourierActivity : AppCompatActivity() {
 //                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "Halo, ${ sessionManager.userName() }"}
                         binding.titleBarDark.tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
                         binding.titleBarDark.tvTitleBarDescription.visibility = binding.titleBarDark.tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            setTitleBarAbsent(userAbsentDateTime)
+                        }
 
                     }
                     RESPONSE_STATUS_EMPTY -> missingDataHandler()
@@ -452,6 +429,14 @@ class CourierActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
+
+//        val firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
+//        val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+//        val userChild = absentChild.child(userId)
+//        userChild.child("isOnline").setValue(false)
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            userChild.child("lastSeen").setValue(DateFormat.now())
+//        } else userChild.child("lastSeen").setValue("")
     }
 
     override fun onBackPressed() {
@@ -480,9 +465,20 @@ class CourierActivity : AppCompatActivity() {
         AppUpdateHelper.checkForUpdates(this)
         getUserLoggedIn()
 
+//        val firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
+//        val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+//        val userChild = absentChild.child(userId)
+//        userChild.child("isOnline").setValue(true)
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            userChild.child("lastSeen").setValue(DateFormat.now())
+//        } else userChild.child("lastSeen").setValue("")
+
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     private fun checkUserAbsent() {
+        absentProgressDialog.show()
+
         val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
         val userChild = absentChild.child(userId)
 
@@ -491,10 +487,19 @@ class CourierActivity : AppCompatActivity() {
                 if (snapshot.exists()) {
                     // Do something
                     val absentDateTime = snapshot.child("morningDateTime").getValue(String::class.java)
+
                     if (!absentDateTime.isNullOrEmpty()) {
-                        val date = DateFormat.format(absentDateTime, "yyyy-MM-dd HH:mm:ss", "HH.mm")
-                        binding.titleBarDark.tvTitleBarDescription.text = "Halo $username, anda telah absen pada $date hari ini."
-                    }
+                        sessionManager.absentDateTime(absentDateTime)
+
+                        if (DateFormat.dateAfterNow(absentDateTime)) {
+                            showDialogAbsent(userChild)
+                            setTitleBarAbsent(absentDateTime)
+                        } else {
+                            setTitleBarAbsent(absentDateTime)
+                            initLayout()
+                        }
+
+                    } else showDialogAbsent(userChild)
                 } else {
                     showDialogAbsent(userChild)
                 }
@@ -510,28 +515,14 @@ class CourierActivity : AppCompatActivity() {
     }
 
     private fun showDialogAbsent(userChild: DatabaseReference) {
+        absentProgressDialog.dismiss()
+
         AlertDialog.Builder(this)
             .setCancelable(false)
-            .setTitle("Absen Sekarang")
-            .setMessage("Data absen akan terekam, mohon untuk melakukan absen tepat waktu.")
+            .setTitle("Yuk, Catat Kehadiranmu Hari ini!")
+            .setMessage("Absenmu penting! Jangan lupa untuk mencatat kehadiranmu sekarang dan ciptakan jejak kerja yang positif.")
             .setPositiveButton("Absen Sekarang") { dialog, _ ->
-                userChild.child("id").setValue(userId)
-                userChild.child("username").setValue(username)
-                userChild.child("fullname").setValue(fullname)
-                userChild.child("lat").setValue("")
-                userChild.child("lng").setValue("")
-                userChild.child("eveningDateTime").setValue("")
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    val absentDateTime = DateFormat.now()
-                    userChild.child("morningDateTime").setValue(absentDateTime)
-
-                    val date = DateFormat.format(absentDateTime, "yyyy-MM-dd HH:mm:ss", "HH.mm")
-                    binding.titleBarDark.tvTitleBarDescription.text = "Halo $username, anda telah absen pada $date hari ini."
-                } else userChild.child("morningDateTime").setValue("")
-
-                dialog.dismiss()
-                return@setPositiveButton
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                         // Meminta izin background location
@@ -541,6 +532,7 @@ class CourierActivity : AppCompatActivity() {
                             ) == PackageManager.PERMISSION_GRANTED
                         ) {
 
+                            initFirebase(userChild)
                             dialog.dismiss()
 
                         } else {
@@ -555,7 +547,10 @@ class CourierActivity : AppCompatActivity() {
                                 )
                             }
                         }
-                    } else dialog.dismiss()
+                    } else {
+                        initFirebase(userChild)
+                        dialog.dismiss()
+                    }
                 } else {
                     // Meminta izin lokasi jika belum diberikan
                     ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
@@ -564,6 +559,89 @@ class CourierActivity : AppCompatActivity() {
             }
             .setNegativeButton("Tutup Aplikasi") { _, _ -> finish() }
             .show()
+    }
+
+    private fun initFirebase(userChild: DatabaseReference) {
+        absentProgressDialog.show()
+
+        userChild.child("id").setValue(userId)
+        userChild.child("username").setValue(username)
+        userChild.child("fullname").setValue(fullname)
+        userChild.child("lat").setValue("")
+        userChild.child("lng").setValue("")
+        userChild.child("eveningDateTime").setValue("")
+        userChild.child("isOnline").setValue(true)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val absentDateTime = DateFormat.now()
+            userChild.child("morningDateTime").setValue(absentDateTime)
+            userChild.child("lastSeen").setValue(absentDateTime)
+
+            sessionManager.absentDateTime(absentDateTime)
+            setTitleBarAbsent(absentDateTime)
+        } else {
+            userChild.child("morningDateTime").setValue("")
+            userChild.child("lastSeen").setValue("")
+        }
+
+        val serviceIntent = Intent(this, TrackingService::class.java)
+        serviceIntent.putExtra("userId", userId)
+        serviceIntent.putExtra("userDistributorId", userDistributorId)
+        serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
+        this.startService(serviceIntent)
+
+        initLayout()
+    }
+
+    private fun initLayout() {
+        binding.tabContainer.visibility = View.VISIBLE
+        tabLayout = binding.tabLayout
+        viewPager = binding.viewPager
+
+        pagerAdapter = CourierViewPagerAdapter(supportFragmentManager)
+        viewPager.adapter = pagerAdapter
+
+        // Connect TabLayout and ViewPager
+        tabLayout.setupWithViewPager(viewPager)
+        pagerAdapter.setCounterPageItem(object : CourierViewPagerAdapter.CounterPageItem{
+            override fun counterItem(count: Int, tabIndex: Int) {
+                if (tabIndex == 0) tabLayout.getTabAt(tabIndex)?.text = "Toko${if (count != 0) " ($count)" else ""}"
+                else tabLayout.getTabAt(tabIndex)?.text = "Basecamp${if (count != 0) " ($count)" else ""}"
+            }
+
+        })
+        tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener{
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                activeTab = tab?.position!!
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {}
+
+        })
+
+        if (CustomUtility(this).isDarkMode()) {
+            tabLayout.setBackgroundColor(getColor(R.color.black_300))
+            tabLayout.setTabTextColors(getColor(R.color.black_600), getColor(R.color.primary))
+            tabLayout.setSelectedTabIndicatorColor(getColor(R.color.primary))
+        }
+        else {
+            tabLayout.setBackgroundColor(getColor(R.color.primary))
+            tabLayout.setTabTextColors(getColor(R.color.primary_600), getColor(R.color.white))
+            tabLayout.setSelectedTabIndicatorColor(getColor(R.color.white))
+        }
+
+        absentProgressDialog.dismiss()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun setTitleBarAbsent(dateString: String) {
+
+        val dateDesc = DateFormat.differenceDateNowDesc(dateString)
+        val date = DateFormat.format(dateString, "yyyy-MM-dd HH:mm:ss", "HH.mm")
+        binding.titleBarDark.tvTitleBarDescription.text = "Halo $username, absenmu tercatat pukul $date $dateDesc"
+
     }
 
 }

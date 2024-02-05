@@ -162,6 +162,7 @@ class ClosingStoreFragment : Fragment() {
                                                             requireContext(),
                                                             TrackingService::class.java
                                                         )
+                                                        serviceIntent.putExtra("userId", userID)
                                                         serviceIntent.putExtra(
                                                             "userDistributorId",
                                                             userDistributorID
@@ -175,6 +176,7 @@ class ClosingStoreFragment : Fragment() {
                                                         )
                                                         requireContext().stopService(serviceIntent)
                                                         Handler().postDelayed({
+                                                            serviceIntent.putExtra("userId", userID)
                                                             serviceIntent.putExtra(
                                                                 "userDistributorId",
                                                                 userDistributorID

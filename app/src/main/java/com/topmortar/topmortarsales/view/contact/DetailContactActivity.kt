@@ -2258,6 +2258,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val isTracking = CustomUtility(this@DetailContactActivity).isServiceRunning(TrackingService::class.java)
         if (!isTracking) {
             val serviceIntent = Intent(this@DetailContactActivity, TrackingService::class.java)
+            serviceIntent.putExtra("userId", userID)
             serviceIntent.putExtra("userDistributorId", userDistributorId)
             serviceIntent.putExtra("deliveryId", deliveryId)
             this@DetailContactActivity.startService(serviceIntent)

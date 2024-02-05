@@ -13,6 +13,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.database.DatabaseReference
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
 import com.topmortar.topmortarsales.commons.utils.CustomNotificationBuilder
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
@@ -25,6 +26,7 @@ class TrackingService : Service() {
     private lateinit var locationCallback: LocationCallback
     private lateinit var firebaseReference: DatabaseReference
     private lateinit var childDelivery: DatabaseReference
+    private lateinit var childAbsent: DatabaseReference
     private lateinit var childDriver: DatabaseReference
 
     companion object {
@@ -62,11 +64,13 @@ class TrackingService : Service() {
 
     private fun startLocationUpdates(intent: Intent?) {
 
+        val userId = intent?.getStringExtra("userId")
         val userDistributorId = intent?.getStringExtra("userDistributorId").toString()
         val deliveryId = intent?.getStringExtra("deliveryId").toString()
 
         firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
         childDelivery = firebaseReference.child(FIREBASE_CHILD_DELIVERY)
+        childAbsent = firebaseReference.child(FIREBASE_CHILD_ABSENT).child(userId.toString())
         childDriver = childDelivery.child(deliveryId)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -79,6 +83,9 @@ class TrackingService : Service() {
                 val driverLocation = locationResult.lastLocation!!
                 childDriver.child("lat").setValue(driverLocation.latitude)
                 childDriver.child("lng").setValue(driverLocation.longitude)
+
+                childAbsent.child("lat").setValue(driverLocation.latitude)
+                childAbsent.child("lng").setValue(driverLocation.longitude)
 
             }
         }
