@@ -3,8 +3,10 @@ package com.topmortar.topmortarsales.view.courier
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -106,6 +108,7 @@ class CourierActivity : AppCompatActivity() {
         binding.titleBarDark.icMore.visibility = View.VISIBLE
         binding.titleBarDark.icMore.setOnClickListener { showPopupMenu(it) }
         binding.titleBarDark.vBorder.visibility = View.GONE
+        binding.titleBarDark.tvTitleBarDescription.isSelected = true
 
         absentProgressDialog = ProgressDialog(this)
         absentProgressDialog.setCancelable(false)
@@ -495,11 +498,16 @@ class CourierActivity : AppCompatActivity() {
                             showDialogAbsent(userChild)
                             setTitleBarAbsent(absentDateTime)
                         } else {
-                            setTitleBarAbsent(absentDateTime)
-                            initLayout()
+                            checkPermission {
+                                absentProgressDialog.dismiss()
+                                setTitleBarAbsent(absentDateTime)
+                                initLayout()
+                            }
                         }
 
-                    } else showDialogAbsent(userChild)
+                    } else {
+                        showDialogAbsent(userChild)
+                    }
                 } else {
                     showDialogAbsent(userChild)
                 }
@@ -523,38 +531,7 @@ class CourierActivity : AppCompatActivity() {
             .setMessage("Absenmu penting! Jangan lupa untuk mencatat kehadiranmu sekarang dan ciptakan jejak kerja yang positif.")
             .setPositiveButton("Absen Sekarang") { dialog, _ ->
 
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        // Meminta izin background location
-                        if (ContextCompat.checkSelfPermission(
-                                this,
-                                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                            ) == PackageManager.PERMISSION_GRANTED
-                        ) {
-
-                            initFirebase(userChild)
-                            dialog.dismiss()
-
-                        } else {
-                            val message = getString(R.string.bg_service_location_permission_message)
-                            val title = getString(R.string.bg_service_location_permission_title)
-                            val customUtility = CustomUtility(this)
-                            customUtility.showPermissionDeniedDialog(title = title, message = message) {
-                                ActivityCompat.requestPermissions(
-                                    this,
-                                    arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
-                                    LOCATION_PERMISSION_REQUEST_CODE
-                                )
-                            }
-                        }
-                    } else {
-                        initFirebase(userChild)
-                        dialog.dismiss()
-                    }
-                } else {
-                    // Meminta izin lokasi jika belum diberikan
-                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
-                }
+                checkPermission(userChild, dialog)
 
             }
             .setNegativeButton("Tutup Aplikasi") { _, _ -> finish() }
@@ -642,6 +619,96 @@ class CourierActivity : AppCompatActivity() {
         val date = DateFormat.format(dateString, "yyyy-MM-dd HH:mm:ss", "HH.mm")
         binding.titleBarDark.tvTitleBarDescription.text = "Halo $username, absenmu tercatat pukul $date $dateDesc"
 
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+                    val userChild = absentChild.child(userId)
+                    checkPermission(userChild = userChild)
+                } else initLayout()
+            } else {
+                val message = getString(R.string.bg_service_location_permission_message)
+                val title = getString(R.string.bg_service_location_permission_title)
+                AlertDialog.Builder(this)
+                    .setCancelable(false)
+                    .setTitle(title)
+                    .setMessage(message)
+                    .setPositiveButton(getString(R.string.open_settings)) { localDialog, _ ->
+                        localDialog.dismiss()
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                        intent.data = Uri.fromParts("package", packageName, null)
+                        startActivityForResult(intent, LOCATION_PERMISSION_REQUEST_CODE)
+                    }
+                    .show()
+            }
+        }
+
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                checkUserAbsent()
+            } else initLayout()
+        }
+    }
+
+    private fun checkPermission(userChild: DatabaseReference? = null, dialog: DialogInterface? = null, validAction: (() -> Unit)? = null) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                if (ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+
+                    if (validAction != null) validAction()
+                    else {
+                        if (userChild != null) initFirebase(userChild)
+                        dialog?.dismiss()
+                    }
+
+                } else {
+                    dialog?.dismiss()
+                    val message = getString(R.string.bg_service_location_permission_message)
+                    val title = getString(R.string.bg_service_location_permission_title)
+                    AlertDialog.Builder(this)
+                        .setCancelable(false)
+                        .setTitle(title)
+                        .setMessage(message)
+                        .setPositiveButton(getString(R.string.open_settings)) { localDialog, _ ->
+                            ActivityCompat.requestPermissions(
+                                this,
+                                arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                                LOCATION_PERMISSION_REQUEST_CODE
+                            )
+                            localDialog.dismiss()
+                        }
+                        .show()
+                }
+            } else {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+                dialog?.dismiss()
+            }
+        } else {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                if (validAction != null) validAction()
+                else {
+                    if (userChild != null) initFirebase(userChild)
+                    dialog?.dismiss()
+                }
+            } else {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+                dialog?.dismiss()
+            }
+        }
     }
 
 }
