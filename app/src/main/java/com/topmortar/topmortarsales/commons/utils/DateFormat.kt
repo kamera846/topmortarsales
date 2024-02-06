@@ -35,12 +35,10 @@ object DateFormat {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun dateAfterNow(dateString: String): Boolean {
-        val targetDateString = format(dateString, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd")
-
         val dateNow = LocalDate.now()
 
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val targetDate = LocalDate.parse(targetDateString, formatter)
+        val targetDate = LocalDate.parse(dateString, formatter)
 
         return dateNow.isAfter(targetDate)
     }

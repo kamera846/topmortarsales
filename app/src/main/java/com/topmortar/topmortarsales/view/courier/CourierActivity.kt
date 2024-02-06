@@ -489,12 +489,14 @@ class CourierActivity : AppCompatActivity() {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
                     // Do something
-                    val absentDateTime = snapshot.child("morningDateTime").getValue(String::class.java)
+                    val absentDateTime = snapshot.child("morningDateTime").getValue(String::class.java).toString()
 
-                    if (!absentDateTime.isNullOrEmpty()) {
+                    if (absentDateTime.isNotEmpty()) {
                         sessionManager.absentDateTime(absentDateTime)
 
-                        if (DateFormat.dateAfterNow(absentDateTime)) {
+                        val absentDate = DateFormat.format(absentDateTime, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd")
+
+                        if (DateFormat.dateAfterNow(absentDate)) {
                             showDialogAbsent(userChild)
                             setTitleBarAbsent(absentDateTime)
                         } else {
