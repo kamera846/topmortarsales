@@ -611,6 +611,10 @@ class CourierActivity : AppCompatActivity() {
             tabLayout.setSelectedTabIndicatorColor(getColor(R.color.white))
         }
 
+        val tabIndexFromIntent = intent.getIntExtra("tabIndex", 0)
+        activeTab = tabIndexFromIntent
+        tabLayout.getTabAt(activeTab)?.select()
+
         absentProgressDialog.dismiss()
     }
 
