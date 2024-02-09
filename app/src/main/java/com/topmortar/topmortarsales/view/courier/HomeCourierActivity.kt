@@ -67,8 +67,8 @@ class HomeCourierActivity : AppCompatActivity() {
         binding.nearestStoreItem.setOnClickListener { if (isAbsentNow) navigateToNearestStore() }
         binding.basecampItem.setOnClickListener { if (isAbsentNow) navigateToBasecamp() }
         binding.nearestBasecampItem.setOnClickListener { if (isAbsentNow) navigateToNearestBasecamp() }
-        binding.myProfileItem.setOnClickListener { if (isAbsentNow) navigateToMyProfile() }
-        binding.contactAdminItem.setOnClickListener { if (isAbsentNow) navigateToContactAdmin() }
+        binding.myProfileItem.setOnClickListener { navigateToMyProfile() }
+        binding.contactAdminItem.setOnClickListener { navigateToContactAdmin() }
 
         lockMenuItem(true)
 
@@ -95,15 +95,15 @@ class HomeCourierActivity : AppCompatActivity() {
         binding.nearestStoreItem.alpha = if (state) 0.5f else 1f
         binding.basecampItem.alpha = if (state) 0.5f else 1f
         binding.nearestBasecampItem.alpha = if (state) 0.5f else 1f
-        binding.myProfileItem.alpha = if (state) 0.5f else 1f
-        binding.contactAdminItem.alpha = if (state) 0.5f else 1f
+//        binding.myProfileItem.alpha = if (state) 0.5f else 1f
+//        binding.contactAdminItem.alpha = if (state) 0.5f else 1f
 
         binding.deliveryItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
         binding.nearestStoreItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
         binding.basecampItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
         binding.nearestBasecampItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
-        binding.myProfileItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
-        binding.contactAdminItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
+//        binding.myProfileItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
+//        binding.contactAdminItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
 
         binding.absentTitle.text = if (state) {
             "Yuk, Catat Kehadiranmu Hari ini!"

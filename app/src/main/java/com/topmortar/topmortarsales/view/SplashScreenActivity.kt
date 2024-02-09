@@ -64,7 +64,7 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.DeviceModel
-import com.topmortar.topmortarsales.view.courier.CourierActivity
+import com.topmortar.topmortarsales.view.courier.HomeCourierActivity
 import com.topmortar.topmortarsales.view.tukang.BrandAmbassadorActivity
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -300,7 +300,7 @@ class SplashScreenActivity : AppCompatActivity() {
     }
     private fun navigateToCourier() {
 
-        val intent = Intent(this, CourierActivity::class.java)
+        val intent = Intent(this, HomeCourierActivity::class.java)
         startActivity(intent)
         finish()
 
