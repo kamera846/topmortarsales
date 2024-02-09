@@ -14,7 +14,7 @@
     <androidx.core.widget.NestedScrollView
         android:id="@+id/container"
         android:layout_below="@+id/titleBarLight"
-        android:layout_above="@+id/btnLogout"
+        android:layout_above="@+id/bottomContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true">
@@ -407,29 +407,61 @@
 
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Btn Logout -->
     <LinearLayout
-        android:visibility="gone"
-        android:id="@+id/btnLogout"
+        android:id="@+id/bottomContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginVertical="8dp"
-        android:padding="12dp"
-        android:gravity="center"
-        android:background="@drawable/bg_base_clickable_round_8"
         android:layout_alignParentBottom="true"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/btnTrackCourier"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Logout"
-            android:textStyle="bold"
-            android:textSize="14sp"
-            android:textAllCaps="true"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginVertical="8dp"
+            android:padding="12dp"
+            android:gravity="center"
+            android:alpha="0.7"
+            android:background="@drawable/et_background_clickable"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Lacak Kurir"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:textAllCaps="true"
+                android:textColor="@color/text_black"/>
+
+        </LinearLayout>
+
+        <!-- Btn Logout -->
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/btnLogout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginVertical="8dp"
+            android:padding="12dp"
+            android:gravity="center"
             android:alpha="0.5"
-            android:textColor="@color/text_black"/>
+            android:background="@drawable/bg_base_clickable_round_8"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Logout"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:textAllCaps="true"
+                android:textColor="@color/text_black"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 

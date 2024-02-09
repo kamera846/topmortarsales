@@ -79,9 +79,11 @@ import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.CONNECTION_FAILURE_RESOLUTION_REQUEST
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_COURIER_ID
 import com.topmortar.topmortarsales.commons.CONST_DELIVERY_ID
 import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
 import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING
+import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING_COURIER
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_CITY_ID
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
@@ -92,6 +94,7 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS_STATUS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.IS_CLOSING
@@ -203,7 +206,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var locationListener: ValueEventListener? = null
     private var courierMarker: Marker? = null
     private var isTracking = false
+    private var isTrackingCourier = false
     private var deliveryID: String? = null
+    private var courierID: String? = null
 
     private var listGudang: ArrayList<GudangModel> = arrayListOf()
     private var selectedCenterPoint: ModalSearchModel? = null
@@ -494,9 +499,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         iMapsStatus = intent.getStringExtra(CONST_MAPS_STATUS)
         iContactID = intent.getStringExtra(CONST_CONTACT_ID)
         deliveryID = intent.getStringExtra(CONST_DELIVERY_ID)
+        courierID = intent.getStringExtra(CONST_COURIER_ID)
         isGetCoordinate = intent.getBooleanExtra(GET_COORDINATE, false)
         isNearestStore = intent.getBooleanExtra(CONST_NEAREST_STORE, false)
         isTracking = intent.getBooleanExtra(CONST_IS_TRACKING, false)
+        isTrackingCourier = intent.getBooleanExtra(CONST_IS_TRACKING_COURIER, false)
         listCoordinate = intent.getStringArrayListExtra(CONST_LIST_COORDINATE)
         listCoordinateName = intent.getStringArrayListExtra(CONST_LIST_COORDINATE_NAME)
         listCoordinateStatus = intent.getStringArrayListExtra(CONST_LIST_COORDINATE_STATUS)
@@ -506,7 +513,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             binding.btnGetLatLng.visibility = View.VISIBLE
             binding.searchBar.visibility = View.VISIBLE
         } else {
-            if (!isNearestStore && !isTracking) {
+            if (!isNearestStore && !isTracking && !isTrackingCourier) {
 
                 fusedLocationClient.lastLocation
                     .addOnSuccessListener { location: Location? ->
@@ -1038,6 +1045,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     setPin(targetLatLng, targetLatLngName ?: "")
                 } else {
                     if (isTracking) setupTracking()
+                    else if (isTrackingCourier) setupTrackingCourier()
                     else setPin(currentLatLng!!, "Lokasi Saya")
 
                     if (isNearestStore && binding.llFilter.isVisible) {
@@ -1838,6 +1846,69 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                             courierMarker?.position = courierLatLng
                         }
                     }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                progressDialog.dismiss()
+                Log.d(TAG_RESPONSE_CONTACT, "Child Driver Error!")
+                handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
+                    "Failed run service. Exception $error"
+                )
+            }
+
+        })
+
+    }
+
+    private fun setupTrackingCourier() {
+        val progressDialog = ProgressDialog(this)
+        progressDialog.setCancelable(false)
+        progressDialog.setMessage("Mendeteksi lokasi kurir…")
+        progressDialog.show()
+
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
+        childDelivery = firebaseReference?.child(FIREBASE_CHILD_ABSENT)
+        childDriver = childDelivery?.child(courierID.toString())
+
+        val courierDrawable = R.drawable.pin_truck
+        mMap.isMyLocationEnabled = false
+
+        childDriver?.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    val courierLat = snapshot.child("lat").getValue(Double::class.java)
+                    val courierLng = snapshot.child("lng").getValue(Double::class.java)
+                    val courierFullName = snapshot.child("fullname").getValue(String::class.java)
+
+                    val courierLatLng = LatLng(courierLat!!, courierLng!!)
+
+                    if (courierMarker == null) {
+                        courierMarker = mMap.addMarker(
+                            MarkerOptions()
+                                .position(courierLatLng)
+                                .title(
+                                    courierFullName ?: "Kurir"
+                                )
+                                .icon(
+                                    BitmapDescriptorFactory.fromBitmap(
+                                        resizedBitmap(courierDrawable)
+                                    )
+                                )
+                        )
+                        progressDialog.dismiss()
+                        changeFocusCamera(courierLatLng)
+                    } else {
+                        progressDialog.dismiss()
+                        courierMarker?.position = courierLatLng
+                    }
+                } else {
+                    Log.d("Tracking Courier", "Not exist")
+                    progressDialog.dismiss()
+                    Log.d(TAG_RESPONSE_CONTACT, "Child Driver Error!")
+                    handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
+                        "Tidak dapat mendeteksi lokasi kurir!"
+                    )
                 }
             }
 

@@ -109,6 +109,7 @@ const val CONST_DELIVERY_ID = "const_delivery_id"
 const val CONST_INVOICE_ID = "const_invoice_id"
 const val CONST_INVOICE_NUMBER = "const_invoice_number"
 const val CONST_INVOICE_IS_COD = "const_invoice_is_cod"
+const val CONST_COURIER_ID = "const_courier_id"
 
 const val CONST_OWNER = "const_owner"
 const val CONST_LOCATION = "const_location"
@@ -142,6 +143,7 @@ const val CONST_LIST_COORDINATE_STATUS = "const_list_coordinate_status"
 const val CONST_LIST_COORDINATE_CITY_ID = "const_list_coordinate_city_id"
 const val CONST_IS_BASE_CAMP = "const_is_base_camp"
 const val CONST_IS_TRACKING = "const_is_tracking"
+const val CONST_IS_TRACKING_COURIER = "const_is_tracking_courier"
 
 /*
     Status

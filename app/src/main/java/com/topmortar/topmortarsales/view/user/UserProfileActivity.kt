@@ -28,9 +28,11 @@ import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_COURIER_ID
 import com.topmortar.topmortarsales.commons.CONST_DATE
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_IS_NOTIFY
+import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING_COURIER
 import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
@@ -66,6 +68,7 @@ import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityUserProfileBinding
 import com.topmortar.topmortarsales.modal.ChartSalesPricingModal
 import com.topmortar.topmortarsales.model.ContactModel
+import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.SplashScreenActivity
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import com.topmortar.topmortarsales.view.delivery.HistoryDeliveryFragment
@@ -115,6 +118,8 @@ class UserProfileActivity : AppCompatActivity() {
 
         if (iUserLevel == AUTH_LEVEL_COURIER) {
             binding.deliveryContainer.visibility = View.VISIBLE
+            binding.btnTrackCourier.visibility = View.VISIBLE
+            binding.btnTrackCourier.setOnClickListener { navigateTrackingCourier() }
 
             /*
             Call Fragment
@@ -229,6 +234,17 @@ class UserProfileActivity : AppCompatActivity() {
         intent.putExtra(CONST_FULL_NAME, iFullName)
         intent.putExtra(CONST_USER_LEVEL, iUserLevel)
         startActivity(intent)
+
+    }
+
+    private fun navigateTrackingCourier() {
+
+        val intent = Intent(this, MapsActivity::class.java)
+        intent.putExtra(CONST_IS_TRACKING_COURIER, true)
+        intent.putExtra(CONST_COURIER_ID, iUserID)
+        startActivity(intent)
+
+        startActivityForResult(intent, MANAGE_USER_ACTIVITY_REQUEST_CODE)
 
     }
 
