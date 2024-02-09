@@ -189,11 +189,11 @@ class ClosingStoreFragment : Fragment() {
                                                         }, 1000)
                                                     }
                                                 } else {
-                                                    val serviceIntent = Intent(
-                                                        requireContext(),
-                                                        TrackingService::class.java
-                                                    )
-                                                    requireContext().stopService(serviceIntent)
+//                                                    val serviceIntent = Intent(
+//                                                        requireContext(),
+//                                                        TrackingService::class.java
+//                                                    )
+//                                                    requireContext().stopService(serviceIntent)
                                                 }
 
                                                 setRecyclerView(contacts)
@@ -201,11 +201,11 @@ class ClosingStoreFragment : Fragment() {
                                                 showBadgeRefresh(false)
                                                 listener?.counterItem(response.results.size)
                                             } else {
-                                                val serviceIntent = Intent(
-                                                    requireContext(),
-                                                    TrackingService::class.java
-                                                )
-                                                requireContext().stopService(serviceIntent)
+//                                                val serviceIntent = Intent(
+//                                                    requireContext(),
+//                                                    TrackingService::class.java
+//                                                )
+//                                                requireContext().stopService(serviceIntent)
 
                                                 setRecyclerView(contacts)
                                                 loadingState(false)

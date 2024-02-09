@@ -30,9 +30,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_SUCCESS
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
-import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil.compressImage
-import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -283,11 +281,11 @@ class PreviewClosingActivity : AppCompatActivity() {
 
                         childDriver?.child("stores")?.addListenerForSingleValueEvent(object : ValueEventListener {
                             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                                val isTracking = CustomUtility(this@PreviewClosingActivity).isServiceRunning(TrackingService::class.java)
-                                if (!dataSnapshot.exists() && isTracking) {
-                                    val serviceIntent = Intent(this@PreviewClosingActivity, TrackingService::class.java)
-                                    this@PreviewClosingActivity.stopService(serviceIntent)
-                                }
+//                                val isTracking = CustomUtility(this@PreviewClosingActivity).isServiceRunning(TrackingService::class.java)
+//                                if (!dataSnapshot.exists() && isTracking) {
+//                                    val serviceIntent = Intent(this@PreviewClosingActivity, TrackingService::class.java)
+//                                    this@PreviewClosingActivity.stopService(serviceIntent)
+//                                }
                                 finishClosing(message)
                             }
 

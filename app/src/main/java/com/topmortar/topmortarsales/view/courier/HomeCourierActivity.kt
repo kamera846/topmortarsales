@@ -1,28 +1,46 @@
 package com.topmortar.topmortarsales.view.courier
 
+import android.Manifest
 import android.app.ProgressDialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
+import android.view.View
 import android.widget.Toast
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_CITY_ID
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_STATUS
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
+import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.services.TrackingService
+import com.topmortar.topmortarsales.commons.utils.DateFormat
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -39,12 +57,18 @@ class HomeCourierActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private val userId get() = sessionManager.userID()
     private val userCity get() = sessionManager.userCityID()
+    private val userName get() = sessionManager.userName()
     private val userFullName get() = sessionManager.fullName()
     private val userDistributorId get() = sessionManager.userDistributor()
-    private val userDistributorNumber get() = sessionManager.userDistributor()
+    private val userDistributorNumber get() = sessionManager.userDistributorNumber()
 
     private var doubleBackToExitPressedOnce = false
-    private var isAbsentNow = false
+    private var isAbsentMorningNow = false
+    private var isAbsentEveningNow = false
+    private var isLocked = false
+
+    private lateinit var firebaseReference : DatabaseReference
+    private lateinit var absentProgressDialog : ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +79,8 @@ class HomeCourierActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId.toString())
+
         initView()
     }
 
@@ -62,34 +88,229 @@ class HomeCourierActivity : AppCompatActivity() {
 
         binding.fullName.text = userFullName
 
-        binding.btnAbsent.setOnClickListener { checkAbsent() }
-        binding.deliveryItem.setOnClickListener { if (isAbsentNow) navigateToDelivery() }
-        binding.nearestStoreItem.setOnClickListener { if (isAbsentNow) navigateToNearestStore() }
-        binding.basecampItem.setOnClickListener { if (isAbsentNow) navigateToBasecamp() }
-        binding.nearestBasecampItem.setOnClickListener { if (isAbsentNow) navigateToNearestBasecamp() }
+
+        absentProgressDialog = ProgressDialog(this)
+        absentProgressDialog.setMessage(getString(R.string.txt_loading))
+        absentProgressDialog.setCancelable(false)
+
+        binding.deliveryItem.setOnClickListener { if (!isLocked) navigateToDelivery() }
+        binding.nearestStoreItem.setOnClickListener { if (!isLocked) navigateToNearestStore() }
+        binding.basecampItem.setOnClickListener { if (!isLocked) navigateToBasecamp() }
+        binding.nearestBasecampItem.setOnClickListener { if (!isLocked) navigateToNearestBasecamp() }
         binding.myProfileItem.setOnClickListener { navigateToMyProfile() }
         binding.contactAdminItem.setOnClickListener { navigateToContactAdmin() }
 
+        binding.btnAbsent.setOnClickListener {
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    if (ContextCompat.checkSelfPermission(
+                            this,
+                            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
+
+                        absentAction()
+
+                    } else {
+                        val message = getString(R.string.bg_service_location_permission_message)
+                        val title = getString(R.string.bg_service_location_permission_title)
+                        AlertDialog.Builder(this)
+                            .setCancelable(false)
+                            .setTitle(title)
+                            .setMessage(message)
+                            .setPositiveButton(getString(R.string.open_settings)) { localDialog, _ ->
+                                ActivityCompat.requestPermissions(
+                                    this,
+                                    arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                                    LOCATION_PERMISSION_REQUEST_CODE
+                                )
+                                localDialog.dismiss()
+                            }
+                            .show()
+                    }
+                } else {
+                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+                }
+            } else {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    absentAction()
+                } else {
+                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+                }
+            }
+        }
+
         lockMenuItem(true)
+
+        checkAbsent()
 
     }
 
     private fun checkAbsent() {
-        val progressDialog = ProgressDialog(this)
-        progressDialog.setMessage(getString(R.string.txt_loading))
-        progressDialog.setCancelable(false)
-        progressDialog.show()
+        absentProgressDialog.show()
 
-        Handler().postDelayed({
+        val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+        val userChild = absentChild.child(userId.toString())
 
-            lockMenuItem(isAbsentNow)
-            progressDialog.dismiss()
+        userChild.addListenerForSingleValueEvent(object: ValueEventListener {
+            @RequiresApi(Build.VERSION_CODES.O)
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    // Do something
+                    if (snapshot.child("morningDateTime").exists()) {
+                        val morningDateTime = snapshot.child("morningDateTime").getValue(String::class.java).toString()
+                        if (morningDateTime.isNotEmpty()) {
+                            sessionManager.absentDateTime(morningDateTime)
 
-        }, 2000)
+                            val absentMorningDate = DateFormat.format(morningDateTime, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd")
+
+                            if (DateFormat.dateAfterNow(absentMorningDate)) {
+                                isAbsentMorningNow = false
+                                lockMenuItem(true)
+                            } else {
+
+                                isAbsentMorningNow = true
+                                if (snapshot.child("eveningDateTime").exists()) {
+                                    Log.d("Evening Date", "Exists")
+                                    val eveningDateTime = snapshot.child("eveningDateTime").getValue(String::class.java).toString()
+
+                                    if (eveningDateTime.isNotEmpty()) {
+                                        Log.d("Evening Date", "Not empty")
+                                        val absentEveningDate = DateFormat.format(eveningDateTime, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd")
+
+                                        if (DateFormat.dateAfterNow(absentEveningDate)) {
+                                            Log.d("Evening Date", "After now")
+                                            val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
+                                            serviceIntent.putExtra("userId", userId)
+                                            serviceIntent.putExtra("userDistributorId", userDistributorId)
+                                            serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
+                                            this@HomeCourierActivity.startService(serviceIntent)
+                                            isAbsentEveningNow = false
+                                            lockMenuItem(false)
+                                        } else {
+                                            Log.d("Evening Date", "Now")
+                                            isAbsentEveningNow = true
+                                            lockMenuItem(true)
+                                        }
+
+                                    } else {
+                                        Log.d("Evening Date", "Empty")
+                                        val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
+                                        serviceIntent.putExtra("userId", userId)
+                                        serviceIntent.putExtra("userDistributorId", userDistributorId)
+                                        serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
+                                        this@HomeCourierActivity.startService(serviceIntent)
+                                        isAbsentEveningNow = false
+                                        lockMenuItem(false)
+                                    }
+                                } else {
+                                    Log.d("Evening Date", "Not exists")
+                                    isAbsentEveningNow = false
+                                    lockMenuItem(false)
+                                }
+
+                            }
+
+                        } else {
+                            isAbsentMorningNow = false
+                            lockMenuItem(true)
+                        }
+                    } else {
+                        isAbsentMorningNow = false
+                        lockMenuItem(true)
+                    }
+                } else {
+                    isAbsentMorningNow = false
+                    lockMenuItem(true)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Do something
+                isAbsentMorningNow = false
+                isAbsentEveningNow = false
+                lockMenuItem(true)
+            }
+
+        })
+    }
+
+    private fun absentAction() {
+
+        var alertTitle = "Absen Kehadiran"
+        var alertMessage = "Konfirmasi absen kehadiran sekarang?"
+
+        if (isAbsentMorningNow) {
+            alertTitle = "Absen Pulang"
+            alertMessage = "Konfirmasi absen pulang sekarang?"
+        }
+
+        AlertDialog.Builder(this)
+            .setCancelable(false)
+            .setTitle(alertTitle)
+            .setMessage(alertMessage)
+            .setPositiveButton("Iya") { dialog, _ ->
+
+                dialog.dismiss()
+                absentProgressDialog.show()
+
+                val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+                val userChild = absentChild.child(userId.toString())
+
+                userChild.child("id").setValue(userId)
+                userChild.child("username").setValue(userName)
+                userChild.child("fullname").setValue(userFullName)
+                userChild.child("isOnline").setValue(true)
+
+                if (!isAbsentMorningNow) {
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        val absentDateTime = DateFormat.now()
+                        userChild.child("morningDateTime").setValue(absentDateTime)
+                        userChild.child("lastSeen").setValue(absentDateTime)
+
+                        sessionManager.absentDateTime(absentDateTime)
+                    } else {
+                        userChild.child("morningDateTime").setValue("")
+                        userChild.child("lastSeen").setValue("")
+                    }
+
+                    val serviceIntent = Intent(this, TrackingService::class.java)
+                    serviceIntent.putExtra("userId", userId)
+                    serviceIntent.putExtra("userDistributorId", userDistributorId)
+                    serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
+                    this.startService(serviceIntent)
+
+                    checkAbsent()
+                } else {
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        val absentDateTime = DateFormat.now()
+                        userChild.child("eveningDateTime").setValue(absentDateTime)
+                        userChild.child("lastSeen").setValue(absentDateTime)
+
+                        sessionManager.absentDateTime(absentDateTime)
+                    } else {
+                        userChild.child("eveningDateTime").setValue("")
+                        userChild.child("lastSeen").setValue("")
+                    }
+
+                    val serviceIntent = Intent(this, TrackingService::class.java)
+                    this.stopService(serviceIntent)
+
+                    checkAbsent()
+                }
+
+            }
+            .setNegativeButton("Batal") { dialog, _ -> dialog.dismiss() }
+            .show()
     }
 
     private fun lockMenuItem(state: Boolean) {
-        isAbsentNow = !state
+        absentProgressDialog.dismiss()
+        isLocked = state
+//        isAbsentMorningNow = !state
 
         binding.deliveryItem.alpha = if (state) 0.5f else 1f
         binding.nearestStoreItem.alpha = if (state) 0.5f else 1f
@@ -105,19 +326,28 @@ class HomeCourierActivity : AppCompatActivity() {
 //        binding.myProfileItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
 //        binding.contactAdminItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
 
-        binding.absentTitle.text = if (state) {
-            "Yuk, Catat Kehadiranmu Hari ini!"
-        } else {
-            "Kehadiranmu Telah Tercatat!"
-        }
-        binding.absentDescription.text = if (state) {
-            "Absenmu penting! Jangan lupa untuk mencatat kehadiranmu sekarang dan ciptakan jejak kerja yang positif."
-        } else {
-            "Terima kasih sudah mencatat kehadiran hari ini dan jangan lupa untuk mencatat absen pulang juga nanti!"
-        }
+        if (isAbsentMorningNow && isAbsentEveningNow) {
 
-        binding.btnAbsent.backgroundTintList = ContextCompat.getColorStateList(this, if (state) R.color.status_bid else R.color.red_claret)
-        binding.btnAbsent.text = if (state) "Absen Sekarang" else "Pulang Sekarang"
+            binding.absentTitle.text = "Absen pulang sudah tercatat!"
+            binding.absentDescription.text = "Terima kasih atas kinerja hari ini. Beristirahatlah untuk kinerja yang maksimal esok hari!"
+
+            binding.btnAbsent.visibility = View.GONE
+        } else {
+
+            binding.absentTitle.text = if (state) {
+                "Yuk, Catat Kehadiranmu Hari ini!"
+            } else {
+                "Kehadiranmu Telah Tercatat!"
+            }
+            binding.absentDescription.text = if (state) {
+                "Absenmu penting! Jangan lupa untuk mencatat kehadiranmu sekarang dan ciptakan jejak kerja yang positif."
+            } else {
+                "Terima kasih sudah mencatat kehadiran hari ini dan jangan lupa untuk mencatat absen pulang juga nanti!"
+            }
+
+            binding.btnAbsent.backgroundTintList = ContextCompat.getColorStateList(this, if (state) R.color.status_bid else R.color.red_claret)
+            binding.btnAbsent.text = if (state) "Absen Sekarang" else "Pulang Sekarang"
+        }
 
     }
 
@@ -293,8 +523,7 @@ class HomeCourierActivity : AppCompatActivity() {
     }
 
     private fun navigateToContactAdmin() {
-        val distributorNumber = userDistributorNumber
-        val phoneNumber = if (!distributorNumber.isNullOrEmpty()) distributorNumber else getString(R.string.topmortar_wa_number)
+        val phoneNumber = if (!userDistributorNumber.isNullOrEmpty()) userDistributorNumber else getString(R.string.topmortar_wa_number)
         val message = "*#Courier Service*\nHalo admin, tolong bantu saya [KETIK PESAN ANDA]"
 
         val intent = Intent(Intent.ACTION_VIEW)

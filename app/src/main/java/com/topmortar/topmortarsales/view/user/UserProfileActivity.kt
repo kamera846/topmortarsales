@@ -1,8 +1,13 @@
 package com.topmortar.topmortarsales.view.user
 
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import android.util.Log
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -14,6 +19,7 @@ import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.google.android.material.tabs.TabLayout
+import com.google.firebase.database.DatabaseReference
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.viewpager.UserProfileViewPagerAdapter
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
@@ -37,6 +43,8 @@ import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
+import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -45,8 +53,12 @@ import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -54,6 +66,7 @@ import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityUserProfileBinding
 import com.topmortar.topmortarsales.modal.ChartSalesPricingModal
 import com.topmortar.topmortarsales.model.ContactModel
+import com.topmortar.topmortarsales.view.SplashScreenActivity
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import com.topmortar.topmortarsales.view.delivery.HistoryDeliveryFragment
 import com.topmortar.topmortarsales.view.reports.ReportsActivity
@@ -64,6 +77,8 @@ import org.greenrobot.eventbus.Subscribe
 class UserProfileActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
+    private val userDistributorId get() = sessionManager.userDistributor()
+
     private lateinit var binding: ActivityUserProfileBinding
     private lateinit var customUtility: CustomUtility
     private lateinit var modalPricingDetails: ChartSalesPricingModal
@@ -75,6 +90,8 @@ class UserProfileActivity : AppCompatActivity() {
     private val bidLimit get() = sessionManager.userBidLimit().toString()
     private var isRequestSync = false
 
+    private lateinit var firebaseReference: DatabaseReference
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -82,6 +99,8 @@ class UserProfileActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
         binding = ActivityUserProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId.toString())
 
         iUserID = intent.getStringExtra(CONST_USER_ID)
         iPhone = intent.getStringExtra(CONST_PHONE)
@@ -219,6 +238,12 @@ class UserProfileActivity : AppCompatActivity() {
             binding.titleBarLight.icEdit.visibility = View.VISIBLE
             binding.titleBarLight.icEdit.setOnClickListener { navigateEditUser() }
         }
+
+        if (sessionManager.userKind() == USER_KIND_COURIER) {
+            binding.btnLogout.visibility = View.VISIBLE
+            binding.btnLogout.setOnClickListener { logoutConfirmation() }
+        }
+
         binding.toggleBarChart.setOnClickListener { toggleBarChart() }
         binding.priceContainer.setOnClickListener { modalPricingDetails.show() }
         binding.titleBarLight.icBack.setOnClickListener { backHandler() }
@@ -439,6 +464,62 @@ class UserProfileActivity : AppCompatActivity() {
             setResult(RESULT_OK, resultIntent)
             finish()
         } else finish()
+    }
+
+
+
+    private fun logoutConfirmation() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Konfirmasi Logout")
+            .setMessage("Apakah anda yakin ingin keluar?")
+            .setNegativeButton("Tidak") { dialog, _ -> dialog.dismiss() }
+            .setPositiveButton("Iya") { dialog, _ ->
+
+                dialog.dismiss()
+                logoutHandler()
+
+            }
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    @SuppressLint("HardwareIds")
+    private fun logoutHandler() {
+
+        // Firebase Auth Session
+        try {
+            val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+            val model = Build.MODEL
+            val manufacturer = Build.MANUFACTURER
+
+            val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
+            val userChild = authChild.child(sessionManager.userName() + sessionManager.userID())
+            val userDevices = userChild.child("devices")
+            var userDeviceText = "$manufacturer$model$androidId"
+            userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
+            val userDevice = userDevices.child(userDeviceText)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                userDevice.child("logout_at").setValue(DateFormat.now())
+            } else userDevice.child("logout_at").setValue("")
+            userDevice.child("login_at").setValue("")
+        } catch (e: Exception) {
+            Log.d("Firebase Auth", "$e")
+        }
+
+        sessionManager.setLoggedIn(LOGGED_OUT)
+        sessionManager.setUserLoggedIn(null)
+
+        val isTracking = CustomUtility(this).isServiceRunning(TrackingService::class.java)
+        if (isTracking) {
+            val serviceIntent = Intent(this, TrackingService::class.java)
+            this.stopService(serviceIntent)
+        }
+
+        val intent = Intent(this, SplashScreenActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 
     override fun onBackPressed() {

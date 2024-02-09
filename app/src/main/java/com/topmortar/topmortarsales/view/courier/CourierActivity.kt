@@ -10,7 +10,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
-import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.MenuItem
@@ -43,16 +42,13 @@ import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
-import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
-import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
-import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
@@ -102,11 +98,17 @@ class CourierActivity : AppCompatActivity() {
 
         binding.titleBarDark.tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
         binding.titleBarDark.tvTitleBarDescription.visibility = binding.titleBarDark.tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
-        binding.titleBarDark.tvTitleBar.setPadding(convertDpToPx(16, this), 0, 0, 0)
-        binding.titleBarDark.tvTitleBarDescription.setPadding(convertDpToPx(16, this), 0, 0, 0)
-        binding.titleBarDark.icBack.visibility = View.GONE
-        binding.titleBarDark.icMore.visibility = View.VISIBLE
-        binding.titleBarDark.icMore.setOnClickListener { showPopupMenu(it) }
+//        binding.titleBarDark.tvTitleBar.setPadding(convertDpToPx(16, this), 0, 0, 0)
+//        binding.titleBarDark.tvTitleBarDescription.setPadding(convertDpToPx(16, this), 0, 0, 0)
+        binding.titleBarDark.icBack.visibility = View.VISIBLE
+        binding.titleBarDark.icBack.setOnClickListener {
+            if (activeTab != 0) tabLayout.getTabAt(0)?.select()
+            else finish()
+        }
+//        binding.titleBarDark.icMore.visibility = View.VISIBLE
+//        binding.titleBarDark.icMore.setOnClickListener { showPopupMenu(it) }
+//        binding.titleBarDark.icSyncNow.visibility = View.VISIBLE
+//        binding.titleBarDark.icSyncNow.setOnClickListener { pagerAdapter.setSyncAction(activeTab) }
         binding.titleBarDark.vBorder.visibility = View.GONE
         binding.titleBarDark.tvTitleBarDescription.isSelected = true
 
@@ -114,9 +116,11 @@ class CourierActivity : AppCompatActivity() {
         absentProgressDialog.setCancelable(false)
         absentProgressDialog.setMessage(getString(R.string.txt_loading))
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            checkUserAbsent()
-        } else initLayout()
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            checkUserAbsent()
+//        } else initLayout()
+
+        initLayout()
 
     }
 
@@ -368,11 +372,11 @@ class CourierActivity : AppCompatActivity() {
         sessionManager.setLoggedIn(LOGGED_OUT)
         sessionManager.setUserLoggedIn(null)
 
-        val isTracking = CustomUtility(this).isServiceRunning(TrackingService::class.java)
-        if (isTracking) {
-            val serviceIntent = Intent(this, TrackingService::class.java)
-            this.stopService(serviceIntent)
-        }
+//        val isTracking = CustomUtility(this).isServiceRunning(TrackingService::class.java)
+//        if (isTracking) {
+//            val serviceIntent = Intent(this, TrackingService::class.java)
+//            this.stopService(serviceIntent)
+//        }
 
         val intent = Intent(this@CourierActivity, SplashScreenActivity::class.java)
         startActivity(intent)
@@ -446,17 +450,19 @@ class CourierActivity : AppCompatActivity() {
         if (activeTab != 0) tabLayout.getTabAt(0)?.select()
         else {
 
-            if (doubleBackToExitPressedOnce) {
-                super.onBackPressed()
-                return
-            }
+            super.onBackPressed()
 
-            this@CourierActivity.doubleBackToExitPressedOnce = true
-            handleMessage(this@CourierActivity, TAG_ACTION_MAIN_ACTIVITY, "Tekan sekali lagi untuk keluar!", TOAST_SHORT)
-
-            Handler(Looper.getMainLooper()).postDelayed({
-                doubleBackToExitPressedOnce = false
-            }, 2000)
+//            if (doubleBackToExitPressedOnce) {
+//                super.onBackPressed()
+//                return
+//            }
+//
+//            this@CourierActivity.doubleBackToExitPressedOnce = true
+//            handleMessage(this@CourierActivity, TAG_ACTION_MAIN_ACTIVITY, "Tekan sekali lagi untuk keluar!", TOAST_SHORT)
+//
+//            Handler(Looper.getMainLooper()).postDelayed({
+//                doubleBackToExitPressedOnce = false
+//            }, 2000)
 
         }
     }
@@ -574,6 +580,7 @@ class CourierActivity : AppCompatActivity() {
 
     private fun initLayout() {
         binding.tabContainer.visibility = View.VISIBLE
+
         tabLayout = binding.tabLayout
         viewPager = binding.viewPager
 
@@ -614,6 +621,9 @@ class CourierActivity : AppCompatActivity() {
         val tabIndexFromIntent = intent.getIntExtra("tabIndex", 0)
         activeTab = tabIndexFromIntent
         tabLayout.getTabAt(activeTab)?.select()
+
+        binding.titleBarDark.icSyncNow.visibility = View.VISIBLE
+        binding.titleBarDark.icSyncNow.setOnClickListener { pagerAdapter.setSyncAction(activeTab) }
 
         absentProgressDialog.dismiss()
     }

@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.IBinder
 import android.os.Looper
 import androidx.core.app.ActivityCompat
@@ -16,6 +17,7 @@ import com.google.firebase.database.DatabaseReference
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
 import com.topmortar.topmortarsales.commons.utils.CustomNotificationBuilder
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.view.SplashScreenActivity
 
@@ -55,8 +57,8 @@ class TrackingService : Service() {
             .setIntent(notificationIntent)
             .setChannelId("topmortar_delivery_notification")
             .setChannelName("Topmortar Delivery Notification")
-            .setContentTitle("Selesaikan Semua Pengiriman")
-            .setContentText("Ketuk untuk melihat pengiriman")
+            .setContentTitle("Kehadiran Sudah Tercatat")
+            .setContentText("Pastikan untuk menyelesaikan semua kiriman sebelum pulang...")
             .build()
 
         startForeground(NOTIFICATION_ID, notification)
@@ -86,6 +88,9 @@ class TrackingService : Service() {
 
                 childAbsent.child("lat").setValue(driverLocation.latitude)
                 childAbsent.child("lng").setValue(driverLocation.longitude)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    childAbsent.child("lastTracking").setValue(DateFormat.now())
+                }
 
             }
         }
