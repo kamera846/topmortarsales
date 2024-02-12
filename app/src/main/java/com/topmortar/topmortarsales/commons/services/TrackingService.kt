@@ -25,7 +25,7 @@ class TrackingService : Service() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
-    private lateinit var locationCallback: LocationCallback
+    private var locationCallback: LocationCallback? = null
     private lateinit var firebaseReference: DatabaseReference
     private lateinit var childDelivery: DatabaseReference
     private lateinit var childAbsent: DatabaseReference
@@ -99,11 +99,12 @@ class TrackingService : Service() {
             &&
             ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
         ) return
-        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback!!, Looper.getMainLooper())
     }
 
     private fun stopLocationUpdates() {
-        fusedLocationClient.removeLocationUpdates(locationCallback)
+        fusedLocationClient.removeLocationUpdates(locationCallback!!)
+        if (locationCallback != null) locationCallback = null
     }
 
     override fun onBind(intent: Intent?): IBinder? {
