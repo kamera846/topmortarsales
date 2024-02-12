@@ -120,6 +120,7 @@ class CourierActivity : AppCompatActivity() {
 //            checkUserAbsent()
 //        } else initLayout()
 
+        CustomUtility(this).setUserStatusOnline(true, userDistributorId, userId)
         initLayout()
 
     }
@@ -433,19 +434,6 @@ class CourierActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        _binding = null
-
-//        val firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
-//        val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
-//        val userChild = absentChild.child(userId)
-//        userChild.child("isOnline").setValue(false)
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            userChild.child("lastSeen").setValue(DateFormat.now())
-//        } else userChild.child("lastSeen").setValue("")
-    }
-
     override fun onBackPressed() {
         if (activeTab != 0) tabLayout.getTabAt(0)?.select()
         else {
@@ -465,23 +453,6 @@ class CourierActivity : AppCompatActivity() {
 //            }, 2000)
 
         }
-    }
-
-    override fun onResume() {
-
-        super.onResume()
-        // Check apps for update
-        AppUpdateHelper.checkForUpdates(this)
-        getUserLoggedIn()
-
-//        val firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
-//        val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
-//        val userChild = absentChild.child(userId)
-//        userChild.child("isOnline").setValue(true)
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            userChild.child("lastSeen").setValue(DateFormat.now())
-//        } else userChild.child("lastSeen").setValue("")
-
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -725,6 +696,39 @@ class CourierActivity : AppCompatActivity() {
                 dialog?.dismiss()
             }
         }
+    }
+
+    override fun onResume() {
+
+        super.onResume()
+        // Check apps for update
+        AppUpdateHelper.checkForUpdates(this)
+        getUserLoggedIn()
+//        CustomUtility(this).setUserStatusOnline(true, userDistributorId, userId)
+
+    }
+
+    override fun onPause() {
+        super.onPause()
+//        CustomUtility(this).setUserStatusOnline(false, userDistributorId, userId)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Handler().postDelayed({
+            CustomUtility(this).setUserStatusOnline(true, userDistributorId.toString(), userId.toString())
+        }, 1000)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        CustomUtility(this).setUserStatusOnline(false, userDistributorId, userId)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
+        CustomUtility(this).setUserStatusOnline(false, userDistributorId, userId)
     }
 
 }

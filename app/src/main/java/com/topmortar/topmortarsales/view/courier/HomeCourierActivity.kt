@@ -87,6 +87,7 @@ class HomeCourierActivity : AppCompatActivity() {
         firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId.toString())
 
         checkLocationPermission()
+        CustomUtility(this).setUserStatusOnline(true, userDistributorId.toString(), userId.toString())
     }
 
     private fun checkLocationPermission() {
@@ -679,5 +680,29 @@ class HomeCourierActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         checkAbsent()
+//        CustomUtility(this).setUserStatusOnline(true, userDistributorId.toString(), userId.toString())
+    }
+
+    override fun onPause() {
+        super.onPause()
+//        CustomUtility(this).setUserStatusOnline(false, userDistributorId.toString(), userId.toString())
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Handler().postDelayed({
+            CustomUtility(this).setUserStatusOnline(true, userDistributorId.toString(), userId.toString())
+        }, 1000)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        CustomUtility(this).setUserStatusOnline(false, userDistributorId.toString(), userId.toString())
+    }
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        CustomUtility(this).setUserStatusOnline(false, userDistributorId.toString(), userId.toString())
     }
 }

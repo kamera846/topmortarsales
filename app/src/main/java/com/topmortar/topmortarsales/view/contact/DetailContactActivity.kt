@@ -288,6 +288,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         setContentView(binding.root)
 
+        if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+
         initVariable()
         initClickHandler()
         dataActivityValidation()
@@ -2024,11 +2026,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         modal.show()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        if (pingUtility != null) pingUtility!!.stopPingMonitoring()
-    }
-
     private fun setupDelivery() {
 
         if (isClosingAction) {
@@ -2263,6 +2260,24 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             serviceIntent.putExtra("deliveryId", deliveryId)
             this@DetailContactActivity.startService(serviceIntent)
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Handler().postDelayed({
+            CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+        }, 1000)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (pingUtility != null) pingUtility!!.stopPingMonitoring()
+        CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
     }
 
 }

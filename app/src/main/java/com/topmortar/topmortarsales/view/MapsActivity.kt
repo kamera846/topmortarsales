@@ -230,6 +230,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         progressDialog.setMessage("Mencari ${if (isBasecamp) "basecamp" else "toko"} terdekat…")
         progressDialog.setCancelable(false)
 
+        if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
         checkLocationPermission()
 
     }
@@ -1959,5 +1960,31 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         }
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+    }
+
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
     }
 }

@@ -39,6 +39,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -76,6 +77,10 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
     // Global
     private lateinit var sessionManager: SessionManager
+    private val userKind get() = sessionManager.userKind()
+    private val userDistributorId get() = sessionManager.userDistributor()
+    private val userID get() = sessionManager.userID()
+
     private lateinit var apiService: ApiService
     private var isListActive: String = LIST_SURAT_JALAN
     private var isFilterInvoice: String = FILTER_NONE
@@ -109,6 +114,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
         setContentView(R.layout.activity_list_invoice)
 
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
 
         initVariable()
@@ -494,6 +500,23 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
     override fun onBackPressed() {
 //        super.onBackPressed()
         backHandler()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Handler().postDelayed({
+            if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+        }, 1000)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
     }
 
 }

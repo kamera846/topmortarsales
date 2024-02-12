@@ -31,6 +31,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_SUCCESS
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil.compressImage
+import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -76,6 +77,8 @@ class PreviewClosingActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
 
         setContentView(R.layout.activity_preview_closing)
+
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
 
         initVariable()
         initClickHandler()
@@ -327,4 +330,22 @@ class PreviewClosingActivity : AppCompatActivity() {
         }, 1000)
 
     }
+
+    override fun onStart() {
+        super.onStart()
+        Handler().postDelayed({
+            if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+        }, 1000)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+    }
+
 }

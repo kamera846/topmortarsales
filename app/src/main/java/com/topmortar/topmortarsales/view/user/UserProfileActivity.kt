@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.provider.Settings
 import android.util.Log
 import android.view.View
@@ -136,6 +137,8 @@ class UserProfileActivity : AppCompatActivity() {
             End Call Fragment
              */
         }
+
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
 
         initClickHandler()
         dataActivityValidation()
@@ -440,16 +443,6 @@ class UserProfileActivity : AppCompatActivity() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        EventBus.getDefault().register(this)
-    }
-
-    override fun onStop() {
-        EventBus.getDefault().unregister(this)
-        super.onStop()
-    }
-
     @Subscribe
     fun onEventBus(event: EventBusUtils.ContactModelEvent) {
         navigateDetailContact(event.data)
@@ -540,6 +533,35 @@ class UserProfileActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         backHandler()
+    }
+
+    override fun onResume() {
+        super.onResume()
+//        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+    }
+
+    override fun onPause() {
+        super.onPause()
+//        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+    }
+
+    override fun onStart() {
+        super.onStart()
+        EventBus.getDefault().register(this)
+        Handler().postDelayed({
+            if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+        }, 1000)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        EventBus.getDefault().unregister(this)
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
     }
 
 }
