@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.databinding.ItemUserTrackingBinding
 import com.topmortar.topmortarsales.model.UserAbsentModel
 
@@ -36,8 +35,23 @@ class UserTrackingRecyclerViewAdapter : RecyclerView.Adapter<UserTrackingRecycle
 
         fun bind(item: UserAbsentModel, position: Int) {
 
-            if (position == 0) itemView.setPadding(convertDpToPx(16, context!!),0,0,0)
-            else if (position == (listItem.size - 1)) itemView.setPadding(0,0,convertDpToPx(16, context!!),0)
+            if (position == 0) {
+                val layoutParams = itemView.layoutParams as ViewGroup.MarginLayoutParams
+
+                // Set margin (misalnya, 16dp)
+                val marginInPx = itemView.resources.getDimensionPixelSize(R.dimen.margin16)
+                layoutParams.setMargins(marginInPx,0,0,0)
+
+                itemView.layoutParams = layoutParams
+            } else if (position == (listItem.size - 1)) {
+                val layoutParams = itemView.layoutParams as ViewGroup.MarginLayoutParams
+
+                // Set margin (misalnya, 16dp)
+                val marginInPx = itemView.resources.getDimensionPixelSize(R.dimen.margin16)
+                layoutParams.setMargins(0,0,marginInPx,0)
+
+                itemView.layoutParams = layoutParams
+            }
 
             binding.userName.text = item.fullname
             if (item.isOnline) {

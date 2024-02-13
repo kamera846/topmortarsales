@@ -3,13 +3,13 @@
     android:layout_width="80dp"
     android:layout_height="wrap_content"
     android:gravity="center"
+    android:background="@drawable/bg_base_clickable_round_8"
     android:orientation="vertical">
 
     <RelativeLayout
         android:id="@+id/userProfile"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_marginTop="16dp"
         android:background="@drawable/bg_light_round_online">
 
         <ImageView
@@ -34,6 +34,7 @@
         android:layout_marginTop="8dp"
         android:ellipsize="end"
         android:maxLines="2"
+        android:background="@android:color/transparent"
         android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
 
 </LinearLayout>
