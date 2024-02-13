@@ -2265,19 +2265,19 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     override fun onStart() {
         super.onStart()
         Handler().postDelayed({
-            CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+            if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
         }, 1000)
     }
 
     override fun onStop() {
         super.onStop()
-        CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+        if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         if (pingUtility != null) pingUtility!!.stopPingMonitoring()
-        CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+        if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
     }
 
 }

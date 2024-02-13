@@ -680,6 +680,159 @@
 
         </androidx.cardview.widget.CardView>
 
+        <androidx.cardview.widget.CardView
+            android:visibility="gone"
+            android:id="@+id/cardTracking"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="-16dp"
+            map:cardCornerRadius="16dp"
+            android:theme="@style/Theme.TopMortarSales.CardView">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingTop="16dp"
+                android:paddingBottom="32dp"
+                android:background="@drawable/bg_bottom_sheet"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:text="Pengguna Yang Dilacak"
+                    android:paddingHorizontal="16dp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:paddingHorizontal="16dp"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/userProfile"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:src="@drawable/person_black"
+                        android:background="@drawable/bg_light_round_8"
+                        android:layout_alignParentStart="true"/>
+
+                    <TextView
+                        android:id="@+id/userTrackingName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Nama Pengguna"
+                        android:textSize="14sp"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="12dp"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:layout_toRightOf="@+id/userProfile"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                    <TextView
+                        android:id="@+id/userTrackingDescription"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Status Pengguna"
+                        android:textSize="12sp"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="12dp"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:layout_toRightOf="@+id/userProfile"
+                        android:layout_below="@+id/userTrackingName"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                    <TextView
+                        android:id="@+id/userTrackingStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Online"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
+                        android:paddingHorizontal="8dp"
+                        android:paddingVertical="2dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:background="@drawable/bg_green_reseda_round_8"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:id="@+id/userTrackingSuggestion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingHorizontal="16dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textStyle="bold"
+                            android:textSize="16sp"
+                            android:text="Pengguna Lain"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                        <LinearLayout
+                            android:visibility="gone"
+                            android:id="@+id/allUserTracking"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:padding="2dp"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:background="@drawable/bg_base_clickable_round_8">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textSize="12sp"
+                                android:text="Lihat semuanya"
+                                android:background="@android:color/transparent"
+                                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                            <ImageView
+                                android:layout_width="12dp"
+                                android:layout_height="12dp"
+                                android:layout_marginStart="2dp"
+                                android:background="@android:color/transparent"
+                                android:src="@drawable/chevron_right_dark"/>
+
+                        </LinearLayout>
+
+
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/userTrackingRecyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        tools:listitem="@layout/item_user_tracking"
+                        map:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
     </LinearLayout>
 
 </RelativeLayout>

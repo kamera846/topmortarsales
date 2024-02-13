@@ -73,6 +73,7 @@ import com.google.maps.model.DirectionsRoute
 import com.google.maps.model.TravelMode
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.PlaceAdapter
+import com.topmortar.topmortarsales.adapter.recyclerview.UserTrackingRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
@@ -131,6 +132,7 @@ import com.topmortar.topmortarsales.model.CityModel
 import com.topmortar.topmortarsales.model.DeliveryModel
 import com.topmortar.topmortarsales.model.GudangModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
+import com.topmortar.topmortarsales.model.UserAbsentModel
 import com.topmortar.topmortarsales.view.suratJalan.ListSuratJalanActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -202,8 +204,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var firebaseReference: DatabaseReference? = null
     private var childDelivery: DatabaseReference? = null
     private var childDriver: DatabaseReference? = null
+    private var childAbsent: DatabaseReference? = null
+    private var childCourier: DatabaseReference? = null
     private var locationCallback: LocationCallback? = null
     private var locationListener: ValueEventListener? = null
+    private var courierTrackingListener: ValueEventListener? = null
     private var courierMarker: Marker? = null
     private var isTracking = false
     private var isTrackingCourier = false
@@ -1863,50 +1868,86 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     }
 
     private fun setupTrackingCourier() {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        mMap.isMyLocationEnabled = false
+
         val progressDialog = ProgressDialog(this)
         progressDialog.setCancelable(false)
         progressDialog.setMessage("Mendeteksi lokasi kurir…")
         progressDialog.show()
 
         firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
-        childDelivery = firebaseReference?.child(FIREBASE_CHILD_ABSENT)
-        childDriver = childDelivery?.child(courierID.toString())
+        childAbsent = firebaseReference?.child(FIREBASE_CHILD_ABSENT)
+        childCourier = childAbsent?.child(courierID.toString())
 
         val courierDrawable = R.drawable.pin_truck
-        mMap.isMyLocationEnabled = false
 
-        childDriver?.addValueEventListener(object : ValueEventListener {
+        courierTrackingListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
                     val courierLat = snapshot.child("lat").getValue(Double::class.java)
                     val courierLng = snapshot.child("lng").getValue(Double::class.java)
                     val courierFullName = snapshot.child("fullname").getValue(String::class.java)
+                    val courierIsOnline = snapshot.child("isOnline").getValue(Boolean::class.java)
+                    val courierLastSeen = snapshot.child("lastSeen").getValue(String::class.java)
+                    val courierLastTracking = snapshot.child("lastTracking").getValue(String::class.java)
 
-                    val courierLatLng = LatLng(courierLat!!, courierLng!!)
+                    if (courierLat != null && courierLng != null) {
 
-                    if (courierMarker == null) {
-                        courierMarker = mMap.addMarker(
-                            MarkerOptions()
-                                .position(courierLatLng)
-                                .title(
-                                    courierFullName ?: "Kurir"
-                                )
-                                .icon(
-                                    BitmapDescriptorFactory.fromBitmap(
-                                        resizedBitmap(courierDrawable)
+                        binding.cardTracking.visibility = View.VISIBLE
+
+                        val courierLatLng = LatLng(courierLat, courierLng)
+
+                        binding.userTrackingName.text = courierFullName
+                        binding.userTrackingDescription.text = "Terakhir dilacak " + DateFormat.format("$courierLastTracking", "yyyy-MM-dd HH:mm:ss", "HH:mm")
+                        if (courierIsOnline!!) {
+                            binding.userTrackingStatus.text = "Online"
+                            binding.userTrackingStatus.setTextColor(getColor(R.color.white))
+                            binding.userTrackingStatus.setBackgroundResource(R.drawable.bg_green_reseda_round_8)
+                        } else {
+                            binding.userTrackingStatus.text = "Offline"
+                            binding.userTrackingStatus.setTextColor(getColor(R.color.black_200))
+                            binding.userTrackingStatus.setBackgroundResource(R.drawable.bg_light_dark_round)
+                        }
+
+                        if (courierMarker == null) {
+                            courierMarker = mMap.addMarker(
+                                MarkerOptions()
+                                    .position(courierLatLng)
+                                    .title(
+                                        courierFullName ?: "Kurir"
                                     )
-                                )
-                        )
-                        progressDialog.dismiss()
-                        changeFocusCamera(courierLatLng)
+                                    .icon(
+                                        BitmapDescriptorFactory.fromBitmap(
+                                            resizedBitmap(courierDrawable)
+                                        )
+                                    )
+                            )
+                            progressDialog.dismiss()
+                            changeFocusCamera(courierLatLng)
+                        } else {
+                            progressDialog.dismiss()
+                            courierMarker?.position = courierLatLng
+                        }
                     } else {
+                        Log.d("Tracking Courier", "Not exist")
                         progressDialog.dismiss()
-                        courierMarker?.position = courierLatLng
+                        handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
+                            "Tidak dapat mendeteksi lokasi kurir!"
+                        )
                     }
                 } else {
                     Log.d("Tracking Courier", "Not exist")
                     progressDialog.dismiss()
-                    Log.d(TAG_RESPONSE_CONTACT, "Child Driver Error!")
                     handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
                         "Tidak dapat mendeteksi lokasi kurir!"
                     )
@@ -1915,14 +1956,102 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             override fun onCancelled(error: DatabaseError) {
                 progressDialog.dismiss()
-                Log.d(TAG_RESPONSE_CONTACT, "Child Driver Error!")
+                Log.d("Tracking Courier", "On Cancelled")
+                handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
+                    "Failed run service. Exception $error"
+                )
+            }
+
+        }
+
+        childCourier?.addValueEventListener(courierTrackingListener!!)
+
+        childAbsent?.addListenerForSingleValueEvent(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    val listUserTracking = arrayListOf<UserAbsentModel>()
+
+                    for (item in snapshot.children) {
+                        val userId = item.child("id").getValue(String::class.java)
+
+
+                        if (!userId.isNullOrEmpty() && userId != courierID) {
+                            listUserTracking.add(
+                                UserAbsentModel(
+                                    eveningDateTime = item.child("eveningDateTime").getValue(String::class.java) ?: "",
+                                    fullname = item.child("fullname").getValue(String::class.java) ?: "",
+                                    id = item.child("id").getValue(String::class.java) ?: "",
+                                    isOnline = item.child("isOnline").getValue(Boolean::class.java) ?: false,
+                                    lastSeen = item.child("lastSeen").getValue(String::class.java) ?: "",
+                                    lastTracking = item.child("lastTracking").getValue(String::class.java) ?: "",
+                                    lat = item.child("lat").getValue(Double::class.java) ?: 0.0,
+                                    lng = item.child("lng").getValue(Double::class.java) ?: 0.0,
+                                    morningDateTime = item.child("morningDateTime").getValue(String::class.java) ?: "",
+                                    username = item.child("username").getValue(String::class.java) ?: "",
+                                )
+                            )
+                        }
+                    }
+
+                    if (listUserTracking.isNotEmpty()) {
+                        binding.userTrackingSuggestion.visibility = View.VISIBLE
+//                        if (listUserTracking.size > 5) {
+//                            binding.allUserTracking.visibility = View.VISIBLE
+//                            binding.allUserTracking.setOnClickListener {
+//                                // Do something here
+//                            }
+//                        }
+
+                        // Acak urutan item dalam daftar
+                        val shuffledList = listUserTracking.shuffled()
+                        // Batasi jumlah item yang ingin ditampilkan (misalnya 5)
+
+                        val limitedList = shuffledList.take(6)
+
+                        val rvAdapter = UserTrackingRecyclerViewAdapter()
+                        rvAdapter.setList(ArrayList(limitedList))
+                        rvAdapter.setOnItemClickListener(object: UserTrackingRecyclerViewAdapter.OnItemClickListener {
+                            override fun onItemClick(item: UserAbsentModel) {
+                                // Do something here
+//                                val intent = Intent(this@MapsActivity, MapsActivity::class.java)
+//                                intent.putExtra(CONST_IS_TRACKING_COURIER, true)
+//                                intent.putExtra(CONST_COURIER_ID, item.id)
+//                                startActivity(intent)
+
+                                if (courierTrackingListener != null) childCourier?.removeEventListener(courierTrackingListener!!)
+                                courierMarker = null
+                                mMap.clear()
+
+                                Handler().postDelayed({
+                                    courierID = item.id
+                                    setupTrackingCourier()
+                                }, 100)
+                            }
+
+                        })
+
+                        binding.userTrackingRecyclerView.adapter = rvAdapter
+                    } else {
+                        binding.userTrackingSuggestion.visibility = View.GONE
+                    }
+                } else {
+                    Log.d("Tracking Courier", "Absent not exist")
+                    progressDialog.dismiss()
+                    handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
+                        "Tidak dapat mendeteksi lokasi kurir!"
+                    )
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                progressDialog.dismiss()
+                Log.d("Tracking Courier", "Absent on cancelled")
                 handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
                     "Failed run service. Exception $error"
                 )
             }
 
         })
-
     }
 
     private fun resizedBitmap(drawable: Int): Bitmap {
@@ -1964,27 +2093,39 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     override fun onResume() {
         super.onResume()
-        if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+//        if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
     }
 
     override fun onPause() {
         super.onPause()
-        if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+//        if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
     }
 
     override fun onStart() {
         super.onStart()
-        if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+
+        Handler().postDelayed({
+            if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+        }, 1000)
+
     }
 
     override fun onStop() {
         super.onStop()
         if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+
+        if (locationListener != null) childDriver?.removeEventListener(locationListener!!)
+        if (locationCallback != null) fusedLocationClient.removeLocationUpdates(locationCallback!!)
+        if (courierTrackingListener != null) childCourier?.removeEventListener(courierTrackingListener!!)
     }
 
 
     override fun onDestroy() {
         super.onDestroy()
         if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+
+        if (locationListener != null) childDriver?.removeEventListener(locationListener!!)
+        if (locationCallback != null) fusedLocationClient.removeLocationUpdates(locationCallback!!)
+        if (courierTrackingListener != null) childCourier?.removeEventListener(courierTrackingListener!!)
     }
 }

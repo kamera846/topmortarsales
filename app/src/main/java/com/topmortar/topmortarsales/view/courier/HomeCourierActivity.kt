@@ -73,7 +73,7 @@ class HomeCourierActivity : AppCompatActivity() {
     private var isLocked = false
 
     private lateinit var firebaseReference : DatabaseReference
-    private lateinit var absentProgressDialog : ProgressDialog
+    private var absentProgressDialog : ProgressDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,6 +83,12 @@ class HomeCourierActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
 
         setContentView(binding.root)
+
+        if (absentProgressDialog == null) {
+            absentProgressDialog = ProgressDialog(this)
+            absentProgressDialog!!.setMessage(getString(R.string.txt_loading))
+            absentProgressDialog!!.setCancelable(false)
+        }
 
         firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId.toString())
 
@@ -126,10 +132,6 @@ class HomeCourierActivity : AppCompatActivity() {
     private fun initView() {
 
         binding.fullName.text = userFullName
-
-        absentProgressDialog = ProgressDialog(this)
-        absentProgressDialog.setMessage(getString(R.string.txt_loading))
-        absentProgressDialog.setCancelable(false)
 
         binding.deliveryItem.setOnClickListener { if (!isLocked) navigateToDelivery() else showDialogLockedFeature() }
         binding.nearestStoreItem.setOnClickListener { if (!isLocked) navigateToNearestStore() else showDialogLockedFeature() }
@@ -186,7 +188,14 @@ class HomeCourierActivity : AppCompatActivity() {
     }
 
     private fun checkAbsent() {
-        absentProgressDialog.show()
+
+        if (absentProgressDialog == null) {
+            absentProgressDialog = ProgressDialog(this)
+            absentProgressDialog!!.setMessage(getString(R.string.txt_loading))
+            absentProgressDialog!!.setCancelable(false)
+        }
+
+        absentProgressDialog!!.show()
 
         val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
         val userChild = absentChild.child(userId.toString())
@@ -298,7 +307,7 @@ class HomeCourierActivity : AppCompatActivity() {
             .setPositiveButton("Iya") { dialog, _ ->
 
                 dialog.dismiss()
-                absentProgressDialog.show()
+                absentProgressDialog?.show()
 
                 val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
                 val userChild = absentChild.child(userId.toString())
@@ -355,7 +364,7 @@ class HomeCourierActivity : AppCompatActivity() {
     }
 
     private fun lockMenuItem(state: Boolean) {
-        absentProgressDialog.dismiss()
+        absentProgressDialog?.dismiss()
         isLocked = state
 //        isAbsentMorningNow = !state
 
@@ -679,7 +688,6 @@ class HomeCourierActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        checkAbsent()
 //        CustomUtility(this).setUserStatusOnline(true, userDistributorId.toString(), userId.toString())
     }
 
@@ -690,6 +698,7 @@ class HomeCourierActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        checkAbsent()
         Handler().postDelayed({
             CustomUtility(this).setUserStatusOnline(true, userDistributorId.toString(), userId.toString())
         }, 1000)

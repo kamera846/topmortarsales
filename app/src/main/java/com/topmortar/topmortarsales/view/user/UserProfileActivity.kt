@@ -245,7 +245,6 @@ class UserProfileActivity : AppCompatActivity() {
         val intent = Intent(this, MapsActivity::class.java)
         intent.putExtra(CONST_IS_TRACKING_COURIER, true)
         intent.putExtra(CONST_COURIER_ID, iUserID)
-        startActivity(intent)
 
         startActivityForResult(intent, MANAGE_USER_ACTIVITY_REQUEST_CODE)
 
@@ -315,7 +314,7 @@ class UserProfileActivity : AppCompatActivity() {
 
         } else binding.tabContainer.visibility = View.GONE
 
-        setupBarChart()
+//        setupBarChart()
 
     }
 
@@ -512,6 +511,8 @@ class UserProfileActivity : AppCompatActivity() {
                 userDevice.child("logout_at").setValue(DateFormat.now())
             } else userDevice.child("logout_at").setValue("")
             userDevice.child("login_at").setValue("")
+
+            if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
         } catch (e: Exception) {
             Log.d("Firebase Auth", "$e")
         }
