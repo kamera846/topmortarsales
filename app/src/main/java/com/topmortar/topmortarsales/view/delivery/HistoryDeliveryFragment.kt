@@ -1,7 +1,7 @@
 package com.topmortar.topmortarsales.view.delivery
 
+import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,16 +15,19 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.HistoryDeliveryRecyclerViewAdapter
+import com.topmortar.topmortarsales.commons.CONST_DELIVERY_ID
+import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING
+import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING_HISTORY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
-import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.FragmentHistoryDeliveryBinding
-import com.topmortar.topmortarsales.model.BaseCampModel
+import com.topmortar.topmortarsales.model.DeliveryModel
+import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
 
 /**
@@ -78,20 +81,17 @@ class HistoryDeliveryFragment : Fragment() {
         loadingState(true)
         showBadgeRefresh(false)
 
-        Handler().postDelayed({
-            loadingState(true, "Belum ada riwayat pengiriman!")
-        }, 1000)
-
-        return
+//        Handler().postDelayed({
+//            loadingState(true, "Belum ada riwayat pengiriman!")
+//        }, 1000)
+//
+//        return
 
         lifecycleScope.launch {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = when (userKind) {
-                    USER_KIND_ADMIN -> apiService.getListBaseCamp(distributorID = userDistributorid)
-                    else -> apiService.getListBaseCamp(distributorID = userDistributorid, cityId = userCity)
-                }
+                val response = apiService.getDelivery(idCourier = userID)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -131,11 +131,15 @@ class HistoryDeliveryFragment : Fragment() {
 
     }
 
-    private fun setRecyclerView(listItem: ArrayList<BaseCampModel>) {
+    private fun setRecyclerView(listItem: ArrayList<DeliveryModel.History>) {
 
         val rvAdapter = HistoryDeliveryRecyclerViewAdapter(listItem, object: HistoryDeliveryRecyclerViewAdapter.ItemClickListener {
-            override fun onItemClick(data: BaseCampModel?) {
-                /// Do something
+            override fun onItemClick(data: DeliveryModel.History?) {
+                val intent = Intent(requireContext(), MapsActivity::class.java)
+                intent.putExtra(CONST_IS_TRACKING, true)
+                intent.putExtra(CONST_IS_TRACKING_HISTORY, true)
+                intent.putExtra(CONST_DELIVERY_ID, data?.id_delivery)
+                startActivity(intent)
             }
 
         })

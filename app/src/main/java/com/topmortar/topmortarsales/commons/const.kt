@@ -146,6 +146,7 @@ const val CONST_LIST_COORDINATE_CITY_ID = "const_list_coordinate_city_id"
 const val CONST_IS_BASE_CAMP = "const_is_base_camp"
 const val CONST_IS_TRACKING = "const_is_tracking"
 const val CONST_IS_TRACKING_COURIER = "const_is_tracking_courier"
+const val CONST_IS_TRACKING_HISTORY = "const_is_tracking_history"
 
 /*
     Status

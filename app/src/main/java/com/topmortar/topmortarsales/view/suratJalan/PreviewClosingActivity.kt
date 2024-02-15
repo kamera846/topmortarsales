@@ -291,7 +291,6 @@ class PreviewClosingActivity : AppCompatActivity() {
                     val stores = snapshot.child("stores/$contactId")
                     if (stores.exists()) {
 
-                        val latLng = snapshot.getValue(DeliveryModel.Delivery::class.java)
                         val courier = snapshot.child("courier").getValue(DeliveryModel.Courier::class.java)
                         val store = stores.getValue(DeliveryModel.Store::class.java)
 //                        Log.d("Item to closing", "$latLng")
@@ -329,8 +328,8 @@ class PreviewClosingActivity : AppCompatActivity() {
                                             val apiService: ApiService = HttpClient.create()
 
                                             val response = apiService.saveDelivery(
-                                                lat = createPartFromString(latLng?.lat.toString()),
-                                                lng = createPartFromString(latLng?.lng.toString()),
+                                                lat = createPartFromString(store?.lat.toString()),
+                                                lng = createPartFromString(store?.lng.toString()),
                                                 endDateTime = createPartFromString(endDateTime),
                                                 endLat = createPartFromString(endLat),
                                                 endLng = createPartFromString(endLng),
@@ -372,8 +371,8 @@ class PreviewClosingActivity : AppCompatActivity() {
                                             val apiService: ApiService = HttpClient.create()
 
                                             val response = apiService.saveDelivery(
-                                                lat = createPartFromString(latLng?.lat.toString()),
-                                                lng = createPartFromString(latLng?.lng.toString()),
+                                                lat = createPartFromString(store?.lat.toString()),
+                                                lng = createPartFromString(store?.lng.toString()),
                                                 endDateTime = createPartFromString(endDateTime),
                                                 endLat = createPartFromString(endLat),
                                                 endLng = createPartFromString(endLng),

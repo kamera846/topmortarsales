@@ -34,6 +34,7 @@ import com.topmortar.topmortarsales.response.ResponseBaseCamp
 import com.topmortar.topmortarsales.response.ResponseCities
 import com.topmortar.topmortarsales.response.ResponseContactList
 import com.topmortar.topmortarsales.response.ResponseCountStore
+import com.topmortar.topmortarsales.response.ResponseDelivery
 import com.topmortar.topmortarsales.response.ResponseDistributor
 import com.topmortar.topmortarsales.response.ResponseGudang
 import com.topmortar.topmortarsales.response.ResponseInvoice
@@ -549,4 +550,17 @@ interface ApiService {
         @Part("id_courier") idCourier: RequestBody,
         @Part("id_contact") idContact: RequestBody,
     ): ResponseMessage
+
+    @GET(DELIVERY)
+    suspend fun getDelivery(): ResponseDelivery
+
+    @GET(DELIVERY)
+    suspend fun getDelivery(
+        @Query("id_courier") idCourier: String
+    ): ResponseDelivery
+
+    @GET(DELIVERY)
+    suspend fun getDetailDelivery(
+        @Query("id") idDelivery: String
+    ): ResponseDelivery
 }

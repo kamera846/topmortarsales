@@ -11,13 +11,13 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.model.BaseCampModel
+import com.topmortar.topmortarsales.model.DeliveryModel
 
-class HistoryDeliveryRecyclerViewAdapter(private val chatList: ArrayList<BaseCampModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<HistoryDeliveryRecyclerViewAdapter.ChatViewHolder>() {
+class HistoryDeliveryRecyclerViewAdapter(private val listItem: ArrayList<DeliveryModel.History>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<HistoryDeliveryRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
 
     interface ItemClickListener {
-        fun onItemClick(data: BaseCampModel? = null)
+        fun onItemClick(data: DeliveryModel.History? = null)
     }
 
     inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -26,10 +26,11 @@ class HistoryDeliveryRecyclerViewAdapter(private val chatList: ArrayList<BaseCam
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
         val tooltipStatus: ImageView = itemView.findViewById(R.id.tooltip_status)
 
-        fun bind(chatItem: BaseCampModel) {
+        fun bind(item: DeliveryModel.History) {
 
-            tvContactName.text = chatItem.nama_gudang
-            tvPhoneNumber.text = if (chatItem.nomorhp_gudang != "") "+${ chatItem.nomorhp_gudang }" else ""
+            val courierName = item.full_name.let { it.ifEmpty { item.username } }
+            tvContactName.text = "Nama Toko"
+            tvPhoneNumber.text = "Dikirim oleh $courierName"
 
         }
 
@@ -45,9 +46,9 @@ class HistoryDeliveryRecyclerViewAdapter(private val chatList: ArrayList<BaseCam
 
     override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
 
-        val chatItem = chatList[position]
+        val item = listItem[position]
 
-        holder.bind(chatItem)
+        holder.bind(item)
         holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
 
         holder.itemView.setOnClickListener { onItemClick(holder, position) }
@@ -57,7 +58,7 @@ class HistoryDeliveryRecyclerViewAdapter(private val chatList: ArrayList<BaseCam
 
     override fun getItemCount(): Int {
 
-        return chatList.size
+        return listItem.size
 
     }
 
@@ -79,7 +80,7 @@ class HistoryDeliveryRecyclerViewAdapter(private val chatList: ArrayList<BaseCam
                 overlayView.visibility = View.GONE
             }, animateDuration)
 
-            val data = chatList[position]
+            val data = listItem[position]
             itemClickListener.onItemClick(data)
 
         }

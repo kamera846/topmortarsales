@@ -3,7 +3,6 @@ package com.topmortar.topmortarsales.view.delivery
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,19 +17,21 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.HistoryDeliveryRecyclerViewAdapter
+import com.topmortar.topmortarsales.commons.CONST_DELIVERY_ID
+import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING_HISTORY
 import com.topmortar.topmortarsales.commons.REQUEST_BASECAMP_FRAGMENT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.RESULT_BASECAMP_FRAGMENT
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
-import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.FragmentDeliveryEndedBinding
-import com.topmortar.topmortarsales.model.BaseCampModel
+import com.topmortar.topmortarsales.model.DeliveryModel
+import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
 
 /**
@@ -83,20 +84,17 @@ class DeliveryEndedFragment : Fragment() {
         loadingState(true)
         showBadgeRefresh(false)
 
-        Handler().postDelayed({
-            loadingState(true, "Belum ada pengiriman yang diselesaikan!")
-        }, 1000)
-
-        return
+//        Handler().postDelayed({
+//            loadingState(true, "Belum ada pengiriman yang diselesaikan!")
+//        }, 1000)
+//
+//        return
 
         lifecycleScope.launch {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = when (userKind) {
-                    USER_KIND_ADMIN -> apiService.getListBaseCamp(distributorID = userDistributorid)
-                    else -> apiService.getListBaseCamp(distributorID = userDistributorid, cityId = userCity)
-                }
+                val response = apiService.getDelivery("7")
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -109,7 +107,7 @@ class DeliveryEndedFragment : Fragment() {
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        loadingState(true, "Belum ada basecamp!")
+                        loadingState(true, "Belum ada kiriman yang diselesaikan!")
                         showBadgeRefresh(false)
                         listener?.counterItem(0)
 
@@ -123,10 +121,9 @@ class DeliveryEndedFragment : Fragment() {
                     }
                 }
 
-
             } catch (e: Exception) {
 
-                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message + e.stackTraceToString())
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
 
@@ -136,11 +133,14 @@ class DeliveryEndedFragment : Fragment() {
 
     }
 
-    private fun setRecyclerView(listItem: ArrayList<BaseCampModel>) {
+    private fun setRecyclerView(listItem: ArrayList<DeliveryModel.History>) {
 
         val rvAdapter = HistoryDeliveryRecyclerViewAdapter(listItem, object: HistoryDeliveryRecyclerViewAdapter.ItemClickListener {
-            override fun onItemClick(data: BaseCampModel?) {
-                navigateItemAction()
+            override fun onItemClick(data: DeliveryModel.History?) {
+                val intent = Intent(requireContext(), MapsActivity::class.java)
+                intent.putExtra(CONST_IS_TRACKING_HISTORY, true)
+                intent.putExtra(CONST_DELIVERY_ID, data?.id_delivery)
+                startActivity(intent)
             }
 
         })
