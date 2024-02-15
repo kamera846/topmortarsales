@@ -75,6 +75,7 @@ const val BASECAMP = "gudang.php"
 const val DISTRIBUTOR = "distributor.php"
 const val VOUCHER = "voucher.php"
 const val WAREHOUSE = "warehouse.php"
+const val DELIVERY = "delivery.php"
 
 /*
     Request Code

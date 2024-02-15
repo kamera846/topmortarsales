@@ -126,6 +126,15 @@ class ClosingStoreFragment : Fragment() {
 //                        response.results[0].nama = "Toko Rafli"
 
                         val contacts = response.results
+//                        val realItem = response.results[0]
+//                        val contacts = arrayListOf<ContactModel>()
+//
+//                        for (i in 0 until 10) {
+//                            val objek = realItem.copy()
+//                            objek.id_contact = (objek.id_contact.toInt() + i).toString()
+//                            objek.nama = objek.nama + " " + i
+//                            contacts.add(objek)
+//                        }
 
                         // Get a reference to your database
                         val deliveryId = AUTH_LEVEL_COURIER + userID

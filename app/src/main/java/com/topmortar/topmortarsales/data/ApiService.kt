@@ -7,6 +7,7 @@ import com.topmortar.topmortarsales.commons.BASECAMP
 import com.topmortar.topmortarsales.commons.BID
 import com.topmortar.topmortarsales.commons.BID_ON_GOING
 import com.topmortar.topmortarsales.commons.CONTACT
+import com.topmortar.topmortarsales.commons.DELIVERY
 import com.topmortar.topmortarsales.commons.DISTRIBUTOR
 import com.topmortar.topmortarsales.commons.EDIT_CONTACT
 import com.topmortar.topmortarsales.commons.GET_CITY
@@ -533,4 +534,19 @@ interface ApiService {
     suspend fun listVoucher(
         @Query("c") idContact: String
     ): ResponseList.ResponseVoucher
+
+    @Multipart
+    @POST(DELIVERY)
+    suspend fun saveDelivery(
+        @Part("lat") lat: RequestBody,
+        @Part("lng") lng: RequestBody,
+        @Part("endDateTime") endDateTime: RequestBody,
+        @Part("endLat") endLat: RequestBody,
+        @Part("endLng") endLng: RequestBody,
+        @Part("startDateTime") startDateTime: RequestBody,
+        @Part("startLat") startLat: RequestBody,
+        @Part("startLng") startLng: RequestBody,
+        @Part("id_courier") idCourier: RequestBody,
+        @Part("id_contact") idContact: RequestBody,
+    ): ResponseMessage
 }
