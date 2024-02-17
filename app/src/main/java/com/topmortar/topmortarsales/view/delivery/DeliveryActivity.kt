@@ -43,8 +43,12 @@ class DeliveryActivity : AppCompatActivity() {
         tabLayout.setupWithViewPager(viewPager)
         pagerAdapter.setCounterPageItem(object : DeliveryViewPagerAdapter.CounterPageItem{
             override fun counterItem(count: Int, tabIndex: Int) {
-                if (tabIndex == 0) tabLayout.getTabAt(tabIndex)?.text = "Berlangsung${if (count != 0) " ($count)" else ""}"
-                else tabLayout.getTabAt(tabIndex)?.text = "Selesai${if (count != 0) " ($count)" else ""}"
+                when (tabIndex) {
+                    0 -> tabLayout.getTabAt(tabIndex)?.text = "Target${if (count != 0) " ($count)" else ""}"
+                    1 -> tabLayout.getTabAt(tabIndex)?.text = "Berlangsung${if (count != 0) " ($count)" else ""}"
+                    2 -> tabLayout.getTabAt(tabIndex)?.text = "Riawayat${if (count != 0) " ($count)" else ""}"
+                    else -> tabLayout.getTabAt(tabIndex)?.text = "Target${if (count != 0) " ($count)" else ""}"
+                }
             }
 
         })

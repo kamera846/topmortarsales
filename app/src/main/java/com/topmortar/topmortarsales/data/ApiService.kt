@@ -21,6 +21,7 @@ import com.topmortar.topmortarsales.commons.SEND_MESSAGE
 import com.topmortar.topmortarsales.commons.SKILL
 import com.topmortar.topmortarsales.commons.STORE_STATUS
 import com.topmortar.topmortarsales.commons.SURAT_JALAN
+import com.topmortar.topmortarsales.commons.SURAT_JALAN_NOT_CLOSING
 import com.topmortar.topmortarsales.commons.TUKANG
 import com.topmortar.topmortarsales.commons.TUKANG_MESSAGE
 import com.topmortar.topmortarsales.commons.UPDATE_PASSWORD
@@ -45,6 +46,7 @@ import com.topmortar.topmortarsales.response.ResponsePromo
 import com.topmortar.topmortarsales.response.ResponseReportVisit
 import com.topmortar.topmortarsales.response.ResponseSkills
 import com.topmortar.topmortarsales.response.ResponseSuratJalan
+import com.topmortar.topmortarsales.response.ResponseSuratJalanNotClosing
 import com.topmortar.topmortarsales.response.ResponseTukangList
 import com.topmortar.topmortarsales.response.ResponseUsers
 import okhttp3.MultipartBody
@@ -563,4 +565,12 @@ interface ApiService {
     suspend fun getDetailDelivery(
         @Query("id") idDelivery: String
     ): ResponseDelivery
+
+    @GET(SURAT_JALAN_NOT_CLOSING)
+    suspend fun sjNotClosing(): ResponseSuratJalanNotClosing
+
+    @GET(SURAT_JALAN_NOT_CLOSING)
+    suspend fun sjNotClosing(
+        @Query("c") idCity: String
+    ): ResponseSuratJalanNotClosing
 }
