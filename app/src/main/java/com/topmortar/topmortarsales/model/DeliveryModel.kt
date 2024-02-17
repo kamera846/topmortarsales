@@ -56,5 +56,17 @@ object DeliveryModel {
         var id_distributor: String = "",
         var is_sales: String = "",
         var is_notify: String = "",
+        var nama: String = "",
+        var nomorhp: String = "",
+        var tgl_lahir: String = "",
+        var store_owner: String = "",
+        var maps_url: String = "",
+        var address: String = "",
+        var store_status: String = "",
+        var ktp_owner: String = "",
+        var termin_payment: String = "",
+        var id_promo: String = "",
+        var reputation: String = "",
+        var created_at: String = "",
     )
 }

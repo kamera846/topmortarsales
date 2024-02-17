@@ -94,7 +94,7 @@ class DeliveryEndedFragment : Fragment() {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getDelivery("7")
+                val response = apiService.getDelivery()
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {

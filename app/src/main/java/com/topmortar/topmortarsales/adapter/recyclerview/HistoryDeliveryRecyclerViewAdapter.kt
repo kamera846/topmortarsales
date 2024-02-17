@@ -29,8 +29,8 @@ class HistoryDeliveryRecyclerViewAdapter(private val listItem: ArrayList<Deliver
         fun bind(item: DeliveryModel.History) {
 
             val courierName = item.full_name.let { it.ifEmpty { item.username } }
-            tvContactName.text = "Nama Toko"
-            tvPhoneNumber.text = "Dikirim oleh $courierName"
+            tvContactName.text = item.nama
+            tvPhoneNumber.text = "Diselesaikan oleh $courierName"
 
         }
 
