@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DatePickerDialog
+import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
@@ -67,6 +68,7 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
 import com.topmortar.topmortarsales.commons.CONST_MAPS_STATUS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
+import com.topmortar.topmortarsales.commons.CONST_PAYMENT_METHOD
 import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.CONST_PROMO
 import com.topmortar.topmortarsales.commons.CONST_REPUTATION
@@ -81,6 +83,8 @@ import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
 import com.topmortar.topmortarsales.commons.IS_CLOSING
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.PAYMENT_TRANSFER
+import com.topmortar.topmortarsales.commons.PAYMENT_TUNAI
 import com.topmortar.topmortarsales.commons.PING_HOST
 import com.topmortar.topmortarsales.commons.PING_MEDIUM
 import com.topmortar.topmortarsales.commons.PING_NORMAL
@@ -153,6 +157,7 @@ import java.util.TimerTask
 class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListener,
     PingUtility.PingResultInterface, SendMessageModal.SendMessageModalInterface {
 
+    private lateinit var progressDialog: ProgressDialog
     private lateinit var sessionManager: SessionManager
     private val userKind get() = sessionManager.userKind().toString()
     //    private val userID = "8"
@@ -243,8 +248,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private var statusItem: List<String> = listOf("Pilih Status", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
     private var terminItem: List<String> = listOf("Pilih Termin Payment", "COD", "COD + Transfer", "COD + Tunai", "30 Hari", "45 Hari", "60 Hari")
+    private var paymentMethodItem: List<String> = listOf("Tunai", "Transfer")
     private var reputationItem: List<String> = listOf("Pilih Reputasi Toko", "Good", "Bad")
     private var selectedStatus: String = ""
+    private var selectedPaymentMethod: String = ""
     private var selectedTermin: String = ""
     private var selectedReputation: String = ""
     private var cameraPermissionLauncher: ActivityResultLauncher<String>? = null
@@ -254,6 +261,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private var iLocation: String? = null
     private var iStatus: String? = null
+    private var iPaymentMethod: String? = null
     private var iTermin: String? = null
     private var iReputation: String? = null
     private var iAddress: String? = null
@@ -287,6 +295,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         binding = ActivityDetailContactBinding.inflate(layoutInflater)
 
         setContentView(binding.root)
+
+        progressDialog = ProgressDialog(this)
+        progressDialog.setCancelable(false)
+        progressDialog.setMessage(getString(R.string.txt_loading))
 
         if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
 
@@ -601,6 +613,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         iKtp = intent.getStringExtra(CONST_KTP)
         iMapsUrl = intent.getStringExtra(CONST_MAPS)
         iStatus = intent.getStringExtra(CONST_STATUS)
+        iPaymentMethod = intent.getStringExtra(CONST_PAYMENT_METHOD)
         iTermin = intent.getStringExtra(CONST_TERMIN)
         iReputation = intent.getStringExtra(CONST_REPUTATION)
 //        if (!iStatus.isNullOrEmpty()) {
@@ -686,6 +699,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         // Set Spinner
         setupStatusSpinner()
+        setupPaymentMethodSpinner()
         setupTerminSpinner()
         setupReputationSpinner()
 
@@ -761,17 +775,29 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 etAddress.isEnabled = true
                 if (iAddress.isNullOrEmpty()) etAddress.setText("")
 
+                // Status
                 statusContainer.visibility = if (userKind == USER_KIND_ADMIN) View.VISIBLE else View.GONE
                 statusContainer.setBackgroundResource(R.drawable.et_background)
                 tooltipStatus.visibility = View.GONE
                 tvStatus.visibility = View.GONE
                 spinStatus.visibility = View.VISIBLE
+
+                // Payment Method
+                binding.paymentMethodContainer.setBackgroundResource(R.drawable.et_background)
+                binding.tvPaymentMethod.visibility = View.GONE
+                binding.spinPaymentMethod.visibility = View.VISIBLE
+
+                // Termin
                 terminContainer.setBackgroundResource(R.drawable.et_background)
                 tvTermin.visibility = View.GONE
                 spinTermin.visibility = View.VISIBLE
+
+                // Reputation
                 reputationContainer.setBackgroundResource(R.drawable.et_background)
                 tvReputation.visibility = View.GONE
                 spinReputation.visibility = View.VISIBLE
+
+                // Promo
                 tvPromo.visibility = View.GONE
                 etPromo.visibility = View.VISIBLE
                 promoContainer.setBackgroundResource(R.drawable.et_background)
@@ -837,14 +863,27 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
                 else btnInvoice.visibility = View.VISIBLE
 //            }
+
+                // Status
                 tvStatus.visibility = View.VISIBLE
                 spinStatus.visibility = View.GONE
+
+                // Payment Method
+                binding.paymentMethodContainer.setBackgroundResource(R.drawable.background_rounded_16)
+                binding.tvPaymentMethod.visibility = View.VISIBLE
+                binding.spinPaymentMethod.visibility = View.GONE
+
+                // Termin
                 terminContainer.setBackgroundResource(R.drawable.background_rounded_16)
                 tvTermin.visibility = View.VISIBLE
                 spinTermin.visibility = View.GONE
+
+                // Reputation
                 reputationContainer.setBackgroundResource(R.drawable.background_rounded_16)
                 tvReputation.visibility = View.VISIBLE
                 spinReputation.visibility = View.GONE
+
+                // Promo
                 tvPromo.visibility = View.VISIBLE
                 etPromo.visibility = View.GONE
                 promoContainer.setBackgroundResource(R.drawable.background_rounded_16)
@@ -895,6 +934,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val pMapsUrl = "${ etMaps.text }"
         val pAddress = "${ etAddress.text }"
         val pStatus = if (selectedStatus.isNullOrEmpty()) "" else selectedStatus.substringBefore(" - ").toLowerCase()
+        val pPaymentMethod = when (selectedPaymentMethod) {
+            paymentMethodItem[1] -> PAYMENT_TRANSFER
+            else -> PAYMENT_TUNAI
+        }
         val pTermin = if (selectedTermin.isNullOrEmpty()) "-1" else {
             when (selectedTermin) {
                 terminItem[1] -> STATUS_TERMIN_COD
@@ -935,6 +978,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val pPromoID = if (selectedPromo != null) selectedPromo!!.id else "0"
 
         loadingState(true)
+        progressDialog.show()
 
 //        Handler().postDelayed({
 //            handleMessage(this, "TAG SAVE", "${contactId!!}, ${formatPhoneNumber(pPhone)}, $pName, $pOwner, $pBirthday, $pMapsUrl, ${pCityID!!}, $pAddress, $pStatus, $imagePart, $pTermin, $pReputation, $pPromoID")
@@ -955,6 +999,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbLocation = createPartFromString(pCityID!!)
                 val rbAddress = createPartFromString(pAddress)
                 val rbStatus = createPartFromString(pStatus)
+                val rbPaymentMethod = createPartFromString(pPaymentMethod)
                 val rbTermin = createPartFromString(pTermin)
                 val rbReputation = createPartFromString(pReputation)
                 val rbPromoId = createPartFromString(pPromoID!!)
@@ -970,6 +1015,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     mapsUrl = rbMapsUrl,
                     address = rbAddress,
                     status = rbStatus,
+                    paymentMethod = rbPaymentMethod,
                     termin = rbTermin,
                     reputation = rbReputation,
                     promoId = rbPromoId,
@@ -1033,6 +1079,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 ////                            }
 //                            setupStatus(iStatus)
 
+                            iPaymentMethod = if (!pPaymentMethod.isNullOrEmpty()) pPaymentMethod else null
                             iTermin = if (!pTermin.isNullOrEmpty()) pTermin else null
 //                            setupTermin(iTermin)
 
@@ -1049,6 +1096,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                             handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal mengubah! Message: ${ responseBody.message }")
                             loadingState(false)
+                            progressDialog.dismiss()
                             toggleEdit(false)
 
                         }
@@ -1056,6 +1104,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                             handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal mengubah data!")
                             loadingState(false)
+                            progressDialog.dismiss()
                             toggleEdit(false)
 
                         }
@@ -1065,6 +1114,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                     handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal mengubah data! Error: " + response.message())
                     loadingState(false)
+                    progressDialog.dismiss()
                     toggleEdit(false)
 
                 }
@@ -1074,6 +1124,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
+                progressDialog.dismiss()
                 toggleEdit(false)
 
             }
@@ -1084,6 +1135,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun getDetailContact(withToggleEdit: Boolean = true) {
         loadingState(true)
+        if (!progressDialog.isShowing) progressDialog.show()
 
         lifecycleScope.launch {
             try {
@@ -1114,6 +1166,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 } else btnInvoice.visibility = View.VISIBLE
 
                                 setupStatus(iStatus)
+                                setupPaymentMethod(iPaymentMethod)
                                 setupTermin(iTermin)
                                 setupReputation(iReputation)
                             } else {
@@ -1123,16 +1176,21 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 } else btnInvoice.visibility = View.VISIBLE
 
                                 setupStatus(data.store_status)
+//                                setupPaymentMethod(data.payment_method)
+//                                setupTermin(data.termin_payment)
+//                                setupReputation(data.reputation)
                             }
 
                             hasEdited = true
                             loadingState(false)
+                            progressDialog.dismiss()
 
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
                             handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak! Message: Response status $RESPONSE_STATUS_FAIL or $RESPONSE_STATUS_FAILED")
                             loadingState(false)
+                            progressDialog.dismiss()
                             toggleEdit(false)
 
                         }
@@ -1140,6 +1198,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                             handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak!")
                             loadingState(false)
+                            progressDialog.dismiss()
                             toggleEdit(false)
 
                         }
@@ -1149,6 +1208,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                     handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak! Error: " + response.message())
                     loadingState(false)
+                    progressDialog.dismiss()
                     toggleEdit(false)
 
                 }
@@ -1158,6 +1218,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
+                progressDialog.dismiss()
                 toggleEdit(false)
 
             }
@@ -1737,6 +1798,19 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
     }
 
+    private fun setupPaymentMethod(paymentMethod: String? = null) {
+        when (paymentMethod) {
+            PAYMENT_TRANSFER -> {
+                binding.tvPaymentMethod.text = paymentMethodItem[1]
+                binding.spinPaymentMethod.setSelection(1)
+            }
+            else -> {
+                binding.tvPaymentMethod.text = paymentMethodItem[0]
+                binding.spinPaymentMethod.setSelection(0)
+            }
+        }
+    }
+
     private fun setupTermin(termin: String? = null) {
         when (termin) {
             STATUS_TERMIN_COD -> {
@@ -1805,6 +1879,28 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         selectedStatus = iStatus!!
         setupStatus(iStatus)
+    }
+
+    private fun setupPaymentMethodSpinner() {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, paymentMethodItem)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        binding.spinPaymentMethod.adapter = adapter
+        binding.spinPaymentMethod.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedPaymentMethod = paymentMethodItem[position]
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+        }
+
+        selectedPaymentMethod = when (iPaymentMethod) {
+            PAYMENT_TRANSFER -> paymentMethodItem[1]
+            else -> paymentMethodItem[0]
+        }
+        setupPaymentMethod(iPaymentMethod)
     }
 
     private fun setupTerminSpinner() {

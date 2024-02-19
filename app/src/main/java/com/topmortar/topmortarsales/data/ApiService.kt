@@ -86,6 +86,7 @@ interface ApiService {
         @Part("mapsUrl") mapsUrl: RequestBody,
         @Part("address") address: RequestBody,
         @Part("status") status: RequestBody,
+        @Part("payment_method") paymentMethod: RequestBody,
         @Part("termin_payment") termin: RequestBody,
         @Part("reputation") reputation: RequestBody,
         @Part("id_promo") promoId: RequestBody,
