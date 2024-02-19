@@ -11,7 +11,11 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.DeliveryModel
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 class HistoryDeliveryRecyclerViewAdapter(private val listItem: ArrayList<DeliveryModel.History>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<HistoryDeliveryRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
@@ -27,10 +31,22 @@ class HistoryDeliveryRecyclerViewAdapter(private val listItem: ArrayList<Deliver
         val tooltipStatus: ImageView = itemView.findViewById(R.id.tooltip_status)
 
         fun bind(item: DeliveryModel.History) {
+            var dateEnded = item.endDatetime
 
-            val courierName = item.full_name.let { it.ifEmpty { item.username } }
+            if (dateEnded.isNotEmpty()) {
+                val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(item.endDatetime)
+                dateEnded = if (date != null) {
+                    val calendar = Calendar.getInstance()
+                    val currentYear = calendar.get(Calendar.YEAR)
+                    val dateYear = SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
+
+                    if (currentYear == dateYear.toInt()) DateFormat.format(item.endDatetime, "yyyy-MM-dd HH:mm:ss", "dd MMM, HH:mm")
+                    else DateFormat.format(item.endDatetime, "yyyy-MM-dd HH:mm:ss", "dd MMM yyyy, HH:mm")
+                } else DateFormat.format(item.endDatetime, "yyyy-MM-dd HH:mm:ss", "dd MMM, HH:mm")
+            }
+
             tvContactName.text = item.nama
-            tvPhoneNumber.text = "Diselesaikan oleh $courierName"
+            tvPhoneNumber.text = "Diselesaikan pada $dateEnded"
 
         }
 

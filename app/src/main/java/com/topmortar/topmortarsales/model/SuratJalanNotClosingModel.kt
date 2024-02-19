@@ -32,4 +32,6 @@ data class SuratJalanNotClosingModel (
     var id_promo: String ="",
     var reputation: String ="",
     var created_at: String ="",
+    var dateProcessed: String = "",
+    var deliveryId: String = "",
 )

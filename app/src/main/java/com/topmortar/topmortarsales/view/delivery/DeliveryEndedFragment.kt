@@ -94,6 +94,10 @@ class DeliveryEndedFragment : Fragment() {
             try {
 
                 val apiService: ApiService = HttpClient.create()
+//                val response = when (userKind) {
+//                    USER_KIND_ADMIN -> apiService.getDelivery()
+//                    else -> apiService.getDelivery(idCourier = userID)
+//                }
                 val response = apiService.getDelivery()
 
                 when (response.status) {

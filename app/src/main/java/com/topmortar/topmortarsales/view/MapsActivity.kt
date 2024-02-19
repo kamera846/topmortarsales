@@ -141,6 +141,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Locale
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -1757,7 +1759,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                                 binding.cardDelivery.visibility = View.VISIBLE
                                                 binding.deliveryCourier.text = deliveryData!!.courier?.name
                                                 binding.deliveryStore.text = store.name
-                                                binding.deliveryDate.text = "Diproses pada " + DateFormat.format(store.startDatetime, "yyyy-MM-dd HH:mm:ss", "dd MMM YYYY, HH.mm")
+//                                                binding.deliveryDate.text = "Diproses pada " + DateFormat.format(store.startDatetime, "yyyy-MM-dd HH:mm:ss", "dd MMM YYYY, HH.mm")
+                                                binding.deliveryDate.text = "Diproses pada " + formatDateYear(store.startDatetime)
                                                 binding.btnSuratJalan.setOnClickListener {
                                                     val intent = Intent(this@MapsActivity, ListSuratJalanActivity::class.java)
                                                     intent.putExtra(CONST_CONTACT_ID, store.id)
@@ -2180,9 +2183,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                     binding.cardDelivery.visibility = View.VISIBLE
                                     binding.deliveryCourier.text = courierName
                                     binding.deliveryStore.text = "Nama Toko"
-                                    binding.deliveryDate.text = "Diproses pada $dateStart"
-                                    binding.deliveryEndDate.visibility = View.VISIBLE
-                                    binding.deliveryEndDate.text = "Diselesaikan pada $dateEnd"
+                                    binding.deliveryDate.text = "Diproses pada " + formatDateYear(item.startDatetime)
+                                    binding.deliveryEndDateContainer.visibility = View.VISIBLE
+                                    binding.deliveryEndDate.text = "Diselesaikan pada " + formatDateYear(item.endDatetime)
                                     binding.btnSuratJalan.setOnClickListener {
                                         val intent = Intent(this@MapsActivity, ListSuratJalanActivity::class.java)
                                         intent.putExtra(CONST_CONTACT_ID, item.id_contact)
@@ -2286,6 +2289,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         val zoomLvl = zoom ?: zoomLevel
         val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoomLvl)
         mMap.animateCamera(cameraUpdate, mapsDuration, null)
+    }
+
+    private fun formatDateYear(dateString: String, dateStringFormat: String = "yyyy-MM-dd HH:mm:ss"): String {
+        val date = SimpleDateFormat(dateStringFormat, Locale.getDefault()).parse(dateString)
+        return if (date != null) {
+            val calendar = Calendar.getInstance()
+            val currentYear = calendar.get(Calendar.YEAR)
+            val dateYear = SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
+
+            if (currentYear == dateYear.toInt()) DateFormat.format(dateString, dateStringFormat, "dd MMM, HH:mm")
+            else DateFormat.format(dateString, dateStringFormat, "dd MMM yyyy, HH:mm")
+        } else DateFormat.format(dateString, dateStringFormat, "dd MMM, HH:mm")
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

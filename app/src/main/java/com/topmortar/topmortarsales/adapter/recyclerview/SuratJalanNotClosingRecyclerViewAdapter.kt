@@ -11,7 +11,11 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.SuratJalanNotClosingModel
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<SuratJalanNotClosingModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<SuratJalanNotClosingRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
@@ -27,9 +31,22 @@ class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<S
         val tooltipStatus: ImageView = itemView.findViewById(R.id.tooltip_status)
 
         fun bind(item: SuratJalanNotClosingModel) {
+            var dateEnded = item.dateProcessed
+
+            if (dateEnded.isNotEmpty()) {
+                val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(item.dateProcessed)
+                dateEnded = if (date != null) {
+                    val calendar = Calendar.getInstance()
+                    val currentYear = calendar.get(Calendar.YEAR)
+                    val dateYear = SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
+
+                    if (currentYear == dateYear.toInt()) DateFormat.format(item.dateProcessed, "yyyy-MM-dd HH:mm:ss", "dd MMM, HH:mm")
+                    else DateFormat.format(item.dateProcessed, "yyyy-MM-dd HH:mm:ss", "dd MMM yyyy, HH:mm")
+                } else DateFormat.format(item.dateProcessed, "yyyy-MM-dd HH:mm:ss", "dd MMM, HH:mm")
+            }
 
             tvContactName.text = item.nama
-            tvPhoneNumber.text = "Menunggu untuk di proses"
+            tvPhoneNumber.text = if (dateEnded.isNotEmpty()) "Telah di proses pada $dateEnded" else "Menunggu untuk di proses"
 
         }
 
