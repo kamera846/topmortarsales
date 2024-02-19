@@ -761,7 +761,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 etAddress.isEnabled = true
                 if (iAddress.isNullOrEmpty()) etAddress.setText("")
 
-                statusContainer.visibility = View.GONE
+                statusContainer.visibility = if (userKind == USER_KIND_ADMIN) View.VISIBLE else View.GONE
                 statusContainer.setBackgroundResource(R.drawable.et_background)
                 tooltipStatus.visibility = View.GONE
                 tvStatus.visibility = View.GONE
