@@ -2,6 +2,7 @@ package com.topmortar.topmortarsales.view.delivery
 
 import android.app.Activity
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +12,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -31,13 +33,17 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.RESULT_BASECAMP_FRAGMENT
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.FragmentDeliveryTargetBinding
+import com.topmortar.topmortarsales.modal.SearchModal
+import com.topmortar.topmortarsales.model.CityModel
 import com.topmortar.topmortarsales.model.DeliveryModel
+import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.model.SuratJalanNotClosingModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
@@ -59,6 +65,9 @@ class DeliveryTargetFragment : Fragment() {
     private val userDistributorid get() = sessionManager.userDistributor().toString()
 
     private lateinit var badgeRefresh: LinearLayout
+    private lateinit var searchModal: SearchModal
+    private var citiesResults: ArrayList<CityModel>? = null
+    private var selectedCity: ModalSearchModel? = null
 
     private var listener: CounterItem? = null
     interface CounterItem {
@@ -88,6 +97,7 @@ class DeliveryTargetFragment : Fragment() {
 
         firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
 
+        if (userKind == USER_KIND_ADMIN) getCities()
         getList()
 
         return view
@@ -108,11 +118,13 @@ class DeliveryTargetFragment : Fragment() {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-//                val response = when (userKind) {
-//                    USER_KIND_ADMIN -> apiService.sjNotClosing()
-//                    else -> apiService.sjNotClosing(idCity = userID)
-//                }
-                val response = apiService.sjNotClosing()
+
+                val response = when (userKind) {
+                    USER_KIND_ADMIN -> {
+                        if (selectedCity != null) apiService.sjNotClosing(idCity = selectedCity?.id!!)
+                        else apiService.sjNotClosing()
+                    } else -> apiService.sjNotClosing(idCity = userCity)
+                }
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -298,6 +310,81 @@ class DeliveryTargetFragment : Fragment() {
             val data = data?.getStringExtra(REQUEST_BASECAMP_FRAGMENT)
             if (!data.isNullOrEmpty() && data == SYNC_NOW) getList()
         }
+    }
+
+
+    private fun getCities() {
+
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.getCities(distributorID = userDistributorId)
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        citiesResults = response.results
+                        val items: ArrayList<ModalSearchModel> = ArrayList()
+
+                        for (i in 0 until citiesResults!!.size) {
+                            val data = citiesResults!![i]
+                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                        }
+                        items.add(0, ModalSearchModel("-1", "Hapus Filter"))
+
+                        setupDialogSearch(items)
+                        binding.llFilter.componentFilter.visibility = View.VISIBLE
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        handleMessage(requireActivity(), "LIST CITY", "Daftar kota kosong!")
+
+                    }
+                    else -> {
+
+                        handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+
+            }
+
+        }
+    }
+
+    private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
+
+        searchModal = SearchModal(requireActivity(), items)
+        searchModal.setCustomDialogListener(object: SearchModal.SearchModalListener{
+            override fun onDataReceived(data: ModalSearchModel) {
+                if (data.id == "-1") {
+                    selectedCity = null
+                    binding.llFilter.tvFilter.text = getString(R.string.tidak_ada_filter)
+                } else {
+                    selectedCity = data
+                    binding.llFilter.tvFilter.text = data.title
+                }
+                getList()
+            }
+
+        })
+        searchModal.searchHint = "Ketik untuk mencari…"
+
+        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(requireContext(), R.color.black_400)
+        else binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(requireContext(), R.color.light)
+        binding.llFilter.componentFilter.visibility = View.GONE
+        binding.llFilter.componentFilter.setOnClickListener {
+            searchModal.show()
+        }
+
     }
 
 }

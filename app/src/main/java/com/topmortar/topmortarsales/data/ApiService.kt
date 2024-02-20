@@ -563,6 +563,11 @@ interface ApiService {
     ): ResponseDelivery
 
     @GET(DELIVERY)
+    suspend fun getDeliveryByCity(
+        @Query("c") cityId: String
+    ): ResponseDelivery
+
+    @GET(DELIVERY)
     suspend fun getDetailDelivery(
         @Query("id") idDelivery: String
     ): ResponseDelivery
