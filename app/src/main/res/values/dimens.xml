@@ -2,4 +2,5 @@
 <resources>
     <dimen name="splashscreen_logo_height">150dp</dimen>
     <dimen name="text_margin">16dp</dimen>
+    <dimen name="margin16">16dp</dimen>
 </resources>

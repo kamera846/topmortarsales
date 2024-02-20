@@ -14,6 +14,7 @@
     <androidx.core.widget.NestedScrollView
         android:id="@+id/container"
         android:layout_below="@+id/titleBarLight"
+        android:layout_above="@+id/bottomContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true">
@@ -65,6 +66,19 @@
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
+
+                    <TextView
+                        android:visibility="gone"
+                        android:id="@+id/userStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Online"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
+                        android:paddingHorizontal="8dp"
+                        android:paddingVertical="2dp"
+                        android:background="@drawable/bg_green_reseda_round_8"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
                     <LinearLayout
                         android:visibility="gone"
@@ -340,6 +354,7 @@
 
             </LinearLayout>
 
+            <!-- Visited Container -->
             <LinearLayout
                 android:visibility="gone"
                 android:id="@+id/tabContainer"
@@ -361,8 +376,312 @@
 
             </LinearLayout>
 
+            <!-- Delivery Container -->
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/deliveryContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:visibility="gone"
+                    android:id="@+id/date_separator"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Riwayat Pengiriman"
+                        android:textSize="14sp"
+                        android:layout_marginEnd="16dp"
+                        android:theme="@style/Theme.TopMortarSales.TextBaseLine" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_weight="1"
+                        android:theme="@style/Theme.TopMortarSales.BaseLine"/>
+
+                </LinearLayout>
+
+                <androidx.fragment.app.FragmentContainerView
+                    android:visibility="gone"
+                    android:id="@+id/historyDeliveryFragmentContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:name="com.topmortar.topmortarsales.view.delivery.HistoryDeliveryFragment"/>
+
+                <RelativeLayout
+                    android:id="@+id/container_absent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/background_rounded_8_clickable"
+                    android:padding="12dp"
+                    android:layout_margin="16dp">
+
+                    <TextView
+                        android:id="@+id/absent_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Informasi Absen Pengguna"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginEnd="48dp"
+                        android:ellipsize="marquee"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:focusable="true"
+                        android:singleLine="true"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentTop="true"/>
+
+                    <ImageView
+                        android:id="@+id/absent_notify_icon"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:src="@drawable/circle_notify_dark"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentTop="true"/>
+
+                    <TextView
+                        android:id="@+id/absent_description"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Kurir sudah mencatat absen hari ini pada pukul 08.15"
+                        android:textSize="12sp"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginEnd="48dp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                        android:layout_alignParentStart="true"
+                        android:layout_below="@+id/absent_title"/>
+
+                    <LinearLayout
+                        android:visibility="gone"
+                        android:id="@+id/absen_evening_info_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="12dp"
+                        android:layout_below="@+id/absent_description">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/circle_info_redwood"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tombol absen pulang akan tersedia pukul 17.00"
+                            android:textSize="12sp"
+                            android:textColor="@color/redwood"
+                            android:layout_marginStart="8dp"/>
+
+                    </LinearLayout>
+
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:id="@+id/menu_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:paddingHorizontal="16dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:id="@+id/btnCourierHistoryDelivery"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/background_rounded_8_clickable"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:padding="12dp"
+                        android:gravity="center_vertical"
+                        android:alpha="0.5"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:padding="8dp"
+                            android:background="@drawable/bg_green_reseda_round_8"
+                            android:src="@drawable/truck_ramp_box_white"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Riwayat Pengiriman"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:layout_marginHorizontal="16dp"
+                            android:ellipsize="marquee"
+                            android:singleLine="true"
+                            android:marqueeRepeatLimit="marquee_forever"
+                            android:focusable="true"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                        <ImageView
+                            android:id="@+id/delivery_item_chevron"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/lock_dark"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/btnCourierReport"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/background_rounded_8_clickable"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:padding="12dp"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:padding="8dp"
+                            android:background="@drawable/bg_redwood_round_8"
+                            android:src="@drawable/file_list_white_only"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Lihat Laporan"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:layout_marginHorizontal="16dp"
+                            android:ellipsize="marquee"
+                            android:singleLine="true"
+                            android:marqueeRepeatLimit="marquee_forever"
+                            android:focusable="true"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                        <ImageView
+                            android:id="@+id/nearest_store_item_chevron"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/chevron_right_dark"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/btnCourierTracking"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/background_rounded_8_clickable"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:padding="12dp"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:padding="8dp"
+                            android:background="@drawable/bg_blue_silver_lake_round_8"
+                            android:src="@drawable/location_white"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Lacak Lokasi Pengguna"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:layout_marginHorizontal="16dp"
+                            android:ellipsize="marquee"
+                            android:singleLine="true"
+                            android:marqueeRepeatLimit="marquee_forever"
+                            android:focusable="true"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                        <ImageView
+                            android:id="@+id/basecamp_item_chevron"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/chevron_right_dark"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>
+
+    <LinearLayout
+        android:id="@+id/bottomContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/btnTrackCourier"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginVertical="8dp"
+            android:padding="12dp"
+            android:gravity="center"
+            android:alpha="0.7"
+            android:background="@drawable/et_background_clickable"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Lacak Kurir"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:textAllCaps="true"
+                android:textColor="@color/text_black"/>
+
+        </LinearLayout>
+
+        <!-- Btn Logout -->
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/btnLogout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginVertical="8dp"
+            android:padding="12dp"
+            android:gravity="center"
+            android:alpha="0.5"
+            android:background="@drawable/bg_base_clickable_round_8"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Logout"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:textAllCaps="true"
+                android:textColor="@color/text_black"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
 
 </RelativeLayout>

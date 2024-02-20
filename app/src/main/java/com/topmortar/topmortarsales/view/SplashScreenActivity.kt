@@ -1,7 +1,9 @@
 package com.topmortar.topmortarsales.view
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -25,6 +27,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -59,7 +64,7 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.DeviceModel
-import com.topmortar.topmortarsales.view.courier.CourierActivity
+import com.topmortar.topmortarsales.view.courier.HomeCourierActivity
 import com.topmortar.topmortarsales.view.tukang.BrandAmbassadorActivity
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -113,6 +118,24 @@ class SplashScreenActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_splash_screen)
 
+        val appUpdateManager = AppUpdateManagerFactory.create(this)
+        val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+        appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
+                appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
+            ) {
+                showUpdateDialog(this)
+            } else {
+                initView()
+            }
+        }. addOnFailureListener {
+            Log.e("UPDATE HANDLER", "Error get information update $it")
+            initView()
+        }
+
+    }
+
+    private fun initView() {
         initVariable()
         initClickHandler()
         initOtpListener()
@@ -122,7 +145,6 @@ class SplashScreenActivity : AppCompatActivity() {
             checkSession()
 
         }, splashScreenDuration)
-
     }
 
     private fun initVariable() {
@@ -278,7 +300,7 @@ class SplashScreenActivity : AppCompatActivity() {
     }
     private fun navigateToCourier() {
 
-        val intent = Intent(this, CourierActivity::class.java)
+        val intent = Intent(this, HomeCourierActivity::class.java)
         startActivity(intent)
         finish()
 
@@ -985,6 +1007,26 @@ class SplashScreenActivity : AppCompatActivity() {
         } else userDevice.child("login_at").setValue("")
         userDevice.child("logout_at").setValue("")
 
+    }
+
+    private fun showUpdateDialog(context: Context) {
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Update Diperlukan")
+            .setMessage("Versi baru aplikasi telah tersedia. Harap perbarui ke versi terbaru.")
+            .setCancelable(false)
+            .setNegativeButton("Nanti dulu") { _,_ -> finish() }
+            .setPositiveButton("Perbarui Sekarang") { dialog, _ ->
+                openPlayStore(context)
+                dialog.dismiss()
+            }
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    private fun openPlayStore(context: Context) {
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}")
+        context.startActivity(intent)
     }
 
 }

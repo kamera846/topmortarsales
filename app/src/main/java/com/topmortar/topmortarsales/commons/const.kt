@@ -21,6 +21,7 @@ const val FIREBASE_REFERENCE = "db_prod" // Production
 //const val FIREBASE_REFERENCE = "db_dev" // Development
 const val FIREBASE_CHILD_AUTH = "auth"
 const val FIREBASE_CHILD_DELIVERY = "delivery"
+const val FIREBASE_CHILD_ABSENT = "absent"
 const val FIREBASE_CHILD_DISTRIBUTOR = "distributor"
 
 /*
@@ -74,6 +75,8 @@ const val BASECAMP = "gudang.php"
 const val DISTRIBUTOR = "distributor.php"
 const val VOUCHER = "voucher.php"
 const val WAREHOUSE = "warehouse.php"
+const val DELIVERY = "delivery.php"
+const val SURAT_JALAN_NOT_CLOSING = "suratjalanNotClosing.php"
 
 /*
     Request Code
@@ -91,6 +94,7 @@ const val REQUEST_EDIT_CONTACT_COORDINATE = 999
 const val REQUEST_BASECAMP_FRAGMENT = "request_basecamp_fragment"
 const val RESULT_BASECAMP_FRAGMENT = 101010
 const val REQUEST_STORAGE_PERMISSION = 111111
+const val BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE = 222222
 
 /*
     Tag Log
@@ -108,6 +112,7 @@ const val CONST_DELIVERY_ID = "const_delivery_id"
 const val CONST_INVOICE_ID = "const_invoice_id"
 const val CONST_INVOICE_NUMBER = "const_invoice_number"
 const val CONST_INVOICE_IS_COD = "const_invoice_is_cod"
+const val CONST_COURIER_ID = "const_courier_id"
 
 const val CONST_OWNER = "const_owner"
 const val CONST_LOCATION = "const_location"
@@ -120,6 +125,7 @@ const val CONST_MAPS = "const_maps"
 const val CONST_MAPS_NAME = "const_maps_name"
 const val CONST_MAPS_STATUS = "const_maps_status"
 const val CONST_STATUS = "const_status"
+const val CONST_PAYMENT_METHOD = "const_payment_method"
 const val CONST_TERMIN = "const_termin"
 const val CONST_REPUTATION = "const_reputation"
 const val CONST_DATE = "const_date"
@@ -141,6 +147,8 @@ const val CONST_LIST_COORDINATE_STATUS = "const_list_coordinate_status"
 const val CONST_LIST_COORDINATE_CITY_ID = "const_list_coordinate_city_id"
 const val CONST_IS_BASE_CAMP = "const_is_base_camp"
 const val CONST_IS_TRACKING = "const_is_tracking"
+const val CONST_IS_TRACKING_COURIER = "const_is_tracking_courier"
+const val CONST_IS_TRACKING_HISTORY = "const_is_tracking_history"
 
 /*
     Status
@@ -157,6 +165,8 @@ const val STATUS_CONTACT_DATA = "data"
 const val STATUS_CONTACT_PASSIVE = "passive"
 const val STATUS_CONTACT_ACTIVE = "active"
 const val STATUS_CONTACT_BLACKLIST = "blacklist"
+const val PAYMENT_TUNAI = "tunai"
+const val PAYMENT_TRANSFER = "transfer"
 const val STATUS_TERMIN_COD = "0"
 const val STATUS_TERMIN_COD_TF = "1"
 const val STATUS_TERMIN_COD_TUNAI = "2"

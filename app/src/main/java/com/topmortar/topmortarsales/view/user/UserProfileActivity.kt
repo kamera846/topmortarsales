@@ -1,8 +1,15 @@
 package com.topmortar.topmortarsales.view.user
 
+import android.annotation.SuppressLint
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.provider.Settings
+import android.util.Log
 import android.view.View
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -14,21 +21,29 @@ import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.google.android.material.tabs.TabLayout
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.viewpager.UserProfileViewPagerAdapter
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_COURIER_ID
 import com.topmortar.topmortarsales.commons.CONST_DATE
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_IS_NOTIFY
+import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING_COURIER
 import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
+import com.topmortar.topmortarsales.commons.CONST_PAYMENT_METHOD
 import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.CONST_PROMO
 import com.topmortar.topmortarsales.commons.CONST_REPUTATION
@@ -36,6 +51,9 @@ import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
+import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -44,15 +62,22 @@ import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityUserProfileBinding
 import com.topmortar.topmortarsales.modal.ChartSalesPricingModal
 import com.topmortar.topmortarsales.model.ContactModel
+import com.topmortar.topmortarsales.view.MapsActivity
+import com.topmortar.topmortarsales.view.SplashScreenActivity
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import kotlinx.coroutines.launch
@@ -62,6 +87,8 @@ import org.greenrobot.eventbus.Subscribe
 class UserProfileActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
+    private val userDistributorId get() = sessionManager.userDistributor()
+
     private lateinit var binding: ActivityUserProfileBinding
     private lateinit var customUtility: CustomUtility
     private lateinit var modalPricingDetails: ChartSalesPricingModal
@@ -73,6 +100,11 @@ class UserProfileActivity : AppCompatActivity() {
     private val bidLimit get() = sessionManager.userBidLimit().toString()
     private var isRequestSync = false
 
+    private lateinit var firebaseReference: DatabaseReference
+    private var childAbsent: DatabaseReference? = null
+    private var childCourier: DatabaseReference? = null
+    private var courierTrackingListener: ValueEventListener? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -80,6 +112,8 @@ class UserProfileActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
         binding = ActivityUserProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId.toString())
 
         iUserID = intent.getStringExtra(CONST_USER_ID)
         iPhone = intent.getStringExtra(CONST_PHONE)
@@ -91,6 +125,17 @@ class UserProfileActivity : AppCompatActivity() {
 
         customUtility = CustomUtility(this)
         modalPricingDetails = ChartSalesPricingModal(this)
+
+        binding.salesReportContainer.visibility = View.VISIBLE
+
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+        if (iUserLevel == AUTH_LEVEL_COURIER) {
+            binding.salesReportContainer.visibility = View.GONE
+            binding.deliveryContainer.visibility = View.VISIBLE
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                setupCourierMenu()
+            }
+        }
 
         initClickHandler()
         dataActivityValidation()
@@ -172,6 +217,7 @@ class UserProfileActivity : AppCompatActivity() {
             intent.putExtra(CONST_ADDRESS, data.address)
             intent.putExtra(CONST_STATUS, data.store_status)
             intent.putExtra(CONST_KTP, data.ktp_owner)
+            intent.putExtra(CONST_PAYMENT_METHOD, data.payment_method)
             intent.putExtra(CONST_TERMIN, data.termin_payment)
             intent.putExtra(CONST_PROMO, data.id_promo)
             intent.putExtra(CONST_REPUTATION, data.reputation)
@@ -192,12 +238,28 @@ class UserProfileActivity : AppCompatActivity() {
 
     }
 
+    private fun navigateTrackingCourier() {
+
+        val intent = Intent(this, MapsActivity::class.java)
+        intent.putExtra(CONST_IS_TRACKING_COURIER, true)
+        intent.putExtra(CONST_COURIER_ID, iUserID)
+
+        startActivityForResult(intent, MANAGE_USER_ACTIVITY_REQUEST_CODE)
+
+    }
+
     private fun initClickHandler() {
 
         if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) {
             binding.titleBarLight.icEdit.visibility = View.VISIBLE
             binding.titleBarLight.icEdit.setOnClickListener { navigateEditUser() }
         }
+
+        if (sessionManager.userKind() == USER_KIND_COURIER) {
+            binding.btnLogout.visibility = View.VISIBLE
+            binding.btnLogout.setOnClickListener { logoutConfirmation() }
+        }
+
         binding.toggleBarChart.setOnClickListener { toggleBarChart() }
         binding.priceContainer.setOnClickListener { modalPricingDetails.show() }
         binding.titleBarLight.icBack.setOnClickListener { backHandler() }
@@ -210,8 +272,6 @@ class UserProfileActivity : AppCompatActivity() {
         if (iUserID.isNullOrEmpty()) {
             return getUserDetail()
         }
-
-        binding.salesReportContainer.visibility = View.VISIBLE
 
         if (iUserName!!.isNotEmpty()) {
             binding.titleBarLight.tvTitleBar.text = iUserName
@@ -250,7 +310,7 @@ class UserProfileActivity : AppCompatActivity() {
 
         } else binding.tabContainer.visibility = View.GONE
 
-        setupBarChart()
+//        setupBarChart()
 
     }
 
@@ -378,16 +438,6 @@ class UserProfileActivity : AppCompatActivity() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        EventBus.getDefault().register(this)
-    }
-
-    override fun onStop() {
-        EventBus.getDefault().unregister(this)
-        super.onStop()
-    }
-
     @Subscribe
     fun onEventBus(event: EventBusUtils.ContactModelEvent) {
         navigateDetailContact(event.data)
@@ -420,8 +470,216 @@ class UserProfileActivity : AppCompatActivity() {
         } else finish()
     }
 
+
+
+    private fun logoutConfirmation() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Konfirmasi Logout")
+            .setMessage("Apakah anda yakin ingin keluar?")
+            .setNegativeButton("Tidak") { dialog, _ -> dialog.dismiss() }
+            .setPositiveButton("Iya") { dialog, _ ->
+
+                dialog.dismiss()
+                logoutHandler()
+
+            }
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    @SuppressLint("HardwareIds")
+    private fun logoutHandler() {
+
+        // Firebase Auth Session
+        try {
+            val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+            val model = Build.MODEL
+            val manufacturer = Build.MANUFACTURER
+
+            val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
+            val userChild = authChild.child(sessionManager.userName() + sessionManager.userID())
+            val userDevices = userChild.child("devices")
+            var userDeviceText = "$manufacturer$model$androidId"
+            userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
+            val userDevice = userDevices.child(userDeviceText)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                userDevice.child("logout_at").setValue(DateFormat.now())
+            } else userDevice.child("logout_at").setValue("")
+            userDevice.child("login_at").setValue("")
+
+            if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+        } catch (e: Exception) {
+            Log.d("Firebase Auth", "$e")
+        }
+
+        sessionManager.setLoggedIn(LOGGED_OUT)
+        sessionManager.setUserLoggedIn(null)
+
+        val isTracking = CustomUtility(this).isServiceRunning(TrackingService::class.java)
+        if (isTracking) {
+            val serviceIntent = Intent(this, TrackingService::class.java)
+            this.stopService(serviceIntent)
+        }
+
+        val intent = Intent(this, SplashScreenActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun setupCourierMenu() {
+        childAbsent = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+        childCourier = childAbsent?.child("$iUserID")
+
+        courierTrackingListener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                // Do something here
+                if (snapshot.child("isOnline").exists()) {
+
+                    val padding8 = convertDpToPx(8, this@UserProfileActivity)
+                    val padding2 = convertDpToPx(2, this@UserProfileActivity)
+                    binding.userStatus.visibility = View.VISIBLE
+
+                    val isOnline = snapshot.child("isOnline").getValue(Boolean::class.java) ?: false
+                    if (isOnline) {
+                        binding.userStatus.text = "Online"
+                        binding.userStatus.setTextColor(getColor(R.color.white))
+                        binding.userStatus.setBackgroundResource(R.drawable.bg_green_reseda_round_8)
+                        binding.userStatus.setPadding(padding8, padding2, padding8, padding2)
+                    } else {
+                        if (snapshot.child("lastSeen").exists()) {
+                            val lastSeen = snapshot.child("lastSeen").getValue(String::class.java).toString()
+                            val dateDescEvening = DateFormat.differenceDateNowDesc(lastSeen)
+                            val dateEvening =
+                                DateFormat.format(lastSeen, "yyyy-MM-dd HH:mm:ss", "HH.mm")
+                            binding.userStatus.text = "Terakhir terlihat $dateEvening $dateDescEvening"
+                            binding.userStatus.setTextColor(getColor(R.color.black_200))
+                            binding.userStatus.setBackgroundResource(android.R.color.transparent)
+                            binding.userStatus.setPadding(0, padding2, 0, padding2)
+                        } else {
+                            binding.userStatus.text = "Offline"
+                            binding.userStatus.setTextColor(getColor(R.color.black_200))
+                            binding.userStatus.setBackgroundResource(R.drawable.bg_light_dark_round)
+                            binding.userStatus.setPadding(padding8, padding2, padding8, padding2)
+                        }
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Do something here
+            }
+
+        }
+        childCourier?.addValueEventListener(courierTrackingListener!!)
+
+        childCourier?.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    // Do something
+                    if (snapshot.child("morningDateTime").exists()) {
+                        val morningDateTime = snapshot.child("morningDateTime").getValue(String::class.java).toString()
+                        if (morningDateTime.isNotEmpty()) {
+                            sessionManager.absentDateTime(morningDateTime)
+
+                            val absentMorningDate = DateFormat.format(morningDateTime, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd")
+
+                            if (DateFormat.dateAfterNow(absentMorningDate)) {
+                                // Absent morning false
+                                binding.absentTitle.text = "Pengguna Belum Absen"
+                                binding.absentDescription.text = "Absen pengguna hari ini belum tercatat"
+                            } else {
+
+                                // Absent morning true
+                                val dateDescMorning = DateFormat.differenceDateNowDesc(morningDateTime)
+                                val dateMorning = DateFormat.format(morningDateTime, "yyyy-MM-dd HH:mm:ss", "HH.mm")
+                                binding.absentTitle.text = "Pengguna Telah Absen"
+                                binding.absentDescription.text = "Absen pengguna telah tercatat pada pukul $dateMorning $dateDescMorning"
+
+                                if (snapshot.child("eveningDateTime").exists()) {
+                                    val eveningDateTime = snapshot.child("eveningDateTime").getValue(String::class.java).toString()
+
+                                    if (eveningDateTime.isNotEmpty()) {
+                                        val absentEveningDate = DateFormat.format(eveningDateTime, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd")
+
+                                        if (DateFormat.dateAfterNow(absentEveningDate)) {
+                                            // Absent evening false
+                                        } else {
+                                            // Absent evening true
+                                            val dateDescEvening = DateFormat.differenceDateNowDesc(eveningDateTime)
+                                            val dateEvening = DateFormat.format(eveningDateTime, "yyyy-MM-dd HH:mm:ss", "HH.mm")
+                                            binding.absentTitle.text = "Pengguna Telah Pulang"
+                                            binding.absentDescription.text = "Absen pengguna telah tercatat pada pukul $dateMorning $dateDescMorning dan pulang pada pukul $dateEvening $dateDescEvening"
+                                        }
+                                    } else {
+                                        // Absent evening false
+                                    }
+                                } else {
+                                    // Absent evening false
+                                }
+
+                            }
+
+                        } else {
+                            // Absent morning false
+                            binding.absentTitle.text = "Pengguna Belum Absen"
+                            binding.absentDescription.text = "Absen pengguna hari ini belum tercatat"
+                        }
+                    } else {
+                        // Absent morning false
+                        binding.absentTitle.text = "Pengguna Belum Absen"
+                        binding.absentDescription.text = "Absen pengguna hari ini belum tercatat"
+                    }
+                } else {
+                    // Absent morning false
+                    binding.absentTitle.text = "Pengguna Belum Absen"
+                    binding.absentDescription.text = "Absen pengguna hari ini belum tercatat"
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Do something here
+            }
+
+        })
+
+        binding.btnCourierReport.setOnClickListener { navigateSalesReport() }
+        binding.btnCourierTracking.setOnClickListener { navigateTrackingCourier() }
+    }
+
     override fun onBackPressed() {
         backHandler()
+    }
+
+    override fun onResume() {
+        super.onResume()
+//        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+    }
+
+    override fun onPause() {
+        super.onPause()
+//        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+    }
+
+    override fun onStart() {
+        super.onStart()
+        EventBus.getDefault().register(this)
+        Handler().postDelayed({
+            if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+        }, 1000)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        EventBus.getDefault().unregister(this)
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
     }
 
 }

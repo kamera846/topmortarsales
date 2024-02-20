@@ -1,9 +1,14 @@
 package com.topmortar.topmortarsales.view.suratJalan
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
@@ -11,7 +16,9 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.location.LocationServices
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -26,19 +33,21 @@ import com.topmortar.topmortarsales.commons.CONST_URI
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
 import com.topmortar.topmortarsales.commons.IS_CLOSING
+import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_SUCCESS
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
-import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil.compressImage
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.model.DeliveryModel
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -78,6 +87,8 @@ class PreviewClosingActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
 
         setContentView(R.layout.activity_preview_closing)
+
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
 
         initVariable()
         initClickHandler()
@@ -279,23 +290,143 @@ class PreviewClosingActivity : AppCompatActivity() {
 
                     val stores = snapshot.child("stores/$contactId")
                     if (stores.exists()) {
-                        childDelivery?.child("$deliveryId/stores/$contactId")?.removeValue()
 
-                        childDriver?.child("stores")?.addListenerForSingleValueEvent(object : ValueEventListener {
-                            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                                val isTracking = CustomUtility(this@PreviewClosingActivity).isServiceRunning(TrackingService::class.java)
-                                if (!dataSnapshot.exists() && isTracking) {
-                                    val serviceIntent = Intent(this@PreviewClosingActivity, TrackingService::class.java)
-                                    this@PreviewClosingActivity.stopService(serviceIntent)
+                        val courier = snapshot.child("courier").getValue(DeliveryModel.Courier::class.java)
+                        val store = stores.getValue(DeliveryModel.Store::class.java)
+//                        Log.d("Item to closing", "$latLng")
+//                        Log.d("Item to closing", "$courier")
+//                        Log.d("Item to closing", "$store")
+
+                        var endDateTime = "0000-00-00 00:00:00"
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            endDateTime = DateFormat.now()
+                        }
+
+                        var endLat = "0.0"
+                        var endLng = "0.0"
+                        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this@PreviewClosingActivity)
+                        if (ActivityCompat.checkSelfPermission(
+                                this@PreviewClosingActivity,
+                                Manifest.permission.ACCESS_FINE_LOCATION
+                            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                                this@PreviewClosingActivity,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                            ) != PackageManager.PERMISSION_GRANTED
+                        ) {
+                            ActivityCompat.requestPermissions(this@PreviewClosingActivity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+                        } else {
+                            fusedLocationClient.lastLocation
+                                .addOnSuccessListener { location: Location? ->
+                                    if (location != null) {
+                                        endLat = location.latitude.toString()
+                                        endLng = location.longitude.toString()
+                                    }
+
+                                    lifecycleScope.launch {
+                                        try {
+
+                                            val apiService: ApiService = HttpClient.create()
+
+                                            val response = apiService.saveDelivery(
+                                                lat = createPartFromString(store?.lat.toString()),
+                                                lng = createPartFromString(store?.lng.toString()),
+                                                endDateTime = createPartFromString(endDateTime),
+                                                endLat = createPartFromString(endLat),
+                                                endLng = createPartFromString(endLng),
+                                                startDateTime = createPartFromString(store?.startDatetime.toString()),
+                                                startLat = createPartFromString(store?.startLat.toString()),
+                                                startLng = createPartFromString(store?.startLng.toString()),
+                                                idCourier = createPartFromString(courier?.id.toString()),
+                                                idContact = createPartFromString(store?.id.toString()),
+                                            )
+
+                                            when (response.status) {
+                                                RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
+
+                                                    finishClosing(message)
+                                                    Log.d("Item to closing", "Success save item")
+
+                                                }
+
+                                                else -> {
+
+                                                    finishClosing(message)
+                                                    Log.d("Item to closing", "Failed to save item: " + response.message)
+
+                                                }
+                                            }
+
+                                        } catch (e: Exception) {
+
+                                            finishClosing(message)
+                                            Log.d("Item to closing", "Failed to save item: Error request. " + e.message)
+
+                                        }
+
+                                    }
+                                }.addOnFailureListener {
+                                    lifecycleScope.launch {
+                                        try {
+
+                                            val apiService: ApiService = HttpClient.create()
+
+                                            val response = apiService.saveDelivery(
+                                                lat = createPartFromString(store?.lat.toString()),
+                                                lng = createPartFromString(store?.lng.toString()),
+                                                endDateTime = createPartFromString(endDateTime),
+                                                endLat = createPartFromString(endLat),
+                                                endLng = createPartFromString(endLng),
+                                                startDateTime = createPartFromString(store?.startDatetime.toString()),
+                                                startLat = createPartFromString(store?.startLat.toString()),
+                                                startLng = createPartFromString(store?.startLng.toString()),
+                                                idCourier = createPartFromString(courier?.id.toString()),
+                                                idContact = createPartFromString(store?.id.toString()),
+                                            )
+
+                                            when (response.status) {
+                                                RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
+
+                                                    finishClosing(message)
+                                                    Log.d("Item to closing", "Success save item: With error listening location. " + it.message)
+
+                                                }
+
+                                                else -> {
+
+                                                    finishClosing(message)
+                                                    Log.d("Item to closing", "Failed to save item: " + response.message)
+
+                                                }
+                                            }
+
+                                        } catch (e: Exception) {
+
+                                            finishClosing(message)
+                                            Log.d("Item to closing", "Failed to save item: Error request. " + e.message)
+
+                                        }
+
+                                    }
                                 }
-                                finishClosing(message)
-                            }
+                        }
 
-                            override fun onCancelled(error: DatabaseError) {
-                                finishClosing(message)
-                            }
+//                        childDelivery?.child("$deliveryId/stores/$contactId")?.removeValue()
 
-                        })
+//                        childDriver?.child("stores")?.addListenerForSingleValueEvent(object : ValueEventListener {
+//                            override fun onDataChange(dataSnapshot: DataSnapshot) {
+////                                val isTracking = CustomUtility(this@PreviewClosingActivity).isServiceRunning(TrackingService::class.java)
+////                                if (!dataSnapshot.exists() && isTracking) {
+////                                    val serviceIntent = Intent(this@PreviewClosingActivity, TrackingService::class.java)
+////                                    this@PreviewClosingActivity.stopService(serviceIntent)
+////                                }
+//                                finishClosing(message)
+//                            }
+//
+//                            override fun onCancelled(error: DatabaseError) {
+//                                finishClosing(message)
+//                            }
+//
+//                        })
 
                     } else {
                         finishClosing(message)
@@ -322,6 +453,8 @@ class PreviewClosingActivity : AppCompatActivity() {
         resultIntent.putExtra(IS_CLOSING, true)
         setResult(RESULT_OK, resultIntent)
 
+        childDelivery?.child("$deliveryId/stores/$contactId")?.removeValue()
+
         handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, message)
         Handler().postDelayed({
             loadingState(false)
@@ -329,4 +462,22 @@ class PreviewClosingActivity : AppCompatActivity() {
         }, 1000)
 
     }
+
+    override fun onStart() {
+        super.onStart()
+        Handler().postDelayed({
+            if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+        }, 1000)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+    }
+
 }

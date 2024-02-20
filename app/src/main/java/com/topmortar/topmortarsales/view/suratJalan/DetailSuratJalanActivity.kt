@@ -114,6 +114,10 @@ import java.util.Locale
 class DetailSuratJalanActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
+    private val userID get() = sessionManager.userID()
+    private val userDistributorId get() = sessionManager.userDistributor()
+    private val userKind get() = sessionManager.userKind()
+
     private lateinit var binding: ActivityDetailSuratJalanBinding
     private lateinit var customUtility: CustomUtility
 
@@ -178,6 +182,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
+        if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
         customUtility = CustomUtility(this@DetailSuratJalanActivity)
 
         initVariable()
@@ -1165,5 +1170,21 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     End Generate & Print PDF
      */
 
+    override fun onStart() {
+        super.onStart()
+        Handler().postDelayed({
+            if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+        }, 1000)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+    }
 
 }

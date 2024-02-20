@@ -7,6 +7,7 @@ import com.topmortar.topmortarsales.commons.BASECAMP
 import com.topmortar.topmortarsales.commons.BID
 import com.topmortar.topmortarsales.commons.BID_ON_GOING
 import com.topmortar.topmortarsales.commons.CONTACT
+import com.topmortar.topmortarsales.commons.DELIVERY
 import com.topmortar.topmortarsales.commons.DISTRIBUTOR
 import com.topmortar.topmortarsales.commons.EDIT_CONTACT
 import com.topmortar.topmortarsales.commons.GET_CITY
@@ -20,6 +21,7 @@ import com.topmortar.topmortarsales.commons.SEND_MESSAGE
 import com.topmortar.topmortarsales.commons.SKILL
 import com.topmortar.topmortarsales.commons.STORE_STATUS
 import com.topmortar.topmortarsales.commons.SURAT_JALAN
+import com.topmortar.topmortarsales.commons.SURAT_JALAN_NOT_CLOSING
 import com.topmortar.topmortarsales.commons.TUKANG
 import com.topmortar.topmortarsales.commons.TUKANG_MESSAGE
 import com.topmortar.topmortarsales.commons.UPDATE_PASSWORD
@@ -33,6 +35,7 @@ import com.topmortar.topmortarsales.response.ResponseBaseCamp
 import com.topmortar.topmortarsales.response.ResponseCities
 import com.topmortar.topmortarsales.response.ResponseContactList
 import com.topmortar.topmortarsales.response.ResponseCountStore
+import com.topmortar.topmortarsales.response.ResponseDelivery
 import com.topmortar.topmortarsales.response.ResponseDistributor
 import com.topmortar.topmortarsales.response.ResponseGudang
 import com.topmortar.topmortarsales.response.ResponseInvoice
@@ -43,6 +46,7 @@ import com.topmortar.topmortarsales.response.ResponsePromo
 import com.topmortar.topmortarsales.response.ResponseReportVisit
 import com.topmortar.topmortarsales.response.ResponseSkills
 import com.topmortar.topmortarsales.response.ResponseSuratJalan
+import com.topmortar.topmortarsales.response.ResponseSuratJalanNotClosing
 import com.topmortar.topmortarsales.response.ResponseTukangList
 import com.topmortar.topmortarsales.response.ResponseUsers
 import okhttp3.MultipartBody
@@ -82,6 +86,7 @@ interface ApiService {
         @Part("mapsUrl") mapsUrl: RequestBody,
         @Part("address") address: RequestBody,
         @Part("status") status: RequestBody,
+        @Part("payment_method") paymentMethod: RequestBody,
         @Part("termin_payment") termin: RequestBody,
         @Part("reputation") reputation: RequestBody,
         @Part("id_promo") promoId: RequestBody,
@@ -533,4 +538,40 @@ interface ApiService {
     suspend fun listVoucher(
         @Query("c") idContact: String
     ): ResponseList.ResponseVoucher
+
+    @Multipart
+    @POST(DELIVERY)
+    suspend fun saveDelivery(
+        @Part("lat") lat: RequestBody,
+        @Part("lng") lng: RequestBody,
+        @Part("endDateTime") endDateTime: RequestBody,
+        @Part("endLat") endLat: RequestBody,
+        @Part("endLng") endLng: RequestBody,
+        @Part("startDateTime") startDateTime: RequestBody,
+        @Part("startLat") startLat: RequestBody,
+        @Part("startLng") startLng: RequestBody,
+        @Part("id_courier") idCourier: RequestBody,
+        @Part("id_contact") idContact: RequestBody,
+    ): ResponseMessage
+
+    @GET(DELIVERY)
+    suspend fun getDelivery(): ResponseDelivery
+
+    @GET(DELIVERY)
+    suspend fun getDelivery(
+        @Query("id_courier") idCourier: String
+    ): ResponseDelivery
+
+    @GET(DELIVERY)
+    suspend fun getDetailDelivery(
+        @Query("id") idDelivery: String
+    ): ResponseDelivery
+
+    @GET(SURAT_JALAN_NOT_CLOSING)
+    suspend fun sjNotClosing(): ResponseSuratJalanNotClosing
+
+    @GET(SURAT_JALAN_NOT_CLOSING)
+    suspend fun sjNotClosing(
+        @Query("c") idCity: String
+    ): ResponseSuratJalanNotClosing
 }

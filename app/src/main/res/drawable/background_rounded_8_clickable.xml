@@ -10,7 +10,7 @@
     <!-- Default background -->
     <item>
         <shape>
-            <solid android:color="@color/light" />
+            <solid android:color="@color/veryLight" />
             <corners android:radius="8dp" />
         </shape>
     </item>

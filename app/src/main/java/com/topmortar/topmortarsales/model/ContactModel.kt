@@ -11,6 +11,7 @@ data class ContactModel(
     var address: String = "",
     var store_status: String = "",
     var ktp_owner: String = "",
+    var payment_method: String = "",
     var termin_payment: String = "",
     var id_promo: String = "",
     var reputation: String = "",

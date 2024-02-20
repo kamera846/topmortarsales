@@ -36,6 +36,7 @@ import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
+import com.topmortar.topmortarsales.commons.CONST_PAYMENT_METHOD
 import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.CONST_PROMO
 import com.topmortar.topmortarsales.commons.CONST_REPUTATION
@@ -126,6 +127,15 @@ class ClosingStoreFragment : Fragment() {
 //                        response.results[0].nama = "Toko Rafli"
 
                         val contacts = response.results
+//                        val realItem = response.results[0]
+//                        val contacts = arrayListOf<ContactModel>()
+//
+//                        for (i in 0 until 10) {
+//                            val objek = realItem.copy()
+//                            objek.id_contact = (objek.id_contact.toInt() + i).toString()
+//                            objek.nama = objek.nama + " " + i
+//                            contacts.add(objek)
+//                        }
 
                         // Get a reference to your database
                         val deliveryId = AUTH_LEVEL_COURIER + userID
@@ -162,6 +172,7 @@ class ClosingStoreFragment : Fragment() {
                                                             requireContext(),
                                                             TrackingService::class.java
                                                         )
+                                                        serviceIntent.putExtra("userId", userID)
                                                         serviceIntent.putExtra(
                                                             "userDistributorId",
                                                             userDistributorID
@@ -175,6 +186,7 @@ class ClosingStoreFragment : Fragment() {
                                                         )
                                                         requireContext().stopService(serviceIntent)
                                                         Handler().postDelayed({
+                                                            serviceIntent.putExtra("userId", userID)
                                                             serviceIntent.putExtra(
                                                                 "userDistributorId",
                                                                 userDistributorID
@@ -187,11 +199,11 @@ class ClosingStoreFragment : Fragment() {
                                                         }, 1000)
                                                     }
                                                 } else {
-                                                    val serviceIntent = Intent(
-                                                        requireContext(),
-                                                        TrackingService::class.java
-                                                    )
-                                                    requireContext().stopService(serviceIntent)
+//                                                    val serviceIntent = Intent(
+//                                                        requireContext(),
+//                                                        TrackingService::class.java
+//                                                    )
+//                                                    requireContext().stopService(serviceIntent)
                                                 }
 
                                                 setRecyclerView(contacts)
@@ -199,11 +211,11 @@ class ClosingStoreFragment : Fragment() {
                                                 showBadgeRefresh(false)
                                                 listener?.counterItem(response.results.size)
                                             } else {
-                                                val serviceIntent = Intent(
-                                                    requireContext(),
-                                                    TrackingService::class.java
-                                                )
-                                                requireContext().stopService(serviceIntent)
+//                                                val serviceIntent = Intent(
+//                                                    requireContext(),
+//                                                    TrackingService::class.java
+//                                                )
+//                                                requireContext().stopService(serviceIntent)
 
                                                 setRecyclerView(contacts)
                                                 loadingState(false)
@@ -318,6 +330,7 @@ class ClosingStoreFragment : Fragment() {
             intent.putExtra(CONST_ADDRESS, data.address)
             intent.putExtra(CONST_STATUS, data.store_status)
             intent.putExtra(CONST_KTP, data.ktp_owner)
+            intent.putExtra(CONST_PAYMENT_METHOD, data.payment_method)
             intent.putExtra(CONST_TERMIN, data.termin_payment)
             intent.putExtra(CONST_PROMO, data.id_promo)
             intent.putExtra(CONST_REPUTATION, data.reputation)

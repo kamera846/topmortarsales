@@ -11,6 +11,8 @@ import android.provider.Settings
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.snackbar.Snackbar
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
+import java.util.Calendar
 
 class CustomUtility(private val context: Context) {
     fun showPermissionDeniedSnackbar(message: String, actionTitle: String = "Coba Lagi", unit: () -> Unit) {
@@ -60,5 +62,22 @@ class CustomUtility(private val context: Context) {
             }
         }
         return false
+    }
+
+    fun setUserStatusOnline(status: Boolean, userDistributorId: String, userId: String) {
+        val calendar = Calendar.getInstance()
+
+        val year = calendar.get(Calendar.YEAR).toString().padStart(2, '0')
+        val month = (calendar.get(Calendar.MONTH) + 1).toString().padStart(2, '0')
+        val day = calendar.get(Calendar.DAY_OF_MONTH).toString().padStart(2, '0')
+
+        val hour = calendar.get(Calendar.HOUR_OF_DAY).toString().padStart(2, '0')
+        val minute = calendar.get(Calendar.MINUTE).toString().padStart(2, '0')
+        val second = calendar.get(Calendar.SECOND).toString().padStart(2, '0')
+
+        val firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
+        val userChild = firebaseReference.child("$FIREBASE_CHILD_ABSENT/$userId")
+        userChild.child("isOnline").setValue(status)
+        userChild.child("lastSeen").setValue("$year-$month-$day $hour:$minute:$second")
     }
 }

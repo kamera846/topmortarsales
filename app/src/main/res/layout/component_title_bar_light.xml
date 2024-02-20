@@ -39,6 +39,12 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:text="sales freelance"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:scrollHorizontally="true"
             android:textSize="14sp"
             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 

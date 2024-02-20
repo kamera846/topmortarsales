@@ -32,4 +32,41 @@ object DeliveryModel {
     ) {
 //        constructor() : this("")
     }
+
+    data class History (
+        var id_delivery: String = "",
+        var endDatetime: String = "",
+        var endLat: String = "",
+        var endLng: String = "",
+        var lat: String = "",
+        var lng: String = "",
+        var id_courier: String = "",
+        var id_contact: String = "",
+        var startDatetime: String = "",
+        var startLat: String = "",
+        var startLng: String = "",
+        var id_user: String = "",
+        var full_name: String = "",
+        var username: String = "",
+        var password: String = "",
+        var level_user: String = "",
+        var id_city: String = "",
+        var phone_user: String = "",
+        var bid_limit: String = "",
+        var id_distributor: String = "",
+        var is_sales: String = "",
+        var is_notify: String = "",
+        var nama: String = "",
+        var nomorhp: String = "",
+        var tgl_lahir: String = "",
+        var store_owner: String = "",
+        var maps_url: String = "",
+        var address: String = "",
+        var store_status: String = "",
+        var ktp_owner: String = "",
+        var termin_payment: String = "",
+        var id_promo: String = "",
+        var reputation: String = "",
+        var created_at: String = "",
+    )
 }

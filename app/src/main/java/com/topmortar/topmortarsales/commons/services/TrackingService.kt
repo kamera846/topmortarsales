@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.IBinder
 import android.os.Looper
 import androidx.core.app.ActivityCompat
@@ -13,8 +14,10 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.database.DatabaseReference
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
 import com.topmortar.topmortarsales.commons.utils.CustomNotificationBuilder
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.view.SplashScreenActivity
 
@@ -22,9 +25,10 @@ class TrackingService : Service() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
-    private lateinit var locationCallback: LocationCallback
+    private var locationCallback: LocationCallback? = null
     private lateinit var firebaseReference: DatabaseReference
     private lateinit var childDelivery: DatabaseReference
+    private lateinit var childAbsent: DatabaseReference
     private lateinit var childDriver: DatabaseReference
 
     companion object {
@@ -53,8 +57,8 @@ class TrackingService : Service() {
             .setIntent(notificationIntent)
             .setChannelId("topmortar_delivery_notification")
             .setChannelName("Topmortar Delivery Notification")
-            .setContentTitle("Selesaikan Semua Pengiriman")
-            .setContentText("Ketuk untuk melihat pengiriman")
+            .setContentTitle("Kehadiran Sudah Tercatat")
+            .setContentText("Pastikan untuk menyelesaikan semua kiriman sebelum pulang...")
             .build()
 
         startForeground(NOTIFICATION_ID, notification)
@@ -62,11 +66,13 @@ class TrackingService : Service() {
 
     private fun startLocationUpdates(intent: Intent?) {
 
+        val userId = intent?.getStringExtra("userId")
         val userDistributorId = intent?.getStringExtra("userDistributorId").toString()
         val deliveryId = intent?.getStringExtra("deliveryId").toString()
 
         firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
         childDelivery = firebaseReference.child(FIREBASE_CHILD_DELIVERY)
+        childAbsent = firebaseReference.child(FIREBASE_CHILD_ABSENT).child(userId.toString())
         childDriver = childDelivery.child(deliveryId)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -80,6 +86,12 @@ class TrackingService : Service() {
                 childDriver.child("lat").setValue(driverLocation.latitude)
                 childDriver.child("lng").setValue(driverLocation.longitude)
 
+                childAbsent.child("lat").setValue(driverLocation.latitude)
+                childAbsent.child("lng").setValue(driverLocation.longitude)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    childAbsent.child("lastTracking").setValue(DateFormat.now())
+                }
+
             }
         }
 
@@ -87,11 +99,12 @@ class TrackingService : Service() {
             &&
             ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
         ) return
-        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback!!, Looper.getMainLooper())
     }
 
     private fun stopLocationUpdates() {
-        fusedLocationClient.removeLocationUpdates(locationCallback)
+        fusedLocationClient.removeLocationUpdates(locationCallback!!)
+        if (locationCallback != null) locationCallback = null
     }
 
     override fun onBind(intent: Intent?): IBinder? {

@@ -58,12 +58,20 @@
         android:theme="@style/Theme.TopMortarSales"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
+        <activity
+            android:name=".view.courier.HomeCourierActivity"
+            android:exported="false" />
+        <activity
+            android:name=".view.delivery.HistoryDeliveryActivity"
+            android:exported="false" />
+
         <service
             android:name=".commons.services.TrackingService"
             android:enabled="true"
             android:exported="false" />
+
         <activity
-            android:name=".view.DeliveryActivity"
+            android:name=".view.delivery.DeliveryActivity"
             android:exported="false" />
         <activity
             android:name=".view.contact.VoucherActivity"

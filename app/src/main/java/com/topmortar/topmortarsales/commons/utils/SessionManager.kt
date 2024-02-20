@@ -127,6 +127,15 @@ class SessionManager(context: Context) {
         return sharedPreferences.getString("deviceUUID", "0")
     }
 
+    fun absentDateTime(absentDateTime: String) {
+        editor.putString("absentDateTime", absentDateTime)
+        editor.apply()
+    }
+
+    fun absentDateTime(): String? {
+        return sharedPreferences.getString("absentDateTime", "0")
+    }
+
     fun setUserLoggedIn(data: UserModel?) {
         if (data != null) {
             val tempData = data.copy()
