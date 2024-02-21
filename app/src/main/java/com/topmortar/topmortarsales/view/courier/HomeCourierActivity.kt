@@ -398,7 +398,7 @@ class HomeCourierActivity : AppCompatActivity() {
             binding.absentDescription.text = if (state) {
                 "Absenmu penting! Jangan lupa untuk mencatat kehadiranmu sekarang dan ciptakan jejak kerja yang positif."
             } else {
-                "Terima kasih sudah mencatat kehadiran hari ini dan jangan lupa untuk mencatat absen pulang juga setelah lebih dari pukul 17.00 nanti!"
+                "Terima kasih sudah mencatat kehadiran hari ini dan jangan lupa untuk mencatat absen pulang juga setelah lebih dari pukul 16.00 nanti!"
             }
 
             binding.btnAbsent.backgroundTintList = ContextCompat.getColorStateList(this, if (state) R.color.status_bid else R.color.red_claret)
@@ -407,7 +407,7 @@ class HomeCourierActivity : AppCompatActivity() {
             val calendar = Calendar.getInstance()
             val currentHour = calendar.get(Calendar.HOUR_OF_DAY) // Mengambil jam saat ini dalam format 24 jam
 
-            if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 17) {
+            if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
                 binding.btnAbsent.visibility = View.GONE
                 binding.absenEveningInfoText.visibility = View.VISIBLE
             } else {
