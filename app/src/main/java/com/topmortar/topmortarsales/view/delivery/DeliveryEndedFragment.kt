@@ -110,9 +110,9 @@ class DeliveryEndedFragment : Fragment() {
                 val apiService: ApiService = HttpClient.create()
                 val response = when (userKind) {
                     USER_KIND_ADMIN -> {
-                        if (selectedCity != null) apiService.getDeliveryByCity(cityId = selectedCity?.id!!)
-                        else apiService.getDelivery()
-                    } else -> apiService.getDeliveryByCity(cityId = selectedCity?.id!!)
+                        if (selectedCity != null) apiService.getDeliveryByCity(cityId = selectedCity?.id!!, distributorID = userDistributorid)
+                        else apiService.getDelivery(distributorID = userDistributorid)
+                    } else -> apiService.getDeliveryByCity(cityId = selectedCity?.id!!, distributorID = userDistributorid)
                 }
 
                 when (response.status) {
@@ -258,7 +258,8 @@ class DeliveryEndedFragment : Fragment() {
                         items.add(0, ModalSearchModel("-1", "Hapus Filter"))
 
                         setupDialogSearch(items)
-                        binding.llFilter.componentFilter.visibility = View.VISIBLE
+//                        binding.llFilter.componentFilter.visibility = View.VISIBLE
+                        binding.llFilter.componentFilter.visibility = View.GONE
 
                     }
                     RESPONSE_STATUS_EMPTY -> {

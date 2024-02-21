@@ -91,7 +91,7 @@ class HistoryDeliveryFragment : Fragment() {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getDelivery(idCourier = userID)
+                val response = apiService.getDelivery(idCourier = userID, distributorID = userDistributorid)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {

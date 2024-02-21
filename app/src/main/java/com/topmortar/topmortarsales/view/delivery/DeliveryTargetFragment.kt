@@ -121,9 +121,9 @@ class DeliveryTargetFragment : Fragment() {
 
                 val response = when (userKind) {
                     USER_KIND_ADMIN -> {
-                        if (selectedCity != null) apiService.sjNotClosing(idCity = selectedCity?.id!!)
-                        else apiService.sjNotClosing()
-                    } else -> apiService.sjNotClosing(idCity = userCity)
+                        if (selectedCity != null) apiService.sjNotClosing(idCity = selectedCity?.id!!, distributorID = userDistributorid)
+                        else apiService.sjNotClosing(distributorID = userDistributorid)
+                    } else -> apiService.sjNotClosing(idCity = userCity, distributorID = userDistributorid)
                 }
 
                 when (response.status) {
@@ -334,7 +334,8 @@ class DeliveryTargetFragment : Fragment() {
                         items.add(0, ModalSearchModel("-1", "Hapus Filter"))
 
                         setupDialogSearch(items)
-                        binding.llFilter.componentFilter.visibility = View.VISIBLE
+//                        binding.llFilter.componentFilter.visibility = View.VISIBLE
+                        binding.llFilter.componentFilter.visibility = View.GONE
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
