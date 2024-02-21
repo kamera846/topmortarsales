@@ -10,6 +10,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.database.DataSnapshot
@@ -22,13 +23,19 @@ import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_DELIVERY_ID
 import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
+import com.topmortar.topmortarsales.data.ApiService
+import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.FragmentDeliveryProgressBinding
 import com.topmortar.topmortarsales.model.DeliveryModel
 import com.topmortar.topmortarsales.view.MapsActivity
+import kotlinx.coroutines.launch
 
 /**
  * A fragment representing a list of Items.
@@ -40,7 +47,9 @@ class DeliveryProgressFragment : Fragment() {
 
     private lateinit var firebaseReference : DatabaseReference
     private lateinit var sessionManager: SessionManager
+    private val userKind get() = sessionManager.userKind().toString()
     private val userDistributorId get() = sessionManager.userDistributor().toString()
+    private val userCity get() = sessionManager.userCityID().toString()
 
     private lateinit var badgeRefresh: LinearLayout
 
@@ -77,53 +86,102 @@ class DeliveryProgressFragment : Fragment() {
         loadingState(true)
         showBadgeRefresh(false)
 
-        // Get a reference to your database
-        val myRef: DatabaseReference = firebaseReference.child(FIREBASE_CHILD_DELIVERY)
+        lifecycleScope.launch {
+            try {
 
-        // Add a ValueEventListener to retrieve the data
-        myRef.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                // The dataSnapshot contains the data from the database
-                if (dataSnapshot.exists()) {
-                    val storeList = arrayListOf<DeliveryModel.Store>()
+                val apiService: ApiService = HttpClient.create()
 
-                    for (delivery in dataSnapshot.children) {
-                        if (delivery.child("stores").exists()) {
-                            for (store in delivery.child("stores").children) {
-                                val storeData = store.getValue(DeliveryModel.Store::class.java)!!
-                                storeData.courier = delivery.child("courier").getValue(DeliveryModel.Courier::class.java)!!
-                                storeData.deliveryId = delivery.child("id").getValue(String::class.java)!!
-                                storeList.add(storeData)
+                val response = when (userKind) {
+                    USER_KIND_ADMIN -> {
+//                        if (selectedCity != null) apiService.sjNotClosing(idCity = selectedCity?.id!!, distributorID = userDistributorid)
+//                        else apiService.sjNotClosing(distributorID = userDistributorid)
+                        apiService.sjNotClosing(distributorID = userDistributorId)
+                    } else -> apiService.sjNotClosing(idCity = userCity, distributorID = userDistributorId)
+                }
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        // List Target Store
+                        val listStores = response.results
+
+                        // Get a reference to your database
+                        val myRef: DatabaseReference = firebaseReference.child(FIREBASE_CHILD_DELIVERY)
+
+                        // Add a ValueEventListener to retrieve the data
+                        myRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                // The dataSnapshot contains the data from the database
+                                if (dataSnapshot.exists()) {
+                                    val storeList = arrayListOf<DeliveryModel.Store>()
+
+                                    for (delivery in dataSnapshot.children) {
+                                        if (delivery.child("stores").exists()) {
+                                            for (store in delivery.child("stores").children) {
+                                                val storeData = store.getValue(DeliveryModel.Store::class.java)!!
+                                                storeData.courier = delivery.child("courier").getValue(DeliveryModel.Courier::class.java)!!
+                                                storeData.deliveryId = delivery.child("id").getValue(String::class.java)!!
+
+                                                val validation = listStores.find { it.id_contact == storeData.id }
+                                                if (validation != null) storeList.add(storeData)
+                                            }
+                                        }
+                                    }
+
+                                    if (storeList.isNotEmpty()) {
+                                        listener?.counterItem(storeList.size)
+                                        setRecyclerView(storeList)
+                                        loadingState(false)
+                                        showBadgeRefresh(false)
+                                    } else {
+                                        listener?.counterItem(0)
+                                        loadingState(true, "Belum ada pengiriman yang berlangsung.")
+                                        showBadgeRefresh(false)
+                                    }
+                                } else {
+                                    listener?.counterItem(0)
+                                    loadingState(true, "Belum ada pengiriman yang berlangsung.")
+                                    showBadgeRefresh(false)
+                                }
                             }
-                        }
-                    }
 
-                    if (storeList.isNotEmpty()) {
-                        listener?.counterItem(storeList.size)
-                        setRecyclerView(storeList)
-                        loadingState(false)
-                        showBadgeRefresh(false)
-                    } else {
-                        listener?.counterItem(0)
+                            override fun onCancelled(databaseError: DatabaseError) {
+                                // Handle errors
+                                handleMessage(requireContext(), TAG_RESPONSE_CONTACT,
+                                    "Failed run service. Exception $databaseError"
+                                )
+                                loadingState(true, getString(R.string.failed_request))
+                                showBadgeRefresh(true)
+                            }
+                        })
+
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
                         loadingState(true, "Belum ada pengiriman yang berlangsung.")
                         showBadgeRefresh(false)
-                    }
-                } else {
-                    listener?.counterItem(0)
-                    loadingState(true, "Belum ada pengiriman yang berlangsung.")
-                    showBadgeRefresh(false)
-                }
-            }
+                        listener?.counterItem(0)
 
-            override fun onCancelled(databaseError: DatabaseError) {
-                // Handle errors
-                handleMessage(requireContext(), TAG_RESPONSE_CONTACT,
-                    "Failed run service. Exception $databaseError"
-                )
+                    }
+                    else -> {
+
+                        handleMessage(requireContext(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        loadingState(true, getString(R.string.failed_request))
+                        showBadgeRefresh(true)
+
+                    }
+                }
+
+            } catch (e: Exception) {
+
+                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message + e.stackTraceToString())
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
+
             }
-        })
+
+        }
 
     }
 

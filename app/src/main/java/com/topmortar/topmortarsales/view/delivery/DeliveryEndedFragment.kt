@@ -112,7 +112,7 @@ class DeliveryEndedFragment : Fragment() {
                     USER_KIND_ADMIN -> {
                         if (selectedCity != null) apiService.getDeliveryByCity(cityId = selectedCity?.id!!, distributorID = userDistributorid)
                         else apiService.getDelivery(distributorID = userDistributorid)
-                    } else -> apiService.getDeliveryByCity(cityId = selectedCity?.id!!, distributorID = userDistributorid)
+                    } else -> apiService.getDeliveryByCity(cityId = userCity, distributorID = userDistributorid)
                 }
 
                 when (response.status) {
