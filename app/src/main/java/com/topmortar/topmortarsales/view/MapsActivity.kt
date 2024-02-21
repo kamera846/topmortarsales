@@ -2069,7 +2069,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getDetailDelivery(idDelivery = deliveryID.toString())
+                val response = apiService.getDetailDelivery(idDelivery = deliveryID.toString(), distributorID = userDistributorId)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {

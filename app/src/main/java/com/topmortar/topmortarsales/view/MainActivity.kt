@@ -423,6 +423,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 //                skillItem.isVisible = true
                 basecamp.isVisible = true
                 gudang.isVisible = true
+                delivery.isVisible = true
             }
         }
 

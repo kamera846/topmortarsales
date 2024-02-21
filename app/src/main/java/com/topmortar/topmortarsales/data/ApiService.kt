@@ -555,23 +555,32 @@ interface ApiService {
     ): ResponseMessage
 
     @GET(DELIVERY)
-    suspend fun getDelivery(): ResponseDelivery
+    suspend fun getDelivery(@Query("dst") distributorID: String): ResponseDelivery
 
     @GET(DELIVERY)
     suspend fun getDelivery(
-        @Query("id_courier") idCourier: String
+        @Query("id_courier") idCourier: String,
+        @Query("dst") distributorID: String
+    ): ResponseDelivery
+
+    @GET(DELIVERY)
+    suspend fun getDeliveryByCity(
+        @Query("c") cityId: String,
+        @Query("dst") distributorID: String
     ): ResponseDelivery
 
     @GET(DELIVERY)
     suspend fun getDetailDelivery(
-        @Query("id") idDelivery: String
+        @Query("id") idDelivery: String,
+        @Query("dst") distributorID: String
     ): ResponseDelivery
 
     @GET(SURAT_JALAN_NOT_CLOSING)
-    suspend fun sjNotClosing(): ResponseSuratJalanNotClosing
+    suspend fun sjNotClosing(@Query("dst") distributorID: String): ResponseSuratJalanNotClosing
 
     @GET(SURAT_JALAN_NOT_CLOSING)
     suspend fun sjNotClosing(
-        @Query("c") idCity: String
+        @Query("c") idCity: String,
+        @Query("dst") distributorID: String
     ): ResponseSuratJalanNotClosing
 }
