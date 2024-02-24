@@ -1,6 +1,7 @@
 package com.topmortar.topmortarsales.view.user
 
 import android.annotation.SuppressLint
+import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -83,6 +84,7 @@ import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
+import java.util.Calendar
 
 class UserProfileActivity : AppCompatActivity() {
 
@@ -104,6 +106,9 @@ class UserProfileActivity : AppCompatActivity() {
     private var childAbsent: DatabaseReference? = null
     private var childCourier: DatabaseReference? = null
     private var courierTrackingListener: ValueEventListener? = null
+
+    private var isAbsentMorningNow = false
+    private var isAbsentEveningNow = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -128,7 +133,10 @@ class UserProfileActivity : AppCompatActivity() {
 
         binding.salesReportContainer.visibility = View.VISIBLE
 
-        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+        if (sessionManager.userKind() == USER_KIND_COURIER) {
+            CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+            checkAbsent()
+        }
         if (iUserLevel == AUTH_LEVEL_COURIER) {
             binding.salesReportContainer.visibility = View.GONE
             binding.deliveryContainer.visibility = View.VISIBLE
@@ -256,7 +264,6 @@ class UserProfileActivity : AppCompatActivity() {
         }
 
         if (sessionManager.userKind() == USER_KIND_COURIER) {
-            binding.btnLogout.visibility = View.VISIBLE
             binding.btnLogout.setOnClickListener { logoutConfirmation() }
         }
 
@@ -489,6 +496,10 @@ class UserProfileActivity : AppCompatActivity() {
 
     @SuppressLint("HardwareIds")
     private fun logoutHandler() {
+        val progressDialog = ProgressDialog(this)
+        progressDialog.setCancelable(false)
+        progressDialog.setMessage(getString(R.string.txt_loading))
+        progressDialog.show()
 
         // Firebase Auth Session
         try {
@@ -508,13 +519,13 @@ class UserProfileActivity : AppCompatActivity() {
             } else userDevice.child("logout_at").setValue("")
             userDevice.child("login_at").setValue("")
 
-            if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+            if (sessionManager.userKind() == USER_KIND_COURIER) {
+//                Log.d("Kurir Logout", "${sessionManager.userDistributor()} : ${sessionManager.userID()}")
+                CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+            }
         } catch (e: Exception) {
             Log.d("Firebase Auth", "$e")
         }
-
-        sessionManager.setLoggedIn(LOGGED_OUT)
-        sessionManager.setUserLoggedIn(null)
 
         val isTracking = CustomUtility(this).isServiceRunning(TrackingService::class.java)
         if (isTracking) {
@@ -522,10 +533,16 @@ class UserProfileActivity : AppCompatActivity() {
             this.stopService(serviceIntent)
         }
 
-        val intent = Intent(this, SplashScreenActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
-        finish()
+        Handler().postDelayed({
+            sessionManager.setLoggedIn(LOGGED_OUT)
+            sessionManager.setUserLoggedIn(null)
+
+            progressDialog.dismiss()
+            val intent = Intent(this, SplashScreenActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
+        }, 1000)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -649,6 +666,94 @@ class UserProfileActivity : AppCompatActivity() {
         binding.btnCourierTracking.setOnClickListener { navigateTrackingCourier() }
     }
 
+    private fun lockBtnLogout(state: Boolean) {
+        val calendar = Calendar.getInstance()
+        val currentHour = calendar.get(Calendar.HOUR_OF_DAY) // Mengambil jam saat ini dalam format 24 jam
+
+        if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
+            binding.btnLogout.visibility = View.GONE
+            binding.lockedInfoText.visibility = View.VISIBLE
+        } else {
+            binding.btnLogout.visibility = View.VISIBLE
+            binding.lockedInfoText.visibility = View.GONE
+        }
+    }
+
+    private fun checkAbsent() {
+
+        val userId = sessionManager.userID().toString()
+        val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+        val userChild = absentChild.child(userId)
+
+        userChild.addListenerForSingleValueEvent(object: ValueEventListener {
+            @RequiresApi(Build.VERSION_CODES.O)
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    // Do something
+                    if (snapshot.child("morningDateTime").exists()) {
+                        val morningDateTime = snapshot.child("morningDateTime").getValue(String::class.java).toString()
+                        if (morningDateTime.isNotEmpty()) {
+                            sessionManager.absentDateTime(morningDateTime)
+
+                            val absentMorningDate = DateFormat.format(morningDateTime, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd")
+
+                            if (DateFormat.dateAfterNow(absentMorningDate)) {
+                                isAbsentMorningNow = false
+                                lockBtnLogout(true)
+                            } else {
+
+                                isAbsentMorningNow = true
+                                if (snapshot.child("eveningDateTime").exists()) {
+                                    val eveningDateTime = snapshot.child("eveningDateTime").getValue(String::class.java).toString()
+
+                                    if (eveningDateTime.isNotEmpty()) {
+                                        val absentEveningDate = DateFormat.format(eveningDateTime, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd")
+
+                                        if (DateFormat.dateAfterNow(absentEveningDate)) {
+                                            isAbsentEveningNow = false
+                                            lockBtnLogout(false)
+                                        } else {
+                                            isAbsentEveningNow = true
+                                            lockBtnLogout(true)
+                                        }
+
+                                    } else {
+                                        isAbsentEveningNow = false
+                                        lockBtnLogout(false)
+                                    }
+                                } else {
+                                    isAbsentEveningNow = false
+                                    lockBtnLogout(false)
+                                }
+
+                            }
+
+                        } else {
+                            isAbsentMorningNow = false
+                            lockBtnLogout(true)
+                        }
+                    } else {
+                        isAbsentMorningNow = false
+                        lockBtnLogout(true)
+                    }
+                } else {
+                    isAbsentMorningNow = false
+                    lockBtnLogout(true)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                // Do something
+                isAbsentMorningNow = false
+                isAbsentEveningNow = false
+                lockBtnLogout(true)
+            }
+
+        })
+    }
+
+// Override Class
+
     override fun onBackPressed() {
         backHandler()
     }
@@ -667,19 +772,43 @@ class UserProfileActivity : AppCompatActivity() {
         super.onStart()
         EventBus.getDefault().register(this)
         Handler().postDelayed({
-            if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+            if (sessionManager.isLoggedIn()) {
+                if (sessionManager.userKind() == USER_KIND_COURIER) {
+                    CustomUtility(this).setUserStatusOnline(
+                        true,
+                        sessionManager.userDistributor().toString(),
+                        sessionManager.userID().toString()
+                    )
+                }
+            }
         }, 1000)
     }
 
     override fun onStop() {
         super.onStop()
         EventBus.getDefault().unregister(this)
-        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+        if (sessionManager.isLoggedIn()) {
+            if (sessionManager.userKind() == USER_KIND_COURIER) {
+                CustomUtility(this).setUserStatusOnline(
+                    false,
+                    sessionManager.userDistributor().toString(),
+                    sessionManager.userID().toString()
+                )
+            }
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+        if (sessionManager.isLoggedIn()) {
+            if (sessionManager.userKind() == USER_KIND_COURIER) {
+                CustomUtility(this).setUserStatusOnline(
+                    false,
+                    sessionManager.userDistributor().toString(),
+                    sessionManager.userID().toString()
+                )
+            }
+        }
     }
 
 }

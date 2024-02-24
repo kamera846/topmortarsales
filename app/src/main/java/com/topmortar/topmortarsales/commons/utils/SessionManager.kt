@@ -100,6 +100,25 @@ class SessionManager(context: Context) {
         return sharedPreferences.getString("printState", PRINT_METHOD_BLUETOOTH)
     }
 
+    fun selectedBasecampAbsent(selectedBasecampAbsentID: String, selectedBasecampAbsentTitle: String, selectedBasecampAbsentCoordinate: String) {
+        editor.putString("selectedBasecampAbsentID", selectedBasecampAbsentID)
+        editor.putString("selectedBasecampAbsentTitle", selectedBasecampAbsentTitle)
+        editor.putString("selectedBasecampAbsentCoordinate", selectedBasecampAbsentCoordinate)
+        editor.apply()
+    }
+
+    fun selectedBasecampAbsentID(): String? {
+        return sharedPreferences.getString("selectedBasecampAbsentID", "")
+    }
+
+    fun selectedBasecampAbsentTitle(): String? {
+        return sharedPreferences.getString("selectedBasecampAbsentTitle", "")
+    }
+
+    fun selectedBasecampAbsentCoordinate(): String? {
+        return sharedPreferences.getString("selectedBasecampAbsentCoordinate", "")
+    }
+
     fun userDistributor(userDistributor: String) {
         editor.putString("userDistributor", userDistributor)
         editor.apply()
