@@ -219,7 +219,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var deliveryID: String? = null
     private var courierID: String? = null
 
-    private val courierDrawable = R.drawable.pin_truck
+//    private val courierDrawable = R.drawable.pin_truck
+    private val courierDrawable = R.drawable.pin_truck_pink_cyclamen
     private val storeDrawable = R.drawable.store_location_status_blacklist
 
     private var listGudang: ArrayList<GudangModel> = arrayListOf()
@@ -1666,7 +1667,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                             .title(deliveryData!!.courier?.name ?: "Kurir")
                                             .icon(
                                                 BitmapDescriptorFactory.fromBitmap(
-                                                    resizedBitmap(courierDrawable)
+                                                    resizedBitmap(courierDrawable, 60)
                                                 )
                                             )
                                     )
@@ -1676,7 +1677,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                             .title(store.name)
                                             .icon(
                                                 BitmapDescriptorFactory.fromBitmap(
-                                                    resizedBitmap(storeDrawable)
+                                                    resizedBitmap(storeDrawable, 60)
                                                 )
                                             )
                                     )
@@ -1849,7 +1850,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                     )
                                     .icon(
                                         BitmapDescriptorFactory.fromBitmap(
-                                            resizedBitmap(courierDrawable)
+                                            resizedBitmap(courierDrawable, 60)
                                         )
                                     )
                             )
@@ -1933,7 +1934,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                     )
                                     .icon(
                                         BitmapDescriptorFactory.fromBitmap(
-                                            resizedBitmap(courierDrawable)
+                                            resizedBitmap(courierDrawable, 60)
                                         )
                                     )
                             )
@@ -2087,7 +2088,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                 .title(courierName)
                                 .icon(
                                     BitmapDescriptorFactory.fromBitmap(
-                                        resizedBitmap(courierDrawable)
+                                        resizedBitmap(courierDrawable, 60)
                                     )
                                 )
                         )
@@ -2097,7 +2098,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                 .title("Nama Toko")
                                 .icon(
                                     BitmapDescriptorFactory.fromBitmap(
-                                        resizedBitmap(storeDrawable)
+                                        resizedBitmap(storeDrawable, 60)
                                     )
                                 )
                         )
@@ -2275,12 +2276,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     }
 
-    private fun resizedBitmap(drawable: Int): Bitmap {
+    private fun resizedBitmap(drawable: Int, sizeDp: Int = 40): Bitmap {
 
         val originalBitmap = BitmapFactory.decodeResource(resources, drawable)
 
-        val newWidth = convertDpToPx(40, this@MapsActivity)
-        val newHeight = convertDpToPx(40, this@MapsActivity)
+        val newWidth = convertDpToPx(sizeDp, this@MapsActivity)
+        val newHeight = convertDpToPx(sizeDp, this@MapsActivity)
 
         return Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
     }

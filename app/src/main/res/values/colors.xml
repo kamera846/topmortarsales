@@ -33,6 +33,7 @@
     <color name="green_tea">#CDDFA0</color>
     <color name="redwood">#AA5042</color>
     <color name="red_claret">#8B2635</color>
+    <color name="pink_cyclamen">#ff729f</color>
     <color name="charcoal">#313E50</color>
     <color name="status_data">#F9D923</color>
     <color name="status_passive">@color/black_600</color>
