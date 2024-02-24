@@ -258,8 +258,8 @@ class DeliveryEndedFragment : Fragment() {
                         items.add(0, ModalSearchModel("-1", "Hapus Filter"))
 
                         setupDialogSearch(items)
-//                        binding.llFilter.componentFilter.visibility = View.VISIBLE
-                        binding.llFilter.componentFilter.visibility = View.GONE
+                        binding.llFilter.componentFilter.visibility = View.VISIBLE
+//                        binding.llFilter.componentFilter.visibility = View.GONE
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
