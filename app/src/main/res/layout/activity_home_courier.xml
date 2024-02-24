@@ -117,15 +117,22 @@
                     android:layout_alignParentStart="true"
                     android:layout_below="@+id/absent_title"/>
 
+                <include
+                    android:id="@+id/selectedBasecampContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:layout_below="@+id/absent_description"
+                    layout="@layout/component_filter"/>
+
                 <Button
                     android:id="@+id/btn_absent"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Absen Sekarang"
-                    android:layout_marginTop="12dp"
                     android:backgroundTint="@color/status_bid"
                     android:backgroundTintMode="add"
-                    android:layout_below="@+id/absent_description"/>
+                    android:layout_below="@+id/selectedBasecampContainer"/>
 
                 <LinearLayout
                     android:visibility="gone"
@@ -134,8 +141,8 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:layout_marginTop="12dp"
-                    android:layout_below="@+id/absent_description">
+                    android:layout_marginTop="8dp"
+                    android:layout_below="@+id/selectedBasecampContainer">
 
                     <ImageView
                         android:layout_width="20dp"

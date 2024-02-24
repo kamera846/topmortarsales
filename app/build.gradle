@@ -14,8 +14,8 @@ android {
         applicationId "com.topmortar.topmortarsales"
         minSdk 24
         targetSdk 33
-        versionCode 72
-        versionName "2.8.72"
+        versionCode 73
+        versionName "2.8.73"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }

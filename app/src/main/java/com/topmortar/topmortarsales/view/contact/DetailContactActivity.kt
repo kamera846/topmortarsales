@@ -806,17 +806,18 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 etName.requestFocus()
                 etName.setSelection(etName.text.length)
-            } else if (sessionManager.userKind() == USER_KIND_SALES) {
-                icEdit.visibility = View.GONE
-                tvMapsContainer.visibility = View.GONE
-                btnSendMessage.visibility = View.GONE
-                btnInvoice.visibility = View.GONE
-
-                tvTitleBar.text = "Edit Contact"
-                icClose.visibility = View.VISIBLE
-                etMapsContainer.visibility = View.VISIBLE
-                btnSaveEdit.visibility = View.VISIBLE
             }
+//            else if (sessionManager.userKind() == USER_KIND_SALES) {
+//                icEdit.visibility = View.GONE
+//                tvMapsContainer.visibility = View.GONE
+//                btnSendMessage.visibility = View.GONE
+//                btnInvoice.visibility = View.GONE
+//
+//                tvTitleBar.text = "Edit Contact"
+//                icClose.visibility = View.VISIBLE
+//                etMapsContainer.visibility = View.VISIBLE
+//                btnSaveEdit.visibility = View.VISIBLE
+//            }
 
         } else {
 
@@ -891,19 +892,20 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 btnSaveEdit.visibility = View.GONE
 
                 etName.clearFocus()
-            } else if (sessionManager.userKind() == USER_KIND_SALES) {
-                icEdit.visibility = View.VISIBLE
-                tvMapsContainer.visibility = View.VISIBLE
-                btnSendMessage.visibility = View.VISIBLE
-                tooltipStatus.visibility = View.VISIBLE
-                if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
-                else btnInvoice.visibility = View.VISIBLE
-
-                tvTitleBar.text = "Detail Contact"
-                icClose.visibility = View.GONE
-                etMapsContainer.visibility = View.GONE
-                btnSaveEdit.visibility = View.GONE
             }
+//            else if (sessionManager.userKind() == USER_KIND_SALES) {
+//                icEdit.visibility = View.VISIBLE
+//                tvMapsContainer.visibility = View.VISIBLE
+//                btnSendMessage.visibility = View.VISIBLE
+//                tooltipStatus.visibility = View.VISIBLE
+//                if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
+//                else btnInvoice.visibility = View.VISIBLE
+//
+//                tvTitleBar.text = "Detail Contact"
+//                icClose.visibility = View.GONE
+//                etMapsContainer.visibility = View.GONE
+//                btnSaveEdit.visibility = View.GONE
+//            }
 
         }
 
@@ -1680,7 +1682,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         }
 
                         // Admin Access
-                        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY || sessionManager.userKind() == USER_KIND_SALES) {
+//                        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY || sessionManager.userKind() == USER_KIND_SALES) {
+                        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) {
                             icEdit.visibility = View.VISIBLE
                             val indicatorImageView = findViewById<View>(R.id.indicatorView)
                             indicatorImageView.visibility = View.VISIBLE
