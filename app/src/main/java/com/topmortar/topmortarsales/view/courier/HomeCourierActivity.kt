@@ -51,6 +51,7 @@ import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
@@ -1013,12 +1014,29 @@ class HomeCourierActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        CustomUtility(this).setUserStatusOnline(false, userDistributorId.toString(), userId.toString())
+
+        if (sessionManager.isLoggedIn()) {
+            if (sessionManager.userKind() == USER_KIND_COURIER) {
+                CustomUtility(this).setUserStatusOnline(
+                    false,
+                    sessionManager.userDistributor().toString(),
+                    sessionManager.userID().toString()
+                )
+            }
+        }
     }
 
 
     override fun onDestroy() {
         super.onDestroy()
-        CustomUtility(this).setUserStatusOnline(false, userDistributorId.toString(), userId.toString())
+        if (sessionManager.isLoggedIn()) {
+            if (sessionManager.userKind() == USER_KIND_COURIER) {
+                CustomUtility(this).setUserStatusOnline(
+                    false,
+                    sessionManager.userDistributor().toString(),
+                    sessionManager.userID().toString()
+                )
+            }
+        }
     }
 }
