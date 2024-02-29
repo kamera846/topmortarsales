@@ -22,8 +22,9 @@ class DeliveryViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
     fun setSyncAction(index: Int) {
         when (index) {
             0 -> targetFragment.syncNow()
-            1 -> progressFragment.syncNow()
-            2 -> endedFragment.syncNow()
+//            1 -> progressFragment.syncNow()
+//            2 -> endedFragment.syncNow()
+            1 -> endedFragment.syncNow()
             else -> targetFragment.syncNow()
         }
     }
@@ -41,23 +42,33 @@ class DeliveryViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
                 })
                 return targetFragment
 
+//            } 1 -> {
+//
+//                progressFragment = DeliveryProgressFragment()
+//                progressFragment.setCounterItem(object : DeliveryProgressFragment.CounterItem{
+//                    override fun counterItem(count: Int) {
+//                        listener?.counterItem(count, 1)
+//                    }
+//
+//                })
+//                return progressFragment
+//
+//            } 2 -> {
+//
+//                endedFragment = DeliveryEndedFragment()
+//                endedFragment.setCounterItem(object : DeliveryEndedFragment.CounterItem{
+//                    override fun counterItem(count: Int) {
+//                        listener?.counterItem(count, 2)
+//                    }
+//
+//                })
+//                return endedFragment
             } 1 -> {
-
-                progressFragment = DeliveryProgressFragment()
-                progressFragment.setCounterItem(object : DeliveryProgressFragment.CounterItem{
-                    override fun counterItem(count: Int) {
-                        listener?.counterItem(count, 1)
-                    }
-
-                })
-                return progressFragment
-
-            } 2 -> {
 
                 endedFragment = DeliveryEndedFragment()
                 endedFragment.setCounterItem(object : DeliveryEndedFragment.CounterItem{
                     override fun counterItem(count: Int) {
-                        listener?.counterItem(count, 2)
+                        listener?.counterItem(count, 1)
                     }
 
                 })
@@ -79,14 +90,15 @@ class DeliveryViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
     }
 
     override fun getCount(): Int {
-        return 3
+        return 2
     }
 
     override fun getPageTitle(position: Int): CharSequence {
         return when (position) {
             0 -> "Target"
-            1 -> "Berlangsung"
-            2 -> "Riwayat"
+//            1 -> "Berlangsung"
+//            2 -> "Riwayat"
+            1 -> "Riwayat"
             else -> "Target"
         }
     }

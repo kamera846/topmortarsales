@@ -46,7 +46,8 @@ class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<S
             }
 
             tvContactName.text = item.nama
-            tvPhoneNumber.text = if (dateEnded.isNotEmpty()) "Telah di proses pada $dateEnded" else "Menunggu untuk di proses"
+//            tvPhoneNumber.text = if (dateEnded.isNotEmpty()) "Telah di proses pada $dateEnded" else "Menunggu untuk di proses"
+            tvPhoneNumber.text = if (dateEnded.isNotEmpty()) "Telah di proses oleh " + item.courierName else "Menunggu untuk di proses"
 
         }
 

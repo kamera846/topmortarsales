@@ -1,11 +1,14 @@
 package com.topmortar.topmortarsales.view.courier
 
+import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.location.Location
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
-import android.os.Handler
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,6 +22,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -49,8 +54,8 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
-import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -74,10 +79,18 @@ class ClosingStoreFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var sessionManager: SessionManager
+    private val userFullName get() = sessionManager.fullName().toString()
     private val userID get() = sessionManager.userID().toString()
     private val userKind get() = sessionManager.userKind().toString()
     private val userCity get() = sessionManager.userCityID().toString()
     private val userDistributorID get() = sessionManager.userDistributor().toString()
+
+    // Delivery
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var deliveryId = ""
+    private lateinit var firebaseReference: DatabaseReference
+    private lateinit var childDelivery: DatabaseReference
+    private lateinit var childDriver: DatabaseReference
 
     private lateinit var badgeRefresh: LinearLayout
 
@@ -102,6 +115,13 @@ class ClosingStoreFragment : Fragment() {
         badgeRefresh = view.findViewById(R.id.badgeRefresh)
 
         sessionManager = SessionManager(requireContext())
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
+
+        deliveryId = "$AUTH_LEVEL_COURIER$userID"
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorID)
+        childDelivery = firebaseReference.child(FIREBASE_CHILD_DELIVERY)
+        childDriver = childDelivery.child(deliveryId)
+
         binding.btnFabAdmin.setOnClickListener { navigateChatAdmin() }
 
         getContacts()
@@ -156,54 +176,13 @@ class ClosingStoreFragment : Fragment() {
                                                     deliveryStore.add(data)
                                                 }
 
-                                                var deliveryCount = 0
                                                 for ((i, contact) in contacts.withIndex()) {
                                                     val findItem = deliveryStore.find { it.id == contact.id_contact }
-                                                    if (findItem != null) {
-                                                        contacts[i].deliveryStatus = "Pengiriman sedang berlangsung"
-                                                        deliveryCount ++
+                                                    contacts[i].deliveryStatus = "Pengiriman sedang berlangsung"
+                                                    if (findItem == null) {
+                                                        Log.d("Contact Item", "Start delivery on founded item")
+                                                        startDelivery(contact)
                                                     }
-                                                }
-
-                                                val isTracking = CustomUtility(requireContext()).isServiceRunning(TrackingService::class.java)
-                                                if (deliveryCount > 0) {
-                                                    if (!isTracking) {
-                                                        val serviceIntent = Intent(
-                                                            requireContext(),
-                                                            TrackingService::class.java
-                                                        )
-                                                        serviceIntent.putExtra("userId", userID)
-                                                        serviceIntent.putExtra(
-                                                            "userDistributorId",
-                                                            userDistributorID
-                                                        )
-                                                        serviceIntent.putExtra("deliveryId", deliveryId)
-                                                        requireContext().startService(serviceIntent)
-                                                    } else {
-                                                        val serviceIntent = Intent(
-                                                            requireContext(),
-                                                            TrackingService::class.java
-                                                        )
-                                                        requireContext().stopService(serviceIntent)
-                                                        Handler().postDelayed({
-                                                            serviceIntent.putExtra("userId", userID)
-                                                            serviceIntent.putExtra(
-                                                                "userDistributorId",
-                                                                userDistributorID
-                                                            )
-                                                            serviceIntent.putExtra(
-                                                                "deliveryId",
-                                                                deliveryId
-                                                            )
-                                                            requireContext().startService(serviceIntent)
-                                                        }, 1000)
-                                                    }
-                                                } else {
-//                                                    val serviceIntent = Intent(
-//                                                        requireContext(),
-//                                                        TrackingService::class.java
-//                                                    )
-//                                                    requireContext().stopService(serviceIntent)
                                                 }
 
                                                 setRecyclerView(contacts)
@@ -211,11 +190,12 @@ class ClosingStoreFragment : Fragment() {
                                                 showBadgeRefresh(false)
                                                 listener?.counterItem(response.results.size)
                                             } else {
-//                                                val serviceIntent = Intent(
-//                                                    requireContext(),
-//                                                    TrackingService::class.java
-//                                                )
-//                                                requireContext().stopService(serviceIntent)
+
+                                                for ((i, contact) in contacts.withIndex()) {
+                                                    Log.d("Contact Item", "Start delivery on empty stores")
+                                                    contacts[i].deliveryStatus = "Pengiriman sedang berlangsung"
+                                                    startDelivery(contact)
+                                                }
 
                                                 setRecyclerView(contacts)
                                                 loadingState(false)
@@ -414,6 +394,41 @@ class ClosingStoreFragment : Fragment() {
         if (resultCode == RESULT_OK) {
             val data = data?.getStringExtra("$MAIN_ACTIVITY_REQUEST_CODE")
             if (!data.isNullOrEmpty() && data == SYNC_NOW) getContacts()
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private fun startDelivery(contact: ContactModel) {
+        val targetLatLng = CustomUtility(requireContext()).latLngConverter(contact.maps_url)
+        if (targetLatLng != null) {
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { currentLatLng: Location ->
+
+                    val courierModel = DeliveryModel.Courier(
+                        id = userID,
+                        name = userFullName
+                    )
+
+                    val store = DeliveryModel.Store(
+                        id = contact.id_contact,
+                        name = contact.nama,
+                        lat = targetLatLng.latitude,
+                        lng = targetLatLng.longitude,
+                        startDatetime = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) DateFormat.now() else "",
+                        startLat = currentLatLng.latitude,
+                        startLng = currentLatLng.longitude,
+                    )
+
+                    childDriver.child("id").setValue(deliveryId)
+                    childDriver.child("lat").setValue(currentLatLng.latitude)
+                    childDriver.child("lng").setValue(currentLatLng.longitude)
+                    childDriver.child("courier").setValue(courierModel)
+                    childDriver.child("stores/${store.id}").setValue(store)
+
+                }.addOnFailureListener {
+                    handleMessage(requireContext(), "onStartDelivery", "Failed get user lastLocation")
+                    Log.e("onStartDelivery", "Failed get user lastLocation: $it")
+                }
         }
     }
 

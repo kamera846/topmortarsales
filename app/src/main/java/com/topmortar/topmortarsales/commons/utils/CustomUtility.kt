@@ -9,6 +9,7 @@ import android.content.res.Configuration
 import android.net.Uri
 import android.provider.Settings
 import androidx.appcompat.app.AlertDialog
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.snackbar.Snackbar
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
@@ -79,5 +80,39 @@ class CustomUtility(private val context: Context) {
         val userChild = firebaseReference.child("$FIREBASE_CHILD_ABSENT/$userId")
         userChild.child("isOnline").setValue(status)
         userChild.child("lastSeen").setValue("$year-$month-$day $hour:$minute:$second")
+    }
+
+
+    fun latLngConverter(stringLatLng: String): LatLng? {
+        return if (stringLatLng.isNotEmpty()) {
+
+            val urlUtility = URLUtility(context)
+
+            if (!urlUtility.isUrl(stringLatLng)) {
+
+                val coordinates = stringLatLng.trim().split(",")
+                return if (coordinates.size == 2) {
+                    val latitude = coordinates[0].toDoubleOrNull()
+                    val longitude = coordinates[1].toDoubleOrNull()
+
+                    if (latitude != null && longitude != null) {
+                        LatLng(latitude, longitude)
+                    } else {
+                        handleMessage(context, "latLngConverter", "Null latitude or longitude")
+                        null
+                    }
+                } else {
+                    handleMessage(context, "latLngConverter", "Failed processed coordinate")
+                    null
+                }
+            } else {
+                handleMessage(context, "latLngConverter", "Wrong coordinate value")
+                null
+            }
+
+        } else {
+            handleMessage(context, "latLngConverter", "Parameter is empty")
+            null
+        }
     }
 }

@@ -221,7 +221,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
 //    private val courierDrawable = R.drawable.pin_truck
     private val courierDrawable = R.drawable.pin_truck_pink_cyclamen
-    private val storeDrawable = R.drawable.store_location_status_blacklist
+    private val locationBlacklistDrawable = R.drawable.store_location_status_blacklist_copy
 
     private var listGudang: ArrayList<GudangModel> = arrayListOf()
     private var selectedCenterPoint: ModalSearchModel? = null
@@ -408,7 +408,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                             if (selectedCenterPoint != null && selectedCenterPoint?.etc == itemToFind) {
                                 binding.textTargetRute.text = "Petunjuk rute menuju ke lokasi gudang"
                                 R.drawable.gudang
-                            } else R.drawable.store_location_status_blacklist
+                            } else locationBlacklistDrawable
                         }
                     }
                     binding.imgTargetRoute.setImageDrawable(getDrawable(imgDrawable))
@@ -541,7 +541,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 binding.textTitleTarget.text = iMapsName
                 binding.textTargetRute.text = "Petunjuk rute menuju ke lokasi ${if (isBasecamp) "basecamp" else "toko"}"
 
-                val imgDrawable = R.drawable.store_location_status_blacklist
+                val imgDrawable = locationBlacklistDrawable
                 binding.imgTargetRoute.setImageDrawable(getDrawable(imgDrawable))
                 binding.btnDrawRoute.setOnClickListener {
                     toggleBtnDrawRoute()
@@ -654,7 +654,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                             STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active
                                             STATUS_CONTACT_PASSIVE -> R.drawable.store_location_status_passive
                                             STATUS_CONTACT_BID -> R.drawable.store_location_status_biding
-                                            else -> R.drawable.store_location_status_blacklist
+                                            else -> locationBlacklistDrawable
                                         }
 
                                         val originalBitmap = BitmapFactory.decodeResource(resources, iconDrawable)
@@ -1079,7 +1079,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     private fun setPin(latLng: LatLng, placeName: String, moveCamera: Boolean = true) {
 
-        val iconDrawable = R.drawable.store_location_status_blacklist
+        val iconDrawable = locationBlacklistDrawable
         val originalBitmap = BitmapFactory.decodeResource(resources, iconDrawable)
 
         val newWidth = convertDpToPx(40, this)
@@ -1677,7 +1677,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                             .title(store.name)
                                             .icon(
                                                 BitmapDescriptorFactory.fromBitmap(
-                                                    resizedBitmap(storeDrawable, 60)
+                                                    resizedBitmap(locationBlacklistDrawable, 60)
                                                 )
                                             )
                                     )
@@ -2095,10 +2095,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         mMap.addMarker(
                             MarkerOptions()
                                 .position(destinationLatLng)
-                                .title("Nama Toko")
+                                .title(item.nama)
                                 .icon(
                                     BitmapDescriptorFactory.fromBitmap(
-                                        resizedBitmap(storeDrawable, 60)
+                                        resizedBitmap(locationBlacklistDrawable, 60)
                                     )
                                 )
                         )
@@ -2183,7 +2183,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                 Handler().postDelayed({
                                     binding.cardDelivery.visibility = View.VISIBLE
                                     binding.deliveryCourier.text = courierName
-                                    binding.deliveryStore.text = "Nama Toko"
+                                    binding.deliveryStore.text = item.nama
                                     binding.deliveryDate.text = "Diproses pada " + formatDateYear(item.startDatetime)
                                     binding.deliveryEndDateContainer.visibility = View.VISIBLE
                                     binding.deliveryEndDate.text = "Diselesaikan pada " + formatDateYear(item.endDatetime)
