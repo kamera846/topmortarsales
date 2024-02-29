@@ -34,4 +34,5 @@ data class SuratJalanNotClosingModel (
     var created_at: String ="",
     var dateProcessed: String = "",
     var deliveryId: String = "",
+    var courierName: String = "",
 )

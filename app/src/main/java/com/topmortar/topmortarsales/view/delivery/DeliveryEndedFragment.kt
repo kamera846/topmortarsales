@@ -126,7 +126,7 @@ class DeliveryEndedFragment : Fragment() {
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        loadingState(true, "Belum ada kiriman yang diselesaikan!")
+                        loadingState(true, "Belum ada kiriman yang diselesaikan hari ini!")
                         showBadgeRefresh(false)
                         listener?.counterItem(0)
 

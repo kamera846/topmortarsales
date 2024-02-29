@@ -161,6 +161,7 @@ class DeliveryTargetFragment : Fragment() {
                                             if (findStoreProcessed != null) {
                                                 storeTarget[i].deliveryId = findStoreProcessed.deliveryId
                                                 storeTarget[i].dateProcessed = findStoreProcessed.startDatetime
+                                                storeTarget[i].courierName = findStoreProcessed.courier?.name ?: "Kurir"
                                             }
                                         }
 

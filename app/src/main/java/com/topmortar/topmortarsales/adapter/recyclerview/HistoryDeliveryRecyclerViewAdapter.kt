@@ -46,7 +46,8 @@ class HistoryDeliveryRecyclerViewAdapter(private val listItem: ArrayList<Deliver
             }
 
             tvContactName.text = item.nama
-            tvPhoneNumber.text = "Diselesaikan pada $dateEnded"
+//            tvPhoneNumber.text = "Diselesaikan pada $dateEnded"
+            tvPhoneNumber.text = "Diselesaikan oleh " + item.full_name
 
         }
 
