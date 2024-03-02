@@ -161,7 +161,6 @@ class DeliveryTargetFragment : Fragment() {
                                             if (findStoreProcessed != null) {
                                                 storeTarget[i].deliveryId = findStoreProcessed.deliveryId
                                                 storeTarget[i].dateProcessed = findStoreProcessed.startDatetime
-                                                storeTarget[i].courierName = findStoreProcessed.courier?.name ?: "Kurir"
                                             }
                                         }
 
@@ -304,11 +303,11 @@ class DeliveryTargetFragment : Fragment() {
     private val someActivityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         // Handle the result
         val resultCode = result.resultCode
-        val data = result.data
+        val dataIntent = result.data
         // Process the result
 
         if (resultCode == RESULT_BASECAMP_FRAGMENT) {
-            val data = data?.getStringExtra(REQUEST_BASECAMP_FRAGMENT)
+            val data = dataIntent?.getStringExtra(REQUEST_BASECAMP_FRAGMENT)
             if (!data.isNullOrEmpty() && data == SYNC_NOW) getList()
         }
     }
