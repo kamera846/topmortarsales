@@ -9,13 +9,10 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.widget.TooltipCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.SuratJalanNotClosingModel
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 
 class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<SuratJalanNotClosingModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<SuratJalanNotClosingRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
@@ -28,27 +25,48 @@ class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<S
 
         private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
-        val tooltipStatus: ImageView = itemView.findViewById(R.id.tooltip_status)
+        val checkListImage: ImageView = itemView.findViewById(R.id.checklist)
+        val icPhone: ImageView = itemView.findViewById(R.id.icPhoneNumber)
 
         fun bind(item: SuratJalanNotClosingModel) {
-            var dateEnded = item.dateProcessed
+            val dateProcessed = item.dateProcessed
 
-            if (dateEnded.isNotEmpty()) {
-                val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(item.dateProcessed)
-                dateEnded = if (date != null) {
-                    val calendar = Calendar.getInstance()
-                    val currentYear = calendar.get(Calendar.YEAR)
-                    val dateYear = SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
+            if (dateProcessed.isNotEmpty()) {
+//                val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(item.dateProcessed)
+//                dateProcessed = if (date != null) {
+//                    val calendar = Calendar.getInstance()
+//                    val currentYear = calendar.get(Calendar.YEAR)
+//                    val dateYear = SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
+//
+//                    if (currentYear == dateYear.toInt()) DateFormat.format(item.dateProcessed, "yyyy-MM-dd HH:mm:ss", "dd MMM, HH:mm")
+//                    else DateFormat.format(item.dateProcessed, "yyyy-MM-dd HH:mm:ss", "dd MMM yyyy, HH:mm")
+//                } else DateFormat.format(item.dateProcessed, "yyyy-MM-dd HH:mm:ss", "dd MMM, HH:mm")
 
-                    if (currentYear == dateYear.toInt()) DateFormat.format(item.dateProcessed, "yyyy-MM-dd HH:mm:ss", "dd MMM, HH:mm")
-                    else DateFormat.format(item.dateProcessed, "yyyy-MM-dd HH:mm:ss", "dd MMM yyyy, HH:mm")
-                } else DateFormat.format(item.dateProcessed, "yyyy-MM-dd HH:mm:ss", "dd MMM, HH:mm")
-            }
+                checkListImage.setImageResource(R.drawable.truck_fast_black)
+            } else checkListImage.setImageResource(R.drawable.time_line_dark_light_only)
 
             tvContactName.text = item.nama
-//            tvPhoneNumber.text = if (dateEnded.isNotEmpty()) "Telah di proses pada $dateEnded" else "Menunggu untuk di proses"
-            tvPhoneNumber.text = if (dateEnded.isNotEmpty()) "Telah di proses oleh " + item.courierName else "Menunggu untuk di proses"
+            tvPhoneNumber.text = "${item.full_name} - ${item.kode_city}"
 
+            checkListImage.visibility = View.VISIBLE
+            icPhone.visibility = View.VISIBLE
+
+            setupStatus(dateProcessed)
+
+        }
+
+        private fun setupStatus(status: String) {
+
+            if (status.isNotEmpty()) tooltipHandler(checkListImage, "Sedang diproses")
+            else tooltipHandler(checkListImage, "Menunggu untuk diproses")
+
+        }
+
+        private fun tooltipHandler(content: ImageView, text: String) {
+            content.setOnLongClickListener {
+                TooltipCompat.setTooltipText(content, text)
+                false
+            }
         }
 
     }
@@ -69,7 +87,7 @@ class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<S
         holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
 
         holder.itemView.setOnClickListener { onItemClick(holder, position) }
-        holder.tooltipStatus.setOnClickListener { onItemClick(holder, position) }
+        holder.checkListImage.setOnClickListener { onItemClick(holder, position) }
 
     }
 

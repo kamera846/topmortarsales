@@ -5,10 +5,14 @@
 
     <LinearLayout
         android:id="@+id/overlay_view"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/background_item_overlay"
         android:orientation="vertical"
+        android:layout_alignTop="@+id/view_item"
+        android:layout_alignBottom="@+id/view_item"
+        android:layout_alignStart="@+id/view_item"
+        android:layout_alignEnd="@+id/view_item"
         android:alpha="0"
         android:visibility="gone">
 
@@ -71,6 +75,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/view_item"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -126,13 +131,32 @@
 
                 </LinearLayout>
 
-                <TextView
-                    android:id="@+id/tv_phone_number"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-                    android:text="@string/list_chat_contact_description"/>
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="4dp"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:visibility="gone"
+                        android:id="@+id/icPhoneNumber"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_marginEnd="4dp"
+                        android:scaleType="fitStart"
+                        android:src="@drawable/person_black"/>
+
+                    <TextView
+                        android:id="@+id/tv_phone_number"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                        android:text="@string/list_chat_contact_description"/>
+
+                </LinearLayout>
+
             </LinearLayout>
 
             <ImageView
