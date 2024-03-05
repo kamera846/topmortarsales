@@ -6,4 +6,7 @@ data class BaseCampModel(
     var location_gudang: String = "",
     var nomorhp_gudang: String = "",
     var id_city: String = "",
+    var nama_city: String = "",
+    var kode_city: String = "",
+    var id_distributor: String = "",
 )

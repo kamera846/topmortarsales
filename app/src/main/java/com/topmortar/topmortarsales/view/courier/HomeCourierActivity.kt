@@ -628,7 +628,8 @@ class HomeCourierActivity : AppCompatActivity() {
                 try {
 
                     val apiService: ApiService = HttpClient.create()
-                    val response = apiService.getListBaseCamp(cityId = userCity ?: "0", distributorID = userDistributorId ?: "0")
+//                    val response = apiService.getListBaseCamp(cityId = userCity ?: "0", distributorID = userDistributorId ?: "0")
+                    val response = apiService.getListBaseCamp(distributorID = userDistributorId ?: "0")
 
                     when (response.status) {
                         RESPONSE_STATUS_OK -> {
@@ -740,7 +741,7 @@ class HomeCourierActivity : AppCompatActivity() {
             modalItems.add(
                 ModalSearchModel(
                     id = item.id_gudang,
-                    title = item.nama_gudang,
+                    title = "${item.nama_gudang} - ${item.kode_city}",
                     etc = item.location_gudang
                 )
             )
@@ -769,7 +770,8 @@ class HomeCourierActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val response = apiService.getListBaseCamp(cityId = userCity.toString(), distributorID = userDistributorId.toString())
+//                val response = apiService.getListBaseCamp(cityId = userCity.toString(), distributorID = userDistributorId.toString())
+                val response = apiService.getListBaseCamp(distributorID = userDistributorId ?: "0")
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
