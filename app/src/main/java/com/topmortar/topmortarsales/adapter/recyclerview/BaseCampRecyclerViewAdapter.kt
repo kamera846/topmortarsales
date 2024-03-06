@@ -29,7 +29,7 @@ class BaseCampRecyclerViewAdapter(private val chatList: ArrayList<BaseCampModel>
         fun bind(chatItem: BaseCampModel) {
 
             tvContactName.text = chatItem.nama_gudang
-            tvPhoneNumber.text = if (chatItem.nomorhp_gudang != "") "+${ chatItem.nomorhp_gudang }" else ""
+            tvPhoneNumber.text = if (chatItem.nomorhp_gudang != "") "+${ chatItem.nomorhp_gudang } - ${ chatItem.kode_city }" else chatItem.kode_city
 
         }
 
