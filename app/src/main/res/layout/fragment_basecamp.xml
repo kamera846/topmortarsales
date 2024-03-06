@@ -12,10 +12,18 @@
 
         <include
             android:visibility="gone"
-            android:id="@+id/badgeRefresh"
+            android:id="@+id/filterLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
+            layout="@layout/component_filter"/>
+
+        <include
+            android:visibility="gone"
+            android:id="@+id/badgeRefresh"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/filterLayout"
             layout="@layout/component_badge_refresh"/>
 
         <androidx.recyclerview.widget.RecyclerView

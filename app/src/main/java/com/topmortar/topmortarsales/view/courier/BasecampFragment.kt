@@ -2,6 +2,7 @@ package com.topmortar.topmortarsales.view.courier
 
 import android.app.Activity
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,6 +12,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -38,7 +40,10 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.FragmentBasecampBinding
+import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.BaseCampModel
+import com.topmortar.topmortarsales.model.CityModel
+import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.reports.NewReportActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
@@ -59,6 +64,10 @@ class BasecampFragment : Fragment() {
     private val userDistributorid get() = sessionManager.userDistributor().toString()
 
     private lateinit var badgeRefresh: LinearLayout
+    private lateinit var searchModal: SearchModal
+    private var citiesResults: ArrayList<CityModel>? = null
+    private var selectedCity: ModalSearchModel? = null
+
 
     private var listener: CounterItem? = null
     interface CounterItem {
@@ -86,7 +95,7 @@ class BasecampFragment : Fragment() {
         userID = sessionManager.userID().toString()
         binding.btnFabAdd.setOnClickListener { navigateFab() }
 
-        getContacts()
+        getCities()
 
         return view
     }
@@ -100,10 +109,8 @@ class BasecampFragment : Fragment() {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = when (userKind) {
-                    USER_KIND_ADMIN -> apiService.getListBaseCamp(distributorID = userDistributorid)
-                    else -> apiService.getListBaseCamp(distributorID = userDistributorid, cityId = userCity)
-                }
+                var response = apiService.getListBaseCamp(distributorID = userDistributorid)
+                if (selectedCity != null) response = apiService.getListBaseCamp(distributorID = userDistributorid, cityId = selectedCity!!.id!!)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -266,6 +273,90 @@ class BasecampFragment : Fragment() {
             val data = data?.getStringExtra(REQUEST_BASECAMP_FRAGMENT)
             if (!data.isNullOrEmpty() && data == SYNC_NOW) getContacts()
         }
+    }
+
+    private fun getCities() {
+
+        loadingState(true)
+        showBadgeRefresh(false)
+
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.getCities(distributorID = userDistributorid)
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        citiesResults = response.results
+                        val items: ArrayList<ModalSearchModel> = ArrayList()
+
+                        for (i in 0 until citiesResults!!.size) {
+                            val data = citiesResults!![i]
+                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                        }
+                        items.add(0, ModalSearchModel("-1", "Hapus Filter"))
+
+                        setupDialogSearch(items)
+                        getContacts()
+                        binding.filterLayout.componentFilter.visibility = View.VISIBLE
+//                        binding.filterLayout.componentFilter.visibility = View.GONE
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        handleMessage(requireActivity(), "LIST CITY", "Daftar kota kosong!")
+                        getContacts()
+
+                    }
+                    else -> {
+
+                        handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        loadingState(true, getString(R.string.failed_get_data))
+                        showBadgeRefresh(true)
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                loadingState(true, getString(R.string.failed_request))
+                showBadgeRefresh(true)
+
+            }
+
+        }
+    }
+
+    private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
+
+        searchModal = SearchModal(requireActivity(), items)
+        searchModal.setCustomDialogListener(object: SearchModal.SearchModalListener{
+            override fun onDataReceived(data: ModalSearchModel) {
+                if (data.id == "-1") {
+                    selectedCity = null
+                    binding.filterLayout.tvFilter.text = getString(R.string.tidak_ada_filter)
+                } else {
+                    selectedCity = data
+                    binding.filterLayout.tvFilter.text = data.title
+                }
+                getContacts()
+            }
+
+        })
+        searchModal.searchHint = "Ketik untuk mencari…"
+
+        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.filterLayout.componentFilter.background = AppCompatResources.getDrawable(requireContext(), R.color.black_400)
+        else binding.filterLayout.componentFilter.background = AppCompatResources.getDrawable(requireContext(), R.color.light)
+        binding.filterLayout.componentFilter.visibility = View.GONE
+        binding.filterLayout.componentFilter.setOnClickListener {
+            searchModal.show()
+        }
+
     }
 
 }
