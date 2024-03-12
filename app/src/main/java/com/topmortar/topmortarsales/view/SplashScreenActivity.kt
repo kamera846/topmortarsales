@@ -66,7 +66,7 @@ import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.DeviceModel
 import com.topmortar.topmortarsales.view.courier.HomeCourierActivity
-import com.topmortar.topmortarsales.view.sales.HomeSalesActivity
+import com.topmortar.topmortarsales.view.rencanaVisits.HomeSalesActivity
 import com.topmortar.topmortarsales.view.tukang.BrandAmbassadorActivity
 import kotlinx.coroutines.launch
 import java.util.UUID

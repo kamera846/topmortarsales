@@ -130,7 +130,7 @@
                 android:orientation="vertical">
 
                 <LinearLayout
-                    android:id="@+id/target_visit"
+                    android:id="@+id/rencana_visit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/background_rounded_8_clickable"
@@ -151,7 +151,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Target Visit"
+                        android:text="Rencana Visit"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:layout_marginHorizontal="16dp"
@@ -162,7 +162,7 @@
                         android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
 
                     <ImageView
-                        android:id="@+id/target_visit_chevron"
+                        android:id="@+id/rencana_visit_chevron"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@drawable/chevron_right_dark"/>

@@ -1,4 +1,4 @@
-package com.topmortar.topmortarsales.view.sales
+package com.topmortar.topmortarsales.view.rencanaVisits
 
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
@@ -79,7 +79,7 @@ class HomeSalesActivity : AppCompatActivity() {
 
         binding.fullName.text = userFullName
 
-        binding.targetVisit.setOnClickListener { navigateToTargetVisit() }
+        binding.rencanaVisit.setOnClickListener { navigateToTargetVisit() }
         binding.allStore.setOnClickListener { navigateToAllStore()}
         binding.nearestStoreItem.setOnClickListener { navigateToNearestStore()}
         binding.registerNewStore.setOnClickListener { navigateToRegisterStore()}
@@ -90,7 +90,23 @@ class HomeSalesActivity : AppCompatActivity() {
     }
 
     private fun navigateToTargetVisit() {
-        // Do something...
+        val intent = Intent(this, RencanaVisitActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun navigateToAllStore() {
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun navigateToRegisterStore() {
+        val intent = Intent(this, NewRoomChatFormActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun navigateToMyProfile() {
+        val intent = Intent(this, UserProfileActivity::class.java)
+        startActivity(intent)
     }
 
     private fun navigateToNearestStore() {
@@ -166,21 +182,6 @@ class HomeSalesActivity : AppCompatActivity() {
             }
 
         }, 1000)
-    }
-
-    private fun navigateToAllStore() {
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
-    }
-
-    private fun navigateToRegisterStore() {
-        val intent = Intent(this, NewRoomChatFormActivity::class.java)
-        startActivity(intent)
-    }
-
-    private fun navigateToMyProfile() {
-        val intent = Intent(this, UserProfileActivity::class.java)
-        startActivity(intent)
     }
 
     private fun logoutConfirmation() {
