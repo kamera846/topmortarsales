@@ -15,6 +15,7 @@ import com.topmortar.topmortarsales.commons.GET_USERS
 import com.topmortar.topmortarsales.commons.INVOICE
 import com.topmortar.topmortarsales.commons.PAYMENT
 import com.topmortar.topmortarsales.commons.PROMO
+import com.topmortar.topmortarsales.commons.RENCANA_VISIT
 import com.topmortar.topmortarsales.commons.REQUEST_OTP
 import com.topmortar.topmortarsales.commons.SEARCH_CONTACT
 import com.topmortar.topmortarsales.commons.SEND_MESSAGE
@@ -43,6 +44,7 @@ import com.topmortar.topmortarsales.response.ResponseList
 import com.topmortar.topmortarsales.response.ResponseMessage
 import com.topmortar.topmortarsales.response.ResponsePayment
 import com.topmortar.topmortarsales.response.ResponsePromo
+import com.topmortar.topmortarsales.response.ResponseRencanaVisit
 import com.topmortar.topmortarsales.response.ResponseReportVisit
 import com.topmortar.topmortarsales.response.ResponseSkills
 import com.topmortar.topmortarsales.response.ResponseSuratJalan
@@ -583,4 +585,22 @@ interface ApiService {
         @Query("c") idCity: String,
         @Query("dst") distributorID: String
     ): ResponseSuratJalanNotClosing
+
+    @GET(RENCANA_VISIT)
+    suspend fun targetJatem(
+        @Query("type") type: String = "jatem",
+        @Query("c") idCity: String,
+    ): ResponseRencanaVisit
+
+    @GET(RENCANA_VISIT)
+    suspend fun targetVoucher(
+        @Query("type") type: String = "voucher",
+        @Query("c") idCity: String,
+    ): ResponseRencanaVisit
+
+    @GET(RENCANA_VISIT)
+    suspend fun targetPasif(
+        @Query("type") type: String = "pasif",
+        @Query("c") idCity: String,
+    ): ResponseRencanaVisit
 }

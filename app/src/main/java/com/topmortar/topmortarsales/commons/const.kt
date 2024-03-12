@@ -77,6 +77,7 @@ const val VOUCHER = "voucher.php"
 const val WAREHOUSE = "warehouse.php"
 const val DELIVERY = "delivery.php"
 const val SURAT_JALAN_NOT_CLOSING = "suratjalanNotClosing.php"
+const val RENCANA_VISIT = "rencanaVisit.php"
 
 /*
     Request Code
