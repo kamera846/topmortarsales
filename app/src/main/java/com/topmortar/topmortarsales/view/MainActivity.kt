@@ -155,15 +155,15 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
         supportActionBar?.hide()
         sessionManager = SessionManager(this@MainActivity)
-        val isLoggedIn = sessionManager.isLoggedIn()
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
 
+        val isLoggedIn = sessionManager.isLoggedIn()
         if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()|| userDistributorId.isEmpty()) return missingDataHandler()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
 
         initVariable()
         initClickHandler()
@@ -191,13 +191,21 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         etSearchBox = findViewById(R.id.et_search_box)
 
         // Set Title Bar
-        icMore.visibility = View.VISIBLE
-        tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
-        tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
-        binding.titleBar.icBack.visibility = View.GONE
-        binding.titleBar.tvTitleBar.setPadding(convertDpToPx(16, this), 0, 0, 0)
-        binding.titleBar.tvTitleBarDescription.setPadding(convertDpToPx(16, this), 0, 0, 0)
-        etSearchBox.setPadding(0, 0, convertDpToPx(16, this), 0)
+        if (userKind == USER_KIND_SALES) {
+            icMore.visibility = View.GONE
+            tvTitleBarDescription.visibility = View.GONE
+            binding.titleBar.tvTitleBar.text = "Semua Toko"
+            binding.titleBar.icBack.visibility = View.VISIBLE
+            binding.titleBar.icBack.setOnClickListener { finish() }
+        } else {
+            icMore.visibility = View.VISIBLE
+            binding.titleBar.icBack.visibility = View.GONE
+            tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
+            tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
+            binding.titleBar.tvTitleBar.setPadding(convertDpToPx(16, this), 0, 0, 0)
+            binding.titleBar.tvTitleBarDescription.setPadding(convertDpToPx(16, this), 0, 0, 0)
+            etSearchBox.setPadding(0, 0, convertDpToPx(16, this), 0)
+        }
 
         // Set Floating Action Button
         if (sessionManager.userKind() == USER_KIND_SALES) btnFab.visibility = View.VISIBLE
@@ -820,8 +828,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                         sessionManager.setUserLoggedIn(data)
 
 //                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "Halo, ${ sessionManager.userName() }"}
-                        tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
-                        tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
+                        if (userKind != USER_KIND_SALES) {
+                            tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
+                            tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
+                        }
 
                         if (!onlySession) {
                             if (isSearchActive) {
@@ -1033,18 +1043,20 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         if (isSearchActive) toggleSearchEvent(SEARCH_CLOSE)
         else {
 
-            if (doubleBackToExitPressedOnce) {
-                super.onBackPressed()
-                return
+            if (userKind == USER_KIND_SALES) super.onBackPressed()
+            else {
+                if (doubleBackToExitPressedOnce) {
+                    super.onBackPressed()
+                    return
+                }
+
+                this@MainActivity.doubleBackToExitPressedOnce = true
+                handleMessage(this@MainActivity, TAG_ACTION_MAIN_ACTIVITY, "Tekan sekali lagi untuk keluar!", TOAST_SHORT)
+
+                Handler(Looper.getMainLooper()).postDelayed({
+                    doubleBackToExitPressedOnce = false
+                }, 2000)
             }
-
-            this@MainActivity.doubleBackToExitPressedOnce = true
-            handleMessage(this@MainActivity, TAG_ACTION_MAIN_ACTIVITY, "Tekan sekali lagi untuk keluar!", TOAST_SHORT)
-
-            Handler(Looper.getMainLooper()).postDelayed({
-                doubleBackToExitPressedOnce = false
-            }, 2000)
-
         }
     }
 
