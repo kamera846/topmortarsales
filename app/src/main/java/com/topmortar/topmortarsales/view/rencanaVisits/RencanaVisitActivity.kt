@@ -32,11 +32,12 @@ class RencanaVisitActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.titleBarDark.icBack.visibility = View.VISIBLE
+        binding.titleBarDark.vBorder.visibility = View.GONE
+        binding.titleBarDark.tvTitleBar.text = "Rencana Visit"
         binding.titleBarDark.icBack.setOnClickListener {
             if (activeTab != 0) tabLayout.getTabAt(0)?.select()
             else finish()
         }
-        binding.titleBarDark.vBorder.visibility = View.GONE
 
         initLayout()
 

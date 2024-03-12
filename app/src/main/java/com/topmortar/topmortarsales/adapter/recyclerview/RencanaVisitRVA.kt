@@ -1,6 +1,7 @@
 package com.topmortar.topmortarsales.adapter.recyclerview
 
 import android.content.Context
+import android.os.Build
 import android.os.Handler
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,7 @@ import android.widget.TextView
 import androidx.appcompat.widget.TooltipCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.RencanaVisitModel
 
 class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<RencanaVisitRVA.ChatViewHolder>() {
@@ -29,17 +31,15 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
         val icPhone: ImageView = itemView.findViewById(R.id.icPhoneNumber)
 
         fun bind(item: RencanaVisitModel) {
-//            val dateProcessed = item.dateProcessed
-//
-//            if (dateProcessed.isNotEmpty()) {
-//                checkListImage.setImageResource(R.drawable.truck_fast_black)
-//            } else checkListImage.setImageResource(R.drawable.time_line_dark_light_only)
+
+            var dateJatem = "Jatuh tempo "
+
+            dateJatem += if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                DateFormat.differenceDateNowDesc(item.created_at)
+            } else ""
 
             tvContactName.text = item.nama
-//            tvPhoneNumber.text = "${item.full_name} - ${item.kode_city}"
-
-//            checkListImage.visibility = View.VISIBLE
-//            icPhone.visibility = View.VISIBLE
+            tvPhoneNumber.text = dateJatem
 
 //            setupStatus(dateProcessed)
 
