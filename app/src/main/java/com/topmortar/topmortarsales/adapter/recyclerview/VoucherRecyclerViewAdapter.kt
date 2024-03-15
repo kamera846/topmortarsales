@@ -32,17 +32,20 @@ class VoucherRecyclerViewAdapter(private val chatList: ArrayList<VoucherModel>, 
         fun bind(item: VoucherModel) {
 
             imgIcon.setImageResource(R.drawable.voucher_primary)
-//            tvContactName.text = item.no_voucher + " (" + item.no_fisik.let { if (!it.isNullOrEmpty()) it else "Belum ada nomor fisik" } + ")"
             tvContactName.text = item.no_voucher
+
             if (item.exp_date.isNullOrEmpty()) tvPhoneNumber.text = "Berlaku " + DateFormat.format(item.date_voucher, format = "dd MMM yyyy") + " - belum ditentukan."
             else tvPhoneNumber.text = "Berlaku " + DateFormat.format(item.date_voucher, format = "dd MMM yyyy") + " - " + DateFormat.format(item.exp_date!!, format = "dd MMM yyyy")
-//            tvPhoneNumber.text = item.no_voucher + " | Dibuat pada " + DateFormat.format(item.date_voucher, format = "dd MMM yyyy")
+
             if (item.is_claimed == "1") {
-//                imgChecklist.visibility = View.VISIBLE
+                textVerified.setBackgroundResource(R.drawable.bg_active_round)
                 textVerified.visibility = View.VISIBLE
                 textVerified.text = "Diklaim"
+            } else if (item.no_fisik.isNotEmpty()) {
+                textVerified.setBackgroundResource(R.drawable.bg_passive_round)
+                textVerified.visibility = View.VISIBLE
+                textVerified.text = "Diterima"
             } else {
-//                imgChecklist.visibility = View.GONE
                 textVerified.visibility = View.GONE
                 textVerified.text = ""
             }
@@ -66,7 +69,7 @@ class VoucherRecyclerViewAdapter(private val chatList: ArrayList<VoucherModel>, 
         holder.bind(item)
         holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
 
-//        holder.itemView.setOnClickListener { onItemClick(holder, position) }
+        holder.itemView.setOnClickListener { onItemClick(holder, position) }
 
     }
 

@@ -19,6 +19,8 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_SUCCESS
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -36,11 +38,13 @@ class AddVoucherModal(private val context: Context, private val lifecycleScope: 
     private val binding get() = _binding!!
     private lateinit var sessionManager: SessionManager
     private val userDistributorId get() = sessionManager.userDistributor().toString()
+    private val userKind get() = sessionManager.userKind().toString()
 
     private lateinit var titleBar: LinearLayout
     private lateinit var icBack: ImageView
     private lateinit var icClose: ImageView
     private lateinit var tvTitleBar: TextView
+    private lateinit var tvTitleBarDesc: TextView
     private lateinit var btnSubmit: Button
 
     private var isEdit: Boolean = false
@@ -79,7 +83,7 @@ class AddVoucherModal(private val context: Context, private val lifecycleScope: 
         window?.windowManager?.defaultDisplay?.getMetrics(displayMetrics)
         val screenWidth = displayMetrics.widthPixels
 
-        val widthPercentage = 0.8f // Set the width percentage (e.g., 80%)
+        val widthPercentage = 0.9f // Set the width percentage (e.g., 90%)
 
         val width = (screenWidth * widthPercentage).toInt()
 
@@ -95,18 +99,45 @@ class AddVoucherModal(private val context: Context, private val lifecycleScope: 
         icBack = titleBar.findViewById(R.id.ic_back)
         icClose = titleBar.findViewById(R.id.ic_close)
         tvTitleBar = titleBar.findViewById(R.id.tv_title_bar)
+        tvTitleBarDesc = titleBar.findViewById(R.id.tv_title_bar_description)
 
         btnSubmit = findViewById(R.id.btn_submit)
 
         // Set Title Bar
         icBack.visibility = View.GONE
         icClose.visibility = View.VISIBLE
-        tvTitleBar.text = (if (isEdit) "Edit" else "Tambah") + " Voucher"
+        tvTitleBar.text = (if (isEdit) "Konfirmasi Penerima" else "Tambah Voucher")
 
         tvTitleBar.setPadding(convertDpToPx(16, context),0, convertDpToPx(16, context), 0)
 
-        if (isEdit && data != null) binding.etVoucher1.setText(data!!.no_fisik)
-//        handleMessage(context, TAG_RESPONSE_MESSAGE, "$isEdit : $data")
+        if (isEdit && data != null) {
+            tvTitleBarDesc.visibility = View.VISIBLE
+            tvTitleBarDesc.text = "Nomor " + data?.no_voucher
+            tvTitleBarDesc.setPadding(convertDpToPx(16, context),0, convertDpToPx(16, context), 0)
+
+            binding.voucher2Container.visibility = View.VISIBLE
+            binding.etVoucher2.setText(if (data!!.is_claimed == "1") "Sudah diklaim" else "Belum diklaim")
+            binding.etVoucher2.isEnabled = false
+            binding.etVoucher2.setBackgroundResource(R.drawable.et_background_disabled)
+            binding.etVoucher2.setTextColor(context.getColor(R.color.black_200))
+
+            if (data!!.no_fisik.isNotEmpty()) {
+                binding.etVoucher1.setText(data?.no_fisik)
+
+                if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) binding.btnSubmit.visibility = View.VISIBLE
+                else {
+                    binding.btnSubmit.visibility = View.GONE
+
+                    binding.etVoucher1.setText(data?.no_fisik)
+                    binding.etVoucher1.isEnabled = false
+                    binding.etVoucher1.setBackgroundResource(R.drawable.et_background_disabled)
+                    binding.etVoucher1.setTextColor(context.getColor(R.color.black_200))
+                }
+
+            }
+
+        } else tvTitleBarDesc.visibility = View.GONE
+
     }
 
     private fun initClickHandler() {
@@ -213,7 +244,8 @@ class AddVoucherModal(private val context: Context, private val lifecycleScope: 
 //            binding.etVoucher4.text.trim().isEmpty() &&
 //            binding.etVoucher5.text.trim().isEmpty()
         ) {
-            val textError = "Kode voucher harus diisi!"
+            val textError = "Nama penerima harus diisi!"
+//            val textError = "Kode voucher harus diisi!"
             binding.etVoucher1.error = textError
             binding.etVoucher1.requestFocus()
             handleMessage(context, "Voucher Validation", textError)
@@ -221,22 +253,22 @@ class AddVoucherModal(private val context: Context, private val lifecycleScope: 
             return false
         }
 
-        if (
-            binding.etVoucher1.text.length < 5 ||
-            binding.etVoucher1.text.length > 5
-//            binding.etVoucher1.text.trim().isEmpty() &&
-//            binding.etVoucher2.text.trim().isEmpty() &&
-//            binding.etVoucher3.text.trim().isEmpty() &&
-//            binding.etVoucher4.text.trim().isEmpty() &&
-//            binding.etVoucher5.text.trim().isEmpty()
-        ) {
-            val textError = "Kode voucher harus memiliki 5 karakter huruf!"
-            binding.etVoucher1.error = textError
-            binding.etVoucher1.requestFocus()
-            handleMessage(context, "Voucher Validation", textError)
-//            handleMessage(context, "Voucher Validation", "Isi minimal satu form voucher untuk menambahkan")
-            return false
-        }
+//        if (
+//            binding.etVoucher1.text.length < 5 ||
+//            binding.etVoucher1.text.length > 5
+////            binding.etVoucher1.text.trim().isEmpty() &&
+////            binding.etVoucher2.text.trim().isEmpty() &&
+////            binding.etVoucher3.text.trim().isEmpty() &&
+////            binding.etVoucher4.text.trim().isEmpty() &&
+////            binding.etVoucher5.text.trim().isEmpty()
+//        ) {
+//            val textError = "Kode voucher harus memiliki 5 karakter huruf!"
+//            binding.etVoucher1.error = textError
+//            binding.etVoucher1.requestFocus()
+//            handleMessage(context, "Voucher Validation", textError)
+////            handleMessage(context, "Voucher Validation", "Isi minimal satu form voucher untuk menambahkan")
+//            return false
+//        }
 
         binding.etVoucher1.error = null
         binding.etVoucher1.clearFocus()

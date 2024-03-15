@@ -37,7 +37,7 @@
                         android:id="@+id/tvVoucher1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Nomor Fisik"
+                        android:text="Penerima"
                         android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
                         android:textSize="16sp"
                         android:textStyle="bold"/>
@@ -59,10 +59,9 @@
                     android:layout_height="48dp"
                     android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                     android:textColorHint="@color/black_600"
-                    android:hint="Masukkan Kode Voucher"
-                    android:maxLength="5"
+                    android:hint="Masukkan Nama Penerima"
                     android:maxLines="1"
-                    android:inputType="number"
+                    android:inputType="textPersonName"
                     android:textSize="14sp"
                     android:background="@drawable/et_background"
                     android:padding="12dp"
@@ -73,6 +72,7 @@
             <!-- Voucher 2 -->
             <LinearLayout
                 android:visibility="gone"
+                android:id="@+id/voucher2Container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
@@ -88,13 +88,13 @@
                         android:id="@+id/tvVoucher2"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Voucher 2"
+                        android:text="Status"
                         android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
                         android:textSize="16sp"
                         android:textStyle="bold"/>
 
                     <TextView
-                        android:visibility="gone"
+                        android:visibility="visible"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
