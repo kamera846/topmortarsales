@@ -18,9 +18,14 @@ import com.topmortar.topmortarsales.model.RencanaVisitModel
 
 class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<RencanaVisitRVA.ChatViewHolder>() {
     private var context: Context? = null
+    private var typeRencana: String? = "jatem"
 
     interface ItemClickListener {
         fun onItemClick(data: RencanaVisitModel? = null)
+    }
+
+    fun setType(type: String) {
+        this.typeRencana = type
     }
 
     inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -28,11 +33,23 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
         private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
         val checkListImage: ImageView = itemView.findViewById(R.id.checklist)
+        val imgProfile: ImageView = itemView.findViewById(R.id.iv_contact_profile)
         val icPhone: ImageView = itemView.findViewById(R.id.icPhoneNumber)
 
         fun bind(item: RencanaVisitModel) {
 
-            var dateJatem = "Jatuh tempo "
+//            checkListImage.visibility = View.VISIBLE
+            when (typeRencana) {
+                "voucher" -> imgProfile.setImageResource(R.drawable.voucher_primary)
+                "passive" -> imgProfile.setImageResource(R.drawable.store_primary)
+                else -> imgProfile.setImageResource(R.drawable.time_primary)
+            }
+
+            var dateJatem = when (typeRencana) {
+                "voucher" -> "Didapatkan "
+                "passive" -> "Terakhir order "
+                else -> "Jatuh tempo "
+            }
 
             dateJatem += if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 DateFormat.differenceDateNowDesc(item.created_at)

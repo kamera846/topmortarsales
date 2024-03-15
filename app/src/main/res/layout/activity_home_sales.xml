@@ -293,6 +293,48 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:visibility="visible"
+                    android:id="@+id/report_detail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/background_rounded_8_clickable"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="12dp"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:padding="8dp"
+                        android:background="@drawable/bg_active_round_8"
+                        android:src="@drawable/file_list_white_only"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Lihat Laporan Saya"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginHorizontal="16dp"
+                        android:ellipsize="marquee"
+                        android:singleLine="true"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:focusable="true"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                    <ImageView
+                        android:id="@+id/report_detail_chevron"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/chevron_right_dark"/>
+
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/my_profile_item"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -327,48 +369,6 @@
 
                     <ImageView
                         android:id="@+id/my_profile_item_chevron"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/chevron_right_dark"/>
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:visibility="gone"
-                    android:id="@+id/contact_admin_item"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/background_rounded_8_clickable"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:padding="12dp"
-                    android:gravity="center_vertical"
-                    android:layout_marginTop="8dp"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:padding="8dp"
-                        android:background="@drawable/bg_active_round_8"
-                        android:src="@drawable/customer_service_white"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Hubungi Admin"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:layout_marginHorizontal="16dp"
-                        android:ellipsize="marquee"
-                        android:singleLine="true"
-                        android:marqueeRepeatLimit="marquee_forever"
-                        android:focusable="true"
-                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
-
-                    <ImageView
-                        android:id="@+id/contact_admin_item_chevron"
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@drawable/chevron_right_dark"/>

@@ -593,14 +593,32 @@ interface ApiService {
     ): ResponseRencanaVisit
 
     @GET(RENCANA_VISIT)
+    suspend fun targetJatemDst(
+        @Query("type") type: String = "jatem",
+        @Query("dst") idDistributor: String,
+    ): ResponseRencanaVisit
+
+    @GET(RENCANA_VISIT)
     suspend fun targetVoucher(
         @Query("type") type: String = "voucher",
         @Query("c") idCity: String,
     ): ResponseRencanaVisit
 
     @GET(RENCANA_VISIT)
+    suspend fun targetVoucherDst(
+        @Query("type") type: String = "voucher",
+        @Query("dst") idDistributor: String,
+    ): ResponseRencanaVisit
+
+    @GET(RENCANA_VISIT)
     suspend fun targetPasif(
-        @Query("type") type: String = "pasif",
+        @Query("type") type: String = "passive",
         @Query("c") idCity: String,
+    ): ResponseRencanaVisit
+
+    @GET(RENCANA_VISIT)
+    suspend fun targetPasifDst(
+        @Query("type") type: String = "passive",
+        @Query("dst") idDistributor: String,
     ): ResponseRencanaVisit
 }

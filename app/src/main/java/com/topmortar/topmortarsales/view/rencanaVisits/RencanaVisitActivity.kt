@@ -9,11 +9,11 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.viewpager.RencanaVisitVPA
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
-import com.topmortar.topmortarsales.databinding.ActivityCourierBinding
+import com.topmortar.topmortarsales.databinding.ActivityRencanaVisitBinding
 
 class RencanaVisitActivity : AppCompatActivity() {
 
-    private var _binding: ActivityCourierBinding? = null
+    private var _binding: ActivityRencanaVisitBinding? = null
     private val binding get() = _binding!!
     private lateinit var sessionManager: SessionManager
 
@@ -26,7 +26,7 @@ class RencanaVisitActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
-        _binding = ActivityCourierBinding.inflate(layoutInflater)
+        _binding = ActivityRencanaVisitBinding.inflate(layoutInflater)
         sessionManager = SessionManager(this@RencanaVisitActivity)
 
         setContentView(binding.root)

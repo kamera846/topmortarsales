@@ -14,11 +14,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.database.DatabaseReference
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
+import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_CITY_ID
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_STATUS
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
+import com.topmortar.topmortarsales.commons.CONST_USER_ID
+import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -37,6 +41,7 @@ import com.topmortar.topmortarsales.view.MainActivity
 import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.SplashScreenActivity
 import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
+import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.launch
 
@@ -85,7 +90,7 @@ class HomeSalesActivity : AppCompatActivity() {
         binding.registerNewStore.setOnClickListener { navigateToRegisterStore()}
         binding.myProfileItem.setOnClickListener { navigateToMyProfile() }
         binding.btnLogout.setOnClickListener { logoutConfirmation() }
-//        binding.contactAdminItem.setOnClickListener { navigateToContactAdmin() }
+        binding.reportDetail.setOnClickListener { navigateToListReport() }
 
     }
 
@@ -106,6 +111,14 @@ class HomeSalesActivity : AppCompatActivity() {
 
     private fun navigateToMyProfile() {
         val intent = Intent(this, UserProfileActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun navigateToListReport() {
+        val intent = Intent(this, ReportsActivity::class.java)
+        intent.putExtra(CONST_USER_ID, userId)
+        intent.putExtra(CONST_FULL_NAME, userFullName)
+        intent.putExtra(CONST_USER_LEVEL, AUTH_LEVEL_SALES)
         startActivity(intent)
     }
 
