@@ -96,6 +96,7 @@ import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
 import com.topmortar.topmortarsales.view.courier.ManageBasecampActivity
 import com.topmortar.topmortarsales.view.delivery.DeliveryActivity
 import com.topmortar.topmortarsales.view.gudang.ManageGudangActivity
+import com.topmortar.topmortarsales.view.rencanaVisits.RencanaVisitActivity
 import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
 import com.topmortar.topmortarsales.view.user.ManageUserActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
@@ -414,6 +415,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         val basecamp = popupMenu.menu.findItem(R.id.option_basecamp)
         val gudang = popupMenu.menu.findItem(R.id.option_gudang)
         val delivery = popupMenu.menu.findItem(R.id.option_delivery)
+        val rencanaVisit = popupMenu.menu.findItem(R.id.rencana_visit)
 
         searchItem.isVisible = false
 //        nearestStoreItem.isVisible = false
@@ -425,6 +427,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 basecamp.isVisible = true
                 gudang.isVisible = true
                 delivery.isVisible = true
+                rencanaVisit.isVisible = true
             } else {
                 userItem.isVisible = true
 //                cityItem.isVisible = true
@@ -432,6 +435,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 basecamp.isVisible = true
                 gudang.isVisible = true
                 delivery.isVisible = true
+                rencanaVisit.isVisible = true
             }
         }
 
@@ -486,6 +490,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 }
                 R.id.option_logout -> {
                     logoutConfirmation()
+                    true
+                }
+                R.id.rencana_visit -> {
+                    startActivity(Intent(this@MainActivity, RencanaVisitActivity::class.java))
                     true
                 }
                 else -> false
