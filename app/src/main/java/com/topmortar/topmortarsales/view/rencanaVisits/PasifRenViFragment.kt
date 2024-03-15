@@ -114,8 +114,10 @@ class PasifRenViFragment : Fragment() {
             try {
 
                 val response = when (userKind) {
-                    USER_KIND_ADMIN -> apiService.targetPasifDst(idDistributor = userDistributorId)
-                    else -> apiService.targetPasif(idCity = userCity)
+                    USER_KIND_ADMIN -> {
+                        if (selectedCity != null) apiService.targetPasif(idCity = selectedCity?.id!!)
+                        else apiService.targetPasifDst(idDistributor = userDistributorId)
+                    } else -> apiService.targetPasif(idCity = userCity)
                 }
 
                 when (response.status) {

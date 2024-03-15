@@ -37,6 +37,10 @@
         android:title="@string/manage_delivery"
         android:visible="false"/>
     <item
+        android:id="@+id/rencana_visit"
+        android:title="Rencana Visit"
+        android:visible="false"/>
+    <item
         android:id="@+id/option_logout"
         android:title="@string/logout" />
 </menu>

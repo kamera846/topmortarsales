@@ -114,8 +114,10 @@ class JatemFragment : Fragment() {
             try {
 
                 val response = when (userKind) {
-                    USER_KIND_ADMIN -> apiService.targetJatemDst(idDistributor = userDistributorId)
-                    else -> apiService.targetJatem(idCity = userCity)
+                    USER_KIND_ADMIN -> {
+                        if (selectedCity != null) apiService.targetJatem(idCity = selectedCity?.id!!)
+                        else apiService.targetJatemDst(idDistributor = userDistributorId)
+                    } else -> apiService.targetJatem(idCity = userCity)
                 }
 
                 when (response.status) {

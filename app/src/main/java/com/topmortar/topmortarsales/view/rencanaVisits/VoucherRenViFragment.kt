@@ -114,8 +114,10 @@ class VoucherRenViFragment : Fragment() {
             try {
 
                 val response = when (userKind) {
-                    USER_KIND_ADMIN -> apiService.targetVoucherDst(idDistributor = userDistributorId)
-                    else -> apiService.targetVoucher(idCity = userCity)
+                    USER_KIND_ADMIN -> {
+                        if (selectedCity != null) apiService.targetVoucher(idCity = selectedCity?.id!!)
+                        else apiService.targetVoucherDst(idDistributor = userDistributorId)
+                    } else -> apiService.targetVoucher(idCity = userCity)
                 }
 
                 when (response.status) {
