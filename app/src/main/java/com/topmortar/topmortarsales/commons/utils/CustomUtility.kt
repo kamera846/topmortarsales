@@ -2,17 +2,20 @@ package com.topmortar.topmortarsales.commons.utils
 
 import android.app.Activity
 import android.app.ActivityManager
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Context.ACTIVITY_SERVICE
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
 import android.provider.Settings
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.snackbar.Snackbar
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
+import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import java.util.Calendar
 
 class CustomUtility(private val context: Context) {
@@ -114,5 +117,20 @@ class CustomUtility(private val context: Context) {
             handleMessage(context, "latLngConverter", "Parameter is empty")
             null
         }
+    }
+
+    fun navigateChatAdmin(message: String, distributorNumber: String) {
+        val phoneNumber = if (distributorNumber.isNotEmpty()) distributorNumber else context.getString(R.string.topmortar_wa_number)
+
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")
+
+        try {
+            (context as Activity).startActivity(intent)
+            (context as Activity).finishAffinity()
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(context as Activity, "Gagal menghubungkan ke whatsapp", TOAST_SHORT).show()
+        }
+
     }
 }

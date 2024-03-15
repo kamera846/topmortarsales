@@ -54,6 +54,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_MARKETING
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.KeyboardHandler
@@ -65,6 +66,7 @@ import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.DeviceModel
 import com.topmortar.topmortarsales.view.courier.HomeCourierActivity
+import com.topmortar.topmortarsales.view.rencanaVisits.HomeSalesActivity
 import com.topmortar.topmortarsales.view.tukang.BrandAmbassadorActivity
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -305,6 +307,13 @@ class SplashScreenActivity : AppCompatActivity() {
         finish()
 
     }
+    private fun navigateToSales() {
+
+        val intent = Intent(this, HomeSalesActivity::class.java)
+        startActivity(intent)
+        finish()
+
+    }
 
     private fun checkSession() {
 
@@ -385,6 +394,7 @@ class SplashScreenActivity : AppCompatActivity() {
             when (userKind) {
                 USER_KIND_BA -> navigateToListTukang()
                 USER_KIND_COURIER -> navigateToCourier()
+                USER_KIND_SALES -> navigateToSales()
                 else -> navigateToMain()
             }
         }
@@ -536,6 +546,7 @@ class SplashScreenActivity : AppCompatActivity() {
                         when (data.level_user) {
                             AUTH_LEVEL_BA -> navigateToListTukang()
                             AUTH_LEVEL_COURIER -> navigateToCourier()
+                            AUTH_LEVEL_SALES -> navigateToSales()
                             else -> navigateToMain()
                         }
 

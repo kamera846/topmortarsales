@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Header -->
+    <LinearLayout
+        android:id="@+id/header_container"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:paddingHorizontal="16dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tv_title_bar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:text="@string/top_mortar_sales"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
+
+        <ImageView
+            android:id="@+id/header_logo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/logo_topmortar_circle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+    </LinearLayout>
+
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/header_container"
+        app:layout_constraintBottom_toTopOf="@id/bottomContainer"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/greeting_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Halo,"
+                android:textSize="26sp"
+                android:textStyle="bold"
+                android:paddingHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+            <TextView
+                android:id="@+id/full_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Selamat Datang"
+                android:textSize="26sp"
+                android:textStyle="bold"
+                android:paddingHorizontal="16dp"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:focusable="true"
+                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+            <RelativeLayout
+                android:visibility="gone"
+                android:id="@+id/container_absent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/background_rounded_8_clickable"
+                android:padding="12dp"
+                android:layout_margin="16dp">
+
+                <TextView
+                    android:id="@+id/absent_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Yuk, Catat Kehadiranmu Hari ini!"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginEnd="48dp"
+                    android:ellipsize="marquee"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:focusable="true"
+                    android:singleLine="true"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"/>
+
+                <ImageView
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/circle_notify_dark"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentTop="true"/>
+
+                <TextView
+                    android:id="@+id/absent_description"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Absenmu penting! Jangan lupa untuk mencatat kehadiranmu sekarang dan ciptakan jejak kerja yang positif."
+                    android:textSize="12sp"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginEnd="48dp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                    android:layout_alignParentStart="true"
+                    android:layout_below="@+id/absent_title"/>
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/menu_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:paddingHorizontal="16dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/rencana_visit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/background_rounded_8_clickable"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="12dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:padding="8dp"
+                        android:background="@drawable/bg_green_reseda_round_8"
+                        android:src="@drawable/store_white"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Rencana Visit"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginHorizontal="16dp"
+                        android:ellipsize="marquee"
+                        android:singleLine="true"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:focusable="true"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                    <ImageView
+                        android:id="@+id/rencana_visit_chevron"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/chevron_right_dark"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/all_store"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/background_rounded_8_clickable"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="12dp"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:padding="8dp"
+                        android:background="@drawable/bg_blue_silver_lake_round_8"
+                        android:src="@drawable/gudang_white"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Semua Toko"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginHorizontal="16dp"
+                        android:ellipsize="marquee"
+                        android:singleLine="true"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:focusable="true"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                    <ImageView
+                        android:id="@+id/all_store_chevron"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/chevron_right_dark"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/nearest_store_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/background_rounded_8_clickable"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="12dp"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:padding="8dp"
+                        android:background="@drawable/bg_redwood_round_8"
+                        android:src="@drawable/location_white"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Lihat Toko Terdekat"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginHorizontal="16dp"
+                        android:ellipsize="marquee"
+                        android:singleLine="true"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:focusable="true"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                    <ImageView
+                        android:id="@+id/nearest_store_item_chevron"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/chevron_right_dark"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/register_new_store"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/background_rounded_8_clickable"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="12dp"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:padding="8dp"
+                        android:background="@drawable/bg_yellow_hunyadi_round_8"
+                        android:src="@drawable/add_white"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Daftarkan Toko Baru"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginHorizontal="16dp"
+                        android:ellipsize="marquee"
+                        android:singleLine="true"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:focusable="true"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                    <ImageView
+                        android:id="@+id/register_new_store_chevron"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/chevron_right_dark"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:visibility="visible"
+                    android:id="@+id/report_detail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/background_rounded_8_clickable"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="12dp"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:padding="8dp"
+                        android:background="@drawable/bg_active_round_8"
+                        android:src="@drawable/file_list_white_only"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Lihat Laporan Saya"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginHorizontal="16dp"
+                        android:ellipsize="marquee"
+                        android:singleLine="true"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:focusable="true"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                    <ImageView
+                        android:id="@+id/report_detail_chevron"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/chevron_right_dark"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/my_profile_item"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/background_rounded_8_clickable"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="12dp"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:padding="8dp"
+                        android:background="@drawable/bg_primary_round_8"
+                        android:src="@drawable/user_add_white"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Profil Saya"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginHorizontal="16dp"
+                        android:ellipsize="marquee"
+                        android:singleLine="true"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:focusable="true"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                    <ImageView
+                        android:id="@+id/my_profile_item_chevron"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@drawable/chevron_right_dark"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <LinearLayout
+        android:id="@+id/bottomContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <!-- Btn Logout -->
+        <LinearLayout
+            android:visibility="visible"
+            android:id="@+id/btn_logout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginVertical="8dp"
+            android:padding="12dp"
+            android:gravity="center"
+            android:alpha="0.5"
+            android:background="@drawable/bg_base_clickable_round_8"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Logout"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:textAllCaps="true"
+                android:textColor="@color/text_black"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

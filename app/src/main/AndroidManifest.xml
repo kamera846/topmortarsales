@@ -59,6 +59,12 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".view.rencanaVisits.RencanaVisitActivity"
+            android:exported="false" />
+        <activity
+            android:name=".view.rencanaVisits.HomeSalesActivity"
+            android:exported="false" />
+        <activity
             android:name=".view.courier.HomeCourierActivity"
             android:exported="false" />
         <activity
