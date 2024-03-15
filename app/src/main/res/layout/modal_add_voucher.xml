@@ -273,6 +273,15 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
+                <TextView
+                    android:visibility="gone"
+                    android:id="@+id/tvDistance"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="*Jarak anda dengan toko saat ini 0.123 km"
+                    android:layout_marginVertical="8dp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
                 <Button
                     android:id="@+id/btn_submit"
                     android:layout_width="match_parent"

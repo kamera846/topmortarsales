@@ -57,6 +57,10 @@ class AddVoucherModal(private val context: Context, private val lifecycleScope: 
     fun setVoucherId(id: String) {
         this.contactId = id
     }
+    private var contactCoordinate: String = ""
+    fun setContactCoordinate(coordinate: String) {
+        this.contactCoordinate = coordinate
+    }
 
     // Interface
     private var modalInterface : AddVoucherModalInterface? = null
@@ -121,11 +125,19 @@ class AddVoucherModal(private val context: Context, private val lifecycleScope: 
             binding.etVoucher2.setBackgroundResource(R.drawable.et_background_disabled)
             binding.etVoucher2.setTextColor(context.getColor(R.color.black_200))
 
+            if (userKind != USER_KIND_ADMIN && userKind != USER_KIND_ADMIN_CITY) binding.tvDistance.visibility = View.VISIBLE
+            else binding.tvDistance.visibility = View.GONE
+            binding.tvDistance.text = "*Jarak anda dengan toko saat ini $contactCoordinate km"
+
             if (data!!.no_fisik.isNotEmpty()) {
                 binding.etVoucher1.setText(data?.no_fisik)
 
-                if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) binding.btnSubmit.visibility = View.VISIBLE
+                if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
+                    binding.tvDistance.visibility = View.GONE
+                    binding.btnSubmit.visibility = View.VISIBLE
+                }
                 else {
+                    binding.tvDistance.visibility = View.GONE
                     binding.btnSubmit.visibility = View.GONE
 
                     binding.etVoucher1.setText(data?.no_fisik)
