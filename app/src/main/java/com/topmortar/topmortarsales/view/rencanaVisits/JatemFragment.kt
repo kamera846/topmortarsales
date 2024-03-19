@@ -179,7 +179,7 @@ class JatemFragment : Fragment() {
                     intent.putExtra(CONST_TERMIN, data.termin_payment)
                     intent.putExtra(CONST_PROMO, data.id_promo)
                     intent.putExtra(CONST_REPUTATION, data.reputation)
-                    intent.putExtra(CONST_DATE, data.created_at)
+                    intent.putExtra(CONST_DATE, data.created_at_store)
                 }
 
                 startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)

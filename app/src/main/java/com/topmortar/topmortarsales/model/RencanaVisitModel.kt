@@ -7,6 +7,7 @@ data class RencanaVisitModel(
     var is_visited: String = "",
     var visit_date: String? = null,
     var created_at: String = "",
+    var created_at_store: String = "",
     var updated_at: String? = null,
     var type_rencana: String = "",
     var id_distributor: String = "",
