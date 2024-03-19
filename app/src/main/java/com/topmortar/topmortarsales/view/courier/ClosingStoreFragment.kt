@@ -414,7 +414,7 @@ class ClosingStoreFragment : Fragment() {
                         name = contact.nama,
                         lat = targetLatLng.latitude,
                         lng = targetLatLng.longitude,
-                        startDatetime = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) DateFormat.now() else "",
+                        startDatetime = DateFormat.now(),
                         startLat = currentLatLng.latitude,
                         startLng = currentLatLng.longitude,
                     )

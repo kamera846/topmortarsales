@@ -140,9 +140,7 @@ class UserProfileActivity : AppCompatActivity() {
         if (iUserLevel == AUTH_LEVEL_COURIER) {
             binding.salesReportContainer.visibility = View.GONE
             binding.deliveryContainer.visibility = View.VISIBLE
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                setupCourierMenu()
-            }
+            setupCourierMenu()
         }
 
         initClickHandler()
@@ -514,9 +512,7 @@ class UserProfileActivity : AppCompatActivity() {
             userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
             val userDevice = userDevices.child(userDeviceText)
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                userDevice.child("logout_at").setValue(DateFormat.now())
-            } else userDevice.child("logout_at").setValue("")
+            userDevice.child("logout_at").setValue(DateFormat.now())
             userDevice.child("login_at").setValue("")
 
             if (sessionManager.userKind() == USER_KIND_COURIER) {
@@ -545,7 +541,6 @@ class UserProfileActivity : AppCompatActivity() {
         }, 1000)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun setupCourierMenu() {
         childAbsent = firebaseReference.child(FIREBASE_CHILD_ABSENT)
         childCourier = childAbsent?.child("$iUserID")
@@ -686,7 +681,6 @@ class UserProfileActivity : AppCompatActivity() {
         val userChild = absentChild.child(userId)
 
         userChild.addListenerForSingleValueEvent(object: ValueEventListener {
-            @RequiresApi(Build.VERSION_CODES.O)
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
                     // Do something

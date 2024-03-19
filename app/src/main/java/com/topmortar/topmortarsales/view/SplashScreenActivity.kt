@@ -1003,19 +1003,17 @@ class SplashScreenActivity : AppCompatActivity() {
         userDevice.child("density").setValue("$density")
 
         // User Loged In Datetime
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            userDevice.child("login_at").addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val loginTime = snapshot.getValue(String::class.java)
-                    if (loginTime.isNullOrEmpty()) userDevice.child("login_at").setValue(DateFormat.now())
-                }
+        userDevice.child("login_at").addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val loginTime = snapshot.getValue(String::class.java)
+                if (loginTime.isNullOrEmpty()) userDevice.child("login_at").setValue(DateFormat.now())
+            }
 
-                override fun onCancelled(error: DatabaseError) {
-                    // Do something
-                }
+            override fun onCancelled(error: DatabaseError) {
+                // Do something
+            }
 
-            })
-        } else userDevice.child("login_at").setValue("")
+        })
         userDevice.child("logout_at").setValue("")
 
     }

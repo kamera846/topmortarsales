@@ -1499,7 +1499,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             name = iMapsName!!,
             lat = selectedLocation!!.latitude,
             lng = selectedLocation!!.longitude,
-            startDatetime = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) DateFormat.now() else "",
+            startDatetime = DateFormat.now(),
             startLat = currentLatLng!!.latitude,
             startLng = currentLatLng!!.longitude,
         ))
@@ -1623,9 +1623,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 .addOnSuccessListener { location: Location? ->
                     childDriver!!.child("endLat").setValue(location?.latitude)
                     childDriver!!.child("endLng").setValue(location?.longitude)
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        childDriver!!.child("endDatetime").setValue(DateFormat.now())
-                    }
+                    childDriver!!.child("endDatetime").setValue(DateFormat.now())
                 }
         }
     }

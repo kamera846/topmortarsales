@@ -51,9 +51,7 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
                 else -> "Jatuh tempo "
             }
 
-            dateJatem += if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                DateFormat.differenceDateNowDesc(item.created_at)
-            } else ""
+            dateJatem += DateFormat.differenceDateNowDesc(item.created_at)
 
             tvContactName.text = item.nama
             tvPhoneNumber.text = dateJatem

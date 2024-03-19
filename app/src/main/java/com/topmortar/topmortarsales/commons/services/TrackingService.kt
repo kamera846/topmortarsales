@@ -88,9 +88,7 @@ class TrackingService : Service() {
 
                 childAbsent.child("lat").setValue(driverLocation.latitude)
                 childAbsent.child("lng").setValue(driverLocation.longitude)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    childAbsent.child("lastTracking").setValue(DateFormat.now())
-                }
+                childAbsent.child("lastTracking").setValue(DateFormat.now())
 
             }
         }

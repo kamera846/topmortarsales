@@ -272,7 +272,6 @@ class HomeCourierActivity : AppCompatActivity() {
         val userChild = absentChild.child(userId.toString())
 
         userChild.addListenerForSingleValueEvent(object: ValueEventListener {
-            @RequiresApi(Build.VERSION_CODES.O)
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
                     // Do something
@@ -842,16 +841,11 @@ class HomeCourierActivity : AppCompatActivity() {
 
                             if (!isAbsentMorningNow) {
 
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                    val absentDateTime = DateFormat.now()
-                                    userChild.child("morningDateTime").setValue(absentDateTime)
-                                    userChild.child("lastSeen").setValue(absentDateTime)
+                                val absentDateTime = DateFormat.now()
+                                userChild.child("morningDateTime").setValue(absentDateTime)
+                                userChild.child("lastSeen").setValue(absentDateTime)
 
-                                    sessionManager.absentDateTime(absentDateTime)
-                                } else {
-                                    userChild.child("morningDateTime").setValue("")
-                                    userChild.child("lastSeen").setValue("")
-                                }
+                                sessionManager.absentDateTime(absentDateTime)
 
                                 if (!CustomUtility(this@HomeCourierActivity).isServiceRunning(TrackingService::class.java)) {
                                     val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
@@ -865,16 +859,11 @@ class HomeCourierActivity : AppCompatActivity() {
                                 checkAbsent()
                             } else {
 
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                    val absentDateTime = DateFormat.now()
-                                    userChild.child("eveningDateTime").setValue(absentDateTime)
-                                    userChild.child("lastSeen").setValue(absentDateTime)
+                                val absentDateTime = DateFormat.now()
+                                userChild.child("eveningDateTime").setValue(absentDateTime)
+                                userChild.child("lastSeen").setValue(absentDateTime)
 
-                                    sessionManager.absentDateTime(absentDateTime)
-                                } else {
-                                    userChild.child("eveningDateTime").setValue("")
-                                    userChild.child("lastSeen").setValue("")
-                                }
+                                sessionManager.absentDateTime(absentDateTime)
 
                                 val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
                                 this@HomeCourierActivity.stopService(serviceIntent)

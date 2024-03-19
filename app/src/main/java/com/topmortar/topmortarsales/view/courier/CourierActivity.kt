@@ -116,10 +116,6 @@ class CourierActivity : AppCompatActivity() {
         absentProgressDialog.setCancelable(false)
         absentProgressDialog.setMessage(getString(R.string.txt_loading))
 
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            checkUserAbsent()
-//        } else initLayout()
-
         CustomUtility(this).setUserStatusOnline(true, userDistributorId, userId)
         initLayout()
 
@@ -362,9 +358,7 @@ class CourierActivity : AppCompatActivity() {
             userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
             val userDevice = userDevices.child(userDeviceText)
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                userDevice.child("logout_at").setValue(DateFormat.now())
-            } else userDevice.child("logout_at").setValue("")
+            userDevice.child("logout_at").setValue(DateFormat.now())
             userDevice.child("login_at").setValue("")
         } catch (e: Exception) {
             Log.d("Firebase Auth", "$e")
@@ -401,9 +395,7 @@ class CourierActivity : AppCompatActivity() {
 //                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "Halo, ${ sessionManager.userName() }"}
                         binding.titleBarDark.tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
                         binding.titleBarDark.tvTitleBarDescription.visibility = binding.titleBarDark.tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            setTitleBarAbsent(userAbsentDateTime)
-                        }
+                        setTitleBarAbsent(userAbsentDateTime)
 
                     }
                     RESPONSE_STATUS_EMPTY -> missingDataHandler()
@@ -455,7 +447,6 @@ class CourierActivity : AppCompatActivity() {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun checkUserAbsent() {
         absentProgressDialog.show()
 
@@ -528,17 +519,12 @@ class CourierActivity : AppCompatActivity() {
         userChild.child("eveningDateTime").setValue("")
         userChild.child("isOnline").setValue(true)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val absentDateTime = DateFormat.now()
-            userChild.child("morningDateTime").setValue(absentDateTime)
-            userChild.child("lastSeen").setValue(absentDateTime)
+        val absentDateTime = DateFormat.now()
+        userChild.child("morningDateTime").setValue(absentDateTime)
+        userChild.child("lastSeen").setValue(absentDateTime)
 
-            sessionManager.absentDateTime(absentDateTime)
-            setTitleBarAbsent(absentDateTime)
-        } else {
-            userChild.child("morningDateTime").setValue("")
-            userChild.child("lastSeen").setValue("")
-        }
+        sessionManager.absentDateTime(absentDateTime)
+        setTitleBarAbsent(absentDateTime)
 
         val serviceIntent = Intent(this, TrackingService::class.java)
         serviceIntent.putExtra("userId", userId)
@@ -599,7 +585,6 @@ class CourierActivity : AppCompatActivity() {
         absentProgressDialog.dismiss()
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     private fun setTitleBarAbsent(dateString: String) {
 
         val dateDesc = DateFormat.differenceDateNowDesc(dateString)
@@ -613,11 +598,9 @@ class CourierActivity : AppCompatActivity() {
 
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
-                    val userChild = absentChild.child(userId)
-                    checkPermission(userChild = userChild)
-                } else initLayout()
+                val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+                val userChild = absentChild.child(userId)
+                checkPermission(userChild = userChild)
             } else {
                 val message = getString(R.string.bg_service_location_permission_message)
                 val title = getString(R.string.bg_service_location_permission_title)
@@ -641,9 +624,7 @@ class CourierActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                checkUserAbsent()
-            } else initLayout()
+            checkUserAbsent()
         }
     }
 

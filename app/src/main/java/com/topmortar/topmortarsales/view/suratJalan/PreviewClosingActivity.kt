@@ -297,10 +297,7 @@ class PreviewClosingActivity : AppCompatActivity() {
 //                        Log.d("Item to closing", "$courier")
 //                        Log.d("Item to closing", "$store")
 
-                        var endDateTime = "0000-00-00 00:00:00"
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            endDateTime = DateFormat.now()
-                        }
+                        val endDateTime = DateFormat.now()
 
                         var endLat = "0.0"
                         var endLng = "0.0"

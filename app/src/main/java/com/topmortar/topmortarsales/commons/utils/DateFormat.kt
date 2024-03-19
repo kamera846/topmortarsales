@@ -7,6 +7,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 object DateFormat {
@@ -24,54 +25,49 @@ object DateFormat {
         return outputFormat.format(date!!)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun now(): String {
-        val waktuSekarang = LocalDateTime.now()
+        val waktuSekarang = Date()
 
         // Format tampilan waktu (opsional)
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-        return waktuSekarang.format(formatter)
+        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        return formatter.format(waktuSekarang)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun dateAfterNow(dateString: String): Boolean {
-        val dateNow = LocalDate.now()
+        val calendarNow = Calendar.getInstance()
 
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val targetDate = LocalDate.parse(dateString, formatter)
+        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val targetDate = formatter.parse(dateString)
 
-        return dateNow.isAfter(targetDate)
+        return calendarNow.time.after(targetDate)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun dateTimeAfterNow(dateTimeString: String): Boolean {
-        val dateNow = LocalDateTime.now()
+        val calendarNow = Calendar.getInstance()
 
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-        val targetDate = LocalDateTime.parse(dateTimeString, formatter)
+        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val targetDate = formatter.parse(dateTimeString)
 
-        return dateNow.isAfter(targetDate)
+        return calendarNow.time.after(targetDate)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
     fun differenceDateNowDesc(dateString: String): String {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val dateTime = dateFormat.parse(dateString)
 
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-        val dateTime = LocalDateTime.parse(dateString, formatter)
+        val calendar = Calendar.getInstance()
+        val today = calendar.time
+        calendar.time = dateTime
 
-        val localDate = dateTime.toLocalDate()
-        val today = LocalDate.now()
-
-        val difference = today.toEpochDay() - localDate.toEpochDay()
+        val difference = ((today.time - calendar.time.time) / (1000 * 60 * 60 * 24)).toInt()
 
         return when {
-            difference == 0L -> "hari ini"
-            difference == 1L -> "kemarin"
-            difference > 1L -> "pada $difference hari yang lalu"
-            localDate.isAfter(today) -> "pada $difference hari mendatang"
+            difference == 0 -> "hari ini"
+            difference == 1 -> "kemarin"
+            difference > 1 -> "pada $difference hari yang lalu"
+            calendar.after(today) -> "pada $difference hari mendatang"
             else -> ""
         }
-
     }
 
 }

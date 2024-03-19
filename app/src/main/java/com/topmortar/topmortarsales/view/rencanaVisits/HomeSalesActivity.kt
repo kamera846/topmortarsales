@@ -243,9 +243,7 @@ class HomeSalesActivity : AppCompatActivity() {
             userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
             val userDevice = userDevices.child(userDeviceText)
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                userDevice.child("logout_at").setValue(DateFormat.now())
-            } else userDevice.child("logout_at").setValue("")
+            userDevice.child("logout_at").setValue(DateFormat.now())
             userDevice.child("login_at").setValue("")
         } catch (e: Exception) {
             Log.d("Firebase Auth", "$e")
