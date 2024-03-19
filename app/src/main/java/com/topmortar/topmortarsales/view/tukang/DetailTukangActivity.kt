@@ -15,7 +15,6 @@ import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -30,6 +29,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.TooltipCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -49,11 +49,9 @@ import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.CONST_SKILL
 import com.topmortar.topmortarsales.commons.CONST_STATUS
-import com.topmortar.topmortarsales.commons.CONST_URI
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
-import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.PING_HOST
 import com.topmortar.topmortarsales.commons.PING_MEDIUM
@@ -90,8 +88,6 @@ import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.model.TukangModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.contact.PreviewKtpActivity
-import com.topmortar.topmortarsales.view.suratJalan.ListSuratJalanActivity
-import com.topmortar.topmortarsales.view.suratJalan.PreviewClosingActivity
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -102,11 +98,10 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import java.util.Timer
-import java.util.TimerTask
 
 
 @Suppress("DEPRECATION")
+@SuppressLint("SetTextI18n")
 class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener,
     PingUtility.PingResultInterface {
 
@@ -534,21 +529,21 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         if (!iContactId.isNullOrEmpty() ) {
             contactId = iContactId
         }
-        if (!iPhone.isNullOrEmpty() ) {
+        if (iPhone.isNotEmpty()) {
             tvPhone.text = "+$iPhone"
             etPhone.setText(iPhone)
         } else {
             tvPhone.text = EMPTY_FIELD_VALUE
             etPhone.setText("")
         }
-        if (!iName.isNullOrEmpty() ) {
+        if (iName.isNotEmpty()) {
             tvName.text = iName
             etName.setText(iName)
         } else {
             tvName.text = EMPTY_FIELD_VALUE
             etName.setText("")
         }
-        if (!iOwner.isNullOrEmpty() ) {
+        if (iOwner.isNotEmpty()) {
             tvOwner.text = iOwner
             etOwner.setText(iOwner)
         } else {
@@ -569,7 +564,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             tvSkill.text = EMPTY_FIELD_VALUE
             etSkill.setText("")
         }
-        if (!iBirthday.isNullOrEmpty() ) {
+        if (iBirthday.isNotEmpty()) {
             if (iBirthday == "0000-00-00") {
                 tvBirthday.text = EMPTY_FIELD_VALUE
             } else {
@@ -723,7 +718,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
     private fun editConfirmation() {
 
-        if (!formValidation("${ etPhone.text }","${ etName.text }", "${ etOwner.text }", "${ etMaps.text }", "${ etLocation.text }", "${ etBirthday.text }", "${ etAddress.text }")) return
+        if (!formValidation("${ etPhone.text }","${ etName.text }")) return
 
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Konfirmasi Perubahan")
@@ -745,7 +740,8 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         var pBirthday = "${ etBirthday.text }"
         val pMapsUrl = "${ etMaps.text }"
         val pAddress = "${ etAddress.text }"
-        val pStatus = if (selectedStatus.isNullOrEmpty()) "" else selectedStatus.substringBefore(" - ").toLowerCase()
+        val pStatus = if (selectedStatus.isEmpty()) "" else selectedStatus.substringBefore(" - ").toLowerCase(
+            Locale.getDefault())
 
         var imagePart: MultipartBody.Part? = null
 
@@ -782,7 +778,6 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                 val rbId = createPartFromString(contactId!!)
                 val rbPhone = createPartFromString(formatPhoneNumber(pPhone))
                 val rbName = createPartFromString(pName)
-                val rbOwner = createPartFromString(pOwner)
                 val rbBirthday = createPartFromString(pBirthday)
                 val rbMapsUrl = createPartFromString(pMapsUrl)
                 val rbLocation = createPartFromString(pCityID!!)
@@ -848,7 +843,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                                 else tvSkill.text = EMPTY_FIELD_VALUE
                             } else tvSkill.text = EMPTY_FIELD_VALUE
 
-                            iStatus = if (!pStatus.isNullOrEmpty()) pStatus else null
+                            iStatus = pStatus.ifEmpty { null }
 
                             getDetailTukang()
 
@@ -907,7 +902,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                         RESPONSE_STATUS_OK -> {
 
                             val data = responseBody.results[0]
-                            if (!data.ktp_tukang.isNullOrEmpty()) {
+                            if (data.ktp_tukang.isNotEmpty()) {
                                 binding.tvKtp.text = "Tekan untuk menampilkan Foto"
                                 iKtp = data.ktp_tukang
                             }
@@ -1001,7 +996,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
     }
 
-    private fun formValidation(phone: String, name: String, owner: String = "", mapsUrl: String = "", location: String = "", birthday: String = "", address: String = ""): Boolean {
+    private fun formValidation(phone: String, name: String): Boolean {
         return if (name.isEmpty()) {
             etName.error = "Nama wajib diisi!"
             etName.requestFocus()
@@ -1084,18 +1079,6 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             } else finish()
 
         }
-
-    }
-
-    private fun navigateToDetailInvoice() {
-
-        val intent = Intent(this@DetailTukangActivity, ListSuratJalanActivity::class.java)
-
-        intent.putExtra(CONST_CONTACT_ID, contactId)
-        if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
-        else intent.putExtra(CONST_NAME, tvName.text)
-
-        startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
 
     }
 
@@ -1365,25 +1348,25 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
     private fun setupStatus(status: String? = null) {
         tooltipStatus.visibility = View.VISIBLE
         when (status) {STATUS_CONTACT_DATA -> {
-            tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_data))
+            tooltipStatus.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_data))
             tooltipHandler(tooltipStatus, "Customer Status is Data")
             tvStatus.text = statusItem[1]
             spinStatus.setSelection(1)
         }
             STATUS_CONTACT_PASSIVE -> {
-                tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_passive))
+                tooltipStatus.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_passive))
                 tooltipHandler(tooltipStatus, "Customer Status is Passive")
                 tvStatus.text = statusItem[2]
                 spinStatus.setSelection(2)
             }
             STATUS_CONTACT_ACTIVE -> {
-                tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_active))
+                tooltipStatus.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_active))
                 tooltipHandler(tooltipStatus, "Customer Status is Active")
                 tvStatus.text = statusItem[3]
                 spinStatus.setSelection(3)
             }
             STATUS_CONTACT_BLACKLIST -> {
-                tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_blacklist))
+                tooltipStatus.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_blacklist))
                 tooltipHandler(tooltipStatus, "Customer Status is Blacklist")
                 tvStatus.text = statusItem[4]
                 spinStatus.setSelection(4)
@@ -1413,25 +1396,6 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         }
 
         setupStatus(iStatus)
-    }
-
-    private fun setupNetworkIndicator() {
-        val indicatorImageView = findViewById<View>(R.id.indicatorView) // Ganti dengan ID tampilan indikator Anda
-        indicatorImageView.visibility = View.VISIBLE
-        val layoutParams = indicatorImageView.layoutParams as ViewGroup.MarginLayoutParams
-        layoutParams.marginEnd = 0
-        layoutParams.marginStart = 16
-        val pingIntervalMillis = 2000L // Ganti dengan interval yang Anda inginkan (dalam milidetik)
-
-        val pingTimer = Timer()
-        pingTimer.scheduleAtFixedRate(object : TimerTask() {
-            override fun run() {
-                val pingTask = PingUtility(indicatorImageView)
-                pingTask.setInterface(this@DetailTukangActivity)
-                pingTask.execute()
-            }
-        }, 0, pingIntervalMillis)
-
     }
 
     private fun chooseFile() {
@@ -1465,17 +1429,6 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
     }
 
-    private fun navigateToPreviewKtp() {
-        val uriList = ArrayList<Uri>()
-        selectedUri?.let { uriList.add(it) }
-
-        val intent = Intent(this, PreviewClosingActivity::class.java)
-        intent.putExtra(CONST_CONTACT_ID, contactId)
-        intent.putParcelableArrayListExtra(CONST_URI, uriList)
-        startActivityForResult(intent, IMG_PREVIEW_STATE)
-
-    }
-
     @SuppressLint("Range")
     private fun getFileNameFromUri(uri: Uri): String? {
         var fileName: String? = null
@@ -1489,6 +1442,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         return fileName
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -1507,6 +1461,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
 //      return super.onBackPressed()
         backHandler()

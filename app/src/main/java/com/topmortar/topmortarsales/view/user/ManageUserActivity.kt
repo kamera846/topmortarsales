@@ -1,5 +1,6 @@
 package com.topmortar.topmortarsales.view.user
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
@@ -17,6 +18,7 @@ import android.widget.PopupMenu
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -51,6 +53,7 @@ import com.topmortar.topmortarsales.databinding.ActivityManageUserBinding
 import com.topmortar.topmortarsales.model.UserModel
 import kotlinx.coroutines.launch
 
+@SuppressLint("SetTextI18n")
 @Suppress("DEPRECATION")
 class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemClickListener {
 
@@ -76,16 +79,8 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
     private val userDistributorId get() = sessionManager.userDistributor().toString()
     private val userKind get() = sessionManager.userKind().toString()
     private val userCityID get() = sessionManager.userCityID().toString()
-    private var doubleBackToExitPressedOnce = false
     private var users: ArrayList<UserModel> = arrayListOf()
     private var activeFilter = EMPTY_FIELD_VALUE
-
-    // Initialize Search Engine
-    private val searchDelayMillis = 500L
-    private val searchHandler = Handler(Looper.getMainLooper())
-    private var searchRunnable: Runnable? = null
-    private var previousSearchTerm = ""
-    private var isSearchActive = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -101,8 +96,8 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
 
         // Get the current theme mode (light or dark)
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background = getDrawable(R.color.black_400)
-        else binding.llFilter.componentFilter.background = getDrawable(R.color.light)
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(this, R.color.black_400)
+        else binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(this, R.color.light)
 
         initVariable()
         initClickHandler()
@@ -284,6 +279,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
         else navigateAddUser(data)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 

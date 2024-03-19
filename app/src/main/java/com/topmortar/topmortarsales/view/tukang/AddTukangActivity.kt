@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.view.tukang
 
 import android.Manifest
@@ -22,14 +24,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
-import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
-import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
-import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
-import com.topmortar.topmortarsales.commons.CONST_NAME
-import com.topmortar.topmortarsales.commons.CONST_OWNER
-import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
@@ -41,7 +36,6 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
-import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.updateTxtMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
@@ -95,7 +89,6 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
     private var cities = listOf("Malang", "Gresik", "Sidoarjo", "Blitar", "Surabaya", "Jakarta", "Bandung", "Yogyakarta", "Kediri")
 
     private var iLocation: String? = null
-    private var iMapsUrl: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -123,7 +116,6 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         val phone = "${ etPhone.text }"
         val name = "${ etName.text }"
         var birthday = "${ etBirthday.text }"
-        val owner = "${ etOwner.text }"
         val cityID = sessionManager.userCityID().let { if (!it.isNullOrEmpty()) it else "0" }
         val skillID = if (selectedSkill != null) "${ selectedSkill!!.id }" else "0"
         val mapsUrl = "${ etMapsUrl.text }"
@@ -131,7 +123,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
         val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
 
-        if (!formValidation(phone = phone, name = name, owner = owner, skill = skillID, message = message, birthday = birthday, mapsUrl = mapsUrl)) return
+        if (!formValidation(phone = phone, name = name, skill = skillID, mapsUrl = mapsUrl)) return
 
         birthday = if (birthday.isEmpty()) "0000-00-00"
         else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
@@ -150,23 +142,19 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
                 val rbPhone = createPartFromString(formatPhoneNumber(phone))
                 val rbName = createPartFromString(name)
-//                val rbLocation = createPartFromString(selectedSkill!!.id)
                 val rbLocation = createPartFromString(cityID)
                 val rbSkill = createPartFromString(skillID)
                 val rbBirthday = createPartFromString(birthday)
-                val rbOwner = createPartFromString(owner)
                 val rbMapsUrl = createPartFromString(mapsUrl)
                 val rbMessage = createPartFromString(message)
                 val rbUserId = createPartFromString(userId)
                 val rbCurrentName = createPartFromString(currentName)
-                val rbTermin = createPartFromString("15")
 
                 val apiService: ApiService = HttpClient.create()
                 val response = message.let {
-                    if (it.isNullOrEmpty()) {
+                    if (it.isEmpty()) {
                         apiService.insertTukang(
                             name = rbName,
-//                            namaLengkap = rbOwner,
                             phone = rbPhone,
                             birthday = rbBirthday,
                             cityId = rbLocation,
@@ -177,7 +165,6 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                     } else {
                         apiService.sendMessageTukang(
                             name = rbName,
-//                            namaLengkap = rbOwner,
                             phone = rbPhone,
                             birthday = rbBirthday,
                             cityId = rbLocation,
@@ -196,7 +183,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                     when (responseBody.status) {
                         RESPONSE_STATUS_OK -> {
 
-                            handleMessage(this@AddTukangActivity, TAG_RESPONSE_MESSAGE, message.let { if (!it.isNullOrEmpty()) "Berhasil menyimpan & mengirim pesan!" else "Berhasil menyimpan kontak!" })
+                            handleMessage(this@AddTukangActivity, TAG_RESPONSE_MESSAGE, message.let { if (it.isNotEmpty()) "Berhasil menyimpan & mengirim pesan!" else "Berhasil menyimpan kontak!" })
                             loadingState(false)
 
                             val resultIntent = Intent()
@@ -251,7 +238,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             }
 
             override fun afterTextChanged(s: Editable?) {
-                if (s.toString().isNullOrEmpty()) btnSubmit.text = "Simpan Kontak"
+                if (s.toString().isEmpty()) btnSubmit.text = "Simpan Kontak"
                 else btnSubmit.text = "Simpan & Kirim Pesan"
             }
         })
@@ -263,7 +250,6 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
             if (urlUtility.isLocationEnabled(this)) {
 
-                val urlUtility = URLUtility(this)
                 urlUtility.requestLocationUpdate()
 
             } else {
@@ -282,62 +268,6 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             intent.putExtra(GET_COORDINATE, true)
             startActivityForResult(intent, REQUEST_EDIT_CONTACT_COORDINATE)
         } else checkLocationPermission()
-    }
-
-    private fun dataActivityValidation() {
-
-        val iContactId = intent.getStringExtra(CONST_CONTACT_ID)
-        val iOwner = intent.getStringExtra(CONST_OWNER)
-        val iPhone = intent.getStringExtra(CONST_PHONE)
-        val iName = intent.getStringExtra(CONST_NAME)
-        val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
-        iLocation = intent.getStringExtra(CONST_LOCATION)
-        iMapsUrl = intent.getStringExtra(CONST_MAPS)
-        activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
-
-        if (iContactId.isNullOrEmpty()) {
-            if (sessionManager.userKind() == USER_KIND_SALES) iLocation = sessionManager.userCityID()
-        }
-        if (!iPhone.isNullOrEmpty()) {
-            etPhone.setText(iPhone)
-            etPhone.setTextColor(getColor(R.color.black_500))
-            etPhone.setBackgroundResource(R.drawable.et_background_disabled)
-            etPhone.isEnabled = false
-        }
-        if (!iName.isNullOrEmpty()) {
-            etName.setText(iName)
-            etName.setTextColor(getColor(R.color.black_500))
-            etName.setBackgroundResource(R.drawable.et_background_disabled)
-            etName.isEnabled = false
-        }
-        if (!iOwner.isNullOrEmpty()) {
-            etOwner.setText(iOwner)
-            etOwner.setTextColor(getColor(R.color.black_500))
-            etOwner.setBackgroundResource(R.drawable.et_background_disabled)
-            etOwner.isEnabled = false
-        }
-        if (!iLocation.isNullOrEmpty()) {
-            etSkill.setText(getString(R.string.txt_loading))
-            etSkill.setTextColor(getColor(R.color.black_500))
-            etSkill.setBackgroundResource(R.drawable.et_background_disabled)
-            etSkill.isEnabled = false
-        }
-        if (!iBirthday.isNullOrEmpty()) {
-            if (iBirthday == "0000-00-00") etBirthday.setText("")
-            else {
-                etBirthday.setText(DateFormat.format(iBirthday))
-                etBirthday.setTextColor(getColor(R.color.black_500))
-                etBirthday.setBackgroundResource(R.drawable.et_background_disabled)
-                etBirthday.isEnabled = false
-            }
-        }
-        if (!iMapsUrl.isNullOrEmpty()) {
-            etMapsUrl.setText(iMapsUrl)
-            etMapsUrl.setTextColor(getColor(R.color.black_500))
-            etMapsUrl.setBackgroundResource(R.drawable.et_background_disabled)
-            etMapsUrl.isEnabled = false
-        }
-
     }
 
     private fun initVariable() {
@@ -459,7 +389,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
     }
 
-    private fun formValidation(phone: String, name: String, skill: String = "", birthday: String = "", owner: String = "", mapsUrl: String = "", message: String): Boolean {
+    private fun formValidation(phone: String, name: String, skill: String = "", mapsUrl: String = ""): Boolean {
         return if (phone.isEmpty()) {
             etPhone.error = "Nomor telpon wajib diisi!"
             etPhone.requestFocus()
@@ -647,6 +577,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         selectedSkill = data
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
