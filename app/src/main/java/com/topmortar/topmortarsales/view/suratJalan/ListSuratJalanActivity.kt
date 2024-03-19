@@ -504,7 +504,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
     override fun onStart() {
         super.onStart()
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
         }, 1000)
     }

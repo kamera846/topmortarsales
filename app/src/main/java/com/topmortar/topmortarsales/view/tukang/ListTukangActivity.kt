@@ -67,6 +67,7 @@ import com.topmortar.topmortarsales.view.user.ManageUserActivity
 import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
+@SuppressLint("SetTextI18n")
 class ListTukangActivity : AppCompatActivity(), ItemClickListener {
 
     private lateinit var scaleAnimation: Animation
@@ -77,7 +78,6 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
     private lateinit var rvListChat: RecyclerView
     private lateinit var llTitleBar: LinearLayout
     private lateinit var btnFab: FloatingActionButton
-    private lateinit var titleBar: TextView
     private lateinit var icMore: ImageView
     private lateinit var icBack: ImageView
     private lateinit var tvTitleBar: TextView
@@ -122,7 +122,6 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         rvListChat = findViewById(R.id.rv_chat_list)
         llTitleBar = findViewById(R.id.title_bar)
         btnFab = findViewById(R.id.btn_fab)
-        titleBar = llTitleBar.findViewById(R.id.tv_title_bar)
         icMore = llTitleBar.findViewById(R.id.ic_more)
         icBack = llTitleBar.findViewById(R.id.ic_back)
         tvTitleBar = llTitleBar.findViewById(R.id.tv_title_bar)
@@ -131,7 +130,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         // Set Title Bar
         icBack.visibility = View.GONE
         icMore.visibility = View.VISIBLE
-        titleBar.text = "List Tukang"
+        tvTitleBar.text = "List Tukang"
         tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
         tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
         tvTitleBar.setPadding(convertDpToPx(16, this), 0, convertDpToPx(16, this), 0)
@@ -425,6 +424,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         finish()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -442,6 +442,7 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
 
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (doubleBackToExitPressedOnce) {
             super.onBackPressed()

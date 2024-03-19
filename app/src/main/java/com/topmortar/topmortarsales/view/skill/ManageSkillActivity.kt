@@ -198,7 +198,7 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
 
     override fun onItemClick(data: SkillModel?) {
         addCityModal.show()
-//        Handler().postDelayed({
+//        Handler(Looper.getMainLooper()).postDelayed({
             addCityModal.setEditCase(true)
             addCityModal.setItem(data!!)
             addCityModal.setTitle("Edit Skill")

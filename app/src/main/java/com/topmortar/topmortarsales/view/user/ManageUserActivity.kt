@@ -348,7 +348,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
             }
             binding.llFilter.tvFilter.text = textActiveFilter
             loadingState(true)
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 val usersDummy = arrayListOf<UserModel>()
                 for (item in users.iterator()) {
                     if (item.level_user == activeFilter) usersDummy.add(item)

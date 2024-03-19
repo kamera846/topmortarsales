@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.view.rencanaVisits
 
 import android.content.Intent
@@ -63,7 +65,6 @@ class JatemFragment : Fragment() {
     private lateinit var userKind: String
     private lateinit var userCity: String
     private lateinit var userID: String
-    private val userDistributorid get() = sessionManager.userDistributor().toString()
 
     private lateinit var badgeRefresh: LinearLayout
     private lateinit var searchModal: SearchModal
@@ -124,7 +125,7 @@ class JatemFragment : Fragment() {
                     RESPONSE_STATUS_OK -> {
 
                         setRecyclerView(response.results)
-                        loadingState(false, )
+                        loadingState(false)
                         showBadgeRefresh(false)
                         listener?.counterItem(response.results.size)
 

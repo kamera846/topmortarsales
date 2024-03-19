@@ -2,6 +2,7 @@ package com.topmortar.topmortarsales.view.contact
 
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -45,7 +46,7 @@ class PreviewKtpActivity : AppCompatActivity() {
             .load(imageUrl)
             .into(photoView, object : Callback {
                 override fun onSuccess() {
-                    Handler().postDelayed({
+                    Handler(Looper.getMainLooper()).postDelayed({
                         lnrFooter.visibility = View.GONE
                         lnrTitleBar.visibility = View.GONE
                     }, 5000)
@@ -68,7 +69,7 @@ class PreviewKtpActivity : AppCompatActivity() {
         photoView.setOnPhotoTapListener { view, x, y ->
             lnrFooter.visibility = View.VISIBLE
             lnrTitleBar.visibility = View.VISIBLE
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 lnrFooter.visibility = View.GONE
                 lnrTitleBar.visibility = View.GONE
             }, 5000)

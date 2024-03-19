@@ -2,6 +2,7 @@ package com.topmortar.topmortarsales.adapter
 
 import android.content.Context
 import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -70,7 +71,7 @@ class CityRecyclerViewAdapter(private val itemClickListener: ItemClickListener) 
                 overlayView.visibility = View.VISIBLE
                 overlayView.startAnimation(fadeIn)
 
-                Handler().postDelayed({
+                Handler(Looper.getMainLooper()).postDelayed({
                     overlayView.alpha = 0f
                     overlayView.visibility = View.GONE
                 }, animateDuration)

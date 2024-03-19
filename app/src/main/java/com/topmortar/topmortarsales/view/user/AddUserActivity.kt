@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.Html
 import android.text.TextWatcher
@@ -113,7 +114,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         initClickHandler()
         dataActivityHandler()
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
 
             // Setup Spinner
             setSpinner()
@@ -147,7 +148,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         loadingState(true)
 
-//        Handler().postDelayed({
+//        Handler(Looper.getMainLooper()).postDelayed({
 //            handleMessage(this, "Add User", "$level : $city : $phone : $username : $password : $confirmPassword")
 //            loadingState(false)
 //            onSubmit = false

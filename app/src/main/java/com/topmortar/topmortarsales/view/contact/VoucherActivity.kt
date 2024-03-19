@@ -7,6 +7,7 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -202,7 +203,7 @@ class VoucherActivity : AppCompatActivity() {
         progressDialog.setMessage("Sedang menghitung jarak...")
         progressDialog.show()
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
 
             val mapsUrl = contactMapsUrl
             val urlUtility = URLUtility(this)

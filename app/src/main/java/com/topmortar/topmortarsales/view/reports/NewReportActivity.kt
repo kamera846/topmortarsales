@@ -10,6 +10,7 @@ import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
@@ -112,7 +113,7 @@ class NewReportActivity : AppCompatActivity() {
             }
         }
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
 
             binding.etName.text = name
             calculateDistance()
@@ -155,7 +156,7 @@ class NewReportActivity : AppCompatActivity() {
     fun calculateDistance(view: View? = null) {
         progressDialog.show()
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
 
             val mapsUrl = coordinate
             val urlUtility = URLUtility(this)

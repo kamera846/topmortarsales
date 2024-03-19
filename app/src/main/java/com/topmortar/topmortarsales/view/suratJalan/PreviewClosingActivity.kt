@@ -1,13 +1,16 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.view.suratJalan
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -53,6 +56,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 
+@SuppressLint("SetTextI18n")
 class PreviewClosingActivity : AppCompatActivity() {
 
     private lateinit var icBack: ImageView
@@ -271,9 +275,9 @@ class PreviewClosingActivity : AppCompatActivity() {
 
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         onBackHandler()
-
     }
 
     private fun onClosingFinished(message: String) {
@@ -453,7 +457,7 @@ class PreviewClosingActivity : AppCompatActivity() {
         childDelivery?.child("$deliveryId/stores/$contactId")?.removeValue()
 
         handleMessage(this@PreviewClosingActivity, TAG_RESPONSE_CONTACT, message)
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             loadingState(false)
             finish()
         }, 1000)
@@ -462,7 +466,7 @@ class PreviewClosingActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
         }, 1000)
     }

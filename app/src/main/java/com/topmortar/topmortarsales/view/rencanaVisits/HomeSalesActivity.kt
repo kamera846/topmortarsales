@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.view.rencanaVisits
 
 import android.annotation.SuppressLint
@@ -45,6 +47,7 @@ import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.launch
 
+@SuppressLint("SetTextI18n")
 class HomeSalesActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityHomeSalesBinding
@@ -56,7 +59,6 @@ class HomeSalesActivity : AppCompatActivity() {
     private val userKind get() = sessionManager.userKind()
     private val userFullName get() = sessionManager.fullName()
     private val userDistributorId get() = sessionManager.userDistributor()
-    private val userDistributorNumber get() = sessionManager.userDistributorNumber()
 
     private var doubleBackToExitPressedOnce = false
     private lateinit var firebaseReference: DatabaseReference
@@ -292,6 +294,7 @@ class HomeSalesActivity : AppCompatActivity() {
         getUserLoggedIn()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (doubleBackToExitPressedOnce) {
             super.onBackPressed()

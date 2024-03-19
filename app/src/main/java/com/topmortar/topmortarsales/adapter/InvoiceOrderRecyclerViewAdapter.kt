@@ -76,7 +76,7 @@ class InvoiceOrderRecyclerViewAdapter() : RecyclerView.Adapter<InvoiceOrderRecyc
 //            overlayView.visibility = View.VISIBLE
 //            overlayView.startAnimation(fadeIn)
 //
-//            Handler().postDelayed({
+//            Handler(Looper.getMainLooper()).postDelayed({
 //                overlayView.alpha = 0f
 //                overlayView.visibility = View.GONE
 //            }, animateDuration)

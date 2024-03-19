@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
@@ -111,7 +112,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         etMessageListener()
         checkLocationPermission()
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             getSkills()
         }, 500)
 
@@ -137,7 +138,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         loadingState(true)
 
-//        Handler().postDelayed({
+//        Handler(Looper.getMainLooper()).postDelayed({
 //            handleMessage(this, "Submit -> ", "$phone : $name : $owner : $birthday : $skillID : $message")
 //            loadingState(false)
 //        }, 1000)

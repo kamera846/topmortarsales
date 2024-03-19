@@ -2,6 +2,7 @@ package com.topmortar.topmortarsales.adapter.recyclerview
 
 import android.content.Context
 import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -74,7 +75,7 @@ class BaseCampRecyclerViewAdapter(private val chatList: ArrayList<BaseCampModel>
             overlayView.visibility = View.VISIBLE
             overlayView.startAnimation(fadeIn)
 
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 overlayView.alpha = 0f
                 overlayView.visibility = View.GONE
             }, animateDuration)

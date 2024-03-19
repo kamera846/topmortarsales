@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.view
 
 import android.Manifest
@@ -13,7 +15,6 @@ import android.location.Address
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationListener
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -28,6 +29,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -38,7 +40,6 @@ import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -66,18 +67,11 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.maps.DirectionsApi
 import com.google.maps.GeoApiContext
-import com.google.maps.PendingResult
 import com.google.maps.errors.ApiException
-import com.google.maps.model.DirectionsResult
-import com.google.maps.model.DirectionsRoute
 import com.google.maps.model.TravelMode
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.PlaceAdapter
 import com.topmortar.topmortarsales.adapter.recyclerview.UserTrackingRecyclerViewAdapter
-import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
-import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
-import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
-import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.CONNECTION_FAILURE_RESOLUTION_REQUEST
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_COURIER_ID
@@ -114,7 +108,6 @@ import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
-import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
@@ -136,6 +129,7 @@ import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.model.UserAbsentModel
 import com.topmortar.topmortarsales.view.suratJalan.ListSuratJalanActivity
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -145,14 +139,13 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
+@OptIn(DelicateCoroutinesApi::class)
+@SuppressLint("SetTextI18n")
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private lateinit var sessionManager: SessionManager
     private val userKind get() = sessionManager.userKind().toString()
     private val userID get() = sessionManager.userID().toString()
-    private val username get() = sessionManager.userName().toString()
-    private val fulllName get() = sessionManager.fullName().toString()
-    private val userCityID get() = sessionManager.userCityID().toString()
     private val userDistributorId get() = sessionManager.userDistributor().toString()
     private val userCity get() = sessionManager.userCityID().toString()
 
@@ -253,9 +246,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
             if (urlUtility.isLocationEnabled(this)) {
 
-                val urlUtility = URLUtility(this)
                 urlUtility.requestLocationUpdate()
-
                 initView()
 
             } else {
@@ -411,7 +402,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                             } else locationBlacklistDrawable
                         }
                     }
-                    binding.imgTargetRoute.setImageDrawable(getDrawable(imgDrawable))
+                    binding.imgTargetRoute.setImageDrawable(AppCompatResources.getDrawable(this, imgDrawable))
 
                 }
                 binding.btnDrawRoute.setOnClickListener {
@@ -431,7 +422,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 getDirections()
             }
 
-        } else if (routeDirections != null) {
+        } else {
 
             // Remove line routes
             for (polyline in listRouteLines) {
@@ -439,12 +430,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             }
             listRouteLines.clear()
 
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 val button = binding.btnDrawRoute
                 val img = binding.btnDrawRouteImg
                 val title = binding.btnDrawRouteTitle
                 button.setBackgroundResource(R.drawable.bg_primary_round)
-                img.setImageDrawable(getDrawable(R.drawable.direction_white))
+                img.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.direction_white))
                 title.text = "Aktifkan Navigasi"
 
                 // Live Location Update with Firebase Realtime Database
@@ -481,17 +472,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             else if (selectedLocation == null) showDialog(message = "Gagal menemukan lokasi target")
             else getDirections()
 
-        } else if (routeDirections != null) {
+        } else {
             mMap.clear()
             setupMaps()
             routeDirections!!.remove()
             routeDirections = null
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 val button = binding.btnGetDirection
                 val img = binding.btnGetDirectionImg
                 val title = binding.btnGetDirectionTitle
                 button.setBackgroundResource(R.drawable.bg_primary_round)
-                img.setImageDrawable(getDrawable(R.drawable.direction_white))
+                img.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.direction_white))
                 title.text = "Aktifkan Navigasi"
             }, 500)
         }
@@ -542,7 +533,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 binding.textTargetRute.text = "Petunjuk rute menuju ke lokasi ${if (isBasecamp) "basecamp" else "toko"}"
 
                 val imgDrawable = locationBlacklistDrawable
-                binding.imgTargetRoute.setImageDrawable(getDrawable(imgDrawable))
+                binding.imgTargetRoute.setImageDrawable(AppCompatResources.getDrawable(this, imgDrawable))
                 binding.btnDrawRoute.setOnClickListener {
                     toggleBtnDrawRoute()
                 }
@@ -588,12 +579,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private fun searchCoordinate() {
         if (!progressDialog.isShowing) {
             progressDialog.show()
-//            Handler().postDelayed({
+//            Handler(Looper.getMainLooper()).postDelayed({
 //                progressDialog.setMessage("Sedang memuat lebih banyak data ${if (isBasecamp) "basecamp" else "toko"}…")
 //            }, 1000)
         }
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
 
             val urlUtility = URLUtility(this)
             val limitKm = binding.etKm.text.toString().toDouble()
@@ -640,7 +631,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                                 if (latitude != null && longitude != null) {
 
-                                    val urlUtility = URLUtility(this@MapsActivity)
                                     val distance = urlUtility.calculateDistance(centerPointLatLng!!.latitude, centerPointLatLng.longitude, latitude, longitude)
 
                                     if (distance < limitKm) {
@@ -826,22 +816,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         return null
     }
 
-    private fun getPlaceNameFromLatLng(latLng: LatLng?): String {
-        return try {
-            val geocoder = Geocoder(this, Locale.getDefault())
-            val addresses = latLng?.let {
-                geocoder.getFromLocation(it.latitude, it.longitude, 1)
-            }
-
-            if (addresses?.isNotEmpty() == true) addresses[0].getAddressLine(0) else "Nama Lokasi Tidak Ditemukan"
-        } catch (e: IOException) {
-            // Handle IOException, log the error, and return a default value
-            e.printStackTrace()
-            "Nama Lokasi Tidak Ditemukan"
-        }
-    }
-
-
     private fun onGetLatLng() {
         binding.btnGetLatLng.setOnClickListener {
 
@@ -932,12 +906,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         val updateCamera = CameraUpdateFactory.newLatLngBounds(bounds, 100)
                         mMap.animateCamera(updateCamera, mapsDuration, null)
 
-                        Handler().postDelayed({
+                        Handler(Looper.getMainLooper()).postDelayed({
                             val button = binding.btnDrawRoute
                             val img = binding.btnDrawRouteImg
                             val title = binding.btnDrawRouteTitle
                             button.setBackgroundResource(R.drawable.bg_passive_round)
-                            img.setImageDrawable(getDrawable(R.drawable.direction_line_white))
+                            img.setImageDrawable(AppCompatResources.getDrawable(this@MapsActivity, R.drawable.direction_line_white))
                             title.text = "Matikan Navigasi"
 
                             // Live Location Update with Firebase Realtime Database
@@ -965,71 +939,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 e.printStackTrace()
             }
         }
-    }
-    private fun getDirections2() {
-        val currentLocation = currentLatLng ?: return
-        val destination = selectedLocation ?: return
-        var directionsResults: List<DirectionsRoute>? = null
-
-        val directionsApiRequest = DirectionsApi.newRequest(getGeoContext())
-            .origin(com.google.maps.model.LatLng(currentLocation.latitude, currentLocation.longitude))
-            .destination(com.google.maps.model.LatLng(destination.latitude, destination.longitude))
-            .mode(TravelMode.DRIVING)
-            .optimizeWaypoints(true)
-            .alternatives(true) // Mengaktifkan opsi jalur alternatif
-
-        directionsApiRequest.setCallback(object : PendingResult.Callback<DirectionsResult> {
-            override fun onResult(result: DirectionsResult) {
-                directionsResults = result.routes.toList()
-
-                // Menampilkan semua jalur yang tersedia dengan warna berbeda
-                for ((index, route) in directionsResults!!.withIndex()) {
-                    val color = if (index == 0) {
-                        R.color.primary
-                    } else {
-                        R.color.primary_600 // Warna untuk jalur lebih lambat
-                    }
-
-                    val overviewPolyLine = route.overviewPolyline.decodePath()
-                    val polylineOptions = PolylineOptions()
-//                        .addAll(route.overviewPolyline.decodePath())
-                        .width(10f)
-                        .color(color)
-
-                    for (latLng in overviewPolyLine) {
-                        polylineOptions.add(LatLng(latLng.lat, latLng.lng))
-                    }
-
-                    mMap.addPolyline(polylineOptions)
-                }
-
-                // Menandai jalur yang sudah dilewati dengan warna Hijau
-                val completedRouteIndex = 0 // Ganti dengan indeks jalur yang sudah dilewati
-                val completedRoute = directionsResults!![completedRouteIndex]
-                val completeOverviewPolyLine = completedRoute.overviewPolyline.decodePath()
-                val completedPolylineOptions = PolylineOptions()
-//                    .addAll(completedRoute.overviewPolyline.decodePath())
-                    .width(10f)
-                    .color(R.color.primary_300) // Warna untuk jalur yang sudah dilewati
-
-                for (latLng in completeOverviewPolyLine) {
-                    completedPolylineOptions.add(LatLng(latLng.lat, latLng.lng))
-                }
-                mMap.addPolyline(completedPolylineOptions)
-
-                // Zoom ke rute pertama
-                val bounds = LatLngBounds.builder()
-                    .include(currentLocation)
-                    .include(destination)
-                    .build()
-                val updateCamera = CameraUpdateFactory.newLatLngBounds(bounds, 100)
-                mMap.animateCamera(updateCamera, mapsDuration, null)
-            }
-
-            override fun onFailure(e: Throwable) {
-                // Tangani kesalahan permintaan API di sini
-            }
-        })
     }
 
     private fun getGeoContext(): GeoApiContext {
@@ -1198,9 +1107,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                             val placeAdapter = PlaceAdapter(placeNames, placeAddress) { position ->
 
                                 val fields = listOf(Place.Field.LAT_LNG)
-                                val request = FetchPlaceRequest.builder(placeIds[position], fields).build()
+                                val requestFetch = FetchPlaceRequest.builder(placeIds[position], fields).build()
 
-                                placesClient.fetchPlace(request)
+                                placesClient.fetchPlace(requestFetch)
                                     .addOnSuccessListener { response: FetchPlaceResponse ->
 
                                         val place = response.place
@@ -1253,8 +1162,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY || userKind == USER_KIND_SALES) {
             val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-            if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.background = getDrawable(R.color.black_400)
-            else binding.llFilter.background = getDrawable(R.color.light)
+            if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.background = AppCompatResources.getDrawable(this, R.color.black_400)
+            else binding.llFilter.background = AppCompatResources.getDrawable(this, R.color.light)
 
             binding.llFilter.visibility = View.VISIBLE
 
@@ -1381,6 +1290,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         } else Toast.makeText(this, "Koneksi ke Layanan Google Play gagal", TOAST_SHORT).show()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         backHandler()
     }
@@ -1474,160 +1384,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         } else super.onBackPressed()
     }
 
-    private fun startTracking() {
-
-        val userLevel = when (sessionManager.userKind()) {
-            USER_KIND_ADMIN -> AUTH_LEVEL_ADMIN
-            USER_KIND_COURIER -> AUTH_LEVEL_COURIER
-            USER_KIND_BA -> AUTH_LEVEL_BA
-            else -> AUTH_LEVEL_SALES
-        }
-
-        val deliveryId = "$userLevel$userID"
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
-        childDelivery = firebaseReference?.child(FIREBASE_CHILD_DELIVERY)
-        childDriver = childDelivery?.child(deliveryId)
-
-        val courierModel = DeliveryModel.Courier(
-            id = userID,
-            name = fulllName
-        )
-
-        val storeModel = arrayListOf<DeliveryModel.Store>()
-        storeModel.add(DeliveryModel.Store(
-            id = iContactID!!,
-            name = iMapsName!!,
-            lat = selectedLocation!!.latitude,
-            lng = selectedLocation!!.longitude,
-            startDatetime = DateFormat.now(),
-            startLat = currentLatLng!!.latitude,
-            startLng = currentLatLng!!.longitude,
-        ))
-
-        val deliveryModel = DeliveryModel.Delivery(
-            id = deliveryId,
-//            stores = storeModel,
-            courier = courierModel
-        )
-
-        childDriver?.setValue(deliveryModel)
-
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location: Location? ->
-                childDriver?.child("startLat")?.setValue(location!!.latitude)
-                childDriver?.child("startLng")?.setValue(location!!.longitude)
-            }
-
-        val locationRequest = LocationRequest.create()
-            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-            .setInterval(mapsDuration.toLong())
-
-        locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
-
-                val driverLocation = locationResult.lastLocation!!
-                childDriver!!.child("lat").setValue(driverLocation.latitude)
-                childDriver!!.child("lng").setValue(driverLocation.longitude)
-
-            }
-        }
-
-        // Listener From Firebase
-        locationListener = object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val driver = dataSnapshot.getValue(DeliveryModel.Delivery::class.java)
-                if (driver != null) {
-                    val iconDrawable = R.drawable.store_location_status_biding
-                    val originalBitmap = BitmapFactory.decodeResource(resources, iconDrawable)
-
-                    val newWidth = convertDpToPx(40, this@MapsActivity)
-                    val newHeight = convertDpToPx(40, this@MapsActivity)
-
-                    val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
-
-//                    val courierMarker = MarkerOptions()
-//                        .position(LatLng(driver.lat, driver.lng))
-//                        .title("Kurir)
-//                        .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
-//                    mMap.addMarker(courierMarker)
-
-                    val latLng = LatLng(driver.lat, driver.lng)
-
-                    if (courierMarker == null) {
-                        if (ActivityCompat.checkSelfPermission(
-                                this@MapsActivity,
-                                Manifest.permission.ACCESS_FINE_LOCATION
-                            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                                this@MapsActivity,
-                                Manifest.permission.ACCESS_COARSE_LOCATION
-                            ) != PackageManager.PERMISSION_GRANTED
-                        ) {
-                            return
-                        }
-                        mMap.isMyLocationEnabled = false
-                        courierMarker = mMap.addMarker(
-                            MarkerOptions()
-                                .position(latLng)
-                                .title("Kurir")
-                                .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
-                        )
-                    } else courierMarker?.position = latLng
-
-//                    val bounds = LatLngBounds.builder()
-//                        .include(latLng)
-//                        .include(selectedLocation ?: return)
-//                        .build()
-//                    val updateCamera = CameraUpdateFactory.newLatLngBounds(bounds, 100)
-//                    mMap.animateCamera(updateCamera, mapsDuration, null)
-                }
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {
-                handleMessage(this@MapsActivity, "MAPS LISTENER", "Failed listening location update: $databaseError")
-            }
-        }
-        childDriver?.addValueEventListener(locationListener!!)
-
-        // Request location updates
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            return
-        }
-        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback!!, Looper.getMainLooper())
-    }
-
-    private fun stopTracking() {
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            return
-        }
-        if (locationCallback != null) {
-            courierMarker?.remove()
-            childDriver?.removeEventListener(locationListener!!)
-            fusedLocationClient.removeLocationUpdates(locationCallback!!)
-            mMap.isMyLocationEnabled = true
-
-            fusedLocationClient.lastLocation
-                .addOnSuccessListener { location: Location? ->
-                    childDriver!!.child("endLat").setValue(location?.latitude)
-                    childDriver!!.child("endLng").setValue(location?.longitude)
-                    childDriver!!.child("endDatetime").setValue(DateFormat.now())
-                }
-        }
-    }
-
     private fun setupTracking() {
         val progressDialog = ProgressDialog(this)
         progressDialog.setCancelable(false)
@@ -1665,7 +1421,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                             .title(deliveryData!!.courier?.name ?: "Kurir")
                                             .icon(
                                                 BitmapDescriptorFactory.fromBitmap(
-                                                    resizedBitmap(courierDrawable, 60)
+                                                    resizedBitmap(courierDrawable)
                                                 )
                                             )
                                     )
@@ -1675,7 +1431,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                             .title(store.name)
                                             .icon(
                                                 BitmapDescriptorFactory.fromBitmap(
-                                                    resizedBitmap(locationBlacklistDrawable, 60)
+                                                    resizedBitmap(locationBlacklistDrawable)
                                                 )
                                             )
                                     )
@@ -1754,7 +1510,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                                 null
                                             )
 
-                                            Handler().postDelayed({
+                                            Handler(Looper.getMainLooper()).postDelayed({
                                                 binding.cardDelivery.visibility = View.VISIBLE
                                                 binding.deliveryCourier.text = deliveryData!!.courier?.name
                                                 binding.deliveryStore.text = store.name
@@ -1848,7 +1604,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                     )
                                     .icon(
                                         BitmapDescriptorFactory.fromBitmap(
-                                            resizedBitmap(courierDrawable, 60)
+                                            resizedBitmap(courierDrawable)
                                         )
                                     )
                             )
@@ -1902,7 +1658,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     val courierLng = snapshot.child("lng").getValue(Double::class.java)
                     val courierFullName = snapshot.child("fullname").getValue(String::class.java)
                     val courierIsOnline = snapshot.child("isOnline").getValue(Boolean::class.java)
-                    val courierLastSeen = snapshot.child("lastSeen").getValue(String::class.java)
                     val courierLastTracking = snapshot.child("lastTracking").getValue(String::class.java)
 
                     if (courierLat != null && courierLng != null) {
@@ -1932,7 +1687,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                     )
                                     .icon(
                                         BitmapDescriptorFactory.fromBitmap(
-                                            resizedBitmap(courierDrawable, 60)
+                                            resizedBitmap(courierDrawable)
                                         )
                                     )
                             )
@@ -2026,7 +1781,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                 courierMarker = null
                                 mMap.clear()
 
-                                Handler().postDelayed({
+                                Handler(Looper.getMainLooper()).postDelayed({
                                     courierID = item.id
                                     setupTrackingCourier()
                                 }, 100)
@@ -2086,7 +1841,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                 .title(courierName)
                                 .icon(
                                     BitmapDescriptorFactory.fromBitmap(
-                                        resizedBitmap(courierDrawable, 60)
+                                        resizedBitmap(courierDrawable)
                                     )
                                 )
                         )
@@ -2096,7 +1851,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                 .title(item.nama)
                                 .icon(
                                     BitmapDescriptorFactory.fromBitmap(
-                                        resizedBitmap(locationBlacklistDrawable, 60)
+                                        resizedBitmap(locationBlacklistDrawable)
                                     )
                                 )
                         )
@@ -2175,10 +1930,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                     null
                                 )
 
-                                val dateStart = DateFormat.format(item.startDatetime, "yyyy-MM-dd HH:mm:ss", "dd MMM YYYY, HH.mm")
-                                val dateEnd = DateFormat.format(item.endDatetime, "yyyy-MM-dd HH:mm:ss", "dd MMM YYYY, HH.mm")
-
-                                Handler().postDelayed({
+                                Handler(Looper.getMainLooper()).postDelayed({
                                     binding.cardDelivery.visibility = View.VISIBLE
                                     binding.deliveryCourier.text = courierName
                                     binding.deliveryStore.text = item.nama
@@ -2274,12 +2026,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     }
 
-    private fun resizedBitmap(drawable: Int, sizeDp: Int = 40): Bitmap {
+    private fun resizedBitmap(drawable: Int): Bitmap {
 
         val originalBitmap = BitmapFactory.decodeResource(resources, drawable)
 
-        val newWidth = convertDpToPx(sizeDp, this@MapsActivity)
-        val newHeight = convertDpToPx(sizeDp, this@MapsActivity)
+        val newWidth = convertDpToPx(60, this@MapsActivity)
+        val newHeight = convertDpToPx(60, this@MapsActivity)
 
         return Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
     }
@@ -2302,6 +2054,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         } else DateFormat.format(dateString, dateStringFormat, "dd MMM, HH:mm")
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -2323,20 +2076,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     }
 
-    override fun onResume() {
-        super.onResume()
-//        if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
-    }
-
-    override fun onPause() {
-        super.onPause()
-//        if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
-    }
-
     override fun onStart() {
         super.onStart()
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
         }, 1000)
 

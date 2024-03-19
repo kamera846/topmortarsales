@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.text.Editable
@@ -768,7 +769,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
         loadingState(true)
 
-//        Handler().postDelayed({
+//        Handler(Looper.getMainLooper()).postDelayed({
 //            Toast.makeText(this, "$pPhone : $pName : $pOwner : $pBirthday : $pMapsUrl : $pAddress : $pStatus : $pCityID : $pSkillID", TOAST_SHORT).show()
 //            loadingState(false)
 //        }, 2000)
@@ -1329,7 +1330,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             overlayMaps.visibility = View.VISIBLE
             overlayMaps.startAnimation(fadeIn)
 
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 overlayMaps.alpha = 0f
                 overlayMaps.visibility = View.GONE
 

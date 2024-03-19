@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.view.contact
 
 import android.Manifest
@@ -12,14 +14,13 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.view.Gravity
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
@@ -29,15 +30,14 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.PopupMenu
 import android.widget.RelativeLayout
 import android.widget.Spinner
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.TooltipCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -74,12 +74,10 @@ import com.topmortar.topmortarsales.commons.CONST_PROMO
 import com.topmortar.topmortarsales.commons.CONST_REPUTATION
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
-import com.topmortar.topmortarsales.commons.CONST_URI
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
-import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
 import com.topmortar.topmortarsales.commons.IS_CLOSING
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
@@ -111,7 +109,6 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_MARKETING
-import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
@@ -127,7 +124,6 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityDetailContactBinding
-import com.topmortar.topmortarsales.modal.AddVoucherModal
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.modal.SendMessageModal
 import com.topmortar.topmortarsales.model.ContactModel
@@ -138,7 +134,6 @@ import com.topmortar.topmortarsales.view.reports.NewReportActivity
 import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import com.topmortar.topmortarsales.view.reports.UsersReportActivity
 import com.topmortar.topmortarsales.view.suratJalan.ListSuratJalanActivity
-import com.topmortar.topmortarsales.view.suratJalan.PreviewClosingActivity
 import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -149,25 +144,19 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import java.util.Timer
-import java.util.TimerTask
 
 
 @Suppress("DEPRECATION")
+@SuppressLint("SetTextI18n")
 class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListener,
     PingUtility.PingResultInterface, SendMessageModal.SendMessageModalInterface {
 
     private lateinit var progressDialog: ProgressDialog
     private lateinit var sessionManager: SessionManager
     private val userKind get() = sessionManager.userKind().toString()
-    //    private val userID = "8"
     private val userID get() = sessionManager.userID().toString()
-    private val username get() = sessionManager.userName().toString()
-    //    private val fulllName = "Ple Courier"
     private val fulllName get() = sessionManager.fullName().toString()
-    private val userCityID get() = sessionManager.userCityID().toString()
     private val userDistributorId get() = sessionManager.userDistributor().toString()
-    private val userCity get() = sessionManager.userCityID().toString()
     private lateinit var binding: ActivityDetailContactBinding
     private var pingUtility: PingUtility? = null
 
@@ -616,11 +605,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         iPaymentMethod = intent.getStringExtra(CONST_PAYMENT_METHOD)
         iTermin = intent.getStringExtra(CONST_TERMIN)
         iReputation = intent.getStringExtra(CONST_REPUTATION)
-//        if (!iStatus.isNullOrEmpty()) {
-            tooltipStatus.visibility = View.VISIBLE
-            if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
-            else btnInvoice.visibility = View.VISIBLE
-//        }
+
+        tooltipStatus.visibility = View.VISIBLE
+        if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
+        else btnInvoice.visibility = View.VISIBLE
+
         iAddress = intent.getStringExtra(CONST_ADDRESS)
         iLocation = intent.getStringExtra(CONST_LOCATION)
         iPromo = intent.getStringExtra(CONST_PROMO)
@@ -630,24 +619,24 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         itemSendMessage = ContactModel(id_contact = iContactId!!, nama = iName!!, nomorhp = iPhone!!, store_owner = iOwner!!, tgl_lahir = iBirthday!!, maps_url = iMapsUrl!!, id_city = iLocation!!)
         setupDialogSendMessage(itemSendMessage)
 
-        if (!iContactId.isNullOrEmpty() ) {
+        if (iContactId.isNotEmpty()) {
             contactId = iContactId
         }
-        if (!iPhone.isNullOrEmpty() ) {
+        if (iPhone.isNotEmpty()) {
             tvPhone.text = "+$iPhone"
             etPhone.setText(iPhone)
         } else {
             tvPhone.text = EMPTY_FIELD_VALUE
             etPhone.setText("")
         }
-        if (!iName.isNullOrEmpty() ) {
+        if (iName.isNotEmpty()) {
             tvName.text = iName
             etName.setText(iName)
         } else {
             tvName.text = EMPTY_FIELD_VALUE
             etName.setText("")
         }
-        if (!iOwner.isNullOrEmpty() ) {
+        if (iOwner.isNotEmpty()) {
             tvOwner.text = iOwner
             etOwner.setText(iOwner)
         } else {
@@ -668,7 +657,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tvPromo.text = EMPTY_FIELD_VALUE
             etPromo.setText("")
         }
-        if (!iBirthday.isNullOrEmpty() ) {
+        if (iBirthday.isNotEmpty()) {
             if (iBirthday == "0000-00-00") {
                 tvBirthday.text = EMPTY_FIELD_VALUE
             } else {
@@ -710,7 +699,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
             if (urlUtility.isLocationEnabled(this)) {
 
-                val urlUtility = URLUtility(this)
                 urlUtility.requestLocationUpdate()
 
             } else {
@@ -807,17 +795,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 etName.requestFocus()
                 etName.setSelection(etName.text.length)
             }
-//            else if (sessionManager.userKind() == USER_KIND_SALES) {
-//                icEdit.visibility = View.GONE
-//                tvMapsContainer.visibility = View.GONE
-//                btnSendMessage.visibility = View.GONE
-//                btnInvoice.visibility = View.GONE
-//
-//                tvTitleBar.text = "Edit Contact"
-//                icClose.visibility = View.VISIBLE
-//                etMapsContainer.visibility = View.VISIBLE
-//                btnSaveEdit.visibility = View.VISIBLE
-//            }
 
         } else {
 
@@ -859,11 +836,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 statusContainer.visibility = View.VISIBLE
                 statusContainer.setBackgroundResource(R.drawable.background_rounded_16)
-//            if (!iStatus.isNullOrEmpty()) {
+
                 tooltipStatus.visibility = View.VISIBLE
                 if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
                 else btnInvoice.visibility = View.VISIBLE
-//            }
 
                 // Status
                 tvStatus.visibility = View.VISIBLE
@@ -893,19 +869,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 etName.clearFocus()
             }
-//            else if (sessionManager.userKind() == USER_KIND_SALES) {
-//                icEdit.visibility = View.VISIBLE
-//                tvMapsContainer.visibility = View.VISIBLE
-//                btnSendMessage.visibility = View.VISIBLE
-//                tooltipStatus.visibility = View.VISIBLE
-//                if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
-//                else btnInvoice.visibility = View.VISIBLE
-//
-//                tvTitleBar.text = "Detail Contact"
-//                icClose.visibility = View.GONE
-//                etMapsContainer.visibility = View.GONE
-//                btnSaveEdit.visibility = View.GONE
-//            }
 
         }
 
@@ -913,7 +876,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun editConfirmation() {
 
-        if (!formValidation("${ etPhone.text }","${ etName.text }", "${ etOwner.text }", "${ etMaps.text }", "${ etLocation.text }", "${ etBirthday.text }", "${ etAddress.text }")) return
+        if (!formValidation("${ etPhone.text }","${ etName.text }")) return
 
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Konfirmasi Perubahan")
@@ -935,12 +898,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         var pBirthday = "${ etBirthday.text }"
         val pMapsUrl = "${ etMaps.text }"
         val pAddress = "${ etAddress.text }"
-        val pStatus = if (selectedStatus.isNullOrEmpty()) "" else selectedStatus.substringBefore(" - ").toLowerCase()
+        val pStatus = if (selectedStatus.isEmpty()) "" else selectedStatus.substringBefore(" - ").toLowerCase(Locale.getDefault())
         val pPaymentMethod = when (selectedPaymentMethod) {
             paymentMethodItem[1] -> PAYMENT_TRANSFER
             else -> PAYMENT_TUNAI
         }
-        val pTermin = if (selectedTermin.isNullOrEmpty()) "-1" else {
+        val pTermin = if (selectedTermin.isEmpty()) "-1" else {
             when (selectedTermin) {
                 terminItem[1] -> STATUS_TERMIN_COD
                 terminItem[2] -> STATUS_TERMIN_COD_TF
@@ -951,7 +914,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 else -> "-1"
             }
         }
-        val pReputation = if (selectedReputation.isNullOrEmpty()) "-1" else {
+        val pReputation = if (selectedReputation.isEmpty()) "-1" else {
             when (selectedReputation) {
                 reputationItem[1] -> "good"
                 reputationItem[2] -> "bad"
@@ -982,7 +945,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         loadingState(true)
         progressDialog.show()
 
-//        Handler().postDelayed({
+//        Handler(Looper.getMainLooper()).postDelayed({
 //            handleMessage(this, "TAG SAVE", "${contactId!!}, ${formatPhoneNumber(pPhone)}, $pName, $pOwner, $pBirthday, $pMapsUrl, ${pCityID!!}, $pAddress, $pStatus, $imagePart, $pTermin, $pReputation, $pPromoID")
 //            loadingState(false)
 //        }, 1000)
@@ -1072,18 +1035,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 else tvPromo.text = EMPTY_FIELD_VALUE
                             } else tvPromo.text = EMPTY_FIELD_VALUE
 
-                            iStatus = if (!pStatus.isNullOrEmpty()) pStatus else null
-                            iReputation = if (!pReputation.isNullOrEmpty()) pReputation else null
-////                            if (!iStatus.isNullOrEmpty()) {
-//                                if (iStatus == STATUS_CONTACT_BLACKL) {
-//                                    btnInvoice.visibility = View.GONE
-//                                } else btnInvoice.visibility = View.VISIBLE
-////                            }
-//                            setupStatus(iStatus)
+                            iStatus = pStatus.ifEmpty { null }
+                            iReputation = pReputation.ifEmpty { null }
 
-                            iPaymentMethod = if (!pPaymentMethod.isNullOrEmpty()) pPaymentMethod else null
-                            iTermin = if (!pTermin.isNullOrEmpty()) pTermin else null
-//                            setupTermin(iTermin)
+                            iPaymentMethod = pPaymentMethod.ifEmpty { null }
+                            iTermin = pTermin.ifEmpty { null }
 
                             // Remove image temp
                             currentPhotoUri?.let {
@@ -1155,7 +1111,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             val data = responseBody.results[0]
 
                             if (withToggleEdit) {
-                                if (!data.ktp_owner.isNullOrEmpty()) {
+                                if (data.ktp_owner.isNotEmpty()) {
                                     tvKtp.text = "Tekan untuk menampilkan KTP"
                                     iKtp = data.ktp_owner
                                 }
@@ -1271,7 +1227,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     }
 
-    private fun formValidation(phone: String, name: String, owner: String = "", mapsUrl: String = "", location: String = "", birthday: String = "", address: String = ""): Boolean {
+    private fun formValidation(phone: String, name: String): Boolean {
         return if (name.isEmpty()) {
             etName.error = "Nama wajib diisi!"
             etName.requestFocus()
@@ -1283,42 +1239,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         } else if (!PhoneHandler.phoneValidation(phone, etPhone)) {
             etPhone.requestFocus()
             false
-//        } else if (mapsUrl.isNotEmpty() && !isValidUrl(mapsUrl)) {
-//            etMaps.error = "Please enter a valid URL!"
-//            etMaps.requestFocus()
-//            false
-//        } else if (owner.isEmpty()) {
-//            etName.error = null
-//            etName.clearFocus()
-//            etOwner.error = "Owner name cannot be empty!"
-//            etOwner.requestFocus()
-//            false
-//        } else if (mapsUrl.isEmpty()) {
-//            etOwner.error = null
-//            etOwner.clearFocus()
-//            etMaps.error = "Maps url cannot be empty!"
-//            etMaps.requestFocus()
-//            false
-//        } else if (location.isEmpty() || location == EMPTY_FIELD_VALUE) {
-//            etMaps.error = null
-//            etMaps.requestFocus()
-//            etLocation.error = "Choose customer city!"
-//            etLocation.requestFocus()
-//            handleMessage(this, "ERROR EDIT CONTACT", "Choose customer city!")
-//            false
-//        } else if (birthday.isEmpty() || birthday == EMPTY_FIELD_VALUE) {
-//            etLocation.error = null
-//            etLocation.clearFocus()
-//            etBirthday.error = "Choose owner birthday!"
-//            etBirthday.requestFocus()
-//            handleMessage(this, "ERROR EDIT CONTACT", "Choose owner birthday!")
-//            false
-//        } else if (address.isEmpty()) {
-//            etBirthday.error = null
-//            etBirthday.clearFocus()
-//            etAddress.error = "Address cannot be empty!"
-//            etAddress.requestFocus()
-//            false
         } else {
             etName.error = null
             etName.clearFocus()
@@ -1355,38 +1275,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     }
 
-    private fun navigateAddNewRoom() {
-
-        val intent = Intent(this@DetailContactActivity, NewRoomChatFormActivity::class.java)
-
-        intent.putExtra(CONST_CONTACT_ID, contactId)
-        if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
-        else intent.putExtra(CONST_NAME, tvName.text)
-
-        // Remove "+" on text phone
-        val trimmedInput = tvPhone.text.trim()
-        if (trimmedInput.startsWith("+")) intent.putExtra(CONST_PHONE, trimmedInput.substring(1))
-
-        if (tvOwner.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_OWNER, "")
-        else intent.putExtra(CONST_OWNER, tvOwner.text)
-
-        if (tvBirthday.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_BIRTHDAY, "0000-00-00")
-        else intent.putExtra(CONST_BIRTHDAY, DateFormat.format("${ tvBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd"))
-        intent.putExtra(ACTIVITY_REQUEST_CODE, DETAIL_ACTIVITY_REQUEST_CODE)
-
-        if (tvLocation.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_LOCATION, "")
-        else intent.putExtra(CONST_LOCATION, selectedCity!!.id)
-
-        if (tvPromo.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_PROMO, "")
-        else intent.putExtra(CONST_PROMO, selectedPromo!!.id)
-
-        if (iMapsUrl == EMPTY_FIELD_VALUE) intent.putExtra(CONST_MAPS, "")
-        else intent.putExtra(CONST_MAPS, iMapsUrl)
-
-        startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
-
-    }
-
     private fun navigateToDetailInvoice() {
 
         if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_MARKETING) {
@@ -1400,7 +1288,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
 
         } else {
-            val bottomSheetLayout = layoutInflater.inflate(R.layout.fragment_bottom_sheet_detail_contact, null)
+            val parentLayout: ViewGroup = findViewById(R.id.detail_contact_activity) // Ganti dengan ID yang sesuai dari layout Anda
+            val bottomSheetLayout = layoutInflater.inflate(R.layout.fragment_bottom_sheet_detail_contact, parentLayout, false)
 
             val invoiceOption = bottomSheetLayout.findViewById<LinearLayout>(R.id.invoiceOption)
             val reportOption = bottomSheetLayout.findViewById<LinearLayout>(R.id.reportOption)
@@ -1478,15 +1367,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
         }
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             bottomSheetDialog.dismiss()
         }, 500)
 
-    }
-
-    // Helper function to show a toast message
-    private fun showToast(message: String) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
     }
 
     private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
@@ -1668,15 +1552,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                         for (i in 0 until results.size) {
                             val data = results[i]
-                            items.add(ModalSearchModel(data.id_promo, "${data.nama_promo}"))
+                            items.add(ModalSearchModel(data.id_promo, data.nama_promo))
                         }
 
                         setupDialogSearchPromo(items)
 
                         val foundItem = results.find { it.id_promo == iPromo }
                         if (foundItem != null) {
-                            tvPromo.text = "${foundItem.nama_promo}"
-                            etPromo.setText("${foundItem.nama_promo}")
+                            tvPromo.text = foundItem.nama_promo
+                            etPromo.setText(foundItem.nama_promo)
                             selectedPromo = ModalSearchModel(foundItem.id_promo, foundItem.nama_promo)
                         } else {
                             tvPromo.text = EMPTY_FIELD_VALUE
@@ -1725,7 +1609,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             overlayMaps.visibility = View.VISIBLE
             overlayMaps.startAnimation(fadeIn)
 
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 overlayMaps.alpha = 0f
                 overlayMaps.visibility = View.GONE
 
@@ -1766,31 +1650,31 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         tooltipStatus.visibility = View.VISIBLE
         when (status) {
             STATUS_CONTACT_DATA -> {
-                tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_data))
+                tooltipStatus.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_data))
                 tooltipHandler(tooltipStatus, "Customer Status is Data")
                 tvStatus.text = statusItem[1]
                 spinStatus.setSelection(1)
             }
             STATUS_CONTACT_PASSIVE -> {
-                tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_passive))
+                tooltipStatus.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_passive))
                 tooltipHandler(tooltipStatus, "Customer Status is Passive")
                 tvStatus.text = statusItem[2]
                 spinStatus.setSelection(2)
             }
             STATUS_CONTACT_ACTIVE -> {
-                tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_active))
+                tooltipStatus.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_active))
                 tooltipHandler(tooltipStatus, "Customer Status is Active")
                 tvStatus.text = statusItem[3]
                 spinStatus.setSelection(3)
             }
             STATUS_CONTACT_BLACKLIST -> {
-                tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_blacklist))
+                tooltipStatus.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_blacklist))
                 tooltipHandler(tooltipStatus, "Customer Status is Blacklist")
                 tvStatus.text = statusItem[4]
                 spinStatus.setSelection(4)
             }
             STATUS_CONTACT_BID -> {
-                tooltipStatus.setImageDrawable(getDrawable(R.drawable.status_bid))
+                tooltipStatus.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_bid))
                 tooltipHandler(tooltipStatus, "Customer Status is Bargained")
                 tvStatus.text = statusItem[5]
                 spinStatus.setSelection(5)
@@ -1960,26 +1844,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         setupReputation(iReputation)
     }
 
-    private fun setupNetworkIndicator() {
-        val indicatorImageView = findViewById<View>(R.id.indicatorView)
-        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_SALES) {
-            val layoutParams = indicatorImageView.layoutParams as ViewGroup.MarginLayoutParams
-            layoutParams.marginEnd = 0
-            layoutParams.marginStart = 16
-        }
-        val pingIntervalMillis = 1000L // milidetik
-
-        val pingTimer = Timer()
-        pingTimer.scheduleAtFixedRate(object : TimerTask() {
-            override fun run() {
-                val pingTask = PingUtility(indicatorImageView)
-                pingTask.setInterface(this@DetailContactActivity)
-                pingTask.execute()
-            }
-        }, 0, pingIntervalMillis)
-
-    }
-
     private fun chooseFile() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
@@ -2011,17 +1875,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
     }
 
-    private fun navigateToPreviewKtp() {
-        val uriList = ArrayList<Uri>()
-        selectedUri?.let { uriList.add(it) }
-
-        val intent = Intent(this, PreviewClosingActivity::class.java)
-        intent.putExtra(CONST_CONTACT_ID, contactId)
-        intent.putParcelableArrayListExtra(CONST_URI, uriList)
-        startActivityForResult(intent, IMG_PREVIEW_STATE)
-
-    }
-
     @SuppressLint("Range")
     private fun getFileNameFromUri(uri: Uri): String? {
         var fileName: String? = null
@@ -2035,6 +1888,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         return fileName
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -2056,6 +1910,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
 //      return super.onBackPressed()
         backHandler()
@@ -2097,34 +1952,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     override fun onSubmitMessage(status: Boolean) {
         getDetailContact(false)
         setupDialogSendMessage(itemSendMessage)
-    }
-
-    private fun showMoreOption() {
-        val titleBar = findViewById<ImageView>(R.id.ic_edit)
-        val popupMenu = PopupMenu(this, titleBar, Gravity.END)
-        popupMenu.menuInflater.inflate(R.menu.option_detail_contact, popupMenu.menu)
-
-        popupMenu.setOnMenuItemClickListener { item: MenuItem? ->
-            when (item?.itemId) {
-                R.id.option_edit -> {
-                    toggleEdit(true)
-                    return@setOnMenuItemClickListener  true
-                }
-                R.id.option_voucher -> {
-                    showFormVoucherModal()
-                    return@setOnMenuItemClickListener  true
-                }
-                else -> return@setOnMenuItemClickListener false
-            }
-        }
-
-        popupMenu.show()
-    }
-
-    private fun showFormVoucherModal() {
-        val modal = AddVoucherModal(this, lifecycleScope)
-        modal.setVoucherId(contactId.toString())
-        modal.show()
     }
 
     private fun setupDelivery() {
@@ -2210,7 +2037,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             val btnDelivery = binding.btnDeliveryTitle
             btnDelivery.text = getString(R.string.txt_loading)
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 fusedLocationClient.lastLocation
                     .addOnSuccessListener { currentLatLng: Location ->
 
@@ -2365,7 +2192,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     override fun onStart() {
         super.onStart()
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
         }, 1000)
     }

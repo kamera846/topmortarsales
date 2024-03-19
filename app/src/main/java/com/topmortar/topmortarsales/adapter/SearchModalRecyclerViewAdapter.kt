@@ -2,6 +2,7 @@ package com.topmortar.topmortarsales.adapter
 
 import android.content.Context
 import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -57,7 +58,7 @@ class SearchModalRecyclerViewAdapter(private val items: ArrayList<ModalSearchMod
                 overlayView.visibility = View.VISIBLE
                 overlayView.startAnimation(fadeIn)
 
-                Handler().postDelayed({
+                Handler(Looper.getMainLooper()).postDelayed({
                     overlayView.alpha = 0f
                     overlayView.visibility = View.GONE
                     val data = filteredItemList[position]

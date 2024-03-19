@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.view.View
 import androidx.appcompat.app.AlertDialog
@@ -397,7 +398,7 @@ class AddBaseCampActivity : AppCompatActivity() {
         loadingState.setMessage(getString(R.string.txt_deleting))
         loadingState.show()
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             handleMessage(this@AddBaseCampActivity, TAG_RESPONSE_MESSAGE, "Berhasil menghapus")
 
             val resultIntent = Intent()

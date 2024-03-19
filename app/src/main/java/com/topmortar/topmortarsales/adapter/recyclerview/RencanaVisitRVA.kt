@@ -1,8 +1,8 @@
 package com.topmortar.topmortarsales.adapter.recyclerview
 
 import android.content.Context
-import android.os.Build
 import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +10,6 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.appcompat.widget.TooltipCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.utils.DateFormat
@@ -33,8 +32,8 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
         private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
         val checkListImage: ImageView = itemView.findViewById(R.id.checklist)
-        val imgProfile: ImageView = itemView.findViewById(R.id.iv_contact_profile)
-        val textVerified: TextView = itemView.findViewById(R.id.textVerified)
+        private val imgProfile: ImageView = itemView.findViewById(R.id.iv_contact_profile)
+        private val textVerified: TextView = itemView.findViewById(R.id.textVerified)
 
         fun bind(item: RencanaVisitModel) {
 
@@ -102,7 +101,7 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
             overlayView.visibility = View.VISIBLE
             overlayView.startAnimation(fadeIn)
 
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 overlayView.alpha = 0f
                 overlayView.visibility = View.GONE
             }, animateDuration)

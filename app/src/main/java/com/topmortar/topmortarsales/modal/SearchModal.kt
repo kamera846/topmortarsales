@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.DisplayMetrics
@@ -56,14 +57,14 @@ class SearchModal(private val context: Context, private val listItem: ArrayList<
     fun isLoading(value: Boolean) {
         isLoading = value
         loadingListener?.invoke(value)
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             isLoadingHandler()
         }, 100)
     }
 
     fun setSearchKey(value: String) {
         searchKeyListener?.invoke(value)
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             etSearch.setText(value)
             etSearch.setSelection(value.length)
             etSearch.requestFocus()

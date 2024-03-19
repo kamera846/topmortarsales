@@ -20,6 +20,7 @@ import android.os.Build
 import android.os.Build.VERSION
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.print.PrintAttributes
 import android.print.PrintManager
 import android.provider.MediaStore
@@ -880,7 +881,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
             "[L]\n"
         )
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             printingState(false)
         }, 1000)
     }
@@ -1172,7 +1173,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
         }, 1000)
     }

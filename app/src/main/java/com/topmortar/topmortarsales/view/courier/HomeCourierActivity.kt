@@ -1,6 +1,9 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.view.courier
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -15,11 +18,12 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.util.Log
 import android.view.View
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
@@ -71,6 +75,7 @@ import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
+@SuppressLint("SetTextI18n")
 class HomeCourierActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityHomeCourierBinding
@@ -78,7 +83,6 @@ class HomeCourierActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
     private val userId get() = sessionManager.userID()
-    private val userCity get() = sessionManager.userCityID()
     private val userName get() = sessionManager.userName()
     private val userFullName get() = sessionManager.fullName()
     private val userDistributorId get() = sessionManager.userDistributor()
@@ -184,8 +188,8 @@ class HomeCourierActivity : AppCompatActivity() {
         binding.contactAdminItem.setOnClickListener { navigateToContactAdmin() }
 
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.selectedBasecampContainer.componentFilter.background = getDrawable(R.color.black_400)
-        else binding.selectedBasecampContainer.componentFilter.background = getDrawable(R.color.light)
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.selectedBasecampContainer.componentFilter.background = AppCompatResources.getDrawable(this, R.color.black_400)
+        else binding.selectedBasecampContainer.componentFilter.background = AppCompatResources.getDrawable(this, R.color.light)
         binding.selectedBasecampContainer.componentFilter.setOnClickListener {
             isSelectBasecampOnly = true
             if (listBasecamp.isEmpty()) getListBasecamp()
@@ -285,8 +289,10 @@ class HomeCourierActivity : AppCompatActivity() {
                             if (DateFormat.dateAfterNow(absentMorningDate)) {
                                 isAbsentMorningNow = false
                                 lockMenuItem(true)
+                                Log.d("ABSENT COURIER", "Belum absen pagi")
                             } else {
 
+                                Log.d("ABSENT COURIER", "Sudah absen pagi")
                                 isAbsentMorningNow = true
                                 if (snapshot.child("eveningDateTime").exists()) {
                                     val eveningDateTime = snapshot.child("eveningDateTime").getValue(String::class.java).toString()
@@ -302,11 +308,13 @@ class HomeCourierActivity : AppCompatActivity() {
                                                 serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
                                                 this@HomeCourierActivity.startService(serviceIntent)
                                             }
+                                            Log.d("ABSENT COURIER", "Belum absen sore")
                                             isAbsentEveningNow = false
                                             lockMenuItem(false)
                                         } else {
                                             val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
                                             this@HomeCourierActivity.stopService(serviceIntent)
+                                            Log.d("ABSENT COURIER", "Sudah absen sore")
                                             isAbsentEveningNow = true
                                             lockMenuItem(true)
                                         }
@@ -319,6 +327,7 @@ class HomeCourierActivity : AppCompatActivity() {
                                             serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
                                             this@HomeCourierActivity.startService(serviceIntent)
                                         }
+                                        Log.d("ABSENT COURIER", "Tgl absen sore tidak ada")
                                         isAbsentEveningNow = false
                                         lockMenuItem(false)
                                     }
@@ -330,6 +339,7 @@ class HomeCourierActivity : AppCompatActivity() {
                                         serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
                                         this@HomeCourierActivity.startService(serviceIntent)
                                     }
+                                    Log.d("ABSENT COURIER", "Kolom absen sore tidak ada")
                                     isAbsentEveningNow = false
                                     lockMenuItem(false)
                                 }
@@ -337,14 +347,17 @@ class HomeCourierActivity : AppCompatActivity() {
                             }
 
                         } else {
+                            Log.d("ABSENT COURIER", "Tgl absen pagi tidak ada")
                             isAbsentMorningNow = false
                             lockMenuItem(true)
                         }
                     } else {
+                        Log.d("ABSENT COURIER", "Kolom absen pagi tidak ada")
                         isAbsentMorningNow = false
                         lockMenuItem(true)
                     }
                 } else {
+                    Log.d("ABSENT COURIER", "Snapshot tidak ada")
                     isAbsentMorningNow = false
                     lockMenuItem(true)
                 }
@@ -395,7 +408,7 @@ class HomeCourierActivity : AppCompatActivity() {
 
                 urlUtility.requestLocationUpdate()
 
-                if (!urlUtility.isUrl(mapsUrl) && !mapsUrl.isNullOrEmpty()) {
+                if (!urlUtility.isUrl(mapsUrl) && mapsUrl.isNotEmpty()) {
                     fusedLocationClient.lastLocation.addOnSuccessListener { location: Location ->
 
                         // Courier Location
@@ -410,7 +423,6 @@ class HomeCourierActivity : AppCompatActivity() {
                         if (latitude != null && longitude != null) {
 
                             // Calculate Distance
-                            val urlUtility = URLUtility(this)
                             val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
                             val shortDistance = "%.3f".format(distance)
 
@@ -540,7 +552,7 @@ class HomeCourierActivity : AppCompatActivity() {
         progressDialog.setMessage("Memuat data toko…")
         progressDialog.show()
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
 
             lifecycleScope.launch {
                 try {
@@ -621,7 +633,7 @@ class HomeCourierActivity : AppCompatActivity() {
         progressDialog.setMessage("Memuat data basecamp…")
         progressDialog.show()
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
 
             lifecycleScope.launch {
                 try {
@@ -904,7 +916,7 @@ class HomeCourierActivity : AppCompatActivity() {
 
     private fun navigateChatAdmin() {
         val distributorNumber = sessionManager.userDistributorNumber()!!
-        val phoneNumber = if (distributorNumber.isNotEmpty()) distributorNumber else getString(R.string.topmortar_wa_number)
+        val phoneNumber = distributorNumber.ifEmpty { getString(R.string.topmortar_wa_number) }
         val message = "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada basecamp *${ selectedBasecamp?.title }*"
 
         val intent = Intent(Intent.ACTION_VIEW)
@@ -952,11 +964,13 @@ class HomeCourierActivity : AppCompatActivity() {
                     .setTitle(title)
                     .setMessage(message)
                     .setPositiveButton(getString(R.string.open_settings)) { localDialog, _ ->
-                        ActivityCompat.requestPermissions(
-                            this,
-                            arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
-                            BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE
-                        )
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            ActivityCompat.requestPermissions(
+                                this,
+                                arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                                BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE
+                            )
+                        }
                         localDialog.dismiss()
                     }
                     .show()
@@ -964,6 +978,7 @@ class HomeCourierActivity : AppCompatActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
@@ -971,6 +986,7 @@ class HomeCourierActivity : AppCompatActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (doubleBackToExitPressedOnce) {
             super.onBackPressed()
@@ -985,20 +1001,10 @@ class HomeCourierActivity : AppCompatActivity() {
         }, 2000)
     }
 
-    override fun onResume() {
-        super.onResume()
-//        CustomUtility(this).setUserStatusOnline(true, userDistributorId.toString(), userId.toString())
-    }
-
-    override fun onPause() {
-        super.onPause()
-//        CustomUtility(this).setUserStatusOnline(false, userDistributorId.toString(), userId.toString())
-    }
-
     override fun onStart() {
         super.onStart()
         checkAbsent()
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             CustomUtility(this).setUserStatusOnline(true, userDistributorId.toString(), userId.toString())
         }, 1000)
     }

@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.view.tukang
 
 import android.annotation.SuppressLint
@@ -131,7 +133,6 @@ class BrandAmbassadorActivity : AppCompatActivity() {
         val popupMenu = PopupMenu(this@BrandAmbassadorActivity, view)
         popupMenu.inflate(R.menu.option_main_menu)
 
-        val optionSyncNow = popupMenu.menu.findItem(R.id.option_sync_now)
         val optionMyProfile = popupMenu.menu.findItem(R.id.option_my_profile)
         val optionNearestStore = popupMenu.menu.findItem(R.id.nearest_store)
         val optionSearch = popupMenu.menu.findItem(R.id.option_search)
@@ -141,10 +142,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
         val optionBasecamp = popupMenu.menu.findItem(R.id.option_basecamp)
         val optionlogout = popupMenu.menu.findItem(R.id.option_logout)
 
-//        optionSyncNow.isVisible = false
         optionMyProfile.isVisible = true
-//        optionNearestStore.isVisible = true
-//        optionNearestStore.isVisible = activeTab == 0
         if (activeTab == 0) {
             optionNearestStore.isVisible = false
             optionNearestStore.title = "Cari Tukang Terdekat"
@@ -194,7 +192,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
         progressDialog.setMessage("Memuat data tukang…")
         progressDialog.show()
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
 
             lifecycleScope.launch {
                 try {
@@ -270,7 +268,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
         progressDialog.setMessage("Memuat data basecamp…")
         progressDialog.show()
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
 
             lifecycleScope.launch {
                 try {
@@ -440,6 +438,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
         _binding = null
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (activeTab != 0) tabLayout.getTabAt(0)?.select()
         else {

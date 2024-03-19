@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.view.user
 
 import android.annotation.SuppressLint
@@ -6,21 +8,16 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.View
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
-import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.BarData
-import com.github.mikephil.charting.data.BarDataSet
-import com.github.mikephil.charting.data.BarEntry
-import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.google.android.material.tabs.TabLayout
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -60,7 +57,6 @@ import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
-import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
@@ -86,6 +82,7 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import java.util.Calendar
 
+@SuppressLint("SetTextI18n")
 class UserProfileActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
@@ -99,7 +96,6 @@ class UserProfileActivity : AppCompatActivity() {
     private var iUserID: String? = null; private var iPhone: String? = null; private var iLocation: String? = null
     private var iIsNotify: String? = null
 
-    private val bidLimit get() = sessionManager.userBidLimit().toString()
     private var isRequestSync = false
 
     private lateinit var firebaseReference: DatabaseReference
@@ -319,114 +315,6 @@ class UserProfileActivity : AppCompatActivity() {
 
     }
 
-    private fun setupBarChart() {
-        lifecycleScope.launch {
-            try {
-
-                val apiService: ApiService = HttpClient.create()
-                val response = when (sessionManager.userKind()) {
-                    USER_KIND_ADMIN -> apiService.getStoreCount()
-                    else -> apiService.getStoreCount(sessionManager.userCityID().toString())
-                }
-
-                when (response.status) {
-                    RESPONSE_STATUS_OK -> {
-
-                        val dataList = response.results
-
-                        binding.barChartContainer.visibility = View.GONE
-                        val barChart = binding.storeBarChart
-
-                        // Create some sample data
-                        val entries = ArrayList<BarEntry>()
-                        val labels = arrayOf<String>()
-
-                        for ((i, item) in dataList.listIterator().withIndex()) {
-                            entries.add(BarEntry(i.toFloat(), item.jml_store.toFloat()))
-                            labels.plus(item.store_status)
-                        }
-
-//                        entries.add(BarEntry(0f, 100f))
-//                        entries.add(BarEntry(1f, 150f))
-//                        entries.add(BarEntry(2f, 80f))
-//                        entries.add(BarEntry(3f, 120f))
-//                        entries.add(BarEntry(4f, 60f))
-//                        entries.add(BarEntry(5f, 90f))
-
-                        // Access the custom colors from resources
-                        val colorActive = ContextCompat.getColor(this@UserProfileActivity, R.color.status_active)
-                        val colorPassive = ContextCompat.getColor(this@UserProfileActivity, R.color.status_passive)
-                        val colorData = ContextCompat.getColor(this@UserProfileActivity, R.color.status_data)
-                        val colorBid = ContextCompat.getColor(this@UserProfileActivity, R.color.status_bid)
-                        val colorBlack = ContextCompat.getColor(this@UserProfileActivity, R.color.black_200)
-                        val colorBlackList = ContextCompat.getColor(this@UserProfileActivity, R.color.status_blacklist)
-
-                        // Create a list of custom colors
-                        val customColors = listOf(
-                            colorActive,
-                            colorBid,
-                            colorBlackList,
-                            colorPassive,
-//                            colorData,
-//                            colorBlack
-                        )
-
-                        val dataSet = BarDataSet(entries, "")
-                        dataSet.colors = customColors
-
-                        val textColorResId = if (customUtility.isDarkMode()) R.color.white else R.color.black_200
-                        val textColor = ContextCompat.getColor(this@UserProfileActivity, textColorResId)
-
-                        // Customize the x-axis labels (optional)
-                        val xAxis = barChart.xAxis
-                        val yAxisLeft = barChart.axisLeft
-                        val yAxisRight = barChart.axisRight
-//                        val labels = arrayOf("Active", "Passive", "Data", "Bid", "Not Set", "Blacklist")
-
-                        xAxis.valueFormatter = IndexAxisValueFormatter(labels)
-                        xAxis.position = XAxis.XAxisPosition.BOTTOM
-                        xAxis.setDrawGridLines(false)
-                        xAxis.setDrawAxisLine(true)
-                        xAxis.granularity = 1f
-
-                        xAxis.textColor = textColor
-                        yAxisLeft.textColor = textColor
-                        yAxisRight.textColor = textColor
-                        dataSet.valueTextColor = textColor
-
-                        val data = BarData(dataSet)
-                        barChart.data = data
-
-                        // Customize the chart (optional)
-                        barChart.setFitBars(true)
-                        barChart.description.isEnabled = false
-                        barChart.animateY(1000)
-
-                        toggleBarChart()
-
-                    }
-                    RESPONSE_STATUS_EMPTY -> {
-
-                        handleMessage(this@UserProfileActivity, TAG_RESPONSE_CONTACT, "Belum ada statistik toko.")
-
-                    }
-                    else -> {
-
-                        handleMessage(this@UserProfileActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
-
-                    }
-                }
-
-
-            } catch (e: Exception) {
-
-                handleMessage(this@UserProfileActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
-
-            }
-
-        }
-    }
-
     private fun toggleBarChart() {
         val barChart = binding.storeBarChart
         val title = binding.tvToggleBarChart
@@ -435,11 +323,11 @@ class UserProfileActivity : AppCompatActivity() {
         if (barChart.isVisible) {
             barChart.visibility = View.GONE
             title.text = "Statistik Toko di Kota Malang (tampilkan)"
-            icon.setImageDrawable(getDrawable(R.drawable.chevron_down_solid))
+            icon.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.chevron_down_solid))
         } else {
             barChart.visibility = View.VISIBLE
             title.text = "Statistik Toko di Kota Malang (sembunyikan)"
-            icon.setImageDrawable(getDrawable(R.drawable.chevron_up_solid))
+            icon.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.chevron_up_solid))
         }
     }
 
@@ -448,6 +336,7 @@ class UserProfileActivity : AppCompatActivity() {
         navigateDetailContact(event.data)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -529,7 +418,7 @@ class UserProfileActivity : AppCompatActivity() {
             this.stopService(serviceIntent)
         }
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             sessionManager.setLoggedIn(LOGGED_OUT)
             sessionManager.setUserLoggedIn(null)
 
@@ -661,7 +550,7 @@ class UserProfileActivity : AppCompatActivity() {
         binding.btnCourierTracking.setOnClickListener { navigateTrackingCourier() }
     }
 
-    private fun lockBtnLogout(state: Boolean) {
+    private fun lockBtnLogout() {
         val calendar = Calendar.getInstance()
         val currentHour = calendar.get(Calendar.HOUR_OF_DAY) // Mengambil jam saat ini dalam format 24 jam
 
@@ -693,7 +582,7 @@ class UserProfileActivity : AppCompatActivity() {
 
                             if (DateFormat.dateAfterNow(absentMorningDate)) {
                                 isAbsentMorningNow = false
-                                lockBtnLogout(true)
+                                lockBtnLogout()
                             } else {
 
                                 isAbsentMorningNow = true
@@ -705,34 +594,34 @@ class UserProfileActivity : AppCompatActivity() {
 
                                         if (DateFormat.dateAfterNow(absentEveningDate)) {
                                             isAbsentEveningNow = false
-                                            lockBtnLogout(false)
+                                            lockBtnLogout()
                                         } else {
                                             isAbsentEveningNow = true
-                                            lockBtnLogout(true)
+                                            lockBtnLogout()
                                         }
 
                                     } else {
                                         isAbsentEveningNow = false
-                                        lockBtnLogout(false)
+                                        lockBtnLogout()
                                     }
                                 } else {
                                     isAbsentEveningNow = false
-                                    lockBtnLogout(false)
+                                    lockBtnLogout()
                                 }
 
                             }
 
                         } else {
                             isAbsentMorningNow = false
-                            lockBtnLogout(true)
+                            lockBtnLogout()
                         }
                     } else {
                         isAbsentMorningNow = false
-                        lockBtnLogout(true)
+                        lockBtnLogout()
                     }
                 } else {
                     isAbsentMorningNow = false
-                    lockBtnLogout(true)
+                    lockBtnLogout()
                 }
             }
 
@@ -740,7 +629,7 @@ class UserProfileActivity : AppCompatActivity() {
                 // Do something
                 isAbsentMorningNow = false
                 isAbsentEveningNow = false
-                lockBtnLogout(true)
+                lockBtnLogout()
             }
 
         })
@@ -748,24 +637,15 @@ class UserProfileActivity : AppCompatActivity() {
 
 // Override Class
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         backHandler()
-    }
-
-    override fun onResume() {
-        super.onResume()
-//        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
-    }
-
-    override fun onPause() {
-        super.onPause()
-//        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
     }
 
     override fun onStart() {
         super.onStart()
         EventBus.getDefault().register(this)
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             if (sessionManager.isLoggedIn()) {
                 if (sessionManager.userKind() == USER_KIND_COURIER) {
                     CustomUtility(this).setUserStatusOnline(

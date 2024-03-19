@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.view
 
 import android.annotation.SuppressLint
@@ -29,6 +31,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -103,7 +106,7 @@ import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-@Suppress("DEPRECATION")
+@SuppressLint("SetTextI18n")
 class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchModalListener {
 
     private lateinit var scaleAnimation: Animation
@@ -126,7 +129,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
     // Global
     private lateinit var sessionManager: SessionManager
     private lateinit var binding: ActivityMainBinding
-    private lateinit var searchModal: SearchModal
     private lateinit var filterModal: FilterTokoModal
     private var selectedCity: ModalSearchModel? = null
     private var doubleBackToExitPressedOnce = false
@@ -215,6 +217,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun initClickHandler() {
 
         btnFab.setOnClickListener { navigateAddNewRoom() }
@@ -258,7 +261,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
     private fun navigateChatAdmin() {
         val distributorNumber = sessionManager.userDistributorNumber()!!
-        val phoneNumber = if (distributorNumber.isNotEmpty()) distributorNumber else getString(R.string.topmortar_wa_number)
+        val phoneNumber = distributorNumber.ifEmpty { getString(R.string.topmortar_wa_number) }
         val message = "*#Courier Service*\nHalo admin, tolong bantu saya [KETIK PESAN ANDA]"
 
         val intent = Intent(Intent.ACTION_VIEW)
@@ -327,7 +330,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         progressDialog.setMessage("Memuat data toko…")
         progressDialog.show()
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
 
             lifecycleScope.launch {
                 try {
@@ -411,14 +414,12 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         val myProfile = popupMenu.menu.findItem(R.id.option_my_profile)
         val cityItem = popupMenu.menu.findItem(R.id.option_city)
         val skillItem = popupMenu.menu.findItem(R.id.option_skill)
-        val nearestStoreItem = popupMenu.menu.findItem(R.id.nearest_store)
         val basecamp = popupMenu.menu.findItem(R.id.option_basecamp)
         val gudang = popupMenu.menu.findItem(R.id.option_gudang)
         val delivery = popupMenu.menu.findItem(R.id.option_delivery)
         val rencanaVisit = popupMenu.menu.findItem(R.id.rencana_visit)
 
         searchItem.isVisible = false
-//        nearestStoreItem.isVisible = false
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
             if (userKind == USER_KIND_ADMIN) {
                 userItem.isVisible = true
@@ -430,8 +431,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 rencanaVisit.isVisible = true
             } else {
                 userItem.isVisible = true
-//                cityItem.isVisible = true
-//                skillItem.isVisible = true
                 basecamp.isVisible = true
                 gudang.isVisible = true
                 delivery.isVisible = true
@@ -552,7 +551,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             llSearchBox.startAnimation(slideInFromLeft)
             llTitleBar.startAnimation(slideOutToRight)
 
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 llTitleBar.visibility = View.GONE
                 etSearchBox.requestFocus()
                 isSearchActive = true
@@ -600,7 +599,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             llTitleBar.startAnimation(slideInFromRight)
             llSearchBox.startAnimation(slideOutToLeft)
 
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 llSearchBox.visibility = View.GONE
                 etSearchBox.clearFocus()
                 isSearchActive = false
@@ -617,7 +616,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 if (icClearSearch.visibility == View.VISIBLE) {
 
                     icClearSearch.startAnimation(fadeOut)
-                    Handler().postDelayed({
+                    Handler(Looper.getMainLooper()).postDelayed({
                         icClearSearch.visibility = View.GONE
                     }, animationDuration)
 
@@ -630,7 +629,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                     etSearchBox.clearFocus()
 
                     icClearSearch.startAnimation(fadeIn)
-                    Handler().postDelayed({
+                    Handler(Looper.getMainLooper()).postDelayed({
                         icClearSearch.visibility = View.VISIBLE
                     }, animationDuration)
 
@@ -761,33 +760,16 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         }
     }
 
-    private fun setupFilterContacts(items: ArrayList<ModalSearchModel> = ArrayList()) {
-
-        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.background = getDrawable(R.color.black_400)
-        else binding.llFilter.background = getDrawable(R.color.light)
-
-        binding.llFilter.visibility = View.VISIBLE
-
-        searchModal = SearchModal(this, items)
-        searchModal.setCustomDialogListener(this)
-        searchModal.searchHint = "Masukkan nama kota…"
-        searchModal.setOnDismissListener {}
-    }
-
     private fun setupFilterTokoModal() {
 
         if (userKind != USER_KIND_COURIER && userKind != USER_KIND_BA) {
             val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-            if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.background = getDrawable(R.color.black_400)
-            else binding.llFilter.background = getDrawable(R.color.light)
+            if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.background = AppCompatResources.getDrawable(this, R.color.black_400)
+            else binding.llFilter.background = AppCompatResources.getDrawable(this, R.color.light)
 
             binding.llFilter.visibility = View.VISIBLE
 
             filterModal = FilterTokoModal(this)
-//        filterModal.setStatuses(selected = selectedStatusID)
-//        filterModal.setVisited(selected = selectedVisitedID)
-//        filterModal.setCities(cities, selected = selectedCitiesID)
             if (userKind == USER_KIND_ADMIN) {
                 filterModal.setStatuses(selected = selectedStatusID)
                 filterModal.setCities(items = cities, selected = selectedCitiesID)
@@ -809,12 +791,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
             })
         }
-    }
-
-    private fun showSearchModal() {
-        val searchKey = if (selectedCity != null) selectedCity!!.title!! else ""
-        if (searchKey.isNotEmpty()) searchModal.setSearchKey(searchKey)
-        searchModal.show()
     }
 
     private fun showFilterModal() {
@@ -1028,6 +1004,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         finish()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -1045,6 +1022,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (isSearchActive) toggleSearchEvent(SEARCH_CLOSE)
         else {

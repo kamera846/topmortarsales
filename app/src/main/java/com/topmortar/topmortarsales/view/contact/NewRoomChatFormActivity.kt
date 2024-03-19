@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
@@ -124,7 +125,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         etMessageListener()
         checkLocationPermission()
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             isLoaded = true
             isCitiesLoaded = true
 //            setSpinnerTermin()
@@ -155,7 +156,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
         loadingState(true)
 
-//        Handler().postDelayed({
+//        Handler(Looper.getMainLooper()).postDelayed({
 //            handleMessage(this, "SEND MESSAGE", "$phone : $name : $owner : $birthday : $cityId : $mapsUrl : $userId : $currentName : $termin : $message")
 //            loadingState(false)
 //        }, 1000)
