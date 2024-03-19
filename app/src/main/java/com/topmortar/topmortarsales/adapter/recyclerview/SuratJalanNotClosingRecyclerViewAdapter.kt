@@ -1,5 +1,6 @@
 package com.topmortar.topmortarsales.adapter.recyclerview
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.model.SuratJalanNotClosingModel
 
+@SuppressLint("SetTextI18n")
 class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<SuratJalanNotClosingModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<SuratJalanNotClosingRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
 
@@ -27,7 +29,7 @@ class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<S
         private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
         val checkListImage: ImageView = itemView.findViewById(R.id.checklist)
-        val icPhone: ImageView = itemView.findViewById(R.id.icPhoneNumber)
+        private val icPhone: ImageView = itemView.findViewById(R.id.icPhoneNumber)
 
         fun bind(item: SuratJalanNotClosingModel) {
             val dateProcessed = item.dateProcessed

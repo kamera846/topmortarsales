@@ -1,5 +1,6 @@
 package com.topmortar.topmortarsales.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -21,6 +22,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
+@SuppressLint("SetTextI18n")
 class InvoiceRecyclerViewAdapter(private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<InvoiceRecyclerViewAdapter.ViewHolder>() {
     private var listItem: ArrayList<InvoiceModel> = ArrayList()
     private var context: Context? = null
@@ -99,27 +101,24 @@ class InvoiceRecyclerViewAdapter(private val itemClickListener: ItemClickListene
 
         holder.itemView.setOnClickListener {
 
-            if (position != RecyclerView.NO_POSITION) {
-                val animateDuration = 200L
+            val animateDuration = 200L
 
-                val fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in)
-                fadeIn.duration = animateDuration
+            val fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in)
+            fadeIn.duration = animateDuration
 
-                val overlayView = holder.itemView.findViewById<LinearLayout>(R.id.overlay_view)
+            val overlayView = holder.itemView.findViewById<LinearLayout>(R.id.overlay_view)
 
-                overlayView.alpha = 0.7f
-                overlayView.visibility = View.VISIBLE
-                overlayView.startAnimation(fadeIn)
+            overlayView.alpha = 0.7f
+            overlayView.visibility = View.VISIBLE
+            overlayView.startAnimation(fadeIn)
 
-                Handler(Looper.getMainLooper()).postDelayed({
-                    overlayView.alpha = 0f
-                    overlayView.visibility = View.GONE
-                }, animateDuration)
+            Handler(Looper.getMainLooper()).postDelayed({
+                overlayView.alpha = 0f
+                overlayView.visibility = View.GONE
+            }, animateDuration)
 
-                val data = listItem[position]
-                itemClickListener.onItemInvoiceClick(data)
-
-            }
+            val data = listItem[position]
+            itemClickListener.onItemInvoiceClick(data)
 
         }
 

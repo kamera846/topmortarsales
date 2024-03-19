@@ -42,7 +42,7 @@ object DateFormat {
 
         // Reset waktu pada targetDate menjadi 00:00:00 untuk membandingkan hanya tanggal
         val calendarNow = Calendar.getInstance()
-        calendarNow.time = targetDate
+        calendarNow.time = targetDate!!
         calendarNow.set(Calendar.HOUR_OF_DAY, 0)
         calendarNow.set(Calendar.MINUTE, 0)
         calendarNow.set(Calendar.SECOND, 0)

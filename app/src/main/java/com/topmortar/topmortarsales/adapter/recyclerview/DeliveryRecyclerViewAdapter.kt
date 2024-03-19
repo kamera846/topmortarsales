@@ -1,5 +1,6 @@
 package com.topmortar.topmortarsales.adapter.recyclerview
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -7,13 +8,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.model.DeliveryModel
 
+@SuppressLint("SetTextI18n")
 class DeliveryRecyclerViewAdapter(private val chatList: ArrayList<DeliveryModel.Store>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<DeliveryRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
 
@@ -23,7 +24,6 @@ class DeliveryRecyclerViewAdapter(private val chatList: ArrayList<DeliveryModel.
 
     inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        private val imgIcon: ImageView = itemView.findViewById(R.id.iv_contact_profile)
         val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
 

@@ -1,6 +1,9 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.view.contact
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -48,6 +51,7 @@ import com.topmortar.topmortarsales.model.VoucherModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
 
+@SuppressLint("SetTextI18n")
 class VoucherActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityVoucherBinding
@@ -81,7 +85,7 @@ class VoucherActivity : AppCompatActivity() {
         binding.titleBarDark.icBack.setOnClickListener { finish() }
         binding.titleBarDark.tvTitleBar.text = "Daftar Voucher"
         binding.titleBarDark.tvTitleBarDescription.text = "Toko $contactName"
-        binding.titleBarDark.tvTitleBarDescription.visibility = if (!contactName.isNullOrEmpty()) View.VISIBLE else View.GONE
+        binding.titleBarDark.tvTitleBarDescription.visibility = if (contactName.isNotEmpty()) View.VISIBLE else View.GONE
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -214,7 +218,7 @@ class VoucherActivity : AppCompatActivity() {
 
                     urlUtility.requestLocationUpdate()
 
-                    if (!urlUtility.isUrl(mapsUrl) && !mapsUrl.isNullOrEmpty()) {
+                    if (!urlUtility.isUrl(mapsUrl) && mapsUrl.isNotEmpty()) {
                         fusedLocationClient.lastLocation.addOnSuccessListener { location: Location ->
 
                             // Courier Location
@@ -229,7 +233,6 @@ class VoucherActivity : AppCompatActivity() {
                             if (latitude != null && longitude != null) {
 
                                 // Calculate Distance
-                                val urlUtility = URLUtility(this)
                                 val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
                                 shortDistance = "%.3f".format(distance)
 
@@ -294,9 +297,9 @@ class VoucherActivity : AppCompatActivity() {
                         val actionTitle = "Hubungi Sekarang"
                         val customUtility = CustomUtility(this@VoucherActivity)
                         customUtility.showPermissionDeniedSnackbar(message, actionTitle) {
-                            val message = "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada toko *${ contactName }*"
+                            val messageText = "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada toko *${ contactName }*"
                             val distributorNumber = SessionManager(this).userDistributorNumber().toString()
-                            customUtility.navigateChatAdmin(message, distributorNumber)
+                            customUtility.navigateChatAdmin(messageText, distributorNumber)
                         }
                     }
 

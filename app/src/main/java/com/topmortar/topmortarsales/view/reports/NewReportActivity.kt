@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.view.reports
 
 import android.Manifest
@@ -49,6 +51,7 @@ import com.topmortar.topmortarsales.databinding.ActivityNewReportBinding
 import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
 
+@SuppressLint("SetTextI18n")
 class NewReportActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityNewReportBinding
@@ -153,7 +156,7 @@ class NewReportActivity : AppCompatActivity() {
     }
 
     @SuppressLint("MissingPermission")
-    fun calculateDistance(view: View? = null) {
+    fun calculateDistance() {
         progressDialog.show()
 
         Handler(Looper.getMainLooper()).postDelayed({
@@ -167,7 +170,7 @@ class NewReportActivity : AppCompatActivity() {
 
                     urlUtility.requestLocationUpdate()
 
-                    if (!urlUtility.isUrl(mapsUrl) && !mapsUrl.isNullOrEmpty()) {
+                    if (!urlUtility.isUrl(mapsUrl) && mapsUrl.isNotEmpty()) {
                         fusedLocationClient.lastLocation.addOnSuccessListener { location: Location ->
 
                             // Courier Location
@@ -182,7 +185,6 @@ class NewReportActivity : AppCompatActivity() {
                             if (latitude != null && longitude != null) {
 
                                 // Calculate Distance
-                                val urlUtility = URLUtility(this)
                                 val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
                                 val shortDistance = "%.3f".format(distance)
 
@@ -271,7 +273,7 @@ class NewReportActivity : AppCompatActivity() {
 
     private fun navigateChatAdmin() {
         val distributorNumber = sessionManager.userDistributorNumber()!!
-        val phoneNumber = if (distributorNumber.isNotEmpty()) distributorNumber else getString(R.string.topmortar_wa_number)
+        val phoneNumber = distributorNumber.ifEmpty { getString(R.string.topmortar_wa_number) }
         val message = "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada $reportType *${ name }*"
 
         val intent = Intent(Intent.ACTION_VIEW)
@@ -302,7 +304,7 @@ class NewReportActivity : AppCompatActivity() {
 
     private fun formValidation(): Boolean {
         val etMessage = binding.etMessage
-        if (coordinate.isNullOrEmpty()) {
+        if (coordinate.isEmpty()) {
             val message = "Jarak anda belum terhitung!"
             customUtility.showDialog(message = message)
             return false

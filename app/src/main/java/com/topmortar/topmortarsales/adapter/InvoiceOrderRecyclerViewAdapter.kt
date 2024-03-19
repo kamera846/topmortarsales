@@ -1,5 +1,6 @@
 package com.topmortar.topmortarsales.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.model.DetailSuratJalanModel
 
-class InvoiceOrderRecyclerViewAdapter() : RecyclerView.Adapter<InvoiceOrderRecyclerViewAdapter.ViewHolder>() {
+@SuppressLint("SetTextI18n")
+class InvoiceOrderRecyclerViewAdapter : RecyclerView.Adapter<InvoiceOrderRecyclerViewAdapter.ViewHolder>() {
     private var listItem: ArrayList<DetailSuratJalanModel> = ArrayList()
     private var context: Context? = null
 
@@ -64,24 +66,10 @@ class InvoiceOrderRecyclerViewAdapter() : RecyclerView.Adapter<InvoiceOrderRecyc
         holder.bind(item)
         holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
 
-        if (position != RecyclerView.NO_POSITION) {
-            val animateDuration = 200L
+        val animateDuration = 200L
 
-            val fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in)
-            fadeIn.duration = animateDuration
-
-//            val overlayView = holder.itemView.findViewById<LinearLayout>(R.id.overlay_view)
-//
-//            overlayView.alpha = 0.7f
-//            overlayView.visibility = View.VISIBLE
-//            overlayView.startAnimation(fadeIn)
-//
-//            Handler(Looper.getMainLooper()).postDelayed({
-//                overlayView.alpha = 0f
-//                overlayView.visibility = View.GONE
-//            }, animateDuration)
-
-        }
+        val fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in)
+        fadeIn.duration = animateDuration
 
     }
 

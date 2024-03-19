@@ -1,5 +1,6 @@
 package com.topmortar.topmortarsales.adapter.recyclerview
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -15,6 +16,7 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.GudangModel
 
+@SuppressLint("SetTextI18n")
 class GudangRecyclerViewAdapter(private val chatList: ArrayList<GudangModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<GudangRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
 

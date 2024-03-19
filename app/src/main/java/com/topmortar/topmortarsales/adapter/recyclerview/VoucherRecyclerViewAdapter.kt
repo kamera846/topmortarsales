@@ -1,5 +1,6 @@
 package com.topmortar.topmortarsales.adapter.recyclerview
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
@@ -15,6 +16,7 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.VoucherModel
 
+@SuppressLint("SetTextI18n")
 class VoucherRecyclerViewAdapter(private val chatList: ArrayList<VoucherModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<VoucherRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
 
@@ -27,7 +29,6 @@ class VoucherRecyclerViewAdapter(private val chatList: ArrayList<VoucherModel>, 
         private val imgIcon: ImageView = itemView.findViewById(R.id.iv_contact_profile)
         val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
-        private val imgChecklist: ImageView = itemView.findViewById(R.id.checklist)
         private val textVerified: TextView = itemView.findViewById(R.id.textVerified)
 
         fun bind(item: VoucherModel) {
