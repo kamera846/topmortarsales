@@ -449,7 +449,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
             }
 
             this@BrandAmbassadorActivity.doubleBackToExitPressedOnce = true
-            handleMessage(this@BrandAmbassadorActivity, TAG_ACTION_MAIN_ACTIVITY, "Tekan sekali lagi untuk keluar!", TOAST_SHORT)
+            handleMessage(this@BrandAmbassadorActivity, TAG_ACTION_MAIN_ACTIVITY, getString(R.string.tekan_sekali_lagi), TOAST_SHORT)
 
             Handler(Looper.getMainLooper()).postDelayed({
                 doubleBackToExitPressedOnce = false

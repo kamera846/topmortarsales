@@ -1035,7 +1035,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 }
 
                 this@MainActivity.doubleBackToExitPressedOnce = true
-                handleMessage(this@MainActivity, TAG_ACTION_MAIN_ACTIVITY, "Tekan sekali lagi untuk keluar!", TOAST_SHORT)
+                handleMessage(this@MainActivity, TAG_ACTION_MAIN_ACTIVITY, getString(R.string.tekan_sekali_lagi), TOAST_SHORT)
 
                 Handler(Looper.getMainLooper()).postDelayed({
                     doubleBackToExitPressedOnce = false
