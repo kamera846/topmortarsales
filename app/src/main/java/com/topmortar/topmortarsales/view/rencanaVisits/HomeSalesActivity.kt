@@ -615,6 +615,49 @@ class HomeSalesActivity : AppCompatActivity() {
 
         if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
 
+        val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+        val userChild = absentChild.child(userId.toString())
+
+        userChild.child("id").setValue(userId)
+        userChild.child("username").setValue(userName)
+        userChild.child("fullname").setValue(userFullName)
+        userChild.child("isOnline").setValue(true)
+
+        if (!isAbsentMorningNow) {
+
+            val absentDateTime = DateFormat.now()
+            userChild.child("morningDateTime").setValue(absentDateTime)
+            userChild.child("lastSeen").setValue(absentDateTime)
+
+            sessionManager.absentDateTime(absentDateTime)
+
+            if (!CustomUtility(this@HomeSalesActivity).isServiceRunning(
+                    TrackingService::class.java)) {
+                val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
+                serviceIntent.putExtra("userId", userId)
+                serviceIntent.putExtra("userDistributorId", userDistributorId)
+                serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
+                this@HomeSalesActivity.startService(serviceIntent)
+            }
+
+            absentProgressDialog?.dismiss()
+            checkAbsent()
+        } else {
+
+            val absentDateTime = DateFormat.now()
+            userChild.child("eveningDateTime").setValue(absentDateTime)
+            userChild.child("lastSeen").setValue(absentDateTime)
+
+            sessionManager.absentDateTime(absentDateTime)
+
+            val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
+            this@HomeSalesActivity.stopService(serviceIntent)
+
+            absentProgressDialog?.dismiss()
+            checkAbsent()
+        }
+
+        return
         lifecycleScope.launch {
             try {
 
@@ -853,7 +896,7 @@ class HomeSalesActivity : AppCompatActivity() {
             val calendar = Calendar.getInstance()
             val currentHour = calendar.get(Calendar.HOUR_OF_DAY) // Mengambil jam saat ini dalam format 24 jam
 
-            if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 13) {
+            if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
                 binding.btnAbsent.visibility = View.GONE
                 binding.absenEveningInfoText.visibility = View.VISIBLE
             } else {

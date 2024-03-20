@@ -36,6 +36,7 @@ import com.topmortar.topmortarsales.commons.CONST_IS_NOTIFY
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_PHONE
+import com.topmortar.topmortarsales.commons.CONST_USER_CITY
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
 import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
@@ -268,6 +269,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
             intent.putExtra(CONST_LOCATION, data.id_city)
             intent.putExtra(CONST_FULL_NAME, data.full_name)
             intent.putExtra(CONST_IS_NOTIFY, data.is_notify)
+            intent.putExtra(CONST_USER_CITY, data.id_city)
         }
 
         startActivityForResult(intent, MANAGE_USER_ACTIVITY_REQUEST_CODE)

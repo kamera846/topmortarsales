@@ -17,14 +17,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
-import androidx.viewpager.widget.ViewPager
-import com.google.android.material.tabs.TabLayout
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.adapter.viewpager.UserProfileViewPagerAdapter
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
@@ -47,6 +44,7 @@ import com.topmortar.topmortarsales.commons.CONST_PROMO
 import com.topmortar.topmortarsales.commons.CONST_REPUTATION
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
+import com.topmortar.topmortarsales.commons.CONST_USER_CITY
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
@@ -60,6 +58,7 @@ import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
@@ -87,6 +86,9 @@ class UserProfileActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
     private val userDistributorId get() = sessionManager.userDistributor()
+    private val userKind get() = sessionManager.userKind()
+    private val userId get() = sessionManager.userID()
+    private val userCity get() = sessionManager.userCityID()
 
     private lateinit var binding: ActivityUserProfileBinding
     private lateinit var customUtility: CustomUtility
@@ -94,7 +96,7 @@ class UserProfileActivity : AppCompatActivity() {
 
     private var iUserName: String? = null; private var iFullName: String? = null; private var iUserLevel: String? = null
     private var iUserID: String? = null; private var iPhone: String? = null; private var iLocation: String? = null
-    private var iIsNotify: String? = null
+    private var iIsNotify: String? = null; private var iUserCity: String? = null
 
     private var isRequestSync = false
 
@@ -123,19 +125,30 @@ class UserProfileActivity : AppCompatActivity() {
         iUserLevel = intent.getStringExtra(CONST_USER_LEVEL)
         iLocation = intent.getStringExtra(CONST_LOCATION)
         iIsNotify = intent.getStringExtra(CONST_IS_NOTIFY)
+        iUserCity = intent.getStringExtra(CONST_USER_CITY)
 
         customUtility = CustomUtility(this)
         modalPricingDetails = ChartSalesPricingModal(this)
 
         binding.salesReportContainer.visibility = View.VISIBLE
 
-        if (sessionManager.userKind() == USER_KIND_COURIER) {
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
             CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
             checkAbsent()
         }
-        if (iUserLevel == AUTH_LEVEL_COURIER) {
+        if (iUserLevel == AUTH_LEVEL_COURIER || (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES)) {
             binding.salesReportContainer.visibility = View.GONE
             binding.deliveryContainer.visibility = View.VISIBLE
+
+            if (iUserLevel == AUTH_LEVEL_COURIER) {
+                binding.btnHistoryVisit.visibility = View.GONE
+                binding.btnCourierHistoryDelivery.visibility = View.VISIBLE
+            } else if (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES) {
+                binding.btnHistoryVisit.visibility = View.VISIBLE
+                binding.btnCourierHistoryDelivery.visibility = View.GONE
+                if (userKind == USER_KIND_SALES) binding.btnCourierTracking.visibility = View.GONE
+            }
+
             setupCourierMenu()
         }
 
@@ -230,6 +243,15 @@ class UserProfileActivity : AppCompatActivity() {
 
     }
 
+    private fun navigateHistoryVisit() {
+
+        val intent = Intent(this@UserProfileActivity, HistoryVisitedActivity::class.java)
+        intent.putExtra(CONST_USER_ID, iUserID ?: userId)
+        intent.putExtra(CONST_USER_CITY, iUserCity ?: userCity)
+        startActivity(intent)
+
+    }
+
     private fun navigateSalesReport() {
 
         val intent = Intent(this@UserProfileActivity, ReportsActivity::class.java)
@@ -257,7 +279,7 @@ class UserProfileActivity : AppCompatActivity() {
             binding.titleBarLight.icEdit.setOnClickListener { navigateEditUser() }
         }
 
-        if (sessionManager.userKind() == USER_KIND_COURIER) {
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
             binding.btnLogout.setOnClickListener { logoutConfirmation() }
         }
 
@@ -282,34 +304,34 @@ class UserProfileActivity : AppCompatActivity() {
         if (iFullName!!.isNotEmpty()) binding.tvFullName.text = iFullName
         if (iUserLevel!!.isNotEmpty()) binding.tvLevel.text = iUserLevel
 
-        if (iUserLevel == AUTH_LEVEL_SALES) {
-
-            if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) binding.titleBarLight.icEdit.visibility = View.VISIBLE
-            binding.priceContainer.visibility = View.GONE
-            binding.tabContainer.visibility = View.VISIBLE
-//            binding.counterContainer.visibility = View.VISIBLE
-
-            val tabLayout: TabLayout = binding.tabLayout
-            val viewPager: ViewPager = binding.viewPager // If using ViewPager
-
-            val pagerAdapter = UserProfileViewPagerAdapter(supportFragmentManager) // Create your PagerAdapter
-
-            pagerAdapter.setUserCityParam(iLocation)
-            pagerAdapter.setUserIdParam(iUserID)
-            viewPager.adapter = pagerAdapter
-
-            // Connect TabLayout and ViewPager
-            tabLayout.setupWithViewPager(viewPager)
-            pagerAdapter.setCounterPageItem(object : UserProfileViewPagerAdapter.CounterPageItem{
-                override fun counterItem(count: Int, tabIndex: Int) {
-//                    if (tabIndex == 0) tabLayout.getTabAt(tabIndex)?.text = "On Bid ($count/$bidLimit)"
-                    if (tabIndex == 0) tabLayout.getTabAt(tabIndex)?.text = "Visited ($count)"
-                    else tabLayout.getTabAt(tabIndex)?.text = "Visited ($count)"
-                }
-
-            })
-
-        } else binding.tabContainer.visibility = View.GONE
+//        if (iUserLevel == AUTH_LEVEL_SALES) {
+//
+//            if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) binding.titleBarLight.icEdit.visibility = View.VISIBLE
+//            binding.priceContainer.visibility = View.GONE
+//            binding.tabContainer.visibility = View.VISIBLE
+////            binding.counterContainer.visibility = View.VISIBLE
+//
+//            val tabLayout: TabLayout = binding.tabLayout
+//            val viewPager: ViewPager = binding.viewPager // If using ViewPager
+//
+//            val pagerAdapter = UserProfileViewPagerAdapter(supportFragmentManager) // Create your PagerAdapter
+//
+//            pagerAdapter.setUserCityParam(iLocation)
+//            pagerAdapter.setUserIdParam(iUserID)
+//            viewPager.adapter = pagerAdapter
+//
+//            // Connect TabLayout and ViewPager
+//            tabLayout.setupWithViewPager(viewPager)
+//            pagerAdapter.setCounterPageItem(object : UserProfileViewPagerAdapter.CounterPageItem{
+//                override fun counterItem(count: Int, tabIndex: Int) {
+////                    if (tabIndex == 0) tabLayout.getTabAt(tabIndex)?.text = "On Bid ($count/$bidLimit)"
+//                    if (tabIndex == 0) tabLayout.getTabAt(tabIndex)?.text = "Visited ($count)"
+//                    else tabLayout.getTabAt(tabIndex)?.text = "Visited ($count)"
+//                }
+//
+//            })
+//
+//        } else binding.tabContainer.visibility = View.GONE
 
 //        setupBarChart()
 
@@ -333,7 +355,7 @@ class UserProfileActivity : AppCompatActivity() {
 
     @Subscribe
     fun onEventBus(event: EventBusUtils.ContactModelEvent) {
-        navigateDetailContact(event.data)
+//        navigateDetailContact(event.data)
     }
 
     @Deprecated("Deprecated in Java")
@@ -404,7 +426,7 @@ class UserProfileActivity : AppCompatActivity() {
             userDevice.child("logout_at").setValue(DateFormat.now())
             userDevice.child("login_at").setValue("")
 
-            if (sessionManager.userKind() == USER_KIND_COURIER) {
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
 //                Log.d("Kurir Logout", "${sessionManager.userDistributor()} : ${sessionManager.userID()}")
                 CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
             }
@@ -430,51 +452,57 @@ class UserProfileActivity : AppCompatActivity() {
         }, 1000)
     }
 
-    private fun setupCourierMenu() {
+    private fun  setupCourierMenu() {
+
+        val personCall = if (userKind == USER_KIND_SALES) "Anda" else "Pengguna"
+        val personcall = if (userKind == USER_KIND_SALES) "anda" else "pengguna"
+
         childAbsent = firebaseReference.child(FIREBASE_CHILD_ABSENT)
-        childCourier = childAbsent?.child("$iUserID")
+        childCourier = childAbsent?.child(iUserID ?: userId ?: "0")
 
-        courierTrackingListener = object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                // Do something here
-                if (snapshot.child("isOnline").exists()) {
+        if (userKind != USER_KIND_SALES) {
+            courierTrackingListener = object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    // Do something here
+                    if (snapshot.child("isOnline").exists()) {
 
-                    val padding8 = convertDpToPx(8, this@UserProfileActivity)
-                    val padding2 = convertDpToPx(2, this@UserProfileActivity)
-                    binding.userStatus.visibility = View.VISIBLE
+                        val padding8 = convertDpToPx(8, this@UserProfileActivity)
+                        val padding2 = convertDpToPx(2, this@UserProfileActivity)
+                        binding.userStatus.visibility = View.VISIBLE
 
-                    val isOnline = snapshot.child("isOnline").getValue(Boolean::class.java) ?: false
-                    if (isOnline) {
-                        binding.userStatus.text = "Online"
-                        binding.userStatus.setTextColor(getColor(R.color.white))
-                        binding.userStatus.setBackgroundResource(R.drawable.bg_green_reseda_round_8)
-                        binding.userStatus.setPadding(padding8, padding2, padding8, padding2)
-                    } else {
-                        if (snapshot.child("lastSeen").exists()) {
-                            val lastSeen = snapshot.child("lastSeen").getValue(String::class.java).toString()
-                            val dateDescEvening = DateFormat.differenceDateNowDesc(lastSeen)
-                            val dateEvening =
-                                DateFormat.format(lastSeen, "yyyy-MM-dd HH:mm:ss", "HH.mm")
-                            binding.userStatus.text = "Terakhir terlihat $dateEvening $dateDescEvening"
-                            binding.userStatus.setTextColor(getColor(R.color.black_200))
-                            binding.userStatus.setBackgroundResource(android.R.color.transparent)
-                            binding.userStatus.setPadding(0, padding2, 0, padding2)
-                        } else {
-                            binding.userStatus.text = "Offline"
-                            binding.userStatus.setTextColor(getColor(R.color.black_200))
-                            binding.userStatus.setBackgroundResource(R.drawable.bg_light_dark_round)
+                        val isOnline = snapshot.child("isOnline").getValue(Boolean::class.java) ?: false
+                        if (isOnline) {
+                            binding.userStatus.text = "Online"
+                            binding.userStatus.setTextColor(getColor(R.color.white))
+                            binding.userStatus.setBackgroundResource(R.drawable.bg_green_reseda_round_8)
                             binding.userStatus.setPadding(padding8, padding2, padding8, padding2)
+                        } else {
+                            if (snapshot.child("lastSeen").exists()) {
+                                val lastSeen = snapshot.child("lastSeen").getValue(String::class.java).toString()
+                                val dateDescEvening = DateFormat.differenceDateNowDesc(lastSeen)
+                                val dateEvening =
+                                    DateFormat.format(lastSeen, "yyyy-MM-dd HH:mm:ss", "HH.mm")
+                                binding.userStatus.text = "Terakhir terlihat $dateEvening $dateDescEvening"
+                                binding.userStatus.setTextColor(getColor(R.color.black_200))
+                                binding.userStatus.setBackgroundResource(android.R.color.transparent)
+                                binding.userStatus.setPadding(0, padding2, 0, padding2)
+                            } else {
+                                binding.userStatus.text = "Offline"
+                                binding.userStatus.setTextColor(getColor(R.color.black_200))
+                                binding.userStatus.setBackgroundResource(R.drawable.bg_light_dark_round)
+                                binding.userStatus.setPadding(padding8, padding2, padding8, padding2)
+                            }
                         }
                     }
                 }
-            }
 
-            override fun onCancelled(error: DatabaseError) {
-                // Do something here
-            }
+                override fun onCancelled(error: DatabaseError) {
+                    // Do something here
+                }
 
+            }
+            childCourier?.addValueEventListener(courierTrackingListener!!)
         }
-        childCourier?.addValueEventListener(courierTrackingListener!!)
 
         childCourier?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -489,15 +517,15 @@ class UserProfileActivity : AppCompatActivity() {
 
                             if (DateFormat.dateAfterNow(absentMorningDate)) {
                                 // Absent morning false
-                                binding.absentTitle.text = "Pengguna Belum Absen"
-                                binding.absentDescription.text = "Absen pengguna hari ini belum tercatat"
+                                binding.absentTitle.text = "$personCall Belum Absen"
+                                binding.absentDescription.text = "Absen $personcall hari ini belum tercatat"
                             } else {
 
                                 // Absent morning true
                                 val dateDescMorning = DateFormat.differenceDateNowDesc(morningDateTime)
                                 val dateMorning = DateFormat.format(morningDateTime, "yyyy-MM-dd HH:mm:ss", "HH.mm")
-                                binding.absentTitle.text = "Pengguna Telah Absen"
-                                binding.absentDescription.text = "Absen pengguna telah tercatat pada pukul $dateMorning $dateDescMorning"
+                                binding.absentTitle.text = "$personCall Telah Absen"
+                                binding.absentDescription.text = "Absen $personcall telah tercatat pada pukul $dateMorning $dateDescMorning"
 
                                 if (snapshot.child("eveningDateTime").exists()) {
                                     val eveningDateTime = snapshot.child("eveningDateTime").getValue(String::class.java).toString()
@@ -511,8 +539,8 @@ class UserProfileActivity : AppCompatActivity() {
                                             // Absent evening true
                                             val dateDescEvening = DateFormat.differenceDateNowDesc(eveningDateTime)
                                             val dateEvening = DateFormat.format(eveningDateTime, "yyyy-MM-dd HH:mm:ss", "HH.mm")
-                                            binding.absentTitle.text = "Pengguna Telah Pulang"
-                                            binding.absentDescription.text = "Absen pengguna telah tercatat pada pukul $dateMorning $dateDescMorning dan pulang pada pukul $dateEvening $dateDescEvening"
+                                            binding.absentTitle.text = "$personCall Telah Pulang"
+                                            binding.absentDescription.text = "Absen $personcall telah tercatat pada pukul $dateMorning $dateDescMorning dan pulang pada pukul $dateEvening $dateDescEvening"
                                         }
                                     } else {
                                         // Absent evening false
@@ -525,18 +553,18 @@ class UserProfileActivity : AppCompatActivity() {
 
                         } else {
                             // Absent morning false
-                            binding.absentTitle.text = "Pengguna Belum Absen"
-                            binding.absentDescription.text = "Absen pengguna hari ini belum tercatat"
+                            binding.absentTitle.text = "$personCall Belum Absen"
+                            binding.absentDescription.text = "Absen $personcall hari ini belum tercatat"
                         }
                     } else {
                         // Absent morning false
-                        binding.absentTitle.text = "Pengguna Belum Absen"
-                        binding.absentDescription.text = "Absen pengguna hari ini belum tercatat"
+                        binding.absentTitle.text = "$personCall Belum Absen"
+                        binding.absentDescription.text = "Absen $personcall hari ini belum tercatat"
                     }
                 } else {
                     // Absent morning false
-                    binding.absentTitle.text = "Pengguna Belum Absen"
-                    binding.absentDescription.text = "Absen pengguna hari ini belum tercatat"
+                    binding.absentTitle.text = "$personCall Belum Absen"
+                    binding.absentDescription.text = "Absen $personcall hari ini belum tercatat"
                 }
             }
 
@@ -546,6 +574,7 @@ class UserProfileActivity : AppCompatActivity() {
 
         })
 
+        binding.btnHistoryVisit.setOnClickListener { navigateHistoryVisit() }
         binding.btnCourierReport.setOnClickListener { navigateSalesReport() }
         binding.btnCourierTracking.setOnClickListener { navigateTrackingCourier() }
     }
@@ -644,10 +673,10 @@ class UserProfileActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        EventBus.getDefault().register(this)
+//        EventBus.getDefault().register(this)
         Handler(Looper.getMainLooper()).postDelayed({
             if (sessionManager.isLoggedIn()) {
-                if (sessionManager.userKind() == USER_KIND_COURIER) {
+                if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
                     CustomUtility(this).setUserStatusOnline(
                         true,
                         sessionManager.userDistributor().toString(),
@@ -660,9 +689,9 @@ class UserProfileActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        EventBus.getDefault().unregister(this)
+//        EventBus.getDefault().unregister(this)
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_COURIER) {
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor().toString(),
@@ -675,7 +704,7 @@ class UserProfileActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_COURIER) {
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor().toString(),

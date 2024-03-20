@@ -507,25 +507,25 @@ class HomeCourierActivity : AppCompatActivity() {
 
         if (isAbsentMorningNow && isAbsentEveningNow) {
 
-            binding.absentTitle.text = "Absen pulang sudah tercatat!"
-            binding.absentDescription.text = "Terima kasih atas kinerja hari ini. Beristirahatlah untuk kinerja yang maksimal esok hari!"
+            binding.absentTitle.text = getString(R.string.absen_pulang_sudah_tercatat)
+            binding.absentDescription.text = getString(R.string.terima_kasih_atas_kinerja_hari_ini)
 
             binding.btnAbsent.visibility = View.GONE
         } else {
 
             binding.absentTitle.text = if (state) {
-                "Yuk, Catat Kehadiranmu Hari ini!"
+                getString(R.string.yuk_catat_kehadiranmu_hari_ini)
             } else {
-                "Kehadiranmu Telah Tercatat!"
+                getString(R.string.kehadiranmu_telah_tercatat)
             }
             binding.absentDescription.text = if (state) {
-                "Absenmu penting! Jangan lupa untuk mencatat kehadiranmu sekarang dan ciptakan jejak kerja yang positif."
+                getString(R.string.absenmu_penting)
             } else {
-                "Terima kasih sudah mencatat kehadiran hari ini dan jangan lupa untuk mencatat absen pulang juga setelah lebih dari pukul 16.00 nanti!"
+                getString(R.string.terimakasih_sudah_mencatat_kehadiran_hari_ini)
             }
 
             binding.btnAbsent.backgroundTintList = ContextCompat.getColorStateList(this, if (state) R.color.status_bid else R.color.red_claret)
-            binding.btnAbsent.text = if (state) "Absen Sekarang" else "Pulang Sekarang"
+            binding.btnAbsent.text = if (state) getString(R.string.absen_sekarang) else getString(R.string.pulang_sekarang)
 
             val calendar = Calendar.getInstance()
             val currentHour = calendar.get(Calendar.HOUR_OF_DAY) // Mengambil jam saat ini dalam format 24 jam
@@ -727,19 +727,19 @@ class HomeCourierActivity : AppCompatActivity() {
     }
 
     private fun showDialogLockedFeature() {
-        var title = "Fitur terkunci"
-        var message = "Absen terlebih dahulu untuk membuka fitur ini"
+        var title = getString(R.string.fitur_terkunci)
+        var message = getString(R.string.absen_terlebih_dahulu_untuk_membuka)
 
         if (isAbsentMorningNow && isAbsentEveningNow) {
 
-            title = "Absen pulang sudah tercatat!"
-            message = "Terima kasih atas kinerja hari ini. Beristirahatlah untuk kinerja yang maksimal esok hari!"
+            title = getString(R.string.absen_pulang_sudah_tercatat)
+            message = getString(R.string.terima_kasih_atas_kinerja_hari_ini)
         }
 
         AlertDialog.Builder(this)
             .setTitle(title)
             .setMessage(message)
-            .setPositiveButton("Oke") { dialog, _ ->
+            .setPositiveButton(getString(R.string.oke)) { dialog, _ ->
                 dialog.dismiss()
             }
             .show()
@@ -994,7 +994,7 @@ class HomeCourierActivity : AppCompatActivity() {
         }
 
         doubleBackToExitPressedOnce = true
-        handleMessage(this, TAG_ACTION_MAIN_ACTIVITY, "Tekan sekali lagi untuk keluar!", TOAST_SHORT)
+        handleMessage(this, TAG_ACTION_MAIN_ACTIVITY, getString(R.string.tekan_sekali_lagi), TOAST_SHORT)
 
         Handler(Looper.getMainLooper()).postDelayed({
             doubleBackToExitPressedOnce = false

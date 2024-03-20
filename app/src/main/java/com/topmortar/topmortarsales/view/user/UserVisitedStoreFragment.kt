@@ -12,6 +12,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -34,7 +35,6 @@ import com.topmortar.topmortarsales.databinding.FragmentUserVisitedStoreBinding
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
-import com.topmortar.topmortarsales.view.suratJalan.ListSuratJalanActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -46,8 +46,8 @@ import java.util.Calendar
 class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemClickListener,
     SearchModal.SearchModalListener {
 
-    private var _binding: FragmentUserVisitedStoreBinding? = null
-    private val binding get() = _binding!!
+//    private var _binding: FragmentUserVisitedStoreBinding? = null
+    private lateinit var binding: FragmentUserVisitedStoreBinding
 
     private lateinit var sessionManager: SessionManager
     private lateinit var userKind: String
@@ -87,11 +87,15 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
         this.userIDParam = id
     }
 
+    fun syncNow() {
+        getContacts()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentUserVisitedStoreBinding.inflate(inflater, container, false)
+        binding = FragmentUserVisitedStoreBinding.inflate(inflater, container, false)
         val view = binding.root
 
         sessionManager = SessionManager(requireContext())
@@ -100,8 +104,8 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
 
         // Get the current theme mode (light or dark)
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.filterBox.background = requireContext().getDrawable(R.color.black_400)
-        else binding.filterBox.background = requireContext().getDrawable(R.color.light)
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.filterBox.background = AppCompatResources.getDrawable(requireContext(), R.color.black_400)
+        else binding.filterBox.background = AppCompatResources.getDrawable(requireContext(), R.color.light)
         binding.filterBox.setOnClickListener { showDropdownMenu() }
 
         toggleFilter(Calendar.getInstance().get(Calendar.MONTH)+1)
@@ -201,12 +205,14 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
 //                        if (userKind == USER_KIND_ADMIN) getCities()
 //                        else loadingState(false)
                         listener?.counterItem(response.results.size)
+                        binding.tvFilter.text = "${listMonthString[selectedMonth]} (${response.results.size} Toko)"
                         loadingState(false)
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
                         listener?.counterItem(0)
+                        binding.tvFilter.text = listMonthString[selectedMonth]
                         loadingState(true, "Belum ada kunjungan!")
 
                     }
@@ -354,8 +360,8 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
     private fun setupFilterContacts(items: ArrayList<ModalSearchModel> = ArrayList()) {
 
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.filterBox.background = requireContext().getDrawable(R.color.black_400)
-        else binding.filterBox.background = requireContext().getDrawable(R.color.light)
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.filterBox.background = AppCompatResources.getDrawable(requireContext(), R.color.black_400)
+        else binding.filterBox.background = AppCompatResources.getDrawable(requireContext(), R.color.light)
 
         binding.filterBox.visibility = View.VISIBLE
         binding.filterBox.setOnClickListener { showSearchModal() }
@@ -407,11 +413,6 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
 
     @Subscribe
     fun onEventBus(event: EventBusUtils.MessageEvent) {
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     override fun onDataReceived(data: ModalSearchModel) {
