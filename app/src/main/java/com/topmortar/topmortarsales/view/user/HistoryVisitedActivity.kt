@@ -1,5 +1,6 @@
 package com.topmortar.topmortarsales.view.user
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -31,6 +32,7 @@ import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
+@SuppressLint("SetTextI18n")
 class HistoryVisitedActivity : AppCompatActivity() {
 
     private var _binding: ActivityHistoryVisitedBinding? = null

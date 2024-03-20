@@ -22,35 +22,21 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
-import com.topmortar.topmortarsales.commons.CONST_ADDRESS
-import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
-import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_COURIER_ID
-import com.topmortar.topmortarsales.commons.CONST_DATE
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_IS_NOTIFY
 import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING_COURIER
-import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
-import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
-import com.topmortar.topmortarsales.commons.CONST_OWNER
-import com.topmortar.topmortarsales.commons.CONST_PAYMENT_METHOD
 import com.topmortar.topmortarsales.commons.CONST_PHONE
-import com.topmortar.topmortarsales.commons.CONST_PROMO
-import com.topmortar.topmortarsales.commons.CONST_REPUTATION
-import com.topmortar.topmortarsales.commons.CONST_STATUS
-import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.CONST_USER_CITY
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
-import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -71,13 +57,10 @@ import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityUserProfileBinding
 import com.topmortar.topmortarsales.modal.ChartSalesPricingModal
-import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.SplashScreenActivity
-import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import kotlinx.coroutines.launch
-import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import java.util.Calendar
 
@@ -213,33 +196,6 @@ class UserProfileActivity : AppCompatActivity() {
         intent.putExtra(CONST_IS_NOTIFY, iIsNotify)
 
         startActivityForResult(intent, MANAGE_USER_ACTIVITY_REQUEST_CODE)
-
-    }
-
-    private fun navigateDetailContact(data: ContactModel? = null) {
-
-        val intent = Intent(this@UserProfileActivity, DetailContactActivity::class.java)
-
-        if (data != null) {
-            intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
-            intent.putExtra(CONST_CONTACT_ID, data.id_contact)
-            intent.putExtra(CONST_NAME, data.nama)
-            intent.putExtra(CONST_PHONE, data.nomorhp)
-            intent.putExtra(CONST_BIRTHDAY, data.tgl_lahir)
-            intent.putExtra(CONST_OWNER, data.store_owner)
-            intent.putExtra(CONST_LOCATION, data.id_city)
-            intent.putExtra(CONST_MAPS, data.maps_url)
-            intent.putExtra(CONST_ADDRESS, data.address)
-            intent.putExtra(CONST_STATUS, data.store_status)
-            intent.putExtra(CONST_KTP, data.ktp_owner)
-            intent.putExtra(CONST_PAYMENT_METHOD, data.payment_method)
-            intent.putExtra(CONST_TERMIN, data.termin_payment)
-            intent.putExtra(CONST_PROMO, data.id_promo)
-            intent.putExtra(CONST_REPUTATION, data.reputation)
-            intent.putExtra(CONST_DATE, data.created_at)
-        }
-
-        startActivity(intent)
 
     }
 

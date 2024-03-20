@@ -1,11 +1,8 @@
 package com.topmortar.topmortarsales.view.user
 
+import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -26,7 +23,6 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
-import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -43,6 +39,7 @@ import java.util.Calendar
 /**
  * A fragment representing a list of Items.
  */
+@SuppressLint("SetTextI18n")
 class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemClickListener,
     SearchModal.SearchModalListener {
 
@@ -55,14 +52,9 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
     private val userID get() = sessionManager.userID().toString()
     private val userDistributorId get() = sessionManager.userDistributor().toString()
     private var userCityParam: String? = ""
-    private lateinit var searchModal: SearchModal
     private var selectedCity: ModalSearchModel? = null
 
     // Initialize Search Engine
-    private val searchDelayMillis = 500L
-    private val searchHandler = Handler(Looper.getMainLooper())
-    private var searchRunnable: Runnable? = null
-    private var previousSearchTerm = ""
     private var isSearchActive = false
 
     // Initialize Filter Month
@@ -114,68 +106,6 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
 //        getContacts()
 
         return view
-    }
-
-    private fun setupSearchBox() {
-
-        val padding16 = convertDpToPx(16, requireContext())
-        val padding8 = convertDpToPx(8, requireContext())
-        binding.searchBox.vBorderTop.visibility = View.VISIBLE
-        binding.searchBox.icCloseSearch.visibility = View.GONE
-        binding.searchBox.etSearchBox.setPadding(padding16,0,padding16,0)
-        binding.searchBox.icClearSearch.visibility = View.INVISIBLE
-        binding.searchBox.icClearSearch.setPadding(padding8,padding8,padding8,padding8)
-        val params = binding.searchBox.icClearSearch.layoutParams
-        params.width = convertDpToPx(40, requireContext())
-        params.height = convertDpToPx(40, requireContext())
-        binding.searchBox.icClearSearch.layoutParams = params
-
-        binding.searchBox.etSearchBox.addTextChangedListener(object: TextWatcher {
-            override fun beforeTextChanged(
-                s: CharSequence?,
-                start: Int,
-                count: Int,
-                after: Int
-            ) {}
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
-                val searchTerm = s.toString()
-
-                if (searchTerm != previousSearchTerm) {
-                    previousSearchTerm = searchTerm
-
-                    searchRunnable?.let { searchHandler.removeCallbacks(it) }
-
-                    searchRunnable = Runnable {
-                        searchContact(searchTerm)
-                    }
-
-                    searchRunnable?.let { searchHandler.postDelayed(it, searchDelayMillis) }
-
-                }
-
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-                if (s.toString().isNotEmpty()) {
-                    binding.searchBox.icClearSearch.visibility = View.VISIBLE
-                    isSearchActive = true
-                } else {
-                    binding.searchBox.icClearSearch.visibility = View.INVISIBLE
-                    isSearchActive = false
-                }
-            }
-
-        })
-
-        binding.searchBox.icClearSearch.setOnClickListener {
-            binding.searchBox.etSearchBox.setText("")
-            isSearchActive = false
-        }
-
-        getContacts()
-
     }
 
     private fun getContacts() {
@@ -303,79 +233,6 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
 
         }
 
-    }
-
-    private fun getCities() {
-
-        loadingState(true)
-
-        // Get Cities
-        lifecycleScope.launch {
-            try {
-
-                val apiService: ApiService = HttpClient.create()
-                val response = apiService.getCities(distributorID = userDistributorId)
-
-                when (response.status) {
-                    RESPONSE_STATUS_OK -> {
-
-                        val results = response.results
-                        val items: ArrayList<ModalSearchModel> = ArrayList()
-
-                        items.add(ModalSearchModel("-1", "Hapus filter"))
-                        for (i in 0 until results.size) {
-                            val data = results[i]
-                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
-                        }
-
-                        setupFilterContacts(items)
-                        loadingState(false)
-
-                    }
-                    RESPONSE_STATUS_EMPTY -> {
-
-                        handleMessage(requireContext(), "LIST CITY", "Daftar kota kosong!")
-                        loadingState(false)
-
-                    }
-                    else -> {
-
-                        handleMessage(requireContext(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
-                        loadingState(false)
-
-                    }
-                }
-
-
-            } catch (e: Exception) {
-
-                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
-                loadingState(false)
-
-            }
-
-        }
-    }
-
-    private fun setupFilterContacts(items: ArrayList<ModalSearchModel> = ArrayList()) {
-
-        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.filterBox.background = AppCompatResources.getDrawable(requireContext(), R.color.black_400)
-        else binding.filterBox.background = AppCompatResources.getDrawable(requireContext(), R.color.light)
-
-        binding.filterBox.visibility = View.VISIBLE
-        binding.filterBox.setOnClickListener { showSearchModal() }
-
-        searchModal = SearchModal(requireContext(), items)
-        searchModal.setCustomDialogListener(this@UserVisitedStoreFragment)
-        searchModal.searchHint = "Masukkan nama kota…"
-        searchModal.setOnDismissListener {}
-    }
-
-    private fun showSearchModal() {
-        val searchKey = if (selectedCity != null) selectedCity!!.title!! else ""
-        if (searchKey.isNotEmpty()) searchModal.setSearchKey(searchKey)
-        searchModal.show()
     }
 
     private fun loadingState(state: Boolean, message: String = getString(R.string.txt_loading)) {
