@@ -11,6 +11,7 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.location.Location
 import android.location.LocationManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -290,6 +291,7 @@ class HomeSalesActivity : AppCompatActivity() {
     }
 
     private fun navigateToMyProfile() {
+        Log.d("USER CLICKED", "Clicked")
         val intent = Intent(this, UserProfileActivity::class.java)
         startActivity(intent)
     }
@@ -1042,6 +1044,53 @@ class HomeSalesActivity : AppCompatActivity() {
 
                 getListStore(showModal = false)
 
+            }
+        } else if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            checkLocationPermission()
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) checkLocationPermission()
+            else {
+                AlertDialog.Builder(this)
+                    .setCancelable(false)
+                    .setTitle("Izin Diperlukan")
+                    .setMessage("Izin lokasi diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
+                    .setPositiveButton(getString(R.string.open_settings)) { localDialog, _ ->
+                        localDialog.dismiss()
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                        intent.data = Uri.fromParts("package", packageName, null)
+                        startActivityForResult(intent, LOCATION_PERMISSION_REQUEST_CODE)
+                    }
+                    .show()
+            }
+        } else if (requestCode == BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) checkLocationPermission()
+            else {
+                val message = getString(R.string.bg_service_location_permission_message)
+                val title = getString(R.string.bg_service_location_permission_title)
+                AlertDialog.Builder(this)
+                    .setCancelable(false)
+                    .setTitle(title)
+                    .setMessage(message)
+                    .setPositiveButton(getString(R.string.open_settings)) { localDialog, _ ->
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                            ActivityCompat.requestPermissions(
+                                this,
+                                arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                                BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE
+                            )
+                        }
+                        localDialog.dismiss()
+                    }
+                    .show()
             }
         }
     }
