@@ -1733,7 +1733,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     for (item in snapshot.children) {
                         val userId = item.child("id").getValue(String::class.java)
 
-
                         if (!userId.isNullOrEmpty() && userId != courierID) {
                             listUserTracking.add(
                                 UserAbsentModel(
@@ -1764,7 +1763,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         // Acak urutan item dalam daftar
                         val shuffledList = listUserTracking.shuffled()
                         // Batasi jumlah item yang ingin ditampilkan (misalnya 5)
-
                         val limitedList = shuffledList.take(6)
 
                         val rvAdapter = UserTrackingRecyclerViewAdapter()

@@ -54,6 +54,8 @@ class UserTrackingRecyclerViewAdapter : RecyclerView.Adapter<UserTrackingRecycle
             }
 
             binding.userName.text = item.fullname
+            binding.initialName.text = getInitials(item.fullname)
+
             if (item.isOnline) {
                 binding.userProfile.setBackgroundResource(R.drawable.bg_light_round_online)
             } else {
@@ -63,6 +65,15 @@ class UserTrackingRecyclerViewAdapter : RecyclerView.Adapter<UserTrackingRecycle
             itemView.setOnClickListener {
                 listener?.onItemClick(item)
             }
+        }
+
+        private fun getInitials(fullName: String): String {
+            val names = fullName.split(" ")
+            var initials = ""
+            for ((i, name) in names.withIndex()) {
+                if (i < 2) initials += name[0]
+            }
+            return initials
         }
 
     }
