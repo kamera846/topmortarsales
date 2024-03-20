@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.InvoicePaymentRecyclerViewAdapter
+import com.topmortar.topmortarsales.commons.CONST_DATE_INVOICE
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_NUMBER
 import com.topmortar.topmortarsales.commons.CONST_NAME
@@ -114,7 +115,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                             totalAdjustmnt += item.adjustment_payment.toDouble()
                         }
 
-                        val dateLastPayment = data[data.lastIndex].date_payment
+                        val dateLastPayment = data[0].date_payment
                         val remaining = totalInvoice.toDouble() - totalPay - totalDiscnt - totalAdjustmnt
 
                         tvTotalPotongan.text = CurrencyFormat.format(totalDiscnt)
@@ -208,6 +209,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
         val iInvoiceNumber = intent.getStringExtra(CONST_INVOICE_NUMBER)
         val iTotalInvoice = intent.getStringExtra(CONST_TOTAL_INVOICE)
         val iSuratJalan = intent.getStringExtra(CONST_NO_SURAT_JALAN)
+        val iDateInvoiceCreated = intent.getStringExtra(CONST_DATE_INVOICE)
 
         if (!iTotalInvoice.isNullOrEmpty()) {
 //            if (iTotalInvoice.toInt() == 0) tvTotalInvoice.text = "Invoice telah di retur"
@@ -228,6 +230,10 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
         if (!iSuratJalan.isNullOrEmpty()) {
             binding.tvSuratJalan.text = "$iSuratJalan"
+        }
+
+        if (!iDateInvoiceCreated.isNullOrEmpty()) {
+            binding.tvDateInvoiceCreated.text = DateFormat.format(dateString = iDateInvoiceCreated, input = "yyyy-MM-dd HH:mm:ss", format = "dd MMM yyyy HH.mm")
         }
 
     }
