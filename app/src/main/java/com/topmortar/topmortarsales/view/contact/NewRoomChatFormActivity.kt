@@ -35,6 +35,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.updateTxtMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
@@ -95,6 +96,14 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         sessionManager = SessionManager(this)
 
         setContentView(R.layout.activity_new_room_chat_form)
+
+        if (sessionManager.userKind() == USER_KIND_SALES) {
+            CustomUtility(this).setUserStatusOnline(
+                true,
+                sessionManager.userDistributor().toString(),
+                sessionManager.userID().toString()
+            )
+        }
 
         initVariable()
         initClickHandler()
@@ -534,6 +543,46 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             }
         }
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (sessionManager.userKind() == USER_KIND_SALES) {
+                CustomUtility(this).setUserStatusOnline(
+                    true,
+                    sessionManager.userDistributor().toString(),
+                    sessionManager.userID().toString()
+                )
+            }
+        }, 1000)
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        if (sessionManager.isLoggedIn()) {
+            if (sessionManager.userKind() == USER_KIND_SALES) {
+                CustomUtility(this).setUserStatusOnline(
+                    false,
+                    sessionManager.userDistributor().toString(),
+                    sessionManager.userID().toString()
+                )
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (sessionManager.isLoggedIn()) {
+            if (sessionManager.userKind() == USER_KIND_SALES) {
+                CustomUtility(this).setUserStatusOnline(
+                    false,
+                    sessionManager.userDistributor().toString(),
+                    sessionManager.userID().toString()
+                )
+            }
+        }
     }
 
 }

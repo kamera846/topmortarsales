@@ -92,6 +92,7 @@ import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.printUtils.Comman
 import com.topmortar.topmortarsales.commons.printUtils.PdfDocumentAdapter
 import com.topmortar.topmortarsales.commons.utils.BluetoothPrinterManager
@@ -187,7 +188,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
-        if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+        if (userKind == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
         customUtility = CustomUtility(this@DetailSuratJalanActivity)
 
         initVariable()
@@ -1172,18 +1173,18 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
-            if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
         }, 1000)
     }
 
     override fun onStop() {
         super.onStop()
-        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
     }
 
 }

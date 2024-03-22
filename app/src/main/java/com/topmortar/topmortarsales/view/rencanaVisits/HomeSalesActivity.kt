@@ -997,11 +997,13 @@ class HomeSalesActivity : AppCompatActivity() {
         super.onStart()
         checkAbsent()
         Handler(Looper.getMainLooper()).postDelayed({
-            CustomUtility(this).setUserStatusOnline(
-                true,
-                sessionManager.userDistributor().toString(),
-                sessionManager.userID().toString()
-            )
+            if (sessionManager.userKind() == USER_KIND_SALES) {
+                CustomUtility(this).setUserStatusOnline(
+                    true,
+                    sessionManager.userDistributor().toString(),
+                    sessionManager.userID().toString()
+                )
+            }
         }, 1000)
     }
 

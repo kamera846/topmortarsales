@@ -3,6 +3,8 @@ package com.topmortar.topmortarsales.view.user
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.topmortar.topmortarsales.R
@@ -25,7 +27,11 @@ import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.CONST_USER_CITY
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
+import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
+import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.databinding.ActivityHistoryVisitedBinding
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
@@ -35,6 +41,7 @@ import org.greenrobot.eventbus.Subscribe
 @SuppressLint("SetTextI18n")
 class HistoryVisitedActivity : AppCompatActivity() {
 
+    private lateinit var sessionManager: SessionManager
     private var _binding: ActivityHistoryVisitedBinding? = null
     private val binding get() = _binding!!
 
@@ -42,6 +49,7 @@ class HistoryVisitedActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
+        sessionManager = SessionManager(this)
         _binding = ActivityHistoryVisitedBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -81,16 +89,48 @@ class HistoryVisitedActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
+
+        if (sessionManager.isLoggedIn()) {
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
+                CustomUtility(this).setUserStatusOnline(
+                    false,
+                    sessionManager.userDistributor().toString(),
+                    sessionManager.userID().toString()
+                )
+            }
+        }
     }
 
     override fun onStart() {
         super.onStart()
         EventBus.getDefault().register(this)
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (sessionManager.isLoggedIn()) {
+                if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
+                    CustomUtility(this).setUserStatusOnline(
+                        true,
+                        sessionManager.userDistributor().toString(),
+                        sessionManager.userID().toString()
+                    )
+                }
+            }
+        }, 1000)
     }
 
     override fun onStop() {
         super.onStop()
         EventBus.getDefault().unregister(this)
+
+        if (sessionManager.isLoggedIn()) {
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
+                CustomUtility(this).setUserStatusOnline(
+                    false,
+                    sessionManager.userDistributor().toString(),
+                    sessionManager.userID().toString()
+                )
+            }
+        }
     }
 
     @Subscribe

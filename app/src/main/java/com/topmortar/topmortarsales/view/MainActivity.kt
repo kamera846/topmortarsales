@@ -79,6 +79,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
+import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -167,6 +168,14 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         setContentView(binding.root)
 
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
+
+        if (sessionManager.userKind() == USER_KIND_SALES) {
+            CustomUtility(this).setUserStatusOnline(
+                true,
+                sessionManager.userDistributor().toString(),
+                sessionManager.userID().toString()
+            )
+        }
 
         initVariable()
         initClickHandler()
@@ -1056,6 +1065,46 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         // Check apps for update
         AppUpdateHelper.checkForUpdates(this)
         getUserLoggedIn(true)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (sessionManager.userKind() == USER_KIND_SALES) {
+                CustomUtility(this).setUserStatusOnline(
+                    true,
+                    sessionManager.userDistributor().toString(),
+                    sessionManager.userID().toString()
+                )
+            }
+        }, 1000)
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        if (sessionManager.isLoggedIn()) {
+            if (sessionManager.userKind() == USER_KIND_SALES) {
+                CustomUtility(this).setUserStatusOnline(
+                    false,
+                    sessionManager.userDistributor().toString(),
+                    sessionManager.userID().toString()
+                )
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (sessionManager.isLoggedIn()) {
+            if (sessionManager.userKind() == USER_KIND_SALES) {
+                CustomUtility(this).setUserStatusOnline(
+                    false,
+                    sessionManager.userDistributor().toString(),
+                    sessionManager.userID().toString()
+                )
+            }
+        }
     }
 
     override fun onDataReceived(data: ModalSearchModel) {

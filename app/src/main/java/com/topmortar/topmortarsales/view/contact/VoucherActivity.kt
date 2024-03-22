@@ -39,6 +39,8 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
@@ -67,6 +69,8 @@ class VoucherActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
     private val userKind get() = sessionManager.userKind().toString()
+    private val userDistributor get() = sessionManager.userDistributor().toString()
+    private val userId get() = sessionManager.userID().toString()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,6 +92,8 @@ class VoucherActivity : AppCompatActivity() {
         binding.titleBarDark.tvTitleBarDescription.visibility = if (contactName.isNotEmpty()) View.VISIBLE else View.GONE
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(true, userDistributor, userId)
 
         getList()
 
@@ -315,5 +321,22 @@ class VoucherActivity : AppCompatActivity() {
             }
 
         }, 500)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(true, userDistributor, userId)
+        }, 1000)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(false, userDistributor, userId)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(false, userDistributor, userId)
     }
 }

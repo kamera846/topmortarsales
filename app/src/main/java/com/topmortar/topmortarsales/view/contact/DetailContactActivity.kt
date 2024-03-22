@@ -109,6 +109,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_MARKETING
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
@@ -289,7 +290,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         progressDialog.setCancelable(false)
         progressDialog.setMessage(getString(R.string.txt_loading))
 
-        if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
 
         initVariable()
         initClickHandler()
@@ -2193,19 +2194,19 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     override fun onStart() {
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
-            if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+            if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
         }, 1000)
     }
 
     override fun onStop() {
         super.onStop()
-        if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         if (pingUtility != null) pingUtility!!.stopPingMonitoring()
-        if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
     }
 
 }
