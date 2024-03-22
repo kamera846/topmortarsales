@@ -21,6 +21,12 @@ android {
     }
 
     signingConfigs {
+//        release {
+//            keyAlias 'topmortarsalesrelease'
+//            keyPassword 'topmortarsalesrelease'
+//            storeFile file('D:\\Pekerjaan\\Proyek Seluler\\topmortarsales\\app\\keystores\\release-keystore')
+//            storePassword 'topmortarsalesrelease'
+//        }
         release {
             keyAlias 'topmortarsalesrelease'
             keyPassword 'topmortarsalesrelease'
