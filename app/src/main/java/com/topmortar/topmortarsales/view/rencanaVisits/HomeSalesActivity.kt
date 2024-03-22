@@ -504,7 +504,7 @@ class HomeSalesActivity : AppCompatActivity() {
 
         if (isAbsentMorningNow) {
             alertTitle = "Absen Pulang"
-            alertMessage = "Konfirmasi absen pulang sekarang?"
+            alertMessage = "Melakukan tindakan ini akan membatasi akses ke aplikasi sampai hari berikutnya!\nKonfirmasi absen pulang sekarang? "
         }
 
         AlertDialog.Builder(this)
@@ -889,7 +889,7 @@ class HomeSalesActivity : AppCompatActivity() {
             binding.absentDescription.text = if (state) {
                 getString(R.string.absenmu_penting)
             } else {
-                getString(R.string.terimakasih_sudah_mencatat_kehadiran_hari_ini)
+                getString(R.string.terimakasih_sudah_mencatat_kehadiran_hari_ini_without_clock)
             }
 
             binding.btnAbsent.backgroundTintList = ContextCompat.getColorStateList(this, if (state) R.color.status_bid else R.color.red_claret)
@@ -898,13 +898,13 @@ class HomeSalesActivity : AppCompatActivity() {
             val calendar = Calendar.getInstance()
             val currentHour = calendar.get(Calendar.HOUR_OF_DAY) // Mengambil jam saat ini dalam format 24 jam
 
-            if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
-                binding.btnAbsent.visibility = View.GONE
-                binding.absenEveningInfoText.visibility = View.VISIBLE
-            } else {
+//            if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
+//                binding.btnAbsent.visibility = View.GONE
+//                binding.absenEveningInfoText.visibility = View.VISIBLE
+//            } else {
                 binding.btnAbsent.visibility = View.VISIBLE
                 binding.absenEveningInfoText.visibility = View.GONE
-            }
+//            }
         }
 
     }
