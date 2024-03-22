@@ -95,6 +95,7 @@ import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.IS_CLOSING
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_SUCCESS
@@ -1381,7 +1382,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 selectedTargetRoute = null
                 toggleDrawRoute()
             } else super.onBackPressed()
-        } else super.onBackPressed()
+        } else {
+            if (isTrackingCourier) {
+                val resultIntent = Intent()
+                resultIntent.putExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE", SYNC_NOW)
+                setResult(RESULT_OK, resultIntent)
+                finish()
+            } else super.onBackPressed()
+        }
     }
 
     private fun setupTracking() {
@@ -1666,6 +1674,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                         val courierLatLng = LatLng(courierLat, courierLng)
 
+                        binding.initialName.text = CustomUtility(this@MapsActivity).getInitials(courierFullName ?: "Nama Pengguna")
                         binding.userTrackingName.text = courierFullName
                         binding.userTrackingDescription.text = "Terakhir dilacak " + DateFormat.format("$courierLastTracking", "yyyy-MM-dd HH:mm:ss", "HH:mm")
                         if (courierIsOnline!!) {

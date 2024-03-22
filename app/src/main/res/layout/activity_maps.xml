@@ -741,13 +741,32 @@
                     android:paddingHorizontal="16dp"
                     android:orientation="horizontal">
 
-                    <ImageView
+<!--                    <ImageView-->
+<!--                        android:id="@+id/userProfile"-->
+<!--                        android:layout_width="60dp"-->
+<!--                        android:layout_height="60dp"-->
+<!--                        android:src="@drawable/person_black"-->
+<!--                        android:background="@drawable/bg_light_round_8"-->
+<!--                        android:layout_alignParentStart="true"/>-->
+
+                    <RelativeLayout
                         android:id="@+id/userProfile"
                         android:layout_width="60dp"
                         android:layout_height="60dp"
-                        android:src="@drawable/person_black"
-                        android:background="@drawable/bg_light_round_8"
-                        android:layout_alignParentStart="true"/>
+                        android:gravity="center"
+                        android:background="@drawable/bg_light_round_8">
+
+                        <TextView
+                            android:id="@+id/initialName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="NP"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/black_300"
+                            android:background="@android:color/transparent"/>
+
+                    </RelativeLayout>
 
                     <TextView
                         android:id="@+id/userTrackingName"

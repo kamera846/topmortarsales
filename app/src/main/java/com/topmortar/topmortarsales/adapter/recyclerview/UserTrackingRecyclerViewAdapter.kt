@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.databinding.ItemUserTrackingBinding
 import com.topmortar.topmortarsales.model.UserAbsentModel
 
@@ -54,7 +55,7 @@ class UserTrackingRecyclerViewAdapter : RecyclerView.Adapter<UserTrackingRecycle
             }
 
             binding.userName.text = item.fullname
-            binding.initialName.text = getInitials(item.fullname)
+            binding.initialName.text = CustomUtility(context!!).getInitials(item.fullname)
 
             if (item.isOnline) {
                 binding.userProfile.setBackgroundResource(R.drawable.bg_light_round_online)
@@ -65,15 +66,6 @@ class UserTrackingRecyclerViewAdapter : RecyclerView.Adapter<UserTrackingRecycle
             itemView.setOnClickListener {
                 listener?.onItemClick(item)
             }
-        }
-
-        private fun getInitials(fullName: String): String {
-            val names = fullName.split(" ")
-            var initials = ""
-            for ((i, name) in names.withIndex()) {
-                if (i < 2) initials += name[0]
-            }
-            return initials
         }
 
     }

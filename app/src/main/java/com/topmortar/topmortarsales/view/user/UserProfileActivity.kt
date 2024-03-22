@@ -115,27 +115,27 @@ class UserProfileActivity : AppCompatActivity() {
 
         binding.salesReportContainer.visibility = View.VISIBLE
 
-        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
-            CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
-            checkAbsent()
-        }
-        if (iUserLevel == AUTH_LEVEL_COURIER || (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES)) {
-            binding.salesReportContainer.visibility = View.GONE
-            binding.deliveryContainer.visibility = View.VISIBLE
-
-            if (iUserLevel == AUTH_LEVEL_COURIER) {
-                binding.btnHistoryVisit.visibility = View.GONE
-                binding.btnCourierHistoryDelivery.visibility = View.VISIBLE
-            } else if (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES) {
-                binding.btnHistoryVisit.visibility = View.VISIBLE
-                binding.btnCourierHistoryDelivery.visibility = View.GONE
-                if (userKind == USER_KIND_SALES) binding.btnCourierTracking.visibility = View.GONE
-            }
-
-            setupCourierMenu()
-        }
-
-        initClickHandler()
+//        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
+//            CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+//            checkAbsent()
+//        }
+//        if (iUserLevel == AUTH_LEVEL_COURIER || (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES)) {
+//            binding.salesReportContainer.visibility = View.GONE
+//            binding.deliveryContainer.visibility = View.VISIBLE
+//
+//            if (iUserLevel == AUTH_LEVEL_COURIER) {
+//                binding.btnHistoryVisit.visibility = View.GONE
+//                binding.btnCourierHistoryDelivery.visibility = View.VISIBLE
+//            } else if (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES) {
+//                binding.btnHistoryVisit.visibility = View.VISIBLE
+//                binding.btnCourierHistoryDelivery.visibility = View.GONE
+//                if (userKind == USER_KIND_SALES) binding.btnCourierTracking.visibility = View.GONE
+//            }
+//
+//            setupCourierMenu()
+//        }
+//
+//        initClickHandler()
         dataActivityValidation()
 
     }
@@ -247,6 +247,28 @@ class UserProfileActivity : AppCompatActivity() {
     }
 
     private fun dataActivityValidation() {
+
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
+            CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+            checkAbsent()
+        }
+        if (iUserLevel == AUTH_LEVEL_COURIER || (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES)) {
+            binding.salesReportContainer.visibility = View.GONE
+            binding.deliveryContainer.visibility = View.VISIBLE
+
+            if (iUserLevel == AUTH_LEVEL_COURIER) {
+                binding.btnHistoryVisit.visibility = View.GONE
+                binding.btnCourierHistoryDelivery.visibility = View.VISIBLE
+            } else if (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES) {
+                binding.btnHistoryVisit.visibility = View.VISIBLE
+                binding.btnCourierHistoryDelivery.visibility = View.GONE
+                if (userKind == USER_KIND_SALES) binding.btnCourierTracking.visibility = View.GONE
+            }
+
+            setupCourierMenu()
+        }
+
+        initClickHandler()
 
         if (iUserID.isNullOrEmpty()) {
             return getUserDetail()
