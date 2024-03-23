@@ -1,5 +1,6 @@
 package com.topmortar.topmortarsales.view.user
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
@@ -17,6 +18,7 @@ import android.widget.PopupMenu
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -34,6 +36,7 @@ import com.topmortar.topmortarsales.commons.CONST_IS_NOTIFY
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_PHONE
+import com.topmortar.topmortarsales.commons.CONST_USER_CITY
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
 import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
@@ -51,6 +54,7 @@ import com.topmortar.topmortarsales.databinding.ActivityManageUserBinding
 import com.topmortar.topmortarsales.model.UserModel
 import kotlinx.coroutines.launch
 
+@SuppressLint("SetTextI18n")
 @Suppress("DEPRECATION")
 class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemClickListener {
 
@@ -76,16 +80,8 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
     private val userDistributorId get() = sessionManager.userDistributor().toString()
     private val userKind get() = sessionManager.userKind().toString()
     private val userCityID get() = sessionManager.userCityID().toString()
-    private var doubleBackToExitPressedOnce = false
     private var users: ArrayList<UserModel> = arrayListOf()
     private var activeFilter = EMPTY_FIELD_VALUE
-
-    // Initialize Search Engine
-    private val searchDelayMillis = 500L
-    private val searchHandler = Handler(Looper.getMainLooper())
-    private var searchRunnable: Runnable? = null
-    private var previousSearchTerm = ""
-    private var isSearchActive = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -101,8 +97,8 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
 
         // Get the current theme mode (light or dark)
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background = getDrawable(R.color.black_400)
-        else binding.llFilter.componentFilter.background = getDrawable(R.color.light)
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(this, R.color.black_400)
+        else binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(this, R.color.light)
 
         initVariable()
         initClickHandler()
@@ -273,6 +269,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
             intent.putExtra(CONST_LOCATION, data.id_city)
             intent.putExtra(CONST_FULL_NAME, data.full_name)
             intent.putExtra(CONST_IS_NOTIFY, data.is_notify)
+            intent.putExtra(CONST_USER_CITY, data.id_city)
         }
 
         startActivityForResult(intent, MANAGE_USER_ACTIVITY_REQUEST_CODE)
@@ -284,6 +281,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
         else navigateAddUser(data)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -348,7 +346,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
             }
             binding.llFilter.tvFilter.text = textActiveFilter
             loadingState(true)
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 val usersDummy = arrayListOf<UserModel>()
                 for (item in users.iterator()) {
                     if (item.level_user == activeFilter) usersDummy.add(item)

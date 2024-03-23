@@ -1,5 +1,6 @@
 package com.topmortar.topmortarsales.view.invoice
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.InvoicePaymentRecyclerViewAdapter
+import com.topmortar.topmortarsales.commons.CONST_DATE_INVOICE
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_NUMBER
 import com.topmortar.topmortarsales.commons.CONST_NAME
@@ -34,6 +36,7 @@ import com.topmortar.topmortarsales.model.InvoicePaymentModel
 import kotlinx.coroutines.launch
 import java.util.Locale
 
+@SuppressLint("SetTextI18n")
 class DetailInvoiceActivity : AppCompatActivity() {
 
     // Global
@@ -80,18 +83,6 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
     private fun getList() {
 
-//        if (totalInvoice.toInt() == 0) {
-//
-//            tvDateInvoice.text = "Sisa Hutang"
-//            tvStatus.text = "-"
-//            tvStatus.setTextColor(getColor(R.color.black_200))
-//            tvStatus.setBackgroundDrawable(getDrawable(R.drawable.bg_data_round))
-//
-//            loadingState(true, "Belum ada pembayaran")
-//            return
-//
-//        }
-
         loadingState(true)
 
         lifecycleScope.launch {
@@ -114,7 +105,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                             totalAdjustmnt += item.adjustment_payment.toDouble()
                         }
 
-                        val dateLastPayment = data[data.lastIndex].date_payment
+                        val dateLastPayment = data[0].date_payment
                         val remaining = totalInvoice.toDouble() - totalPay - totalDiscnt - totalAdjustmnt
 
                         tvTotalPotongan.text = CurrencyFormat.format(totalDiscnt)
@@ -126,12 +117,12 @@ class DetailInvoiceActivity : AppCompatActivity() {
                                 tvDateInvoice.text = DateFormat.format(dateString = dateLastPayment, input = "yyyy-MM-dd HH:mm:ss", format = "EEEE, dd MMMM yyyy")
                                 tvStatus.text = "paid".uppercase(Locale.ROOT)
                                 tvStatus.setTextColor(getColor(R.color.white))
-                                tvStatus.setBackgroundDrawable(getDrawable(R.drawable.bg_active_round))
+                                tvStatus.setBackgroundResource(R.drawable.bg_active_round)
                             } else {
                                 tvDateInvoice.text = "Sisa Hutang"
                                 tvStatus.text = CurrencyFormat.format(remaining)
                                 tvStatus.setTextColor(getColor(R.color.black_200))
-                                tvStatus.setBackgroundDrawable(getDrawable(R.drawable.bg_data_round))
+                                tvStatus.setBackgroundResource(R.drawable.bg_data_round)
                             }
                         }
 
@@ -144,10 +135,9 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         tvDateInvoice.text = "Sisa Hutang"
                         tvStatus.text = CurrencyFormat.format(remaining)
                         tvStatus.setTextColor(getColor(R.color.black_200))
-                        tvStatus.setBackgroundDrawable(getDrawable(R.drawable.bg_data_round))
+                        tvStatus.setBackgroundResource(R.drawable.bg_data_round)
 
                         loadingState(true, "Belum ada pembayaran")
-//                        binding.cardOthers.visibility = View.VISIBLE
 
                     }
                     else -> {
@@ -208,13 +198,11 @@ class DetailInvoiceActivity : AppCompatActivity() {
         val iInvoiceNumber = intent.getStringExtra(CONST_INVOICE_NUMBER)
         val iTotalInvoice = intent.getStringExtra(CONST_TOTAL_INVOICE)
         val iSuratJalan = intent.getStringExtra(CONST_NO_SURAT_JALAN)
+        val iDateInvoiceCreated = intent.getStringExtra(CONST_DATE_INVOICE)
 
         if (!iTotalInvoice.isNullOrEmpty()) {
-//            if (iTotalInvoice.toInt() == 0) tvTotalInvoice.text = "Invoice telah di retur"
-//            else {
                 totalInvoice = iTotalInvoice
                 tvTotalInvoice.text = CurrencyFormat.format(totalInvoice.toDouble())
-//            }
         } else tvTotalInvoice.text = CurrencyFormat.format(0.0)
 
         if (!iInvoiceNumber.isNullOrEmpty()) {
@@ -228,6 +216,10 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
         if (!iSuratJalan.isNullOrEmpty()) {
             binding.tvSuratJalan.text = "$iSuratJalan"
+        }
+
+        if (!iDateInvoiceCreated.isNullOrEmpty()) {
+            binding.tvDateInvoiceCreated.text = DateFormat.format(dateString = iDateInvoiceCreated, input = "yyyy-MM-dd HH:mm:ss", format = "dd MMM yyyy HH.mm")
         }
 
     }
@@ -247,7 +239,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
         cardStatus = findViewById(R.id.card_status)
         cardOthers = findViewById(R.id.card_others)
 
-        icBack.setImageDrawable(getDrawable(R.drawable.arrow_back_white))
+        icBack.setImageResource(R.drawable.arrow_back_white)
         tvTitleBar.text = "Detail Invoice"
         tvTitleBar.setTextColor(getColor(R.color.white))
 

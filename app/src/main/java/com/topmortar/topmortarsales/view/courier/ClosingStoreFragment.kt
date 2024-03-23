@@ -6,7 +6,6 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.location.Location
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -81,8 +80,6 @@ class ClosingStoreFragment : Fragment() {
     private lateinit var sessionManager: SessionManager
     private val userFullName get() = sessionManager.fullName().toString()
     private val userID get() = sessionManager.userID().toString()
-    private val userKind get() = sessionManager.userKind().toString()
-    private val userCity get() = sessionManager.userCityID().toString()
     private val userDistributorID get() = sessionManager.userDistributor().toString()
 
     // Delivery
@@ -342,7 +339,7 @@ class ClosingStoreFragment : Fragment() {
 
     private fun navigateChatAdmin() {
         val distributorNumber = sessionManager.userDistributorNumber()!!
-        val phoneNumber = if (distributorNumber.isNotEmpty()) distributorNumber else getString(R.string.topmortar_wa_number)
+        val phoneNumber = distributorNumber.ifEmpty { getString(R.string.topmortar_wa_number) }
         val message = "*#Courier Service*\nHalo admin, tolong bantu saya [KETIK PESAN ANDA]"
 
         val intent = Intent(Intent.ACTION_VIEW)
@@ -392,8 +389,8 @@ class ClosingStoreFragment : Fragment() {
         val data = result.data
         // Process the result
         if (resultCode == RESULT_OK) {
-            val data = data?.getStringExtra("$MAIN_ACTIVITY_REQUEST_CODE")
-            if (!data.isNullOrEmpty() && data == SYNC_NOW) getContacts()
+            val resultData = data?.getStringExtra("$MAIN_ACTIVITY_REQUEST_CODE")
+            if (!resultData.isNullOrEmpty() && resultData == SYNC_NOW) getContacts()
         }
     }
 
@@ -414,7 +411,7 @@ class ClosingStoreFragment : Fragment() {
                         name = contact.nama,
                         lat = targetLatLng.latitude,
                         lng = targetLatLng.longitude,
-                        startDatetime = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) DateFormat.now() else "",
+                        startDatetime = DateFormat.now(),
                         startLat = currentLatLng.latitude,
                         startLng = currentLatLng.longitude,
                     )

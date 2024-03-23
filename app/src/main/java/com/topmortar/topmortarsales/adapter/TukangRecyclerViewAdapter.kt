@@ -2,6 +2,7 @@ package com.topmortar.topmortarsales.adapter
 
 import android.content.Context
 import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,9 +14,7 @@ import androidx.appcompat.widget.TooltipCompat
 import androidx.core.content.ContextCompat.getDrawable
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_ACTIVE
-import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BID
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BLACKLIST
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
@@ -38,7 +37,7 @@ class TukangRecyclerViewAdapter(private val chatList: ArrayList<TukangModel>, pr
         fun bind(chatItem: TukangModel) {
 
             ivProfile.setImageResource(R.drawable.person_red)
-            tvContactName.text = "${chatItem.nama}"
+            tvContactName.text = chatItem.nama
             tvPhoneNumber.text = if (chatItem.nomorhp != "") "+${ chatItem.nomorhp } (${chatItem.kode_skill})" else ""
             setupStatus(chatItem.tukang_status)
 
@@ -117,7 +116,7 @@ class TukangRecyclerViewAdapter(private val chatList: ArrayList<TukangModel>, pr
             overlayView.visibility = View.VISIBLE
             overlayView.startAnimation(fadeIn)
 
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 overlayView.alpha = 0f
                 overlayView.visibility = View.GONE
             }, animateDuration)

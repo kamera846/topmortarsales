@@ -1,5 +1,8 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.modal
 
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
@@ -32,12 +35,12 @@ import com.topmortar.topmortarsales.model.VoucherModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+@SuppressLint("SetTextI18n")
 class AddVoucherModal(private val context: Context, private val lifecycleScope: CoroutineScope) : Dialog(context) {
 
     private var _binding: ModalAddVoucherBinding? = null
     private val binding get() = _binding!!
     private lateinit var sessionManager: SessionManager
-    private val userDistributorId get() = sessionManager.userDistributor().toString()
     private val userKind get() = sessionManager.userKind().toString()
 
     private lateinit var titleBar: LinearLayout

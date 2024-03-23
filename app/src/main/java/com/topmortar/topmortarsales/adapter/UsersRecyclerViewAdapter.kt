@@ -2,6 +2,7 @@ package com.topmortar.topmortarsales.adapter
 
 import android.content.Context
 import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -72,27 +73,24 @@ class UsersRecyclerViewAdapter(private val itemClickListener: ItemClickListener)
 
         holder.itemView.setOnClickListener {
 
-            if (position != RecyclerView.NO_POSITION) {
-                val animateDuration = 200L
+            val animateDuration = 200L
 
-                val fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in)
-                fadeIn.duration = animateDuration
+            val fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in)
+            fadeIn.duration = animateDuration
 
-                val overlayView = holder.itemView.findViewById<LinearLayout>(R.id.overlay_view)
+            val overlayView = holder.itemView.findViewById<LinearLayout>(R.id.overlay_view)
 
-                overlayView.alpha = 0.7f
-                overlayView.visibility = View.VISIBLE
-                overlayView.startAnimation(fadeIn)
+            overlayView.alpha = 0.7f
+            overlayView.visibility = View.VISIBLE
+            overlayView.startAnimation(fadeIn)
 
-                Handler().postDelayed({
-                    overlayView.alpha = 0f
-                    overlayView.visibility = View.GONE
-                }, animateDuration)
+            Handler(Looper.getMainLooper()).postDelayed({
+                overlayView.alpha = 0f
+                overlayView.visibility = View.GONE
+            }, animateDuration)
 
-                val data = listItem[position]
-                itemClickListener.onItemClick(data)
-
-            }
+            val data = listItem[position]
+            itemClickListener.onItemClick(data)
 
         }
 

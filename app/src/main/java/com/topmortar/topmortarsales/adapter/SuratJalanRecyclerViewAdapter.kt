@@ -2,6 +2,7 @@ package com.topmortar.topmortarsales.adapter
 
 import android.content.Context
 import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,19 +30,13 @@ class SuratJalanRecyclerViewAdapter(private val itemClickListener: ItemClickList
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         private val ivProfile: ImageView = itemView.findViewById(R.id.iv_contact_profile)
-        private val ivUpload: ImageView = itemView.findViewById(R.id.iv_upload)
-        private val ivPrinter: ImageView = itemView.findViewById(R.id.iv_printer)
         private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
 
         fun bind(item: SuratJalanModel) {
 
-//            ivUpload.visibility = View.VISIBLE
-//            ivPrinter.visibility = View.VISIBLE
-
             ivProfile.setImageResource(R.drawable.file_list_red)
             tvContactName.text = item.no_surat_jalan
-//            tvPhoneNumber.text = "${ item.order_number } - ${ DateFormat.format(item.delivery_date) }"
             tvPhoneNumber.text = DateFormat.format(dateString = item.dalivery_date, input = "yyyy-MM-dd HH:mm:ss", format = "dd MMMM yyyy HH.mm")
 
         }
@@ -65,27 +60,24 @@ class SuratJalanRecyclerViewAdapter(private val itemClickListener: ItemClickList
 
         holder.itemView.setOnClickListener {
 
-            if (position != RecyclerView.NO_POSITION) {
-                val animateDuration = 200L
+            val animateDuration = 200L
 
-                val fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in)
-                fadeIn.duration = animateDuration
+            val fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in)
+            fadeIn.duration = animateDuration
 
-                val overlayView = holder.itemView.findViewById<LinearLayout>(R.id.overlay_view)
+            val overlayView = holder.itemView.findViewById<LinearLayout>(R.id.overlay_view)
 
-                overlayView.alpha = 0.7f
-                overlayView.visibility = View.VISIBLE
-                overlayView.startAnimation(fadeIn)
+            overlayView.alpha = 0.7f
+            overlayView.visibility = View.VISIBLE
+            overlayView.startAnimation(fadeIn)
 
-                Handler().postDelayed({
-                    overlayView.alpha = 0f
-                    overlayView.visibility = View.GONE
-                }, animateDuration)
+            Handler(Looper.getMainLooper()).postDelayed({
+                overlayView.alpha = 0f
+                overlayView.visibility = View.GONE
+            }, animateDuration)
 
-                val data = listItem[position]
-                itemClickListener.onItemClick(data)
-
-            }
+            val data = listItem[position]
+            itemClickListener.onItemClick(data)
 
         }
 

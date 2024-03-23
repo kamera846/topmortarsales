@@ -1,7 +1,9 @@
 package com.topmortar.topmortarsales.adapter.recyclerview
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +16,7 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.GudangModel
 
+@SuppressLint("SetTextI18n")
 class GudangRecyclerViewAdapter(private val chatList: ArrayList<GudangModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<GudangRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
 
@@ -75,7 +78,7 @@ class GudangRecyclerViewAdapter(private val chatList: ArrayList<GudangModel>, pr
             overlayView.visibility = View.VISIBLE
             overlayView.startAnimation(fadeIn)
 
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 overlayView.alpha = 0f
                 overlayView.visibility = View.GONE
             }, animateDuration)

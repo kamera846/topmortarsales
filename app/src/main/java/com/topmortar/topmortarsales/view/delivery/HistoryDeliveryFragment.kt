@@ -81,7 +81,7 @@ class HistoryDeliveryFragment : Fragment() {
         loadingState(true)
         showBadgeRefresh(false)
 
-//        Handler().postDelayed({
+//        Handler(Looper.getMainLooper()).postDelayed({
 //            loadingState(true, "Belum ada riwayat pengiriman!")
 //        }, 1000)
 //

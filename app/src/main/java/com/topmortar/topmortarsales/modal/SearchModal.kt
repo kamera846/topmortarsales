@@ -1,9 +1,12 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.modal
 
 import android.app.Dialog
 import android.content.Context
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.DisplayMetrics
@@ -27,7 +30,6 @@ class SearchModal(private val context: Context, private val listItem: ArrayList<
 
     private var listener: SearchModalListener? = null
     private var isLoading = false
-    private var loadingListener: ((Boolean) -> Unit)? = null
     private var searchKeyListener: ((String) -> Unit)? = null
     var label = "Pilih Opsi Kota"
     var searchHint = "Masukkan judul…"
@@ -53,36 +55,13 @@ class SearchModal(private val context: Context, private val listItem: ArrayList<
         this.listener = listener
     }
 
-    fun isLoading(value: Boolean) {
-        isLoading = value
-        loadingListener?.invoke(value)
-        Handler().postDelayed({
-            isLoadingHandler()
-        }, 100)
-    }
-
     fun setSearchKey(value: String) {
         searchKeyListener?.invoke(value)
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             etSearch.setText(value)
             etSearch.setSelection(value.length)
             etSearch.requestFocus()
         }, 100)
-    }
-
-    fun setLoadingListener(listener: (Boolean) -> Unit) {
-        loadingListener = listener
-    }
-
-    private fun isLoadingHandler() {
-
-        if (isLoading) {
-            txtLoading.visibility = View.VISIBLE
-            rvItems.visibility = View.GONE
-        } else {
-            txtLoading.visibility = View.GONE
-            rvItems.visibility = View.VISIBLE
-        }
     }
 
     private fun setLayout() {
@@ -109,7 +88,7 @@ class SearchModal(private val context: Context, private val listItem: ArrayList<
         tvSearch = findViewById(R.id.tv_search_label)
         etSearch = findViewById(R.id.et_search_box)
         icClearSearch = findViewById(R.id.ic_clear_search)
-        tvSearch.setText(label)
+        tvSearch.text = label
         etSearch.hint = searchHint
     }
 

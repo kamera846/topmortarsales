@@ -1,14 +1,15 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.view.gudang
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.Handler
 import android.provider.Settings
 import android.view.View
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -30,7 +31,6 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_SUCCESS
-import com.topmortar.topmortarsales.commons.RESULT_BASECAMP_FRAGMENT
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
@@ -51,6 +51,7 @@ import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
 
+@SuppressLint("SetTextI18n")
 class FormGudangActivity : AppCompatActivity() {
 
     private var _binding: ActivityFormGudangBinding? = null
@@ -149,6 +150,7 @@ class FormGudangActivity : AppCompatActivity() {
         } else checkLocationPermission()
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_EDIT_CONTACT_COORDINATE) {
@@ -165,7 +167,6 @@ class FormGudangActivity : AppCompatActivity() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
             if (urlUtility.isLocationEnabled(this)) {
 
-                val urlUtility = URLUtility(this)
                 urlUtility.requestLocationUpdate()
 
             } else {
@@ -237,7 +238,7 @@ class FormGudangActivity : AppCompatActivity() {
                         )
                     }
                 } else {
-                    if (phone.isNullOrEmpty()) {
+                    if (phone.isEmpty()) {
                         apiService.addGudang(
                             name = rbName,
                             cityId = rbLocation,
@@ -392,78 +393,4 @@ class FormGudangActivity : AppCompatActivity() {
         searchModal.show()
     }
 
-    private fun deleteValidation() {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Peringatan!")
-            .setMessage("Apakah anda yakin akan menghapus $name?")
-            .setPositiveButton("Hapus") { dialog, _ ->
-                submitDelete()
-                dialog.dismiss()
-            }
-            .setNegativeButton("Batal") { dialog, _ ->
-                dialog.dismiss()
-            }
-        builder.show()
-    }
-
-    private fun submitDelete() {
-        val loadingState = ProgressDialog(this)
-        loadingState.setCancelable(false)
-        loadingState.setMessage(getString(R.string.txt_deleting))
-        loadingState.show()
-
-        Handler().postDelayed({
-            handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, "Berhasil menghapus")
-
-            val resultIntent = Intent()
-            resultIntent.putExtra(REQUEST_BASECAMP_FRAGMENT, SYNC_NOW)
-            setResult(RESULT_BASECAMP_FRAGMENT, resultIntent)
-            finish()
-            loadingState.dismiss()
-        }, 1000)
-        return
-
-        lifecycleScope.launch {
-            try {
-                val rbIdGudang = createPartFromString(idGudang)
-
-                val apiService: ApiService = HttpClient.create()
-                val response = apiService.deleteGudang( idGudang = rbIdGudang )
-
-                when (response.status) {
-                    RESPONSE_STATUS_OK -> {
-
-                        handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, "Berhasil menghapus")
-
-                        val resultIntent = Intent()
-                        resultIntent.putExtra(REQUEST_BASECAMP_FRAGMENT, SYNC_NOW)
-                        setResult(RESULT_BASECAMP_FRAGMENT, resultIntent)
-                        finish()
-                        loadingState.dismiss()
-
-                    }
-                    RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
-
-                        handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, "Gagal menghapus gudang: ${ response.message }")
-                        loadingState.dismiss()
-
-                    }
-                    else -> {
-
-                        handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, "Gagal menghapus!")
-                        loadingState.dismiss()
-
-                    }
-                }
-
-
-            } catch (e: Exception) {
-
-                handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
-                loadingState.dismiss()
-
-            }
-
-        }
-    }
 }

@@ -1,10 +1,11 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.commons.services
 
 import android.Manifest
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.IBinder
 import android.os.Looper
 import androidx.core.app.ActivityCompat
@@ -33,10 +34,6 @@ class TrackingService : Service() {
 
     companion object {
         const val NOTIFICATION_ID = 1010
-    }
-
-    override fun onCreate() {
-        super.onCreate()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -88,9 +85,7 @@ class TrackingService : Service() {
 
                 childAbsent.child("lat").setValue(driverLocation.latitude)
                 childAbsent.child("lng").setValue(driverLocation.longitude)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    childAbsent.child("lastTracking").setValue(DateFormat.now())
-                }
+                childAbsent.child("lastTracking").setValue(DateFormat.now())
 
             }
         }

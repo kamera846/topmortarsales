@@ -1,12 +1,16 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.view.contact
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.view.View
 import android.view.animation.AnimationUtils
@@ -35,6 +39,8 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
@@ -47,6 +53,7 @@ import com.topmortar.topmortarsales.model.VoucherModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
 
+@SuppressLint("SetTextI18n")
 class VoucherActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityVoucherBinding
@@ -62,6 +69,8 @@ class VoucherActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
     private val userKind get() = sessionManager.userKind().toString()
+    private val userDistributor get() = sessionManager.userDistributor().toString()
+    private val userId get() = sessionManager.userID().toString()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,9 +89,11 @@ class VoucherActivity : AppCompatActivity() {
         binding.titleBarDark.icBack.setOnClickListener { finish() }
         binding.titleBarDark.tvTitleBar.text = "Daftar Voucher"
         binding.titleBarDark.tvTitleBarDescription.text = "Toko $contactName"
-        binding.titleBarDark.tvTitleBarDescription.visibility = if (!contactName.isNullOrEmpty()) View.VISIBLE else View.GONE
+        binding.titleBarDark.tvTitleBarDescription.visibility = if (contactName.isNotEmpty()) View.VISIBLE else View.GONE
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(true, userDistributor, userId)
 
         getList()
 
@@ -202,7 +213,7 @@ class VoucherActivity : AppCompatActivity() {
         progressDialog.setMessage("Sedang menghitung jarak...")
         progressDialog.show()
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
 
             val mapsUrl = contactMapsUrl
             val urlUtility = URLUtility(this)
@@ -213,7 +224,7 @@ class VoucherActivity : AppCompatActivity() {
 
                     urlUtility.requestLocationUpdate()
 
-                    if (!urlUtility.isUrl(mapsUrl) && !mapsUrl.isNullOrEmpty()) {
+                    if (!urlUtility.isUrl(mapsUrl) && mapsUrl.isNotEmpty()) {
                         fusedLocationClient.lastLocation.addOnSuccessListener { location: Location ->
 
                             // Courier Location
@@ -228,7 +239,6 @@ class VoucherActivity : AppCompatActivity() {
                             if (latitude != null && longitude != null) {
 
                                 // Calculate Distance
-                                val urlUtility = URLUtility(this)
                                 val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
                                 shortDistance = "%.3f".format(distance)
 
@@ -293,9 +303,9 @@ class VoucherActivity : AppCompatActivity() {
                         val actionTitle = "Hubungi Sekarang"
                         val customUtility = CustomUtility(this@VoucherActivity)
                         customUtility.showPermissionDeniedSnackbar(message, actionTitle) {
-                            val message = "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada toko *${ contactName }*"
+                            val messageText = "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada toko *${ contactName }*"
                             val distributorNumber = SessionManager(this).userDistributorNumber().toString()
-                            customUtility.navigateChatAdmin(message, distributorNumber)
+                            customUtility.navigateChatAdmin(messageText, distributorNumber)
                         }
                     }
 
@@ -311,5 +321,22 @@ class VoucherActivity : AppCompatActivity() {
             }
 
         }, 500)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(true, userDistributor, userId)
+        }, 1000)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(false, userDistributor, userId)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(false, userDistributor, userId)
     }
 }

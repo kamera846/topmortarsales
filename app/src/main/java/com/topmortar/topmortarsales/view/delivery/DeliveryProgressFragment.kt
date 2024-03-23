@@ -187,7 +187,7 @@ class DeliveryProgressFragment : Fragment() {
 
             } catch (e: Exception) {
 
-                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message + e.stackTraceToString())
+                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
 

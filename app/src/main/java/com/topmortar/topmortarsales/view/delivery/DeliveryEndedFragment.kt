@@ -1,6 +1,5 @@
 package com.topmortar.topmortarsales.view.delivery
 
-import android.app.Activity
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
@@ -11,7 +10,6 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -24,11 +22,8 @@ import com.topmortar.topmortarsales.R.string
 import com.topmortar.topmortarsales.adapter.recyclerview.HistoryDeliveryRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_DELIVERY_ID
 import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING_HISTORY
-import com.topmortar.topmortarsales.commons.REQUEST_BASECAMP_FRAGMENT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
-import com.topmortar.topmortarsales.commons.RESULT_BASECAMP_FRAGMENT
-import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -98,7 +93,7 @@ class DeliveryEndedFragment : Fragment() {
         loadingState(true)
         showBadgeRefresh(false)
 
-//        Handler().postDelayed({
+//        Handler(Looper.getMainLooper()).postDelayed({
 //            loadingState(true, "Belum ada pengiriman yang diselesaikan!")
 //        }, 1000)
 //
@@ -142,7 +137,7 @@ class DeliveryEndedFragment : Fragment() {
 
             } catch (e: Exception) {
 
-                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message + e.stackTraceToString())
+                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(string.failed_request))
                 showBadgeRefresh(true)
 
@@ -189,13 +184,6 @@ class DeliveryEndedFragment : Fragment() {
 
     }
 
-    private fun navigateItemAction() {
-
-        val intent = Intent(requireContext(), HistoryDeliveryActivity::class.java)
-        (requireContext() as Activity).startActivity(intent)
-
-    }
-
     private fun loadingState(state: Boolean, message: String = getString(string.txt_loading)) {
 
         binding.txtLoading.text = message
@@ -223,18 +211,6 @@ class DeliveryEndedFragment : Fragment() {
             badgeRefresh.visibility = View.VISIBLE
             tvTitle.setOnClickListener { getList() }
         } else badgeRefresh.visibility = View.GONE
-    }
-
-    private val someActivityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        // Handle the result
-        val resultCode = result.resultCode
-        val data = result.data
-        // Process the result
-
-        if (resultCode == RESULT_BASECAMP_FRAGMENT) {
-            val data = data?.getStringExtra(REQUEST_BASECAMP_FRAGMENT)
-            if (!data.isNullOrEmpty() && data == SYNC_NOW) getList()
-        }
     }
 
     private fun getCities() {

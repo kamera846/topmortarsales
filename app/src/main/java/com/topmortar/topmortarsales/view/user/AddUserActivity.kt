@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.Html
 import android.text.TextWatcher
@@ -54,6 +55,7 @@ import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.CityModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 @SuppressLint("SetTextI18n")
 class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
@@ -113,7 +115,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         initClickHandler()
         dataActivityHandler()
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
 
             // Setup Spinner
             setSpinner()
@@ -133,7 +135,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         val level = selectedLevel
         var city = "${ etUserCity.text }"
         val phone = "${ etPhone.text }"
-        val username = "${ etUsername.text }".trim().replace(" ", "").toLowerCase()
+        val username = "${ etUsername.text }".trim().replace(" ", "").lowercase(Locale.getDefault())
         val fullName = "${ etFullName.text }"
         val password = "${ etPassword.text }"
         val confirmPassword = "${ etConfirmPassword.text }"
@@ -147,7 +149,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         loadingState(true)
 
-//        Handler().postDelayed({
+//        Handler(Looper.getMainLooper()).postDelayed({
 //            handleMessage(this, "Add User", "$level : $city : $phone : $username : $password : $confirmPassword")
 //            loadingState(false)
 //            onSubmit = false
@@ -265,7 +267,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
                 if (currentText.isNotEmpty()) {
                     tvUsernameGenerated.visibility = View.VISIBLE
-                    tvUsernameGenerated.text = "$usernameGeneratedDescription <b><i>${currentText.replace(" ", "").toLowerCase()}</i></b>"
+                    tvUsernameGenerated.text = "$usernameGeneratedDescription <b><i>${currentText.replace(" ", "").lowercase(Locale.getDefault())}</i></b>"
                     tvUsernameGenerated.text = Html.fromHtml("${ tvUsernameGenerated.text }", Html.FROM_HTML_MODE_COMPACT)
                 } else tvUsernameGenerated.visibility = View.GONE
             }
@@ -463,7 +465,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         // Handle the selected option
         spinLevel.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: android.view.View?, position: Int, id: Long) {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 // Get the selected item value (e.g., "admin" or "sales")
                 selectedLevel = when (position) {
                     0 -> null

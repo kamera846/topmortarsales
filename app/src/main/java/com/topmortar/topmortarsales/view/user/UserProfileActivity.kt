@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.view.user
 
 import android.annotation.SuppressLint
@@ -6,64 +8,43 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.View
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
-import androidx.viewpager.widget.ViewPager
-import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.BarData
-import com.github.mikephil.charting.data.BarDataSet
-import com.github.mikephil.charting.data.BarEntry
-import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
-import com.google.android.material.tabs.TabLayout
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.adapter.viewpager.UserProfileViewPagerAdapter
-import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
-import com.topmortar.topmortarsales.commons.CONST_ADDRESS
-import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
-import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_COURIER_ID
-import com.topmortar.topmortarsales.commons.CONST_DATE
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_IS_NOTIFY
 import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING_COURIER
-import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
-import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
-import com.topmortar.topmortarsales.commons.CONST_OWNER
-import com.topmortar.topmortarsales.commons.CONST_PAYMENT_METHOD
 import com.topmortar.topmortarsales.commons.CONST_PHONE
-import com.topmortar.topmortarsales.commons.CONST_PROMO
-import com.topmortar.topmortarsales.commons.CONST_REPUTATION
-import com.topmortar.topmortarsales.commons.CONST_STATUS
-import com.topmortar.topmortarsales.commons.CONST_TERMIN
+import com.topmortar.topmortarsales.commons.CONST_USER_CITY
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
-import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
-import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
@@ -76,20 +57,21 @@ import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityUserProfileBinding
 import com.topmortar.topmortarsales.modal.ChartSalesPricingModal
-import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.SplashScreenActivity
-import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import kotlinx.coroutines.launch
-import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import java.util.Calendar
 
+@SuppressLint("SetTextI18n")
 class UserProfileActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
     private val userDistributorId get() = sessionManager.userDistributor()
+    private val userKind get() = sessionManager.userKind()
+    private val userId get() = sessionManager.userID()
+    private val userCity get() = sessionManager.userCityID()
 
     private lateinit var binding: ActivityUserProfileBinding
     private lateinit var customUtility: CustomUtility
@@ -97,9 +79,8 @@ class UserProfileActivity : AppCompatActivity() {
 
     private var iUserName: String? = null; private var iFullName: String? = null; private var iUserLevel: String? = null
     private var iUserID: String? = null; private var iPhone: String? = null; private var iLocation: String? = null
-    private var iIsNotify: String? = null
+    private var iIsNotify: String? = null; private var iUserCity: String? = null
 
-    private val bidLimit get() = sessionManager.userBidLimit().toString()
     private var isRequestSync = false
 
     private lateinit var firebaseReference: DatabaseReference
@@ -127,25 +108,34 @@ class UserProfileActivity : AppCompatActivity() {
         iUserLevel = intent.getStringExtra(CONST_USER_LEVEL)
         iLocation = intent.getStringExtra(CONST_LOCATION)
         iIsNotify = intent.getStringExtra(CONST_IS_NOTIFY)
+        iUserCity = intent.getStringExtra(CONST_USER_CITY)
 
         customUtility = CustomUtility(this)
         modalPricingDetails = ChartSalesPricingModal(this)
 
         binding.salesReportContainer.visibility = View.VISIBLE
 
-        if (sessionManager.userKind() == USER_KIND_COURIER) {
-            CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
-            checkAbsent()
-        }
-        if (iUserLevel == AUTH_LEVEL_COURIER) {
-            binding.salesReportContainer.visibility = View.GONE
-            binding.deliveryContainer.visibility = View.VISIBLE
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                setupCourierMenu()
-            }
-        }
-
-        initClickHandler()
+//        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
+//            CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+//            checkAbsent()
+//        }
+//        if (iUserLevel == AUTH_LEVEL_COURIER || (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES)) {
+//            binding.salesReportContainer.visibility = View.GONE
+//            binding.deliveryContainer.visibility = View.VISIBLE
+//
+//            if (iUserLevel == AUTH_LEVEL_COURIER) {
+//                binding.btnHistoryVisit.visibility = View.GONE
+//                binding.btnCourierHistoryDelivery.visibility = View.VISIBLE
+//            } else if (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES) {
+//                binding.btnHistoryVisit.visibility = View.VISIBLE
+//                binding.btnCourierHistoryDelivery.visibility = View.GONE
+//                if (userKind == USER_KIND_SALES) binding.btnCourierTracking.visibility = View.GONE
+//            }
+//
+//            setupCourierMenu()
+//        }
+//
+//        initClickHandler()
         dataActivityValidation()
 
     }
@@ -209,29 +199,11 @@ class UserProfileActivity : AppCompatActivity() {
 
     }
 
-    private fun navigateDetailContact(data: ContactModel? = null) {
+    private fun navigateHistoryVisit() {
 
-        val intent = Intent(this@UserProfileActivity, DetailContactActivity::class.java)
-
-        if (data != null) {
-            intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
-            intent.putExtra(CONST_CONTACT_ID, data.id_contact)
-            intent.putExtra(CONST_NAME, data.nama)
-            intent.putExtra(CONST_PHONE, data.nomorhp)
-            intent.putExtra(CONST_BIRTHDAY, data.tgl_lahir)
-            intent.putExtra(CONST_OWNER, data.store_owner)
-            intent.putExtra(CONST_LOCATION, data.id_city)
-            intent.putExtra(CONST_MAPS, data.maps_url)
-            intent.putExtra(CONST_ADDRESS, data.address)
-            intent.putExtra(CONST_STATUS, data.store_status)
-            intent.putExtra(CONST_KTP, data.ktp_owner)
-            intent.putExtra(CONST_PAYMENT_METHOD, data.payment_method)
-            intent.putExtra(CONST_TERMIN, data.termin_payment)
-            intent.putExtra(CONST_PROMO, data.id_promo)
-            intent.putExtra(CONST_REPUTATION, data.reputation)
-            intent.putExtra(CONST_DATE, data.created_at)
-        }
-
+        val intent = Intent(this@UserProfileActivity, HistoryVisitedActivity::class.java)
+        intent.putExtra(CONST_USER_ID, iUserID ?: userId)
+        intent.putExtra(CONST_USER_CITY, iUserCity ?: userCity)
         startActivity(intent)
 
     }
@@ -263,7 +235,7 @@ class UserProfileActivity : AppCompatActivity() {
             binding.titleBarLight.icEdit.setOnClickListener { navigateEditUser() }
         }
 
-        if (sessionManager.userKind() == USER_KIND_COURIER) {
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
             binding.btnLogout.setOnClickListener { logoutConfirmation() }
         }
 
@@ -275,6 +247,28 @@ class UserProfileActivity : AppCompatActivity() {
     }
 
     private fun dataActivityValidation() {
+
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
+            CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+            checkAbsent()
+        }
+        if (iUserLevel == AUTH_LEVEL_COURIER || (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES)) {
+            binding.salesReportContainer.visibility = View.GONE
+            binding.deliveryContainer.visibility = View.VISIBLE
+
+            if (iUserLevel == AUTH_LEVEL_COURIER) {
+                binding.btnHistoryVisit.visibility = View.GONE
+                binding.btnCourierHistoryDelivery.visibility = View.VISIBLE
+            } else if (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES) {
+                binding.btnHistoryVisit.visibility = View.VISIBLE
+                binding.btnCourierHistoryDelivery.visibility = View.GONE
+                if (userKind == USER_KIND_SALES) binding.btnCourierTracking.visibility = View.GONE
+            }
+
+            setupCourierMenu()
+        }
+
+        initClickHandler()
 
         if (iUserID.isNullOrEmpty()) {
             return getUserDetail()
@@ -288,145 +282,37 @@ class UserProfileActivity : AppCompatActivity() {
         if (iFullName!!.isNotEmpty()) binding.tvFullName.text = iFullName
         if (iUserLevel!!.isNotEmpty()) binding.tvLevel.text = iUserLevel
 
-        if (iUserLevel == AUTH_LEVEL_SALES) {
-
-            if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) binding.titleBarLight.icEdit.visibility = View.VISIBLE
-            binding.priceContainer.visibility = View.GONE
-            binding.tabContainer.visibility = View.VISIBLE
-//            binding.counterContainer.visibility = View.VISIBLE
-
-            val tabLayout: TabLayout = binding.tabLayout
-            val viewPager: ViewPager = binding.viewPager // If using ViewPager
-
-            val pagerAdapter = UserProfileViewPagerAdapter(supportFragmentManager) // Create your PagerAdapter
-
-            pagerAdapter.setUserCityParam(iLocation)
-            pagerAdapter.setUserIdParam(iUserID)
-            viewPager.adapter = pagerAdapter
-
-            // Connect TabLayout and ViewPager
-            tabLayout.setupWithViewPager(viewPager)
-            pagerAdapter.setCounterPageItem(object : UserProfileViewPagerAdapter.CounterPageItem{
-                override fun counterItem(count: Int, tabIndex: Int) {
-//                    if (tabIndex == 0) tabLayout.getTabAt(tabIndex)?.text = "On Bid ($count/$bidLimit)"
-                    if (tabIndex == 0) tabLayout.getTabAt(tabIndex)?.text = "Visited ($count)"
-                    else tabLayout.getTabAt(tabIndex)?.text = "Visited ($count)"
-                }
-
-            })
-
-        } else binding.tabContainer.visibility = View.GONE
+//        if (iUserLevel == AUTH_LEVEL_SALES) {
+//
+//            if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) binding.titleBarLight.icEdit.visibility = View.VISIBLE
+//            binding.priceContainer.visibility = View.GONE
+//            binding.tabContainer.visibility = View.VISIBLE
+////            binding.counterContainer.visibility = View.VISIBLE
+//
+//            val tabLayout: TabLayout = binding.tabLayout
+//            val viewPager: ViewPager = binding.viewPager // If using ViewPager
+//
+//            val pagerAdapter = UserProfileViewPagerAdapter(supportFragmentManager) // Create your PagerAdapter
+//
+//            pagerAdapter.setUserCityParam(iLocation)
+//            pagerAdapter.setUserIdParam(iUserID)
+//            viewPager.adapter = pagerAdapter
+//
+//            // Connect TabLayout and ViewPager
+//            tabLayout.setupWithViewPager(viewPager)
+//            pagerAdapter.setCounterPageItem(object : UserProfileViewPagerAdapter.CounterPageItem{
+//                override fun counterItem(count: Int, tabIndex: Int) {
+////                    if (tabIndex == 0) tabLayout.getTabAt(tabIndex)?.text = "On Bid ($count/$bidLimit)"
+//                    if (tabIndex == 0) tabLayout.getTabAt(tabIndex)?.text = "Visited ($count)"
+//                    else tabLayout.getTabAt(tabIndex)?.text = "Visited ($count)"
+//                }
+//
+//            })
+//
+//        } else binding.tabContainer.visibility = View.GONE
 
 //        setupBarChart()
 
-    }
-
-    private fun setupBarChart() {
-        lifecycleScope.launch {
-            try {
-
-                val apiService: ApiService = HttpClient.create()
-                val response = when (sessionManager.userKind()) {
-                    USER_KIND_ADMIN -> apiService.getStoreCount()
-                    else -> apiService.getStoreCount(sessionManager.userCityID().toString())
-                }
-
-                when (response.status) {
-                    RESPONSE_STATUS_OK -> {
-
-                        val dataList = response.results
-
-                        binding.barChartContainer.visibility = View.GONE
-                        val barChart = binding.storeBarChart
-
-                        // Create some sample data
-                        val entries = ArrayList<BarEntry>()
-                        val labels = arrayOf<String>()
-
-                        for ((i, item) in dataList.listIterator().withIndex()) {
-                            entries.add(BarEntry(i.toFloat(), item.jml_store.toFloat()))
-                            labels.plus(item.store_status)
-                        }
-
-//                        entries.add(BarEntry(0f, 100f))
-//                        entries.add(BarEntry(1f, 150f))
-//                        entries.add(BarEntry(2f, 80f))
-//                        entries.add(BarEntry(3f, 120f))
-//                        entries.add(BarEntry(4f, 60f))
-//                        entries.add(BarEntry(5f, 90f))
-
-                        // Access the custom colors from resources
-                        val colorActive = ContextCompat.getColor(this@UserProfileActivity, R.color.status_active)
-                        val colorPassive = ContextCompat.getColor(this@UserProfileActivity, R.color.status_passive)
-                        val colorData = ContextCompat.getColor(this@UserProfileActivity, R.color.status_data)
-                        val colorBid = ContextCompat.getColor(this@UserProfileActivity, R.color.status_bid)
-                        val colorBlack = ContextCompat.getColor(this@UserProfileActivity, R.color.black_200)
-                        val colorBlackList = ContextCompat.getColor(this@UserProfileActivity, R.color.status_blacklist)
-
-                        // Create a list of custom colors
-                        val customColors = listOf(
-                            colorActive,
-                            colorBid,
-                            colorBlackList,
-                            colorPassive,
-//                            colorData,
-//                            colorBlack
-                        )
-
-                        val dataSet = BarDataSet(entries, "")
-                        dataSet.colors = customColors
-
-                        val textColorResId = if (customUtility.isDarkMode()) R.color.white else R.color.black_200
-                        val textColor = ContextCompat.getColor(this@UserProfileActivity, textColorResId)
-
-                        // Customize the x-axis labels (optional)
-                        val xAxis = barChart.xAxis
-                        val yAxisLeft = barChart.axisLeft
-                        val yAxisRight = barChart.axisRight
-//                        val labels = arrayOf("Active", "Passive", "Data", "Bid", "Not Set", "Blacklist")
-
-                        xAxis.valueFormatter = IndexAxisValueFormatter(labels)
-                        xAxis.position = XAxis.XAxisPosition.BOTTOM
-                        xAxis.setDrawGridLines(false)
-                        xAxis.setDrawAxisLine(true)
-                        xAxis.granularity = 1f
-
-                        xAxis.textColor = textColor
-                        yAxisLeft.textColor = textColor
-                        yAxisRight.textColor = textColor
-                        dataSet.valueTextColor = textColor
-
-                        val data = BarData(dataSet)
-                        barChart.data = data
-
-                        // Customize the chart (optional)
-                        barChart.setFitBars(true)
-                        barChart.description.isEnabled = false
-                        barChart.animateY(1000)
-
-                        toggleBarChart()
-
-                    }
-                    RESPONSE_STATUS_EMPTY -> {
-
-                        handleMessage(this@UserProfileActivity, TAG_RESPONSE_CONTACT, "Belum ada statistik toko.")
-
-                    }
-                    else -> {
-
-                        handleMessage(this@UserProfileActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
-
-                    }
-                }
-
-
-            } catch (e: Exception) {
-
-                handleMessage(this@UserProfileActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
-
-            }
-
-        }
     }
 
     private fun toggleBarChart() {
@@ -437,19 +323,20 @@ class UserProfileActivity : AppCompatActivity() {
         if (barChart.isVisible) {
             barChart.visibility = View.GONE
             title.text = "Statistik Toko di Kota Malang (tampilkan)"
-            icon.setImageDrawable(getDrawable(R.drawable.chevron_down_solid))
+            icon.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.chevron_down_solid))
         } else {
             barChart.visibility = View.VISIBLE
             title.text = "Statistik Toko di Kota Malang (sembunyikan)"
-            icon.setImageDrawable(getDrawable(R.drawable.chevron_up_solid))
+            icon.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.chevron_up_solid))
         }
     }
 
     @Subscribe
     fun onEventBus(event: EventBusUtils.ContactModelEvent) {
-        navigateDetailContact(event.data)
+//        navigateDetailContact(event.data)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -514,12 +401,10 @@ class UserProfileActivity : AppCompatActivity() {
             userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
             val userDevice = userDevices.child(userDeviceText)
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                userDevice.child("logout_at").setValue(DateFormat.now())
-            } else userDevice.child("logout_at").setValue("")
+            userDevice.child("logout_at").setValue(DateFormat.now())
             userDevice.child("login_at").setValue("")
 
-            if (sessionManager.userKind() == USER_KIND_COURIER) {
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
 //                Log.d("Kurir Logout", "${sessionManager.userDistributor()} : ${sessionManager.userID()}")
                 CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
             }
@@ -533,7 +418,7 @@ class UserProfileActivity : AppCompatActivity() {
             this.stopService(serviceIntent)
         }
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             sessionManager.setLoggedIn(LOGGED_OUT)
             sessionManager.setUserLoggedIn(null)
 
@@ -545,52 +430,57 @@ class UserProfileActivity : AppCompatActivity() {
         }, 1000)
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun setupCourierMenu() {
+    private fun  setupCourierMenu() {
+
+        val personCall = if (userKind == USER_KIND_SALES) "Anda" else "Pengguna"
+        val personcall = if (userKind == USER_KIND_SALES) "anda" else "pengguna"
+
         childAbsent = firebaseReference.child(FIREBASE_CHILD_ABSENT)
-        childCourier = childAbsent?.child("$iUserID")
+        childCourier = childAbsent?.child(iUserID ?: userId ?: "0")
 
-        courierTrackingListener = object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                // Do something here
-                if (snapshot.child("isOnline").exists()) {
+        if (userKind != USER_KIND_SALES) {
+            courierTrackingListener = object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    // Do something here
+                    if (snapshot.child("isOnline").exists()) {
 
-                    val padding8 = convertDpToPx(8, this@UserProfileActivity)
-                    val padding2 = convertDpToPx(2, this@UserProfileActivity)
-                    binding.userStatus.visibility = View.VISIBLE
+                        val padding8 = convertDpToPx(8, this@UserProfileActivity)
+                        val padding2 = convertDpToPx(2, this@UserProfileActivity)
+                        binding.userStatus.visibility = View.VISIBLE
 
-                    val isOnline = snapshot.child("isOnline").getValue(Boolean::class.java) ?: false
-                    if (isOnline) {
-                        binding.userStatus.text = "Online"
-                        binding.userStatus.setTextColor(getColor(R.color.white))
-                        binding.userStatus.setBackgroundResource(R.drawable.bg_green_reseda_round_8)
-                        binding.userStatus.setPadding(padding8, padding2, padding8, padding2)
-                    } else {
-                        if (snapshot.child("lastSeen").exists()) {
-                            val lastSeen = snapshot.child("lastSeen").getValue(String::class.java).toString()
-                            val dateDescEvening = DateFormat.differenceDateNowDesc(lastSeen)
-                            val dateEvening =
-                                DateFormat.format(lastSeen, "yyyy-MM-dd HH:mm:ss", "HH.mm")
-                            binding.userStatus.text = "Terakhir terlihat $dateEvening $dateDescEvening"
-                            binding.userStatus.setTextColor(getColor(R.color.black_200))
-                            binding.userStatus.setBackgroundResource(android.R.color.transparent)
-                            binding.userStatus.setPadding(0, padding2, 0, padding2)
-                        } else {
-                            binding.userStatus.text = "Offline"
-                            binding.userStatus.setTextColor(getColor(R.color.black_200))
-                            binding.userStatus.setBackgroundResource(R.drawable.bg_light_dark_round)
+                        val isOnline = snapshot.child("isOnline").getValue(Boolean::class.java) ?: false
+                        if (isOnline) {
+                            binding.userStatus.text = "Online"
+                            binding.userStatus.setTextColor(getColor(R.color.white))
+                            binding.userStatus.setBackgroundResource(R.drawable.bg_green_reseda_round_8)
                             binding.userStatus.setPadding(padding8, padding2, padding8, padding2)
+                        } else {
+                            if (snapshot.child("lastSeen").exists()) {
+                                val lastSeen = snapshot.child("lastSeen").getValue(String::class.java).toString()
+                                val dateDescEvening = DateFormat.differenceDateNowDesc(lastSeen)
+                                val dateEvening =
+                                    DateFormat.format(lastSeen, "yyyy-MM-dd HH:mm:ss", "HH.mm")
+                                binding.userStatus.text = "Terakhir terlihat $dateEvening $dateDescEvening"
+                                binding.userStatus.setTextColor(getColor(R.color.black_200))
+                                binding.userStatus.setBackgroundResource(android.R.color.transparent)
+                                binding.userStatus.setPadding(0, padding2, 0, padding2)
+                            } else {
+                                binding.userStatus.text = "Offline"
+                                binding.userStatus.setTextColor(getColor(R.color.black_200))
+                                binding.userStatus.setBackgroundResource(R.drawable.bg_light_dark_round)
+                                binding.userStatus.setPadding(padding8, padding2, padding8, padding2)
+                            }
                         }
                     }
                 }
-            }
 
-            override fun onCancelled(error: DatabaseError) {
-                // Do something here
-            }
+                override fun onCancelled(error: DatabaseError) {
+                    // Do something here
+                }
 
+            }
+            childCourier?.addValueEventListener(courierTrackingListener!!)
         }
-        childCourier?.addValueEventListener(courierTrackingListener!!)
 
         childCourier?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -605,15 +495,15 @@ class UserProfileActivity : AppCompatActivity() {
 
                             if (DateFormat.dateAfterNow(absentMorningDate)) {
                                 // Absent morning false
-                                binding.absentTitle.text = "Pengguna Belum Absen"
-                                binding.absentDescription.text = "Absen pengguna hari ini belum tercatat"
+                                binding.absentTitle.text = "$personCall Belum Absen"
+                                binding.absentDescription.text = "Absen $personcall hari ini belum tercatat"
                             } else {
 
                                 // Absent morning true
                                 val dateDescMorning = DateFormat.differenceDateNowDesc(morningDateTime)
                                 val dateMorning = DateFormat.format(morningDateTime, "yyyy-MM-dd HH:mm:ss", "HH.mm")
-                                binding.absentTitle.text = "Pengguna Telah Absen"
-                                binding.absentDescription.text = "Absen pengguna telah tercatat pada pukul $dateMorning $dateDescMorning"
+                                binding.absentTitle.text = "$personCall Telah Absen"
+                                binding.absentDescription.text = "Absen $personcall telah tercatat pada pukul $dateMorning $dateDescMorning"
 
                                 if (snapshot.child("eveningDateTime").exists()) {
                                     val eveningDateTime = snapshot.child("eveningDateTime").getValue(String::class.java).toString()
@@ -627,8 +517,8 @@ class UserProfileActivity : AppCompatActivity() {
                                             // Absent evening true
                                             val dateDescEvening = DateFormat.differenceDateNowDesc(eveningDateTime)
                                             val dateEvening = DateFormat.format(eveningDateTime, "yyyy-MM-dd HH:mm:ss", "HH.mm")
-                                            binding.absentTitle.text = "Pengguna Telah Pulang"
-                                            binding.absentDescription.text = "Absen pengguna telah tercatat pada pukul $dateMorning $dateDescMorning dan pulang pada pukul $dateEvening $dateDescEvening"
+                                            binding.absentTitle.text = "$personCall Telah Pulang"
+                                            binding.absentDescription.text = "Absen $personcall telah tercatat pada pukul $dateMorning $dateDescMorning dan pulang pada pukul $dateEvening $dateDescEvening"
                                         }
                                     } else {
                                         // Absent evening false
@@ -641,18 +531,18 @@ class UserProfileActivity : AppCompatActivity() {
 
                         } else {
                             // Absent morning false
-                            binding.absentTitle.text = "Pengguna Belum Absen"
-                            binding.absentDescription.text = "Absen pengguna hari ini belum tercatat"
+                            binding.absentTitle.text = "$personCall Belum Absen"
+                            binding.absentDescription.text = "Absen $personcall hari ini belum tercatat"
                         }
                     } else {
                         // Absent morning false
-                        binding.absentTitle.text = "Pengguna Belum Absen"
-                        binding.absentDescription.text = "Absen pengguna hari ini belum tercatat"
+                        binding.absentTitle.text = "$personCall Belum Absen"
+                        binding.absentDescription.text = "Absen $personcall hari ini belum tercatat"
                     }
                 } else {
                     // Absent morning false
-                    binding.absentTitle.text = "Pengguna Belum Absen"
-                    binding.absentDescription.text = "Absen pengguna hari ini belum tercatat"
+                    binding.absentTitle.text = "$personCall Belum Absen"
+                    binding.absentDescription.text = "Absen $personcall hari ini belum tercatat"
                 }
             }
 
@@ -662,21 +552,22 @@ class UserProfileActivity : AppCompatActivity() {
 
         })
 
+        binding.btnHistoryVisit.setOnClickListener { navigateHistoryVisit() }
         binding.btnCourierReport.setOnClickListener { navigateSalesReport() }
         binding.btnCourierTracking.setOnClickListener { navigateTrackingCourier() }
     }
 
-    private fun lockBtnLogout(state: Boolean) {
+    private fun lockBtnLogout() {
         val calendar = Calendar.getInstance()
         val currentHour = calendar.get(Calendar.HOUR_OF_DAY) // Mengambil jam saat ini dalam format 24 jam
 
-        if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
-            binding.btnLogout.visibility = View.GONE
-            binding.lockedInfoText.visibility = View.VISIBLE
-        } else {
+//        if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
+//            binding.btnLogout.visibility = View.GONE
+//            binding.lockedInfoText.visibility = View.VISIBLE
+//        } else {
             binding.btnLogout.visibility = View.VISIBLE
             binding.lockedInfoText.visibility = View.GONE
-        }
+//        }
     }
 
     private fun checkAbsent() {
@@ -686,7 +577,6 @@ class UserProfileActivity : AppCompatActivity() {
         val userChild = absentChild.child(userId)
 
         userChild.addListenerForSingleValueEvent(object: ValueEventListener {
-            @RequiresApi(Build.VERSION_CODES.O)
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
                     // Do something
@@ -699,7 +589,7 @@ class UserProfileActivity : AppCompatActivity() {
 
                             if (DateFormat.dateAfterNow(absentMorningDate)) {
                                 isAbsentMorningNow = false
-                                lockBtnLogout(true)
+                                lockBtnLogout()
                             } else {
 
                                 isAbsentMorningNow = true
@@ -711,34 +601,34 @@ class UserProfileActivity : AppCompatActivity() {
 
                                         if (DateFormat.dateAfterNow(absentEveningDate)) {
                                             isAbsentEveningNow = false
-                                            lockBtnLogout(false)
+                                            lockBtnLogout()
                                         } else {
                                             isAbsentEveningNow = true
-                                            lockBtnLogout(true)
+                                            lockBtnLogout()
                                         }
 
                                     } else {
                                         isAbsentEveningNow = false
-                                        lockBtnLogout(false)
+                                        lockBtnLogout()
                                     }
                                 } else {
                                     isAbsentEveningNow = false
-                                    lockBtnLogout(false)
+                                    lockBtnLogout()
                                 }
 
                             }
 
                         } else {
                             isAbsentMorningNow = false
-                            lockBtnLogout(true)
+                            lockBtnLogout()
                         }
                     } else {
                         isAbsentMorningNow = false
-                        lockBtnLogout(true)
+                        lockBtnLogout()
                     }
                 } else {
                     isAbsentMorningNow = false
-                    lockBtnLogout(true)
+                    lockBtnLogout()
                 }
             }
 
@@ -746,7 +636,7 @@ class UserProfileActivity : AppCompatActivity() {
                 // Do something
                 isAbsentMorningNow = false
                 isAbsentEveningNow = false
-                lockBtnLogout(true)
+                lockBtnLogout()
             }
 
         })
@@ -754,26 +644,17 @@ class UserProfileActivity : AppCompatActivity() {
 
 // Override Class
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         backHandler()
     }
 
-    override fun onResume() {
-        super.onResume()
-//        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
-    }
-
-    override fun onPause() {
-        super.onPause()
-//        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
-    }
-
     override fun onStart() {
         super.onStart()
-        EventBus.getDefault().register(this)
-        Handler().postDelayed({
+//        EventBus.getDefault().register(this)
+        Handler(Looper.getMainLooper()).postDelayed({
             if (sessionManager.isLoggedIn()) {
-                if (sessionManager.userKind() == USER_KIND_COURIER) {
+                if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
                     CustomUtility(this).setUserStatusOnline(
                         true,
                         sessionManager.userDistributor().toString(),
@@ -786,9 +667,9 @@ class UserProfileActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-        EventBus.getDefault().unregister(this)
+//        EventBus.getDefault().unregister(this)
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_COURIER) {
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor().toString(),
@@ -801,7 +682,7 @@ class UserProfileActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_COURIER) {
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor().toString(),

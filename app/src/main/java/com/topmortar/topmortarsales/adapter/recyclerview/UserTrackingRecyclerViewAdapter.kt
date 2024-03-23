@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.databinding.ItemUserTrackingBinding
 import com.topmortar.topmortarsales.model.UserAbsentModel
 
@@ -54,6 +55,8 @@ class UserTrackingRecyclerViewAdapter : RecyclerView.Adapter<UserTrackingRecycle
             }
 
             binding.userName.text = item.fullname
+            binding.initialName.text = CustomUtility(context!!).getInitials(item.fullname)
+
             if (item.isOnline) {
                 binding.userProfile.setBackgroundResource(R.drawable.bg_light_round_online)
             } else {

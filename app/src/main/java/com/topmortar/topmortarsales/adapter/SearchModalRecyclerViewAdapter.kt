@@ -1,8 +1,9 @@
 package com.topmortar.topmortarsales.adapter
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
-import android.util.Log
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -45,30 +46,29 @@ class SearchModalRecyclerViewAdapter(private val items: ArrayList<ModalSearchMod
         holder.bind(item)
         holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
         holder.itemView.setOnClickListener {
-            if (position != RecyclerView.NO_POSITION) {
-                val animateDuration = 100L
+            val animateDuration = 100L
 
-                val fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in)
-                fadeIn.duration = animateDuration
+            val fadeIn = AnimationUtils.loadAnimation(context, R.anim.fade_in)
+            fadeIn.duration = animateDuration
 
-                val overlayView = holder.itemView.findViewById<LinearLayout>(R.id.overlay_view)
+            val overlayView = holder.itemView.findViewById<LinearLayout>(R.id.overlay_view)
 
-                overlayView.alpha = 0.3f
-                overlayView.visibility = View.VISIBLE
-                overlayView.startAnimation(fadeIn)
+            overlayView.alpha = 0.3f
+            overlayView.visibility = View.VISIBLE
+            overlayView.startAnimation(fadeIn)
 
-                Handler().postDelayed({
-                    overlayView.alpha = 0f
-                    overlayView.visibility = View.GONE
-                    val data = filteredItemList[position]
-                    itemClickListener.onItemClick(data)
-                }, animateDuration)
-            }
+            Handler(Looper.getMainLooper()).postDelayed({
+                overlayView.alpha = 0f
+                overlayView.visibility = View.GONE
+                val data = filteredItemList[position]
+                itemClickListener.onItemClick(data)
+            }, animateDuration)
         }
     }
 
     override fun getItemCount(): Int = filteredItemList.size
 
+    @SuppressLint("NotifyDataSetChanged")
     fun filter(filterText: String) {
         filteredItemList.clear()
 

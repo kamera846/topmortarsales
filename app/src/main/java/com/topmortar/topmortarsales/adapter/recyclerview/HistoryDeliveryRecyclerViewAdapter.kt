@@ -1,7 +1,9 @@
 package com.topmortar.topmortarsales.adapter.recyclerview
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,12 +13,9 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.DeliveryModel
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 
+@SuppressLint("SetTextI18n")
 class HistoryDeliveryRecyclerViewAdapter(private val listItem: ArrayList<DeliveryModel.History>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<HistoryDeliveryRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
 
@@ -31,22 +30,8 @@ class HistoryDeliveryRecyclerViewAdapter(private val listItem: ArrayList<Deliver
         val tooltipStatus: ImageView = itemView.findViewById(R.id.tooltip_status)
 
         fun bind(item: DeliveryModel.History) {
-            var dateEnded = item.endDatetime
-
-            if (dateEnded.isNotEmpty()) {
-                val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(item.endDatetime)
-                dateEnded = if (date != null) {
-                    val calendar = Calendar.getInstance()
-                    val currentYear = calendar.get(Calendar.YEAR)
-                    val dateYear = SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
-
-                    if (currentYear == dateYear.toInt()) DateFormat.format(item.endDatetime, "yyyy-MM-dd HH:mm:ss", "dd MMM, HH:mm")
-                    else DateFormat.format(item.endDatetime, "yyyy-MM-dd HH:mm:ss", "dd MMM yyyy, HH:mm")
-                } else DateFormat.format(item.endDatetime, "yyyy-MM-dd HH:mm:ss", "dd MMM, HH:mm")
-            }
 
             tvContactName.text = item.nama
-//            tvPhoneNumber.text = "Diselesaikan pada $dateEnded"
             tvPhoneNumber.text = "Diselesaikan oleh " + item.full_name
 
         }
@@ -92,7 +77,7 @@ class HistoryDeliveryRecyclerViewAdapter(private val listItem: ArrayList<Deliver
             overlayView.visibility = View.VISIBLE
             overlayView.startAnimation(fadeIn)
 
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 overlayView.alpha = 0f
                 overlayView.visibility = View.GONE
             }, animateDuration)

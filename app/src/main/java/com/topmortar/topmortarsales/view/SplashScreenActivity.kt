@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.view
 
 import android.annotation.SuppressLint
@@ -7,6 +9,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.text.Editable
 import android.text.InputType
@@ -69,8 +72,10 @@ import com.topmortar.topmortarsales.view.courier.HomeCourierActivity
 import com.topmortar.topmortarsales.view.rencanaVisits.HomeSalesActivity
 import com.topmortar.topmortarsales.view.tukang.BrandAmbassadorActivity
 import kotlinx.coroutines.launch
+import java.util.Locale
 import java.util.UUID
 
+@SuppressLint("CustomSplashScreen", "SetTextI18n")
 class SplashScreenActivity : AppCompatActivity() {
 
     private lateinit var rlModal: LinearLayout
@@ -142,7 +147,7 @@ class SplashScreenActivity : AppCompatActivity() {
         initClickHandler()
         initOtpListener()
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
 
             checkSession()
 
@@ -207,7 +212,7 @@ class SplashScreenActivity : AppCompatActivity() {
         icEyeNewPasswordContainer.setOnClickListener { togglePassword() }
         tvResetPassword.setOnClickListener {
             currentSubmitStep = 1
-            submitHandler(next = true)
+            submitHandler()
         }
         icBack.setOnClickListener { if (currentSubmitStep > 0) submitHandler(previous = true) }
 
@@ -358,7 +363,7 @@ class SplashScreenActivity : AppCompatActivity() {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         if (snapshot.exists()) {
                             for (item in snapshot.children) {
-                                val device = item.getValue(DeviceModel::class.java)?.let { it }
+                                val device = item.getValue(DeviceModel::class.java)
                                 var userDeviceText = "${device?.manufacture}${device?.model}${device?.id}"
                                 userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
                                 val userDevice = userDevicesChild.child(userDeviceText)
@@ -410,17 +415,17 @@ class SplashScreenActivity : AppCompatActivity() {
 
     }
 
-    private fun showAlert(message: String, duration: Long = 2000) {
+    private fun showAlert(message: String) {
 
         cardAlert.visibility = View.VISIBLE
         tvAlert.text = message
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
 
             cardAlert.visibility = View.GONE
             tvAlert.text = ""
 
-        }, duration)
+        }, 5000)
 
     }
 
@@ -429,10 +434,10 @@ class SplashScreenActivity : AppCompatActivity() {
         builder.setTitle("Batalkan Setel Ulang Kata Sandi")
             .setMessage("Apakah Anda yakin ingin membatalkan proses \"Setel Ulang Kata Sandi\"?")
             .setNegativeButton("Tidak") { dialog, _ -> dialog.dismiss() }
-            .setPositiveButton("Iya") { dialog, _ ->
+            .setPositiveButton("Iya") { _, _ ->
 
                 currentSubmitStep += 1
-                submitHandler(next = true)
+                submitHandler()
 
             }
         val dialog = builder.create()
@@ -510,7 +515,7 @@ class SplashScreenActivity : AppCompatActivity() {
                                 override fun onDataChange(snapshot: DataSnapshot) {
                                     if (snapshot.exists()) {
                                         for (item in snapshot.children) {
-                                            val device = item.getValue(DeviceModel::class.java)?.let { it }
+                                            val device = item.getValue(DeviceModel::class.java)
                                             var userDeviceText = "${device?.manufacture}${device?.model}${device?.id}"
                                             userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
                                             val userDevice = userDevicesChild.child(userDeviceText)
@@ -555,19 +560,19 @@ class SplashScreenActivity : AppCompatActivity() {
                     }
                     RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                        showAlert("${ response.message }", 5000)
+                        showAlert(response.message)
                         loadingState(false)
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        showAlert("Username atau kata sandi anda sepertinya salah!", 5000)
+                        showAlert("Username atau kata sandi anda sepertinya salah!")
                         loadingState(false)
 
                     }
                     else -> {
 
-                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_CONTACT, response.message.let { if (!it.isNullOrEmpty()) it else "Proses autentikasi gagal" })
+                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_CONTACT, response.message.let { it.ifEmpty { "Proses autentikasi gagal" } })
                         loadingState(false)
 
                     }
@@ -585,7 +590,8 @@ class SplashScreenActivity : AppCompatActivity() {
 
     private fun requestOtpHandler() {
 
-        val usernameForgot = "${ etUsernameForgot.text }".trim().replace(" ", "").toLowerCase()
+        val usernameForgot = "${ etUsernameForgot.text }".trim().replace(" ", "")
+            .lowercase(Locale.getDefault())
 
         if (usernameForgot.isEmpty()) {
             etUsernameForgot.error = "Username tidak boleh kosong!"
@@ -598,9 +604,9 @@ class SplashScreenActivity : AppCompatActivity() {
 
         loadingState(true)
 
-//        Handler().postDelayed({
+//        Handler(Looper.getMainLooper()).postDelayed({
 //            currentSubmitStep += 1
-//            submitHandler(next = true)
+//            submitHandler()
 //            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Success creating new OTP code!")
 //            loadingState(false)
 //        }, 1000)
@@ -620,8 +626,10 @@ class SplashScreenActivity : AppCompatActivity() {
                     if (responseBody.status == RESPONSE_STATUS_OK) {
 
                         currentSubmitStep += 1
-                        submitHandler(next = true)
-                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "${ responseBody.message }")
+                        submitHandler()
+                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE,
+                            responseBody.message
+                        )
                         loadingState(false)
 
                     } else {
@@ -679,9 +687,9 @@ class SplashScreenActivity : AppCompatActivity() {
 
         loadingState(true)
 
-//        Handler().postDelayed({
+//        Handler(Looper.getMainLooper()).postDelayed({
 //            currentSubmitStep += 1
-//            submitHandler(next = true)
+//            submitHandler()
 //            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "$otpCode")
 ////            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "OTP code verified, please insert your new password!")
 //            loadingState(false)
@@ -703,8 +711,10 @@ class SplashScreenActivity : AppCompatActivity() {
 
                         idUserResetPassword = responseBody.user_id
                         currentSubmitStep += 1
-                        submitHandler(next = true)
-                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "${ responseBody.message }")
+                        submitHandler()
+                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE,
+                            responseBody.message
+                        )
                         loadingState(false)
 
                     } else {
@@ -732,7 +742,7 @@ class SplashScreenActivity : AppCompatActivity() {
         val userID = "$idUserResetPassword"
         val password = "${ etNewPassword.text }"
 
-        if (userID.isNullOrEmpty()) {
+        if (userID.isEmpty()) {
             handleMessage(this, "USER RESET PASSWORD", "Tidak dapat menemukan pengguna untuk setel ulang kata sandi, silakan coba masukkan kata sandi Anda!")
         } else if (password.isEmpty()) {
             etNewPassword.error = "Kata sandi baru Anda tidak boleh kosong!"
@@ -750,9 +760,9 @@ class SplashScreenActivity : AppCompatActivity() {
 
         loadingState(true)
 
-//        Handler().postDelayed({
+//        Handler(Looper.getMainLooper()).postDelayed({
 //            currentSubmitStep += 1
-//            submitHandler(next = true)
+//            submitHandler()
 ////            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Success change password. Please login again!")
 //            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "$password : $userID")
 //            loadingState(false)
@@ -776,11 +786,11 @@ class SplashScreenActivity : AppCompatActivity() {
 
                             idUserResetPassword = null
                             currentSubmitStep += 1
-                            submitHandler(next = true)
+                            submitHandler()
                             handleMessage(
                                 this@SplashScreenActivity,
                                 TAG_RESPONSE_MESSAGE,
-                                "${responseBody.message}"
+                                responseBody.message
                             )
                             loadingState(false)
                         }
@@ -813,7 +823,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
     }
 
-    private fun submitHandler(next: Boolean? = null, previous: Boolean? = null, submit: Boolean? = null) {
+    private fun submitHandler(previous: Boolean? = null, submit: Boolean? = null) {
 
         if (isPasswordShow) togglePassword()
 
@@ -955,6 +965,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (currentSubmitStep > 0) {
             if (currentSubmitStep > 2) showResetConfirmation()
@@ -1003,19 +1014,17 @@ class SplashScreenActivity : AppCompatActivity() {
         userDevice.child("density").setValue("$density")
 
         // User Loged In Datetime
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            userDevice.child("login_at").addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val loginTime = snapshot.getValue(String::class.java)
-                    if (loginTime.isNullOrEmpty()) userDevice.child("login_at").setValue(DateFormat.now())
-                }
+        userDevice.child("login_at").addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val loginTime = snapshot.getValue(String::class.java)
+                if (loginTime.isNullOrEmpty()) userDevice.child("login_at").setValue(DateFormat.now())
+            }
 
-                override fun onCancelled(error: DatabaseError) {
-                    // Do something
-                }
+            override fun onCancelled(error: DatabaseError) {
+                // Do something
+            }
 
-            })
-        } else userDevice.child("login_at").setValue("")
+        })
         userDevice.child("logout_at").setValue("")
 
     }

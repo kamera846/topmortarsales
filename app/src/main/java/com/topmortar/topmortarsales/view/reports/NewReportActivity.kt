@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.view.reports
 
 import android.Manifest
@@ -10,6 +12,7 @@ import android.location.Location
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
@@ -35,6 +38,8 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
@@ -48,6 +53,7 @@ import com.topmortar.topmortarsales.databinding.ActivityNewReportBinding
 import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
 
+@SuppressLint("SetTextI18n")
 class NewReportActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityNewReportBinding
@@ -84,6 +90,14 @@ class NewReportActivity : AppCompatActivity() {
 
         initContent()
         initClickHandler()
+
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
+            CustomUtility(this).setUserStatusOnline(
+                true,
+                sessionManager.userDistributor().toString(),
+                sessionManager.userID().toString()
+            )
+        }
     }
 
     private fun initContent() {
@@ -112,7 +126,7 @@ class NewReportActivity : AppCompatActivity() {
             }
         }
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
 
             binding.etName.text = name
             calculateDistance()
@@ -152,10 +166,10 @@ class NewReportActivity : AppCompatActivity() {
     }
 
     @SuppressLint("MissingPermission")
-    fun calculateDistance(view: View? = null) {
+    fun calculateDistance() {
         progressDialog.show()
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
 
             val mapsUrl = coordinate
             val urlUtility = URLUtility(this)
@@ -166,7 +180,7 @@ class NewReportActivity : AppCompatActivity() {
 
                     urlUtility.requestLocationUpdate()
 
-                    if (!urlUtility.isUrl(mapsUrl) && !mapsUrl.isNullOrEmpty()) {
+                    if (!urlUtility.isUrl(mapsUrl) && mapsUrl.isNotEmpty()) {
                         fusedLocationClient.lastLocation.addOnSuccessListener { location: Location ->
 
                             // Courier Location
@@ -181,7 +195,6 @@ class NewReportActivity : AppCompatActivity() {
                             if (latitude != null && longitude != null) {
 
                                 // Calculate Distance
-                                val urlUtility = URLUtility(this)
                                 val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
                                 val shortDistance = "%.3f".format(distance)
 
@@ -270,7 +283,7 @@ class NewReportActivity : AppCompatActivity() {
 
     private fun navigateChatAdmin() {
         val distributorNumber = sessionManager.userDistributorNumber()!!
-        val phoneNumber = if (distributorNumber.isNotEmpty()) distributorNumber else getString(R.string.topmortar_wa_number)
+        val phoneNumber = distributorNumber.ifEmpty { getString(R.string.topmortar_wa_number) }
         val message = "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada $reportType *${ name }*"
 
         val intent = Intent(Intent.ACTION_VIEW)
@@ -301,7 +314,7 @@ class NewReportActivity : AppCompatActivity() {
 
     private fun formValidation(): Boolean {
         val etMessage = binding.etMessage
-        if (coordinate.isNullOrEmpty()) {
+        if (coordinate.isEmpty()) {
             val message = "Jarak anda belum terhitung!"
             customUtility.showDialog(message = message)
             return false
@@ -409,6 +422,46 @@ class NewReportActivity : AppCompatActivity() {
         } else {
             binding.tvLoading.visibility = View.GONE
             binding.container.visibility = View.VISIBLE
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
+                CustomUtility(this).setUserStatusOnline(
+                    true,
+                    sessionManager.userDistributor().toString(),
+                    sessionManager.userID().toString()
+                )
+            }
+        }, 1000)
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        if (sessionManager.isLoggedIn()) {
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
+                CustomUtility(this).setUserStatusOnline(
+                    false,
+                    sessionManager.userDistributor().toString(),
+                    sessionManager.userID().toString()
+                )
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (sessionManager.isLoggedIn()) {
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
+                CustomUtility(this).setUserStatusOnline(
+                    false,
+                    sessionManager.userDistributor().toString(),
+                    sessionManager.userID().toString()
+                )
+            }
         }
     }
 

@@ -1,7 +1,9 @@
 package com.topmortar.topmortarsales.view.contact
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -12,8 +14,8 @@ import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.CONST_KTP
-import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 
+@SuppressLint("SetTextI18n")
 class PreviewKtpActivity : AppCompatActivity() {
 
     private lateinit var tvTitleBar: TextView
@@ -45,7 +47,7 @@ class PreviewKtpActivity : AppCompatActivity() {
             .load(imageUrl)
             .into(photoView, object : Callback {
                 override fun onSuccess() {
-                    Handler().postDelayed({
+                    Handler(Looper.getMainLooper()).postDelayed({
                         lnrFooter.visibility = View.GONE
                         lnrTitleBar.visibility = View.GONE
                     }, 5000)
@@ -63,12 +65,12 @@ class PreviewKtpActivity : AppCompatActivity() {
 
         // Mengaktifkan rotasi
         photoView.rotation = 0f // Atur rotasi awal gambar (dalam derajat)
-        photoView.setOnClickListener { photoView.rotation = photoView.rotation + 90F }
+        photoView.setOnClickListener { photoView.rotation += 90F }
         icBack.setOnClickListener { finish() }
-        photoView.setOnPhotoTapListener { view, x, y ->
+        photoView.setOnPhotoTapListener { _, _, _ ->
             lnrFooter.visibility = View.VISIBLE
             lnrTitleBar.visibility = View.VISIBLE
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 lnrFooter.visibility = View.GONE
                 lnrTitleBar.visibility = View.GONE
             }, 5000)

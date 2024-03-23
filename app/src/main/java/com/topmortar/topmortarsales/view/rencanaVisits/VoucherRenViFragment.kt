@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.view.rencanaVisits
 
 import android.content.Intent
@@ -63,7 +65,6 @@ class VoucherRenViFragment : Fragment() {
     private lateinit var userKind: String
     private lateinit var userCity: String
     private lateinit var userID: String
-    private val userDistributorid get() = sessionManager.userDistributor().toString()
 
     private lateinit var badgeRefresh: LinearLayout
     private lateinit var searchModal: SearchModal
@@ -124,7 +125,7 @@ class VoucherRenViFragment : Fragment() {
                     RESPONSE_STATUS_OK -> {
 
                         setRecyclerView(response.results)
-                        loadingState(false, )
+                        loadingState(false)
                         showBadgeRefresh(false)
                         listener?.counterItem(response.results.size)
 
@@ -147,7 +148,7 @@ class VoucherRenViFragment : Fragment() {
 
             } catch (e: Exception) {
 
-                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message + e.stackTraceToString())
+                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
 
@@ -179,7 +180,7 @@ class VoucherRenViFragment : Fragment() {
                     intent.putExtra(CONST_TERMIN, data.termin_payment)
                     intent.putExtra(CONST_PROMO, data.id_promo)
                     intent.putExtra(CONST_REPUTATION, data.reputation)
-                    intent.putExtra(CONST_DATE, data.created_at)
+                    intent.putExtra(CONST_DATE, data.created_at_store)
                 }
 
                 startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)

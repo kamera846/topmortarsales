@@ -1,7 +1,9 @@
 package com.topmortar.topmortarsales.adapter.recyclerview
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +16,7 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.VoucherModel
 
+@SuppressLint("SetTextI18n")
 class VoucherRecyclerViewAdapter(private val chatList: ArrayList<VoucherModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<VoucherRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
 
@@ -26,7 +29,6 @@ class VoucherRecyclerViewAdapter(private val chatList: ArrayList<VoucherModel>, 
         private val imgIcon: ImageView = itemView.findViewById(R.id.iv_contact_profile)
         val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
-        private val imgChecklist: ImageView = itemView.findViewById(R.id.checklist)
         private val textVerified: TextView = itemView.findViewById(R.id.textVerified)
 
         fun bind(item: VoucherModel) {
@@ -92,7 +94,7 @@ class VoucherRecyclerViewAdapter(private val chatList: ArrayList<VoucherModel>, 
             overlayView.visibility = View.VISIBLE
             overlayView.startAnimation(fadeIn)
 
-            Handler().postDelayed({
+            Handler(Looper.getMainLooper()).postDelayed({
                 overlayView.alpha = 0f
                 overlayView.visibility = View.GONE
             }, animateDuration)

@@ -182,5 +182,19 @@
         2. Notifications related to geolocation.\n
         \nPlease select the "Always Allow!" option in the settings
     </string>
+    <string name="absen_pulang_sudah_tercatat" translatable="false">Absen pulang sudah tercatat</string>
+    <string name="terima_kasih_atas_kinerja_hari_ini" translatable="false">Terima kasih atas kinerja hari ini. Beristirahatlah untuk kinerja yang maksimal esok hari.</string>
+    <string name="yuk_catat_kehadiranmu_hari_ini" translatable="false">Yuk, Catat Kehadiranmu Hari ini</string>
+    <string name="kehadiranmu_telah_tercatat" translatable="false">Kehadiranmu Telah Tercatat</string>
+    <string name="absenmu_penting" translatable="false">Absenmu penting! Jangan lupa untuk mencatat kehadiranmu sekarang dan ciptakan jejak kerja yang positif.</string>
+    <string name="terimakasih_sudah_mencatat_kehadiran_hari_ini" translatable="false">Terima kasih sudah mencatat kehadiran hari ini dan jangan lupa untuk mencatat absen pulang juga setelah lebih dari pukul 16.00 nanti.</string>
+    <string name="terimakasih_sudah_mencatat_kehadiran_hari_ini_without_clock" translatable="false">Terima kasih sudah mencatat kehadiran hari ini dan jangan lupa untuk mencatat absen pulang juga setelah pekerjaan anda selesai nanti.</string>
+    <string name="absen_sekarang" translatable="false">Absen Sekarang</string>
+    <string name="pulang_sekarang" translatable="false">Pulang Sekarang</string>
+    <string name="fitur_terkunci" translatable="false">Fitur terkunci</string>
+    <string name="absen_terlebih_dahulu_untuk_membuka" translatable="false">Absen terlebih dahulu untuk membuka fitur ini</string>
+    <string name="tekan_sekali_lagi" translatable="false">Tekan sekali lagi untuk keluar!</string>
+
+    <string name="oke" translatable="false">Oke</string>
 
 </resources>

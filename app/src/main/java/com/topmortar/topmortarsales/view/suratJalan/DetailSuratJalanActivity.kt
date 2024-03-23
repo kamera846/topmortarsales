@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.view.suratJalan
 
 import android.Manifest
@@ -20,6 +22,7 @@ import android.os.Build
 import android.os.Build.VERSION
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.print.PrintAttributes
 import android.print.PrintManager
 import android.provider.MediaStore
@@ -27,6 +30,7 @@ import android.provider.Settings
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.ImageView
@@ -88,6 +92,7 @@ import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.printUtils.Comman
 import com.topmortar.topmortarsales.commons.printUtils.PdfDocumentAdapter
 import com.topmortar.topmortarsales.commons.utils.BluetoothPrinterManager
@@ -111,6 +116,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@SuppressLint("SetTextI18n")
 class DetailSuratJalanActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
@@ -171,7 +177,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         private const val PRINT_METHOD_WIFI_TITLE = "Print Wifi"
     }
 
-    var fileName : String = "Surat Jalan.pdf"
+    private var fileName : String = "Surat Jalan.pdf"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -182,7 +188,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
-        if (userKind == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+        if (userKind == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
         customUtility = CustomUtility(this@DetailSuratJalanActivity)
 
         initVariable()
@@ -380,11 +386,11 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                         isClosing = data.is_closing == "1"
                         isCod = data.is_cod == "1"
 
-                        tvReferenceNumber.text = "${ data.no_surat_jalan }"
+                        tvReferenceNumber.text = data.no_surat_jalan
 //                        tvDeliveryDate.text = "${ data.dalivery_date }"
-                        tvShipToName.text = "${ data.ship_to_name }"
-                        tvShipToAddress.text = "${ data.ship_to_address }"
-                        tvShipToPhone.text = "${ data.ship_to_phone }"
+                        tvShipToName.text = data.ship_to_name
+                        tvShipToAddress.text = data.ship_to_address
+                        tvShipToPhone.text = data.ship_to_phone
                         tvDeliveryOrderDate.text = "Delivery Date: ${ data.dalivery_date }"
                         tvDeliveryOrderNumber.text = "Printed Date: " + isClosing.let { if (it) data.date_printed else "-" }
                         tvCourier.text = "Kurir: ${ data.courier_name }"
@@ -393,12 +399,12 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                         if (isClosing) {
                             tvReceivedBy.visibility = View.VISIBLE
                             tvReceivedDate.visibility = View.VISIBLE
-                            tvReceivedBy.text = "${ data.ship_to_name }"
-                            tvReceivedDate.text = "Sudah di closing pada ${ data.date_closing }" + data.distance.let { if (!it.isNullOrEmpty()) "\ndengan jarak $it km dari titik toko" else "" }
+                            tvReceivedBy.text = data.ship_to_name
+                            tvReceivedDate.text = "Sudah di closing pada ${ data.date_closing }" + data.distance.let { if (it.isNotEmpty()) "\ndengan jarak $it km dari titik toko" else "" }
                             btnBottomAction.visibility = View.GONE
                         }
 
-                        setRecyclerView(response.results[0].details.let { if (it.isNullOrEmpty()) arrayListOf() else it })
+                        setRecyclerView(response.results[0].details.let { if (it.isEmpty()) arrayListOf() else it })
 
 //                        Toast.makeText(this@DetailSuratJalanActivity, "${detailContact!!.maps_url}", TOAST_SHORT).show()
                         loadingState(false)
@@ -526,7 +532,6 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                         if (latitude != null && longitude != null) {
 
                             // Calculate Distance
-                            val urlUtility = URLUtility(this)
                             val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
                             var stringDistance = "%.3f".format(distance)
 
@@ -569,7 +574,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
     private fun navigateChatAdmin() {
         val distributorNumber = sessionManager.userDistributorNumber()!!
-        val phoneNumber = if (distributorNumber.isNotEmpty()) distributorNumber else getString(R.string.topmortar_wa_number)
+        val phoneNumber = distributorNumber.ifEmpty { getString(R.string.topmortar_wa_number) }
         val message = "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada toko *${ detailContact!!.nama }*"
 
         val intent = Intent(Intent.ACTION_VIEW)
@@ -767,7 +772,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                             val data = response.results[0]
 
                             fileName = "Surat Jalan ${data.no_surat_jalan}.pdf"
-                            File(Comman.getAppPath(this@DetailSuratJalanActivity)).mkdirs()
+                            Comman.getAppPath(this@DetailSuratJalanActivity)
+                                ?.let { File(it).mkdirs() }
                             createPDFFile(Comman.getAppPath(this@DetailSuratJalanActivity) + fileName, data)
                             printingState(false)
 
@@ -805,32 +811,29 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         val printer = EscPosPrinter(printersConnections, 203, 70f, 48)
 
         // Change the desired width and height for your image (in pixels)
-        val desiredWidth = 200*2 // Adjust this to your desired width
-        val desiredHeight = 103*2 // Adjust this to your desired height
-
         val drawable = this.applicationContext.resources.getDrawableForDensity(
             R.drawable.logo_top_mortar,
             DisplayMetrics.DENSITY_MEDIUM
         )
 
         // Scale the drawable to the desired dimensions
-        val scaledDrawable = scaleDrawable(drawable!!, desiredWidth, desiredHeight)
+        val scaledDrawable = scaleDrawable(drawable!!)
 
         // Convert the scaled drawable to hexadecimal string and print it
         val imageHexadecimal = PrinterTextParserImg.bitmapToHexadecimalString(printer, scaledDrawable)
 
         // Data to Printed
-        val txtReferenceNumber = "${ data.no_surat_jalan }"
-        val txtShipToName = "${ data.ship_to_name }"
-        val txtShipToAddress = "${ data.ship_to_address }"
-        val txtShipToPhone = "${ data.ship_to_phone }"
+        val txtReferenceNumber = data.no_surat_jalan
+        val txtShipToName = data.ship_to_name
+        val txtShipToAddress = data.ship_to_address
+        val txtShipToPhone = data.ship_to_phone
         val txtDeliveryOrderDate = "Delivery Date: ${ data.dalivery_date }"
         val txtPrintedDate = "Printed Date: ${ data.date_printed }"
         val txtCourier = "Kurir: ${ data.courier_name }"
         val txtVehicle = "Kendaraan: ${ data.nama_kendaraan }"
         val txtVehicleNumber = "No. Polisi: ${ data.nopol_kendaraan }"
 
-        val orders = data.details.let { if (it.isNullOrEmpty()) arrayListOf() else it }
+        val orders = data.details.let { if (it.isEmpty()) arrayListOf() else it }
         var textOrders = ""
 
         orders.forEach {
@@ -880,21 +883,22 @@ class DetailSuratJalanActivity : AppCompatActivity() {
             "[L]\n"
         )
 
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             printingState(false)
         }, 1000)
     }
 
-    private fun scaleDrawable(drawable: Drawable, width: Int, height: Int): Drawable {
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    private fun scaleDrawable(drawable: Drawable): Drawable {
+        val bitmap = Bitmap.createBitmap(400, 206, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
-        drawable.setBounds(0, 0, width, height)
+        drawable.setBounds(0, 0, 400, 206)
         drawable.draw(canvas)
         return BitmapDrawable(this.applicationContext.resources, bitmap)
     }
 
     private fun showPrintOption() {
-        val bottomSheetLayout = layoutInflater.inflate(R.layout.fragment_bottom_sheet_print_option, null)
+        val parentLayout: ViewGroup = findViewById(R.id.detail_surat_jalan_activity) // Ganti dengan ID yang sesuai dari layout Anda
+        val bottomSheetLayout = layoutInflater.inflate(R.layout.fragment_bottom_sheet_print_option, parentLayout, false)
 
         bottomSheetDialog = BottomSheetDialog(this)
         bottomSheetDialog.setContentView(bottomSheetLayout)
@@ -978,6 +982,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_ENABLE_BLUETOOTH) {
@@ -999,6 +1004,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         backHandler()
     }
@@ -1023,12 +1029,6 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         paragraph.paddingRight = paddingRight
         paragraph.paddingBottom = paddingBottom
         return paragraph
-    }
-
-    private fun getCellWithRowspan(content: String, rowspan: Int, alignment: TextAlignment): Cell {
-        return Cell(rowspan, 1).apply {
-            add(getParagraph(content, alignment))
-        }
     }
 
     private fun createPDFFile(path: String, data: SuratJalanModel) {
@@ -1117,7 +1117,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 //            }
 //        }
 
-        val items = data.details.let { if (it.isNullOrEmpty()) arrayListOf() else it }
+        val items = data.details.let { if (it.isEmpty()) arrayListOf() else it }
 
         for ((index, item) in items.iterator().withIndex()) {
             val i = index + 1
@@ -1172,19 +1172,19 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        Handler().postDelayed({
-            if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
         }, 1000)
     }
 
     override fun onStop() {
         super.onStop()
-        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
     }
 
 }

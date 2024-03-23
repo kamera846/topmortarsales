@@ -1,5 +1,6 @@
 package com.topmortar.topmortarsales.view.suratJalan
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
@@ -17,6 +18,7 @@ import android.widget.PopupMenu
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -39,9 +41,9 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
-import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
@@ -52,6 +54,7 @@ import com.topmortar.topmortarsales.view.invoice.DetailInvoiceActivity
 import kotlinx.coroutines.launch
 
 @Suppress("DEPRECATION")
+@SuppressLint("SetTextI18n")
 class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapter.ItemClickListener,
     InvoiceRecyclerViewAdapter.ItemClickListener {
 
@@ -77,25 +80,16 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
     // Global
     private lateinit var sessionManager: SessionManager
-    private val userKind get() = sessionManager.userKind()
     private val userDistributorId get() = sessionManager.userDistributor()
     private val userID get() = sessionManager.userID()
 
     private lateinit var apiService: ApiService
     private var isListActive: String = LIST_SURAT_JALAN
     private var isFilterInvoice: String = FILTER_NONE
-    private var doubleBackToExitPressedOnce = false
     private var isRequestSync = false
     private var isClosingAction = false
     private var contactId: String? = null
     private var iName: String? = null
-
-    // Initialize Search Engine
-    private val searchDelayMillis = 500L
-    private val searchHandler = Handler(Looper.getMainLooper())
-    private var searchRunnable: Runnable? = null
-    private var previousSearchTerm = ""
-    private var isSearchActive = false
 
     companion object {
         const val LIST_SURAT_JALAN = "list_surat_jalan"
@@ -114,13 +108,12 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
         setContentView(R.layout.activity_list_invoice)
 
-        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
 
         initVariable()
         initClickHandler()
         dataActivityValidation()
-//        toggleList()
 
     }
 
@@ -156,10 +149,8 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
         // Get the current theme mode (light or dark)
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) llFilter.background = getDrawable(R.color.black_400)
-        else llFilter.background = getDrawable(R.color.light)
-
-        val padding16 = convertDpToPx(16, this)
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) llFilter.background = AppCompatResources.getDrawable(this, R.color.black_400)
+        else llFilter.background = AppCompatResources.getDrawable(this, R.color.light)
 
     }
 
@@ -454,6 +445,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
@@ -497,6 +489,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
 //        super.onBackPressed()
         backHandler()
@@ -504,19 +497,19 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
     override fun onStart() {
         super.onStart()
-        Handler().postDelayed({
-            if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
         }, 1000)
     }
 
     override fun onStop() {
         super.onStop()
-        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
     }
 
 }
