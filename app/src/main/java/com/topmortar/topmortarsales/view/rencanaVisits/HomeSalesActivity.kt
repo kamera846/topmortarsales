@@ -75,6 +75,7 @@ import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityHomeSalesBinding
 import com.topmortar.topmortarsales.modal.SearchModal
+import com.topmortar.topmortarsales.model.BaseCampModel
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MainActivity
@@ -102,6 +103,7 @@ class HomeSalesActivity : AppCompatActivity() {
     private val selectedStoreDefaultID get() = sessionManager.selectedStoreAbsentID()
     private val selectedStoreDefaultTitle get() = sessionManager.selectedStoreAbsentTitle()
     private val selectedStoreDefaultCoordinate get() = sessionManager.selectedStoreAbsentCoordinate()
+    private val selectedAbsentMode get() = sessionManager.selectedAbsentMode()
 
     private var doubleBackToExitPressedOnce = false
     private var isAbsentMorningNow = false
@@ -116,7 +118,15 @@ class HomeSalesActivity : AppCompatActivity() {
     private lateinit var searchStoreAbsentModal: SearchModal
     private var selectedStore: ModalSearchModel? = null
     private var listStore: ArrayList<ContactModel> = arrayListOf()
+    private var listBaseCamp: ArrayList<BaseCampModel> = arrayListOf()
     private var isSelectStoreOnly = false
+
+    companion object {
+        const val ABSENT_MODE_STORE = "store"
+        const val ABSENT_MODE_BASECAMP = "basecamp"
+    }
+
+    private var absentMode: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -137,6 +147,7 @@ class HomeSalesActivity : AppCompatActivity() {
         apiService = HttpClient.create()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         customUtility = CustomUtility(this)
+        absentMode = selectedAbsentMode
 
         binding.selectedStoreContainer.tvLabel.text = "Lokasi absen:"
 
@@ -149,6 +160,7 @@ class HomeSalesActivity : AppCompatActivity() {
                 etc = selectedStoreDefaultCoordinate
             )
         }
+        absentMode = selectedAbsentMode
         setupDialogSearch()
 
         checkLocationPermission()
@@ -206,11 +218,7 @@ class HomeSalesActivity : AppCompatActivity() {
         else binding.selectedStoreContainer.componentFilter.background = AppCompatResources.getDrawable(this, R.color.light)
         binding.selectedStoreContainer.componentFilter.setOnClickListener {
             isSelectStoreOnly = true
-            if (listStore.isEmpty()) getListStore()
-            else {
-                setupDialogSearch(listStore)
-                searchStoreAbsentModal.show()
-            }
+            getListAbsent()
         }
 
         binding.btnAbsent.setOnClickListener {
@@ -224,13 +232,8 @@ class HomeSalesActivity : AppCompatActivity() {
                     ) {
 
                         absentProgressDialog?.show()
-                        if (selectedStore == null) {
-                            if (listStore.isEmpty()) getListStore()
-                            else {
-                                setupDialogSearch(listStore)
-                                searchStoreAbsentModal.show()
-                            }
-                        } else absentAction()
+                        if (selectedStore == null) getListAbsent()
+                        else absentAction()
 
                     } else {
                         val message = getString(R.string.bg_service_location_permission_message)
@@ -256,13 +259,8 @@ class HomeSalesActivity : AppCompatActivity() {
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 //                    absentAction()
                     absentProgressDialog?.show()
-                    if (selectedStore == null) {
-                        if (listStore.isEmpty()) getListStore()
-                        else {
-                            setupDialogSearch(listStore)
-                            searchStoreAbsentModal.show()
-                        }
-                    } else absentAction()
+                    if (selectedStore == null) getListAbsent()
+                    else absentAction()
                 } else {
                     ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
                 }
@@ -467,33 +465,76 @@ class HomeSalesActivity : AppCompatActivity() {
 
     }
 
-    private fun setupDialogSearch(items: ArrayList<ContactModel> = ArrayList()) {
+    private fun setupDialogSearch(storeItems: ArrayList<ContactModel> = ArrayList(), basecampItems: ArrayList<BaseCampModel> = ArrayList()) {
 
         val modalItems = arrayListOf<ModalSearchModel>()
-        for (item in items) {
-            modalItems.add(
-                ModalSearchModel(
-                    id = item.id_contact,
-                    title = item.nama,
-                    etc = item.maps_url
+        if (absentMode == ABSENT_MODE_STORE) {
+            for (item in storeItems) {
+                modalItems.add(
+                    ModalSearchModel(
+                        id = item.id_contact,
+                        title = item.nama,
+                        etc = item.maps_url
+                    )
                 )
-            )
+            }
+            modalItems.add(0, ModalSearchModel(id = "-1", "== Ganti absen dari basecamp =="))
+        } else {
+            for (item in basecampItems) {
+                modalItems.add(
+                    ModalSearchModel(
+                        id = item.id_gudang,
+                        title = item.nama_gudang,
+                        etc = item.location_gudang
+                    )
+                )
+            }
+            modalItems.add(0, ModalSearchModel(id = "-1", "== Ganti absen dari toko =="))
         }
 
         searchStoreAbsentModal = SearchModal(this, modalItems)
-        searchStoreAbsentModal.label = "Pilih Toko"
+        searchStoreAbsentModal.label = if (absentMode == ABSENT_MODE_STORE) "Pilih Toko" else "Pilih Basecamp"
         searchStoreAbsentModal.searchHint = "Ketik untuk mencari…"
         searchStoreAbsentModal.setOnDismissListener { absentProgressDialog?.dismiss() }
         searchStoreAbsentModal.setCustomDialogListener(object : SearchModal.SearchModalListener {
             override fun onDataReceived(data: ModalSearchModel) {
-                selectedStore = data
-                binding.selectedStoreContainer.tvFilter.text = data.title
-                sessionManager.selectedStoreAbsent(data.id ?: "", data.title ?: "", data.etc ?: "")
-                if (isSelectStoreOnly) isSelectStoreOnly = false
-                else absentAction()
+                if (data.id == "-1") {
+                    if (absentMode == ABSENT_MODE_STORE) absentMode = ABSENT_MODE_BASECAMP
+                    else absentMode = ABSENT_MODE_STORE
+                    getListAbsent()
+                } else {
+                    selectedStore = data
+                    binding.selectedStoreContainer.tvFilter.text = data.title
+                    sessionManager.selectedStoreAbsent(data.id ?: "", data.title ?: "", data.etc ?: "", absentMode ?: ABSENT_MODE_STORE)
+                    if (isSelectStoreOnly) {
+                        isSelectStoreOnly = false
+                        Log.d("SELECTED ABSENT", "select only: $absentMode : $selectedStore")
+                    }
+                    else {
+                        Log.d("SELECTED ABSENT", "absent: $absentMode : $selectedStore")
+                        return
+                        absentAction()
+                    }
+                }
             }
 
         })
+    }
+
+    private fun getListAbsent() {
+        if (absentMode == ABSENT_MODE_STORE) {
+            if (listStore.isEmpty()) getListStore()
+            else {
+                setupDialogSearch(listStore)
+                searchStoreAbsentModal.show()
+            }
+        } else {
+            if (listBaseCamp.isEmpty()) getListBasecamp()
+            else {
+                setupDialogSearch(basecampItems = listBaseCamp)
+                searchStoreAbsentModal.show()
+            }
+        }
     }
 
     private fun absentAction() {
@@ -950,6 +991,50 @@ class HomeSalesActivity : AppCompatActivity() {
 
                         absentProgressDialog?.dismiss()
                         setupDialogSearch(listStore)
+                        if (showModal) searchStoreAbsentModal.show()
+
+                    }
+                    else -> {
+
+                        handleMessage(this@HomeSalesActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        absentProgressDialog?.dismiss()
+
+                    }
+                }
+
+            } catch (e: Exception) {
+
+                handleMessage(this@HomeSalesActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                absentProgressDialog?.dismiss()
+
+            }
+
+        }
+
+    }
+
+    private fun getListBasecamp(showModal: Boolean = true) {
+
+        if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
+
+        lifecycleScope.launch {
+            try {
+
+                val response = apiService.getListBaseCamp(distributorID = userDistributorId ?: "0")
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        absentProgressDialog?.dismiss()
+                        listBaseCamp = response.results
+                        setupDialogSearch(basecampItems = listBaseCamp)
+                        if (showModal) searchStoreAbsentModal.show()
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        absentProgressDialog?.dismiss()
+                        setupDialogSearch(basecampItems = listBaseCamp)
                         if (showModal) searchStoreAbsentModal.show()
 
                     }

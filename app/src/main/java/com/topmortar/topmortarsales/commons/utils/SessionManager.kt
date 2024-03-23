@@ -119,10 +119,11 @@ class SessionManager(context: Context) {
         return sharedPreferences.getString("selectedBasecampAbsentCoordinate", "")
     }
 
-    fun selectedStoreAbsent(selectedStoreAbsentID: String, selectedStoreAbsentTitle: String, selectedStoreAbsentCoordinate: String) {
+    fun selectedStoreAbsent(selectedStoreAbsentID: String, selectedStoreAbsentTitle: String, selectedStoreAbsentCoordinate: String, selectedAbsentMode: String) {
         editor.putString("selectedStoreAbsentID", selectedStoreAbsentID)
         editor.putString("selectedStoreAbsentTitle", selectedStoreAbsentTitle)
         editor.putString("selectedStoreAbsentCoordinate", selectedStoreAbsentCoordinate)
+        editor.putString("selectedAbsentMode", selectedAbsentMode)
         editor.apply()
     }
 
@@ -136,6 +137,10 @@ class SessionManager(context: Context) {
 
     fun selectedStoreAbsentCoordinate(): String? {
         return sharedPreferences.getString("selectedStoreAbsentCoordinate", "")
+    }
+
+    fun selectedAbsentMode(): String? {
+        return sharedPreferences.getString("selectedAbsentMode", "")
     }
 
     fun userDistributor(userDistributor: String) {
