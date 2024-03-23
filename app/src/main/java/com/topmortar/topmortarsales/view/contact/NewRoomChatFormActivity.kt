@@ -25,6 +25,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.ABSENT_MODE_STORE
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
@@ -33,6 +34,7 @@ import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.SELECTED_ABSENT_MODE
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
@@ -206,6 +208,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
                             val resultIntent = Intent()
                             resultIntent.putExtra("$activityRequestCode", SYNC_NOW)
+                            resultIntent.putExtra(SELECTED_ABSENT_MODE, ABSENT_MODE_STORE)
                             setResult(RESULT_OK, resultIntent)
                             finish()
 

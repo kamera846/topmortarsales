@@ -15,6 +15,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.ABSENT_MODE_BASECAMP
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
@@ -23,6 +24,7 @@ import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.EDIT_CONTACT
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.REQUEST_BASECAMP_FRAGMENT
 import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -30,6 +32,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.RESULT_BASECAMP_FRAGMENT
+import com.topmortar.topmortarsales.commons.SELECTED_ABSENT_MODE
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
@@ -247,6 +250,8 @@ class AddBaseCampActivity : AppCompatActivity() {
 
                         val resultIntent = Intent()
                         resultIntent.putExtra(REQUEST_BASECAMP_FRAGMENT, SYNC_NOW)
+                        resultIntent.putExtra("$MAIN_ACTIVITY_REQUEST_CODE", SYNC_NOW)
+                        resultIntent.putExtra(SELECTED_ABSENT_MODE, ABSENT_MODE_BASECAMP)
                         setResult(RESULT_BASECAMP_FRAGMENT, resultIntent)
                         finish()
                         loadingState.dismiss()

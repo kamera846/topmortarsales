@@ -33,6 +33,8 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.ABSENT_MODE_BASECAMP
+import com.topmortar.topmortarsales.commons.ABSENT_MODE_STORE
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE
@@ -57,6 +59,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.SELECTED_ABSENT_MODE
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
@@ -82,6 +85,7 @@ import com.topmortar.topmortarsales.view.MainActivity
 import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.SplashScreenActivity
 import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
+import com.topmortar.topmortarsales.view.courier.AddBaseCampActivity
 import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.launch
@@ -120,11 +124,6 @@ class HomeSalesActivity : AppCompatActivity() {
     private var listStore: ArrayList<ContactModel> = arrayListOf()
     private var listBaseCamp: ArrayList<BaseCampModel> = arrayListOf()
     private var isSelectStoreOnly = false
-
-    companion object {
-        const val ABSENT_MODE_STORE = "store"
-        const val ABSENT_MODE_BASECAMP = "basecamp"
-    }
 
     private var absentMode: String? = null
 
@@ -209,6 +208,8 @@ class HomeSalesActivity : AppCompatActivity() {
         binding.allStore.setOnClickListener { if (isLocked) showDialogLockedFeature() else navigateToAllStore()}
         binding.nearestStoreItem.setOnClickListener { navigateToNearestStore()}
         binding.registerNewStore.setOnClickListener { navigateToRegisterStore()}
+        binding.nearestBasecampItem.setOnClickListener { navigateToNearestBasecamp()}
+        binding.registerNewBasecamp.setOnClickListener { navigateToRegisterBasecamp()}
         binding.myProfileItem.setOnClickListener { navigateToMyProfile() }
         binding.btnLogout.setOnClickListener { logoutConfirmation() }
         binding.reportDetail.setOnClickListener { navigateToListReport() }
@@ -288,8 +289,12 @@ class HomeSalesActivity : AppCompatActivity() {
         startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
     }
 
+    private fun navigateToRegisterBasecamp() {
+        val intent = Intent(this, AddBaseCampActivity::class.java)
+        startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
+    }
+
     private fun navigateToMyProfile() {
-        Log.d("USER CLICKED", "Clicked")
         val intent = Intent(this, UserProfileActivity::class.java)
         startActivity(intent)
     }
@@ -349,6 +354,83 @@ class HomeSalesActivity : AppCompatActivity() {
                             val intent = Intent(this@HomeSalesActivity, MapsActivity::class.java)
 
                             intent.putExtra(CONST_NEAREST_STORE, true)
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+
+                            progressDialog.dismiss()
+                            startActivity(intent)
+
+                        }
+                        else -> {
+
+                            handleMessage(this@HomeSalesActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                            progressDialog.dismiss()
+
+                        }
+                    }
+
+
+                } catch (e: Exception) {
+
+                    handleMessage(this@HomeSalesActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                    progressDialog.dismiss()
+
+                }
+
+            }
+
+        }, 1000)
+    }
+
+    private fun navigateToNearestBasecamp() {
+        val progressDialog = ProgressDialog(this)
+        progressDialog.setMessage("Memuat data basecamp…")
+        progressDialog.show()
+
+        Handler().postDelayed({
+
+            lifecycleScope.launch {
+                try {
+
+                    val response = apiService.getListBaseCamp(distributorID = userDistributorId ?: "0")
+
+                    when (response.status) {
+                        RESPONSE_STATUS_OK -> {
+
+                            val listCoordinate = arrayListOf<String>()
+                            val listCoordinateName = arrayListOf<String>()
+                            val listCoordinateStatus = arrayListOf<String>()
+                            val listCoordinateCityID = arrayListOf<String>()
+
+                            for (item in response.results.listIterator()) {
+                                listCoordinate.add(item.location_gudang)
+                                listCoordinateName.add(item.nama_gudang)
+                                listCoordinateStatus.add("blacklist")
+                                listCoordinateCityID.add(item.id_city)
+                            }
+
+                            val intent = Intent(this@HomeSalesActivity, MapsActivity::class.java)
+
+                            intent.putExtra(CONST_NEAREST_STORE, true)
+                            intent.putExtra(CONST_IS_BASE_CAMP, true)
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
+                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
+
+                            progressDialog.dismiss()
+                            startActivity(intent)
+
+                        }
+                        RESPONSE_STATUS_EMPTY -> {
+
+                            val listCoordinate = arrayListOf<String>()
+                            val listCoordinateName = arrayListOf<String>()
+
+                            val intent = Intent(this@HomeSalesActivity, MapsActivity::class.java)
+
+                            intent.putExtra(CONST_NEAREST_STORE, true)
+                            intent.putExtra(CONST_IS_BASE_CAMP, true)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
 
@@ -499,22 +581,15 @@ class HomeSalesActivity : AppCompatActivity() {
         searchStoreAbsentModal.setCustomDialogListener(object : SearchModal.SearchModalListener {
             override fun onDataReceived(data: ModalSearchModel) {
                 if (data.id == "-1") {
-                    if (absentMode == ABSENT_MODE_STORE) absentMode = ABSENT_MODE_BASECAMP
-                    else absentMode = ABSENT_MODE_STORE
+                    absentMode = if (absentMode == ABSENT_MODE_STORE) ABSENT_MODE_BASECAMP
+                    else ABSENT_MODE_STORE
                     getListAbsent()
                 } else {
                     selectedStore = data
                     binding.selectedStoreContainer.tvFilter.text = data.title
                     sessionManager.selectedStoreAbsent(data.id ?: "", data.title ?: "", data.etc ?: "", absentMode ?: ABSENT_MODE_STORE)
-                    if (isSelectStoreOnly) {
-                        isSelectStoreOnly = false
-                        Log.d("SELECTED ABSENT", "select only: $absentMode : $selectedStore")
-                    }
-                    else {
-                        Log.d("SELECTED ABSENT", "absent: $absentMode : $selectedStore")
-                        return
-                        absentAction()
-                    }
+                    if (isSelectStoreOnly) isSelectStoreOnly = false
+                    else absentAction()
                 }
             }
 
@@ -805,6 +880,7 @@ class HomeSalesActivity : AppCompatActivity() {
 
         val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
         val userChild = absentChild.child(userId.toString())
+        Log.d("ABSENT COURIER", "Check absent")
 
         userChild.addListenerForSingleValueEvent(object: ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -896,6 +972,7 @@ class HomeSalesActivity : AppCompatActivity() {
 
             override fun onCancelled(error: DatabaseError) {
                 // Do something
+                Log.d("ABSENT COURIER", "On cancelled")
                 isAbsentMorningNow = false
                 isAbsentEveningNow = false
                 lockMenuItem(true)
@@ -1126,10 +1203,12 @@ class HomeSalesActivity : AppCompatActivity() {
 
         if (requestCode == MAIN_ACTIVITY_REQUEST_CODE) {
             val resultData = data?.getStringExtra("$MAIN_ACTIVITY_REQUEST_CODE")
+            val resultDataMode = data?.getStringExtra(SELECTED_ABSENT_MODE)
 
             if (resultData == SYNC_NOW) {
 
-                getListStore(showModal = false)
+                if (resultDataMode == ABSENT_MODE_STORE) getListStore(showModal = false)
+                else getListBasecamp(showModal = false)
 
             }
         } else if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
