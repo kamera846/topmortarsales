@@ -1676,7 +1676,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                         binding.initialName.text = CustomUtility(this@MapsActivity).getInitials(courierFullName ?: "Nama Pengguna")
                         binding.userTrackingName.text = courierFullName
-                        binding.userTrackingDescription.text = "Terakhir dilacak " + DateFormat.format("$courierLastTracking", "yyyy-MM-dd HH:mm:ss", "HH:mm")
+                        binding.userTrackingDescription.text = "Terakhir dilacak " + DateFormat.format("$courierLastTracking", "yyyy-MM-dd HH:mm:ss", "dd MMM yyyy, HH.mm")
                         if (courierIsOnline!!) {
                             binding.userTrackingStatus.text = "Online"
                             binding.userTrackingStatus.setTextColor(getColor(R.color.white))
