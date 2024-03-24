@@ -178,6 +178,11 @@ const val STATUS_TERMIN_60 = "60"
 const val INVOICE_PAID = "paid"
 const val GET_COORDINATE = "get_coordinate"
 
+const val ABSENT_MODE_STORE = "store"
+const val ABSENT_MODE_BASECAMP = "basecamp"
+const val SELECTED_ABSENT_MODE = "selected_absent_mode"
+
+
 /*
     User Kind
  */
