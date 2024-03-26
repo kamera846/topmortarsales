@@ -83,6 +83,7 @@ class HomeCourierActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
     private val userId get() = sessionManager.userID()
+    private val userCity get() = sessionManager.userCityID()
     private val userName get() = sessionManager.userName()
     private val userFullName get() = sessionManager.fullName()
     private val userDistributorId get() = sessionManager.userDistributor()
@@ -847,6 +848,7 @@ class HomeCourierActivity : AppCompatActivity() {
                             val userChild = absentChild.child(userId.toString())
 
                             userChild.child("id").setValue(userId)
+                            userChild.child("idCity").setValue(userCity)
                             userChild.child("username").setValue(userName)
                             userChild.child("fullname").setValue(userFullName)
                             userChild.child("isOnline").setValue(true)

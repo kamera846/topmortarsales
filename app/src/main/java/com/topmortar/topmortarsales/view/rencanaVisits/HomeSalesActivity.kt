@@ -737,6 +737,7 @@ class HomeSalesActivity : AppCompatActivity() {
         val userChild = absentChild.child(userId.toString())
 
         userChild.child("id").setValue(userId)
+        userChild.child("idCity").setValue(userCity)
         userChild.child("username").setValue(userName)
         userChild.child("fullname").setValue(userFullName)
         userChild.child("isOnline").setValue(true)
