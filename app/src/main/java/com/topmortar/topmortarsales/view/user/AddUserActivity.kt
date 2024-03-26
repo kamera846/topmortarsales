@@ -26,6 +26,7 @@ import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_MARKETING
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_IS_NOTIFY
@@ -458,6 +459,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
             AUTH_LEVEL_COURIER ->  3
             AUTH_LEVEL_BA ->  4
             AUTH_LEVEL_MARKETING ->  5
+            AUTH_LEVEL_PENAGIHAN ->  6
             else -> 0
         }
 
@@ -474,6 +476,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                     3 -> AUTH_LEVEL_COURIER
                     4 -> AUTH_LEVEL_BA
                     5 -> AUTH_LEVEL_MARKETING
+                    6 -> AUTH_LEVEL_PENAGIHAN
                     else -> null
                 }
                 if (selectedLevel == AUTH_LEVEL_SALES) binding.isNotifyCheckbox.visibility = View.VISIBLE
@@ -491,6 +494,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                     AUTH_LEVEL_COURIER -> AUTH_LEVEL_COURIER
                     AUTH_LEVEL_BA -> AUTH_LEVEL_BA
                     AUTH_LEVEL_MARKETING -> AUTH_LEVEL_MARKETING
+                    AUTH_LEVEL_PENAGIHAN -> AUTH_LEVEL_PENAGIHAN
                     else -> null
                 }
 

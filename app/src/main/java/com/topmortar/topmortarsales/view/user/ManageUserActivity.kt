@@ -30,6 +30,7 @@ import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_MARKETING
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_IS_NOTIFY
@@ -277,7 +278,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
     }
 
     override fun onItemClick(data: UserModel?) {
-        if (data?.level_user == AUTH_LEVEL_SALES || data?.level_user == AUTH_LEVEL_COURIER || data?.level_user == AUTH_LEVEL_BA) navigateDetailUser(data)
+        if (data?.level_user == AUTH_LEVEL_SALES || data?.level_user == AUTH_LEVEL_COURIER || data?.level_user == AUTH_LEVEL_BA || data?.level_user == AUTH_LEVEL_PENAGIHAN) navigateDetailUser(data)
         else navigateAddUser(data)
     }
 
@@ -328,6 +329,10 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
                     return@setOnMenuItemClickListener  true
                 } R.id.option_marketing -> {
                     activeFilter = AUTH_LEVEL_MARKETING
+                    synchFilter()
+                    return@setOnMenuItemClickListener  true
+                } R.id.option_penagihan -> {
+                    activeFilter = AUTH_LEVEL_PENAGIHAN
                     synchFilter()
                     return@setOnMenuItemClickListener  true
                 } else -> return@setOnMenuItemClickListener false

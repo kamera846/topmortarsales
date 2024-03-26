@@ -43,6 +43,7 @@ import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_MARKETING
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
 import com.topmortar.topmortarsales.commons.LOGGED_IN
@@ -57,6 +58,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_MARKETING
+import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
@@ -399,7 +401,7 @@ class SplashScreenActivity : AppCompatActivity() {
             when (userKind) {
                 USER_KIND_BA -> navigateToListTukang()
                 USER_KIND_COURIER -> navigateToCourier()
-                USER_KIND_SALES -> navigateToSales()
+                USER_KIND_SALES, USER_KIND_PENAGIHAN -> navigateToSales()
                 else -> navigateToMain()
             }
         }
@@ -551,7 +553,7 @@ class SplashScreenActivity : AppCompatActivity() {
                         when (data.level_user) {
                             AUTH_LEVEL_BA -> navigateToListTukang()
                             AUTH_LEVEL_COURIER -> navigateToCourier()
-                            AUTH_LEVEL_SALES -> navigateToSales()
+                            AUTH_LEVEL_SALES, AUTH_LEVEL_PENAGIHAN -> navigateToSales()
                             else -> navigateToMain()
                         }
 
