@@ -561,13 +561,13 @@ class UserProfileActivity : AppCompatActivity() {
         val calendar = Calendar.getInstance()
         val currentHour = calendar.get(Calendar.HOUR_OF_DAY) // Mengambil jam saat ini dalam format 24 jam
 
-//        if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
-//            binding.btnLogout.visibility = View.GONE
-//            binding.lockedInfoText.visibility = View.VISIBLE
-//        } else {
+        if (userKind == USER_KIND_COURIER && isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
+            binding.btnLogout.visibility = View.GONE
+            binding.lockedInfoText.visibility = View.VISIBLE
+        } else {
             binding.btnLogout.visibility = View.VISIBLE
             binding.lockedInfoText.visibility = View.GONE
-//        }
+        }
     }
 
     private fun checkAbsent() {
