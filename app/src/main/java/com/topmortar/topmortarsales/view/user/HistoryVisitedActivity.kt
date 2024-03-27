@@ -28,6 +28,7 @@ import com.topmortar.topmortarsales.commons.CONST_USER_CITY
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
@@ -41,9 +42,12 @@ import org.greenrobot.eventbus.Subscribe
 @SuppressLint("SetTextI18n")
 class HistoryVisitedActivity : AppCompatActivity() {
 
-    private lateinit var sessionManager: SessionManager
     private var _binding: ActivityHistoryVisitedBinding? = null
     private val binding get() = _binding!!
+    private lateinit var sessionManager: SessionManager
+    private val userId get() = sessionManager.userID()
+    private val userKind get() = sessionManager.userKind()
+    private val userDistributorId get() = sessionManager.userDistributor()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,6 +63,10 @@ class HistoryVisitedActivity : AppCompatActivity() {
 
         val iUserID = intent.getStringExtra(CONST_USER_ID)
         val iUserCity = intent.getStringExtra(CONST_USER_CITY)
+
+        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
+            CustomUtility(this).setUserStatusOnline(true, userDistributorId.toString(), userId.toString())
+        }
 
         /*
         Call Fragment
@@ -91,7 +99,7 @@ class HistoryVisitedActivity : AppCompatActivity() {
         _binding = null
 
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor().toString(),
@@ -107,7 +115,7 @@ class HistoryVisitedActivity : AppCompatActivity() {
 
         Handler(Looper.getMainLooper()).postDelayed({
             if (sessionManager.isLoggedIn()) {
-                if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
+                if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                     CustomUtility(this).setUserStatusOnline(
                         true,
                         sessionManager.userDistributor().toString(),
@@ -123,7 +131,7 @@ class HistoryVisitedActivity : AppCompatActivity() {
         EventBus.getDefault().unregister(this)
 
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor().toString(),

@@ -98,4 +98,22 @@ object DateFormat {
         }
     }
 
+    fun changeDateToDaysBeforeOrAfter(dateString: String, totalDays: Int, inputDateFormat: String = "yyyy-MM-dd HH:mm:ss", outputDateFormat: String = "dd MMMM yyyy, HH.mm"): String {
+        val dateFormat = SimpleDateFormat(inputDateFormat, Locale.getDefault())
+
+        return try {
+            val date = dateFormat.parse(dateString)
+
+            val calendar = Calendar.getInstance()
+            calendar.time = date!!
+
+            calendar.add(Calendar.DAY_OF_YEAR, totalDays)
+
+            SimpleDateFormat(outputDateFormat, Locale.getDefault()).format(calendar.time)
+        } catch (e: Exception) {
+            println("Terjadi kesalahan: ${e.message}")
+            dateString
+        }
+    }
+
 }

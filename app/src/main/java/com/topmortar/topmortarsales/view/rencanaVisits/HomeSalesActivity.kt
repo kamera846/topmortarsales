@@ -65,6 +65,7 @@ import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
@@ -102,6 +103,7 @@ class HomeSalesActivity : AppCompatActivity() {
     private val userCity get() = sessionManager.userCityID()
     private val userName get() = sessionManager.userName()
     private val userFullName get() = sessionManager.fullName()
+    private val userKind get() = sessionManager.userKind()
     private val userDistributorId get() = sessionManager.userDistributor()
     private val userDistributorNumber get() = sessionManager.userDistributorNumber()
     private val selectedStoreDefaultID get() = sessionManager.selectedStoreAbsentID()
@@ -317,7 +319,8 @@ class HomeSalesActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
 
-                    val response = apiService.getContacts(cityId = userCity!!, distributorID = userDistributorId!!)
+                    val response = if (userKind == USER_KIND_PENAGIHAN) apiService.getContactsByDistributor(distributorID = userDistributorId ?: "0")
+                    else apiService.getContacts(cityId = userCity ?: "0", distributorID = userDistributorId ?: "0")
 
                     when (response.status) {
                         RESPONSE_STATUS_OK -> {
@@ -737,6 +740,7 @@ class HomeSalesActivity : AppCompatActivity() {
         val userChild = absentChild.child(userId.toString())
 
         userChild.child("id").setValue(userId)
+        userChild.child("idCity").setValue(userCity)
         userChild.child("username").setValue(userName)
         userChild.child("fullname").setValue(userFullName)
         userChild.child("isOnline").setValue(true)
@@ -1053,7 +1057,8 @@ class HomeSalesActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val response = apiService.getContacts(cityId = userCity ?: "0", distributorID = userDistributorId ?: "0")
+                val response = if (userKind == USER_KIND_PENAGIHAN) apiService.getContactsByDistributor(distributorID = userDistributorId ?: "0")
+                    else apiService.getContacts(cityId = userCity ?: "0", distributorID = userDistributorId ?: "0")
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -1159,7 +1164,7 @@ class HomeSalesActivity : AppCompatActivity() {
         super.onStart()
         checkAbsent()
         Handler(Looper.getMainLooper()).postDelayed({
-            if (sessionManager.userKind() == USER_KIND_SALES) {
+            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     true,
                     sessionManager.userDistributor().toString(),
@@ -1173,7 +1178,7 @@ class HomeSalesActivity : AppCompatActivity() {
         super.onStop()
 
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_SALES) {
+            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor().toString(),
@@ -1183,11 +1188,10 @@ class HomeSalesActivity : AppCompatActivity() {
         }
     }
 
-
     override fun onDestroy() {
         super.onDestroy()
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_SALES) {
+            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor().toString(),

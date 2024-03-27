@@ -2,6 +2,8 @@ package com.topmortar.topmortarsales.view.reports
 
 import android.app.DatePickerDialog
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -22,6 +24,9 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
+import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -40,6 +45,7 @@ class ReportsActivity : AppCompatActivity() {
 
     private val userID get() = sessionManager.userID().toString()
     private val userKind get() = sessionManager.userKind().toString()
+    private val userDistributorId get() = sessionManager.userDistributor().toString()
     private var iUserID: String? = null
     private var contactID: String? = null
     private var contactName: String? = null
@@ -78,6 +84,8 @@ class ReportsActivity : AppCompatActivity() {
         binding.titleBarDark.tvTitleBarDescription.visibility = View.VISIBLE
         if (!contactName.isNullOrEmpty()) binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (iUserID.isNullOrEmpty()) "saya" else ""} di toko ini"
         else binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (userFullName.isNullOrEmpty()) "" else "$userFullName"}"
+
+        CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
 
         setDatePickerDialog()
         initClickHandler()
@@ -238,5 +246,48 @@ class ReportsActivity : AppCompatActivity() {
 
         binding.titleBarDark.icBack.setOnClickListener { finish() }
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+//        EventBus.getDefault().register(this)
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (sessionManager.isLoggedIn()) {
+                if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+                    CustomUtility(this).setUserStatusOnline(
+                        true,
+                        sessionManager.userDistributor().toString(),
+                        sessionManager.userID().toString()
+                    )
+                }
+            }
+        }, 1000)
+    }
+
+    override fun onStop() {
+        super.onStop()
+//        EventBus.getDefault().unregister(this)
+        if (sessionManager.isLoggedIn()) {
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+                CustomUtility(this).setUserStatusOnline(
+                    false,
+                    sessionManager.userDistributor().toString(),
+                    sessionManager.userID().toString()
+                )
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (sessionManager.isLoggedIn()) {
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+                CustomUtility(this).setUserStatusOnline(
+                    false,
+                    sessionManager.userDistributor().toString(),
+                    sessionManager.userID().toString()
+                )
+            }
+        }
     }
 }

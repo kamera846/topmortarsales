@@ -23,6 +23,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.CONST_COURIER_ID
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
@@ -44,6 +45,7 @@ import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
@@ -235,7 +237,7 @@ class UserProfileActivity : AppCompatActivity() {
             binding.titleBarLight.icEdit.setOnClickListener { navigateEditUser() }
         }
 
-        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
             binding.btnLogout.setOnClickListener { logoutConfirmation() }
         }
 
@@ -248,21 +250,21 @@ class UserProfileActivity : AppCompatActivity() {
 
     private fun dataActivityValidation() {
 
-        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
             CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
             checkAbsent()
         }
-        if (iUserLevel == AUTH_LEVEL_COURIER || (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES)) {
+        if (iUserLevel == AUTH_LEVEL_COURIER || (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES) || (iUserLevel == AUTH_LEVEL_PENAGIHAN || userKind == USER_KIND_PENAGIHAN)) {
             binding.salesReportContainer.visibility = View.GONE
             binding.deliveryContainer.visibility = View.VISIBLE
 
             if (iUserLevel == AUTH_LEVEL_COURIER) {
                 binding.btnHistoryVisit.visibility = View.GONE
                 binding.btnCourierHistoryDelivery.visibility = View.VISIBLE
-            } else if (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES) {
+            } else if (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES || iUserLevel == AUTH_LEVEL_PENAGIHAN || userKind == USER_KIND_PENAGIHAN) {
                 binding.btnHistoryVisit.visibility = View.VISIBLE
                 binding.btnCourierHistoryDelivery.visibility = View.GONE
-                if (userKind == USER_KIND_SALES) binding.btnCourierTracking.visibility = View.GONE
+                if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) binding.btnCourierTracking.visibility = View.GONE
             }
 
             setupCourierMenu()
@@ -404,7 +406,7 @@ class UserProfileActivity : AppCompatActivity() {
             userDevice.child("logout_at").setValue(DateFormat.now())
             userDevice.child("login_at").setValue("")
 
-            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
 //                Log.d("Kurir Logout", "${sessionManager.userDistributor()} : ${sessionManager.userID()}")
                 CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
             }
@@ -432,13 +434,13 @@ class UserProfileActivity : AppCompatActivity() {
 
     private fun  setupCourierMenu() {
 
-        val personCall = if (userKind == USER_KIND_SALES) "Anda" else "Pengguna"
-        val personcall = if (userKind == USER_KIND_SALES) "anda" else "pengguna"
+        val personCall = if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) "Anda" else "Pengguna"
+        val personcall = if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) "anda" else "pengguna"
 
         childAbsent = firebaseReference.child(FIREBASE_CHILD_ABSENT)
         childCourier = childAbsent?.child(iUserID ?: userId ?: "0")
 
-        if (userKind != USER_KIND_SALES) {
+        if (userKind != USER_KIND_SALES && userKind != USER_KIND_PENAGIHAN) {
             courierTrackingListener = object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     // Do something here
@@ -561,13 +563,13 @@ class UserProfileActivity : AppCompatActivity() {
         val calendar = Calendar.getInstance()
         val currentHour = calendar.get(Calendar.HOUR_OF_DAY) // Mengambil jam saat ini dalam format 24 jam
 
-//        if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
-//            binding.btnLogout.visibility = View.GONE
-//            binding.lockedInfoText.visibility = View.VISIBLE
-//        } else {
+        if (userKind == USER_KIND_COURIER && isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
+            binding.btnLogout.visibility = View.GONE
+            binding.lockedInfoText.visibility = View.VISIBLE
+        } else {
             binding.btnLogout.visibility = View.VISIBLE
             binding.lockedInfoText.visibility = View.GONE
-//        }
+        }
     }
 
     private fun checkAbsent() {
@@ -654,7 +656,7 @@ class UserProfileActivity : AppCompatActivity() {
 //        EventBus.getDefault().register(this)
         Handler(Looper.getMainLooper()).postDelayed({
             if (sessionManager.isLoggedIn()) {
-                if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
+                if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                     CustomUtility(this).setUserStatusOnline(
                         true,
                         sessionManager.userDistributor().toString(),
@@ -669,7 +671,7 @@ class UserProfileActivity : AppCompatActivity() {
         super.onStop()
 //        EventBus.getDefault().unregister(this)
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor().toString(),
@@ -682,7 +684,7 @@ class UserProfileActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor().toString(),

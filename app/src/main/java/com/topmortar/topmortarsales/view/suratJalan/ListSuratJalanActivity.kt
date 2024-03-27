@@ -41,6 +41,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -108,7 +109,9 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
         setContentView(R.layout.activity_list_invoice)
 
-        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+        }
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
 
         initVariable()
@@ -498,18 +501,24 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
     override fun onStart() {
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
-            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+                CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+            }
         }, 1000)
     }
 
     override fun onStop() {
         super.onStop()
-        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+        }
     }
 
 }

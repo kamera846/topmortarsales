@@ -40,6 +40,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -100,7 +101,7 @@ class VoucherRenViFragment : Fragment() {
 
         apiService = HttpClient.create()
 
-        if (userKind == USER_KIND_ADMIN) getCities()
+        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
         getList()
 
         return view
@@ -115,7 +116,7 @@ class VoucherRenViFragment : Fragment() {
             try {
 
                 val response = when (userKind) {
-                    USER_KIND_ADMIN -> {
+                    USER_KIND_ADMIN, USER_KIND_PENAGIHAN -> {
                         if (selectedCity != null) apiService.targetVoucher(idCity = selectedCity?.id!!)
                         else apiService.targetVoucherDst(idDistributor = userDistributorId)
                     } else -> apiService.targetVoucher(idCity = userCity)
@@ -315,6 +316,7 @@ class VoucherRenViFragment : Fragment() {
         binding.llFilter.componentFilter.setOnClickListener {
             searchModal.show()
         }
+        binding.llFilter.tvFilter.text = selectedCity?.title ?: getString(R.string.tidak_ada_filter)
 
     }
 

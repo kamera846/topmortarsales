@@ -110,6 +110,7 @@ import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
@@ -237,7 +238,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         progressDialog.setMessage("Mencari ${if (isBasecamp) "basecamp" else "toko"} terdekat…")
         progressDialog.setCancelable(false)
 
-        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN){
+            CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+        }
         checkLocationPermission()
 
     }
@@ -1741,22 +1744,40 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                     for (item in snapshot.children) {
                         val userId = item.child("id").getValue(String::class.java)
+                        val userIdCity = item.child("idCity").getValue(String::class.java)
 
                         if (!userId.isNullOrEmpty() && userId != courierID) {
-                            listUserTracking.add(
-                                UserAbsentModel(
-                                    eveningDateTime = item.child("eveningDateTime").getValue(String::class.java) ?: "",
-                                    fullname = item.child("fullname").getValue(String::class.java) ?: "",
-                                    id = item.child("id").getValue(String::class.java) ?: "",
-                                    isOnline = item.child("isOnline").getValue(Boolean::class.java) ?: false,
-                                    lastSeen = item.child("lastSeen").getValue(String::class.java) ?: "",
-                                    lastTracking = item.child("lastTracking").getValue(String::class.java) ?: "",
-                                    lat = item.child("lat").getValue(Double::class.java) ?: 0.0,
-                                    lng = item.child("lng").getValue(Double::class.java) ?: 0.0,
-                                    morningDateTime = item.child("morningDateTime").getValue(String::class.java) ?: "",
-                                    username = item.child("username").getValue(String::class.java) ?: "",
+                            if (userKind == USER_KIND_ADMIN) {
+                                listUserTracking.add(
+                                    UserAbsentModel(
+                                        eveningDateTime = item.child("eveningDateTime").getValue(String::class.java) ?: "",
+                                        fullname = item.child("fullname").getValue(String::class.java) ?: "",
+                                        id = item.child("id").getValue(String::class.java) ?: "",
+                                        isOnline = item.child("isOnline").getValue(Boolean::class.java) ?: false,
+                                        lastSeen = item.child("lastSeen").getValue(String::class.java) ?: "",
+                                        lastTracking = item.child("lastTracking").getValue(String::class.java) ?: "",
+                                        lat = item.child("lat").getValue(Double::class.java) ?: 0.0,
+                                        lng = item.child("lng").getValue(Double::class.java) ?: 0.0,
+                                        morningDateTime = item.child("morningDateTime").getValue(String::class.java) ?: "",
+                                        username = item.child("username").getValue(String::class.java) ?: "",
+                                    )
                                 )
-                            )
+                            } else if (!userIdCity.isNullOrEmpty() && userCity == userIdCity) {
+                                listUserTracking.add(
+                                    UserAbsentModel(
+                                        eveningDateTime = item.child("eveningDateTime").getValue(String::class.java) ?: "",
+                                        fullname = item.child("fullname").getValue(String::class.java) ?: "",
+                                        id = item.child("id").getValue(String::class.java) ?: "",
+                                        isOnline = item.child("isOnline").getValue(Boolean::class.java) ?: false,
+                                        lastSeen = item.child("lastSeen").getValue(String::class.java) ?: "",
+                                        lastTracking = item.child("lastTracking").getValue(String::class.java) ?: "",
+                                        lat = item.child("lat").getValue(Double::class.java) ?: 0.0,
+                                        lng = item.child("lng").getValue(Double::class.java) ?: 0.0,
+                                        morningDateTime = item.child("morningDateTime").getValue(String::class.java) ?: "",
+                                        username = item.child("username").getValue(String::class.java) ?: "",
+                                    )
+                                )
+                            }
                         }
                     }
 
@@ -2087,14 +2108,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         super.onStart()
 
         Handler(Looper.getMainLooper()).postDelayed({
-            if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+            if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN){
+                CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+            }
         }, 1000)
 
     }
 
     override fun onStop() {
         super.onStop()
-        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN){
+            CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+        }
 
         if (locationListener != null) childDriver?.removeEventListener(locationListener!!)
         if (locationCallback != null) fusedLocationClient.removeLocationUpdates(locationCallback!!)
@@ -2104,7 +2129,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     override fun onDestroy() {
         super.onDestroy()
-        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN){
+            CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+        }
 
         if (locationListener != null) childDriver?.removeEventListener(locationListener!!)
         if (locationCallback != null) fusedLocationClient.removeLocationUpdates(locationCallback!!)

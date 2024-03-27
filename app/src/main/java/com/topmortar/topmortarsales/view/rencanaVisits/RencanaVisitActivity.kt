@@ -9,6 +9,7 @@ import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.viewpager.RencanaVisitVPA
+import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -19,6 +20,8 @@ class RencanaVisitActivity : AppCompatActivity() {
     private var _binding: ActivityRencanaVisitBinding? = null
     private val binding get() = _binding!!
     private lateinit var sessionManager: SessionManager
+    private val userId get() = sessionManager.userID()
+    private val userDistributorId get() = sessionManager.userDistributor()
 
     private lateinit var tabLayout: TabLayout
     private lateinit var viewPager: ViewPager
@@ -40,6 +43,13 @@ class RencanaVisitActivity : AppCompatActivity() {
         binding.titleBarDark.icBack.setOnClickListener {
             if (activeTab != 0) tabLayout.getTabAt(0)?.select()
             else finish()
+        }
+        if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            CustomUtility(this).setUserStatusOnline(
+                true,
+                userDistributorId.toString(),
+                userId.toString()
+            )
         }
 
         initLayout()
@@ -106,7 +116,7 @@ class RencanaVisitActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
-            if (sessionManager.userKind() == USER_KIND_SALES) {
+            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     true,
                     sessionManager.userDistributor().toString(),
@@ -120,7 +130,7 @@ class RencanaVisitActivity : AppCompatActivity() {
         super.onStop()
 
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_SALES) {
+            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor().toString(),
@@ -133,7 +143,7 @@ class RencanaVisitActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_SALES) {
+            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor().toString(),

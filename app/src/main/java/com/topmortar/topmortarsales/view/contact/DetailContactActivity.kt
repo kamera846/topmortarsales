@@ -109,6 +109,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_MARKETING
+import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
@@ -290,7 +291,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         progressDialog.setCancelable(false)
         progressDialog.setMessage(getString(R.string.txt_loading))
 
-        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
+            CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+        }
 
         initVariable()
         initClickHandler()
@@ -608,8 +611,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         iReputation = intent.getStringExtra(CONST_REPUTATION)
 
         tooltipStatus.visibility = View.VISIBLE
-        if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
-        else btnInvoice.visibility = View.VISIBLE
+//        if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
+//        else btnInvoice.visibility = View.VISIBLE
+        btnInvoice.visibility = View.VISIBLE
 
         iAddress = intent.getStringExtra(CONST_ADDRESS)
         iLocation = intent.getStringExtra(CONST_LOCATION)
@@ -839,8 +843,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 statusContainer.setBackgroundResource(R.drawable.background_rounded_16)
 
                 tooltipStatus.visibility = View.VISIBLE
-                if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
-                else btnInvoice.visibility = View.VISIBLE
+//                if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
+//                else btnInvoice.visibility = View.VISIBLE
+                btnInvoice.visibility = View.VISIBLE
 
                 // Status
                 tvStatus.visibility = View.VISIBLE
@@ -1120,9 +1125,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Berhasil mengubah data!")
                                 toggleEdit(false)
 
-                                if (iStatus == STATUS_CONTACT_BLACKLIST) {
-                                    btnInvoice.visibility = View.GONE
-                                } else btnInvoice.visibility = View.VISIBLE
+//                                if (iStatus == STATUS_CONTACT_BLACKLIST) {
+//                                    btnInvoice.visibility = View.GONE
+//                                } else btnInvoice.visibility = View.VISIBLE
+                                btnInvoice.visibility = View.VISIBLE
 
                                 setupStatus(iStatus)
                                 setupPaymentMethod(iPaymentMethod)
@@ -1130,9 +1136,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 setupReputation(iReputation)
                             } else {
 
-                                if (data.store_status == STATUS_CONTACT_BLACKLIST) {
-                                    btnInvoice.visibility = View.GONE
-                                } else btnInvoice.visibility = View.VISIBLE
+//                                if (data.store_status == STATUS_CONTACT_BLACKLIST) {
+//                                    btnInvoice.visibility = View.GONE
+//                                } else btnInvoice.visibility = View.VISIBLE
+                                btnInvoice.visibility = View.VISIBLE
 
                                 setupStatus(data.store_status)
 //                                setupPaymentMethod(data.payment_method)
@@ -1293,6 +1300,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             val bottomSheetLayout = layoutInflater.inflate(R.layout.fragment_bottom_sheet_detail_contact, parentLayout, false)
 
             val invoiceOption = bottomSheetLayout.findViewById<LinearLayout>(R.id.invoiceOption)
+            val sjOption = bottomSheetLayout.findViewById<LinearLayout>(R.id.suratJalanOption)
             val reportOption = bottomSheetLayout.findViewById<LinearLayout>(R.id.reportOption)
             val btnNewReport = bottomSheetLayout.findViewById<Button>(R.id.btnNewReport)
             val reportsTitle = bottomSheetLayout.findViewById<TextView>(R.id.reportsTitle)
@@ -1307,6 +1315,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 reportsTitle.text = "Lihat Laporan Sales"
                 reportOption.visibility = View.VISIBLE
                 btnNewReport.visibility = View.GONE
+            } else if (sessionManager.userKind() == USER_KIND_SALES && iStatus == STATUS_CONTACT_BLACKLIST) {
+                invoiceOption.visibility = View.GONE
+                sjOption.visibility = View.GONE
+                voucherOption.visibility = View.GONE
             }
 
             bottomSheetDialog.setContentView(bottomSheetLayout)
@@ -2194,19 +2206,25 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     override fun onStart() {
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
-            if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+            if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
+                CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+            }
         }, 1000)
     }
 
     override fun onStop() {
         super.onStop()
-        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
+            CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+        }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         if (pingUtility != null) pingUtility!!.stopPingMonitoring()
-        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
+            CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+        }
     }
 
 }
