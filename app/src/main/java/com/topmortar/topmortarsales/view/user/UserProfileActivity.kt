@@ -264,7 +264,7 @@ class UserProfileActivity : AppCompatActivity() {
             } else if (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES || iUserLevel == AUTH_LEVEL_PENAGIHAN || userKind == USER_KIND_PENAGIHAN) {
                 binding.btnHistoryVisit.visibility = View.VISIBLE
                 binding.btnCourierHistoryDelivery.visibility = View.GONE
-                if (userKind == USER_KIND_SALES) binding.btnCourierTracking.visibility = View.GONE
+                if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) binding.btnCourierTracking.visibility = View.GONE
             }
 
             setupCourierMenu()
@@ -440,7 +440,7 @@ class UserProfileActivity : AppCompatActivity() {
         childAbsent = firebaseReference.child(FIREBASE_CHILD_ABSENT)
         childCourier = childAbsent?.child(iUserID ?: userId ?: "0")
 
-        if (userKind != USER_KIND_SALES) {
+        if (userKind != USER_KIND_SALES && userKind != USER_KIND_PENAGIHAN) {
             courierTrackingListener = object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     // Do something here

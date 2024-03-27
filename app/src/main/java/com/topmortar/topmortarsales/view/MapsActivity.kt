@@ -110,6 +110,7 @@ import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
@@ -237,7 +238,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         progressDialog.setMessage("Mencari ${if (isBasecamp) "basecamp" else "toko"} terdekat…")
         progressDialog.setCancelable(false)
 
-        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN){
+            CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+        }
         checkLocationPermission()
 
     }
@@ -2105,14 +2108,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         super.onStart()
 
         Handler(Looper.getMainLooper()).postDelayed({
-            if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+            if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN){
+                CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+            }
         }, 1000)
 
     }
 
     override fun onStop() {
         super.onStop()
-        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN){
+            CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+        }
 
         if (locationListener != null) childDriver?.removeEventListener(locationListener!!)
         if (locationCallback != null) fusedLocationClient.removeLocationUpdates(locationCallback!!)
@@ -2122,7 +2129,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     override fun onDestroy() {
         super.onDestroy()
-        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES) CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN){
+            CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+        }
 
         if (locationListener != null) childDriver?.removeEventListener(locationListener!!)
         if (locationCallback != null) fusedLocationClient.removeLocationUpdates(locationCallback!!)

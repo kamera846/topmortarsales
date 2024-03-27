@@ -8,6 +8,8 @@ import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -37,6 +39,9 @@ import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -58,6 +63,7 @@ class AddBaseCampActivity : AppCompatActivity() {
     private var _binding: ActivityAddBaseCampBinding? = null
     private val binding get() = _binding!!
     private lateinit var sessionManager: SessionManager
+    private val userID get() = sessionManager.userID()
     private val userCityID get() = sessionManager.userCityID()
     private val userKind get() = sessionManager.userKind()
     private val userDistributorId get() = sessionManager.userDistributor().toString()
@@ -88,6 +94,12 @@ class AddBaseCampActivity : AppCompatActivity() {
 //            binding.titleBar.icTrash.visibility = View.VISIBLE
 //            binding.titleBar.icTrash.setOnClickListener { deleteValidation() }
             setCitiesOption()
+        } else if (
+                userKind == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_COURIER ||
+                userKind == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_SALES ||
+                userKind == USER_KIND_PENAGIHAN || sessionManager.userKind() == USER_KIND_PENAGIHAN
+            ) {
+                CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
         }
         setMapsAction()
     }
@@ -306,11 +318,6 @@ class AddBaseCampActivity : AppCompatActivity() {
         return true
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        _binding = null
-    }
-
     private fun getCities() {
 
         lifecycleScope.launch {
@@ -382,6 +389,30 @@ class AddBaseCampActivity : AppCompatActivity() {
         val searchKey = binding.etCityOption.text.toString()
         if (searchKey.isNotEmpty()) searchModal.setSearchKey(searchKey)
         searchModal.show()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+                CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+            }
+        }, 1000)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+        }
     }
 
 }

@@ -77,6 +77,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
@@ -169,7 +170,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
 
-        if (sessionManager.userKind() == USER_KIND_SALES) {
+        if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
             CustomUtility(this).setUserStatusOnline(
                 true,
                 sessionManager.userDistributor().toString(),
@@ -180,7 +181,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         initVariable()
         initClickHandler()
         loadingState(true)
-        if (userKind == USER_KIND_ADMIN) getCities()
+        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
         else getContacts()
 
     }
@@ -203,7 +204,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         etSearchBox = findViewById(R.id.et_search_box)
 
         // Set Title Bar
-        if (userKind == USER_KIND_SALES) {
+        if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
             icMore.visibility = View.GONE
             tvTitleBarDescription.visibility = View.GONE
             binding.titleBar.tvTitleBar.text = "Semua Toko"
@@ -220,7 +221,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         }
 
         // Set Floating Action Button
-        if (sessionManager.userKind() == USER_KIND_SALES) btnFab.visibility = View.VISIBLE
+        if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) btnFab.visibility = View.VISIBLE
         if (sessionManager.userKind() != USER_KIND_COURIER) icSearch.visibility = View.VISIBLE
         if (sessionManager.userKind() == USER_KIND_COURIER) btnFabAdmin.visibility = View.VISIBLE
 
@@ -346,7 +347,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
                     val apiService: ApiService = HttpClient.create()
                     val response = when (userKind) {
-                        USER_KIND_ADMIN -> apiService.getContactsByDistributor(distributorID = userDistributorId)
+                        USER_KIND_ADMIN, USER_KIND_PENAGIHAN -> apiService.getContactsByDistributor(distributorID = userDistributorId)
                         USER_KIND_COURIER -> apiService.getCourierStore(processNumber = "1", courierId = userId)
                         else -> apiService.getContacts(cityId = userCity, distributorID = userDistributorId)
                     }
@@ -662,7 +663,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                     USER_KIND_COURIER -> apiService.getCourierStore(processNumber = "1", courierId = userId)
                     else -> {
                         val statusFilter = selectedStatusID.toLowerCase(Locale.ROOT)
-                        val cityID = if (userKind == USER_KIND_ADMIN) selectedCitiesID?.id_city
+                        val cityID = if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) selectedCitiesID?.id_city
                         else userCity
 
                         if (cityID != null && statusFilter != "-1") {
@@ -779,7 +780,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             binding.llFilter.visibility = View.VISIBLE
 
             filterModal = FilterTokoModal(this)
-            if (userKind == USER_KIND_ADMIN) {
+            if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) {
                 filterModal.setStatuses(selected = selectedStatusID)
                 filterModal.setCities(items = cities, selected = selectedCitiesID)
             } else if (userKind == USER_KIND_SALES || userKind == USER_KIND_ADMIN_CITY) filterModal.setStatuses(selected = selectedStatusID)
@@ -821,7 +822,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                         sessionManager.setUserLoggedIn(data)
 
 //                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "Halo, ${ sessionManager.userName() }"}
-                        if (userKind != USER_KIND_SALES) {
+                        if (userKind != USER_KIND_SALES && userKind != USER_KIND_PENAGIHAN) {
                             tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
                             tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
                         }
@@ -830,7 +831,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                             if (isSearchActive) {
                                 searchContact()
                             } else {
-                                if (userKind == USER_KIND_ADMIN) getCities()
+                                if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
                                 else getContacts()
                             }
                         }
@@ -858,7 +859,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 val searchKey = createPartFromString(key)
 
                 val statusFilter = selectedStatusID.toLowerCase(Locale.ROOT)
-                val cityID = if (userKind == USER_KIND_ADMIN) selectedCitiesID?.id_city
+                val cityID = if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) selectedCitiesID?.id_city
                 else userCity
 
                 val apiService: ApiService = HttpClient.create()
@@ -1036,7 +1037,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         if (isSearchActive) toggleSearchEvent(SEARCH_CLOSE)
         else {
 
-            if (userKind == USER_KIND_SALES) super.onBackPressed()
+            if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) super.onBackPressed()
             else {
                 if (doubleBackToExitPressedOnce) {
                     super.onBackPressed()
@@ -1070,7 +1071,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
     override fun onStart() {
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
-            if (sessionManager.userKind() == USER_KIND_SALES) {
+            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     true,
                     sessionManager.userDistributor().toString(),
@@ -1084,7 +1085,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         super.onStop()
 
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_SALES) {
+            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor().toString(),
@@ -1097,7 +1098,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
     override fun onDestroy() {
         super.onDestroy()
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_SALES) {
+            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor().toString(),
