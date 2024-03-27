@@ -44,7 +44,13 @@ class RencanaVisitActivity : AppCompatActivity() {
             if (activeTab != 0) tabLayout.getTabAt(0)?.select()
             else finish()
         }
-        CustomUtility(this).setUserStatusOnline(true, userDistributorId.toString(), userId.toString())
+        if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            CustomUtility(this).setUserStatusOnline(
+                true,
+                userDistributorId.toString(),
+                userId.toString()
+            )
+        }
 
         initLayout()
 
