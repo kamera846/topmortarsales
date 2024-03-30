@@ -25,4 +25,5 @@ data class RencanaVisitModel(
     var id_promo: String = "",
     var reputation: String = "",
     var payment_method: String = "",
+    var date_invoice: String = ""
 )
