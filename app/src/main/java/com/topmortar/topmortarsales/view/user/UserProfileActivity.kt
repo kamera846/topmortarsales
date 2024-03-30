@@ -563,7 +563,7 @@ class UserProfileActivity : AppCompatActivity() {
         val calendar = Calendar.getInstance()
         val currentHour = calendar.get(Calendar.HOUR_OF_DAY) // Mengambil jam saat ini dalam format 24 jam
 
-        if (userKind == USER_KIND_COURIER && isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
+        if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
             binding.btnLogout.visibility = View.GONE
             binding.lockedInfoText.visibility = View.VISIBLE
         } else {
