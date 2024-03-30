@@ -1020,13 +1020,13 @@ class HomeSalesActivity : AppCompatActivity() {
             val calendar = Calendar.getInstance()
             val currentHour = calendar.get(Calendar.HOUR_OF_DAY) // Mengambil jam saat ini dalam format 24 jam
 
-//            if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
-//                binding.btnAbsent.visibility = View.GONE
-//                binding.absenEveningInfoText.visibility = View.VISIBLE
-//            } else {
+            if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
+                binding.btnAbsent.visibility = View.GONE
+                binding.absenEveningInfoText.visibility = View.VISIBLE
+            } else {
                 binding.btnAbsent.visibility = View.VISIBLE
                 binding.absenEveningInfoText.visibility = View.GONE
-//            }
+            }
         }
 
     }
