@@ -50,8 +50,10 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
                 else -> "Jatuh tempo "
             }
 
-            dateJatem += if (typeRencana == "jatem") DateFormat.changeDateToDaysBeforeOrAfter(item.created_at, -15, outputDateFormat = "dd MMMM yyyy")
-                else DateFormat.format(item.created_at)
+            dateJatem += if (typeRencana == "jatem") {
+                val terminPayment = item.termin_payment.toInt()
+                DateFormat.changeDateToDaysBeforeOrAfter(item.date_invoice, terminPayment, outputDateFormat = "dd MMMM yyyy")
+            } else DateFormat.format(item.created_at)
 
             tvContactName.text = item.nama
             tvPhoneNumber.text = dateJatem
