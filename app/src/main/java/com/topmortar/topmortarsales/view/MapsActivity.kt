@@ -114,6 +114,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
+import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
@@ -130,12 +131,15 @@ import com.topmortar.topmortarsales.model.GudangModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.model.UserAbsentModel
 import com.topmortar.topmortarsales.view.suratJalan.ListSuratJalanActivity
+import com.topmortar.topmortarsales.view.user.AllUserTrackingActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -241,6 +245,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN){
             CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
         }
+        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) EventBus.getDefault().register(this)
+
         checkLocationPermission()
 
     }
@@ -1296,7 +1302,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        backHandler()
+        if (!isGetCoordinate && !isTracking && !isTrackingCourier && !isTrackingHistory) {
+            if (routeDirections != null) toggleBtnDrawRoute()
+            else if (isCardNavigationShowing) {
+                selectedTargetRoute = null
+                toggleDrawRoute()
+            } else super.onBackPressed()
+        } else {
+            if (isTrackingCourier) {
+                val resultIntent = Intent()
+                resultIntent.putExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE", SYNC_NOW)
+                setResult(RESULT_OK, resultIntent)
+                finish()
+            } else super.onBackPressed()
+        }
     }
 
     private fun getListGudang() {
@@ -1384,14 +1403,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             else if (isCardNavigationShowing) {
                 selectedTargetRoute = null
                 toggleDrawRoute()
-            } else super.onBackPressed()
+            } else finish()
         } else {
             if (isTrackingCourier) {
                 val resultIntent = Intent()
                 resultIntent.putExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE", SYNC_NOW)
                 setResult(RESULT_OK, resultIntent)
                 finish()
-            } else super.onBackPressed()
+            } else finish()
         }
     }
 
@@ -1655,7 +1674,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         val progressDialog = ProgressDialog(this)
         progressDialog.setCancelable(false)
-        progressDialog.setMessage("Mendeteksi lokasi kurir…")
+        progressDialog.setMessage("Mendeteksi lokasi pengguna…")
         progressDialog.show()
 
         firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
@@ -1695,7 +1714,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                 MarkerOptions()
                                     .position(courierLatLng)
                                     .title(
-                                        courierFullName ?: "Kurir"
+                                        courierFullName ?: "Pengguna"
                                     )
                                     .icon(
                                         BitmapDescriptorFactory.fromBitmap(
@@ -1713,14 +1732,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         Log.d("Tracking Courier", "Not exist")
                         progressDialog.dismiss()
                         handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
-                            "Tidak dapat mendeteksi lokasi kurir!"
+                            "Tidak dapat mendeteksi lokasi pengguna!"
                         )
                     }
                 } else {
                     Log.d("Tracking Courier", "Not exist")
                     progressDialog.dismiss()
                     handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
-                        "Tidak dapat mendeteksi lokasi kurir!"
+                        "Tidak dapat mendeteksi lokasi pengguna!"
                     )
                 }
             }
@@ -1792,27 +1811,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                         // Acak urutan item dalam daftar
                         val shuffledList = listUserTracking.shuffled()
-                        // Batasi jumlah item yang ingin ditampilkan (misalnya 5)
                         val limitedList = shuffledList.take(6)
+
+                        binding.allUserTracking.visibility = View.VISIBLE
+                        binding.allUserTracking.setOnClickListener {
+                            val intent = Intent(this@MapsActivity, AllUserTrackingActivity::class.java)
+                            startActivity(intent)
+                        }
 
                         val rvAdapter = UserTrackingRecyclerViewAdapter()
                         rvAdapter.setList(ArrayList(limitedList))
                         rvAdapter.setOnItemClickListener(object: UserTrackingRecyclerViewAdapter.OnItemClickListener {
                             override fun onItemClick(item: UserAbsentModel) {
                                 // Do something here
-//                                val intent = Intent(this@MapsActivity, MapsActivity::class.java)
-//                                intent.putExtra(CONST_IS_TRACKING_COURIER, true)
-//                                intent.putExtra(CONST_COURIER_ID, item.id)
-//                                startActivity(intent)
-
-                                if (courierTrackingListener != null) childCourier?.removeEventListener(courierTrackingListener!!)
-                                courierMarker = null
-                                mMap.clear()
-
-                                Handler(Looper.getMainLooper()).postDelayed({
-                                    courierID = item.id
-                                    setupTrackingCourier()
-                                }, 100)
+                                refreshUserTracked(item)
                             }
 
                         })
@@ -1839,6 +1851,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             }
 
         })
+    }
+
+    private fun refreshUserTracked(item: UserAbsentModel) {
+        if (courierTrackingListener != null) childCourier?.removeEventListener(courierTrackingListener!!)
+        courierMarker = null
+        mMap.clear()
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            courierID = item.id
+            setupTrackingCourier()
+        }, 100)
     }
 
     private fun setupTrackingHistory() {
@@ -2104,6 +2127,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     }
 
+    @Subscribe
+    fun onEventBus(event: EventBusUtils.UserAbsentModelEvent) {
+        Log.d("User Tracking", "${event.data}")
+        refreshUserTracked(event.data!!)
+    }
+
     override fun onStart() {
         super.onStart()
 
@@ -2117,6 +2146,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     override fun onStop() {
         super.onStop()
+
         if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN){
             CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
         }
@@ -2129,6 +2159,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     override fun onDestroy() {
         super.onDestroy()
+
+        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) EventBus.getDefault().unregister(this)
         if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN){
             CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
         }

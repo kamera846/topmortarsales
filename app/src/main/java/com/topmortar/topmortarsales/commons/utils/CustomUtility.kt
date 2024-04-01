@@ -135,12 +135,14 @@ class CustomUtility(private val context: Context) {
     }
 
     fun getInitials(fullName: String, length: Int = 2): String {
-        val cleanFullName = fullName.trim()
-        val names = cleanFullName.split(" ")
-        var initials = ""
-        for ((i, name) in names.withIndex()) {
-            if (i < length) initials += name[0]
-        }
-        return initials
+        return if (fullName.isNotEmpty()) {
+            val cleanFullName = fullName.trim()
+            val names = cleanFullName.split(" ")
+            var initials = ""
+            for ((i, name) in names.withIndex()) {
+                if (i < length) initials += name[0]
+            }
+            initials
+        } else ""
     }
 }
