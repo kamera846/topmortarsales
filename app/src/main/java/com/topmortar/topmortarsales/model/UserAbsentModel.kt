@@ -11,4 +11,5 @@ data class UserAbsentModel(
     var lng:Double = 0.0,
     var morningDateTime:String = "",
     var username:String = "",
+    var userLevel:String = "",
 )

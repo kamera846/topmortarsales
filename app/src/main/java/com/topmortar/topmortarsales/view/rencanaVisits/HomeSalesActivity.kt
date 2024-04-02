@@ -36,6 +36,7 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ABSENT_MODE_BASECAMP
 import com.topmortar.topmortarsales.commons.ABSENT_MODE_STORE
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
@@ -65,6 +66,7 @@ import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
@@ -149,6 +151,17 @@ class HomeSalesActivity : AppCompatActivity() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         customUtility = CustomUtility(this)
         absentMode = selectedAbsentMode
+
+        // Set User Absent Level (TEMP)
+        val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+        val userChild = absentChild.child(userId.toString())
+        val userLevel = when (userKind) {
+            USER_KIND_PENAGIHAN -> AUTH_LEVEL_PENAGIHAN
+            USER_KIND_SALES -> AUTH_LEVEL_SALES
+            USER_KIND_COURIER -> AUTH_LEVEL_COURIER
+            else -> ""
+        }
+        userChild.child("userLevel").setValue(userLevel)
 
         binding.selectedStoreContainer.tvLabel.text = "Lokasi absen:"
 
@@ -738,6 +751,13 @@ class HomeSalesActivity : AppCompatActivity() {
 
         val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
         val userChild = absentChild.child(userId.toString())
+        val userLevel = when (userKind) {
+            USER_KIND_PENAGIHAN -> AUTH_LEVEL_PENAGIHAN
+            USER_KIND_SALES -> AUTH_LEVEL_SALES
+            USER_KIND_COURIER -> AUTH_LEVEL_COURIER
+            else -> ""
+        }
+        userChild.child("userLevel").setValue(userLevel)
 
         userChild.child("id").setValue(userId)
         userChild.child("idCity").setValue(userCity)
