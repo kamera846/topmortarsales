@@ -57,14 +57,11 @@ import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAX_REPORT_DISTANCE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
-import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
-import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SELECTED_ABSENT_MODE
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
-import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
@@ -75,7 +72,6 @@ import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
-import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
@@ -139,6 +135,50 @@ class HomeSalesActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
 
         setContentView(binding.root)
+        initGlobalVariable()
+
+        CustomUtility(this).setUserStatusOnline(true, userDistributorId.toString(), userId.toString())
+
+    }
+
+    private fun checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            checkGpsStatus()
+        } else {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+        }
+    }
+
+    private fun checkGpsStatus() {
+        val locationManager =
+            getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+
+        if (!isGpsEnabled) {
+            // GPS tidak aktif, munculkan dialog untuk mengaktifkannya
+            showGpsDisabledDialog()
+        } else {
+            initView()
+        }
+    }
+
+    private fun showGpsDisabledDialog() {
+
+        val serviceIntent = Intent(this, TrackingService::class.java)
+        stopService(serviceIntent)
+
+        AlertDialog.Builder(this)
+            .setMessage("Aplikasi memerlukan lokasi untuk berfungsi. Aktifkan lokasi sekarang?")
+            .setCancelable(false)
+            .setPositiveButton("Ya") { _, _ ->
+                // Buka pengaturan untuk mengaktifkan GPS
+                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                startActivityForResult(intent, LOCATION_PERMISSION_REQUEST_CODE)
+            }
+            .show()
+    }
+
+    private fun initGlobalVariable() {
 
         if (absentProgressDialog == null) {
             absentProgressDialog = ProgressDialog(this)
@@ -176,47 +216,11 @@ class HomeSalesActivity : AppCompatActivity() {
         }
         absentMode = selectedAbsentMode
         setupDialogSearch()
-
-        checkLocationPermission()
-        CustomUtility(this).setUserStatusOnline(true, userDistributorId.toString(), userId.toString())
-
-    }
-
-    private fun checkLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            checkGpsStatus()
-        } else {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
-        }
-    }
-
-    private fun checkGpsStatus() {
-        val locationManager =
-            getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-
-        if (!isGpsEnabled) {
-            // GPS tidak aktif, munculkan dialog untuk mengaktifkannya
-            showGpsDisabledDialog()
-        } else {
-            initView()
-        }
-    }
-
-    private fun showGpsDisabledDialog() {
-        AlertDialog.Builder(this)
-            .setMessage("Aplikasi memerlukan lokasi untuk berfungsi. Aktifkan lokasi sekarang?")
-            .setCancelable(false)
-            .setPositiveButton("Ya") { _, _ ->
-                // Buka pengaturan untuk mengaktifkan GPS
-                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                startActivityForResult(intent, LOCATION_PERMISSION_REQUEST_CODE)
-            }
-            .show()
     }
 
     private fun initView() {
 
+        initGlobalVariable()
         binding.fullName.text = userFullName
 
         binding.rencanaVisit.setOnClickListener { if (isLocked) showDialogLockedFeature() else navigateToTargetVisit() }
@@ -664,56 +668,68 @@ class HomeSalesActivity : AppCompatActivity() {
                 urlUtility.requestLocationUpdate()
 
                 if (!urlUtility.isUrl(mapsUrl) && mapsUrl.isNotEmpty()) {
-                    fusedLocationClient.lastLocation.addOnSuccessListener { location: Location ->
+                    fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
 
-                        // Courier Location
-                        val currentLatitude = location.latitude
-                        val currentLongitude = location.longitude
+                        if (location != null) {
+                            // Courier Location
+                            val currentLatitude = location.latitude
+                            val currentLongitude = location.longitude
 
-                        // Store Location
-                        val coordinate = mapsUrl.split(",")
-                        val latitude = coordinate[0].toDoubleOrNull()
-                        val longitude = coordinate[1].toDoubleOrNull()
+                            // Store Location
+                            val coordinate = mapsUrl.split(",")
+                            val latitude = coordinate[0].toDoubleOrNull()
+                            val longitude = coordinate[1].toDoubleOrNull()
 
-                        if (latitude != null && longitude != null) {
+                            if (latitude != null && longitude != null) {
 
-                            // Calculate Distance
-                            val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
-                            val shortDistance = "%.3f".format(distance)
+                                // Calculate Distance
+                                val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
+                                val shortDistance = "%.3f".format(distance)
 
-                            if (distance > MAX_REPORT_DISTANCE) {
-                                val builder = AlertDialog.Builder(this)
-                                builder.setCancelable(false)
-                                builder.setOnDismissListener {
-                                    absentProgressDialog?.dismiss()
-                                }
-                                builder.setOnCancelListener {
-                                    absentProgressDialog?.dismiss()
-                                }
-                                builder.setTitle("Peringatan!")
-                                    .setMessage("Titik anda saat ini $shortDistance km dari titik ${ selectedStore?.title }. Cobalah untuk lebih dekat dengan toko!")
-                                    .setPositiveButton("Oke") { dialog, _ ->
+                                if (distance > MAX_REPORT_DISTANCE) {
+                                    val builder = AlertDialog.Builder(this)
+                                    builder.setCancelable(false)
+                                    builder.setOnDismissListener {
                                         absentProgressDialog?.dismiss()
-                                        dialog.dismiss()
                                     }
-                                    .setNegativeButton("Buka Maps") { dialog, _ ->
-                                        val intent = Intent(this@HomeSalesActivity, MapsActivity::class.java)
-                                        intent.putExtra(CONST_IS_BASE_CAMP, true)
-                                        intent.putExtra(CONST_MAPS, mapsUrl)
-                                        intent.putExtra(CONST_MAPS_NAME, selectedStore?.title)
-                                        startActivity(intent)
-
+                                    builder.setOnCancelListener {
                                         absentProgressDialog?.dismiss()
-                                        dialog.dismiss()
                                     }
-                                builder.show()
+                                    builder.setTitle("Peringatan!")
+                                        .setMessage("Titik anda saat ini $shortDistance km dari titik ${ selectedStore?.title }. Cobalah untuk lebih dekat dengan toko!")
+                                        .setPositiveButton("Oke") { dialog, _ ->
+                                            absentProgressDialog?.dismiss()
+                                            dialog.dismiss()
+                                        }
+                                        .setNegativeButton("Buka Maps") { dialog, _ ->
+                                            val intent = Intent(this@HomeSalesActivity, MapsActivity::class.java)
+                                            intent.putExtra(CONST_IS_BASE_CAMP, true)
+                                            intent.putExtra(CONST_MAPS, mapsUrl)
+                                            intent.putExtra(CONST_MAPS_NAME, selectedStore?.title)
+                                            startActivity(intent)
+
+                                            absentProgressDialog?.dismiss()
+                                            dialog.dismiss()
+                                        }
+                                    builder.show()
+                                } else {
+                                    executeAbsentReport(shortDistance)
+                                }
+
                             } else {
-                                executeAbsentReport(shortDistance)
+                                absentProgressDialog?.dismiss()
+                                Toast.makeText(this, "Gagal memproses koordinat", TOAST_SHORT).show()
                             }
-
                         } else {
-                            absentProgressDialog?.dismiss()
-                            Toast.makeText(this, "Gagal memproses koordinat", TOAST_SHORT).show()
+                            AlertDialog.Builder(this)
+                                .setCancelable(false)
+                                .setTitle("Gagal memproses lokasi")
+                                .setMessage("Cobalah untuk menututup dan membuka ulang aplikasi")
+                                .setPositiveButton("Tutup") { dialog, _ ->
+                                    finish()
+                                    dialog.dismiss()
+                                }
+                                .show()
                         }
 
                     }.addOnFailureListener {
@@ -800,96 +816,96 @@ class HomeSalesActivity : AppCompatActivity() {
         }
 
         return
-        lifecycleScope.launch {
-            try {
-
-                var visitReport = "Absen masuk\n•by system•"
-                if (isAbsentMorningNow) visitReport = "Absen pulang\n•by system•"
-
-                val response = apiService.makeVisitReport(
-                    idContact = createPartFromString(selectedStore?.id!!),
-                    idUser = createPartFromString(userId!!),
-                    laporanVisit = createPartFromString(visitReport),
-                    distanceVisit = createPartFromString(shortDistance)
-                )
-
-                if (response.isSuccessful) {
-
-                    val responseBody = response.body()!!
-
-                    when (responseBody.status) {
-                        RESPONSE_STATUS_OK -> {
-
-                            val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
-                            val userChild = absentChild.child(userId.toString())
-
-                            userChild.child("id").setValue(userId)
-                            userChild.child("username").setValue(userName)
-                            userChild.child("fullname").setValue(userFullName)
-                            userChild.child("isOnline").setValue(true)
-
-                            if (!isAbsentMorningNow) {
-
-                                val absentDateTime = DateFormat.now()
-                                userChild.child("morningDateTime").setValue(absentDateTime)
-                                userChild.child("lastSeen").setValue(absentDateTime)
-
-                                sessionManager.absentDateTime(absentDateTime)
-
-                                if (!CustomUtility(this@HomeSalesActivity).isServiceRunning(
-                                        TrackingService::class.java)) {
-                                    val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
-                                    serviceIntent.putExtra("userId", userId)
-                                    serviceIntent.putExtra("userDistributorId", userDistributorId)
-                                    serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
-                                    this@HomeSalesActivity.startService(serviceIntent)
-                                }
-
-                                absentProgressDialog?.dismiss()
-                                checkAbsent()
-                            } else {
-
-                                val absentDateTime = DateFormat.now()
-                                userChild.child("eveningDateTime").setValue(absentDateTime)
-                                userChild.child("lastSeen").setValue(absentDateTime)
-
-                                sessionManager.absentDateTime(absentDateTime)
-
-                                val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
-                                this@HomeSalesActivity.stopService(serviceIntent)
-
-                                absentProgressDialog?.dismiss()
-                                checkAbsent()
-                            }
-
-                        }
-                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
-
-                            absentProgressDialog?.dismiss()
-                            handleMessage(this@HomeSalesActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan absen! Message: ${ responseBody.message }")
-
-                        }
-                        else -> {
-
-                            absentProgressDialog?.dismiss()
-                            handleMessage(this@HomeSalesActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
-
-                        }
-                    }
-                } else {
-
-                    absentProgressDialog?.dismiss()
-                    handleMessage(this@HomeSalesActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan absen! Error: " + response.message())
-
-                }
-
-            } catch (e: Exception) {
-
-                handleMessage(this@HomeSalesActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
-
-            }
-
-        }
+//        lifecycleScope.launch {
+//            try {
+//
+//                var visitReport = "Absen masuk\n•by system•"
+//                if (isAbsentMorningNow) visitReport = "Absen pulang\n•by system•"
+//
+//                val response = apiService.makeVisitReport(
+//                    idContact = createPartFromString(selectedStore?.id!!),
+//                    idUser = createPartFromString(userId!!),
+//                    laporanVisit = createPartFromString(visitReport),
+//                    distanceVisit = createPartFromString(shortDistance)
+//                )
+//
+//                if (response.isSuccessful) {
+//
+//                    val responseBody = response.body()!!
+//
+//                    when (responseBody.status) {
+//                        RESPONSE_STATUS_OK -> {
+//
+//                            val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+//                            val userChild = absentChild.child(userId.toString())
+//
+//                            userChild.child("id").setValue(userId)
+//                            userChild.child("username").setValue(userName)
+//                            userChild.child("fullname").setValue(userFullName)
+//                            userChild.child("isOnline").setValue(true)
+//
+//                            if (!isAbsentMorningNow) {
+//
+//                                val absentDateTime = DateFormat.now()
+//                                userChild.child("morningDateTime").setValue(absentDateTime)
+//                                userChild.child("lastSeen").setValue(absentDateTime)
+//
+//                                sessionManager.absentDateTime(absentDateTime)
+//
+//                                if (!CustomUtility(this@HomeSalesActivity).isServiceRunning(
+//                                        TrackingService::class.java)) {
+//                                    val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
+//                                    serviceIntent.putExtra("userId", userId)
+//                                    serviceIntent.putExtra("userDistributorId", userDistributorId)
+//                                    serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
+//                                    this@HomeSalesActivity.startService(serviceIntent)
+//                                }
+//
+//                                absentProgressDialog?.dismiss()
+//                                checkAbsent()
+//                            } else {
+//
+//                                val absentDateTime = DateFormat.now()
+//                                userChild.child("eveningDateTime").setValue(absentDateTime)
+//                                userChild.child("lastSeen").setValue(absentDateTime)
+//
+//                                sessionManager.absentDateTime(absentDateTime)
+//
+//                                val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
+//                                this@HomeSalesActivity.stopService(serviceIntent)
+//
+//                                absentProgressDialog?.dismiss()
+//                                checkAbsent()
+//                            }
+//
+//                        }
+//                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+//
+//                            absentProgressDialog?.dismiss()
+//                            handleMessage(this@HomeSalesActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan absen! Message: ${ responseBody.message }")
+//
+//                        }
+//                        else -> {
+//
+//                            absentProgressDialog?.dismiss()
+//                            handleMessage(this@HomeSalesActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+//
+//                        }
+//                    }
+//                } else {
+//
+//                    absentProgressDialog?.dismiss()
+//                    handleMessage(this@HomeSalesActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan absen! Error: " + response.message())
+//
+//                }
+//
+//            } catch (e: Exception) {
+//
+//                handleMessage(this@HomeSalesActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+//
+//            }
+//
+//        }
     }
 
     private fun checkAbsent() {
@@ -1182,7 +1198,8 @@ class HomeSalesActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        checkAbsent()
+//        checkAbsent()
+        checkLocationPermission()
         Handler(Looper.getMainLooper()).postDelayed({
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
@@ -1235,8 +1252,8 @@ class HomeSalesActivity : AppCompatActivity() {
                 else getListBasecamp(showModal = false)
 
             }
-        } else if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            checkLocationPermission()
+//        } else if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+//            checkLocationPermission()
         }
     }
 
