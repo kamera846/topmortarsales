@@ -139,6 +139,7 @@ class NewReportActivity : AppCompatActivity() {
     private fun initClickHandler() {
         binding.titleBarLight.icBack.setOnClickListener { finish() }
         binding.btnReport.setOnClickListener { submitValidation() }
+        binding.lnrDistance.setOnClickListener { calculateDistance() }
     }
 
     private fun etMessageListener() {
