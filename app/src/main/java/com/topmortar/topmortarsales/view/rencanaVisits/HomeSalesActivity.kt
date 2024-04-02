@@ -773,8 +773,8 @@ class HomeSalesActivity : AppCompatActivity() {
             USER_KIND_COURIER -> AUTH_LEVEL_COURIER
             else -> ""
         }
-        userChild.child("userLevel").setValue(userLevel)
 
+        userChild.child("userLevel").setValue(userLevel)
         userChild.child("id").setValue(userId)
         userChild.child("idCity").setValue(userCity)
         userChild.child("username").setValue(userName)
