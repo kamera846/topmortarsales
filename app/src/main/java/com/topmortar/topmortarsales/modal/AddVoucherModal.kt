@@ -41,6 +41,7 @@ class AddVoucherModal(private val context: Context, private val lifecycleScope: 
     private var _binding: ModalAddVoucherBinding? = null
     private val binding get() = _binding!!
     private lateinit var sessionManager: SessionManager
+    private val userID get() = sessionManager.userID().toString()
     private val userKind get() = sessionManager.userKind().toString()
 
     private lateinit var titleBar: LinearLayout
@@ -206,11 +207,18 @@ class AddVoucherModal(private val context: Context, private val lifecycleScope: 
 //                val voucher = createPartFromString(vouchers.joinToString(","))
 
                 val idVoucher = createPartFromString(contactId)
+                val idUser = createPartFromString(userID)
+                val distance = createPartFromString(contactCoordinate)
                 val noFisik = createPartFromString(voucher1.toString())
 
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.editNoFisikVoucher(idVoucher = idVoucher, noFisik = noFisik)
+                val response = apiService.editNoFisikVoucher(
+                    idVoucher = idVoucher,
+                    idUser = idUser,
+                    distance = distance,
+                    noFisik = noFisik
+                )
 
                 when (response.status) {
                     RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
