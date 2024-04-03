@@ -35,6 +35,8 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
@@ -56,6 +58,8 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
@@ -86,6 +90,7 @@ class HomeCourierActivity : AppCompatActivity() {
     private val userCity get() = sessionManager.userCityID()
     private val userName get() = sessionManager.userName()
     private val userFullName get() = sessionManager.fullName()
+    private val userKind get() = sessionManager.userKind()
     private val userDistributorId get() = sessionManager.userDistributor()
     private val userDistributorNumber get() = sessionManager.userDistributorNumber()
     private val selectedBasecampDefaultID get() = sessionManager.selectedBasecampAbsentID()
@@ -126,6 +131,17 @@ class HomeCourierActivity : AppCompatActivity() {
         apiService = HttpClient.create()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         customUtility = CustomUtility(this)
+
+        // Set User Absent Level (TEMP)
+        val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+        val userChild = absentChild.child(userId.toString())
+        val userLevel = when (userKind) {
+            USER_KIND_PENAGIHAN -> AUTH_LEVEL_PENAGIHAN
+            USER_KIND_SALES -> AUTH_LEVEL_SALES
+            USER_KIND_COURIER -> AUTH_LEVEL_COURIER
+            else -> ""
+        }
+        userChild.child("userLevel").setValue(userLevel)
 
         binding.selectedBasecampContainer.tvLabel.text = "Basecamp:"
 
@@ -846,7 +862,14 @@ class HomeCourierActivity : AppCompatActivity() {
 
                             val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
                             val userChild = absentChild.child(userId.toString())
+                            val userLevel = when (userKind) {
+                                USER_KIND_PENAGIHAN -> AUTH_LEVEL_PENAGIHAN
+                                USER_KIND_SALES -> AUTH_LEVEL_SALES
+                                USER_KIND_COURIER -> AUTH_LEVEL_COURIER
+                                else -> ""
+                            }
 
+                            userChild.child("userLevel").setValue(userLevel)
                             userChild.child("id").setValue(userId)
                             userChild.child("idCity").setValue(userCity)
                             userChild.child("username").setValue(userName)

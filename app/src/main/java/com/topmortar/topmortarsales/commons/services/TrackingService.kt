@@ -53,9 +53,9 @@ class TrackingService : Service() {
         val notification = CustomNotificationBuilder.with(this)
             .setIntent(notificationIntent)
             .setChannelId("topmortar_delivery_notification")
-            .setChannelName("Topmortar Delivery Notification")
+            .setChannelName("Topmortar Absent Notification")
             .setContentTitle("Kehadiran Sudah Tercatat")
-            .setContentText("Pastikan untuk menyelesaikan semua kiriman sebelum pulang...")
+            .setContentText("Pastikan untuk menyelesaikan target anda sebelum pulang...")
             .build()
 
         startForeground(NOTIFICATION_ID, notification)

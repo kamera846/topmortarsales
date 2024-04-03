@@ -6,9 +6,11 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -26,6 +28,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
 import com.topmortar.topmortarsales.commons.CONST_MAPS
@@ -41,6 +44,7 @@ import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
+import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
@@ -61,6 +65,9 @@ class NewReportActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private lateinit var customUtility: CustomUtility
     private lateinit var progressDialog: ProgressDialog
+
+    private val userId get() = sessionManager.userID()
+    private val userDistributorId get() = sessionManager.userDistributor()
 
     private val msgMaxLines = 6
     private val msgMaxLength = 500
@@ -89,9 +96,6 @@ class NewReportActivity : AppCompatActivity() {
         progressDialog.setCancelable(false)
         progressDialog.setMessage("Sedang menghitung jarak...")
 
-        initContent()
-        initClickHandler()
-
         if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
             CustomUtility(this).setUserStatusOnline(
                 true,
@@ -99,6 +103,51 @@ class NewReportActivity : AppCompatActivity() {
                 sessionManager.userID().toString()
             )
         }
+    }
+
+    private fun checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            checkGpsStatus()
+        } else {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+        }
+    }
+
+    private fun checkGpsStatus() {
+        val locationManager =
+            getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+
+        if (!isGpsEnabled) {
+            // GPS tidak aktif, munculkan dialog untuk mengaktifkannya
+            showGpsDisabledDialog()
+        } else {
+            if (!CustomUtility(this).isServiceRunning(
+                    TrackingService::class.java)) {
+                val serviceIntent = Intent(this, TrackingService::class.java)
+                serviceIntent.putExtra("userId", userId)
+                serviceIntent.putExtra("userDistributorId", userDistributorId)
+                serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
+                startService(serviceIntent)
+            }
+            initContent()
+        }
+    }
+
+    private fun showGpsDisabledDialog() {
+
+        val serviceIntent = Intent(this, TrackingService::class.java)
+        stopService(serviceIntent)
+
+        AlertDialog.Builder(this)
+            .setMessage("Aplikasi memerlukan lokasi untuk berfungsi. Aktifkan lokasi sekarang?")
+            .setCancelable(false)
+            .setPositiveButton("Ya") { _, _ ->
+                // Buka pengaturan untuk mengaktifkan GPS
+                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                startActivityForResult(intent, LOCATION_PERMISSION_REQUEST_CODE)
+            }
+            .show()
     }
 
     private fun initContent() {
@@ -127,6 +176,7 @@ class NewReportActivity : AppCompatActivity() {
             }
         }
 
+        initClickHandler()
         Handler(Looper.getMainLooper()).postDelayed({
 
             binding.etName.text = name
@@ -139,6 +189,7 @@ class NewReportActivity : AppCompatActivity() {
     private fun initClickHandler() {
         binding.titleBarLight.icBack.setOnClickListener { finish() }
         binding.btnReport.setOnClickListener { submitValidation() }
+        binding.lnrDistance.setOnClickListener { calculateDistance() }
     }
 
     private fun etMessageListener() {
@@ -182,77 +233,104 @@ class NewReportActivity : AppCompatActivity() {
                     urlUtility.requestLocationUpdate()
 
                     if (!urlUtility.isUrl(mapsUrl) && mapsUrl.isNotEmpty()) {
-                        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location ->
+                        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
 
-                            // Courier Location
-                            val currentLatitude = location.latitude
-                            val currentLongitude = location.longitude
+                            if (location != null) {
+                                // Courier Location
+                                val currentLatitude = location.latitude
+                                val currentLongitude = location.longitude
 
-                            // Store Location
-                            val coordinate = mapsUrl.split(",")
-                            val latitude = coordinate[0].toDoubleOrNull()
-                            val longitude = coordinate[1].toDoubleOrNull()
+                                // Store Location
+                                val coordinate = mapsUrl.split(",")
+                                val latitude = coordinate[0].toDoubleOrNull()
+                                val longitude = coordinate[1].toDoubleOrNull()
 
-                            if (latitude != null && longitude != null) {
+                                if (latitude != null && longitude != null) {
 
-                                // Calculate Distance
-                                val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
-                                val shortDistance = "%.3f".format(distance)
+                                    // Calculate Distance
+                                    val distance = urlUtility.calculateDistance(
+                                        currentLatitude,
+                                        currentLongitude,
+                                        latitude,
+                                        longitude
+                                    )
+                                    val shortDistance = "%.3f".format(distance)
 
-                                if (distance > MAX_REPORT_DISTANCE) {
-                                    val builder = AlertDialog.Builder(this)
-                                    builder.setCancelable(false)
-                                    builder.setOnDismissListener { progressDialog.dismiss() }
-                                    builder.setOnCancelListener { progressDialog.dismiss() }
-                                    builder.setTitle("Peringatan!")
-                                        .setMessage("Titik anda saat ini $shortDistance km dari titik $reportType. Cobalah untuk lebih dekat dengan $reportType!")
-                                        .setPositiveButton("Oke") { dialog, _ ->
-                                            progressDialog.dismiss()
+                                    if (distance > MAX_REPORT_DISTANCE) {
+                                        val builder = AlertDialog.Builder(this)
+                                        builder.setCancelable(false)
+                                        builder.setOnDismissListener { progressDialog.dismiss() }
+                                        builder.setOnCancelListener { progressDialog.dismiss() }
+                                        builder.setTitle("Peringatan!")
+                                            .setMessage("Titik anda saat ini $shortDistance km dari titik $reportType. Cobalah untuk lebih dekat dengan $reportType!")
+                                            .setPositiveButton("Oke") { dialog, _ ->
+                                                progressDialog.dismiss()
 
-                                            binding.etDistance.setTextColor(getColor(R.color.primary))
-                                            binding.etDistance.text = shortDistance
-                                            binding.icRefreshDistance.visibility = View.VISIBLE
-                                            binding.tvDistanceError.visibility = View.VISIBLE
-                                            binding.tvDistanceError.text = "Jarak anda lebih dari $MAX_REPORT_DISTANCE km. Cobalah untuk lebih dekat dengan titik $reportType dan refresh jaraknya!"
-                                            isDistanceToLong = true
+                                                binding.etDistance.setTextColor(getColor(R.color.primary))
+                                                binding.etDistance.text = shortDistance
+                                                binding.icRefreshDistance.visibility = View.VISIBLE
+                                                binding.tvDistanceError.visibility = View.VISIBLE
+                                                binding.tvDistanceError.text =
+                                                    "Jarak anda lebih dari $MAX_REPORT_DISTANCE km. Cobalah untuk lebih dekat dengan titik $reportType dan refresh jaraknya!"
+                                                isDistanceToLong = true
 
-                                            dialog.dismiss()
-                                        }
-                                        .setNegativeButton("Buka Maps") { dialog, _ ->
-                                            val intent = Intent(this@NewReportActivity, MapsActivity::class.java)
-                                            intent.putExtra(CONST_IS_BASE_CAMP, reportType == "basecamp")
-                                            intent.putExtra(CONST_MAPS, mapsUrl)
-                                            intent.putExtra(CONST_MAPS_NAME, name)
-                                            startActivity(intent)
+                                                dialog.dismiss()
+                                            }
+                                            .setNegativeButton("Buka Maps") { dialog, _ ->
+                                                val intent = Intent(
+                                                    this@NewReportActivity,
+                                                    MapsActivity::class.java
+                                                )
+                                                intent.putExtra(
+                                                    CONST_IS_BASE_CAMP,
+                                                    reportType == "basecamp"
+                                                )
+                                                intent.putExtra(CONST_MAPS, mapsUrl)
+                                                intent.putExtra(CONST_MAPS_NAME, name)
+                                                startActivity(intent)
 
-                                            progressDialog.dismiss()
+                                                progressDialog.dismiss()
 
-                                            binding.etDistance.setTextColor(getColor(R.color.primary))
-                                            binding.etDistance.text = shortDistance
-                                            binding.icRefreshDistance.visibility = View.VISIBLE
-                                            binding.tvDistanceError.visibility = View.VISIBLE
-                                            binding.tvDistanceError.text = "Cobalah untuk lebih dekat dengan titik $reportType dan refresh jaraknya!"
-                                            isDistanceToLong = true
+                                                binding.etDistance.setTextColor(getColor(R.color.primary))
+                                                binding.etDistance.text = shortDistance
+                                                binding.icRefreshDistance.visibility = View.VISIBLE
+                                                binding.tvDistanceError.visibility = View.VISIBLE
+                                                binding.tvDistanceError.text =
+                                                    "Cobalah untuk lebih dekat dengan titik $reportType dan refresh jaraknya!"
+                                                isDistanceToLong = true
 
-                                            dialog.dismiss()
-                                        }
-                                    builder.show()
+                                                dialog.dismiss()
+                                            }
+                                        builder.show()
+                                    } else {
+                                        progressDialog.dismiss()
+
+                                        var textColor = getColor(R.color.black_200)
+                                        if (customUtility.isDarkMode()) textColor =
+                                            getColor(R.color.black_600)
+
+                                        binding.etDistance.setTextColor(textColor)
+                                        binding.etDistance.text = shortDistance
+                                        binding.icRefreshDistance.visibility = View.VISIBLE
+                                        binding.tvDistanceError.visibility = View.GONE
+                                        isDistanceToLong = false
+                                    }
+
                                 } else {
                                     progressDialog.dismiss()
-
-                                    var textColor = getColor(R.color.black_200)
-                                    if (customUtility.isDarkMode()) textColor = getColor(R.color.black_600)
-
-                                    binding.etDistance.setTextColor(textColor)
-                                    binding.etDistance.text = shortDistance
-                                    binding.icRefreshDistance.visibility = View.VISIBLE
-                                    binding.tvDistanceError.visibility = View.GONE
-                                    isDistanceToLong = false
+                                    Toast.makeText(this, "Gagal memproses koordinat", TOAST_SHORT)
+                                        .show()
                                 }
-
                             } else {
-                                progressDialog.dismiss()
-                                Toast.makeText(this, "Gagal memproses koordinat", TOAST_SHORT).show()
+                                AlertDialog.Builder(this)
+                                    .setCancelable(false)
+                                    .setTitle("Gagal memproses lokasi")
+                                    .setMessage("Cobalah untuk menututup dan membuka ulang aplikasi")
+                                    .setPositiveButton("Tutup") { dialog, _ ->
+                                        finish()
+                                        dialog.dismiss()
+                                    }
+                                    .show()
                             }
 
                         }.addOnFailureListener {
@@ -425,9 +503,9 @@ class NewReportActivity : AppCompatActivity() {
             binding.container.visibility = View.VISIBLE
         }
     }
-
     override fun onStart() {
         super.onStart()
+        checkLocationPermission()
         Handler(Looper.getMainLooper()).postDelayed({
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
@@ -470,14 +548,19 @@ class NewReportActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                getDistance()
-                calculateDistance()
-            } else {
-                if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    val message = "Izin lokasi diperlukan untuk fitur ini. Tolong berikan izinnya."
-                    customUtility.showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE) }
-                } else customUtility.showPermissionDeniedDialog("Izin lokasi diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) checkLocationPermission()
+            else {
+                AlertDialog.Builder(this)
+                    .setCancelable(false)
+                    .setTitle("Izin Diperlukan")
+                    .setMessage("Izin lokasi diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
+                    .setPositiveButton(getString(R.string.open_settings)) { localDialog, _ ->
+                        localDialog.dismiss()
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                        intent.data = Uri.fromParts("package", packageName, null)
+                        startActivityForResult(intent, LOCATION_PERMISSION_REQUEST_CODE)
+                    }
+                    .show()
             }
         }
 

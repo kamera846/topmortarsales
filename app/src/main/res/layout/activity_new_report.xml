@@ -126,13 +126,13 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:id="@+id/lnrDistance"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
                         android:gravity="center_vertical"
                         android:clickable="true"
                         android:focusable="true"
                         android:background="@drawable/et_background_clickable"
-                        android:onClick="calculateDistance"
                         android:orientation="horizontal">
 
                         <TextView
