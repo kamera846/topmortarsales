@@ -424,7 +424,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
                             // Firebase Auth Session
                             try {
-                                firebaseReference = FirebaseUtils().getReference(distributorId = data.id_distributor)
+                                firebaseReference = FirebaseUtils().getReference(distributorId = data.id_distributor.ifEmpty { "-firebase-005" })
                                 val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
                                 val userChild = authChild.child(data.username + data.id_user)
                                 val userDevicesChild = userChild.child("devices")
@@ -1022,7 +1022,8 @@ class SplashScreenActivity : AppCompatActivity() {
 
                             // Firebase Auth Session
                             try {
-                                firebaseReference = FirebaseUtils().getReference(distributorId = userDistributor)
+                                val userDistributorIds = sessionManager.userDistributor()
+                                firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-006")
                                 val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
                                 val userChild = authChild.child(username + userId)
                                 val userDevicesChild = userChild.child("devices")

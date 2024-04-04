@@ -159,6 +159,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private val userID get() = sessionManager.userID().toString()
     private val fulllName get() = sessionManager.fullName().toString()
     private val userDistributorId get() = sessionManager.userDistributor().toString()
+    private val userDistributorIds get() = sessionManager.userDistributor()
     private lateinit var binding: ActivityDetailContactBinding
     private var pingUtility: PingUtility? = null
 
@@ -292,7 +293,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         progressDialog.setMessage(getString(R.string.txt_loading))
 
         if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
-            CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+            CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-003", userID)
         }
 
         initVariable()
@@ -1983,7 +1984,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
 
         deliveryId = "$AUTH_LEVEL_COURIER$userID"
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
+        val userDistributorIds = sessionManager.userDistributor()
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-007")
         childDelivery = firebaseReference?.child(FIREBASE_CHILD_DELIVERY)
         childDriver = childDelivery?.child(deliveryId)
 
@@ -2207,7 +2209,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
             if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
-                CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+                CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-003", userID)
             }
         }, 1000)
     }
@@ -2215,7 +2217,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     override fun onStop() {
         super.onStop()
         if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
-            CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+            CustomUtility(this).setUserStatusOnline(false, userDistributorIds ?: "-custom-003", userID)
         }
     }
 
@@ -2223,7 +2225,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         super.onDestroy()
         if (pingUtility != null) pingUtility!!.stopPingMonitoring()
         if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
-            CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+            CustomUtility(this).setUserStatusOnline(false, userDistributorIds ?: "-custom-003", userID)
         }
     }
 

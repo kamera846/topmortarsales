@@ -71,6 +71,7 @@ class VoucherActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private val userKind get() = sessionManager.userKind().toString()
     private val userDistributor get() = sessionManager.userDistributor().toString()
+    private val userDistributors get() = sessionManager.userDistributor()
     private val userId get() = sessionManager.userID().toString()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -95,7 +96,7 @@ class VoucherActivity : AppCompatActivity() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
-            CustomUtility(this).setUserStatusOnline(true, userDistributor, userId)
+            CustomUtility(this).setUserStatusOnline(true, userDistributors ?: "-custom-005", userId)
         }
 
         getList()
@@ -330,7 +331,7 @@ class VoucherActivity : AppCompatActivity() {
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
             if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
-                CustomUtility(this).setUserStatusOnline(true, userDistributor, userId)
+                CustomUtility(this).setUserStatusOnline(true, userDistributors ?: "-custom-005", userId)
             }
         }, 1000)
     }
@@ -338,14 +339,14 @@ class VoucherActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
-            CustomUtility(this).setUserStatusOnline(false, userDistributor, userId)
+            CustomUtility(this).setUserStatusOnline(false, userDistributors ?: "-custom-005", userId)
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
-            CustomUtility(this).setUserStatusOnline(false, userDistributor, userId)
+            CustomUtility(this).setUserStatusOnline(false, userDistributors ?: "-custom-005", userId)
         }
     }
 }

@@ -92,7 +92,7 @@ class PreviewClosingActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_preview_closing)
 
-        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, userDistributorId ?: "-custom-017", "$userID")
 
         initVariable()
         initClickHandler()
@@ -283,7 +283,8 @@ class PreviewClosingActivity : AppCompatActivity() {
     private fun onClosingFinished(message: String) {
 
         deliveryId = "$AUTH_LEVEL_COURIER$userID"
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId!!)
+        val userDistributorIds = sessionManager.userDistributor()
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-015")
         childDelivery = firebaseReference?.child(FIREBASE_CHILD_DELIVERY)
         childDriver = childDelivery?.child(deliveryId)
 
@@ -467,18 +468,18 @@ class PreviewClosingActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
-            if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+            if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, userDistributorId ?: "-custom-017", "$userID")
         }, 1000)
     }
 
     override fun onStop() {
         super.onStop()
-        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, userDistributorId ?: "-custom-017", "$userID")
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, userDistributorId ?: "-custom-017", "$userID")
     }
 
 }

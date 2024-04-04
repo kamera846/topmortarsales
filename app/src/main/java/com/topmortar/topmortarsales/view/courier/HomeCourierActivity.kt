@@ -130,7 +130,8 @@ class HomeCourierActivity : AppCompatActivity() {
             absentProgressDialog!!.setCancelable(false)
         }
 
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId.toString())
+        val userDistributorIds = sessionManager.userDistributor()
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-011")
         apiService = HttpClient.create()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         customUtility = CustomUtility(this)
@@ -160,7 +161,7 @@ class HomeCourierActivity : AppCompatActivity() {
         setupDialogSearch()
 
         checkLocationPermission()
-        CustomUtility(this).setUserStatusOnline(true, userDistributorId.toString(), userId.toString())
+        CustomUtility(this).setUserStatusOnline(true, userDistributorId ?: "-custom-008", userId ?: "")
     }
 
     private fun checkLocationPermission() {
@@ -1038,7 +1039,7 @@ class HomeCourierActivity : AppCompatActivity() {
         super.onStart()
         checkAbsent()
         Handler(Looper.getMainLooper()).postDelayed({
-            CustomUtility(this).setUserStatusOnline(true, userDistributorId.toString(), userId.toString())
+            CustomUtility(this).setUserStatusOnline(true, userDistributorId ?: "-custom-008", userId ?: "")
         }, 1000)
     }
 
@@ -1049,8 +1050,8 @@ class HomeCourierActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_COURIER) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
-                    sessionManager.userID().toString()
+                    userDistributorId ?: "-custom-008",
+                    sessionManager.userID() ?: ""
                 )
             }
         }
@@ -1063,8 +1064,8 @@ class HomeCourierActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_COURIER) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
-                    sessionManager.userID().toString()
+                    userDistributorId ?: "-custom-008",
+                    sessionManager.userID() ?: ""
                 )
             }
         }

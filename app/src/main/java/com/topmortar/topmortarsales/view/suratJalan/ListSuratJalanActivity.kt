@@ -110,7 +110,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
         setContentView(R.layout.activity_list_invoice)
 
         if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
-            CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+            CustomUtility(this).setUserStatusOnline(true, userDistributorId ?: "-custom-016", "$userID")
         }
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
 
@@ -502,7 +502,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
-                CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+                CustomUtility(this).setUserStatusOnline(true, userDistributorId ?: "-custom-016", "$userID")
             }
         }, 1000)
     }
@@ -510,14 +510,14 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
     override fun onStop() {
         super.onStop()
         if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
-            CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+            CustomUtility(this).setUserStatusOnline(false, userDistributorId ?: "-custom-016", "$userID")
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
-            CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+            CustomUtility(this).setUserStatusOnline(false, userDistributorId ?: "-custom-016", "$userID")
         }
     }
 

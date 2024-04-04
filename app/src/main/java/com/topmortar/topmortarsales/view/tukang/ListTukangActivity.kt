@@ -105,7 +105,8 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
         setContentView(R.layout.activity_list_tukang)
 
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
+        val userDistributorIds = sessionManager.userDistributor()
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-016")
 
         initVariable()
         initClickHandler()

@@ -67,6 +67,7 @@ class AddBaseCampActivity : AppCompatActivity() {
     private val userCityID get() = sessionManager.userCityID()
     private val userKind get() = sessionManager.userKind()
     private val userDistributorId get() = sessionManager.userDistributor().toString()
+    private val userDistributorIds get() = sessionManager.userDistributor()
     private lateinit var searchModal: SearchModal
     private var selectedCity: ModalSearchModel? = null
     private var citiesResults: ArrayList<CityModel> = ArrayList()
@@ -99,7 +100,7 @@ class AddBaseCampActivity : AppCompatActivity() {
                 userKind == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_SALES ||
                 userKind == USER_KIND_PENAGIHAN || sessionManager.userKind() == USER_KIND_PENAGIHAN
             ) {
-                CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+                CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-006", "$userID")
         }
         setMapsAction()
     }
@@ -395,7 +396,7 @@ class AddBaseCampActivity : AppCompatActivity() {
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
-                CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+                CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-006", "$userID")
             }
         }, 1000)
     }
@@ -403,7 +404,7 @@ class AddBaseCampActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
-            CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+            CustomUtility(this).setUserStatusOnline(false, userDistributorIds ?: "-custom-006", "$userID")
         }
     }
 
@@ -411,7 +412,7 @@ class AddBaseCampActivity : AppCompatActivity() {
         super.onDestroy()
         _binding = null
         if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
-            CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+            CustomUtility(this).setUserStatusOnline(false, userDistributorIds ?: "-custom-006", "$userID")
         }
     }
 

@@ -99,8 +99,8 @@ class NewReportActivity : AppCompatActivity() {
         if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
             CustomUtility(this).setUserStatusOnline(
                 true,
-                sessionManager.userDistributor().toString(),
-                sessionManager.userID().toString()
+                sessionManager.userDistributor() ?: "-custom-012",
+                sessionManager.userID() ?: ""
             )
         }
     }
@@ -510,8 +510,8 @@ class NewReportActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     true,
-                    sessionManager.userDistributor().toString(),
-                    sessionManager.userID().toString()
+                    sessionManager.userDistributor() ?: "-custom-012",
+                    sessionManager.userID() ?: ""
                 )
             }
         }, 1000)
@@ -524,8 +524,8 @@ class NewReportActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
-                    sessionManager.userID().toString()
+                    sessionManager.userDistributor() ?: "-custom-012",
+                    sessionManager.userID() ?: ""
                 )
             }
         }
@@ -537,8 +537,8 @@ class NewReportActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
-                    sessionManager.userID().toString()
+                    sessionManager.userDistributor() ?: "-custom-012",
+                    sessionManager.userID() ?: ""
                 )
             }
         }

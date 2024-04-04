@@ -61,6 +61,7 @@ class CourierActivity : AppCompatActivity() {
     private val fullname get() = sessionManager.fullName()!!
     private val userCity get() = sessionManager.userCityID()!!
     private val userDistributorId get() = sessionManager.userDistributor()!!
+    private val userDistributorIds get() = sessionManager.userDistributor()
     private val userAbsentDateTime get() = sessionManager.absentDateTime()!!
 
     private lateinit var firebaseReference : DatabaseReference
@@ -84,7 +85,8 @@ class CourierActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
+        val userDistributorIds = sessionManager.userDistributor()
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-010")
 
         binding.titleBarDark.tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
         binding.titleBarDark.tvTitleBarDescription.visibility = binding.titleBarDark.tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
@@ -106,7 +108,7 @@ class CourierActivity : AppCompatActivity() {
         absentProgressDialog.setCancelable(false)
         absentProgressDialog.setMessage(getString(R.string.txt_loading))
 
-        CustomUtility(this).setUserStatusOnline(true, userDistributorId, userId)
+        CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-007", userId)
         initLayout()
 
     }
@@ -446,19 +448,19 @@ class CourierActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
-            CustomUtility(this).setUserStatusOnline(true, userDistributorId, userId)
+            CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-007", userId)
         }, 1000)
     }
 
     override fun onStop() {
         super.onStop()
-        CustomUtility(this).setUserStatusOnline(false, userDistributorId, userId)
+        CustomUtility(this).setUserStatusOnline(false, userDistributorIds ?: "-custom-007", userId)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
-        CustomUtility(this).setUserStatusOnline(false, userDistributorId, userId)
+        CustomUtility(this).setUserStatusOnline(false, userDistributorIds ?: "-custom-007", userId)
     }
 
 }

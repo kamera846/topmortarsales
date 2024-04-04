@@ -78,8 +78,8 @@ class UsersReportActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCl
         if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
             CustomUtility(this).setUserStatusOnline(
                 true,
-                sessionManager.userDistributor().toString(),
-                sessionManager.userID().toString()
+                sessionManager.userDistributor() ?: "-custom-014",
+                sessionManager.userID() ?: ""
             )
         }
 
@@ -243,8 +243,8 @@ class UsersReportActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCl
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
                 CustomUtility(this).setUserStatusOnline(
                     true,
-                    sessionManager.userDistributor().toString(),
-                    sessionManager.userID().toString()
+                    sessionManager.userDistributor() ?: "-custom-014",
+                    sessionManager.userID() ?: ""
                 )
             }
         }, 1000)
@@ -257,8 +257,8 @@ class UsersReportActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCl
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
-                    sessionManager.userID().toString()
+                    sessionManager.userDistributor() ?: "-custom-014",
+                    sessionManager.userID() ?: ""
                 )
             }
         }
@@ -270,8 +270,8 @@ class UsersReportActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCl
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
-                    sessionManager.userID().toString()
+                    sessionManager.userDistributor() ?: "-custom-014",
+                    sessionManager.userID() ?: ""
                 )
             }
         }

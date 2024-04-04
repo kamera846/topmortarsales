@@ -137,7 +137,7 @@ class HomeSalesActivity : AppCompatActivity() {
         setContentView(binding.root)
         initGlobalVariable()
 
-        CustomUtility(this).setUserStatusOnline(true, userDistributorId.toString(), userId.toString())
+        CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor() ?: "-custom-010", sessionManager.userID() ?: "")
 
     }
 
@@ -186,7 +186,8 @@ class HomeSalesActivity : AppCompatActivity() {
             absentProgressDialog!!.setCancelable(false)
         }
 
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId.toString())
+        val userDistributorIds = sessionManager.userDistributor()
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-014")
         apiService = HttpClient.create()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         customUtility = CustomUtility(this)
@@ -1208,8 +1209,8 @@ class HomeSalesActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     true,
-                    sessionManager.userDistributor().toString(),
-                    sessionManager.userID().toString()
+                    sessionManager.userDistributor() ?: "-custom-010",
+                    sessionManager.userID() ?: ""
                 )
             }
         }, 1000)
@@ -1222,8 +1223,8 @@ class HomeSalesActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
-                    sessionManager.userID().toString()
+                    sessionManager.userDistributor() ?: "-custom-010",
+                    sessionManager.userID() ?: ""
                 )
             }
         }
@@ -1235,8 +1236,8 @@ class HomeSalesActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
-                    sessionManager.userID().toString()
+                    sessionManager.userDistributor() ?: "-custom-010",
+                    sessionManager.userID() ?: ""
                 )
             }
         }

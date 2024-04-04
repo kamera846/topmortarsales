@@ -46,6 +46,7 @@ class ReportsActivity : AppCompatActivity() {
     private val userID get() = sessionManager.userID().toString()
     private val userKind get() = sessionManager.userKind().toString()
     private val userDistributorId get() = sessionManager.userDistributor().toString()
+    private val userDistributorIds get() = sessionManager.userDistributor()
     private var iUserID: String? = null
     private var contactID: String? = null
     private var contactName: String? = null
@@ -85,7 +86,7 @@ class ReportsActivity : AppCompatActivity() {
         if (!contactName.isNullOrEmpty()) binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (iUserID.isNullOrEmpty()) "saya" else ""} di toko ini"
         else binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (userFullName.isNullOrEmpty()) "" else "$userFullName"}"
 
-        CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+        CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-013", userID)
 
         setDatePickerDialog()
         initClickHandler()
@@ -256,8 +257,8 @@ class ReportsActivity : AppCompatActivity() {
                 if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                     CustomUtility(this).setUserStatusOnline(
                         true,
-                        sessionManager.userDistributor().toString(),
-                        sessionManager.userID().toString()
+                        sessionManager.userDistributor() ?: "-custom-013",
+                        sessionManager.userID() ?: ""
                     )
                 }
             }
@@ -271,8 +272,8 @@ class ReportsActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
-                    sessionManager.userID().toString()
+                    sessionManager.userDistributor() ?: "-custom-013",
+                    sessionManager.userID() ?: ""
                 )
             }
         }
@@ -284,8 +285,8 @@ class ReportsActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
-                    sessionManager.userID().toString()
+                    sessionManager.userDistributor() ?: "-custom-013",
+                    sessionManager.userID() ?: ""
                 )
             }
         }

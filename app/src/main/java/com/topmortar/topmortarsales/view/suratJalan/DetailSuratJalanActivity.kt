@@ -194,7 +194,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
             userKind == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_SALES ||
             userKind == USER_KIND_PENAGIHAN || sessionManager.userKind() == USER_KIND_PENAGIHAN
         ) {
-            CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+            CustomUtility(this).setUserStatusOnline(true, userDistributorId ?: "-custom-015", "$userID")
         }
 
         customUtility = CustomUtility(this@DetailSuratJalanActivity)
@@ -1182,7 +1182,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
-                CustomUtility(this).setUserStatusOnline(true, "$userDistributorId", "$userID")
+                CustomUtility(this).setUserStatusOnline(true, userDistributorId ?: "-custom-015", "$userID")
             }
         }, 1000)
     }
@@ -1190,14 +1190,14 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
-            CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+            CustomUtility(this).setUserStatusOnline(false, userDistributorId ?: "-custom-015", "$userID")
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
-            CustomUtility(this).setUserStatusOnline(false, "$userDistributorId", "$userID")
+            CustomUtility(this).setUserStatusOnline(false, userDistributorId ?: "-custom-015", "$userID")
         }
     }
 

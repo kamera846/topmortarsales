@@ -90,7 +90,8 @@ class DeliveryTargetFragment : Fragment() {
         userCity = sessionManager.userCityID().toString()
         userID = sessionManager.userID().toString()
 
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
+        val userDistributorIds = sessionManager.userDistributor()
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-013")
 
         if (userKind == USER_KIND_ADMIN) getCities()
         getList()

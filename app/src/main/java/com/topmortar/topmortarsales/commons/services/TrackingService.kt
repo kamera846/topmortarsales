@@ -64,10 +64,10 @@ class TrackingService : Service() {
     private fun startLocationUpdates(intent: Intent?) {
 
         val userId = intent?.getStringExtra("userId")
-        val userDistributorId = intent?.getStringExtra("userDistributorId").toString()
+        val userDistributorId = intent?.getStringExtra("userDistributorId")
         val deliveryId = intent?.getStringExtra("deliveryId").toString()
 
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId ?: "-firebase-001")
         childDelivery = firebaseReference.child(FIREBASE_CHILD_DELIVERY)
         childAbsent = firebaseReference.child(FIREBASE_CHILD_ABSENT).child(userId.toString())
         childDriver = childDelivery.child(deliveryId)

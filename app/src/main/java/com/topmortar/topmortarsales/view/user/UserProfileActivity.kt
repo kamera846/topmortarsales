@@ -101,7 +101,8 @@ class UserProfileActivity : AppCompatActivity() {
         binding = ActivityUserProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId.toString())
+        val userDistributorIds = sessionManager.userDistributor()
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-018")
 
         iUserID = intent.getStringExtra(CONST_USER_ID)
         iPhone = intent.getStringExtra(CONST_PHONE)
@@ -251,7 +252,7 @@ class UserProfileActivity : AppCompatActivity() {
     private fun dataActivityValidation() {
 
         if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
-            CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+            CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor() ?: "-custom-019", sessionManager.userID() ?: "")
             checkAbsent()
         }
         if (iUserLevel == AUTH_LEVEL_COURIER || (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES) || (iUserLevel == AUTH_LEVEL_PENAGIHAN || userKind == USER_KIND_PENAGIHAN)) {
@@ -408,7 +409,7 @@ class UserProfileActivity : AppCompatActivity() {
 
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
 //                Log.d("Kurir Logout", "${sessionManager.userDistributor()} : ${sessionManager.userID()}")
-                CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor().toString(), sessionManager.userID().toString())
+                CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor() ?: "-custom-019", sessionManager.userID().toString())
             }
         } catch (e: Exception) {
             Log.d("Firebase Auth", "$e")
@@ -659,7 +660,7 @@ class UserProfileActivity : AppCompatActivity() {
                 if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                     CustomUtility(this).setUserStatusOnline(
                         true,
-                        sessionManager.userDistributor().toString(),
+                        sessionManager.userDistributor() ?: "-custom-019",
                         sessionManager.userID().toString()
                     )
                 }
@@ -674,7 +675,7 @@ class UserProfileActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
+                    sessionManager.userDistributor() ?: "-custom-019",
                     sessionManager.userID().toString()
                 )
             }
@@ -687,7 +688,7 @@ class UserProfileActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
+                    sessionManager.userDistributor() ?: "-custom-019",
                     sessionManager.userID().toString()
                 )
             }

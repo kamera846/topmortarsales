@@ -160,7 +160,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
         supportActionBar?.hide()
         sessionManager = SessionManager(this@MainActivity)
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
+        val userDistributorIds = sessionManager.userDistributor()
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-002")
 
         val isLoggedIn = sessionManager.isLoggedIn()
         if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()|| userDistributorId.isEmpty()) return missingDataHandler()
@@ -173,7 +174,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
             CustomUtility(this).setUserStatusOnline(
                 true,
-                sessionManager.userDistributor().toString(),
+                sessionManager.userDistributor() ?: "-custom-001",
                 sessionManager.userID().toString()
             )
         }
@@ -1077,7 +1078,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     true,
-                    sessionManager.userDistributor().toString(),
+                    sessionManager.userDistributor() ?: "-custom-001",
                     sessionManager.userID().toString()
                 )
             }
@@ -1091,7 +1092,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
+                    sessionManager.userDistributor() ?: "-custom-001",
                     sessionManager.userID().toString()
                 )
             }
@@ -1104,7 +1105,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
+                    sessionManager.userDistributor() ?: "-custom-001",
                     sessionManager.userID().toString()
                 )
             }
