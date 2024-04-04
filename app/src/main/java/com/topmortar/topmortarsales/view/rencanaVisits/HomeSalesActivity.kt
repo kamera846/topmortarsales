@@ -551,8 +551,12 @@ class HomeSalesActivity : AppCompatActivity() {
                     RESPONSE_STATUS_OK -> {
 
                         val data = response.results[0]
-                        sessionManager.setUserLoggedIn(data)
-                        binding.fullName.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) it else "Selamat Datang"}
+                        if (data.phone_user == "0") {
+                            logoutHandler()
+                        } else {
+                            sessionManager.setUserLoggedIn(data)
+                            binding.fullName.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) it else "Selamat Datang"}
+                        }
 
                     } RESPONSE_STATUS_EMPTY -> missingDataHandler()
                     else -> Log.d("TAG USER LOGGED IN", "Failed get data!")

@@ -819,27 +819,30 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                     RESPONSE_STATUS_OK -> {
 
                         val data = response.results[0]
-                        sessionManager.setUserLoggedIn(data)
+                        if (data.phone_user == "0") {
+                            logoutHandler()
+                        } else {
+                            sessionManager.setUserLoggedIn(data)
 
 //                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "Halo, ${ sessionManager.userName() }"}
-                        if (userKind != USER_KIND_SALES && userKind != USER_KIND_PENAGIHAN) {
-                            tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
-                            tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
-                        }
+                            if (userKind != USER_KIND_SALES && userKind != USER_KIND_PENAGIHAN) {
+                                tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
+                                tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
+                            }
 
-                        if (!onlySession) {
-                            if (isSearchActive) {
-                                searchContact()
-                            } else {
-                                if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
-                                else getContacts()
+                            if (!onlySession) {
+                                if (isSearchActive) {
+                                    searchContact()
+                                } else {
+                                    if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
+                                    else getContacts()
+                                }
                             }
                         }
 
                     } RESPONSE_STATUS_EMPTY -> missingDataHandler()
                     else -> Log.d("TAG USER LOGGED IN", "Failed get data!")
                 }
-
 
             } catch (e: Exception) {
                 Log.d("TAG USER LOGGED IN", "Failed run service. Exception " + e.message)

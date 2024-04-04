@@ -47,7 +47,9 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MAX_REPORT_DISTANCE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
@@ -75,6 +77,7 @@ import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.BaseCampModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MapsActivity
+import com.topmortar.topmortarsales.view.SplashScreenActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -1026,6 +1029,11 @@ class HomeCourierActivity : AppCompatActivity() {
         }, 2000)
     }
 
+    override fun onResume() {
+        super.onResume()
+        getUserLoggedIn()
+    }
+
     override fun onStart() {
         super.onStart()
         checkAbsent()
@@ -1060,5 +1068,65 @@ class HomeCourierActivity : AppCompatActivity() {
                 )
             }
         }
+    }
+
+    private fun getUserLoggedIn() {
+
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.detailUser(userId = userId ?: "")
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        val data = response.results[0]
+                        if (data.phone_user == "0") {
+                            logoutHandler()
+                        } else {
+                            sessionManager.setUserLoggedIn(data)
+                            binding.fullName.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) it else "Selamat Datang"}
+                        }
+
+                    } RESPONSE_STATUS_EMPTY -> logoutHandler()
+                    else -> Log.d("TAG USER LOGGED IN", "Failed get data!")
+                }
+
+            } catch (e: Exception) {
+                Log.d("TAG USER LOGGED IN", "Failed run service. Exception " + e.message)
+            }
+
+        }
+
+    }
+
+    private fun logoutHandler() {
+
+        // Firebase Auth Session
+        try {
+            val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+            val model = Build.MODEL
+            val manufacturer = Build.MANUFACTURER
+
+            val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
+            val userChild = authChild.child(sessionManager.userName() + sessionManager.userID())
+            val userDevices = userChild.child("devices")
+            var userDeviceText = "$manufacturer$model$androidId"
+            userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
+            val userDevice = userDevices.child(userDeviceText)
+
+            userDevice.child("logout_at").setValue(DateFormat.now())
+            userDevice.child("login_at").setValue("")
+        } catch (e: Exception) {
+            Log.d("Firebase Auth", "$e")
+        }
+
+        sessionManager.setLoggedIn(LOGGED_OUT)
+        sessionManager.setUserLoggedIn(null)
+
+        val intent = Intent(this, SplashScreenActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 }
