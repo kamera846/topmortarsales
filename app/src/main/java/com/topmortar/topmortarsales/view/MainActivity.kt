@@ -1064,14 +1064,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
     }
 
-    override fun onResume() {
-
-        super.onResume()
-        // Check apps for update
-        AppUpdateHelper.checkForUpdates(this)
-        getUserLoggedIn(true)
-    }
-
     override fun onStart() {
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
@@ -1082,6 +1074,9 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                     sessionManager.userID().toString()
                 )
             }
+            // Check apps for update
+            AppUpdateHelper.checkForUpdates(this)
+            getUserLoggedIn(true)
         }, 1000)
     }
 

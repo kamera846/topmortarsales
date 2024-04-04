@@ -1181,10 +1181,6 @@ class HomeSalesActivity : AppCompatActivity() {
     }
 
 // Override Class
-    override fun onResume() {
-        super.onResume()
-        getUserLoggedIn()
-    }
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
@@ -1213,6 +1209,7 @@ class HomeSalesActivity : AppCompatActivity() {
                     sessionManager.userID() ?: ""
                 )
             }
+            getUserLoggedIn()
         }, 1000)
     }
 

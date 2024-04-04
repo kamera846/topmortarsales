@@ -1030,16 +1030,12 @@ class HomeCourierActivity : AppCompatActivity() {
         }, 2000)
     }
 
-    override fun onResume() {
-        super.onResume()
-        getUserLoggedIn()
-    }
-
     override fun onStart() {
         super.onStart()
         checkAbsent()
         Handler(Looper.getMainLooper()).postDelayed({
             CustomUtility(this).setUserStatusOnline(true, userDistributorId ?: "-custom-008", userId ?: "")
+            getUserLoggedIn()
         }, 1000)
     }
 
