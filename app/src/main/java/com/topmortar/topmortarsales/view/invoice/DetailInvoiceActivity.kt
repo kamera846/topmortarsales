@@ -64,7 +64,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
         if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
             CustomUtility(this).setUserStatusOnline(
                 true,
-                sessionManager.userDistributor().toString(),
+                sessionManager.userDistributor() ?: "-custom-009",
                 sessionManager.userID().toString()
             )
         }
@@ -244,7 +244,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     true,
-                    sessionManager.userDistributor().toString(),
+                    sessionManager.userDistributor() ?: "-custom-009",
                     sessionManager.userID().toString()
                 )
             }
@@ -258,7 +258,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
+                    sessionManager.userDistributor() ?: "-custom-009",
                     sessionManager.userID().toString()
                 )
             }
@@ -271,7 +271,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
+                    sessionManager.userDistributor() ?: "-custom-009",
                     sessionManager.userID().toString()
                 )
             }

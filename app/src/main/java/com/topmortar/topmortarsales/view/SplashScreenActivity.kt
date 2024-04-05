@@ -47,6 +47,7 @@ import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
 import com.topmortar.topmortarsales.commons.LOGGED_IN
+import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
@@ -326,85 +327,12 @@ class SplashScreenActivity : AppCompatActivity() {
 
         val isLoggedIn = sessionManager.isLoggedIn()
         val userId = sessionManager.userID()!!
-        val username = sessionManager.userName()!!
-        val userFullName = sessionManager.fullName()!!
         val userCity = sessionManager.userCityID()!!
         val userKind = sessionManager.userKind()!!
         val userDistributor = sessionManager.userDistributor()!!
-        val userDistributoNumber = sessionManager.userDistributorNumber()!!
-        val userBidLimit = sessionManager.userBidLimit()!!
 
         if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty() || userDistributor.isEmpty()) showCardLogin()
-        else {
-            val userlevel = when (userKind) {
-                USER_KIND_ADMIN -> AUTH_LEVEL_ADMIN
-                USER_KIND_ADMIN_CITY -> AUTH_LEVEL_ADMIN_CITY
-                USER_KIND_COURIER -> AUTH_LEVEL_COURIER
-                USER_KIND_BA -> AUTH_LEVEL_BA
-                USER_KIND_MARKETING -> AUTH_LEVEL_MARKETING
-                else -> AUTH_LEVEL_SALES
-            }
-
-            // Firebase Auth Session
-            try {
-                firebaseReference = FirebaseUtils().getReference(distributorId = userDistributor)
-                val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
-                val userChild = authChild.child(username + userId)
-                val userDevicesChild = userChild.child("devices")
-
-                userChild.child("id_user").setValue(userId)
-                userChild.child("username").setValue(username)
-                userChild.child("id_city").setValue(userCity)
-                userChild.child("level_user").setValue(userlevel)
-                userChild.child("id_distributor").setValue(userDistributor)
-                userChild.child("full_name").setValue(userFullName)
-                userChild.child("nomorhp_distributor").setValue(userDistributoNumber)
-                userChild.child("bid_limit").setValue(userBidLimit)
-
-                userDevicesChild.addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        if (snapshot.exists()) {
-                            for (item in snapshot.children) {
-                                val device = item.getValue(DeviceModel::class.java)
-                                var userDeviceText = "${device?.manufacture}${device?.model}${device?.id}"
-                                userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
-                                val userDevice = userDevicesChild.child(userDeviceText)
-                                userDevice.child("id").setValue(device?.id)
-                                userDevice.child("model").setValue(device?.model)
-                                userDevice.child("manufacture").setValue(device?.manufacture)
-                                userDevice.child("device").setValue(device?.device)
-                                userDevice.child("product").setValue(device?.product)
-                                userDevice.child("sdk_version").setValue(device?.sdk_version)
-                                userDevice.child("version_release").setValue(device?.version_release)
-                                userDevice.child("screen_width").setValue(device?.screen_width)
-                                userDevice.child("screen_height").setValue(device?.screen_height)
-                                userDevice.child("density").setValue(device?.density)
-                                userDevice.child("login_at").setValue(device?.login_at)
-                                userDevice.child("logout_at").setValue(device?.logout_at)
-                            }
-
-                            userDevice(userChild)
-                        } else {
-                            userDevice(userChild)
-                        }
-                    }
-
-                    override fun onCancelled(error: DatabaseError) {
-                        userDevice(userChild)
-                    }
-
-                })
-            } catch (e: Exception) {
-                Log.e("Firebase Auth", "$e")
-            }
-
-            when (userKind) {
-                USER_KIND_BA -> navigateToListTukang()
-                USER_KIND_COURIER -> navigateToCourier()
-                USER_KIND_SALES, USER_KIND_PENAGIHAN -> navigateToSales()
-                else -> navigateToMain()
-            }
-        }
+        else getUserLoggedIn()
 
     }
 
@@ -487,77 +415,82 @@ class SplashScreenActivity : AppCompatActivity() {
                         val results = response.results
                         val data = results[0]
 
-                        sessionManager.setUserLoggedIn(data)
-                        sessionManager.setLoggedIn(LOGGED_IN)
+                        if (data.phone_user == "0") {
+                            showAlert("Akun anda telah ditangguhkan!")
+                            loadingState(false)
+                        } else {
+                            sessionManager.setUserLoggedIn(data)
+                            sessionManager.setLoggedIn(LOGGED_IN)
 
-                        // Firebase Auth Session
-                        try {
-                            firebaseReference = FirebaseUtils().getReference(distributorId = data.id_distributor)
-                            val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
-                            val userChild = authChild.child(data.username + data.id_user)
-                            val userDevicesChild = userChild.child("devices")
+                            // Firebase Auth Session
+                            try {
+                                firebaseReference = FirebaseUtils().getReference(distributorId = data.id_distributor.ifEmpty { "-firebase-005" })
+                                val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
+                                val userChild = authChild.child(data.username + data.id_user)
+                                val userDevicesChild = userChild.child("devices")
 
-                            userChild.child("id_user").setValue(data.id_user)
-                            userChild.child("phone_user").setValue(data.phone_user)
-                            userChild.child("username").setValue(data.username)
-                            userChild.child("password").setValue(data.password)
-                            userChild.child("level_user").setValue(data.level_user)
-                            userChild.child("id_city").setValue(data.id_city)
-                            userChild.child("nama_city").setValue(data.nama_city)
-                            userChild.child("kode_city").setValue(data.kode_city)
-                            userChild.child("bid_limit").setValue(data.bid_limit)
-                            userChild.child("full_name").setValue(data.full_name)
-                            userChild.child("id_distributor").setValue(data.id_distributor)
-                            userChild.child("nama_distributor").setValue(data.nama_distributor)
-                            userChild.child("nomorhp_distributor").setValue(data.nomorhp_distributor)
-                            userChild.child("alamat_distributor").setValue(data.alamat_distributor)
-                            userChild.child("jenis_distributor").setValue(data.jenis_distributor)
+                                userChild.child("id_user").setValue(data.id_user)
+                                userChild.child("phone_user").setValue(data.phone_user)
+                                userChild.child("username").setValue(data.username)
+                                userChild.child("password").setValue(data.password)
+                                userChild.child("level_user").setValue(data.level_user)
+                                userChild.child("id_city").setValue(data.id_city)
+                                userChild.child("nama_city").setValue(data.nama_city)
+                                userChild.child("kode_city").setValue(data.kode_city)
+                                userChild.child("bid_limit").setValue(data.bid_limit)
+                                userChild.child("full_name").setValue(data.full_name)
+                                userChild.child("id_distributor").setValue(data.id_distributor)
+                                userChild.child("nama_distributor").setValue(data.nama_distributor)
+                                userChild.child("nomorhp_distributor").setValue(data.nomorhp_distributor)
+                                userChild.child("alamat_distributor").setValue(data.alamat_distributor)
+                                userChild.child("jenis_distributor").setValue(data.jenis_distributor)
 
-                            userDevicesChild.addListenerForSingleValueEvent(object : ValueEventListener {
-                                override fun onDataChange(snapshot: DataSnapshot) {
-                                    if (snapshot.exists()) {
-                                        for (item in snapshot.children) {
-                                            val device = item.getValue(DeviceModel::class.java)
-                                            var userDeviceText = "${device?.manufacture}${device?.model}${device?.id}"
-                                            userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
-                                            val userDevice = userDevicesChild.child(userDeviceText)
-                                            userDevice.child("id").setValue(device?.id)
-                                            userDevice.child("model").setValue(device?.model)
-                                            userDevice.child("manufacture").setValue(device?.manufacture)
-                                            userDevice.child("device").setValue(device?.device)
-                                            userDevice.child("product").setValue(device?.product)
-                                            userDevice.child("sdk_version").setValue(device?.sdk_version)
-                                            userDevice.child("version_release").setValue(device?.version_release)
-                                            userDevice.child("screen_width").setValue(device?.screen_width)
-                                            userDevice.child("screen_height").setValue(device?.screen_height)
-                                            userDevice.child("density").setValue(device?.density)
-                                            userDevice.child("login_at").setValue(device?.login_at)
-                                            userDevice.child("logout_at").setValue(device?.logout_at)
+                                userDevicesChild.addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                        if (snapshot.exists()) {
+                                            for (item in snapshot.children) {
+                                                val device = item.getValue(DeviceModel::class.java)
+                                                var userDeviceText = "${device?.manufacture}${device?.model}${device?.id}"
+                                                userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
+                                                val userDevice = userDevicesChild.child(userDeviceText)
+                                                userDevice.child("id").setValue(device?.id)
+                                                userDevice.child("model").setValue(device?.model)
+                                                userDevice.child("manufacture").setValue(device?.manufacture)
+                                                userDevice.child("device").setValue(device?.device)
+                                                userDevice.child("product").setValue(device?.product)
+                                                userDevice.child("sdk_version").setValue(device?.sdk_version)
+                                                userDevice.child("version_release").setValue(device?.version_release)
+                                                userDevice.child("screen_width").setValue(device?.screen_width)
+                                                userDevice.child("screen_height").setValue(device?.screen_height)
+                                                userDevice.child("density").setValue(device?.density)
+                                                userDevice.child("login_at").setValue(device?.login_at)
+                                                userDevice.child("logout_at").setValue(device?.logout_at)
+                                            }
+
+                                            userDevice(userChild)
+                                        } else {
+                                            userDevice(userChild)
                                         }
+                                    }
 
-                                        userDevice(userChild)
-                                    } else {
+                                    override fun onCancelled(error: DatabaseError) {
                                         userDevice(userChild)
                                     }
-                                }
 
-                                override fun onCancelled(error: DatabaseError) {
-                                    userDevice(userChild)
-                                }
+                                })
+                            } catch (e: Exception) {
+                                Log.e("Firebase Auth", "$e")
+                            }
 
-                            })
-                        } catch (e: Exception) {
-                            Log.e("Firebase Auth", "$e")
+                            when (data.level_user) {
+                                AUTH_LEVEL_BA -> navigateToListTukang()
+                                AUTH_LEVEL_COURIER -> navigateToCourier()
+                                AUTH_LEVEL_SALES, AUTH_LEVEL_PENAGIHAN -> navigateToSales()
+                                else -> navigateToMain()
+                            }
+
+                            loadingState(false)
                         }
-
-                        when (data.level_user) {
-                            AUTH_LEVEL_BA -> navigateToListTukang()
-                            AUTH_LEVEL_COURIER -> navigateToCourier()
-                            AUTH_LEVEL_SALES, AUTH_LEVEL_PENAGIHAN -> navigateToSales()
-                            else -> navigateToMain()
-                        }
-
-                        loadingState(false)
 
                     }
                     RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
@@ -1028,6 +961,146 @@ class SplashScreenActivity : AppCompatActivity() {
 
         })
         userDevice.child("logout_at").setValue("")
+
+    }
+
+    private fun getUserLoggedIn() {
+
+        val userId = sessionManager.userID()!!
+        val username = sessionManager.userName()!!
+        val userFullName = sessionManager.fullName()!!
+        val userCity = sessionManager.userCityID()!!
+        val userKind = sessionManager.userKind()!!
+        val userDistributor = sessionManager.userDistributor()!!
+        val userDistributorNumber = sessionManager.userDistributorNumber()!!
+        val userBidLimit = sessionManager.userBidLimit()!!
+
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.detailUser(userId = userId)
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        val data = response.results[0]
+                        if (data.phone_user == "0") {
+
+                            // Firebase Auth Session
+                            try {
+                                val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+                                val model = Build.MODEL
+                                val manufacturer = Build.MANUFACTURER
+
+                                val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
+                                val userChild = authChild.child(sessionManager.userName() + sessionManager.userID())
+                                val userDevices = userChild.child("devices")
+                                var userDeviceText = "$manufacturer$model$androidId"
+                                userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
+                                val userDevice = userDevices.child(userDeviceText)
+
+                                userDevice.child("logout_at").setValue(DateFormat.now())
+                                userDevice.child("login_at").setValue("")
+                            } catch (e: Exception) {
+                                Log.d("Firebase Auth", "$e")
+                            }
+
+                            sessionManager.setLoggedIn(LOGGED_OUT)
+                            sessionManager.setUserLoggedIn(null)
+
+                            showCardLogin()
+                        } else {
+                            val userLevel = when (userKind) {
+                                USER_KIND_ADMIN -> AUTH_LEVEL_ADMIN
+                                USER_KIND_ADMIN_CITY -> AUTH_LEVEL_ADMIN_CITY
+                                USER_KIND_COURIER -> AUTH_LEVEL_COURIER
+                                USER_KIND_BA -> AUTH_LEVEL_BA
+                                USER_KIND_MARKETING -> AUTH_LEVEL_MARKETING
+                                else -> AUTH_LEVEL_SALES
+                            }
+
+                            // Firebase Auth Session
+                            try {
+                                val userDistributorIds = sessionManager.userDistributor()
+                                firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-006")
+                                val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
+                                val userChild = authChild.child(username + userId)
+                                val userDevicesChild = userChild.child("devices")
+
+                                userChild.child("id_user").setValue(userId)
+                                userChild.child("username").setValue(username)
+                                userChild.child("id_city").setValue(userCity)
+                                userChild.child("level_user").setValue(userLevel)
+                                userChild.child("id_distributor").setValue(userDistributor)
+                                userChild.child("full_name").setValue(userFullName)
+                                userChild.child("nomorhp_distributor").setValue(userDistributorNumber)
+                                userChild.child("bid_limit").setValue(userBidLimit)
+
+                                userDevicesChild.addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(snapshot: DataSnapshot) {
+                                        if (snapshot.exists()) {
+                                            for (item in snapshot.children) {
+                                                val device = item.getValue(DeviceModel::class.java)
+                                                var userDeviceText = "${device?.manufacture}${device?.model}${device?.id}"
+                                                userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
+                                                val userDevice = userDevicesChild.child(userDeviceText)
+                                                userDevice.child("id").setValue(device?.id)
+                                                userDevice.child("model").setValue(device?.model)
+                                                userDevice.child("manufacture").setValue(device?.manufacture)
+                                                userDevice.child("device").setValue(device?.device)
+                                                userDevice.child("product").setValue(device?.product)
+                                                userDevice.child("sdk_version").setValue(device?.sdk_version)
+                                                userDevice.child("version_release").setValue(device?.version_release)
+                                                userDevice.child("screen_width").setValue(device?.screen_width)
+                                                userDevice.child("screen_height").setValue(device?.screen_height)
+                                                userDevice.child("density").setValue(device?.density)
+                                                userDevice.child("login_at").setValue(device?.login_at)
+                                                userDevice.child("logout_at").setValue(device?.logout_at)
+                                            }
+
+                                            userDevice(userChild)
+                                        } else {
+                                            userDevice(userChild)
+                                        }
+                                    }
+
+                                    override fun onCancelled(error: DatabaseError) {
+                                        userDevice(userChild)
+                                    }
+
+                                })
+                            } catch (e: Exception) {
+                                Log.e("Firebase Auth", "$e")
+                            }
+
+                            when (userKind) {
+                                USER_KIND_BA -> navigateToListTukang()
+                                USER_KIND_COURIER -> navigateToCourier()
+                                USER_KIND_SALES, USER_KIND_PENAGIHAN -> navigateToSales()
+                                else -> navigateToMain()
+                            }
+                        }
+
+                    } RESPONSE_STATUS_EMPTY -> {
+                        sessionManager.setLoggedIn(LOGGED_OUT)
+                        sessionManager.setUserLoggedIn(null)
+                        showCardLogin()
+                }
+                    else -> {
+                        sessionManager.setLoggedIn(LOGGED_OUT)
+                        sessionManager.setUserLoggedIn(null)
+                        showCardLogin()
+                    }
+                }
+
+            } catch (e: Exception) {
+                sessionManager.setLoggedIn(LOGGED_OUT)
+                sessionManager.setUserLoggedIn(null)
+                showCardLogin()
+            }
+
+        }
 
     }
 

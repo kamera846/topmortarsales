@@ -1,5 +1,6 @@
 package com.topmortar.topmortarsales.view.user
 
+import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.Gravity
@@ -8,6 +9,7 @@ import android.view.View
 import android.widget.PopupMenu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -20,14 +22,19 @@ import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_SUCCESS
+import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
+import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityAllUserTrackingBinding
 import com.topmortar.topmortarsales.model.UserAbsentModel
+import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 
 class AllUserTrackingActivity : AppCompatActivity() {
@@ -39,6 +46,7 @@ class AllUserTrackingActivity : AppCompatActivity() {
     private val userCity get() = sessionManager.userCityID()
 
     private var activeFilter = EMPTY_FIELD_VALUE
+    private var onRefreshed = false
 
     // Tracking
     private var firebaseReference: DatabaseReference? = null
@@ -57,7 +65,16 @@ class AllUserTrackingActivity : AppCompatActivity() {
 
     private fun initView() {
         binding.titleBar.icBack.visibility = View.VISIBLE
-        binding.titleBar.icBack.setOnClickListener { finish() }
+        binding.titleBar.icBack.setOnClickListener {
+            if (onRefreshed) {
+                val intent = Intent()
+                intent.putExtra(SYNC_NOW, SYNC_NOW)
+                setResult(RESULT_OK, intent)
+                finish()
+            } else finish()
+        }
+        binding.titleBar.icSyncNow.visibility = View.VISIBLE
+        binding.titleBar.icSyncNow.setOnClickListener { refreshList() }
 
         binding.titleBar.tvTitleBar.text = "Daftar Pengguna Yang Dilacak"
 
@@ -74,7 +91,8 @@ class AllUserTrackingActivity : AppCompatActivity() {
 
         loadingState(true)
         binding.llFilter.componentFilter.visibility = View.GONE
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId ?: "null")
+        val userDistributorIds = sessionManager.userDistributor()
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-017")
         childAbsent = firebaseReference?.child(FIREBASE_CHILD_ABSENT)
 
         try {
@@ -154,6 +172,101 @@ class AllUserTrackingActivity : AppCompatActivity() {
         }
     }
 
+
+    private fun refreshList() {
+
+        loadingState(true)
+        binding.llFilter.componentFilter.visibility = View.GONE
+        val userDistributorIds = sessionManager.userDistributor()
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-017")
+        childAbsent = firebaseReference?.child(FIREBASE_CHILD_ABSENT)
+
+        try {
+            lifecycleScope.launch {
+                val apiService = HttpClient.create()
+                val response = apiService.getUsers(distributorID = userDistributorId.toString())
+                when (response.status) {
+                    RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
+                        val usersDb = response.results
+                        childAbsent?.orderByChild("lastTracking")?.addListenerForSingleValueEvent(object: ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
+                                if (snapshot.exists()) {
+                                    val listUserTracking = arrayListOf<UserAbsentModel>()
+                                    onRefreshed = true
+                                    activeFilter = EMPTY_FIELD_VALUE
+                                    binding.llFilter.tvFilter.text = activeFilter
+
+                                    for (item in snapshot.children) {
+                                        val userIdCity = item.child("idCity").getValue(String::class.java)
+                                        val userLat = item.child("lat").getValue(Double::class.java)
+                                        val userLng = item.child("lng").getValue(Double::class.java)
+                                        val userId = item.child("id").getValue(String::class.java) ?: "-1"
+
+                                        if (userLat != null && userLng != null) {
+                                            val matchesUser = usersDb.find { it.id_user ==  userId}
+                                            if (matchesUser != null) {
+                                                if (matchesUser.phone_user == "0") {
+                                                    childAbsent?.child(userId)?.removeValue()
+                                                } else {
+                                                    if (userKind == USER_KIND_ADMIN) {
+                                                        listUserTracking.add(setListItem(item))
+                                                    } else if (!userIdCity.isNullOrEmpty() && userCity == userIdCity) {
+                                                        listUserTracking.add(setListItem(item))
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (listUserTracking.isNotEmpty()) {
+
+                                        val rvAdapter = AllUserTrackingRVA()
+                                        listUserTracking.sortByDescending { it.lastTracking }
+                                        rvAdapter.setList(ArrayList(listUserTracking))
+                                        rvAdapter.setOnItemClickListener(object: AllUserTrackingRVA.OnItemClickListener {
+                                            override fun onItemClick(item: UserAbsentModel) {
+                                                // Do something here
+                                                val messageEvent = EventBusUtils.UserAbsentModelEvent(item)
+                                                EventBus.getDefault().post(messageEvent)
+                                                finish()
+                                            }
+                                        })
+
+                                        binding.rvList.apply {
+                                            layoutManager = LinearLayoutManager(this@AllUserTrackingActivity)
+                                            adapter = rvAdapter
+                                        }
+
+                                        binding.llFilter.componentFilter.visibility = View.VISIBLE
+                                        loadingState(false)
+                                    } else {
+                                        loadingState(true, "Belum ada pengguna yang bisa dilacak")
+                                    }
+                                } else {
+                                    loadingState(true, "Belum ada pengguna yang bisa dilacak")
+                                    handleMessage(this@AllUserTrackingActivity, TAG_RESPONSE_CONTACT,
+                                        "Belum ada pengguna yang bisa dilacak"
+                                    )
+                                }
+                            }
+
+                            override fun onCancelled(error: DatabaseError) {
+                                loadingState(true, "Memuat data dibatalkan")
+                                handleMessage(this@AllUserTrackingActivity, TAG_RESPONSE_CONTACT,
+                                    "Failed run service. Exception $error"
+                                )
+                            }
+
+                        })
+                    } else -> getList()
+                }
+            }
+        } catch (e: Error) {
+            loadingState(true, "Gagal memuat data. Error: ${e.message}")
+            handleMessage(this, TAG_RESPONSE_CONTACT, e.message.toString())
+        }
+    }
+
     private fun setListItem(item: DataSnapshot): UserAbsentModel {
         return UserAbsentModel(
             eveningDateTime = item.child("eveningDateTime").getValue(String::class.java) ?: "",
@@ -226,5 +339,14 @@ class AllUserTrackingActivity : AppCompatActivity() {
         val textActiveFilter = activeFilter
         binding.llFilter.tvFilter.text = textActiveFilter
         getList()
+    }
+
+    override fun onBackPressed() {
+        if (onRefreshed) {
+            val intent = Intent()
+            intent.putExtra(SYNC_NOW, SYNC_NOW)
+            setResult(RESULT_OK, intent)
+            finish()
+        } else super.onBackPressed()
     }
 }

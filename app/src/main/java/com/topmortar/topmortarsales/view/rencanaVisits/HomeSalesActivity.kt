@@ -137,7 +137,7 @@ class HomeSalesActivity : AppCompatActivity() {
         setContentView(binding.root)
         initGlobalVariable()
 
-        CustomUtility(this).setUserStatusOnline(true, userDistributorId.toString(), userId.toString())
+        CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor() ?: "-custom-010", sessionManager.userID() ?: "")
 
     }
 
@@ -186,7 +186,8 @@ class HomeSalesActivity : AppCompatActivity() {
             absentProgressDialog!!.setCancelable(false)
         }
 
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId.toString())
+        val userDistributorIds = sessionManager.userDistributor()
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-014")
         apiService = HttpClient.create()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         customUtility = CustomUtility(this)
@@ -551,8 +552,12 @@ class HomeSalesActivity : AppCompatActivity() {
                     RESPONSE_STATUS_OK -> {
 
                         val data = response.results[0]
-                        sessionManager.setUserLoggedIn(data)
-                        binding.fullName.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) it else "Selamat Datang"}
+                        if (data.phone_user == "0") {
+                            logoutHandler()
+                        } else {
+                            sessionManager.setUserLoggedIn(data)
+                            binding.fullName.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) it else "Selamat Datang"}
+                        }
 
                     } RESPONSE_STATUS_EMPTY -> missingDataHandler()
                     else -> Log.d("TAG USER LOGGED IN", "Failed get data!")
@@ -1176,10 +1181,6 @@ class HomeSalesActivity : AppCompatActivity() {
     }
 
 // Override Class
-    override fun onResume() {
-        super.onResume()
-        getUserLoggedIn()
-    }
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
@@ -1204,10 +1205,11 @@ class HomeSalesActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     true,
-                    sessionManager.userDistributor().toString(),
-                    sessionManager.userID().toString()
+                    sessionManager.userDistributor() ?: "-custom-010",
+                    sessionManager.userID() ?: ""
                 )
             }
+            getUserLoggedIn()
         }, 1000)
     }
 
@@ -1218,8 +1220,8 @@ class HomeSalesActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
-                    sessionManager.userID().toString()
+                    sessionManager.userDistributor() ?: "-custom-010",
+                    sessionManager.userID() ?: ""
                 )
             }
         }
@@ -1231,8 +1233,8 @@ class HomeSalesActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
-                    sessionManager.userID().toString()
+                    sessionManager.userDistributor() ?: "-custom-010",
+                    sessionManager.userID() ?: ""
                 )
             }
         }

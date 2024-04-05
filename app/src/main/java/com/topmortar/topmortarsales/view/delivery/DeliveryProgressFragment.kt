@@ -82,7 +82,8 @@ class DeliveryProgressFragment : Fragment() {
         badgeRefresh = view.findViewById(R.id.badgeRefresh)
 
         sessionManager = SessionManager(requireContext())
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
+        val userDistributorIds = sessionManager.userDistributor()
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-012")
 
         if (userKind == USER_KIND_ADMIN) getCities()
         getList()

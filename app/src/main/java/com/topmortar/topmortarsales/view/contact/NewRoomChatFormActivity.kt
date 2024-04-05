@@ -103,7 +103,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
             CustomUtility(this).setUserStatusOnline(
                 true,
-                sessionManager.userDistributor().toString(),
+                sessionManager.userDistributor() ?: "-custom-004",
                 sessionManager.userID().toString()
             )
         }
@@ -555,7 +555,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     true,
-                    sessionManager.userDistributor().toString(),
+                    sessionManager.userDistributor() ?: "-custom-004",
                     sessionManager.userID().toString()
                 )
             }
@@ -569,7 +569,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
+                    sessionManager.userDistributor() ?: "-custom-004",
                     sessionManager.userID().toString()
                 )
             }
@@ -582,7 +582,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
+                    sessionManager.userDistributor() ?: "-custom-004",
                     sessionManager.userID().toString()
                 )
             }

@@ -153,6 +153,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private val userKind get() = sessionManager.userKind().toString()
     private val userID get() = sessionManager.userID().toString()
     private val userDistributorId get() = sessionManager.userDistributor().toString()
+    private val userDistributorIds get() = sessionManager.userDistributor()
     private val userCity get() = sessionManager.userCityID().toString()
 
     private lateinit var mMap: GoogleMap
@@ -226,6 +227,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var selectedCenterPoint: ModalSearchModel? = null
     private lateinit var searchModal: SearchModal
 
+    companion object {
+        const val ALL_USER_TRACKING_REQUEST = 123
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -243,7 +248,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         progressDialog.setCancelable(false)
 
         if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN){
-            CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+            CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-002", userID)
         }
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) EventBus.getDefault().register(this)
 
@@ -1420,7 +1425,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         progressDialog.setMessage("Mencarikan rute…")
         progressDialog.show()
 
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
+        val userDistributorIds = sessionManager.userDistributor()
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-003")
         childDelivery = firebaseReference?.child(FIREBASE_CHILD_DELIVERY)
         childDriver = childDelivery?.child(deliveryID!!)
         val childStores = childDriver?.child("stores/$iContactID")
@@ -1677,7 +1683,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         progressDialog.setMessage("Mendeteksi lokasi pengguna…")
         progressDialog.show()
 
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
+        val userDistributorIds = sessionManager.userDistributor()
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-004")
         childAbsent = firebaseReference?.child(FIREBASE_CHILD_ABSENT)
         childCourier = childAbsent?.child(courierID.toString())
 
@@ -1816,7 +1823,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         binding.allUserTracking.visibility = View.VISIBLE
                         binding.allUserTracking.setOnClickListener {
                             val intent = Intent(this@MapsActivity, AllUserTrackingActivity::class.java)
-                            startActivity(intent)
+                            startActivityForResult(intent, ALL_USER_TRACKING_REQUEST)
                         }
 
                         val rvAdapter = UserTrackingRecyclerViewAdapter()
@@ -2123,6 +2130,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 finish()
             }
 
+        } else if (requestCode == ALL_USER_TRACKING_REQUEST) {
+            val resultData = data?.getStringExtra(SYNC_NOW)
+            if (resultData == SYNC_NOW) {
+                setupTrackingCourier()
+                println("Refreshed")
+            }
         }
 
     }
@@ -2138,7 +2151,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         Handler(Looper.getMainLooper()).postDelayed({
             if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN){
-                CustomUtility(this).setUserStatusOnline(true, userDistributorId, userID)
+                CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-002", userID)
             }
         }, 1000)
 
@@ -2148,7 +2161,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         super.onStop()
 
         if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN){
-            CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+            CustomUtility(this).setUserStatusOnline(false, userDistributorIds ?: "-custom-002", userID)
         }
 
         if (locationListener != null) childDriver?.removeEventListener(locationListener!!)
@@ -2162,7 +2175,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) EventBus.getDefault().unregister(this)
         if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN){
-            CustomUtility(this).setUserStatusOnline(false, userDistributorId, userID)
+            CustomUtility(this).setUserStatusOnline(false, userDistributorIds ?: "-custom-002", userID)
         }
 
         if (locationListener != null) childDriver?.removeEventListener(locationListener!!)

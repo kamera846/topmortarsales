@@ -65,7 +65,7 @@ class HistoryVisitedActivity : AppCompatActivity() {
         val iUserCity = intent.getStringExtra(CONST_USER_CITY)
 
         if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
-            CustomUtility(this).setUserStatusOnline(true, userDistributorId.toString(), userId.toString())
+            CustomUtility(this).setUserStatusOnline(true, userDistributorId ?: "-custom-018", userId ?: "")
         }
 
         /*
@@ -102,7 +102,7 @@ class HistoryVisitedActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
+                    sessionManager.userDistributor() ?: "-custom-018",
                     sessionManager.userID().toString()
                 )
             }
@@ -118,7 +118,7 @@ class HistoryVisitedActivity : AppCompatActivity() {
                 if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                     CustomUtility(this).setUserStatusOnline(
                         true,
-                        sessionManager.userDistributor().toString(),
+                        sessionManager.userDistributor() ?: "-custom-018",
                         sessionManager.userID().toString()
                     )
                 }
@@ -134,7 +134,7 @@ class HistoryVisitedActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
+                    sessionManager.userDistributor() ?: "-custom-018",
                     sessionManager.userID().toString()
                 )
             }

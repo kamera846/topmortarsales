@@ -47,8 +47,8 @@ class RencanaVisitActivity : AppCompatActivity() {
         if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
             CustomUtility(this).setUserStatusOnline(
                 true,
-                userDistributorId.toString(),
-                userId.toString()
+                userDistributorId ?: "-custom-011",
+                userId ?: ""
             )
         }
 
@@ -119,8 +119,8 @@ class RencanaVisitActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     true,
-                    sessionManager.userDistributor().toString(),
-                    sessionManager.userID().toString()
+                    userDistributorId ?: "-custom-011",
+                    userId ?: ""
                 )
             }
         }, 1000)
@@ -133,8 +133,8 @@ class RencanaVisitActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
-                    sessionManager.userID().toString()
+                    userDistributorId ?: "-custom-011",
+                    userId ?: ""
                 )
             }
         }
@@ -146,8 +146,8 @@ class RencanaVisitActivity : AppCompatActivity() {
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
-                    sessionManager.userID().toString()
+                    userDistributorId ?: "-custom-011",
+                    userId ?: ""
                 )
             }
         }

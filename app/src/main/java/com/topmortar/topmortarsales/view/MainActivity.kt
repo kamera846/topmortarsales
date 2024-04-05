@@ -160,7 +160,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
         supportActionBar?.hide()
         sessionManager = SessionManager(this@MainActivity)
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
+        val userDistributorIds = sessionManager.userDistributor()
+        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-002")
 
         val isLoggedIn = sessionManager.isLoggedIn()
         if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()|| userDistributorId.isEmpty()) return missingDataHandler()
@@ -173,7 +174,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
             CustomUtility(this).setUserStatusOnline(
                 true,
-                sessionManager.userDistributor().toString(),
+                sessionManager.userDistributor() ?: "-custom-001",
                 sessionManager.userID().toString()
             )
         }
@@ -819,27 +820,30 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                     RESPONSE_STATUS_OK -> {
 
                         val data = response.results[0]
-                        sessionManager.setUserLoggedIn(data)
+                        if (data.phone_user == "0") {
+                            logoutHandler()
+                        } else {
+                            sessionManager.setUserLoggedIn(data)
 
 //                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "Halo, ${ sessionManager.userName() }"}
-                        if (userKind != USER_KIND_SALES && userKind != USER_KIND_PENAGIHAN) {
-                            tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
-                            tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
-                        }
+                            if (userKind != USER_KIND_SALES && userKind != USER_KIND_PENAGIHAN) {
+                                tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
+                                tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
+                            }
 
-                        if (!onlySession) {
-                            if (isSearchActive) {
-                                searchContact()
-                            } else {
-                                if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
-                                else getContacts()
+                            if (!onlySession) {
+                                if (isSearchActive) {
+                                    searchContact()
+                                } else {
+                                    if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
+                                    else getContacts()
+                                }
                             }
                         }
 
                     } RESPONSE_STATUS_EMPTY -> missingDataHandler()
                     else -> Log.d("TAG USER LOGGED IN", "Failed get data!")
                 }
-
 
             } catch (e: Exception) {
                 Log.d("TAG USER LOGGED IN", "Failed run service. Exception " + e.message)
@@ -1060,24 +1064,19 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
     }
 
-    override fun onResume() {
-
-        super.onResume()
-        // Check apps for update
-        AppUpdateHelper.checkForUpdates(this)
-        getUserLoggedIn(true)
-    }
-
     override fun onStart() {
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     true,
-                    sessionManager.userDistributor().toString(),
+                    sessionManager.userDistributor() ?: "-custom-001",
                     sessionManager.userID().toString()
                 )
             }
+            // Check apps for update
+            AppUpdateHelper.checkForUpdates(this)
+            getUserLoggedIn(true)
         }, 1000)
     }
 
@@ -1088,7 +1087,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
+                    sessionManager.userDistributor() ?: "-custom-001",
                     sessionManager.userID().toString()
                 )
             }
@@ -1101,7 +1100,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
-                    sessionManager.userDistributor().toString(),
+                    sessionManager.userDistributor() ?: "-custom-001",
                     sessionManager.userID().toString()
                 )
             }
