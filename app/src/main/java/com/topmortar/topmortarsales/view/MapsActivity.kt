@@ -227,6 +227,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var selectedCenterPoint: ModalSearchModel? = null
     private lateinit var searchModal: SearchModal
 
+    companion object {
+        const val ALL_USER_TRACKING_REQUEST = 123
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -1819,7 +1823,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         binding.allUserTracking.visibility = View.VISIBLE
                         binding.allUserTracking.setOnClickListener {
                             val intent = Intent(this@MapsActivity, AllUserTrackingActivity::class.java)
-                            startActivity(intent)
+                            startActivityForResult(intent, ALL_USER_TRACKING_REQUEST)
                         }
 
                         val rvAdapter = UserTrackingRecyclerViewAdapter()
@@ -2126,6 +2130,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 finish()
             }
 
+        } else if (requestCode == ALL_USER_TRACKING_REQUEST) {
+            val resultData = data?.getStringExtra(SYNC_NOW)
+            if (resultData == SYNC_NOW) {
+                setupTrackingCourier()
+                println("Refreshed")
+            }
         }
 
     }
