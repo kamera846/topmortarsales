@@ -295,7 +295,8 @@ class HomeSalesActivity : AppCompatActivity() {
     }
 
     private fun navigateToTargetVisit() {
-        val intent = Intent(this, RencanaVisitActivity::class.java)
+        val intent = if (userKind == USER_KIND_SALES) Intent(this, RencanaVisitActivity::class.java)
+        else Intent(this, RencanaVisitPenagihanActivity::class.java)
         startActivity(intent)
     }
 

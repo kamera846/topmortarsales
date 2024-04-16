@@ -102,6 +102,7 @@ import com.topmortar.topmortarsales.view.courier.ManageBasecampActivity
 import com.topmortar.topmortarsales.view.delivery.DeliveryActivity
 import com.topmortar.topmortarsales.view.gudang.ManageGudangActivity
 import com.topmortar.topmortarsales.view.rencanaVisits.RencanaVisitActivity
+import com.topmortar.topmortarsales.view.rencanaVisits.RencanaVisitPenagihanActivity
 import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
 import com.topmortar.topmortarsales.view.user.ManageUserActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
@@ -429,6 +430,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         val gudang = popupMenu.menu.findItem(R.id.option_gudang)
         val delivery = popupMenu.menu.findItem(R.id.option_delivery)
         val rencanaVisit = popupMenu.menu.findItem(R.id.rencana_visit)
+        val rencanaVisitPenagihan = popupMenu.menu.findItem(R.id.rencana_visit_penagihan)
 
         searchItem.isVisible = false
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
@@ -440,12 +442,14 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 gudang.isVisible = true
                 delivery.isVisible = true
                 rencanaVisit.isVisible = true
+                rencanaVisitPenagihan.isVisible = true
             } else {
                 userItem.isVisible = true
                 basecamp.isVisible = true
                 gudang.isVisible = true
                 delivery.isVisible = true
                 rencanaVisit.isVisible = true
+                rencanaVisitPenagihan.isVisible = true
             }
         }
 
@@ -504,6 +508,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 }
                 R.id.rencana_visit -> {
                     startActivity(Intent(this@MainActivity, RencanaVisitActivity::class.java))
+                    true
+                }
+                R.id.rencana_visit_penagihan -> {
+                    startActivity(Intent(this@MainActivity, RencanaVisitPenagihanActivity::class.java))
                     true
                 }
                 else -> false

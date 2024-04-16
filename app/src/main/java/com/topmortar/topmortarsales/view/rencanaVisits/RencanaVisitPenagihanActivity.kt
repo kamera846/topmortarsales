@@ -8,16 +8,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.adapter.viewpager.RencanaVisitVPA
+import com.topmortar.topmortarsales.adapter.viewpager.RencanaVisitPenagihanVPA
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
-import com.topmortar.topmortarsales.databinding.ActivityRencanaVisitBinding
+import com.topmortar.topmortarsales.databinding.ActivityRencanaVisitPenagihanBinding
 
-class RencanaVisitActivity : AppCompatActivity() {
+class RencanaVisitPenagihanActivity : AppCompatActivity() {
 
-    private var _binding: ActivityRencanaVisitBinding? = null
+    private var _binding: ActivityRencanaVisitPenagihanBinding? = null
     private val binding get() = _binding!!
     private lateinit var sessionManager: SessionManager
     private val userId get() = sessionManager.userID()
@@ -25,21 +25,21 @@ class RencanaVisitActivity : AppCompatActivity() {
 
     private lateinit var tabLayout: TabLayout
     private lateinit var viewPager: ViewPager
-    private lateinit var pagerAdapter: RencanaVisitVPA
+    private lateinit var pagerAdapter: RencanaVisitPenagihanVPA
     private var activeTab = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
-        _binding = ActivityRencanaVisitBinding.inflate(layoutInflater)
-        sessionManager = SessionManager(this@RencanaVisitActivity)
+        _binding = ActivityRencanaVisitPenagihanBinding.inflate(layoutInflater)
+        sessionManager = SessionManager(this@RencanaVisitPenagihanActivity)
 
         setContentView(binding.root)
 
         binding.titleBarDark.icBack.visibility = View.VISIBLE
         binding.titleBarDark.vBorder.visibility = View.GONE
-        binding.titleBarDark.tvTitleBar.text = "Rencana Visit Sales"
+        binding.titleBarDark.tvTitleBar.text = "Rencana Visit Penagihan"
         binding.titleBarDark.icBack.setOnClickListener {
             if (activeTab != 0) tabLayout.getTabAt(0)?.select()
             else finish()
@@ -67,17 +67,18 @@ class RencanaVisitActivity : AppCompatActivity() {
         tabLayout = binding.tabLayout
         viewPager = binding.viewPager
 
-        pagerAdapter = RencanaVisitVPA(supportFragmentManager)
+        pagerAdapter = RencanaVisitPenagihanVPA(supportFragmentManager)
         viewPager.adapter = pagerAdapter
 
         // Connect TabLayout and ViewPager
         tabLayout.setupWithViewPager(viewPager)
-        pagerAdapter.setCounterPageItem(object : RencanaVisitVPA.CounterPageItem{
+        pagerAdapter.setCounterPageItem(object : RencanaVisitPenagihanVPA.CounterPageItem{
             override fun counterItem(count: Int, tabIndex: Int) {
                 when (tabIndex) {
-                    0 -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Jatuh Tempo"
-                    1 -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Voucher"
-                    else -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Pasif"
+                    0 -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Jatem 7"
+                    1 -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Jatem 15"
+                    2 -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Jatem 15+"
+                    else -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Voucher"
                 }
             }
 
