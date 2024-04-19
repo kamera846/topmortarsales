@@ -32,10 +32,12 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.view.GravityCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.navigation.NavigationView
 import com.google.firebase.database.DatabaseReference
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter
@@ -110,7 +112,8 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 @SuppressLint("SetTextI18n")
-class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchModalListener {
+class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchModalListener,
+    NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var scaleAnimation: Animation
 
@@ -180,12 +183,126 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             )
         }
 
+        val popupMenu = binding.navView
+
+        val searchItem = popupMenu.menu.findItem(R.id.option_search)
+        val userItem = popupMenu.menu.findItem(R.id.option_user)
+        val myProfile = popupMenu.menu.findItem(R.id.option_my_profile)
+        val cityItem = popupMenu.menu.findItem(R.id.option_city)
+        val skillItem = popupMenu.menu.findItem(R.id.option_skill)
+        val basecamp = popupMenu.menu.findItem(R.id.option_basecamp)
+        val gudang = popupMenu.menu.findItem(R.id.option_gudang)
+        val delivery = popupMenu.menu.findItem(R.id.option_delivery)
+        val rencanaVisitGroup = popupMenu.menu.findItem(R.id.rencana_visit_group)
+        val rencanaVisit = popupMenu.menu.findItem(R.id.rencana_visit)
+        val rencanaVisitPenagihan = popupMenu.menu.findItem(R.id.rencana_visit_penagihan)
+
+        searchItem.isVisible = false
+        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
+            if (userKind == USER_KIND_ADMIN) {
+                userItem.isVisible = true
+                cityItem.isVisible = true
+                skillItem.isVisible = true
+                basecamp.isVisible = true
+                gudang.isVisible = true
+                delivery.isVisible = true
+                rencanaVisitGroup.isVisible = true
+                rencanaVisit.isVisible = true
+                rencanaVisitPenagihan.isVisible = true
+            } else {
+                userItem.isVisible = true
+                basecamp.isVisible = true
+                gudang.isVisible = true
+                delivery.isVisible = true
+                rencanaVisitGroup.isVisible = true
+                rencanaVisit.isVisible = true
+                rencanaVisitPenagihan.isVisible = true
+            }
+        }
+
+        if (sessionManager.userKind() != USER_KIND_SALES) {
+            myProfile.isVisible = false
+        }
+        binding.navView.setNavigationItemSelectedListener(this)
+        binding.titleBar.icMenu.visibility = View.VISIBLE
+        binding.titleBar.icMenu.setOnClickListener { binding.drawerLayout.openDrawer(GravityCompat.START) }
+//        val toggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav)
+//        drawerLayout.addDrawerListener(toggle)
+//        toggle.syncState()
+//        if (savedInstanceState == null) {
+//            supportFragmentManager.beginTransaction()
+//                .replace(R.id.fragment_container, HomeFragment()).commit()
+//            navigationView.setCheckedItem(R.id.option)
+//        }
+
         initVariable()
         initClickHandler()
         loadingState(true)
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
         else getContacts()
 
+    }
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.option_sync_now -> {
+                getUserLoggedIn()
+                true
+            }
+            R.id.nearest_store -> {
+                navigateChecklocation()
+                true
+            }
+            R.id.option_my_profile -> {
+                val intent = Intent(this@MainActivity, UserProfileActivity::class.java)
+                startActivity(intent)
+                true
+            }
+            R.id.option_search -> {
+                toggleSearchEvent(SEARCH_OPEN)
+                true
+            }
+            R.id.option_user -> {
+                startActivity(Intent(this@MainActivity, ManageUserActivity::class.java))
+                true
+            }
+            R.id.option_city -> {
+                val intent = Intent(this@MainActivity, ManageCityActivity::class.java)
+                intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
+                startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
+                true
+            }
+            R.id.option_skill -> {
+                startActivity(Intent(this@MainActivity, ManageSkillActivity::class.java))
+                true
+            }
+            R.id.option_basecamp -> {
+                startActivity(Intent(this@MainActivity, ManageBasecampActivity::class.java))
+                true
+            }
+            R.id.option_gudang -> {
+                startActivity(Intent(this@MainActivity, ManageGudangActivity::class.java))
+                true
+            }
+            R.id.option_delivery -> {
+                startActivity(Intent(this@MainActivity, DeliveryActivity::class.java))
+                true
+            }
+            R.id.option_logout -> {
+                logoutConfirmation()
+                true
+            }
+            R.id.rencana_visit -> {
+                startActivity(Intent(this@MainActivity, RencanaVisitActivity::class.java))
+                true
+            }
+            R.id.rencana_visit_penagihan -> {
+                startActivity(Intent(this@MainActivity, RencanaVisitPenagihanActivity::class.java))
+                true
+            }
+        }
+        binding.drawerLayout.closeDrawer(GravityCompat.START)
+        return true
     }
 
     private fun initVariable() {
@@ -213,7 +330,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             binding.titleBar.icBack.visibility = View.VISIBLE
             binding.titleBar.icBack.setOnClickListener { finish() }
         } else {
-            icMore.visibility = View.VISIBLE
+            if (userKind == USER_KIND_ADMIN) binding.titleBar.icMenu.visibility = View.VISIBLE
+            else icMore.visibility = View.VISIBLE
             binding.titleBar.icBack.visibility = View.GONE
             tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
             tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
@@ -1046,24 +1164,30 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        if (isSearchActive) toggleSearchEvent(SEARCH_CLOSE)
-        else {
 
-            if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) super.onBackPressed()
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
+        } else {
+            if (isSearchActive) toggleSearchEvent(SEARCH_CLOSE)
             else {
-                if (doubleBackToExitPressedOnce) {
-                    super.onBackPressed()
-                    return
+
+                if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) super.onBackPressed()
+                else {
+                    if (doubleBackToExitPressedOnce) {
+                        super.onBackPressed()
+                        return
+                    }
+
+                    this@MainActivity.doubleBackToExitPressedOnce = true
+                    handleMessage(this@MainActivity, TAG_ACTION_MAIN_ACTIVITY, getString(R.string.tekan_sekali_lagi), TOAST_SHORT)
+
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        doubleBackToExitPressedOnce = false
+                    }, 2000)
                 }
-
-                this@MainActivity.doubleBackToExitPressedOnce = true
-                handleMessage(this@MainActivity, TAG_ACTION_MAIN_ACTIVITY, getString(R.string.tekan_sekali_lagi), TOAST_SHORT)
-
-                Handler(Looper.getMainLooper()).postDelayed({
-                    doubleBackToExitPressedOnce = false
-                }, 2000)
             }
         }
+
     }
 
     override fun onItemClick(data: ContactModel?) {
