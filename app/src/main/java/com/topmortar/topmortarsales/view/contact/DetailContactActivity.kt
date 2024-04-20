@@ -81,6 +81,7 @@ import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.IS_CLOSING
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.PAYMENT_NOT_SET
 import com.topmortar.topmortarsales.commons.PAYMENT_TRANSFER
 import com.topmortar.topmortarsales.commons.PAYMENT_TUNAI
 import com.topmortar.topmortarsales.commons.PING_HOST
@@ -240,7 +241,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private var statusItem: List<String> = listOf("Pilih Status", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
     private var terminItem: List<String> = listOf("Pilih Termin Payment", "COD", "COD + Transfer", "COD + Tunai", "30 Hari", "45 Hari", "60 Hari")
-    private var paymentMethodItem: List<String> = listOf("Tunai", "Transfer")
+    private var paymentMethodItem: List<String> = listOf("Pilih Metode Pembayaran", "Tunai", "Transfer")
     private var reputationItem: List<String> = listOf("Pilih Reputasi Toko", "Good", "Bad")
     private var selectedStatus: String = ""
     private var selectedPaymentMethod: String = ""
@@ -907,8 +908,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val pAddress = "${ etAddress.text }"
         val pStatus = if (selectedStatus.isEmpty()) "" else selectedStatus.substringBefore(" - ").toLowerCase(Locale.getDefault())
         val pPaymentMethod = when (selectedPaymentMethod) {
-            paymentMethodItem[1] -> PAYMENT_TRANSFER
-            else -> PAYMENT_TUNAI
+            paymentMethodItem[1] -> PAYMENT_TUNAI
+            paymentMethodItem[2] -> PAYMENT_TRANSFER
+            else -> PAYMENT_NOT_SET
         }
         val pTermin = if (selectedTermin.isEmpty()) "-1" else {
             when (selectedTermin) {
@@ -1703,12 +1705,16 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun setupPaymentMethod(paymentMethod: String? = null) {
         when (paymentMethod) {
-            PAYMENT_TRANSFER -> {
+            PAYMENT_TUNAI -> {
                 binding.tvPaymentMethod.text = paymentMethodItem[1]
                 binding.spinPaymentMethod.setSelection(1)
             }
+            PAYMENT_TRANSFER -> {
+                binding.tvPaymentMethod.text = paymentMethodItem[2]
+                binding.spinPaymentMethod.setSelection(2)
+            }
             else -> {
-                binding.tvPaymentMethod.text = paymentMethodItem[0]
+                binding.tvPaymentMethod.text = EMPTY_FIELD_VALUE
                 binding.spinPaymentMethod.setSelection(0)
             }
         }
@@ -1800,7 +1806,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
 
         selectedPaymentMethod = when (iPaymentMethod) {
-            PAYMENT_TRANSFER -> paymentMethodItem[1]
+            PAYMENT_TUNAI -> paymentMethodItem[1]
+            PAYMENT_TRANSFER -> paymentMethodItem[2]
             else -> paymentMethodItem[0]
         }
         setupPaymentMethod(iPaymentMethod)
