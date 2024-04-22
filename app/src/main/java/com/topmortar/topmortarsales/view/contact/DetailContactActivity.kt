@@ -158,6 +158,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var sessionManager: SessionManager
     private val userKind get() = sessionManager.userKind().toString()
     private val userID get() = sessionManager.userID().toString()
+    private val username get() = sessionManager.userName().toString()
     private val fulllName get() = sessionManager.fullName().toString()
     private val userDistributorId get() = sessionManager.userDistributor().toString()
     private val userDistributorIds get() = sessionManager.userDistributor()
@@ -2206,7 +2207,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         if (!isTracking) {
             val serviceIntent = Intent(this@DetailContactActivity, TrackingService::class.java)
             serviceIntent.putExtra("userId", userID)
-            serviceIntent.putExtra("userDistributorId", userDistributorId)
+            serviceIntent.putExtra("userDistributorId", userDistributorIds ?: "-start-002-$username")
             serviceIntent.putExtra("deliveryId", deliveryId)
             this@DetailContactActivity.startService(serviceIntent)
         }
