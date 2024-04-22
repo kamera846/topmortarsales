@@ -67,6 +67,7 @@ class NewReportActivity : AppCompatActivity() {
     private lateinit var progressDialog: ProgressDialog
 
     private val userId get() = sessionManager.userID()
+    private val username get() = sessionManager.userName()
     private val userDistributorId get() = sessionManager.userDistributor()
 
     private val msgMaxLines = 6
@@ -126,7 +127,7 @@ class NewReportActivity : AppCompatActivity() {
                     TrackingService::class.java)) {
                 val serviceIntent = Intent(this, TrackingService::class.java)
                 serviceIntent.putExtra("userId", userId)
-                serviceIntent.putExtra("userDistributorId", userDistributorId)
+                serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-001-$username")
                 serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
                 startService(serviceIntent)
             }

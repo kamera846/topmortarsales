@@ -284,7 +284,7 @@ class CourierActivity : AppCompatActivity() {
 
         val serviceIntent = Intent(this, TrackingService::class.java)
         serviceIntent.putExtra("userId", userId)
-        serviceIntent.putExtra("userDistributorId", userDistributorId)
+        serviceIntent.putExtra("userDistributorId", userDistributorIds ?: "-start-003-$username")
         serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
         this.startService(serviceIntent)
 

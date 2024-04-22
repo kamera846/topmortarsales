@@ -41,6 +41,10 @@
         android:title="Rencana Visit"
         android:visible="false"/>
     <item
+        android:id="@+id/rencana_visit_penagihan"
+        android:title="Rencana Visit Penagihan"
+        android:visible="false"/>
+    <item
         android:id="@+id/option_logout"
         android:title="@string/logout" />
 </menu>

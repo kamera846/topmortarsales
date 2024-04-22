@@ -295,7 +295,8 @@ class HomeSalesActivity : AppCompatActivity() {
     }
 
     private fun navigateToTargetVisit() {
-        val intent = Intent(this, RencanaVisitActivity::class.java)
+        val intent = if (userKind == USER_KIND_SALES) Intent(this, RencanaVisitActivity::class.java)
+        else Intent(this, RencanaVisitPenagihanActivity::class.java)
         startActivity(intent)
     }
 
@@ -798,7 +799,7 @@ class HomeSalesActivity : AppCompatActivity() {
                     TrackingService::class.java)) {
                 val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
                 serviceIntent.putExtra("userId", userId)
-                serviceIntent.putExtra("userDistributorId", userDistributorId)
+                serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
                 serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
                 this@HomeSalesActivity.startService(serviceIntent)
             }
@@ -956,7 +957,7 @@ class HomeSalesActivity : AppCompatActivity() {
                                             if (!CustomUtility(this@HomeSalesActivity).isServiceRunning(TrackingService::class.java)) {
                                                 val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
                                                 serviceIntent.putExtra("userId", userId)
-                                                serviceIntent.putExtra("userDistributorId", userDistributorId)
+                                                serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
                                                 serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
                                                 this@HomeSalesActivity.startService(serviceIntent)
                                             }
@@ -975,7 +976,7 @@ class HomeSalesActivity : AppCompatActivity() {
                                         if (!CustomUtility(this@HomeSalesActivity).isServiceRunning(TrackingService::class.java)) {
                                             val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
                                             serviceIntent.putExtra("userId", userId)
-                                            serviceIntent.putExtra("userDistributorId", userDistributorId)
+                                            serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
                                             serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
                                             this@HomeSalesActivity.startService(serviceIntent)
                                         }
@@ -987,7 +988,7 @@ class HomeSalesActivity : AppCompatActivity() {
                                     if (!CustomUtility(this@HomeSalesActivity).isServiceRunning(TrackingService::class.java)) {
                                         val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
                                         serviceIntent.putExtra("userId", userId)
-                                        serviceIntent.putExtra("userDistributorId", userDistributorId)
+                                        serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
                                         serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
                                         this@HomeSalesActivity.startService(serviceIntent)
                                     }

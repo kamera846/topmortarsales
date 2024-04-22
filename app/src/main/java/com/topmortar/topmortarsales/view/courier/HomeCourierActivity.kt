@@ -325,7 +325,7 @@ class HomeCourierActivity : AppCompatActivity() {
                                             if (!CustomUtility(this@HomeCourierActivity).isServiceRunning(TrackingService::class.java)) {
                                                 val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
                                                 serviceIntent.putExtra("userId", userId)
-                                                serviceIntent.putExtra("userDistributorId", userDistributorId)
+                                                serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-004-$userName")
                                                 serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
                                                 this@HomeCourierActivity.startService(serviceIntent)
                                             }
@@ -344,7 +344,7 @@ class HomeCourierActivity : AppCompatActivity() {
                                         if (!CustomUtility(this@HomeCourierActivity).isServiceRunning(TrackingService::class.java)) {
                                             val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
                                             serviceIntent.putExtra("userId", userId)
-                                            serviceIntent.putExtra("userDistributorId", userDistributorId)
+                                            serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-004-$userName")
                                             serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
                                             this@HomeCourierActivity.startService(serviceIntent)
                                         }
@@ -356,7 +356,7 @@ class HomeCourierActivity : AppCompatActivity() {
                                     if (!CustomUtility(this@HomeCourierActivity).isServiceRunning(TrackingService::class.java)) {
                                         val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
                                         serviceIntent.putExtra("userId", userId)
-                                        serviceIntent.putExtra("userDistributorId", userDistributorId)
+                                        serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-004-$userName")
                                         serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
                                         this@HomeCourierActivity.startService(serviceIntent)
                                     }
@@ -891,7 +891,7 @@ class HomeCourierActivity : AppCompatActivity() {
                                 if (!CustomUtility(this@HomeCourierActivity).isServiceRunning(TrackingService::class.java)) {
                                     val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
                                     serviceIntent.putExtra("userId", userId)
-                                    serviceIntent.putExtra("userDistributorId", userDistributorId)
+                                    serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-004-$userName")
                                     serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
                                     this@HomeCourierActivity.startService(serviceIntent)
                                 }
