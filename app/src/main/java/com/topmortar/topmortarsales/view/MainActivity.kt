@@ -560,14 +560,14 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 gudang.isVisible = true
                 delivery.isVisible = true
                 rencanaVisit.isVisible = true
-                rencanaVisitPenagihan.isVisible = true
+//                rencanaVisitPenagihan.isVisible = true
             } else {
                 userItem.isVisible = true
                 basecamp.isVisible = true
                 gudang.isVisible = true
                 delivery.isVisible = true
                 rencanaVisit.isVisible = true
-                rencanaVisitPenagihan.isVisible = true
+//                rencanaVisitPenagihan.isVisible = true
             }
         }
 
