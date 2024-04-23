@@ -75,11 +75,9 @@ class RencanaVisitPenagihanActivity : AppCompatActivity() {
         pagerAdapter.setCounterPageItem(object : RencanaVisitPenagihanVPA.CounterPageItem{
             override fun counterItem(count: Int, tabIndex: Int) {
                 when (tabIndex) {
-                    0 -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Jatem 7"
-                    1 -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Jatem 15"
-                    2 -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Jatem 15+"
-                    3 -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Voucher"
-                    else -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Pasif"
+                    0 -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Jatem 0-7"
+                    1 -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Jatem 8-15"
+                    else -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Jatem 15+"
                 }
             }
 

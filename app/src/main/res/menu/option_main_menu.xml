@@ -38,7 +38,7 @@
         android:visible="false"/>
     <item
         android:id="@+id/rencana_visit"
-        android:title="Rencana Visit"
+        android:title="Rencana Visit Sales"
         android:visible="false"/>
     <item
         android:id="@+id/rencana_visit_penagihan"

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/jatemPenagihan3Fragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include
+            android:visibility="gone"
+            android:id="@+id/llFilter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            layout="@layout/component_filter"/>
+
+        <include
+            android:visibility="gone"
+            android:id="@+id/badgeRefresh"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/llFilter"
+            layout="@layout/component_badge_refresh"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_below="@+id/badgeRefresh"
+            android:id="@+id/rv_chat_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:listitem="@layout/item_chat_room"/>
+
+        <TextView
+            android:visibility="gone"
+            android:layout_below="@+id/badgeRefresh"
+            android:id="@+id/txt_loading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:padding="16dp"
+            android:text="@string/txt_loading"
+            android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+    </RelativeLayout>
+
+</FrameLayout>

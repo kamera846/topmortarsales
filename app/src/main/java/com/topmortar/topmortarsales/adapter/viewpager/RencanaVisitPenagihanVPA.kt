@@ -3,9 +3,9 @@ package com.topmortar.topmortarsales.adapter.viewpager
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
-import com.topmortar.topmortarsales.view.rencanaVisits.JatemFragment
-import com.topmortar.topmortarsales.view.rencanaVisits.PasifRenViFragment
-import com.topmortar.topmortarsales.view.rencanaVisits.VoucherRenViFragment
+import com.topmortar.topmortarsales.view.rencanaVisits.JatemPenagihan1Fragment
+import com.topmortar.topmortarsales.view.rencanaVisits.JatemPenagihan2Fragment
+import com.topmortar.topmortarsales.view.rencanaVisits.JatemPenagihan3Fragment
 
 class RencanaVisitPenagihanVPA(fm: FragmentManager) : FragmentPagerAdapter(fm) {
 
@@ -16,98 +16,73 @@ class RencanaVisitPenagihanVPA(fm: FragmentManager) : FragmentPagerAdapter(fm) {
     fun setCounterPageItem(listener: CounterPageItem) {
         this.listener = listener
     }
-    private lateinit var fragmentJatem: JatemFragment
-    private lateinit var fragmentVoucherRenVi: VoucherRenViFragment
-    private lateinit var fragmentPasifRenVi: PasifRenViFragment
+    private lateinit var fragmentJatem1: JatemPenagihan1Fragment
+    private lateinit var fragmentJatem2: JatemPenagihan2Fragment
+    private lateinit var fragmentJatem3: JatemPenagihan3Fragment
     fun setSyncAction(index: Int) {
         when (index) {
-            0 -> fragmentJatem.syncNow()
-            1 -> fragmentJatem.syncNow()
-            2 -> fragmentJatem.syncNow()
-            3 -> fragmentVoucherRenVi.syncNow()
-            4 -> fragmentPasifRenVi.syncNow()
+            0 -> fragmentJatem1.syncNow()
+            1 -> fragmentJatem2.syncNow()
+            2 -> fragmentJatem3.syncNow()
         }
     }
 
     fun clearData() {
-        fragmentJatem = JatemFragment()
-        fragmentVoucherRenVi = VoucherRenViFragment()
+        fragmentJatem1 = JatemPenagihan1Fragment()
+        fragmentJatem2 = JatemPenagihan2Fragment()
+        fragmentJatem3 = JatemPenagihan3Fragment()
     }
 
     override fun getItem(position: Int): Fragment {
         return when (position) {
             0 -> {
 
-                fragmentJatem = JatemFragment()
-                fragmentJatem.setCounterItem(object : JatemFragment.CounterItem{
+                fragmentJatem1 = JatemPenagihan1Fragment()
+                fragmentJatem1.setCounterItem(object : JatemPenagihan1Fragment.CounterItem{
                     override fun counterItem(count: Int) {
                         listener?.counterItem(count, position)
                     }
 
                 })
-                return fragmentJatem
+                return fragmentJatem1
 
             }
             1 -> {
 
-                fragmentJatem = JatemFragment()
-                fragmentJatem.setCounterItem(object : JatemFragment.CounterItem{
+                fragmentJatem2 = JatemPenagihan2Fragment()
+                fragmentJatem2.setCounterItem(object : JatemPenagihan2Fragment.CounterItem{
                     override fun counterItem(count: Int) {
                         listener?.counterItem(count, position)
                     }
 
                 })
-                return fragmentJatem
+                return fragmentJatem2
 
             }
-            2 -> {
+            else -> {
 
-                fragmentJatem = JatemFragment()
-                fragmentJatem.setCounterItem(object : JatemFragment.CounterItem{
+                fragmentJatem3 = JatemPenagihan3Fragment()
+                fragmentJatem3.setCounterItem(object : JatemPenagihan3Fragment.CounterItem{
                     override fun counterItem(count: Int) {
                         listener?.counterItem(count, position)
                     }
 
                 })
-                return fragmentJatem
-
-            } 3 -> {
-
-                fragmentVoucherRenVi = VoucherRenViFragment()
-                fragmentVoucherRenVi.setCounterItem(object : VoucherRenViFragment.CounterItem{
-                    override fun counterItem(count: Int) {
-                        listener?.counterItem(count, position)
-                    }
-
-                })
-                return fragmentVoucherRenVi
-
-            } else -> {
-
-                fragmentPasifRenVi = PasifRenViFragment()
-                fragmentPasifRenVi.setCounterItem(object : PasifRenViFragment.CounterItem{
-                    override fun counterItem(count: Int) {
-                        listener?.counterItem(count, position)
-                    }
-
-                })
-                return fragmentPasifRenVi
+                return fragmentJatem3
 
             }
         }
     }
 
     override fun getCount(): Int {
-        return 5
+        return 3
     }
 
     override fun getPageTitle(position: Int): CharSequence {
         return when (position) {
-            0 -> "Jatem 7"
-            1 -> "Jatem 15"
-            2 -> "Jatem 15+"
-            3 -> "Voucher"
-            else -> "Pasif"
+            0 -> "Jatem 0-7"
+            1 -> "Jatem 8-15"
+            else -> "Jatem 15+"
         }
     }
 }
