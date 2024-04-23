@@ -16,6 +16,7 @@ import com.topmortar.topmortarsales.commons.INVOICE
 import com.topmortar.topmortarsales.commons.PAYMENT
 import com.topmortar.topmortarsales.commons.PROMO
 import com.topmortar.topmortarsales.commons.RENCANA_VISIT
+import com.topmortar.topmortarsales.commons.RENCANA_VISIT_PENAGIHAN
 import com.topmortar.topmortarsales.commons.REQUEST_OTP
 import com.topmortar.topmortarsales.commons.SEARCH_CONTACT
 import com.topmortar.topmortarsales.commons.SEND_MESSAGE
@@ -626,5 +627,11 @@ interface ApiService {
     suspend fun targetPasifDst(
         @Query("type") type: String = "passive",
         @Query("dst") idDistributor: String,
+    ): ResponseRencanaVisit
+
+    @GET(RENCANA_VISIT_PENAGIHAN)
+    suspend fun jatemPenagihan(
+        @Query("dst") dst: String,
+        @Query("type") type: String,
     ): ResponseRencanaVisit
 }
