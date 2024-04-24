@@ -79,7 +79,7 @@ object DateFormat {
         }
     }
 
-    fun differenceDateNowDescCustom(dateString: String): String {
+    fun differenceDateNowDescCustom(dateString: String): Int {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         val dateTime = dateFormat.parse(dateString)!!
 
@@ -87,15 +87,7 @@ object DateFormat {
         val today = calendar.time
         calendar.time = dateTime
 
-        val difference = ((today.time - calendar.time.time) / (1000 * 60 * 60 * 24)).toInt()
-
-        return when {
-            difference == 0 -> "hari ini"
-            difference == 1 -> "kemarin"
-            difference > 1 -> "$difference hari"
-            calendar.after(today) -> "$difference hari"
-            else -> ""
-        }
+        return ((today.time - calendar.time.time) / (1000 * 60 * 60 * 24)).toInt()
     }
 
     fun changeDateToDaysBeforeOrAfter(dateString: String, totalDays: Int, inputDateFormat: String = "yyyy-MM-dd HH:mm:ss", outputDateFormat: String = "dd MMMM yyyy, HH.mm"): String {
