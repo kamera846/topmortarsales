@@ -44,20 +44,30 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
             }
 
             val dateCounter = DateFormat.differenceDateNowDescCustom(item.created_at)
+            val formatDateCounter = when {
+                dateCounter == 0 -> "hari ini"
+                dateCounter == 1 -> "kemarin"
+                dateCounter > 1 -> "$dateCounter hari"
+                else -> ""
+            }
+
+            if (dateCounter > 4 && typeRencana == "jatemPenagihan") itemView.setBackgroundColor(context!!.getColor(R.color.primary15))
+            else itemView.setBackgroundColor(context!!.getColor(R.color.baseBackground))
+
             var dateJatem = when (typeRencana) {
                 "voucher" -> "Didapatkan "
                 "passive" -> "Terakhir order "
                 else -> "Jatuh tempo "
             }
 
-            dateJatem += if (typeRencana == "jatem") {
+            dateJatem += if (item.termin_payment.isNotEmpty() && (typeRencana == "jatem" || typeRencana == "jatemPenagihan")) {
                 val terminPayment = item.termin_payment.toInt()
                 DateFormat.changeDateToDaysBeforeOrAfter(item.date_invoice, terminPayment, outputDateFormat = "dd MMMM yyyy")
             } else DateFormat.format(item.created_at)
 
             tvContactName.text = item.nama
             tvPhoneNumber.text = dateJatem
-            textVerified.text = dateCounter
+            textVerified.text = formatDateCounter
             textVerified.setBackgroundResource(R.drawable.bg_passive_round)
             textVerified.visibility = View.VISIBLE
 

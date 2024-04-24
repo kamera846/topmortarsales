@@ -81,7 +81,7 @@ class RencanaVisitPenagihanVPA(fm: FragmentManager) : FragmentPagerAdapter(fm) {
     override fun getPageTitle(position: Int): CharSequence {
         return when (position) {
             0 -> "Jatem 0-7"
-            1 -> "Jatem 8-15"
+            1 -> "Jatem 7-15"
             else -> "Jatem 15+"
         }
     }
