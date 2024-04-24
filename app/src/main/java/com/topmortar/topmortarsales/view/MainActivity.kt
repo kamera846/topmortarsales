@@ -335,27 +335,26 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 binding.titleBar.icMenu.visibility = View.VISIBLE
                 icMore.visibility = View.GONE
 
-//                val navigationView: NavigationView = findViewById(R.id.nav_view)
-//                val headerView: View = navigationView.getHeaderView(0)
-//                val navFullName = headerView.findViewById<TextView>(R.id.navFullName)
-//                val navUserName = headerView.findViewById<TextView>(R.id.navUserName)
-//
-//                sessionManager.fullName().let {
-//                    if (!it.isNullOrEmpty()) {
-//                        navFullName.visibility = View.VISIBLE
-//                        navFullName.text = it
-//                    } else {
-//                        navFullName.visibility = View.GONE
-//                    }
-//                }
-//                sessionManager.userName().let {
-//                    if (!it.isNullOrEmpty()) {
-//                        navUserName.visibility = View.VISIBLE
-//                        navUserName.text = it
-//                    } else {
-//                        navUserName.visibility = View.GONE
-//                    }
-//                }
+                val headerView = binding.navView.getHeaderView(0)
+                val navFullName = headerView.findViewById<TextView>(R.id.nav_full_name)
+                val navUserName = headerView.findViewById<TextView>(R.id.navUserName)
+
+                sessionManager.fullName().let {
+                    if (!it.isNullOrEmpty()) {
+                        navFullName.visibility = View.VISIBLE
+                        navFullName.text = it
+                    } else {
+                        navFullName.visibility = View.GONE
+                    }
+                }
+                sessionManager.userName().let {
+                    if (!it.isNullOrEmpty()) {
+                        navUserName.visibility = View.VISIBLE
+                        navUserName.text = it
+                    } else {
+                        navUserName.visibility = View.GONE
+                    }
+                }
             } else {
                 binding.titleBar.icMenu.visibility = View.GONE
                 icMore.visibility = View.VISIBLE
