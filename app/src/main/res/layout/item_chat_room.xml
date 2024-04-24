@@ -56,7 +56,6 @@
                     android:text="@string/list_chat_contact_description"/>
             </LinearLayout>
 
-
             <ImageView
                 android:visibility="visible"
                 android:layout_width="54dp"
