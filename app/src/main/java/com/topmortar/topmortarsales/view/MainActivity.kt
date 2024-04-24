@@ -185,14 +185,14 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
         val popupMenu = binding.navView
 
-        val searchItem = popupMenu.menu.findItem(R.id.option_search)
-        val userItem = popupMenu.menu.findItem(R.id.option_user)
-        val myProfile = popupMenu.menu.findItem(R.id.option_my_profile)
-        val cityItem = popupMenu.menu.findItem(R.id.option_city)
-        val skillItem = popupMenu.menu.findItem(R.id.option_skill)
-        val basecamp = popupMenu.menu.findItem(R.id.option_basecamp)
-        val gudang = popupMenu.menu.findItem(R.id.option_gudang)
-        val delivery = popupMenu.menu.findItem(R.id.option_delivery)
+        val searchItem = popupMenu.menu.findItem(R.id.nav_search)
+        val userItem = popupMenu.menu.findItem(R.id.nav_user)
+        val myProfile = popupMenu.menu.findItem(R.id.nav_my_profile)
+        val cityItem = popupMenu.menu.findItem(R.id.nav_city)
+        val skillItem = popupMenu.menu.findItem(R.id.nav_skill)
+        val basecamp = popupMenu.menu.findItem(R.id.nav_basecamp)
+        val gudang = popupMenu.menu.findItem(R.id.nav_gudang)
+        val delivery = popupMenu.menu.findItem(R.id.nav_delivery)
         val rencanaVisitGroup = popupMenu.menu.findItem(R.id.rencana_visit_group)
         val rencanaVisit = popupMenu.menu.findItem(R.id.rencana_visit)
         val rencanaVisitPenagihan = popupMenu.menu.findItem(R.id.rencana_visit_penagihan)
@@ -245,50 +245,50 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.option_sync_now -> {
+            R.id.nav_sync_now -> {
                 getUserLoggedIn()
                 true
             }
-            R.id.nearest_store -> {
+            R.id.nav_nearest_store -> {
                 navigateChecklocation()
                 true
             }
-            R.id.option_my_profile -> {
+            R.id.nav_my_profile -> {
                 val intent = Intent(this@MainActivity, UserProfileActivity::class.java)
                 startActivity(intent)
                 true
             }
-            R.id.option_search -> {
+            R.id.nav_search -> {
                 toggleSearchEvent(SEARCH_OPEN)
                 true
             }
-            R.id.option_user -> {
+            R.id.nav_user -> {
                 startActivity(Intent(this@MainActivity, ManageUserActivity::class.java))
                 true
             }
-            R.id.option_city -> {
+            R.id.nav_city -> {
                 val intent = Intent(this@MainActivity, ManageCityActivity::class.java)
                 intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
                 startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
                 true
             }
-            R.id.option_skill -> {
+            R.id.nav_skill -> {
                 startActivity(Intent(this@MainActivity, ManageSkillActivity::class.java))
                 true
             }
-            R.id.option_basecamp -> {
+            R.id.nav_basecamp -> {
                 startActivity(Intent(this@MainActivity, ManageBasecampActivity::class.java))
                 true
             }
-            R.id.option_gudang -> {
+            R.id.nav_gudang -> {
                 startActivity(Intent(this@MainActivity, ManageGudangActivity::class.java))
                 true
             }
-            R.id.option_delivery -> {
+            R.id.nav_delivery -> {
                 startActivity(Intent(this@MainActivity, DeliveryActivity::class.java))
                 true
             }
-            R.id.option_logout -> {
+            R.id.nav_logout -> {
                 logoutConfirmation()
                 true
             }
@@ -325,13 +325,41 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         // Set Title Bar
         if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
             icMore.visibility = View.GONE
+            binding.titleBar.icMenu.visibility = View.GONE
             tvTitleBarDescription.visibility = View.GONE
             binding.titleBar.tvTitleBar.text = "Semua Toko"
             binding.titleBar.icBack.visibility = View.VISIBLE
             binding.titleBar.icBack.setOnClickListener { finish() }
         } else {
-            if (userKind == USER_KIND_ADMIN) binding.titleBar.icMenu.visibility = View.VISIBLE
-            else icMore.visibility = View.VISIBLE
+            if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
+                binding.titleBar.icMenu.visibility = View.VISIBLE
+                icMore.visibility = View.GONE
+
+//                val navigationView: NavigationView = findViewById(R.id.nav_view)
+//                val headerView: View = navigationView.getHeaderView(0)
+//                val navFullName = headerView.findViewById<TextView>(R.id.navFullName)
+//                val navUserName = headerView.findViewById<TextView>(R.id.navUserName)
+//
+//                sessionManager.fullName().let {
+//                    if (!it.isNullOrEmpty()) {
+//                        navFullName.visibility = View.VISIBLE
+//                        navFullName.text = it
+//                    } else {
+//                        navFullName.visibility = View.GONE
+//                    }
+//                }
+//                sessionManager.userName().let {
+//                    if (!it.isNullOrEmpty()) {
+//                        navUserName.visibility = View.VISIBLE
+//                        navUserName.text = it
+//                    } else {
+//                        navUserName.visibility = View.GONE
+//                    }
+//                }
+            } else {
+                binding.titleBar.icMenu.visibility = View.GONE
+                icMore.visibility = View.VISIBLE
+            }
             binding.titleBar.icBack.visibility = View.GONE
             tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
             tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }

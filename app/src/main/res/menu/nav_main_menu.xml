@@ -8,48 +8,48 @@
         android:checkableBehavior="none">
 
         <item
-            android:id="@+id/option_sync_now"
+            android:id="@+id/nav_sync_now"
             android:icon="@drawable/sync_now_black"
             android:title="@string/sync_now" />
         <item
-            android:id="@+id/option_my_profile"
+            android:id="@+id/nav_my_profile"
             android:icon="@drawable/person_black"
             android:title="@string/my_profile" />
         <item
-            android:id="@+id/nearest_store"
+            android:id="@+id/nav_nearest_store"
             android:icon="@drawable/store_black"
             android:title="@string/nearest_store" />
         <item
-            android:id="@+id/option_search"
+            android:id="@+id/nav_search"
             android:icon="@drawable/search_black"
             android:title="@string/search" />
         <item
-            android:id="@+id/option_user"
+            android:id="@+id/nav_user"
             android:icon="@drawable/person_group_black"
             android:title="@string/manage_user"
             android:visible="false"/>
         <item
-            android:id="@+id/option_city"
+            android:id="@+id/nav_city"
             android:icon="@drawable/city_black"
             android:title="@string/manage_city"
             android:visible="false"/>
         <item
-            android:id="@+id/option_skill"
+            android:id="@+id/nav_skill"
             android:icon="@drawable/skill_black"
             android:title="@string/manage_skill"
             android:visible="false"/>
         <item
-            android:id="@+id/option_basecamp"
+            android:id="@+id/nav_basecamp"
             android:icon="@drawable/warehouse_black"
             android:title="@string/manage_basecamp"
             android:visible="false"/>
         <item
-            android:id="@+id/option_gudang"
+            android:id="@+id/nav_gudang"
             android:icon="@drawable/gudang_black"
             android:title="@string/manage_gudang"
             android:visible="false"/>
         <item
-            android:id="@+id/option_delivery"
+            android:id="@+id/nav_delivery"
             android:icon="@drawable/truck_fast_black"
             android:title="@string/manage_delivery"
             android:visible="false"/>
