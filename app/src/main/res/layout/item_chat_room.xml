@@ -56,7 +56,6 @@
                     android:text="@string/list_chat_contact_description"/>
             </LinearLayout>
 
-
             <ImageView
                 android:visibility="visible"
                 android:layout_width="54dp"
@@ -66,11 +65,6 @@
                 android:contentDescription="@string/icon_tooltip_information"/>
 
         </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:theme="@style/Theme.TopMortarSales.BaseLine"/>
 
     </LinearLayout>
 
