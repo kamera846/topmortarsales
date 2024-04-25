@@ -225,6 +225,10 @@ class HomeSalesActivity : AppCompatActivity() {
         binding.fullName.text = userFullName
 
         binding.rencanaVisit.setOnClickListener { if (isLocked) showDialogLockedFeature() else navigateToTargetVisit() }
+        if (userKind == USER_KIND_PENAGIHAN) {
+            binding.rencanaVisitPenagihan.visibility = View.VISIBLE
+            binding.rencanaVisitPenagihan.setOnClickListener { if (isLocked) showDialogLockedFeature() else navigateToTargetVisitPenagihan() }
+        } else binding.rencanaVisitPenagihan.visibility = View.GONE
         binding.allStore.setOnClickListener { if (isLocked) showDialogLockedFeature() else navigateToAllStore()}
         binding.nearestStoreItem.setOnClickListener { navigateToNearestStore()}
         binding.registerNewStore.setOnClickListener { navigateToRegisterStore()}
@@ -295,8 +299,12 @@ class HomeSalesActivity : AppCompatActivity() {
     }
 
     private fun navigateToTargetVisit() {
-        val intent = if (userKind == USER_KIND_SALES) Intent(this, RencanaVisitActivity::class.java)
-        else Intent(this, RencanaVisitPenagihanActivity::class.java)
+        val intent = Intent(this, RencanaVisitActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun navigateToTargetVisitPenagihan() {
+        val intent = Intent(this, RencanaVisitPenagihanActivity::class.java)
         startActivity(intent)
     }
 
@@ -1032,9 +1040,11 @@ class HomeSalesActivity : AppCompatActivity() {
         isLocked = state
 
         binding.rencanaVisit.alpha = if (state) 0.5f else 1f
+        binding.rencanaVisitPenagihan.alpha = if (state) 0.5f else 1f
         binding.allStore.alpha = if (state) 0.5f else 1f
 
         binding.rencanaVisitChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
+        binding.rencanaVisitPenagihanChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
         binding.allStoreChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
 
         if (isAbsentMorningNow && isAbsentEveningNow) {
