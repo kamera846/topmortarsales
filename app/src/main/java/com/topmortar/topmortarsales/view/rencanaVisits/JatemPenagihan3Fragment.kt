@@ -117,9 +117,9 @@ class JatemPenagihan3Fragment : Fragment() {
 
                 val response = when (userKind) {
                     USER_KIND_ADMIN, USER_KIND_PENAGIHAN -> {
-                        if (selectedCity != null) apiService.jatemPenagihan(dst = userDistributorId, type = "jatem3")
-                        else apiService.jatemPenagihan(dst = userDistributorId, type = "jatem3")
-                    } else -> apiService.jatemPenagihan(dst = userDistributorId, type = "jatem3")
+                        if (selectedCity != null) apiService.targetJatem(idCity = selectedCity?.id!!)
+                        else apiService.targetJatemDst(idDistributor = userDistributorId)
+                    } else -> apiService.targetJatem(idCity = selectedCity?.id!!)
                 }
 
                 when (response.status) {
