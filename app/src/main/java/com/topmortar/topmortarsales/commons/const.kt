@@ -79,6 +79,7 @@ const val DELIVERY = "delivery.php"
 const val SURAT_JALAN_NOT_CLOSING = "suratjalanNotClosing.php"
 const val RENCANA_VISIT = "rencanaVisit.php"
 const val RENCANA_VISIT_PENAGIHAN = "renvisPenagihan.php"
+const val GET_CONTACT_SALES = "getContactSales.php"
 
 /*
     Request Code

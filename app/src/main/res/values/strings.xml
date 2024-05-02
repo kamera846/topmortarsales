@@ -197,5 +197,7 @@
     <string name="tekan_sekali_lagi" translatable="false">Tekan sekali lagi untuk keluar!</string>
 
     <string name="oke" translatable="false">Oke</string>
+    <string name="text_by">by</string>
+    <string name="get_contact_sales_err">Failed to get store creator data!</string>
 
 </resources>
