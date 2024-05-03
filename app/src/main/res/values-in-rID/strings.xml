@@ -183,4 +183,6 @@
         2. Notifikasi terkait geolokasi.\n
         \nMohon untuk memilih opsi "Izinkan Sepanjang Waktu!" pada pengaturan
     </string>
+    <string name="text_by">oleh</string>
+    <string name="get_contact_sales_err">Gagal mendapatkan data pembuat toko!</string>
 </resources>

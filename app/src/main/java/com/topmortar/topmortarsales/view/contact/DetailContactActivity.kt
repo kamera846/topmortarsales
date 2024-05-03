@@ -304,6 +304,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         checkLocationPermission()
 
         // Get List City
+//        getContactSales()
         getCities()
         if (userKind == USER_KIND_COURIER) {
             setupDelivery()
@@ -1485,6 +1486,49 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val searchKey = etPromo.text.toString()
         if (searchKey.isNotEmpty()) searchPromoModal.setSearchKey(searchKey)
         searchPromoModal.show()
+    }
+
+    private fun getContactSales() {
+
+        // Get Cities
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.getContactSales(idContact = contactId ?: "0")
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        val results = response.results
+                        val data = results[0]
+
+                        binding.textBy.visibility = View.VISIBLE
+                        binding.textBy.text = getString(R.string.text_by) + " " + data.username
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+//                        handleMessage(this@DetailContactActivity, "CONTACT SALES", getString(R.string.get_contact_sales_err))
+
+                    }
+                    else -> {
+
+                        handleMessage(this@DetailContactActivity, "CONTACT SALES", getString(R.string.failed_get_data))
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(this@DetailContactActivity, "CONTACT SALES", "Failed run service. Exception " + e.message)
+
+            }
+
+            getPromo()
+
+        }
     }
 
     private fun getCities() {
