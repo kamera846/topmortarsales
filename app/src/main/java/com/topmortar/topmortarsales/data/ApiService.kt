@@ -11,6 +11,7 @@ import com.topmortar.topmortarsales.commons.DELIVERY
 import com.topmortar.topmortarsales.commons.DISTRIBUTOR
 import com.topmortar.topmortarsales.commons.EDIT_CONTACT
 import com.topmortar.topmortarsales.commons.GET_CITY
+import com.topmortar.topmortarsales.commons.GET_CONTACT_SALES
 import com.topmortar.topmortarsales.commons.GET_USERS
 import com.topmortar.topmortarsales.commons.INVOICE
 import com.topmortar.topmortarsales.commons.PAYMENT
@@ -36,6 +37,7 @@ import com.topmortar.topmortarsales.response.ResponseAuth
 import com.topmortar.topmortarsales.response.ResponseBaseCamp
 import com.topmortar.topmortarsales.response.ResponseCities
 import com.topmortar.topmortarsales.response.ResponseContactList
+import com.topmortar.topmortarsales.response.ResponseContactSales
 import com.topmortar.topmortarsales.response.ResponseCountStore
 import com.topmortar.topmortarsales.response.ResponseDelivery
 import com.topmortar.topmortarsales.response.ResponseDistributor
@@ -634,4 +636,9 @@ interface ApiService {
         @Query("dst") dst: String,
         @Query("type") type: String,
     ): ResponseRencanaVisit
+
+    @GET(GET_CONTACT_SALES)
+    suspend fun getContactSales(
+        @Query("contact") idContact: String,
+    ): ResponseContactSales
 }

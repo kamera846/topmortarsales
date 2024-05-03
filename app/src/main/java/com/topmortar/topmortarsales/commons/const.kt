@@ -3,22 +3,22 @@ package com.topmortar.topmortarsales.commons
 import android.widget.Toast
 
 /*
-    Services
+    Prod Services
  */
-const val BASE_URL = "https://saleswa.topmortarindonesia.com/" // Production
-//const val BASE_URL = "https://dev-saleswa.topmortarindonesia.com/" // Development
+//const val BASE_URL = "https://saleswa.topmortarindonesia.com/" // Production
+//const val PING_HOST = "saleswa.topmortarindonesia.com" // Production
+//const val FIREBASE_REFERENCE = "db_prod" // Production
 
 /*
-    Ping Host
+    Dev Services
  */
-const val PING_HOST = "saleswa.topmortarindonesia.com" // Production
-//const val PING_HOST = "dev-saleswa.topmortarindonesia.com" // Development
+const val BASE_URL = "https://dev-saleswa.topmortarindonesia.com/" // Development
+const val PING_HOST = "dev-saleswa.topmortarindonesia.com" // Development
+const val FIREBASE_REFERENCE = "db_dev" // Development
 
 /*
     Firebase Realtime Database
  */
-const val FIREBASE_REFERENCE = "db_prod" // Production
-//const val FIREBASE_REFERENCE = "db_dev" // Development
 const val FIREBASE_CHILD_AUTH = "auth"
 const val FIREBASE_CHILD_DELIVERY = "delivery"
 const val FIREBASE_CHILD_ABSENT = "absent"
