@@ -304,7 +304,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         checkLocationPermission()
 
         // Get List City
-        getContactSales()
+//        getContactSales()
         getCities()
         if (userKind == USER_KIND_COURIER) {
             setupDelivery()
