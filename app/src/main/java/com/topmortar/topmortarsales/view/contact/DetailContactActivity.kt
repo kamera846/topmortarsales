@@ -81,12 +81,14 @@ import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.IS_CLOSING
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.NORMAL_REPORT
 import com.topmortar.topmortarsales.commons.PAYMENT_NOT_SET
 import com.topmortar.topmortarsales.commons.PAYMENT_TRANSFER
 import com.topmortar.topmortarsales.commons.PAYMENT_TUNAI
 import com.topmortar.topmortarsales.commons.PING_HOST
 import com.topmortar.topmortarsales.commons.PING_MEDIUM
 import com.topmortar.topmortarsales.commons.PING_NORMAL
+import com.topmortar.topmortarsales.commons.REPORT_SOURCE
 import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
@@ -262,6 +264,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var iMapsUrl: String? = null
     private var iKtp: String? = null
     private var iPromo: String? = null
+    private var iReportSource: String? = NORMAL_REPORT
 
     private var isSearchCity = false
     private var isSearchPromo = false
@@ -622,6 +625,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         iAddress = intent.getStringExtra(CONST_ADDRESS)
         iLocation = intent.getStringExtra(CONST_LOCATION)
         iPromo = intent.getStringExtra(CONST_PROMO)
+        iReportSource = intent.getStringExtra(REPORT_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
 
         activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
 
@@ -1374,6 +1378,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 val intent = Intent(this@DetailContactActivity, NewReportActivity::class.java)
 
+                intent.putExtra(REPORT_SOURCE, iReportSource)
                 intent.putExtra(CONST_CONTACT_ID, contactId)
                 if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
                 else intent.putExtra(CONST_NAME, tvName.text)

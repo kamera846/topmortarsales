@@ -36,6 +36,8 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAX_REPORT_DISTANCE
+import com.topmortar.topmortarsales.commons.NORMAL_REPORT
+import com.topmortar.topmortarsales.commons.REPORT_SOURCE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -80,6 +82,7 @@ class NewReportActivity : AppCompatActivity() {
     private val idUser get() = sessionManager.userID().toString()
     private var name: String = ""
     private var coordinate: String = ""
+    private lateinit var iReportSource: String
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
@@ -104,6 +107,8 @@ class NewReportActivity : AppCompatActivity() {
                 sessionManager.userID() ?: ""
             )
         }
+
+        iReportSource = intent.getStringExtra(REPORT_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
     }
 
     private fun checkLocationPermission() {
@@ -425,6 +430,7 @@ class NewReportActivity : AppCompatActivity() {
                 val rbidUser = createPartFromString(idUser)
                 val rbdistanceVisit = createPartFromString(binding.etDistance.text.toString())
                 val rblaporanVisit = createPartFromString(binding.etMessage.text.toString())
+                val rbSource = createPartFromString(iReportSource)
 
                 val apiService: ApiService = HttpClient.create()
                 val response = when (isBaseCamp) {
@@ -433,11 +439,13 @@ class NewReportActivity : AppCompatActivity() {
                         idUser = rbidUser,
                         distanceVisit = rbdistanceVisit,
                         laporanVisit = rblaporanVisit,
+                        source = rbSource
                     ) else -> apiService.makeVisitReport(
                         idContact = rbidContact,
                         idUser = rbidUser,
                         distanceVisit = rbdistanceVisit,
                         laporanVisit = rblaporanVisit,
+                        source = rbSource
                     )
                 }
 
@@ -449,6 +457,7 @@ class NewReportActivity : AppCompatActivity() {
                         RESPONSE_STATUS_OK -> {
 
                             loadingSubmit(false)
+                            println("Report source is $iReportSource")
                             Toast.makeText(this@NewReportActivity, responseBody.message, TOAST_SHORT).show()
                             finish()
 
