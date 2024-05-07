@@ -434,6 +434,7 @@ class UserProfileActivity : AppCompatActivity() {
     }
 
     private fun  setupCourierMenu() {
+        binding.absentDescription.text = getString(R.string.txt_loading)
 
         val personCall = if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) "Anda" else "Pengguna"
         val personcall = if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) "anda" else "pengguna"
