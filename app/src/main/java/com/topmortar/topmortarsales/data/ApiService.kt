@@ -14,6 +14,7 @@ import com.topmortar.topmortarsales.commons.GET_CITY
 import com.topmortar.topmortarsales.commons.GET_CONTACT_SALES
 import com.topmortar.topmortarsales.commons.GET_USERS
 import com.topmortar.topmortarsales.commons.INVOICE
+import com.topmortar.topmortarsales.commons.NORMAL_REPORT
 import com.topmortar.topmortarsales.commons.PAYMENT
 import com.topmortar.topmortarsales.commons.PROMO
 import com.topmortar.topmortarsales.commons.RENCANA_VISIT
@@ -386,7 +387,8 @@ interface ApiService {
         @Part("id_gudang") idGudang: RequestBody,
         @Part("id_user") idUser: RequestBody,
         @Part("distance_visit") distanceVisit: RequestBody,
-        @Part("laporan_visit") laporanVisit: RequestBody
+        @Part("laporan_visit") laporanVisit: RequestBody,
+        @Part("source") source: RequestBody? = createPartFromString(NORMAL_REPORT)
     ): Response<ResponseReportVisit>
 
     @GET(VISIT)
@@ -407,7 +409,8 @@ interface ApiService {
         @Part("id_contact") idContact: RequestBody,
         @Part("id_user") idUser: RequestBody,
         @Part("distance_visit") distanceVisit: RequestBody,
-        @Part("laporan_visit") laporanVisit: RequestBody
+        @Part("laporan_visit") laporanVisit: RequestBody,
+        @Part("source") source: RequestBody? = createPartFromString(NORMAL_REPORT)
     ): Response<ResponseReportVisit>
 
     @GET(VISIT)
