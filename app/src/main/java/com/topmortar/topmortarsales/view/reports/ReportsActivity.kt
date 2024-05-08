@@ -4,7 +4,9 @@ import android.app.DatePickerDialog
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.MenuItem
 import android.view.View
+import android.widget.PopupMenu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -85,6 +87,11 @@ class ReportsActivity : AppCompatActivity() {
         binding.titleBarDark.tvTitleBarDescription.visibility = View.VISIBLE
         if (!contactName.isNullOrEmpty()) binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (iUserID.isNullOrEmpty()) "saya" else ""} di toko ini"
         else binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (userFullName.isNullOrEmpty()) "" else "$userFullName"}"
+
+        if (userKind != USER_KIND_COURIER && userLevel != AUTH_LEVEL_COURIER && userKind != USER_KIND_BA && userLevel != AUTH_LEVEL_BA) {
+            binding.titleBarDark.icMore.visibility = View.VISIBLE
+            binding.titleBarDark.icMore.setOnClickListener { showPopupMenu() }
+        }
 
         CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-013", userID)
 
@@ -247,6 +254,35 @@ class ReportsActivity : AppCompatActivity() {
 
         binding.titleBarDark.icBack.setOnClickListener { finish() }
 
+    }
+
+    private fun showPopupMenu() {
+        val popupMenu = PopupMenu(this, binding.titleBarDark.icMore)
+        popupMenu.inflate(R.menu.option_report_type_menu)
+
+        val allItem = popupMenu.menu.findItem(R.id.option_all)
+        val normalItem = popupMenu.menu.findItem(R.id.option_normal)
+        val salesItem = popupMenu.menu.findItem(R.id.option_sales)
+        val penagihanItem = popupMenu.menu.findItem(R.id.option_penagihan)
+
+        popupMenu.setOnMenuItemClickListener { item: MenuItem ->
+            when (item.itemId) {
+                R.id.option_all -> {
+                    getList()
+                    true
+                } R.id.option_normal -> {
+                    getList()
+                    true
+                } R.id.option_sales -> {
+                    getList()
+                    true
+                } R.id.option_penagihan -> {
+                    getList()
+                    true
+                } else -> false
+            }
+        }
+        popupMenu.show()
     }
 
     override fun onStart() {

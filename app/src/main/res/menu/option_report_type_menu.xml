@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/option_all"
+        android:title="Semua" />
+    <item
+        android:id="@+id/option_normal"
+        android:title="Normal" />
+    <item
+        android:id="@+id/option_sales"
+        android:title="Renvi Sales" />
+    <item
+        android:id="@+id/option_penagihan"
+        android:title="Renvi Penagihan" />
+</menu>
