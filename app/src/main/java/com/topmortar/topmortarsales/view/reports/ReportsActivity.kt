@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.ReportsRecyclerViewAdapter
+import com.topmortar.topmortarsales.commons.ALL_REPORT
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
@@ -19,10 +20,13 @@ import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
+import com.topmortar.topmortarsales.commons.NORMAL_REPORT
+import com.topmortar.topmortarsales.commons.PENAGIHAN_REPORT_RENVI
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.SALES_REPORT_RENVI
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
@@ -56,6 +60,7 @@ class ReportsActivity : AppCompatActivity() {
     private var userLevel: String? = null
     private var isCourier = false
     private var isBA = false
+    private var activeFilter = ALL_REPORT
 
     private lateinit var datePicker: DatePickerDialog
     private var selectedDate: Calendar = Calendar.getInstance()
@@ -155,9 +160,44 @@ class ReportsActivity : AppCompatActivity() {
                     when (responseBody.status) {
                         RESPONSE_STATUS_OK -> {
 
-                            setRecyclerView(responseBody.results)
-//                            binding.llFilter.visibility = View.VISIBLE
-                            loadingState(false)
+                            val data = responseBody.results
+
+                            var filterMessage = "laporan"
+                            val filterResults: ArrayList<ReportVisitModel> = when (activeFilter) {
+                                SALES_REPORT_RENVI -> {
+                                    filterMessage = "laporan sales"
+                                    val list = ArrayList(data.filter { it.source_visit == SALES_REPORT_RENVI })
+//                                    println("List $activeFilter size is ${list.size}")
+                                    list
+                                }
+
+                                PENAGIHAN_REPORT_RENVI -> {
+                                    filterMessage = "laporan penagihan"
+                                    val list = ArrayList(data.filter { it.source_visit == PENAGIHAN_REPORT_RENVI })
+//                                    println("List $activeFilter size is ${list.size}")
+                                    list
+                                }
+
+                                NORMAL_REPORT -> {
+                                    val list = ArrayList(data.filter { it.source_visit != SALES_REPORT_RENVI && it.source_visit != PENAGIHAN_REPORT_RENVI })
+//                                    println("List $activeFilter size is ${list.size}")
+                                    list
+                                }
+
+                                else -> {
+//                                    println("List $activeFilter size is ${data.size}")
+                                    data
+                                }
+                            }
+
+                            if (filterResults.isEmpty()) {
+//                                println("Filter results $activeFilter is empty")
+                                loadingState(true, "Belum ada $filterMessage.")
+                            } else {
+//                                println("Filter results $activeFilter is good")
+                                setRecyclerView(filterResults)
+                                loadingState(false)
+                            }
 
                         }
                         RESPONSE_STATUS_EMPTY -> {
@@ -260,23 +300,22 @@ class ReportsActivity : AppCompatActivity() {
         val popupMenu = PopupMenu(this, binding.titleBarDark.icMore)
         popupMenu.inflate(R.menu.option_report_type_menu)
 
-        val allItem = popupMenu.menu.findItem(R.id.option_all)
-        val normalItem = popupMenu.menu.findItem(R.id.option_normal)
-        val salesItem = popupMenu.menu.findItem(R.id.option_sales)
-        val penagihanItem = popupMenu.menu.findItem(R.id.option_penagihan)
-
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
                 R.id.option_all -> {
+                    activeFilter = ALL_REPORT
                     getList()
                     true
                 } R.id.option_normal -> {
+                    activeFilter = NORMAL_REPORT
                     getList()
                     true
                 } R.id.option_sales -> {
+                    activeFilter = SALES_REPORT_RENVI
                     getList()
                     true
                 } R.id.option_penagihan -> {
+                    activeFilter = PENAGIHAN_REPORT_RENVI
                     getList()
                     true
                 } else -> false
