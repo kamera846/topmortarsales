@@ -103,7 +103,7 @@ object DateFormat {
 
             SimpleDateFormat(outputDateFormat, Locale.getDefault()).format(calendar.time)
         } catch (e: Exception) {
-            println("Terjadi kesalahan: ${e.message}")
+//            println("Terjadi kesalahan: ${e.message}")
             dateString
         }
     }

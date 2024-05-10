@@ -186,6 +186,7 @@ const val ABSENT_MODE_BASECAMP = "basecamp"
 const val SELECTED_ABSENT_MODE = "selected_absent_mode"
 
 const val REPORT_SOURCE = "report_source"
+const val ALL_REPORT = "all"
 const val NORMAL_REPORT = "normal"
 const val SALES_REPORT_RENVI = "renvisales"
 const val PENAGIHAN_REPORT_RENVI = "renvipenagihan"
