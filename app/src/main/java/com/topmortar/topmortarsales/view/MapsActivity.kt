@@ -608,7 +608,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             mMap.clear()
 
             var centerPointLatLng = currentLatLng
-            println(selectedCenterPoint)
+//            println(selectedCenterPoint)
             if (selectedCenterPoint != null && selectedCenterPoint?.id != "-1") {
                 val coordinates = selectedCenterPoint?.etc!!.trim().split(",")
                 centerPointLatLng = if (coordinates.size == 2) {
@@ -2134,7 +2134,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             val resultData = data?.getStringExtra(SYNC_NOW)
             if (resultData == SYNC_NOW) {
                 setupTrackingCourier()
-                println("Refreshed")
+//                println("Refreshed")
             }
         }
 

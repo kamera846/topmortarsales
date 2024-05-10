@@ -457,7 +457,7 @@ class NewReportActivity : AppCompatActivity() {
                         RESPONSE_STATUS_OK -> {
 
                             loadingSubmit(false)
-                            println("Report source is $iReportSource")
+//                            println("Report source is $iReportSource")
                             Toast.makeText(this@NewReportActivity, responseBody.message, TOAST_SHORT).show()
                             finish()
 
