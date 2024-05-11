@@ -134,6 +134,7 @@ import com.topmortar.topmortarsales.databinding.ActivityDetailContactBinding
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.modal.SendMessageModal
 import com.topmortar.topmortarsales.model.ContactModel
+import com.topmortar.topmortarsales.model.ContactSales
 import com.topmortar.topmortarsales.model.DeliveryModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MapsActivity
@@ -1509,15 +1510,24 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                         val data = response.results
 
-                        if (data != null) {
+                        if (data is Map<*, *>) {
+                            // Melakukan casting ke tipe Map<String, Any>
+                            val resultMap = data as Map<String, Any>
+
+                            // Membuat objek ContactSales baru
+                            val contactSales = ContactSales(username = resultMap["username"].toString())
+
+                            println("Any data is object of $contactSales")
                             binding.textBy.visibility = View.VISIBLE
-                            binding.textBy.text = " " + getString(R.string.text_by) + " " + data.username
+                            binding.textBy.text = " " + getString(R.string.text_by) + " " + contactSales.username
+                        } else {
+                            println("Any data is $data")
                         }
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-//                        handleMessage(this@DetailContactActivity, "CONTACT SALES", getString(R.string.get_contact_sales_err))
+                        // Empty creator name
 
                     }
                     else -> {
