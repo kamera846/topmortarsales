@@ -5,5 +5,5 @@ import com.topmortar.topmortarsales.model.ContactSales
 data class ResponseContactSales (
     val status: String = "",
     val message: String = "",
-    val results: ArrayList<ContactSales> = ArrayList()
+    val results: Any? = null
 )

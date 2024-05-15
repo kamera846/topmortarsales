@@ -42,6 +42,7 @@ import androidx.appcompat.widget.TooltipCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.view.marginRight
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -124,6 +125,7 @@ import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.PingUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
+import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -132,6 +134,7 @@ import com.topmortar.topmortarsales.databinding.ActivityDetailContactBinding
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.modal.SendMessageModal
 import com.topmortar.topmortarsales.model.ContactModel
+import com.topmortar.topmortarsales.model.ContactSales
 import com.topmortar.topmortarsales.model.DeliveryModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MapsActivity
@@ -307,8 +310,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         checkLocationPermission()
 
         // Get List City
-//        getContactSales()
         getCities()
+        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) getContactSales()
         if (userKind == USER_KIND_COURIER) {
             setupDelivery()
         } else {
@@ -1505,16 +1508,26 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        val results = response.results
-                        val data = results[0]
+                        val data = response.results
 
-                        binding.textBy.visibility = View.VISIBLE
-                        binding.textBy.text = getString(R.string.text_by) + " " + data.username
+                        if (data is Map<*, *>) {
+                            // Melakukan casting ke tipe Map<String, Any>
+                            val resultMap = data as Map<String, Any>
+
+                            // Membuat objek ContactSales baru
+                            val contactSales = ContactSales(username = resultMap["username"].toString())
+
+                            println("Any data is object of $contactSales")
+                            binding.textBy.visibility = View.VISIBLE
+                            binding.textBy.text = " " + getString(R.string.text_by) + " " + contactSales.username
+                        } else {
+                            println("Any data is $data")
+                        }
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-//                        handleMessage(this@DetailContactActivity, "CONTACT SALES", getString(R.string.get_contact_sales_err))
+                        // Empty creator name
 
                     }
                     else -> {

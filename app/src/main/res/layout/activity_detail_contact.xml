@@ -138,6 +138,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
                     android:theme="@style/Theme.TopMortarSales.BaseLine"/>
 
                 <TextView
@@ -145,8 +146,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="15 November 2023"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
                     android:textSize="14sp"
                     android:theme="@style/Theme.TopMortarSales.TextBaseLine" />
 
@@ -164,6 +163,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_weight="1"
+                    android:layout_marginStart="8dp"
                     android:theme="@style/Theme.TopMortarSales.BaseLine"/>
 
             </LinearLayout>

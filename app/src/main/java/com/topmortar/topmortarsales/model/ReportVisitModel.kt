@@ -24,5 +24,6 @@ data class ReportVisitModel(
     var nama_gudang: String = "",
     var location_gudang: String = "",
     var nomorhp_gudang: String = "",
+    var source_visit: String = "",
     var approve_message: String? = null
 )
