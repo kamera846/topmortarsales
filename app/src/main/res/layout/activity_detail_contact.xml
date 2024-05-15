@@ -12,6 +12,7 @@
         layout="@layout/component_title_bar_light"/>
 
     <ScrollView
+        android:id="@+id/contentScrollView"
         android:layout_below="@+id/title_bar"
         android:layout_above="@+id/bottom_action"
         android:layout_width="match_parent"

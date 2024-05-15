@@ -258,6 +258,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var selectedUri: Uri? = null
     private var currentPhotoUri: Uri? = null
 
+    private var titlePage = "Detail Contact"
+    private var iName: String? = null
     private var iLocation: String? = null
     private var iStatus: String? = null
     private var iPaymentMethod: String? = null
@@ -391,7 +393,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         btnInvoice = findViewById(R.id.btn_invoice)
 
         // Setup Title Bar
-        tvTitleBar.text = "Detail Contact"
+        tvTitleBar.text = titlePage
 
         // Setup Date Picker Dialog
         setDatePickerDialog()
@@ -424,6 +426,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         bottomSheetDialog = BottomSheetDialog(this)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        scrollViewListener()
 
     }
 
@@ -598,7 +602,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val iContactId = intent.getStringExtra(CONST_CONTACT_ID)
         val iPhone = intent.getStringExtra(CONST_PHONE)
         val iOwner = intent.getStringExtra(CONST_OWNER)
-        val iName = intent.getStringExtra(CONST_NAME)
         val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
         val iDate = intent.getStringExtra(CONST_DATE)
 
@@ -613,6 +616,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             binding.line.visibility = View.GONE
         }
 
+        iName = intent.getStringExtra(CONST_NAME)
         iKtp = intent.getStringExtra(CONST_KTP)
         iMapsUrl = intent.getStringExtra(CONST_MAPS)
         iStatus = intent.getStringExtra(CONST_STATUS)
@@ -645,7 +649,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tvPhone.text = EMPTY_FIELD_VALUE
             etPhone.setText("")
         }
-        if (iName.isNotEmpty()) {
+        if (!iName.isNullOrEmpty()) {
             tvName.text = iName
             etName.setText(iName)
         } else {
@@ -2272,6 +2276,23 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             serviceIntent.putExtra("userDistributorId", userDistributorIds ?: "-start-002-$username")
             serviceIntent.putExtra("deliveryId", deliveryId)
             this@DetailContactActivity.startService(serviceIntent)
+        }
+    }
+
+    private fun scrollViewListener() {
+
+        val profileBar = binding.profileBar
+        profileBar.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+        val profileBarHeight = profileBar.measuredHeight // Ukuran tinggi LinearLayout
+
+        binding.contentScrollView.viewTreeObserver.addOnScrollChangedListener {
+            val scrollY = binding.contentScrollView.scrollY
+
+            if (scrollY < profileBarHeight) {
+                binding.titleBar.tvTitleBar.text = titlePage
+            } else if (scrollY > profileBarHeight) {
+                binding.titleBar.tvTitleBar.text = iName
+            }
         }
     }
 
