@@ -407,7 +407,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
             rlLoading.visibility = View.VISIBLE
             rvListChat.visibility = View.GONE
-            binding.swipeRefreshLayout.isRefreshing = true
+
+            binding.swipeRefreshLayout.isRefreshing = message === getString(R.string.txt_loading)
 
         } else {
 
