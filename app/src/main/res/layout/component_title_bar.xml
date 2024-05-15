@@ -36,6 +36,10 @@
                 android:text="@string/list_chat"
                 android:textSize="18sp"
                 android:textStyle="bold"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:focusable="true"
+                android:singleLine="true"
                 android:textColor="@color/white" />
 
             <TextView
