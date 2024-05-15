@@ -238,6 +238,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         initVariable()
         initClickHandler()
         loadingState(true)
+        binding.swipeRefreshLayout.setOnRefreshListener { getContacts() }
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
         else getContacts()
 
@@ -406,11 +407,13 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
             rlLoading.visibility = View.VISIBLE
             rvListChat.visibility = View.GONE
+            binding.swipeRefreshLayout.isRefreshing = true
 
         } else {
 
             rlLoading.visibility = View.GONE
             rvListChat.visibility = View.VISIBLE
+            binding.swipeRefreshLayout.isRefreshing = false
 
         }
 
