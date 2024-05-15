@@ -84,6 +84,15 @@ class SessionManager(context: Context) {
         return sharedPreferences.getBoolean("pinMapHint", false)
     }
 
+    fun swipeRefreshHint(swipeRefreshHint: Boolean) {
+        editor.putBoolean("swipeRefreshHint", swipeRefreshHint)
+        editor.apply()
+    }
+
+    fun swipeRefreshHint(): Boolean {
+        return sharedPreferences.getBoolean("swipeRefreshHint", false)
+    }
+
     fun userBidLimit(userBidLimit: String) {
         editor.putString("userBidLimit", userBidLimit)
         editor.apply()

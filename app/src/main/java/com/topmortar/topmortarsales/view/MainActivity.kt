@@ -865,6 +865,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                     }
                 }
 
+                checkSwipeRefreshLayoutHint()
+
 
             } catch (e: Exception) {
 
@@ -1172,6 +1174,18 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         val intent = Intent(this@MainActivity, SplashScreenActivity::class.java)
         startActivity(intent)
         finish()
+    }
+
+    private fun checkSwipeRefreshLayoutHint() {
+        val swipeRefreshHint = sessionManager.swipeRefreshHint()
+
+        if (!swipeRefreshHint) {
+            binding.swipeRefreshHint.visibility = View.VISIBLE
+            binding.btnTrySwipeRefresh.setOnClickListener {
+                binding.swipeRefreshHint.visibility = View.GONE
+                sessionManager.swipeRefreshHint(true)
+            }
+        } else binding.swipeRefreshHint.visibility = View.GONE
     }
 
     @Deprecated("Deprecated in Java")

@@ -6,7 +6,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/drawer_layout"
-    tools:openDrawer="start"
     tools:context=".view.MainActivity">
 
     <RelativeLayout
@@ -139,6 +138,44 @@
             android:textSize="14sp"
             android:textStyle="bold"
             android:text="Cek Lokasi" />
+
+        <LinearLayout
+            android:visibility="visible"
+            android:id="@+id/swipeRefreshHint"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="64dp"
+            android:background="@color/black"
+            android:gravity="center"
+            android:alpha="0.9"
+            android:clickable="true"
+            android:orientation="vertical">
+
+            <ImageView
+                android:visibility="visible"
+                android:layout_width="wrap_content"
+                android:layout_height="200dp"
+                android:src="@drawable/swipe_down_white"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="64dp"
+                android:text="@string/now_you_can_swipe_to_refresh_list"
+                android:textSize="16sp"
+                android:textColor="@color/white" />
+
+            <Button
+                android:id="@+id/btnTrySwipeRefresh"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/try_it"
+                android:textStyle="bold"
+                android:textColor="@color/black_200"
+                android:backgroundTint="@color/white"/>
+
+        </LinearLayout>
 
     </RelativeLayout>
 
