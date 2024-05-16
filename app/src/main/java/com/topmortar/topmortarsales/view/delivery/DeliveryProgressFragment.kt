@@ -88,6 +88,11 @@ class DeliveryProgressFragment : Fragment() {
         if (userKind == USER_KIND_ADMIN) getCities()
         getList()
 
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            if (userKind == USER_KIND_ADMIN) getCities()
+            getList()
+        }
+
         return view
     }
 
@@ -245,10 +250,14 @@ class DeliveryProgressFragment : Fragment() {
             binding.txtLoading.visibility = View.VISIBLE
             binding.recyclerview.visibility = View.GONE
 
+            binding.swipeRefreshLayout.isRefreshing = message === getString(R.string.txt_loading)
+
         } else {
 
             binding.txtLoading.visibility = View.GONE
             binding.recyclerview.visibility = View.VISIBLE
+
+            binding.swipeRefreshLayout.isRefreshing = false
 
         }
 
