@@ -30,6 +30,7 @@ import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.databinding.ActivityManageCityBinding
 import com.topmortar.topmortarsales.modal.AddCityModal
 import com.topmortar.topmortarsales.model.CityModel
 import kotlinx.coroutines.launch
@@ -55,6 +56,7 @@ class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClic
 
     // Global
     private lateinit var sessionManager: SessionManager
+    private lateinit var binding: ActivityManageCityBinding
     private val userDistributorId get() = sessionManager.userDistributor().toString()
     private lateinit var addCityModal: AddCityModal
     private var isRequestSync = false
@@ -66,13 +68,15 @@ class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClic
         supportActionBar?.hide()
         sessionManager = SessionManager(this)
 
-        setContentView(R.layout.activity_manage_city)
+        binding = ActivityManageCityBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
 
         initVariable()
         initClickHandler()
         getList()
+        binding.swipeRefreshLayout.setOnRefreshListener { getList() }
 
     }
 
@@ -188,10 +192,13 @@ class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClic
             rlLoading.visibility = View.VISIBLE
             rvListItem.visibility = View.GONE
 
+            binding.swipeRefreshLayout.isRefreshing = message === getString(R.string.txt_loading)
+
         } else {
 
             rlLoading.visibility = View.GONE
             rvListItem.visibility = View.VISIBLE
+            binding.swipeRefreshLayout.isRefreshing = false
 
         }
 
