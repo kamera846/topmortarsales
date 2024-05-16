@@ -96,6 +96,7 @@ class BasecampFragment : Fragment() {
         binding.btnFabAdd.setOnClickListener { navigateFab() }
 
         getCities()
+        binding.swipeRefreshLayout.setOnRefreshListener { getCities() }
 
         return view
     }
@@ -217,10 +218,14 @@ class BasecampFragment : Fragment() {
             binding.txtLoading.visibility = View.VISIBLE
             binding.rvChatList.visibility = View.GONE
 
+            binding.swipeRefreshLayout.isRefreshing = message === getString(R.string.txt_loading)
+
         } else {
 
             binding.txtLoading.visibility = View.GONE
             binding.rvChatList.visibility = View.VISIBLE
+
+            binding.swipeRefreshLayout.isRefreshing = false
 
         }
 
