@@ -77,6 +77,10 @@ class ManageGudangActivity : AppCompatActivity() {
 
         getList()
         if (userKind == USER_KIND_ADMIN) getCities()
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            getList()
+            if (userKind == USER_KIND_ADMIN) getCities()
+        }
 
     }
 
@@ -199,10 +203,13 @@ class ManageGudangActivity : AppCompatActivity() {
             binding.txtLoading.visibility = View.VISIBLE
             binding.rvChatList.visibility = View.GONE
 
+            binding.swipeRefreshLayout.isRefreshing = message === getString(R.string.txt_loading)
+
         } else {
 
             binding.txtLoading.visibility = View.GONE
             binding.rvChatList.visibility = View.VISIBLE
+            binding.swipeRefreshLayout.isRefreshing = false
 
         }
 
