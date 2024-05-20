@@ -98,6 +98,8 @@ class ReportsActivity : AppCompatActivity() {
             binding.titleBarDark.icMore.setOnClickListener { showPopupMenu() }
         }
 
+        binding.swipeRefreshLayout.setOnRefreshListener { setDatePickerDialog() }
+
         CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-013", userID)
 
         setDatePickerDialog()
@@ -281,10 +283,14 @@ class ReportsActivity : AppCompatActivity() {
             binding.txtLoading.visibility = View.VISIBLE
             binding.recyclerView.visibility = View.GONE
 
+            binding.swipeRefreshLayout.isRefreshing = message === getString(R.string.txt_loading)
+
         } else {
 
             binding.txtLoading.visibility = View.GONE
             binding.recyclerView.visibility = View.VISIBLE
+
+            binding.swipeRefreshLayout.isRefreshing = false
 
         }
 
