@@ -300,9 +300,11 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
         etName.hint = "Masukkan Nama Tukang"
         etOwner.hint = "Masukkan Nama Lengkap Tukang"
-        etBirthday.hint = "Choose Tukang Birthday"
+        etBirthday.hint = "Atur tanggal lahir tukang"
         btnInvoice.visibility = View.GONE
         skillContainer.visibility = View.VISIBLE
+        binding.paymentMethodContainer.visibility = View.GONE
+        binding.bottomAction.visibility = View.GONE
         terminContainer.visibility = View.GONE
         ownerSection.visibility = View.GONE
         binding.promoContainer.visibility = View.GONE
