@@ -103,7 +103,7 @@ class JatemPenagihan3Fragment : Fragment() {
 
         apiService = HttpClient.create()
 
-        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
+//        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
         getList()
 
         return view
@@ -119,9 +119,9 @@ class JatemPenagihan3Fragment : Fragment() {
 
                 val response = when (userKind) {
                     USER_KIND_ADMIN, USER_KIND_PENAGIHAN -> {
-                        if (selectedCity != null) apiService.targetJatem(idCity = selectedCity?.id!!)
-                        else apiService.targetJatemDst(idDistributor = userDistributorId)
-                    } else -> apiService.targetJatem(idCity = userCity)
+                        if (selectedCity != null) apiService.jatemPenagihan(dst = userDistributorId, type = "jatem3")
+                        else apiService.jatemPenagihan(dst = userDistributorId, type = "jatem3")
+                    } else -> apiService.jatemPenagihan(dst = userDistributorId, type = "jatem3")
                 }
 
                 when (response.status) {
