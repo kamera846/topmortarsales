@@ -20,6 +20,7 @@ import android.util.Log
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.EditText
@@ -33,6 +34,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.GravityCompat
+import androidx.core.view.setMargins
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -333,7 +335,18 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             binding.titleBar.icBack.setOnClickListener { finish() }
         } else {
             if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
+                val contentWidht = convertDpToPx(40, this)
+                val contentHeight = convertDpToPx(40, this)
+                val paddingHorizontal = convertDpToPx(8, this)
+                val paddingVertival = convertDpToPx(8, this)
                 binding.titleBar.icMenu.visibility = View.VISIBLE
+                binding.titleBar.icMenu.layoutParams.width = contentWidht
+                binding.titleBar.icMenu.layoutParams.height = contentHeight
+                binding.titleBar.icMenu.setPadding(paddingHorizontal,paddingVertival,paddingHorizontal,paddingVertival)
+                (binding.titleBar.icMenu.layoutParams as ViewGroup.MarginLayoutParams).setMargins(0,0,paddingHorizontal,0)
+                binding.titleBar.icSearch.layoutParams.width = contentWidht
+                binding.titleBar.icSearch.layoutParams.height = contentHeight
+                binding.titleBar.icSearch.setPadding(paddingHorizontal,paddingVertival,paddingHorizontal,paddingVertival)
                 icMore.visibility = View.GONE
 
                 val headerView = binding.navView.getHeaderView(0)

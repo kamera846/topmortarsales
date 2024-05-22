@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -107,6 +108,7 @@ class ReportsActivity : AppCompatActivity() {
             binding.titleBarDark.icMore.layoutParams.width = contentWidht
             binding.titleBarDark.icMore.layoutParams.height = contentHeight
             binding.titleBarDark.icMore.setPadding(paddingHorizontal,paddingVertival,paddingHorizontal,paddingVertival)
+            (binding.titleBarDark.icMore.layoutParams as ViewGroup.MarginLayoutParams).setMargins(0,0,paddingHorizontal,0)
             binding.titleBarDark.icRow.layoutParams.width = contentWidht
             binding.titleBarDark.icRow.layoutParams.height = contentHeight
             binding.titleBarDark.icRow.setPadding(paddingHorizontal,paddingVertival,paddingHorizontal,paddingVertival)
