@@ -75,6 +75,7 @@ class AllUserTrackingActivity : AppCompatActivity() {
         }
         binding.titleBar.icSyncNow.visibility = View.VISIBLE
         binding.titleBar.icSyncNow.setOnClickListener { refreshList() }
+        binding.swipeRefreshLayout.setOnRefreshListener { refreshList() }
 
         binding.titleBar.tvTitleBar.text = "Daftar Pengguna Yang Dilacak"
 
@@ -292,10 +293,14 @@ class AllUserTrackingActivity : AppCompatActivity() {
             binding.rlLoading.visibility = View.VISIBLE
             binding.rvList.visibility = View.GONE
 
+            binding.swipeRefreshLayout.isRefreshing = message === getString(R.string.txt_loading)
+
         } else {
 
             binding.rlLoading.visibility = View.GONE
             binding.rvList.visibility = View.VISIBLE
+
+            binding.swipeRefreshLayout.isRefreshing = false
 
         }
 

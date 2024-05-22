@@ -37,13 +37,20 @@
         layout="@layout/component_filter"/>
 
     <!-- Chat List -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:visibility="gone"
-        android:id="@+id/rvList"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:listitem="@layout/item_all_user_tracking"
-        android:layout_below="@id/llFilter"/>
+        android:layout_below="@id/llFilter">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:visibility="gone"
+            android:id="@+id/rvList"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:listitem="@layout/item_all_user_tracking"/>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <RelativeLayout
         android:visibility="visible"
@@ -57,7 +64,7 @@
             android:id="@+id/txtLoading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
+            android:layout_centerInParent="true"
             android:text="@string/txt_loading"
             android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
