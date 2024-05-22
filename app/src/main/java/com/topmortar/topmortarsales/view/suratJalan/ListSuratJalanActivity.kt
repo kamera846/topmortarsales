@@ -48,6 +48,7 @@ import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.databinding.ActivityListInvoiceBinding
 import com.topmortar.topmortarsales.model.InvoiceModel
 import com.topmortar.topmortarsales.model.SuratJalanModel
 import com.topmortar.topmortarsales.response.ResponseInvoice
@@ -80,6 +81,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
     private lateinit var etSearchBox: EditText
 
     // Global
+    private lateinit var binding: ActivityListInvoiceBinding
     private lateinit var sessionManager: SessionManager
     private val userDistributorId get() = sessionManager.userDistributor()
     private val userID get() = sessionManager.userID()
@@ -107,7 +109,8 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
         supportActionBar?.hide()
         sessionManager = SessionManager(this)
 
-        setContentView(R.layout.activity_list_invoice)
+        binding = ActivityListInvoiceBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
             CustomUtility(this).setUserStatusOnline(true, userDistributorId ?: "-custom-016", "$userID")
@@ -161,6 +164,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
         icBack.setOnClickListener { backHandler() }
         icSyncNow.setOnClickListener { toggleList() }
+        binding.swipeRefreshLayout.setOnRefreshListener { toggleList() }
         icOption.setOnClickListener { showPopupMenu() }
         llFilter.setOnClickListener { showDropdownMenu() }
 
@@ -416,10 +420,14 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
             rlLoading.visibility = View.VISIBLE
             rvListItem.visibility = View.GONE
 
+            binding.swipeRefreshLayout.isRefreshing = message === getString(R.string.txt_loading)
+
         } else {
 
             rlLoading.visibility = View.GONE
             rvListItem.visibility = View.VISIBLE
+
+            binding.swipeRefreshLayout.isRefreshing = false
 
         }
 
