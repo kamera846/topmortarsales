@@ -50,6 +50,7 @@ class ReportsRecyclerViewAdapter : RecyclerView.Adapter<ReportsRecyclerViewAdapt
         fun bind(item: ReportVisitModel, position: Int) {
             binding.description.text = item.laporan_visit
             if (item.is_approved == "1") binding.icStatus.setImageDrawable(context!!.getDrawable(R.drawable.checkbox_circle_green))
+            else binding.icStatus.setImageDrawable(context!!.getDrawable(R.drawable.checkbox_circle_light))
 
             val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(item.date_visit)
             val dateFormat = if (date != null) {
