@@ -190,6 +190,15 @@ class SessionManager(context: Context) {
         return sharedPreferences.getString("absentDateTime", "0")
     }
 
+    fun layoutReportStatus(layoutReportStatus: String) {
+        editor.putString("layoutReportStatus", layoutReportStatus)
+        editor.apply()
+    }
+
+    fun layoutReportStatus(): String? {
+        return sharedPreferences.getString("layoutReportStatus", "")
+    }
+
     fun setUserLoggedIn(data: UserModel?) {
         if (data != null) {
             val tempData = data.copy()

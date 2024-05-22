@@ -82,6 +82,26 @@
 
         <ImageView
             android:visibility="gone"
+            android:id="@+id/ic_row"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:padding="16dp"
+            android:src="@drawable/layout_row_white"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="Icon linear white" />
+
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/ic_grid"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:padding="16dp"
+            android:src="@drawable/layout_grid_white"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="Icon grid white" />
+
+        <ImageView
+            android:visibility="gone"
             android:id="@+id/ic_more"
             android:layout_width="56dp"
             android:layout_height="56dp"

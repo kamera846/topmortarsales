@@ -10,6 +10,7 @@ import android.widget.PopupMenu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.ReportsRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.ALL_REPORT
@@ -20,6 +21,8 @@ import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
+import com.topmortar.topmortarsales.commons.LAYOUT_GRID
+import com.topmortar.topmortarsales.commons.LAYOUT_ROW
 import com.topmortar.topmortarsales.commons.NORMAL_REPORT
 import com.topmortar.topmortarsales.commons.PENAGIHAN_REPORT_RENVI
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -35,6 +38,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
@@ -61,6 +65,7 @@ class ReportsActivity : AppCompatActivity() {
     private var isCourier = false
     private var isBA = false
     private var activeFilter = ALL_REPORT
+    private val layoutStatus get() = sessionManager.layoutReportStatus()
 
     private lateinit var datePicker: DatePickerDialog
     private var selectedDate: Calendar = Calendar.getInstance()
@@ -94,10 +99,25 @@ class ReportsActivity : AppCompatActivity() {
         else binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (userFullName.isNullOrEmpty()) "" else "$userFullName"}"
 
         if (userKind != USER_KIND_COURIER && userLevel != AUTH_LEVEL_COURIER && userKind != USER_KIND_BA && userLevel != AUTH_LEVEL_BA) {
+            val contentWidht = convertDpToPx(40, this)
+            val contentHeight = convertDpToPx(40, this)
+            val paddingHorizontal = convertDpToPx(8, this)
+            val paddingVertival = convertDpToPx(8, this)
             binding.titleBarDark.icMore.visibility = View.VISIBLE
+            binding.titleBarDark.icMore.layoutParams.width = contentWidht
+            binding.titleBarDark.icMore.layoutParams.height = contentHeight
+            binding.titleBarDark.icMore.setPadding(paddingHorizontal,paddingVertival,paddingHorizontal,paddingVertival)
+            binding.titleBarDark.icRow.layoutParams.width = contentWidht
+            binding.titleBarDark.icRow.layoutParams.height = contentHeight
+            binding.titleBarDark.icRow.setPadding(paddingHorizontal,paddingVertival,paddingHorizontal,paddingVertival)
+            binding.titleBarDark.icGrid.layoutParams.width = contentWidht
+            binding.titleBarDark.icGrid.layoutParams.height = contentHeight
+            binding.titleBarDark.icGrid.setPadding(paddingHorizontal,paddingVertival,paddingHorizontal,paddingVertival)
             binding.titleBarDark.icMore.setOnClickListener { showPopupMenu() }
         }
 
+        if (layoutStatus == LAYOUT_ROW) binding.titleBarDark.icGrid.visibility = View.VISIBLE
+        else binding.titleBarDark.icRow.visibility = View.VISIBLE
         binding.swipeRefreshLayout.setOnRefreshListener { setDatePickerDialog() }
 
         CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-013", userID)
@@ -256,8 +276,10 @@ class ReportsActivity : AppCompatActivity() {
         else mAdapter.setIsCourier(false)
         if (contactID.isNullOrEmpty()) mAdapter.setWithName(true)
 
+        mAdapter.setLayoutStatus(layoutStatus)
+
         binding.recyclerView.apply {
-            layoutManager = GridLayoutManager(this@ReportsActivity, 2)
+            layoutManager = if (layoutStatus == LAYOUT_ROW) LinearLayoutManager(this@ReportsActivity) else GridLayoutManager(this@ReportsActivity, 2)
             adapter = mAdapter
 
             mAdapter.setOnItemClickListener(object : ReportsRecyclerViewAdapter.OnItemClickListener{
@@ -299,6 +321,18 @@ class ReportsActivity : AppCompatActivity() {
     private fun initClickHandler() {
 
         binding.titleBarDark.icBack.setOnClickListener { finish() }
+        binding.titleBarDark.icGrid.setOnClickListener {
+            sessionManager.layoutReportStatus(LAYOUT_GRID)
+            binding.titleBarDark.icRow.visibility = View.VISIBLE
+            binding.titleBarDark.icGrid.visibility = View.GONE
+            setDatePickerDialog()
+        }
+        binding.titleBarDark.icRow.setOnClickListener {
+            sessionManager.layoutReportStatus(LAYOUT_ROW)
+            binding.titleBarDark.icRow.visibility = View.GONE
+            binding.titleBarDark.icGrid.visibility = View.VISIBLE
+            setDatePickerDialog()
+        }
 
     }
 

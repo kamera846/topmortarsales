@@ -191,6 +191,9 @@ const val NORMAL_REPORT = "normal"
 const val SALES_REPORT_RENVI = "renvisales"
 const val PENAGIHAN_REPORT_RENVI = "renvipenagihan"
 
+const val LAYOUT_GRID = "layout_grid"
+const val LAYOUT_ROW = "layout_row"
+
 /*
     User Kind
  */
