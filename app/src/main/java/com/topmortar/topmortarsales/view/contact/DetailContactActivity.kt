@@ -75,6 +75,7 @@ import com.topmortar.topmortarsales.commons.CONST_PROMO
 import com.topmortar.topmortarsales.commons.CONST_REPUTATION
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
+import com.topmortar.topmortarsales.commons.CONST_WEEKLY_VISIT_STATUS
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
@@ -246,10 +247,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var itemSendMessage: ContactModel? = null
 
     private var statusItem: List<String> = listOf("Pilih Status", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
+    private var statusWeeklyVisitItem: List<String> = listOf("Pilih Status", "Active")
     private var terminItem: List<String> = listOf("Pilih Termin Payment", "COD", "COD + Transfer", "COD + Tunai", "30 Hari", "45 Hari", "60 Hari")
     private var paymentMethodItem: List<String> = listOf("Pilih Metode Pembayaran", "Tunai", "Transfer")
     private var reputationItem: List<String> = listOf("Pilih Reputasi Toko", "Good", "Bad")
     private var selectedStatus: String = ""
+    private var selectedWeeklyVisitStatus: String = ""
     private var selectedPaymentMethod: String = ""
     private var selectedTermin: String = ""
     private var selectedReputation: String = ""
@@ -260,6 +263,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private var iLocation: String? = null
     private var iStatus: String? = null
+    private var iWeeklyVisitStatus: String? = null
     private var iPaymentMethod: String? = null
     private var iTermin: String? = null
     private var iReputation: String? = null
@@ -616,11 +620,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         iKtp = intent.getStringExtra(CONST_KTP)
         iMapsUrl = intent.getStringExtra(CONST_MAPS)
         iStatus = intent.getStringExtra(CONST_STATUS)
+        iWeeklyVisitStatus = intent.getStringExtra(CONST_WEEKLY_VISIT_STATUS)
         iPaymentMethod = intent.getStringExtra(CONST_PAYMENT_METHOD)
         iTermin = intent.getStringExtra(CONST_TERMIN)
         iReputation = intent.getStringExtra(CONST_REPUTATION)
 
         tooltipStatus.visibility = View.VISIBLE
+        binding.weeklyVisitContainer.visibility = if (userKind == USER_KIND_ADMIN) View.VISIBLE else View.GONE
+        binding.tooltipWeeklyVisit.visibility = View.VISIBLE
 //        if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
 //        else btnInvoice.visibility = View.VISIBLE
         btnInvoice.visibility = View.VISIBLE
@@ -704,6 +711,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         // Set Spinner
         setupStatusSpinner()
+        setupWeekliVisitStatusSpinner()
         setupPaymentMethodSpinner()
         setupTerminSpinner()
         setupReputationSpinner()
@@ -786,6 +794,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 tvStatus.visibility = View.GONE
                 spinStatus.visibility = View.VISIBLE
 
+                // Weekly Visit Status
+                binding.weeklyVisitContainer.visibility = if (userKind == USER_KIND_ADMIN) View.VISIBLE else View.GONE
+                binding.weeklyVisitContainer.setBackgroundResource(R.drawable.et_background)
+                binding.tooltipWeeklyVisit.visibility = View.GONE
+                binding.tvWeeklyVisit.visibility = View.GONE
+                binding.spinWeeklyVisit.visibility = View.VISIBLE
+
                 // Payment Method
                 binding.paymentMethodContainer.setBackgroundResource(R.drawable.et_background)
                 binding.tvPaymentMethod.visibility = View.GONE
@@ -853,7 +868,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 statusContainer.visibility = View.VISIBLE
                 statusContainer.setBackgroundResource(R.drawable.background_rounded_16)
 
+                binding.weeklyVisitContainer.visibility = View.VISIBLE
+                binding.weeklyVisitContainer.setBackgroundResource(R.drawable.background_rounded_16)
+
                 tooltipStatus.visibility = View.VISIBLE
+                binding.tooltipWeeklyVisit.visibility = View.VISIBLE
 //                if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
 //                else btnInvoice.visibility = View.VISIBLE
                 btnInvoice.visibility = View.VISIBLE
@@ -861,6 +880,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 // Status
                 tvStatus.visibility = View.VISIBLE
                 spinStatus.visibility = View.GONE
+
+                // Weekly Visit Status
+                binding.tvWeeklyVisit.visibility = View.VISIBLE
+                binding.spinWeeklyVisit.visibility = View.GONE
 
                 // Payment Method
                 binding.paymentMethodContainer.setBackgroundResource(R.drawable.background_rounded_16)
@@ -916,6 +939,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val pMapsUrl = "${ etMaps.text }"
         val pAddress = "${ etAddress.text }"
         val pStatus = if (selectedStatus.isEmpty()) "" else selectedStatus.substringBefore(" - ").toLowerCase(Locale.getDefault())
+        val pWeeklyVisitStatus = if (selectedWeeklyVisitStatus.isEmpty()) "" else selectedWeeklyVisitStatus.substringBefore(" - ").toLowerCase(Locale.getDefault())
         val pPaymentMethod = when (selectedPaymentMethod) {
             paymentMethodItem[1] -> PAYMENT_TUNAI
             paymentMethodItem[2] -> PAYMENT_TRANSFER
@@ -982,6 +1006,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbLocation = createPartFromString(pCityID!!)
                 val rbAddress = createPartFromString(pAddress)
                 val rbStatus = createPartFromString(pStatus)
+                val rbWeeklyVisitStatus = createPartFromString(pWeeklyVisitStatus)
                 val rbPaymentMethod = createPartFromString(pPaymentMethod)
                 val rbTermin = createPartFromString(pTermin)
                 val rbReputation = createPartFromString(pReputation)
@@ -998,6 +1023,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     mapsUrl = rbMapsUrl,
                     address = rbAddress,
                     status = rbStatus,
+                    tagihanMingguan = rbWeeklyVisitStatus,
                     paymentMethod = rbPaymentMethod,
                     termin = rbTermin,
                     reputation = rbReputation,
@@ -1054,6 +1080,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             } else tvPromo.text = EMPTY_FIELD_VALUE
 
                             iStatus = pStatus.ifEmpty { null }
+                            iWeeklyVisitStatus = pWeeklyVisitStatus.ifEmpty { null }
                             iReputation = pReputation.ifEmpty { null }
 
                             iPaymentMethod = pPaymentMethod.ifEmpty { null }
@@ -1143,6 +1170,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 btnInvoice.visibility = View.VISIBLE
 
                                 setupStatus(iStatus)
+                                setupWeeklyVisitStatus(iWeeklyVisitStatus)
                                 setupPaymentMethod(iPaymentMethod)
                                 setupTermin(iTermin)
                                 setupReputation(iReputation)
@@ -1154,6 +1182,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 btnInvoice.visibility = View.VISIBLE
 
                                 setupStatus(data.store_status)
+                                setupWeeklyVisitStatus(data.tagihan_mingguan)
 //                                setupPaymentMethod(data.payment_method)
 //                                setupTermin(data.termin_payment)
 //                                setupReputation(data.reputation)
@@ -1766,6 +1795,24 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
     }
 
+    private fun setupWeeklyVisitStatus(status: String? = null) {
+        binding.tooltipWeeklyVisit.visibility = View.VISIBLE
+        when (status) {
+            STATUS_CONTACT_DATA -> {
+                binding.tooltipWeeklyVisit.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_active))
+                tooltipHandler(binding.tooltipWeeklyVisit, "Customer Status is active")
+                binding.tvWeeklyVisit.text = statusWeeklyVisitItem[1]
+                binding.spinWeeklyVisit.setSelection(1)
+            }
+            else -> {
+                binding.tooltipWeeklyVisit.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_passive))
+                tooltipHandler(binding.tooltipWeeklyVisit, "Customer Status is not set")
+                binding.tvWeeklyVisit.text = statusWeeklyVisitItem[0]
+                binding.spinWeeklyVisit.setSelection(0)
+            }
+        }
+    }
+
     private fun setupPaymentMethod(paymentMethod: String? = null) {
         when (paymentMethod) {
             PAYMENT_TUNAI -> {
@@ -1851,6 +1898,26 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         selectedStatus = iStatus!!
         setupStatus(iStatus)
+    }
+
+    private fun setupWeekliVisitStatusSpinner() {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, statusWeeklyVisitItem)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        binding.spinWeeklyVisit.adapter = adapter
+        binding.spinWeeklyVisit.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedWeeklyVisitStatus = if (position != 0) statusWeeklyVisitItem[position]
+                else ""
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+        }
+
+        selectedWeeklyVisitStatus = iStatus!!
+        setupWeeklyVisitStatus(iWeeklyVisitStatus)
     }
 
     private fun setupPaymentMethodSpinner() {

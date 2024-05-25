@@ -96,6 +96,7 @@ interface ApiService {
         @Part("mapsUrl") mapsUrl: RequestBody,
         @Part("address") address: RequestBody,
         @Part("status") status: RequestBody,
+        @Part("tagihan_mingguan") tagihanMingguan: RequestBody,
         @Part("payment_method") paymentMethod: RequestBody,
         @Part("termin_payment") termin: RequestBody,
         @Part("reputation") reputation: RequestBody,
