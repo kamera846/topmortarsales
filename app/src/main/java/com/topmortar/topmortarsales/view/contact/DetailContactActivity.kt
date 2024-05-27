@@ -939,7 +939,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val pMapsUrl = "${ etMaps.text }"
         val pAddress = "${ etAddress.text }"
         val pStatus = if (selectedStatus.isEmpty()) "" else selectedStatus.substringBefore(" - ").toLowerCase(Locale.getDefault())
-        val pWeeklyVisitStatus = if (selectedWeeklyVisitStatus.isEmpty()) "" else selectedWeeklyVisitStatus.substringBefore(" - ").toLowerCase(Locale.getDefault())
+        val pWeeklyVisitStatus = if (selectedWeeklyVisitStatus.isEmpty()) "0" else "1"
         val pPaymentMethod = when (selectedPaymentMethod) {
             paymentMethodItem[1] -> PAYMENT_TUNAI
             paymentMethodItem[2] -> PAYMENT_TRANSFER
@@ -988,8 +988,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         progressDialog.show()
 
 //        Handler(Looper.getMainLooper()).postDelayed({
-//            handleMessage(this, "TAG SAVE", "${contactId!!}, ${formatPhoneNumber(pPhone)}, $pName, $pOwner, $pBirthday, $pMapsUrl, ${pCityID!!}, $pAddress, $pStatus, $imagePart, $pTermin, $pReputation, $pPromoID")
+//            handleMessage(this, "TAG SAVE", "${contactId!!}, ${formatPhoneNumber(pPhone)}, $pName, $pOwner, $pBirthday, $pMapsUrl, ${pCityID!!}, $pAddress, $pStatus, $imagePart, $pTermin, $pReputation, $pPromoID, $pWeeklyVisitStatus")
 //            loadingState(false)
+//            progressDialog.dismiss()
 //        }, 1000)
 //
 //        return
@@ -1798,7 +1799,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private fun setupWeeklyVisitStatus(status: String? = null) {
         binding.tooltipWeeklyVisit.visibility = View.VISIBLE
         when (status) {
-            STATUS_CONTACT_DATA -> {
+            "1" -> {
                 binding.tooltipWeeklyVisit.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_active))
                 tooltipHandler(binding.tooltipWeeklyVisit, "Customer Status is active")
                 binding.tvWeeklyVisit.text = statusWeeklyVisitItem[1]
@@ -1807,7 +1808,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             else -> {
                 binding.tooltipWeeklyVisit.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_passive))
                 tooltipHandler(binding.tooltipWeeklyVisit, "Customer Status is not set")
-                binding.tvWeeklyVisit.text = statusWeeklyVisitItem[0]
+                binding.tvWeeklyVisit.text = EMPTY_FIELD_VALUE
                 binding.spinWeeklyVisit.setSelection(0)
             }
         }
