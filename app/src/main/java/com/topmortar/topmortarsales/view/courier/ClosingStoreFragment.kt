@@ -315,7 +315,7 @@ class ClosingStoreFragment : Fragment() {
             intent.putExtra(CONST_PROMO, data.id_promo)
             intent.putExtra(CONST_REPUTATION, data.reputation)
             intent.putExtra(CONST_DATE, data.created_at)
-            intent.putExtra(CONST_WEEKLY_VISIT_STATUS, data.tagihan_mingguan)
+            intent.putExtra(CONST_WEEKLY_VISIT_STATUS, data.tagih_mingguan)
         }
 
 //        (requireContext() as Activity).startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)

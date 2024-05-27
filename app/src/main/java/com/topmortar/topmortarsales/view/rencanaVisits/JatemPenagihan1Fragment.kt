@@ -190,7 +190,7 @@ class JatemPenagihan1Fragment : Fragment() {
                     intent.putExtra(CONST_REPUTATION, data.reputation)
                     intent.putExtra(CONST_DATE, data.created_at_store)
                     intent.putExtra(REPORT_SOURCE, PENAGIHAN_REPORT_RENVI)
-                    intent.putExtra(CONST_WEEKLY_VISIT_STATUS, data.tagihan_mingguan)
+                    intent.putExtra(CONST_WEEKLY_VISIT_STATUS, data.tagih_mingguan)
                 }
 
                 startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)

@@ -42,7 +42,6 @@ import androidx.appcompat.widget.TooltipCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.view.marginRight
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -126,7 +125,6 @@ import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.PingUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
-import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -1183,7 +1181,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 btnInvoice.visibility = View.VISIBLE
 
                                 setupStatus(data.store_status)
-                                setupWeeklyVisitStatus(data.tagihan_mingguan)
+                                setupWeeklyVisitStatus(data.tagih_mingguan)
 //                                setupPaymentMethod(data.payment_method)
 //                                setupTermin(data.termin_payment)
 //                                setupReputation(data.reputation)

@@ -20,7 +20,7 @@ data class RencanaVisitModel(
     var maps_url: String = "",
     var address: String = "",
     var store_status: String = "",
-    var tagihan_mingguan: String? = null,
+    var tagih_mingguan: String? = null,
     var ktp_owner: String = "",
     var termin_payment: String = "",
     var id_promo: String = "",
