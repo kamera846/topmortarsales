@@ -61,6 +61,7 @@ import com.topmortar.topmortarsales.databinding.ActivityUserProfileBinding
 import com.topmortar.topmortarsales.modal.ChartSalesPricingModal
 import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.SplashScreenActivity
+import com.topmortar.topmortarsales.view.delivery.HistoryDeliveryActivity
 import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.Subscribe
@@ -221,6 +222,16 @@ class UserProfileActivity : AppCompatActivity() {
 
     }
 
+    private fun navigateDeliveryCourierHistory() {
+
+        val intent = Intent(this@UserProfileActivity, HistoryDeliveryActivity::class.java)
+        intent.putExtra(CONST_USER_ID, iUserID)
+        intent.putExtra(CONST_FULL_NAME, iFullName)
+        intent.putExtra(CONST_USER_LEVEL, iUserLevel)
+        startActivity(intent)
+
+    }
+
     private fun navigateTrackingCourier() {
 
         val intent = Intent(this, MapsActivity::class.java)
@@ -246,6 +257,7 @@ class UserProfileActivity : AppCompatActivity() {
         binding.priceContainer.setOnClickListener { modalPricingDetails.show() }
         binding.titleBarLight.icBack.setOnClickListener { backHandler() }
         binding.salesReportContainer.setOnClickListener { navigateSalesReport() }
+        binding.btnCourierHistoryDelivery.setOnClickListener { navigateDeliveryCourierHistory() }
 
     }
 

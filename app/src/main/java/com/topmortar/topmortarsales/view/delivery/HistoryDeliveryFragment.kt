@@ -21,6 +21,8 @@ import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING_HISTORY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -42,6 +44,7 @@ class HistoryDeliveryFragment : Fragment() {
     private lateinit var userKind: String
     private lateinit var userCity: String
     private lateinit var userID: String
+    private var iUserID: String? = null
     private val userDistributorid get() = sessionManager.userDistributor().toString()
 
     private lateinit var badgeRefresh: LinearLayout
@@ -56,6 +59,9 @@ class HistoryDeliveryFragment : Fragment() {
     fun syncNow() {
         getList()
     }
+    fun setUserID(id: String?) {
+        this.iUserID = id
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -69,7 +75,7 @@ class HistoryDeliveryFragment : Fragment() {
         sessionManager = SessionManager(requireContext())
         userKind = sessionManager.userKind().toString()
         userCity = sessionManager.userCityID().toString()
-        userID = sessionManager.userID().toString()
+        userID = iUserID ?: ""
 
         getList()
 
@@ -104,7 +110,7 @@ class HistoryDeliveryFragment : Fragment() {
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        loadingState(true, "Belum ada basecamp!")
+                        loadingState(true, "Belum ada riwayat!")
                         showBadgeRefresh(false)
                         listener?.counterItem(0)
 
@@ -136,13 +142,14 @@ class HistoryDeliveryFragment : Fragment() {
         val rvAdapter = HistoryDeliveryRecyclerViewAdapter(listItem, object: HistoryDeliveryRecyclerViewAdapter.ItemClickListener {
             override fun onItemClick(data: DeliveryModel.History?) {
                 val intent = Intent(requireContext(), MapsActivity::class.java)
-                intent.putExtra(CONST_IS_TRACKING, true)
                 intent.putExtra(CONST_IS_TRACKING_HISTORY, true)
                 intent.putExtra(CONST_DELIVERY_ID, data?.id_delivery)
                 startActivity(intent)
             }
 
         })
+
+        rvAdapter.isHistoryCourier(true)
 
         binding.rvChatList.layoutManager = LinearLayoutManager(requireContext())
         binding.rvChatList.adapter = rvAdapter
