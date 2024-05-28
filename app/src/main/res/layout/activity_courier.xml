@@ -1,35 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".view.courier.CourierActivity">
 
-    <include
-        android:id="@+id/titleBarDark"
-        layout="@layout/component_title_bar"/>
-
     <LinearLayout
-        android:visibility="gone"
-        android:id="@+id/tabContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/primary"/>
+        <include
+            android:id="@+id/titleBarDark"
+            layout="@layout/component_title_bar"/>
 
-        <androidx.viewpager.widget.ViewPager
-            android:id="@+id/viewPager"
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/tabContainer"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+            android:orientation="vertical">
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tabLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/primary"/>
+
+            <androidx.viewpager.widget.ViewPager
+                android:id="@+id/viewPager"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-</LinearLayout>
+    <include
+        android:visibility="gone"
+        android:id="@+id/includeSwipeRefreshHint"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        layout="@layout/component_swipe_refresh_hint"/>
+
+</RelativeLayout>
