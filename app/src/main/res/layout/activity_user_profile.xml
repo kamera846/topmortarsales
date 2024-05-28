@@ -504,7 +504,6 @@
                         android:focusable="true"
                         android:padding="12dp"
                         android:gravity="center_vertical"
-                        android:alpha="0.5"
                         android:orientation="horizontal">
 
                         <ImageView
@@ -532,7 +531,7 @@
                             android:id="@+id/delivery_item_chevron"
                             android:layout_width="20dp"
                             android:layout_height="20dp"
-                            android:src="@drawable/lock_dark"/>
+                            android:src="@drawable/chevron_right_dark"/>
 
                     </LinearLayout>
 
