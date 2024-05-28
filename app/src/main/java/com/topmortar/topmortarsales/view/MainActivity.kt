@@ -1196,12 +1196,12 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         val swipeRefreshHint = sessionManager.swipeRefreshHint()
 
         if (!swipeRefreshHint) {
-            binding.swipeRefreshHint.visibility = View.VISIBLE
-            binding.btnTrySwipeRefresh.setOnClickListener {
-                binding.swipeRefreshHint.visibility = View.GONE
+            binding.includeSwipeRefreshHint.swipeRefreshHint.visibility = View.VISIBLE
+            binding.includeSwipeRefreshHint.btnTrySwipeRefresh.setOnClickListener {
+                binding.includeSwipeRefreshHint.swipeRefreshHint.visibility = View.GONE
                 sessionManager.swipeRefreshHint(true)
             }
-        } else binding.swipeRefreshHint.visibility = View.GONE
+        } else binding.includeSwipeRefreshHint.swipeRefreshHint.visibility = View.GONE
     }
 
     @Deprecated("Deprecated in Java")
