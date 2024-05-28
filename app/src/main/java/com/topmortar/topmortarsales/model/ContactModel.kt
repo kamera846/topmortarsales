@@ -10,6 +10,7 @@ data class ContactModel(
     var maps_url: String = "",
     var address: String = "",
     var store_status: String = "",
+    var tagih_mingguan: String? = null,
     var ktp_owner: String = "",
     var payment_method: String = "",
     var termin_payment: String = "",

@@ -879,6 +879,68 @@
 
                 </LinearLayout>
 
+                <!-- Text Tagihan Mingguan -->
+                <LinearLayout
+                    android:visibility="gone"
+                    android:id="@+id/weekly_visit_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/background_rounded_16"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:text="Tagihan Mingguan"
+                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginTop="16dp"
+                            android:layout_marginBottom="4dp"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
+
+                        <TextView
+                            android:visibility="visible"
+                            android:id="@+id/tv_weekly_visit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:text="@string/active"
+                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginBottom="16dp"
+                            android:textSize="14sp"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                        <Spinner
+                            android:visibility="gone"
+                            android:id="@+id/spin_weekly_visit"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginBottom="16dp"/>
+
+                    </LinearLayout>
+
+                    <ImageView
+                        android:visibility="visible"
+                        android:id="@+id/tooltip_weekly_visit"
+                        android:layout_width="46dp"
+                        android:layout_height="46dp"
+                        android:padding="16dp"
+                        android:src="@drawable/status_active"
+                        android:contentDescription="@string/icon_tooltip_information"/>
+
+                </LinearLayout>
+
                 <!-- Text Method -->
                 <LinearLayout
                     android:visibility="visible"
