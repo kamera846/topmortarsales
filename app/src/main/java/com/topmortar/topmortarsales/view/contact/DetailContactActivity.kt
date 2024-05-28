@@ -308,7 +308,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         initVariable()
         initClickHandler()
-        dataActivityValidation()
+        _getDetailContact()
+//        dataActivityValidation()
         checkLocationPermission()
 
         // Get List City
@@ -624,7 +625,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         iReputation = intent.getStringExtra(CONST_REPUTATION)
 
         tooltipStatus.visibility = View.VISIBLE
-        binding.weeklyVisitContainer.visibility = if (userKind == USER_KIND_ADMIN) View.VISIBLE else View.GONE
+        binding.weeklyVisitContainer.visibility = View.VISIBLE
         binding.tooltipWeeklyVisit.visibility = View.VISIBLE
 //        if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
 //        else btnInvoice.visibility = View.VISIBLE
@@ -793,7 +794,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 spinStatus.visibility = View.VISIBLE
 
                 // Weekly Visit Status
-                binding.weeklyVisitContainer.visibility = if (userKind == USER_KIND_ADMIN) View.VISIBLE else View.GONE
+                binding.weeklyVisitContainer.visibility = if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) View.VISIBLE else View.GONE
                 binding.weeklyVisitContainer.setBackgroundResource(R.drawable.et_background)
                 binding.tooltipWeeklyVisit.visibility = View.GONE
                 binding.tvWeeklyVisit.visibility = View.GONE
@@ -1133,6 +1134,186 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         }
 
+    }
+
+    private fun _getDetailContact() {
+        loadingState(true)
+        if (!progressDialog.isShowing) progressDialog.show()
+
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = intent.getStringExtra(CONST_CONTACT_ID)?.let { apiService.getContactDetail(contactId = it) }
+
+                if (response!!.isSuccessful) {
+
+                    val responseBody = response.body()!!
+
+                    when (responseBody.status) {
+                        RESPONSE_STATUS_OK -> {
+
+                            val data = responseBody.results[0]
+
+                            val iContactId = data.id_contact
+                            val iPhone = data.nomorhp
+                            val iOwner = data.store_owner
+                            val iName = data.nama
+                            val iBirthday = data.tgl_lahir
+                            val iDate = data.created_at
+
+                            if (iDate.isEmpty()) {
+                                binding.dateSeparator.visibility = View.GONE
+                                binding.line.visibility = View.VISIBLE
+                            } else {
+                                val date = DateFormat.format(iDate, format = "dd MMM yyyy")
+
+                                binding.tvDate.text = date
+                                binding.dateSeparator.visibility = View.VISIBLE
+                                binding.line.visibility = View.GONE
+                            }
+
+                            iKtp = data.ktp_owner
+                            iMapsUrl = data.maps_url
+                            iStatus = data.store_status
+                            iWeeklyVisitStatus = data.tagih_mingguan
+                            iPaymentMethod = data.payment_method
+                            iTermin = data.termin_payment
+                            iReputation = data.reputation
+
+                            tooltipStatus.visibility = View.VISIBLE
+                            binding.weeklyVisitContainer.visibility = View.VISIBLE
+                            binding.tooltipWeeklyVisit.visibility = View.VISIBLE
+//        if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
+//        else btnInvoice.visibility = View.VISIBLE
+                            btnInvoice.visibility = View.VISIBLE
+
+                            iAddress = data.address
+                            iLocation = data.id_city
+                            iPromo = data.id_promo
+                            iReportSource = intent.getStringExtra(REPORT_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
+
+                            activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
+
+                            itemSendMessage = ContactModel(id_contact = iContactId!!, nama = iName!!, nomorhp = iPhone!!, store_owner = iOwner!!, tgl_lahir = iBirthday!!, maps_url = iMapsUrl!!, id_city = iLocation!!)
+                            setupDialogSendMessage(itemSendMessage)
+
+                            if (iContactId.isNotEmpty()) {
+                                contactId = iContactId
+                            }
+                            if (iPhone.isNotEmpty()) {
+                                tvPhone.text = "+$iPhone"
+                                etPhone.setText(iPhone)
+                            } else {
+                                tvPhone.text = EMPTY_FIELD_VALUE
+                                etPhone.setText("")
+                            }
+                            if (iName.isNotEmpty()) {
+                                tvName.text = iName
+                                etName.setText(iName)
+                            } else {
+                                tvName.text = EMPTY_FIELD_VALUE
+                                etName.setText("")
+                            }
+                            if (iOwner.isNotEmpty()) {
+                                tvOwner.text = iOwner
+                                etOwner.setText(iOwner)
+                            } else {
+                                tvOwner.text = EMPTY_FIELD_VALUE
+                                etOwner.setText("")
+                            }
+                            if (!iLocation.isNullOrEmpty()) {
+                                tvLocation.text = getString(R.string.txt_loading)
+                                etLocation.setText(getString(R.string.txt_loading))
+                            } else {
+                                tvLocation.text = EMPTY_FIELD_VALUE
+                                etLocation.setText("")
+                            }
+                            if (!iPromo.isNullOrEmpty()) {
+                                tvPromo.text = getString(R.string.txt_loading)
+                                etPromo.setText(getString(R.string.txt_loading))
+                            } else {
+                                tvPromo.text = EMPTY_FIELD_VALUE
+                                etPromo.setText("")
+                            }
+                            if (iBirthday.isNotEmpty()) {
+                                if (iBirthday == "0000-00-00") {
+                                    tvBirthday.text = EMPTY_FIELD_VALUE
+                                } else {
+                                    tvBirthday.text = DateFormat.format(iBirthday)
+                                    etBirthday.setText(DateFormat.format(iBirthday))
+                                }
+                            }
+                            if (!iMapsUrl.isNullOrEmpty()) {
+                                tvMaps.text = "Tekan untuk menampilkan lokasi"
+                                etMaps.setText(iMapsUrl)
+                            } else {
+                                iMapsUrl = EMPTY_FIELD_VALUE
+                                tvMaps.text = EMPTY_FIELD_VALUE
+                                etMaps.setText("")
+                            }
+                            if (!iKtp.isNullOrEmpty()) {
+                                tvKtp.text = "Tekan untuk menampilkan KTP"
+                                etKtp.setText("")
+                            } else {
+                                iKtp = EMPTY_FIELD_VALUE
+                                tvKtp.text = EMPTY_FIELD_VALUE
+                                etKtp.setText("")
+                            }
+
+                            // Other columns handle
+                            if (!iAddress.isNullOrEmpty()) etAddress.setText(iAddress)
+                            else etAddress.setText(EMPTY_FIELD_VALUE)
+
+                            loadingState(false)
+                            progressDialog.dismiss()
+
+                            // Set Spinner
+                            setupStatusSpinner()
+                            setupWeekliVisitStatusSpinner()
+                            setupPaymentMethodSpinner()
+                            setupTerminSpinner()
+                            setupReputationSpinner()
+
+                        }
+                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+
+                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak! Message: Response status $RESPONSE_STATUS_FAIL or $RESPONSE_STATUS_FAILED")
+                            loadingState(false)
+                            progressDialog.dismiss()
+                            toggleEdit(false)
+
+                        }
+                        else -> {
+
+                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak!")
+                            loadingState(false)
+                            progressDialog.dismiss()
+                            toggleEdit(false)
+
+                        }
+                    }
+
+                } else {
+
+                    handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak! Error: " + response.message())
+                    loadingState(false)
+                    progressDialog.dismiss()
+                    toggleEdit(false)
+
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                loadingState(false)
+                progressDialog.dismiss()
+                toggleEdit(false)
+
+            }
+
+        }
     }
 
     private fun getDetailContact(withToggleEdit: Boolean = true) {
