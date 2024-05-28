@@ -259,9 +259,10 @@ class UserProfileActivity : AppCompatActivity() {
             binding.salesReportContainer.visibility = View.GONE
             binding.deliveryContainer.visibility = View.VISIBLE
 
-            if (iUserLevel == AUTH_LEVEL_COURIER) {
+            if (iUserLevel == AUTH_LEVEL_COURIER || userKind == USER_KIND_COURIER) {
                 binding.btnHistoryVisit.visibility = View.GONE
                 binding.btnCourierHistoryDelivery.visibility = View.VISIBLE
+                if (userKind == USER_KIND_COURIER) binding.btnCourierTracking.visibility = View.GONE
             } else if (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES || iUserLevel == AUTH_LEVEL_PENAGIHAN || userKind == USER_KIND_PENAGIHAN) {
                 binding.btnHistoryVisit.visibility = View.VISIBLE
                 binding.btnCourierHistoryDelivery.visibility = View.GONE
