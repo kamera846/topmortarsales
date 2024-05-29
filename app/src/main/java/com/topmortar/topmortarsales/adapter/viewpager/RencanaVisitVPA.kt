@@ -7,7 +7,7 @@ import com.topmortar.topmortarsales.view.rencanaVisits.JatemFragment
 import com.topmortar.topmortarsales.view.rencanaVisits.PasifRenViFragment
 import com.topmortar.topmortarsales.view.rencanaVisits.VoucherRenViFragment
 
-class RencanaVisitVPA(fm: FragmentManager) : FragmentPagerAdapter(fm) {
+class RencanaVisitVPA(fm: FragmentManager, private var tabSize: Int) : FragmentPagerAdapter(fm) {
 
     private var listener: CounterPageItem? = null
     interface CounterPageItem {
@@ -24,7 +24,7 @@ class RencanaVisitVPA(fm: FragmentManager) : FragmentPagerAdapter(fm) {
             0 -> frgamentJatem.syncNow()
             1 -> fragmentVoucherRenVi.syncNow()
             2 -> fragmentPasifRenViFragment.syncNow()
-//            3 -> fragmentPasifRenViFragment.syncNow()
+            3 -> fragmentPasifRenViFragment.syncNow()
         }
     }
 
@@ -53,17 +53,17 @@ class RencanaVisitVPA(fm: FragmentManager) : FragmentPagerAdapter(fm) {
                 })
                 return fragmentVoucherRenVi
 
-//            }
-//            2 -> {
-//
-//                fragmentPasifRenViFragment = PasifRenViFragment()
-//                fragmentPasifRenViFragment.setCounterItem(object : PasifRenViFragment.CounterItem{
-//                    override fun counterItem(count: Int) {
-//                        listener?.counterItem(count, position)
-//                    }
-//
-//                })
-//                return fragmentPasifRenViFragment
+            }
+            2 -> {
+
+                fragmentPasifRenViFragment = PasifRenViFragment()
+                fragmentPasifRenViFragment.setCounterItem(object : PasifRenViFragment.CounterItem{
+                    override fun counterItem(count: Int) {
+                        listener?.counterItem(count, position)
+                    }
+
+                })
+                return fragmentPasifRenViFragment
 
             } else -> {
 
@@ -81,15 +81,6 @@ class RencanaVisitVPA(fm: FragmentManager) : FragmentPagerAdapter(fm) {
     }
 
     override fun getCount(): Int {
-        return 3
-    }
-
-    override fun getPageTitle(position: Int): CharSequence {
-        return when (position) {
-            0 -> "Jatuh Tempo"
-            1 -> "Voucher"
-            else -> "Pasif"
-//            else -> "Mingguan"
-        }
+        return tabSize
     }
 }

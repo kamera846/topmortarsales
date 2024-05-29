@@ -31,6 +31,7 @@ class RencanaVisitActivity : AppCompatActivity() {
     private lateinit var pagerAdapter: RencanaVisitVPA
     private var activeTab = 0
 
+    private val tabTitles = listOf("Jatuh Tempo", "Voucher", "Pasif")
     private val tabTitleViews = mutableListOf<TextView>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,31 +73,21 @@ class RencanaVisitActivity : AppCompatActivity() {
         tabLayout = binding.tabLayout
         viewPager = binding.viewPager
 
-        pagerAdapter = RencanaVisitVPA(supportFragmentManager)
+        pagerAdapter = RencanaVisitVPA(supportFragmentManager, tabTitles.size)
         viewPager.adapter = pagerAdapter
 
         // Connect TabLayout and ViewPager
         tabLayout.setupWithViewPager(viewPager)
-        for (i in 0..2) {
+        for ((idx, item) in tabTitles.listIterator().withIndex()) {
             val textView = LayoutInflater.from(this).inflate(R.layout.tab_renvi_title, null) as TextView
-            textView.text = when (i) {
-                0 -> "Jatuh Tempo"
-                1 -> "Voucher"
-                else -> "Pasif"
-//                else -> "Mingguan"
-            }
+            textView.text = item
             tabTitleViews.add(textView)
-            tabLayout.getTabAt(i)?.customView = textView
+            tabLayout.getTabAt(idx)?.customView = textView
         }
         tabTitleViews[0].setTypeface(null, android.graphics.Typeface.BOLD)
         pagerAdapter.setCounterPageItem(object : RencanaVisitVPA.CounterPageItem{
             override fun counterItem(count: Int, tabIndex: Int) {
-                when (tabIndex) {
-                    0 -> tabTitleViews[tabIndex].text = "${if (count != 0) "($count) " else ""}Jatuh Tempo"
-                    1 -> tabTitleViews[tabIndex].text = "${if (count != 0) "($count) " else ""}Voucher"
-                    else -> tabTitleViews[tabIndex].text = "${if (count != 0) "($count) " else ""}Pasif"
-//                    else -> tabTitleViews[tabIndex].text = "${if (count != 0) "($count) " else ""}Mingguan"
-                }
+                tabTitleViews[tabIndex].text = "${if (count != 0) "($count) " else ""}" +  tabTitles[tabIndex]
             }
 
         })
