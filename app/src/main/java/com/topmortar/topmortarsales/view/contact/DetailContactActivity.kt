@@ -1162,7 +1162,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             val iContactId = data.id_contact
                             val iPhone = data.nomorhp
                             val iOwner = data.store_owner
-                            val iName = data.nama
                             val iBirthday = data.tgl_lahir
                             val iDate = data.created_at
 
@@ -1177,6 +1176,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 binding.line.visibility = View.GONE
                             }
 
+                            iName = data.nama
                             iKtp = data.ktp_owner
                             iMapsUrl = data.maps_url
                             iStatus = data.store_status
@@ -1212,7 +1212,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 tvPhone.text = EMPTY_FIELD_VALUE
                                 etPhone.setText("")
                             }
-                            if (iName.isNotEmpty()) {
+                            if (!iName.isNullOrEmpty()) {
                                 tvName.text = iName
                                 etName.setText(iName)
                             } else {
