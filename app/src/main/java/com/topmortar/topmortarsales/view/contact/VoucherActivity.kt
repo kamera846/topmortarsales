@@ -100,6 +100,7 @@ class VoucherActivity : AppCompatActivity() {
         }
 
         getList()
+        binding.swipeRefreshLayout.setOnRefreshListener { getList() }
 
     }
 
@@ -202,10 +203,14 @@ class VoucherActivity : AppCompatActivity() {
             binding.txtLoading.visibility = View.VISIBLE
             binding.rvList.visibility = View.GONE
 
+            binding.swipeRefreshLayout.isRefreshing = message === getString(R.string.txt_loading)
+
         } else {
 
             binding.txtLoading.visibility = View.GONE
             binding.rvList.visibility = View.VISIBLE
+
+            binding.swipeRefreshLayout.isRefreshing = false
 
         }
 

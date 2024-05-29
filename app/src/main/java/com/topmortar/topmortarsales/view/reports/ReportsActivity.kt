@@ -17,6 +17,7 @@ import com.topmortar.topmortarsales.adapter.recyclerview.ReportsRecyclerViewAdap
 import com.topmortar.topmortarsales.commons.ALL_REPORT
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_NAME
@@ -65,6 +66,7 @@ class ReportsActivity : AppCompatActivity() {
     private var userLevel: String? = null
     private var isCourier = false
     private var isBA = false
+    private var isPenagihan = false
     private var activeFilter = ALL_REPORT
     private val layoutStatus get() = sessionManager.layoutReportStatus()
 
@@ -92,8 +94,12 @@ class ReportsActivity : AppCompatActivity() {
         if (userKind == USER_KIND_BA) isBA = true
         else if (userLevel == AUTH_LEVEL_BA) isBA = true
 
+        if (userKind == USER_KIND_PENAGIHAN) isPenagihan = true
+        else if (userLevel == AUTH_LEVEL_PENAGIHAN) isPenagihan = true
+
         if (isCourier) binding.titleBarDark.tvTitleBar.text = if (!contactName.isNullOrEmpty()) contactName else "Laporan Kurir"
         else if (isBA) binding.titleBarDark.tvTitleBar.text = if (!contactName.isNullOrEmpty()) contactName else "Laporan BA"
+        else if (isPenagihan) binding.titleBarDark.tvTitleBar.text = if (!contactName.isNullOrEmpty()) contactName else "Laporan Penagihan"
         else binding.titleBarDark.tvTitleBar.text = if (!contactName.isNullOrEmpty()) contactName else "Laporan Sales"
         binding.titleBarDark.tvTitleBarDescription.visibility = View.VISIBLE
         if (!contactName.isNullOrEmpty()) binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (iUserID.isNullOrEmpty()) "saya" else ""} di toko ini"
