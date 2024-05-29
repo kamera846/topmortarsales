@@ -7,7 +7,7 @@ import com.topmortar.topmortarsales.view.rencanaVisits.JatemPenagihan1Fragment
 import com.topmortar.topmortarsales.view.rencanaVisits.JatemPenagihan2Fragment
 import com.topmortar.topmortarsales.view.rencanaVisits.JatemPenagihan3Fragment
 
-class RencanaVisitPenagihanVPA(fm: FragmentManager) : FragmentPagerAdapter(fm) {
+class RencanaVisitPenagihanVPA(fm: FragmentManager, private var tabSize: Int) : FragmentPagerAdapter(fm) {
 
     private var listener: CounterPageItem? = null
     interface CounterPageItem {
@@ -24,6 +24,7 @@ class RencanaVisitPenagihanVPA(fm: FragmentManager) : FragmentPagerAdapter(fm) {
             0 -> fragmentJatem1.syncNow()
             1 -> fragmentJatem2.syncNow()
             2 -> fragmentJatem3.syncNow()
+            3 -> fragmentJatem3.syncNow()
         }
     }
 
@@ -59,6 +60,18 @@ class RencanaVisitPenagihanVPA(fm: FragmentManager) : FragmentPagerAdapter(fm) {
                 return fragmentJatem2
 
             }
+            2 -> {
+
+                fragmentJatem3 = JatemPenagihan3Fragment()
+                fragmentJatem3.setCounterItem(object : JatemPenagihan3Fragment.CounterItem{
+                    override fun counterItem(count: Int) {
+                        listener?.counterItem(count, position)
+                    }
+
+                })
+                return fragmentJatem3
+
+            }
             else -> {
 
                 fragmentJatem3 = JatemPenagihan3Fragment()
@@ -75,14 +88,6 @@ class RencanaVisitPenagihanVPA(fm: FragmentManager) : FragmentPagerAdapter(fm) {
     }
 
     override fun getCount(): Int {
-        return 3
-    }
-
-    override fun getPageTitle(position: Int): CharSequence {
-        return when (position) {
-            0 -> "Jatem 0-7"
-            1 -> "Jatem 8-15"
-            else -> "Jatem 16+"
-        }
+        return tabSize
     }
 }
