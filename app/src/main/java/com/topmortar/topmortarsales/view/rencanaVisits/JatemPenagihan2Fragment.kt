@@ -106,6 +106,7 @@ class JatemPenagihan2Fragment : Fragment() {
 
 //        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
         getList()
+        binding.swipeRefreshLayout.setOnRefreshListener { getList() }
 
         return view
     }
@@ -232,10 +233,14 @@ class JatemPenagihan2Fragment : Fragment() {
             binding.txtLoading.visibility = View.VISIBLE
             binding.rvChatList.visibility = View.GONE
 
+            binding.swipeRefreshLayout.isRefreshing = message === getString(R.string.txt_loading)
+
         } else {
 
             binding.txtLoading.visibility = View.GONE
             binding.rvChatList.visibility = View.VISIBLE
+
+            binding.swipeRefreshLayout.isRefreshing = false
 
         }
 
