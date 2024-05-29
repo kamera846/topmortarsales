@@ -3,7 +3,9 @@ package com.topmortar.topmortarsales.view.rencanaVisits
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.LayoutInflater
 import android.view.View
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
@@ -27,6 +29,9 @@ class RencanaVisitPenagihanActivity : AppCompatActivity() {
     private lateinit var viewPager: ViewPager
     private lateinit var pagerAdapter: RencanaVisitPenagihanVPA
     private var activeTab = 0
+
+    private val tabTitles = listOf("Jatem 0-7", "Jatem 8-15", "Jatem 16+")
+    private val tabTitleViews = mutableListOf<TextView>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,27 +72,33 @@ class RencanaVisitPenagihanActivity : AppCompatActivity() {
         tabLayout = binding.tabLayout
         viewPager = binding.viewPager
 
-        pagerAdapter = RencanaVisitPenagihanVPA(supportFragmentManager)
+        pagerAdapter = RencanaVisitPenagihanVPA(supportFragmentManager, tabTitles.size)
         viewPager.adapter = pagerAdapter
 
         // Connect TabLayout and ViewPager
         tabLayout.setupWithViewPager(viewPager)
+        for ((idx, item) in tabTitles.listIterator().withIndex()) {
+            val textView = LayoutInflater.from(this).inflate(R.layout.tab_renvi_title, null) as TextView
+            textView.text = item
+            tabTitleViews.add(textView)
+            tabLayout.getTabAt(idx)?.customView = textView
+        }
+        tabTitleViews[0].setTypeface(null, android.graphics.Typeface.BOLD)
         pagerAdapter.setCounterPageItem(object : RencanaVisitPenagihanVPA.CounterPageItem{
             override fun counterItem(count: Int, tabIndex: Int) {
-                when (tabIndex) {
-                    0 -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Jatem 0-7"
-                    1 -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Jatem 8-15"
-                    else -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Jatem 16+"
-                }
+                tabTitleViews[tabIndex].text = "${if (count != 0) "($count) " else ""}" + tabTitles[tabIndex]
             }
 
         })
         tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener{
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 activeTab = tab?.position!!
+                tabTitleViews[activeTab].setTypeface(null, android.graphics.Typeface.BOLD)
             }
 
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+                tabTitleViews[activeTab].setTypeface(null, android.graphics.Typeface.NORMAL)
+            }
 
             override fun onTabReselected(tab: TabLayout.Tab?) {}
 
