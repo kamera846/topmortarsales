@@ -188,6 +188,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
         val popupMenu = binding.navView
 
+        val syncNowItem = popupMenu.menu.findItem(R.id.nav_sync_now)
         val searchItem = popupMenu.menu.findItem(R.id.nav_search)
         val userItem = popupMenu.menu.findItem(R.id.nav_user)
         val myProfile = popupMenu.menu.findItem(R.id.nav_my_profile)
@@ -201,6 +202,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         val rencanaVisitPenagihan = popupMenu.menu.findItem(R.id.rencana_visit_penagihan)
 
         searchItem.isVisible = false
+        syncNowItem.isVisible = false
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
             if (userKind == USER_KIND_ADMIN) {
                 userItem.isVisible = true
@@ -241,7 +243,14 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         initVariable()
         initClickHandler()
         loadingState(true)
-        binding.swipeRefreshLayout.setOnRefreshListener { getContacts() }
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            if (isSearchActive) {
+                searchContact()
+            } else {
+                if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
+                else getContacts()
+            }
+        }
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
         else getContacts()
 
