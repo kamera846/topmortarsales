@@ -24,6 +24,7 @@ class RencanaVisitVPA(fm: FragmentManager) : FragmentPagerAdapter(fm) {
             0 -> frgamentJatem.syncNow()
             1 -> fragmentVoucherRenVi.syncNow()
             2 -> fragmentPasifRenViFragment.syncNow()
+//            3 -> fragmentPasifRenViFragment.syncNow()
         }
     }
 
@@ -34,7 +35,7 @@ class RencanaVisitVPA(fm: FragmentManager) : FragmentPagerAdapter(fm) {
                 frgamentJatem = JatemFragment()
                 frgamentJatem.setCounterItem(object : JatemFragment.CounterItem{
                     override fun counterItem(count: Int) {
-                        listener?.counterItem(count, 0)
+                        listener?.counterItem(count, position)
                     }
 
                 })
@@ -46,18 +47,30 @@ class RencanaVisitVPA(fm: FragmentManager) : FragmentPagerAdapter(fm) {
                 fragmentVoucherRenVi = VoucherRenViFragment()
                 fragmentVoucherRenVi.setCounterItem(object : VoucherRenViFragment.CounterItem{
                     override fun counterItem(count: Int) {
-                        listener?.counterItem(count, 1)
+                        listener?.counterItem(count, position)
                     }
 
                 })
                 return fragmentVoucherRenVi
+
+//            }
+//            2 -> {
+//
+//                fragmentPasifRenViFragment = PasifRenViFragment()
+//                fragmentPasifRenViFragment.setCounterItem(object : PasifRenViFragment.CounterItem{
+//                    override fun counterItem(count: Int) {
+//                        listener?.counterItem(count, position)
+//                    }
+//
+//                })
+//                return fragmentPasifRenViFragment
 
             } else -> {
 
                 fragmentPasifRenViFragment = PasifRenViFragment()
                 fragmentPasifRenViFragment.setCounterItem(object : PasifRenViFragment.CounterItem{
                     override fun counterItem(count: Int) {
-                        listener?.counterItem(count, 2)
+                        listener?.counterItem(count, position)
                     }
 
                 })
@@ -76,6 +89,7 @@ class RencanaVisitVPA(fm: FragmentManager) : FragmentPagerAdapter(fm) {
             0 -> "Jatuh Tempo"
             1 -> "Voucher"
             else -> "Pasif"
+//            else -> "Mingguan"
         }
     }
 }
