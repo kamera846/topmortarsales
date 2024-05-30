@@ -389,7 +389,8 @@ interface ApiService {
         @Part("id_user") idUser: RequestBody,
         @Part("distance_visit") distanceVisit: RequestBody,
         @Part("laporan_visit") laporanVisit: RequestBody,
-        @Part("source") source: RequestBody? = createPartFromString(NORMAL_REPORT)
+        @Part("source") source: RequestBody? = createPartFromString(NORMAL_REPORT),
+        @Part("type_renvi") renviSource: RequestBody? = createPartFromString(NORMAL_REPORT)
     ): Response<ResponseReportVisit>
 
     @GET(VISIT)
@@ -411,7 +412,8 @@ interface ApiService {
         @Part("id_user") idUser: RequestBody,
         @Part("distance_visit") distanceVisit: RequestBody,
         @Part("laporan_visit") laporanVisit: RequestBody,
-        @Part("source") source: RequestBody? = createPartFromString(NORMAL_REPORT)
+        @Part("source") source: RequestBody? = createPartFromString(NORMAL_REPORT),
+        @Part("type_renvi") renviSource: RequestBody? = createPartFromString(NORMAL_REPORT)
     ): Response<ResponseReportVisit>
 
     @GET(VISIT)

@@ -38,6 +38,8 @@ import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.CONST_WEEKLY_VISIT_STATUS
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.PENAGIHAN_REPORT_RENVI
+import com.topmortar.topmortarsales.commons.RENVI_JATEM2
+import com.topmortar.topmortarsales.commons.RENVI_SOURCE
 import com.topmortar.topmortarsales.commons.REPORT_SOURCE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -189,8 +191,9 @@ class JatemPenagihan2Fragment : Fragment() {
                     intent.putExtra(CONST_PROMO, data.id_promo)
                     intent.putExtra(CONST_REPUTATION, data.reputation)
                     intent.putExtra(CONST_DATE, data.created_at_store)
-                    intent.putExtra(REPORT_SOURCE, PENAGIHAN_REPORT_RENVI)
                     intent.putExtra(CONST_WEEKLY_VISIT_STATUS, data.tagih_mingguan)
+                    intent.putExtra(REPORT_SOURCE, PENAGIHAN_REPORT_RENVI)
+                    intent.putExtra(RENVI_SOURCE, RENVI_JATEM2)
                 }
 
                 startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)

@@ -37,6 +37,7 @@ import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAX_REPORT_DISTANCE
 import com.topmortar.topmortarsales.commons.NORMAL_REPORT
+import com.topmortar.topmortarsales.commons.RENVI_SOURCE
 import com.topmortar.topmortarsales.commons.REPORT_SOURCE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
@@ -83,6 +84,7 @@ class NewReportActivity : AppCompatActivity() {
     private var name: String = ""
     private var coordinate: String = ""
     private lateinit var iReportSource: String
+    private lateinit var iRenviSource: String
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
@@ -109,6 +111,7 @@ class NewReportActivity : AppCompatActivity() {
         }
 
         iReportSource = intent.getStringExtra(REPORT_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
+        iRenviSource = intent.getStringExtra(RENVI_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
     }
 
     private fun checkLocationPermission() {
@@ -421,7 +424,22 @@ class NewReportActivity : AppCompatActivity() {
     }
 
     private fun submitReport() {
+
+        val submitDialog = ProgressDialog(this)
+        submitDialog.setCancelable(false)
+        submitDialog.setMessage("Membuat laporan...")
+
+        submitDialog.show()
         loadingSubmit(true)
+
+//        Handler(Looper.getMainLooper()).postDelayed({
+//            Toast.makeText(this@NewReportActivity, "Berhasil membuat laporan", TOAST_SHORT).show()
+//            println("Form Data: $id : $idUser : ${binding.etDistance.text} : ${binding.etMessage.text} : $iReportSource : $iRenviSource")
+//            submitDialog.dismiss()
+//            loadingSubmit(false)
+//        }, 1000)
+//
+//        return
 
         lifecycleScope.launch {
             try {
@@ -431,6 +449,7 @@ class NewReportActivity : AppCompatActivity() {
                 val rbdistanceVisit = createPartFromString(binding.etDistance.text.toString())
                 val rblaporanVisit = createPartFromString(binding.etMessage.text.toString())
                 val rbSource = createPartFromString(iReportSource)
+                val rbRenviSource = createPartFromString(iRenviSource)
 
                 val apiService: ApiService = HttpClient.create()
                 val response = when (isBaseCamp) {
@@ -439,13 +458,15 @@ class NewReportActivity : AppCompatActivity() {
                         idUser = rbidUser,
                         distanceVisit = rbdistanceVisit,
                         laporanVisit = rblaporanVisit,
-                        source = rbSource
+                        source = rbSource,
+                        renviSource = rbRenviSource,
                     ) else -> apiService.makeVisitReport(
                         idContact = rbidContact,
                         idUser = rbidUser,
                         distanceVisit = rbdistanceVisit,
                         laporanVisit = rblaporanVisit,
-                        source = rbSource
+                        source = rbSource,
+                        renviSource = rbRenviSource,
                     )
                 }
 
@@ -456,6 +477,7 @@ class NewReportActivity : AppCompatActivity() {
                     when (responseBody.status) {
                         RESPONSE_STATUS_OK -> {
 
+                            submitDialog.dismiss()
                             loadingSubmit(false)
 //                            println("Report source is $iReportSource")
                             Toast.makeText(this@NewReportActivity, responseBody.message, TOAST_SHORT).show()
@@ -465,12 +487,14 @@ class NewReportActivity : AppCompatActivity() {
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
                             handleMessage(this@NewReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan! Message: ${ responseBody.message }")
+                            submitDialog.dismiss()
                             loadingSubmit(false)
 
                         }
                         else -> {
 
                             handleMessage(this@NewReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan!: ${ responseBody.message }")
+                            submitDialog.dismiss()
                             loadingSubmit(false)
 
                         }
@@ -479,6 +503,7 @@ class NewReportActivity : AppCompatActivity() {
                 } else {
 
                     handleMessage(this@NewReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan! Error: " + response.message())
+                    submitDialog.dismiss()
                     loadingSubmit(false)
 
                 }
@@ -487,6 +512,7 @@ class NewReportActivity : AppCompatActivity() {
             } catch (e: Exception) {
 
                 handleMessage(this@NewReportActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                submitDialog.dismiss()
                 loadingSubmit(false)
 
             }
