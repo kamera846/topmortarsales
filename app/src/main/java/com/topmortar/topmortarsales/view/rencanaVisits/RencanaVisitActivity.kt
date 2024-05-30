@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.size
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import com.topmortar.topmortarsales.R
@@ -31,7 +30,7 @@ class RencanaVisitActivity : AppCompatActivity() {
     private lateinit var pagerAdapter: RencanaVisitVPA
     private var activeTab = 0
 
-    private val tabTitles = listOf("Jatuh Tempo", "Voucher", "Pasif")
+    private val tabTitles = listOf("Jatuh Tempo", "Voucher", "Pasif", "Mingguan")
     private val tabTitleViews = mutableListOf<TextView>()
 
     override fun onCreate(savedInstanceState: Bundle?) {

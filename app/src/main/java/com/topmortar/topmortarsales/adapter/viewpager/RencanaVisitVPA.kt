@@ -3,8 +3,10 @@ package com.topmortar.topmortarsales.adapter.viewpager
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
+import com.topmortar.topmortarsales.commons.SALES_REPORT_RENVI
 import com.topmortar.topmortarsales.view.rencanaVisits.JatemFragment
 import com.topmortar.topmortarsales.view.rencanaVisits.PasifRenViFragment
+import com.topmortar.topmortarsales.view.rencanaVisits.TagihMingguanFragment
 import com.topmortar.topmortarsales.view.rencanaVisits.VoucherRenViFragment
 
 class RencanaVisitVPA(fm: FragmentManager, private var tabSize: Int) : FragmentPagerAdapter(fm) {
@@ -19,12 +21,13 @@ class RencanaVisitVPA(fm: FragmentManager, private var tabSize: Int) : FragmentP
     private lateinit var frgamentJatem: JatemFragment
     private lateinit var fragmentVoucherRenVi: VoucherRenViFragment
     private lateinit var fragmentPasifRenViFragment: PasifRenViFragment
+    private lateinit var fragmentWeekly: TagihMingguanFragment
     fun setSyncAction(index: Int) {
         when (index) {
             0 -> frgamentJatem.syncNow()
             1 -> fragmentVoucherRenVi.syncNow()
             2 -> fragmentPasifRenViFragment.syncNow()
-            3 -> fragmentPasifRenViFragment.syncNow()
+            3 -> fragmentWeekly.syncNow()
         }
     }
 
@@ -67,14 +70,15 @@ class RencanaVisitVPA(fm: FragmentManager, private var tabSize: Int) : FragmentP
 
             } else -> {
 
-                fragmentPasifRenViFragment = PasifRenViFragment()
-                fragmentPasifRenViFragment.setCounterItem(object : PasifRenViFragment.CounterItem{
+                fragmentWeekly = TagihMingguanFragment()
+                fragmentWeekly.setReportSource(SALES_REPORT_RENVI)
+                fragmentWeekly.setCounterItem(object : TagihMingguanFragment.CounterItem{
                     override fun counterItem(count: Int) {
                         listener?.counterItem(count, position)
                     }
 
                 })
-                return fragmentPasifRenViFragment
+                return fragmentWeekly
 
             }
         }

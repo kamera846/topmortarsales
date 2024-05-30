@@ -30,7 +30,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity() {
     private lateinit var pagerAdapter: RencanaVisitPenagihanVPA
     private var activeTab = 0
 
-    private val tabTitles = listOf("Jatem 0-7", "Jatem 8-15", "Jatem 16+")
+    private val tabTitles = listOf("Jatem 0-7", "Jatem 8-15", "Jatem 16+", "Mingguan")
     private val tabTitleViews = mutableListOf<TextView>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
