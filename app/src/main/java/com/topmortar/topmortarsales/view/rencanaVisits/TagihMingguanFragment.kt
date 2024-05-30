@@ -194,7 +194,7 @@ class TagihMingguanFragment : Fragment() {
                     intent.putExtra(CONST_PROMO, data.id_promo)
                     intent.putExtra(CONST_REPUTATION, data.reputation)
                     intent.putExtra(CONST_DATE, data.created_at_store)
-                    intent.putExtra(REPORT_SOURCE, reportSource)
+                    intent.putExtra(REPORT_SOURCE, SALES_REPORT_RENVI)
                     intent.putExtra(CONST_WEEKLY_VISIT_STATUS, data.tagih_mingguan)
                 }
 
