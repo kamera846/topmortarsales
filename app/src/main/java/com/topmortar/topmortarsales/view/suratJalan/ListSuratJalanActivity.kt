@@ -255,6 +255,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
+                        llFilter.visibility = View.VISIBLE
                         loadingState(true, "Daftar invoice kosong!")
 
                     }
