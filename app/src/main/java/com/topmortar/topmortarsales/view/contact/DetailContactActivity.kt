@@ -310,7 +310,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         initVariable()
         initClickHandler()
-        _getDetailContact()
+        getContact()
 //        dataActivityValidation()
         checkLocationPermission()
 
@@ -1140,7 +1140,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     }
 
-    private fun _getDetailContact() {
+    private fun getContact() {
+        contactId = intent.getStringExtra(CONST_CONTACT_ID) ?: "0"
         loadingState(true)
         if (!progressDialog.isShowing) progressDialog.show()
 
@@ -1148,7 +1149,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = intent.getStringExtra(CONST_CONTACT_ID)?.let { apiService.getContactDetail(contactId = it) }
+                val response = contactId?.let { apiService.getContactDetail(contactId = it) }
 
                 if (response!!.isSuccessful) {
 
