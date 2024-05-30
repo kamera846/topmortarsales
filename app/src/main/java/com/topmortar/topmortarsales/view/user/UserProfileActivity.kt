@@ -61,6 +61,7 @@ import com.topmortar.topmortarsales.databinding.ActivityUserProfileBinding
 import com.topmortar.topmortarsales.modal.ChartSalesPricingModal
 import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.SplashScreenActivity
+import com.topmortar.topmortarsales.view.delivery.HistoryDeliveryActivity
 import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.Subscribe
@@ -221,6 +222,16 @@ class UserProfileActivity : AppCompatActivity() {
 
     }
 
+    private fun navigateDeliveryCourierHistory() {
+
+        val intent = Intent(this@UserProfileActivity, HistoryDeliveryActivity::class.java)
+        intent.putExtra(CONST_USER_ID, iUserID)
+        intent.putExtra(CONST_FULL_NAME, iFullName)
+        intent.putExtra(CONST_USER_LEVEL, iUserLevel)
+        startActivity(intent)
+
+    }
+
     private fun navigateTrackingCourier() {
 
         val intent = Intent(this, MapsActivity::class.java)
@@ -246,6 +257,7 @@ class UserProfileActivity : AppCompatActivity() {
         binding.priceContainer.setOnClickListener { modalPricingDetails.show() }
         binding.titleBarLight.icBack.setOnClickListener { backHandler() }
         binding.salesReportContainer.setOnClickListener { navigateSalesReport() }
+        binding.btnCourierHistoryDelivery.setOnClickListener { navigateDeliveryCourierHistory() }
 
     }
 
@@ -259,9 +271,10 @@ class UserProfileActivity : AppCompatActivity() {
             binding.salesReportContainer.visibility = View.GONE
             binding.deliveryContainer.visibility = View.VISIBLE
 
-            if (iUserLevel == AUTH_LEVEL_COURIER) {
+            if (iUserLevel == AUTH_LEVEL_COURIER || userKind == USER_KIND_COURIER) {
                 binding.btnHistoryVisit.visibility = View.GONE
                 binding.btnCourierHistoryDelivery.visibility = View.VISIBLE
+                if (userKind == USER_KIND_COURIER) binding.btnCourierTracking.visibility = View.GONE
             } else if (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES || iUserLevel == AUTH_LEVEL_PENAGIHAN || userKind == USER_KIND_PENAGIHAN) {
                 binding.btnHistoryVisit.visibility = View.VISIBLE
                 binding.btnCourierHistoryDelivery.visibility = View.GONE

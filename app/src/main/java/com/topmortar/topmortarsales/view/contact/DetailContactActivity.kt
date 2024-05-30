@@ -42,7 +42,6 @@ import androidx.appcompat.widget.TooltipCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.view.marginRight
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -75,6 +74,7 @@ import com.topmortar.topmortarsales.commons.CONST_PROMO
 import com.topmortar.topmortarsales.commons.CONST_REPUTATION
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
+import com.topmortar.topmortarsales.commons.CONST_WEEKLY_VISIT_STATUS
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
@@ -125,7 +125,6 @@ import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.PingUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
-import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -246,10 +245,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var itemSendMessage: ContactModel? = null
 
     private var statusItem: List<String> = listOf("Pilih Status", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
+    private var statusWeeklyVisitItem: List<String> = listOf("Pilih Status", "Active")
     private var terminItem: List<String> = listOf("Pilih Termin Payment", "COD", "COD + Transfer", "COD + Tunai", "30 Hari", "45 Hari", "60 Hari")
     private var paymentMethodItem: List<String> = listOf("Pilih Metode Pembayaran", "Tunai", "Transfer")
     private var reputationItem: List<String> = listOf("Pilih Reputasi Toko", "Good", "Bad")
     private var selectedStatus: String = ""
+    private var selectedWeeklyVisitStatus: String = ""
     private var selectedPaymentMethod: String = ""
     private var selectedTermin: String = ""
     private var selectedReputation: String = ""
@@ -258,8 +259,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var selectedUri: Uri? = null
     private var currentPhotoUri: Uri? = null
 
+    private var titlePage = "Detail Contact"
+    private var iName: String? = null
     private var iLocation: String? = null
     private var iStatus: String? = null
+    private var iWeeklyVisitStatus: String? = null
     private var iPaymentMethod: String? = null
     private var iTermin: String? = null
     private var iReputation: String? = null
@@ -306,7 +310,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         initVariable()
         initClickHandler()
-        dataActivityValidation()
+        _getDetailContact()
+//        dataActivityValidation()
         checkLocationPermission()
 
         // Get List City
@@ -391,7 +396,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         btnInvoice = findViewById(R.id.btn_invoice)
 
         // Setup Title Bar
-        tvTitleBar.text = "Detail Contact"
+        tvTitleBar.text = titlePage
 
         // Setup Date Picker Dialog
         setDatePickerDialog()
@@ -424,6 +429,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         bottomSheetDialog = BottomSheetDialog(this)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        scrollViewListener()
 
     }
 
@@ -598,7 +605,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val iContactId = intent.getStringExtra(CONST_CONTACT_ID)
         val iPhone = intent.getStringExtra(CONST_PHONE)
         val iOwner = intent.getStringExtra(CONST_OWNER)
-        val iName = intent.getStringExtra(CONST_NAME)
         val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
         val iDate = intent.getStringExtra(CONST_DATE)
 
@@ -613,14 +619,18 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             binding.line.visibility = View.GONE
         }
 
+        iName = intent.getStringExtra(CONST_NAME)
         iKtp = intent.getStringExtra(CONST_KTP)
         iMapsUrl = intent.getStringExtra(CONST_MAPS)
         iStatus = intent.getStringExtra(CONST_STATUS)
+        iWeeklyVisitStatus = intent.getStringExtra(CONST_WEEKLY_VISIT_STATUS)
         iPaymentMethod = intent.getStringExtra(CONST_PAYMENT_METHOD)
         iTermin = intent.getStringExtra(CONST_TERMIN)
         iReputation = intent.getStringExtra(CONST_REPUTATION)
 
         tooltipStatus.visibility = View.VISIBLE
+        binding.weeklyVisitContainer.visibility = View.VISIBLE
+        binding.tooltipWeeklyVisit.visibility = View.VISIBLE
 //        if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
 //        else btnInvoice.visibility = View.VISIBLE
         btnInvoice.visibility = View.VISIBLE
@@ -645,7 +655,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tvPhone.text = EMPTY_FIELD_VALUE
             etPhone.setText("")
         }
-        if (iName.isNotEmpty()) {
+        if (!iName.isNullOrEmpty()) {
             tvName.text = iName
             etName.setText(iName)
         } else {
@@ -704,6 +714,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         // Set Spinner
         setupStatusSpinner()
+        setupWeekliVisitStatusSpinner()
         setupPaymentMethodSpinner()
         setupTerminSpinner()
         setupReputationSpinner()
@@ -786,6 +797,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 tvStatus.visibility = View.GONE
                 spinStatus.visibility = View.VISIBLE
 
+                // Weekly Visit Status
+                binding.weeklyVisitContainer.visibility = if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) View.VISIBLE else View.GONE
+                binding.weeklyVisitContainer.setBackgroundResource(R.drawable.et_background)
+                binding.tooltipWeeklyVisit.visibility = View.GONE
+                binding.tvWeeklyVisit.visibility = View.GONE
+                binding.spinWeeklyVisit.visibility = View.VISIBLE
+
                 // Payment Method
                 binding.paymentMethodContainer.setBackgroundResource(R.drawable.et_background)
                 binding.tvPaymentMethod.visibility = View.GONE
@@ -853,7 +871,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 statusContainer.visibility = View.VISIBLE
                 statusContainer.setBackgroundResource(R.drawable.background_rounded_16)
 
+                binding.weeklyVisitContainer.visibility = View.VISIBLE
+                binding.weeklyVisitContainer.setBackgroundResource(R.drawable.background_rounded_16)
+
                 tooltipStatus.visibility = View.VISIBLE
+                binding.tooltipWeeklyVisit.visibility = View.VISIBLE
 //                if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
 //                else btnInvoice.visibility = View.VISIBLE
                 btnInvoice.visibility = View.VISIBLE
@@ -861,6 +883,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 // Status
                 tvStatus.visibility = View.VISIBLE
                 spinStatus.visibility = View.GONE
+
+                // Weekly Visit Status
+                binding.tvWeeklyVisit.visibility = View.VISIBLE
+                binding.spinWeeklyVisit.visibility = View.GONE
 
                 // Payment Method
                 binding.paymentMethodContainer.setBackgroundResource(R.drawable.background_rounded_16)
@@ -916,6 +942,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val pMapsUrl = "${ etMaps.text }"
         val pAddress = "${ etAddress.text }"
         val pStatus = if (selectedStatus.isEmpty()) "" else selectedStatus.substringBefore(" - ").toLowerCase(Locale.getDefault())
+        val pWeeklyVisitStatus = if (selectedWeeklyVisitStatus.isEmpty()) "0" else "1"
         val pPaymentMethod = when (selectedPaymentMethod) {
             paymentMethodItem[1] -> PAYMENT_TUNAI
             paymentMethodItem[2] -> PAYMENT_TRANSFER
@@ -964,8 +991,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         progressDialog.show()
 
 //        Handler(Looper.getMainLooper()).postDelayed({
-//            handleMessage(this, "TAG SAVE", "${contactId!!}, ${formatPhoneNumber(pPhone)}, $pName, $pOwner, $pBirthday, $pMapsUrl, ${pCityID!!}, $pAddress, $pStatus, $imagePart, $pTermin, $pReputation, $pPromoID")
+//            handleMessage(this, "TAG SAVE", "${contactId!!}, ${formatPhoneNumber(pPhone)}, $pName, $pOwner, $pBirthday, $pMapsUrl, ${pCityID!!}, $pAddress, $pStatus, $imagePart, $pTermin, $pReputation, $pPromoID, $pWeeklyVisitStatus")
 //            loadingState(false)
+//            progressDialog.dismiss()
 //        }, 1000)
 //
 //        return
@@ -982,6 +1010,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbLocation = createPartFromString(pCityID!!)
                 val rbAddress = createPartFromString(pAddress)
                 val rbStatus = createPartFromString(pStatus)
+                val rbWeeklyVisitStatus = createPartFromString(pWeeklyVisitStatus)
                 val rbPaymentMethod = createPartFromString(pPaymentMethod)
                 val rbTermin = createPartFromString(pTermin)
                 val rbReputation = createPartFromString(pReputation)
@@ -998,6 +1027,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     mapsUrl = rbMapsUrl,
                     address = rbAddress,
                     status = rbStatus,
+                    tagihanMingguan = rbWeeklyVisitStatus,
                     paymentMethod = rbPaymentMethod,
                     termin = rbTermin,
                     reputation = rbReputation,
@@ -1054,6 +1084,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             } else tvPromo.text = EMPTY_FIELD_VALUE
 
                             iStatus = pStatus.ifEmpty { null }
+                            iWeeklyVisitStatus = pWeeklyVisitStatus.ifEmpty { null }
                             iReputation = pReputation.ifEmpty { null }
 
                             iPaymentMethod = pPaymentMethod.ifEmpty { null }
@@ -1109,6 +1140,186 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     }
 
+    private fun _getDetailContact() {
+        loadingState(true)
+        if (!progressDialog.isShowing) progressDialog.show()
+
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = intent.getStringExtra(CONST_CONTACT_ID)?.let { apiService.getContactDetail(contactId = it) }
+
+                if (response!!.isSuccessful) {
+
+                    val responseBody = response.body()!!
+
+                    when (responseBody.status) {
+                        RESPONSE_STATUS_OK -> {
+
+                            val data = responseBody.results[0]
+
+                            val iContactId = data.id_contact
+                            val iPhone = data.nomorhp
+                            val iOwner = data.store_owner
+                            val iBirthday = data.tgl_lahir
+                            val iDate = data.created_at
+
+                            if (iDate.isEmpty()) {
+                                binding.dateSeparator.visibility = View.GONE
+                                binding.line.visibility = View.VISIBLE
+                            } else {
+                                val date = DateFormat.format(iDate, format = "dd MMM yyyy")
+
+                                binding.tvDate.text = date
+                                binding.dateSeparator.visibility = View.VISIBLE
+                                binding.line.visibility = View.GONE
+                            }
+
+                            iName = data.nama
+                            iKtp = data.ktp_owner
+                            iMapsUrl = data.maps_url
+                            iStatus = data.store_status
+                            iWeeklyVisitStatus = data.tagih_mingguan
+                            iPaymentMethod = data.payment_method
+                            iTermin = data.termin_payment
+                            iReputation = data.reputation
+
+                            tooltipStatus.visibility = View.VISIBLE
+                            binding.weeklyVisitContainer.visibility = View.VISIBLE
+                            binding.tooltipWeeklyVisit.visibility = View.VISIBLE
+//        if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
+//        else btnInvoice.visibility = View.VISIBLE
+                            btnInvoice.visibility = View.VISIBLE
+
+                            iAddress = data.address
+                            iLocation = data.id_city
+                            iPromo = data.id_promo
+                            iReportSource = intent.getStringExtra(REPORT_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
+
+                            activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
+
+                            itemSendMessage = ContactModel(id_contact = iContactId!!, nama = iName!!, nomorhp = iPhone!!, store_owner = iOwner!!, tgl_lahir = iBirthday!!, maps_url = iMapsUrl!!, id_city = iLocation!!)
+                            setupDialogSendMessage(itemSendMessage)
+
+                            if (iContactId.isNotEmpty()) {
+                                contactId = iContactId
+                            }
+                            if (iPhone.isNotEmpty()) {
+                                tvPhone.text = "+$iPhone"
+                                etPhone.setText(iPhone)
+                            } else {
+                                tvPhone.text = EMPTY_FIELD_VALUE
+                                etPhone.setText("")
+                            }
+                            if (!iName.isNullOrEmpty()) {
+                                tvName.text = iName
+                                etName.setText(iName)
+                            } else {
+                                tvName.text = EMPTY_FIELD_VALUE
+                                etName.setText("")
+                            }
+                            if (iOwner.isNotEmpty()) {
+                                tvOwner.text = iOwner
+                                etOwner.setText(iOwner)
+                            } else {
+                                tvOwner.text = EMPTY_FIELD_VALUE
+                                etOwner.setText("")
+                            }
+                            if (!iLocation.isNullOrEmpty()) {
+                                tvLocation.text = getString(R.string.txt_loading)
+                                etLocation.setText(getString(R.string.txt_loading))
+                            } else {
+                                tvLocation.text = EMPTY_FIELD_VALUE
+                                etLocation.setText("")
+                            }
+                            if (!iPromo.isNullOrEmpty()) {
+                                tvPromo.text = getString(R.string.txt_loading)
+                                etPromo.setText(getString(R.string.txt_loading))
+                            } else {
+                                tvPromo.text = EMPTY_FIELD_VALUE
+                                etPromo.setText("")
+                            }
+                            if (iBirthday.isNotEmpty()) {
+                                if (iBirthday == "0000-00-00") {
+                                    tvBirthday.text = EMPTY_FIELD_VALUE
+                                } else {
+                                    tvBirthday.text = DateFormat.format(iBirthday)
+                                    etBirthday.setText(DateFormat.format(iBirthday))
+                                }
+                            }
+                            if (!iMapsUrl.isNullOrEmpty()) {
+                                tvMaps.text = "Tekan untuk menampilkan lokasi"
+                                etMaps.setText(iMapsUrl)
+                            } else {
+                                iMapsUrl = EMPTY_FIELD_VALUE
+                                tvMaps.text = EMPTY_FIELD_VALUE
+                                etMaps.setText("")
+                            }
+                            if (!iKtp.isNullOrEmpty()) {
+                                tvKtp.text = "Tekan untuk menampilkan KTP"
+                                etKtp.setText("")
+                            } else {
+                                iKtp = EMPTY_FIELD_VALUE
+                                tvKtp.text = EMPTY_FIELD_VALUE
+                                etKtp.setText("")
+                            }
+
+                            // Other columns handle
+                            if (!iAddress.isNullOrEmpty()) etAddress.setText(iAddress)
+                            else etAddress.setText(EMPTY_FIELD_VALUE)
+
+                            loadingState(false)
+                            progressDialog.dismiss()
+
+                            // Set Spinner
+                            setupStatusSpinner()
+                            setupWeekliVisitStatusSpinner()
+                            setupPaymentMethodSpinner()
+                            setupTerminSpinner()
+                            setupReputationSpinner()
+
+                        }
+                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+
+                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak! Message: Response status $RESPONSE_STATUS_FAIL or $RESPONSE_STATUS_FAILED")
+                            loadingState(false)
+                            progressDialog.dismiss()
+                            toggleEdit(false)
+
+                        }
+                        else -> {
+
+                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak!")
+                            loadingState(false)
+                            progressDialog.dismiss()
+                            toggleEdit(false)
+
+                        }
+                    }
+
+                } else {
+
+                    handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak! Error: " + response.message())
+                    loadingState(false)
+                    progressDialog.dismiss()
+                    toggleEdit(false)
+
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                loadingState(false)
+                progressDialog.dismiss()
+                toggleEdit(false)
+
+            }
+
+        }
+    }
+
     private fun getDetailContact(withToggleEdit: Boolean = true) {
         loadingState(true)
         if (!progressDialog.isShowing) progressDialog.show()
@@ -1143,6 +1354,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 btnInvoice.visibility = View.VISIBLE
 
                                 setupStatus(iStatus)
+                                setupWeeklyVisitStatus(iWeeklyVisitStatus)
                                 setupPaymentMethod(iPaymentMethod)
                                 setupTermin(iTermin)
                                 setupReputation(iReputation)
@@ -1154,6 +1366,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 btnInvoice.visibility = View.VISIBLE
 
                                 setupStatus(data.store_status)
+                                setupWeeklyVisitStatus(data.tagih_mingguan)
 //                                setupPaymentMethod(data.payment_method)
 //                                setupTermin(data.termin_payment)
 //                                setupReputation(data.reputation)
@@ -1766,6 +1979,24 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
     }
 
+    private fun setupWeeklyVisitStatus(status: String? = null) {
+        binding.tooltipWeeklyVisit.visibility = View.VISIBLE
+        when (status) {
+            "1" -> {
+                binding.tooltipWeeklyVisit.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_active))
+                tooltipHandler(binding.tooltipWeeklyVisit, "Customer Status is active")
+                binding.tvWeeklyVisit.text = statusWeeklyVisitItem[1]
+                binding.spinWeeklyVisit.setSelection(1)
+            }
+            else -> {
+                binding.tooltipWeeklyVisit.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_passive))
+                tooltipHandler(binding.tooltipWeeklyVisit, "Customer Status is not set")
+                binding.tvWeeklyVisit.text = EMPTY_FIELD_VALUE
+                binding.spinWeeklyVisit.setSelection(0)
+            }
+        }
+    }
+
     private fun setupPaymentMethod(paymentMethod: String? = null) {
         when (paymentMethod) {
             PAYMENT_TUNAI -> {
@@ -1851,6 +2082,26 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         selectedStatus = iStatus!!
         setupStatus(iStatus)
+    }
+
+    private fun setupWeekliVisitStatusSpinner() {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, statusWeeklyVisitItem)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        binding.spinWeeklyVisit.adapter = adapter
+        binding.spinWeeklyVisit.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedWeeklyVisitStatus = if (position != 0) statusWeeklyVisitItem[position]
+                else ""
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+        }
+
+        selectedWeeklyVisitStatus = iStatus!!
+        setupWeeklyVisitStatus(iWeeklyVisitStatus)
     }
 
     private fun setupPaymentMethodSpinner() {
@@ -2272,6 +2523,23 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             serviceIntent.putExtra("userDistributorId", userDistributorIds ?: "-start-002-$username")
             serviceIntent.putExtra("deliveryId", deliveryId)
             this@DetailContactActivity.startService(serviceIntent)
+        }
+    }
+
+    private fun scrollViewListener() {
+
+        val profileBar = binding.profileBar
+        profileBar.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+        val profileBarHeight = profileBar.measuredHeight // Ukuran tinggi LinearLayout
+
+        binding.contentScrollView.viewTreeObserver.addOnScrollChangedListener {
+            val scrollY = binding.contentScrollView.scrollY
+
+            if (scrollY < profileBarHeight) {
+                binding.titleBar.tvTitleBar.text = titlePage
+            } else if (scrollY > profileBarHeight) {
+                binding.titleBar.tvTitleBar.text = iName
+            }
         }
     }
 

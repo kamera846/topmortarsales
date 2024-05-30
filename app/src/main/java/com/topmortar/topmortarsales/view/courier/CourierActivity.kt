@@ -109,6 +109,7 @@ class CourierActivity : AppCompatActivity() {
         absentProgressDialog.setMessage(getString(R.string.txt_loading))
 
         CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-007", userId)
+        checkSwipeRefreshLayoutHint()
         initLayout()
 
     }
@@ -289,6 +290,18 @@ class CourierActivity : AppCompatActivity() {
         this.startService(serviceIntent)
 
         initLayout()
+    }
+
+    private fun checkSwipeRefreshLayoutHint() {
+        val swipeRefreshHint = sessionManager.swipeRefreshHint()
+
+        if (!swipeRefreshHint) {
+            binding.includeSwipeRefreshHint.swipeRefreshHint.visibility = View.VISIBLE
+            binding.includeSwipeRefreshHint.btnTrySwipeRefresh.setOnClickListener {
+                binding.includeSwipeRefreshHint.swipeRefreshHint.visibility = View.GONE
+                sessionManager.swipeRefreshHint(true)
+            }
+        } else binding.includeSwipeRefreshHint.swipeRefreshHint.visibility = View.GONE
     }
 
     private fun initLayout() {

@@ -1,129 +1,162 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.drawerlayout.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.MainActivity"
-    android:theme="@style/Theme.TopMortarSales"
-    android:id="@+id/rl_parent">
+    android:id="@+id/drawer_layout"
+    tools:context=".view.MainActivity">
 
     <RelativeLayout
-        android:id="@+id/rl_header"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <!-- Title Bar -->
-        <include
-            android:id="@+id/title_bar"
-            layout="@layout/component_title_bar"/>
-
-        <!-- Search Box -->
-        <include
-            android:visibility="gone"
-            android:id="@+id/search_box"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            layout="@layout/component_search_box"/>
-
-    </RelativeLayout>
-
-    <LinearLayout
-        android:visibility="gone"
-        android:layout_below="@+id/rl_header"
-        android:id="@+id/ll_filter"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="8dp"
-        android:background="@color/light"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
-            android:text="@string/filter"/>
-
-        <TextView
-            android:id="@+id/tv_filter"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
-            android:textStyle="bold"
-            android:layout_marginStart="4dp"
-            android:text="@string/tidak_ada_filter"/>
-
-        <ImageView
-            android:layout_width="16dp"
-            android:layout_height="16dp"
-            android:layout_marginLeft="16dp"
-            android:src="@drawable/up_down_black"/>
-
-    </LinearLayout>
-
-    <!-- Chat List -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_chat_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:listitem="@layout/item_chat_room"
-        android:layout_below="@id/ll_filter"/>
+        android:theme="@style/Theme.TopMortarSales"
+        android:id="@+id/rl_parent">
 
-    <RelativeLayout
-        android:visibility="gone"
-        android:id="@+id/rl_loading"
-        android:layout_below="@+id/ll_filter"
-        android:padding="16dp"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        <RelativeLayout
+            android:id="@+id/rl_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-        <TextView
-            android:id="@+id/txt_loading"
+            <!-- Title Bar -->
+            <include
+                android:id="@+id/title_bar"
+                layout="@layout/component_title_bar"/>
+
+            <!-- Search Box -->
+            <include
+                android:visibility="gone"
+                android:id="@+id/search_box"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                layout="@layout/component_search_box"/>
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:visibility="gone"
+            android:layout_below="@+id/rl_header"
+            android:id="@+id/ll_filter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:background="@color/light"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                android:text="@string/filter"/>
+
+            <TextView
+                android:id="@+id/tv_filter"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                android:textStyle="bold"
+                android:layout_marginStart="4dp"
+                android:text="@string/tidak_ada_filter"/>
+
+            <ImageView
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginLeft="16dp"
+                android:src="@drawable/up_down_black"/>
+
+        </LinearLayout>
+
+        <!-- Chat List -->
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefreshLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/ll_filter">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_chat_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:listitem="@layout/item_chat_room"/>
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+        <RelativeLayout
+            android:visibility="gone"
+            android:id="@+id/rl_loading"
+            android:layout_below="@+id/ll_filter"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/txt_loading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:text="@string/txt_loading"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+        </RelativeLayout>
+
+        <!-- Floating Action Button -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:visibility="gone"
+            android:id="@+id/btn_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:text="@string/txt_loading"
-            android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:contentDescription="@string/fab_description"
+            android:src="@mipmap/ic_add_white" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:visibility="gone"
+            android:id="@+id/btn_fab_admin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="16dp"
+            android:contentDescription="@string/fab_description"
+            android:src="@drawable/customer_service_white" />
+
+        <Button
+            android:visibility="gone"
+            android:id="@+id/btn_check_location"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginHorizontal="8dp"
+            android:padding="8dp"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:text="Cek Lokasi" />
+
+        <include
+            android:visibility="gone"
+            android:id="@+id/includeSwipeRefreshHint"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            layout="@layout/component_swipe_refresh_hint"/>
 
     </RelativeLayout>
 
-    <!-- Floating Action Button -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:visibility="gone"
-        android:id="@+id/btn_fab"
+    <com.google.android.material.navigation.NavigationView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="16dp"
-        android:contentDescription="@string/fab_description"
-        android:src="@mipmap/ic_add_white" />
+        android:layout_height="match_parent"
+        android:id="@+id/nav_view"
+        android:layout_gravity="start"
+        app:headerLayout="@layout/nav_main_menu_header"
+        app:menu="@menu/nav_main_menu"
+        android:background="@color/navMainMenuBackground"
+        app:itemIconTint="@color/navMainMenuTint"
+        app:itemTextColor="@color/navMainMenu"/>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:visibility="gone"
-        android:id="@+id/btn_fab_admin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="16dp"
-        android:contentDescription="@string/fab_description"
-        android:src="@drawable/customer_service_white" />
-
-    <Button
-        android:visibility="gone"
-        android:id="@+id/btn_check_location"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginHorizontal="8dp"
-        android:padding="8dp"
-        android:textSize="14sp"
-        android:textStyle="bold"
-        android:text="Cek Lokasi" />
-
-</RelativeLayout>
+</androidx.drawerlayout.widget.DrawerLayout>

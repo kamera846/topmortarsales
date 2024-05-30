@@ -17,12 +17,19 @@
             android:layout_alignParentTop="true"
             layout="@layout/component_badge_refresh"/>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:layout_below="@+id/badgeRefresh"
-            android:id="@+id/rv_chat_list"
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefreshLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:listitem="@layout/item_chat_room"/>
+            android:layout_below="@+id/badgeRefresh">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_chat_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:listitem="@layout/item_chat_room"/>
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:visibility="visible"
@@ -38,11 +45,10 @@
 
         <TextView
             android:visibility="gone"
-            android:layout_below="@+id/badgeRefresh"
             android:id="@+id/txt_loading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
+            android:layout_centerInParent="true"
             android:padding="16dp"
             android:text="@string/txt_loading"
             android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />

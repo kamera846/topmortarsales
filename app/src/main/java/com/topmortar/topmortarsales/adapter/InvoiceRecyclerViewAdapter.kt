@@ -63,14 +63,12 @@ class InvoiceRecyclerViewAdapter(private val itemClickListener: ItemClickListene
                 DateFormat.format(itemDate, "yyyy-MM-dd HH:mm:ss", "dd MMMM, HH:mm")
             }
             tvPhoneNumber.text = item.no_surat_jalan + " | " + dateFormat
-            when (item.status_invoice) {
-                INVOICE_PAID -> {
-                    tooltipStatus.setImageDrawable(context?.let { ContextCompat.getDrawable(it, R.drawable.status_active) })
-                    tooltipHandler(tooltipStatus, "Invoice has been paid")
-                } else -> {
-                    tooltipStatus.setImageDrawable(context?.let { ContextCompat.getDrawable(it, R.drawable.status_data) })
-                    tooltipHandler(tooltipStatus, "Unpaid invoice")
-                }
+            if (item.status_invoice == INVOICE_PAID || item.total_invoice == "0") {
+                tooltipStatus.setImageDrawable(context?.let { ContextCompat.getDrawable(it, R.drawable.status_active) })
+                tooltipHandler(tooltipStatus, "Invoice has been paid")
+            } else {
+                tooltipStatus.setImageDrawable(context?.let { ContextCompat.getDrawable(it, R.drawable.status_data) })
+                tooltipHandler(tooltipStatus, "Unpaid invoice")
             }
 
         }

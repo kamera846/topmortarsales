@@ -3,11 +3,13 @@ package com.topmortar.topmortarsales.adapter.viewpager
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
+import com.topmortar.topmortarsales.commons.SALES_REPORT_RENVI
 import com.topmortar.topmortarsales.view.rencanaVisits.JatemFragment
 import com.topmortar.topmortarsales.view.rencanaVisits.PasifRenViFragment
+import com.topmortar.topmortarsales.view.rencanaVisits.TagihMingguanFragment
 import com.topmortar.topmortarsales.view.rencanaVisits.VoucherRenViFragment
 
-class RencanaVisitVPA(fm: FragmentManager) : FragmentPagerAdapter(fm) {
+class RencanaVisitVPA(fm: FragmentManager, private var tabSize: Int) : FragmentPagerAdapter(fm) {
 
     private var listener: CounterPageItem? = null
     interface CounterPageItem {
@@ -19,11 +21,13 @@ class RencanaVisitVPA(fm: FragmentManager) : FragmentPagerAdapter(fm) {
     private lateinit var frgamentJatem: JatemFragment
     private lateinit var fragmentVoucherRenVi: VoucherRenViFragment
     private lateinit var fragmentPasifRenViFragment: PasifRenViFragment
+    private lateinit var fragmentWeekly: TagihMingguanFragment
     fun setSyncAction(index: Int) {
         when (index) {
             0 -> frgamentJatem.syncNow()
             1 -> fragmentVoucherRenVi.syncNow()
             2 -> fragmentPasifRenViFragment.syncNow()
+            3 -> fragmentWeekly.syncNow()
         }
     }
 
@@ -34,7 +38,7 @@ class RencanaVisitVPA(fm: FragmentManager) : FragmentPagerAdapter(fm) {
                 frgamentJatem = JatemFragment()
                 frgamentJatem.setCounterItem(object : JatemFragment.CounterItem{
                     override fun counterItem(count: Int) {
-                        listener?.counterItem(count, 0)
+                        listener?.counterItem(count, position)
                     }
 
                 })
@@ -46,36 +50,41 @@ class RencanaVisitVPA(fm: FragmentManager) : FragmentPagerAdapter(fm) {
                 fragmentVoucherRenVi = VoucherRenViFragment()
                 fragmentVoucherRenVi.setCounterItem(object : VoucherRenViFragment.CounterItem{
                     override fun counterItem(count: Int) {
-                        listener?.counterItem(count, 1)
+                        listener?.counterItem(count, position)
                     }
 
                 })
                 return fragmentVoucherRenVi
 
-            } else -> {
+            }
+            2 -> {
 
                 fragmentPasifRenViFragment = PasifRenViFragment()
                 fragmentPasifRenViFragment.setCounterItem(object : PasifRenViFragment.CounterItem{
                     override fun counterItem(count: Int) {
-                        listener?.counterItem(count, 2)
+                        listener?.counterItem(count, position)
                     }
 
                 })
                 return fragmentPasifRenViFragment
+
+            } else -> {
+
+                fragmentWeekly = TagihMingguanFragment()
+                fragmentWeekly.setReportSource(SALES_REPORT_RENVI)
+                fragmentWeekly.setCounterItem(object : TagihMingguanFragment.CounterItem{
+                    override fun counterItem(count: Int) {
+                        listener?.counterItem(count, position)
+                    }
+
+                })
+                return fragmentWeekly
 
             }
         }
     }
 
     override fun getCount(): Int {
-        return 3
-    }
-
-    override fun getPageTitle(position: Int): CharSequence {
-        return when (position) {
-            0 -> "Jatuh Tempo"
-            1 -> "Voucher"
-            else -> "Pasif"
-        }
+        return tabSize
     }
 }

@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.LAYOUT_GRID
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -21,6 +22,7 @@ class ReportsRecyclerViewAdapter : RecyclerView.Adapter<ReportsRecyclerViewAdapt
     private var listItem: ArrayList<ReportVisitModel> = ArrayList()
     private var context: Context? = null
     private var withName: Boolean? = null
+    private var layoutStatus: String? = null
     private var isCourier = false
 
     interface OnItemClickListener {
@@ -39,12 +41,16 @@ class ReportsRecyclerViewAdapter : RecyclerView.Adapter<ReportsRecyclerViewAdapt
     fun setWithName(withName: Boolean?) {
         this.withName = withName
     }
+    fun setLayoutStatus(layoutStatus: String?) {
+        this.layoutStatus = layoutStatus
+    }
 
     inner class ViewHolder(private val binding: ItemReportsBinding) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: ReportVisitModel, position: Int) {
             binding.description.text = item.laporan_visit
             if (item.is_approved == "1") binding.icStatus.setImageDrawable(context!!.getDrawable(R.drawable.checkbox_circle_green))
+            else binding.icStatus.setImageDrawable(context!!.getDrawable(R.drawable.checkbox_circle_light))
 
             val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(item.date_visit)
             val dateFormat = if (date != null) {
@@ -66,8 +72,13 @@ class ReportsRecyclerViewAdapter : RecyclerView.Adapter<ReportsRecyclerViewAdapt
             binding.date.text = if (withName == true) "$stringDistance km\n$dateFormat" else dateFormat
 
             val layoutParams = binding.root.layoutParams as ViewGroup.MarginLayoutParams
-            if (position == 0 || position == 1) layoutParams.topMargin = convertDpToPx(16, context as Activity)
-            if (position == listItem.size - 1 || position == listItem.size - 2) layoutParams.bottomMargin = convertDpToPx(16, context as Activity)
+            if (layoutStatus == LAYOUT_GRID) {
+                if (position == 0 || position == 1) layoutParams.topMargin = convertDpToPx(16, context as Activity)
+                if (position == listItem.size - 1 || position == listItem.size - 2) layoutParams.bottomMargin = convertDpToPx(16, context as Activity)
+            } else {
+                if (position == 0) layoutParams.topMargin = convertDpToPx(16, context as Activity)
+                if (position == listItem.size - 1) layoutParams.bottomMargin = convertDpToPx(16, context as Activity)
+            }
 
             itemView.setOnClickListener {
                 listener?.onItemClick(item)

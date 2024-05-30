@@ -46,6 +46,7 @@ import com.topmortar.topmortarsales.commons.CONST_PROMO
 import com.topmortar.topmortarsales.commons.CONST_REPUTATION
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
+import com.topmortar.topmortarsales.commons.CONST_WEEKLY_VISIT_STATUS
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -123,6 +124,7 @@ class ClosingStoreFragment : Fragment() {
         binding.btnFabAdmin.setOnClickListener { navigateChatAdmin() }
 
         getContacts()
+        binding.swipeRefreshLayout.setOnRefreshListener { getContacts() }
 
         return view
     }
@@ -314,6 +316,7 @@ class ClosingStoreFragment : Fragment() {
             intent.putExtra(CONST_PROMO, data.id_promo)
             intent.putExtra(CONST_REPUTATION, data.reputation)
             intent.putExtra(CONST_DATE, data.created_at)
+            intent.putExtra(CONST_WEEKLY_VISIT_STATUS, data.tagih_mingguan)
         }
 
 //        (requireContext() as Activity).startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
@@ -330,10 +333,14 @@ class ClosingStoreFragment : Fragment() {
             binding.txtLoading.visibility = View.VISIBLE
             binding.rvChatList.visibility = View.GONE
 
+            binding.swipeRefreshLayout.isRefreshing = message === getString(R.string.txt_loading)
+
         } else {
 
             binding.txtLoading.visibility = View.GONE
             binding.rvChatList.visibility = View.VISIBLE
+
+            binding.swipeRefreshLayout.isRefreshing = false
 
         }
 

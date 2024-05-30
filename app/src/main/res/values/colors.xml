@@ -42,4 +42,7 @@
     <color name="status_blacklist">#EB5353</color>
     <color name="status_bid">#187498</color>
     <color name="baseBackground">@color/white</color>
+    <color name="navMainMenuBackground">@color/white</color>
+    <color name="navMainMenu">@color/black_200</color>
+    <color name="navMainMenuTint">@color/black</color>
 </resources>

@@ -185,4 +185,6 @@
     </string>
     <string name="text_by">oleh</string>
     <string name="get_contact_sales_err">Gagal mendapatkan data pembuat toko!</string>
+    <string name="now_you_can_swipe_to_refresh_list">Sekarang Anda dapat menarik layar untuk menyegarkan daftar!</string>
+    <string name="try_it">Tutup untuk mencoba</string>
 </resources>

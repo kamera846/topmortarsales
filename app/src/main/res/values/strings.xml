@@ -200,4 +200,8 @@
     <string name="text_by">by</string>
     <string name="get_contact_sales_err">Failed to get store creator data!</string>
 
+    <string name="open_nav" translatable="false">Open Navigation Drawer</string>
+    <string name="close_nav" translatable="false">Close Navigation Drawer</string>
+    <string name="now_you_can_swipe_to_refresh_list">Now you can swipe to refresh the list!</string>
+    <string name="try_it">Close to try it</string>
 </resources>

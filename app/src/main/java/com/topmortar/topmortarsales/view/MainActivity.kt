@@ -20,6 +20,7 @@ import android.util.Log
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.EditText
@@ -32,10 +33,13 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.view.GravityCompat
+import androidx.core.view.setMargins
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.navigation.NavigationView
 import com.google.firebase.database.DatabaseReference
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter
@@ -61,6 +65,7 @@ import com.topmortar.topmortarsales.commons.CONST_PROMO
 import com.topmortar.topmortarsales.commons.CONST_REPUTATION
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
+import com.topmortar.topmortarsales.commons.CONST_WEEKLY_VISIT_STATUS
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
@@ -110,7 +115,8 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 @SuppressLint("SetTextI18n")
-class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchModalListener {
+class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchModalListener,
+    NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var scaleAnimation: Animation
 
@@ -180,12 +186,136 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             )
         }
 
+        val popupMenu = binding.navView
+
+        val syncNowItem = popupMenu.menu.findItem(R.id.nav_sync_now)
+        val searchItem = popupMenu.menu.findItem(R.id.nav_search)
+        val userItem = popupMenu.menu.findItem(R.id.nav_user)
+        val myProfile = popupMenu.menu.findItem(R.id.nav_my_profile)
+        val cityItem = popupMenu.menu.findItem(R.id.nav_city)
+        val skillItem = popupMenu.menu.findItem(R.id.nav_skill)
+        val basecamp = popupMenu.menu.findItem(R.id.nav_basecamp)
+        val gudang = popupMenu.menu.findItem(R.id.nav_gudang)
+        val delivery = popupMenu.menu.findItem(R.id.nav_delivery)
+        val rencanaVisitGroup = popupMenu.menu.findItem(R.id.rencana_visit_group)
+        val rencanaVisit = popupMenu.menu.findItem(R.id.rencana_visit)
+        val rencanaVisitPenagihan = popupMenu.menu.findItem(R.id.rencana_visit_penagihan)
+
+        searchItem.isVisible = false
+        syncNowItem.isVisible = false
+        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
+            if (userKind == USER_KIND_ADMIN) {
+                userItem.isVisible = true
+                cityItem.isVisible = true
+                skillItem.isVisible = true
+                basecamp.isVisible = true
+                gudang.isVisible = true
+                delivery.isVisible = true
+                rencanaVisitGroup.isVisible = true
+                rencanaVisit.isVisible = true
+                rencanaVisitPenagihan.isVisible = true
+            } else {
+                userItem.isVisible = true
+                basecamp.isVisible = true
+                gudang.isVisible = true
+                delivery.isVisible = true
+                rencanaVisitGroup.isVisible = true
+                rencanaVisit.isVisible = true
+                rencanaVisitPenagihan.isVisible = true
+            }
+        }
+
+        if (sessionManager.userKind() != USER_KIND_SALES) {
+            myProfile.isVisible = false
+        }
+        binding.navView.setNavigationItemSelectedListener(this)
+        binding.titleBar.icMenu.visibility = View.VISIBLE
+        binding.titleBar.icMenu.setOnClickListener { binding.drawerLayout.openDrawer(GravityCompat.START) }
+//        val toggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav)
+//        drawerLayout.addDrawerListener(toggle)
+//        toggle.syncState()
+//        if (savedInstanceState == null) {
+//            supportFragmentManager.beginTransaction()
+//                .replace(R.id.fragment_container, HomeFragment()).commit()
+//            navigationView.setCheckedItem(R.id.option)
+//        }
+
         initVariable()
         initClickHandler()
         loadingState(true)
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            if (isSearchActive) {
+                searchContact()
+            } else {
+                if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
+                else getContacts()
+            }
+        }
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
         else getContacts()
 
+    }
+
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.nav_sync_now -> {
+                getUserLoggedIn()
+                true
+            }
+            R.id.nav_nearest_store -> {
+                navigateChecklocation()
+                true
+            }
+            R.id.nav_my_profile -> {
+                val intent = Intent(this@MainActivity, UserProfileActivity::class.java)
+                startActivity(intent)
+                true
+            }
+            R.id.nav_search -> {
+                toggleSearchEvent(SEARCH_OPEN)
+                true
+            }
+            R.id.nav_user -> {
+                startActivity(Intent(this@MainActivity, ManageUserActivity::class.java))
+                true
+            }
+            R.id.nav_city -> {
+                val intent = Intent(this@MainActivity, ManageCityActivity::class.java)
+                intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
+                startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
+                true
+            }
+            R.id.nav_skill -> {
+                startActivity(Intent(this@MainActivity, ManageSkillActivity::class.java))
+                true
+            }
+            R.id.nav_basecamp -> {
+                startActivity(Intent(this@MainActivity, ManageBasecampActivity::class.java))
+                true
+            }
+            R.id.nav_gudang -> {
+                startActivity(Intent(this@MainActivity, ManageGudangActivity::class.java))
+                true
+            }
+            R.id.nav_delivery -> {
+                startActivity(Intent(this@MainActivity, DeliveryActivity::class.java))
+                true
+            }
+            R.id.nav_logout -> {
+                logoutConfirmation()
+                true
+            }
+            R.id.rencana_visit -> {
+                startActivity(Intent(this@MainActivity, RencanaVisitActivity::class.java))
+                true
+            }
+            R.id.rencana_visit_penagihan -> {
+                startActivity(Intent(this@MainActivity, RencanaVisitPenagihanActivity::class.java))
+                true
+            }
+        }
+        binding.drawerLayout.closeDrawer(GravityCompat.START)
+        return true
     }
 
     private fun initVariable() {
@@ -208,12 +338,51 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         // Set Title Bar
         if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
             icMore.visibility = View.GONE
+            binding.titleBar.icMenu.visibility = View.GONE
             tvTitleBarDescription.visibility = View.GONE
             binding.titleBar.tvTitleBar.text = "Semua Toko"
             binding.titleBar.icBack.visibility = View.VISIBLE
             binding.titleBar.icBack.setOnClickListener { finish() }
         } else {
-            icMore.visibility = View.VISIBLE
+            if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
+                val contentWidht = convertDpToPx(40, this)
+                val contentHeight = convertDpToPx(40, this)
+                val paddingHorizontal = convertDpToPx(8, this)
+                val paddingVertival = convertDpToPx(8, this)
+                binding.titleBar.icMenu.visibility = View.VISIBLE
+                binding.titleBar.icMenu.layoutParams.width = contentWidht
+                binding.titleBar.icMenu.layoutParams.height = contentHeight
+                binding.titleBar.icMenu.setPadding(paddingHorizontal,paddingVertival,paddingHorizontal,paddingVertival)
+                (binding.titleBar.icMenu.layoutParams as ViewGroup.MarginLayoutParams).setMargins(0,0,paddingHorizontal,0)
+                binding.titleBar.icSearch.layoutParams.width = contentWidht
+                binding.titleBar.icSearch.layoutParams.height = contentHeight
+                binding.titleBar.icSearch.setPadding(paddingHorizontal,paddingVertival,paddingHorizontal,paddingVertival)
+                icMore.visibility = View.GONE
+
+                val headerView = binding.navView.getHeaderView(0)
+                val navFullName = headerView.findViewById<TextView>(R.id.nav_full_name)
+                val navUserName = headerView.findViewById<TextView>(R.id.navUserName)
+
+                sessionManager.fullName().let {
+                    if (!it.isNullOrEmpty()) {
+                        navFullName.visibility = View.VISIBLE
+                        navFullName.text = it
+                    } else {
+                        navFullName.visibility = View.GONE
+                    }
+                }
+                sessionManager.userName().let {
+                    if (!it.isNullOrEmpty()) {
+                        navUserName.visibility = View.VISIBLE
+                        navUserName.text = it
+                    } else {
+                        navUserName.visibility = View.GONE
+                    }
+                }
+            } else {
+                binding.titleBar.icMenu.visibility = View.GONE
+                icMore.visibility = View.VISIBLE
+            }
             binding.titleBar.icBack.visibility = View.GONE
             tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
             tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
@@ -262,10 +431,13 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             rlLoading.visibility = View.VISIBLE
             rvListChat.visibility = View.GONE
 
+            binding.swipeRefreshLayout.isRefreshing = message === getString(R.string.txt_loading)
+
         } else {
 
             rlLoading.visibility = View.GONE
             rvListChat.visibility = View.VISIBLE
+            binding.swipeRefreshLayout.isRefreshing = false
 
         }
 
@@ -331,6 +503,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             intent.putExtra(CONST_PROMO, data.id_promo)
             intent.putExtra(CONST_REPUTATION, data.reputation)
             intent.putExtra(CONST_DATE, data.created_at)
+            intent.putExtra(CONST_WEEKLY_VISIT_STATUS, data.tagih_mingguan)
         }
 
         startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
@@ -717,6 +890,8 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                     }
                 }
 
+                checkSwipeRefreshLayoutHint()
+
 
             } catch (e: Exception) {
 
@@ -1026,6 +1201,18 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         finish()
     }
 
+    private fun checkSwipeRefreshLayoutHint() {
+        val swipeRefreshHint = sessionManager.swipeRefreshHint()
+
+        if (!swipeRefreshHint) {
+            binding.includeSwipeRefreshHint.swipeRefreshHint.visibility = View.VISIBLE
+            binding.includeSwipeRefreshHint.btnTrySwipeRefresh.setOnClickListener {
+                binding.includeSwipeRefreshHint.swipeRefreshHint.visibility = View.GONE
+                sessionManager.swipeRefreshHint(true)
+            }
+        } else binding.includeSwipeRefreshHint.swipeRefreshHint.visibility = View.GONE
+    }
+
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -1046,24 +1233,30 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        if (isSearchActive) toggleSearchEvent(SEARCH_CLOSE)
-        else {
 
-            if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) super.onBackPressed()
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
+        } else {
+            if (isSearchActive) toggleSearchEvent(SEARCH_CLOSE)
             else {
-                if (doubleBackToExitPressedOnce) {
-                    super.onBackPressed()
-                    return
+
+                if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) super.onBackPressed()
+                else {
+                    if (doubleBackToExitPressedOnce) {
+                        super.onBackPressed()
+                        return
+                    }
+
+                    this@MainActivity.doubleBackToExitPressedOnce = true
+                    handleMessage(this@MainActivity, TAG_ACTION_MAIN_ACTIVITY, getString(R.string.tekan_sekali_lagi), TOAST_SHORT)
+
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        doubleBackToExitPressedOnce = false
+                    }, 2000)
                 }
-
-                this@MainActivity.doubleBackToExitPressedOnce = true
-                handleMessage(this@MainActivity, TAG_ACTION_MAIN_ACTIVITY, getString(R.string.tekan_sekali_lagi), TOAST_SHORT)
-
-                Handler(Looper.getMainLooper()).postDelayed({
-                    doubleBackToExitPressedOnce = false
-                }, 2000)
             }
         }
+
     }
 
     override fun onItemClick(data: ContactModel?) {

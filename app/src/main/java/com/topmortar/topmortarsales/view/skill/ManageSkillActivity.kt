@@ -24,6 +24,7 @@ import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.databinding.ActivityManageSkillBinding
 import com.topmortar.topmortarsales.modal.AddSkillModal
 import com.topmortar.topmortarsales.model.SkillModel
 import kotlinx.coroutines.launch
@@ -50,6 +51,7 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
 
     // Global
     private lateinit var sessionManager: SessionManager
+    private lateinit var binding: ActivityManageSkillBinding
     private val userDistributorId get() = sessionManager.userDistributor().toString()
     private lateinit var addCityModal: AddSkillModal
 
@@ -60,13 +62,15 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
         supportActionBar?.hide()
         sessionManager = SessionManager(this)
 
-        setContentView(R.layout.activity_manage_skill)
+        binding = ActivityManageSkillBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
 
         initVariable()
         initClickHandler()
         getList()
+        binding.swipeRefreshLayout.setOnRefreshListener { getList() }
 
     }
 
@@ -185,11 +189,13 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
 
             rlLoading.visibility = View.VISIBLE
             rvListItem.visibility = View.GONE
+            binding.swipeRefreshLayout.isRefreshing = message === getString(R.string.txt_loading)
 
         } else {
 
             rlLoading.visibility = View.GONE
             rvListItem.visibility = View.VISIBLE
+            binding.swipeRefreshLayout.isRefreshing = false
 
         }
 

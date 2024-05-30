@@ -35,6 +35,7 @@ import com.topmortar.topmortarsales.commons.CONST_PROMO
 import com.topmortar.topmortarsales.commons.CONST_REPUTATION
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
+import com.topmortar.topmortarsales.commons.CONST_WEEKLY_VISIT_STATUS
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.PENAGIHAN_REPORT_RENVI
 import com.topmortar.topmortarsales.commons.REPORT_SOURCE
@@ -105,6 +106,7 @@ class JatemPenagihan3Fragment : Fragment() {
 
 //        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
         getList()
+        binding.swipeRefreshLayout.setOnRefreshListener { getList() }
 
         return view
     }
@@ -188,6 +190,7 @@ class JatemPenagihan3Fragment : Fragment() {
                     intent.putExtra(CONST_REPUTATION, data.reputation)
                     intent.putExtra(CONST_DATE, data.created_at_store)
                     intent.putExtra(REPORT_SOURCE, PENAGIHAN_REPORT_RENVI)
+                    intent.putExtra(CONST_WEEKLY_VISIT_STATUS, data.tagih_mingguan)
                 }
 
                 startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
@@ -230,10 +233,14 @@ class JatemPenagihan3Fragment : Fragment() {
             binding.txtLoading.visibility = View.VISIBLE
             binding.rvChatList.visibility = View.GONE
 
+            binding.swipeRefreshLayout.isRefreshing = message === getString(R.string.txt_loading)
+
         } else {
 
             binding.txtLoading.visibility = View.GONE
             binding.rvChatList.visibility = View.VISIBLE
+
+            binding.swipeRefreshLayout.isRefreshing = false
 
         }
 

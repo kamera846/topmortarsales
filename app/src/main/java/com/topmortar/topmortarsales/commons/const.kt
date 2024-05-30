@@ -128,6 +128,7 @@ const val CONST_MAPS = "const_maps"
 const val CONST_MAPS_NAME = "const_maps_name"
 const val CONST_MAPS_STATUS = "const_maps_status"
 const val CONST_STATUS = "const_status"
+const val CONST_WEEKLY_VISIT_STATUS = "const_weekly_visit_status"
 const val CONST_PAYMENT_METHOD = "const_payment_method"
 const val CONST_TERMIN = "const_termin"
 const val CONST_REPUTATION = "const_reputation"
@@ -190,6 +191,9 @@ const val ALL_REPORT = "all"
 const val NORMAL_REPORT = "normal"
 const val SALES_REPORT_RENVI = "renvisales"
 const val PENAGIHAN_REPORT_RENVI = "renvipenagihan"
+
+const val LAYOUT_GRID = "layout_grid"
+const val LAYOUT_ROW = "layout_row"
 
 /*
     User Kind

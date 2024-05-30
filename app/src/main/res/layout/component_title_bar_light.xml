@@ -30,6 +30,10 @@
             android:text="@string/top_mortar_sales"
             android:textSize="18sp"
             android:textStyle="bold"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:focusable="true"
+            android:singleLine="true"
             android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
 
         <TextView

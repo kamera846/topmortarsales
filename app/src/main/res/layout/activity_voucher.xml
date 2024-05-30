@@ -14,15 +14,23 @@
         android:visibility="gone"
         android:id="@+id/txt_loading"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center"
         android:padding="16dp"
         android:textAlignment="center"
         android:text="@string/txt_loading"
         android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_list"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:listitem="@layout/item_chat_room"/>
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:listitem="@layout/item_chat_room"/>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </LinearLayout>

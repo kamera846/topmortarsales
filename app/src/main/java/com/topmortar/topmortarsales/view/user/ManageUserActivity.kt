@@ -104,6 +104,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
         initVariable()
         initClickHandler()
         getList()
+        binding.swipeRefreshLayout.setOnRefreshListener { getList() }
 
     }
 
@@ -231,10 +232,13 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
             rlLoading.visibility = View.VISIBLE
             rvListItem.visibility = View.GONE
 
+            binding.swipeRefreshLayout.isRefreshing = message === getString(R.string.txt_loading)
+
         } else {
 
             rlLoading.visibility = View.GONE
             rvListItem.visibility = View.VISIBLE
+            binding.swipeRefreshLayout.isRefreshing = false
 
         }
 

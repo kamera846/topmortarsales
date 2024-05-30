@@ -13,14 +13,23 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.DeliveryModel
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 @SuppressLint("SetTextI18n")
 class HistoryDeliveryRecyclerViewAdapter(private val listItem: ArrayList<DeliveryModel.History>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<HistoryDeliveryRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
+    private var isHistoryCourier: Boolean = false
 
     interface ItemClickListener {
         fun onItemClick(data: DeliveryModel.History? = null)
+    }
+
+    fun isHistoryCourier(state: Boolean) {
+        this.isHistoryCourier = state
     }
 
     inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -32,8 +41,20 @@ class HistoryDeliveryRecyclerViewAdapter(private val listItem: ArrayList<Deliver
         fun bind(item: DeliveryModel.History) {
 
             tvContactName.text = item.nama
-            tvPhoneNumber.text = "Diselesaikan oleh " + item.full_name
+            tvPhoneNumber.text = "Diselesaikan " + if (isHistoryCourier) "pada " + formatDateYear(item.endDatetime) else "oleh " + item.full_name
 
+        }
+
+        private fun formatDateYear(dateString: String, dateStringFormat: String = "yyyy-MM-dd HH:mm:ss"): String {
+            val date = SimpleDateFormat(dateStringFormat, Locale.getDefault()).parse(dateString)
+            return if (date != null) {
+                val calendar = Calendar.getInstance()
+                val currentYear = calendar.get(Calendar.YEAR)
+                val dateYear = SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
+
+                if (currentYear == dateYear.toInt()) DateFormat.format(dateString, dateStringFormat, "dd MMM, HH:mm")
+                else DateFormat.format(dateString, dateStringFormat, "dd MMM yyyy, HH:mm")
+            } else DateFormat.format(dateString, dateStringFormat, "dd MMM, HH:mm")
         }
 
     }

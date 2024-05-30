@@ -96,6 +96,7 @@ interface ApiService {
         @Part("mapsUrl") mapsUrl: RequestBody,
         @Part("address") address: RequestBody,
         @Part("status") status: RequestBody,
+        @Part("tagih_mingguan") tagihanMingguan: RequestBody,
         @Part("payment_method") paymentMethod: RequestBody,
         @Part("termin_payment") termin: RequestBody,
         @Part("reputation") reputation: RequestBody,
@@ -631,6 +632,18 @@ interface ApiService {
     @GET(RENCANA_VISIT)
     suspend fun targetPasifDst(
         @Query("type") type: String = "passive",
+        @Query("dst") idDistributor: String,
+    ): ResponseRencanaVisit
+
+    @GET(RENCANA_VISIT)
+    suspend fun targetWeekly(
+        @Query("type") type: String = "tagih_mingguan",
+        @Query("c") idCity: String,
+    ): ResponseRencanaVisit
+
+    @GET(RENCANA_VISIT)
+    suspend fun targetWeeklyDst(
+        @Query("type") type: String = "tagih_mingguan",
         @Query("dst") idDistributor: String,
     ): ResponseRencanaVisit
 
