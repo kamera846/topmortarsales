@@ -16,6 +16,7 @@ import com.topmortar.topmortarsales.commons.GET_USERS
 import com.topmortar.topmortarsales.commons.INVOICE
 import com.topmortar.topmortarsales.commons.NORMAL_REPORT
 import com.topmortar.topmortarsales.commons.PAYMENT
+import com.topmortar.topmortarsales.commons.PRODUCT
 import com.topmortar.topmortarsales.commons.PROMO
 import com.topmortar.topmortarsales.commons.RENCANA_VISIT
 import com.topmortar.topmortarsales.commons.RENCANA_VISIT_PENAGIHAN
@@ -47,6 +48,7 @@ import com.topmortar.topmortarsales.response.ResponseInvoice
 import com.topmortar.topmortarsales.response.ResponseList
 import com.topmortar.topmortarsales.response.ResponseMessage
 import com.topmortar.topmortarsales.response.ResponsePayment
+import com.topmortar.topmortarsales.response.ResponseProduct
 import com.topmortar.topmortarsales.response.ResponsePromo
 import com.topmortar.topmortarsales.response.ResponseRencanaVisit
 import com.topmortar.topmortarsales.response.ResponseReportVisit
@@ -659,4 +661,9 @@ interface ApiService {
     suspend fun getContactSales(
         @Query("contact") idContact: String,
     ): ResponseContactSales
+
+    @GET(PRODUCT)
+    suspend fun getProducts(
+        @Query("c") idCity: String,
+    ): ResponseProduct
 }
