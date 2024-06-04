@@ -204,4 +204,5 @@
     <string name="close_nav" translatable="false">Close Navigation Drawer</string>
     <string name="now_you_can_swipe_to_refresh_list">Now you can swipe to refresh the list!</string>
     <string name="try_it">Close to try it</string>
+    <string name="list_product">Daftar Produk</string>
 </resources>

@@ -106,6 +106,7 @@ import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
 import com.topmortar.topmortarsales.view.courier.ManageBasecampActivity
 import com.topmortar.topmortarsales.view.delivery.DeliveryActivity
 import com.topmortar.topmortarsales.view.gudang.ManageGudangActivity
+import com.topmortar.topmortarsales.view.product.ProductsActivity
 import com.topmortar.topmortarsales.view.rencanaVisits.RencanaVisitActivity
 import com.topmortar.topmortarsales.view.rencanaVisits.RencanaVisitPenagihanActivity
 import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
@@ -190,6 +191,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
         val syncNowItem = popupMenu.menu.findItem(R.id.nav_sync_now)
         val searchItem = popupMenu.menu.findItem(R.id.nav_search)
+        val productsItem = popupMenu.menu.findItem(R.id.nav_products)
         val userItem = popupMenu.menu.findItem(R.id.nav_user)
         val myProfile = popupMenu.menu.findItem(R.id.nav_my_profile)
         val cityItem = popupMenu.menu.findItem(R.id.nav_city)
@@ -205,24 +207,17 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         syncNowItem.isVisible = false
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
             if (userKind == USER_KIND_ADMIN) {
-                userItem.isVisible = true
                 cityItem.isVisible = true
                 skillItem.isVisible = true
-                basecamp.isVisible = true
-                gudang.isVisible = true
-                delivery.isVisible = true
-                rencanaVisitGroup.isVisible = true
-                rencanaVisit.isVisible = true
-                rencanaVisitPenagihan.isVisible = true
-            } else {
-                userItem.isVisible = true
-                basecamp.isVisible = true
-                gudang.isVisible = true
-                delivery.isVisible = true
-                rencanaVisitGroup.isVisible = true
-                rencanaVisit.isVisible = true
-                rencanaVisitPenagihan.isVisible = true
             }
+            productsItem.isVisible = true
+            userItem.isVisible = true
+            basecamp.isVisible = true
+            gudang.isVisible = true
+            delivery.isVisible = true
+            rencanaVisitGroup.isVisible = true
+            rencanaVisit.isVisible = true
+            rencanaVisitPenagihan.isVisible = true
         }
 
         if (sessionManager.userKind() != USER_KIND_SALES) {
@@ -273,6 +268,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             }
             R.id.nav_search -> {
                 toggleSearchEvent(SEARCH_OPEN)
+                true
+            }
+            R.id.nav_products -> {
+                startActivity(Intent(this@MainActivity, ProductsActivity::class.java))
                 true
             }
             R.id.nav_user -> {
