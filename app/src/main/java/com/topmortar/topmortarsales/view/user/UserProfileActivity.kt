@@ -371,16 +371,69 @@ class UserProfileActivity : AppCompatActivity() {
 
     }
 
-    private fun backHandler() {
+    private fun backHandler(unit: Unit? = null) {
         if (isRequestSync) {
             val resultIntent = Intent()
             resultIntent.putExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE", SYNC_NOW)
             setResult(RESULT_OK, resultIntent)
-            finish()
-        } else finish()
+            unit ?: finish()
+        } else unit ?: finish()
     }
 
+    private fun checkUserAllowLogout() {
+        val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+        val userChild = absentChild.child(iUserID ?: "0")
+        userChild.child("isAllowedLogout").addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    val isAllowed = snapshot.getValue(Boolean::class.java)
+                    if (isAllowed == true) {
+                        binding.btnAllowLogout.visibility = View.GONE
+                        binding.allowedLogoutInfoText.visibility = View.VISIBLE
+                        binding.textCancelAllowLogout.setOnClickListener { allowedLogoutConfirmation(false) }
+                    } else {
+                        binding.btnAllowLogout.visibility = View.VISIBLE
+                        binding.allowedLogoutInfoText.visibility = View.GONE
+                        binding.btnAllowLogout.setOnClickListener { allowedLogoutConfirmation(true) }
+                    }
+                } else {
+                    binding.btnAllowLogout.visibility = View.VISIBLE
+                    binding.allowedLogoutInfoText.visibility = View.GONE
+                    binding.btnAllowLogout.setOnClickListener { allowedLogoutConfirmation(true) }
+                }
+            }
 
+            override fun onCancelled(error: DatabaseError) {
+                binding.btnAllowLogout.visibility = View.VISIBLE
+                binding.allowedLogoutInfoText.visibility = View.GONE
+                binding.btnAllowLogout.setOnClickListener { allowedLogoutConfirmation(true) }
+            }
+
+        })
+    }
+
+    private fun allowLogoutHandler(state: Boolean) {
+        val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+        val userChild = absentChild.child(iUserID ?: "0")
+        userChild.child("isAllowedLogout").setValue(state)
+        checkUserAllowLogout()
+    }
+
+    private fun allowedLogoutConfirmation(state: Boolean) {
+        val message = "Apakah anda yakin akan " + (if (state) "mengizinkan" else "membatalkan izin") + " pengguna ini?"
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Konfirmasi Perizinan")
+            .setMessage(message)
+            .setNegativeButton("Tidak") { dialog, _ -> dialog.dismiss() }
+            .setPositiveButton("Iya") { dialog, _ ->
+
+                dialog.dismiss()
+                allowLogoutHandler(state)
+
+            }
+        val dialog = builder.create()
+        dialog.show()
+    }
 
     private fun logoutConfirmation() {
         val builder = AlertDialog.Builder(this)
@@ -530,6 +583,7 @@ class UserProfileActivity : AppCompatActivity() {
 
                                         if (DateFormat.dateAfterNow(absentEveningDate)) {
                                             // Absent evening false
+                                            if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) checkUserAllowLogout()
                                         } else {
                                             // Absent evening true
                                             val dateDescEvening = DateFormat.differenceDateNowDesc(eveningDateTime)
@@ -539,9 +593,11 @@ class UserProfileActivity : AppCompatActivity() {
                                         }
                                     } else {
                                         // Absent evening false
+                                        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) checkUserAllowLogout()
                                     }
                                 } else {
                                     // Absent evening false
+                                    if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) checkUserAllowLogout()
                                 }
 
                             }
@@ -663,7 +719,8 @@ class UserProfileActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        backHandler()
+        val superBack = super.onBackPressed()
+        backHandler(superBack)
     }
 
     override fun onStart() {
