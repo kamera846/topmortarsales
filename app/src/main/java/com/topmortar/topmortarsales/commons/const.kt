@@ -23,6 +23,7 @@ const val FIREBASE_CHILD_AUTH = "auth"
 const val FIREBASE_CHILD_DELIVERY = "delivery"
 const val FIREBASE_CHILD_ABSENT = "absent"
 const val FIREBASE_CHILD_DISTRIBUTOR = "distributor"
+const val FIREBASE_CHILD_IS_ALLOWED_LOGOUT = "isAllowedLogout"
 
 /*
     Global

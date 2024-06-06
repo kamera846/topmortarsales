@@ -37,6 +37,7 @@ import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_IS_ALLOWED_LOGOUT
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -387,7 +388,7 @@ class UserProfileActivity : AppCompatActivity() {
     private fun checkUserAllowLogout() {
         val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
         val userChild = absentChild.child(iUserID ?: "0")
-        userAllowedLogoutChild = userChild.child("isAllowedLogout")
+        userAllowedLogoutChild = userChild.child(FIREBASE_CHILD_IS_ALLOWED_LOGOUT)
         userAllowLogoutListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
@@ -442,7 +443,7 @@ class UserProfileActivity : AppCompatActivity() {
     private fun allowLogoutHandler(state: Boolean) {
         val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
         val userChild = absentChild.child(iUserID ?: "0")
-        userChild.child("isAllowedLogout").setValue(state)
+        userChild.child(FIREBASE_CHILD_IS_ALLOWED_LOGOUT).setValue(state)
         checkUserAllowLogout()
     }
 
@@ -502,7 +503,7 @@ class UserProfileActivity : AppCompatActivity() {
 
             // Reset value allowed logout
             val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
-            absentChild.child(sessionManager.userID() ?: "0").child("isAllowedLogout").setValue(false)
+            absentChild.child(sessionManager.userID() ?: "0").child(FIREBASE_CHILD_IS_ALLOWED_LOGOUT).setValue(false)
 
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
 //                Log.d("Kurir Logout", "${sessionManager.userDistributor()} : ${sessionManager.userID()}")
