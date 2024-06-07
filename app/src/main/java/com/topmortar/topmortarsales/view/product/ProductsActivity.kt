@@ -42,6 +42,7 @@ class ProductsActivity : AppCompatActivity() {
     private val userDistributorId get() = sessionManager.userDistributor()
     private val userKind get() = sessionManager.userKind()
     private val userCity get() = sessionManager.userCityID()
+    private val userCityName get() = sessionManager.userCityName()
 
     private lateinit var searchModal: SearchModal
     private var citiesResults: ArrayList<CityModel>? = null
@@ -68,11 +69,15 @@ class ProductsActivity : AppCompatActivity() {
         if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(this, R.color.black_400)
         else binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(this, R.color.light)
 
-        if (userKind == USER_KIND_ADMIN) getCities()
-        else getList()
+        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
+        else {
+            binding.titleBar.tvTitleBarDescription.visibility = View.VISIBLE
+            binding.titleBar.tvTitleBarDescription.text = "Di kota $userCityName"
+            getList()
+        }
 
         binding.swipeRefreshLayout.setOnRefreshListener {
-            if (userKind == USER_KIND_ADMIN) getCities()
+            if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
             else getList()
         }
 
@@ -105,6 +110,8 @@ class ProductsActivity : AppCompatActivity() {
 //                        binding.llFilter.componentFilter.visibility = View.GONE
 
                             selectedCity = items[0]
+                            binding.titleBar.tvTitleBarDescription.visibility = View.VISIBLE
+                            binding.titleBar.tvTitleBarDescription.text = "Di kota ${ items[0].title}"
                             binding.llFilter.tvFilter.text = items[0].title
                             getList()
 
@@ -143,9 +150,12 @@ class ProductsActivity : AppCompatActivity() {
             override fun onDataReceived(data: ModalSearchModel) {
                 if (data.id == "-1") {
                     selectedCity = null
+                    binding.titleBar.tvTitleBarDescription.visibility = View.GONE
                     binding.llFilter.tvFilter.text = getString(R.string.tidak_ada_filter)
                 } else {
                     selectedCity = data
+                    binding.titleBar.tvTitleBarDescription.visibility = View.VISIBLE
+                    binding.titleBar.tvTitleBarDescription.text = "Di kota ${ data.title}"
                     binding.llFilter.tvFilter.text = data.title
                 }
                 getList()

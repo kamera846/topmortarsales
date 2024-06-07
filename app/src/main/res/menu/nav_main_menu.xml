@@ -25,7 +25,7 @@
             android:title="@string/search" />
         <item
             android:id="@+id/nav_products"
-            android:icon="@drawable/person_group_black"
+            android:icon="@drawable/box_stacked_solid_black"
             android:title="@string/list_product"
             android:visible="false"/>
         <item

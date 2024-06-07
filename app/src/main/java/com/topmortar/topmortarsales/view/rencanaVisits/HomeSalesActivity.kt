@@ -85,6 +85,7 @@ import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.SplashScreenActivity
 import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
 import com.topmortar.topmortarsales.view.courier.AddBaseCampActivity
+import com.topmortar.topmortarsales.view.product.ProductsActivity
 import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.launch
@@ -237,6 +238,7 @@ class HomeSalesActivity : AppCompatActivity() {
         binding.myProfileItem.setOnClickListener { navigateToMyProfile() }
         binding.btnLogout.setOnClickListener { logoutConfirmation() }
         binding.reportDetail.setOnClickListener { navigateToListReport() }
+        binding.products.setOnClickListener { navigateToProduct() }
 
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
         if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.selectedStoreContainer.componentFilter.background = AppCompatResources.getDrawable(this, R.color.black_400)
@@ -333,6 +335,11 @@ class HomeSalesActivity : AppCompatActivity() {
         intent.putExtra(CONST_USER_ID, userId)
         intent.putExtra(CONST_FULL_NAME, userFullName)
         intent.putExtra(CONST_USER_LEVEL, AUTH_LEVEL_SALES)
+        startActivity(intent)
+    }
+
+    private fun navigateToProduct() {
+        val intent = Intent(this, ProductsActivity::class.java)
         startActivity(intent)
     }
 
