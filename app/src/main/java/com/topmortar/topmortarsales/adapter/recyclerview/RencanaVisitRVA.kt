@@ -34,6 +34,7 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
         val checkListImage: ImageView = itemView.findViewById(R.id.checklist)
         private val imgProfile: ImageView = itemView.findViewById(R.id.iv_contact_profile)
         private val textVerified: TextView = itemView.findViewById(R.id.textVerified)
+        private val badgeNew: TextView = itemView.findViewById(R.id.textCornerBadge)
 
         fun bind(item: RencanaVisitModel) {
 
@@ -64,6 +65,11 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
                 val terminPayment = item.termin_payment.toInt()
                 DateFormat.changeDateToDaysBeforeOrAfter(item.date_invoice, terminPayment, outputDateFormat = "dd MMMM yyyy")
             } else DateFormat.format(item.created_at)
+
+            if (!item.is_new.isNullOrEmpty()) {
+                if (item.is_new == "1") badgeNew.visibility = View.VISIBLE
+                else badgeNew.visibility = View.GONE
+            }
 
             tvContactName.text = item.nama
             tvPhoneNumber.text = dateJatem
