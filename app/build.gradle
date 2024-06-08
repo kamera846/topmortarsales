@@ -7,15 +7,15 @@ plugins {
 
 android {
     namespace 'com.topmortar.topmortarsales'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
 //        archivesBaseName "Top Mortar Sales"
         applicationId "com.topmortar.topmortarsales"
         minSdk 24
         targetSdk 33
-        versionCode 96
-        versionName "2.8.96"
+        versionCode 97
+        versionName "2.8.97"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -69,6 +69,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    implementation 'androidx.activity:activity-ktx:1.9.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'

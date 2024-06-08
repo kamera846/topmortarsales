@@ -24,19 +24,24 @@
             android:icon="@drawable/search_black"
             android:title="@string/search" />
         <item
+            android:id="@+id/nav_products"
+            android:icon="@drawable/box_stacked_solid_black"
+            android:title="@string/list_product"
+            android:visible="false"/>
+        <item
             android:id="@+id/nav_user"
             android:icon="@drawable/person_group_black"
             android:title="@string/manage_user"
             android:visible="false"/>
         <item
-            android:id="@+id/nav_city"
-            android:icon="@drawable/city_black"
-            android:title="@string/manage_city"
-            android:visible="false"/>
-        <item
             android:id="@+id/nav_skill"
             android:icon="@drawable/skill_black"
             android:title="@string/manage_skill"
+            android:visible="false"/>
+        <item
+            android:id="@+id/nav_city"
+            android:icon="@drawable/city_black"
+            android:title="@string/manage_city"
             android:visible="false"/>
         <item
             android:id="@+id/nav_basecamp"

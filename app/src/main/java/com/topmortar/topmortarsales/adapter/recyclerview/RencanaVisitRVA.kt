@@ -34,6 +34,7 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
         val checkListImage: ImageView = itemView.findViewById(R.id.checklist)
         private val imgProfile: ImageView = itemView.findViewById(R.id.iv_contact_profile)
         private val textVerified: TextView = itemView.findViewById(R.id.textVerified)
+        private val badgeNew: TextView = itemView.findViewById(R.id.textCornerBadge)
 
         fun bind(item: RencanaVisitModel) {
 
@@ -44,12 +45,12 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
             }
 
             val dateCounter = DateFormat.differenceDateNowDescCustom(item.created_at)
-            val formatDateCounter = when {
-                dateCounter == 0 -> "hari ini"
-                dateCounter == 1 -> "kemarin"
-                dateCounter > 1 -> "$dateCounter hari"
-                else -> ""
-            }
+//            val formatDateCounter = when {
+//                dateCounter == 0 -> "hari ini"
+//                dateCounter == 1 -> "kemarin"
+//                dateCounter > 1 -> "$dateCounter hari"
+//                else -> ""
+//            }
 
             if (dateCounter > 4 && typeRencana == "jatemPenagihan") itemView.setBackgroundColor(context!!.getColor(R.color.primary15))
             else itemView.setBackgroundColor(context!!.getColor(R.color.baseBackground))
@@ -60,14 +61,19 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
                 else -> "Jatuh tempo "
             }
 
-            dateJatem += if (item.termin_payment.isNotEmpty() && (typeRencana == "jatem" || typeRencana == "jatemPenagihan")) {
+            dateJatem += if (item.termin_payment.isNotEmpty() && item.termin_payment != "-1" && (typeRencana == "jatem" || typeRencana == "jatemPenagihan")) {
                 val terminPayment = item.termin_payment.toInt()
                 DateFormat.changeDateToDaysBeforeOrAfter(item.date_invoice, terminPayment, outputDateFormat = "dd MMMM yyyy")
             } else DateFormat.format(item.created_at)
 
+            if (!item.is_new.isNullOrEmpty()) {
+                if (item.is_new == "1") badgeNew.visibility = View.VISIBLE
+                else badgeNew.visibility = View.GONE
+            }
+
             tvContactName.text = item.nama
             tvPhoneNumber.text = dateJatem
-            textVerified.text = formatDateCounter
+            textVerified.text = "$dateCounter hari"
             textVerified.setBackgroundResource(R.drawable.bg_passive_round)
             textVerified.visibility = View.VISIBLE
 

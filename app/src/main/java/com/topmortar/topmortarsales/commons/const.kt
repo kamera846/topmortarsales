@@ -23,6 +23,7 @@ const val FIREBASE_CHILD_AUTH = "auth"
 const val FIREBASE_CHILD_DELIVERY = "delivery"
 const val FIREBASE_CHILD_ABSENT = "absent"
 const val FIREBASE_CHILD_DISTRIBUTOR = "distributor"
+const val FIREBASE_CHILD_IS_ALLOWED_LOGOUT = "isAllowedLogout"
 
 /*
     Global
@@ -80,6 +81,7 @@ const val SURAT_JALAN_NOT_CLOSING = "suratjalanNotClosing.php"
 const val RENCANA_VISIT = "rencanaVisit.php"
 const val RENCANA_VISIT_PENAGIHAN = "renvisPenagihan.php"
 const val GET_CONTACT_SALES = "getContactSales.php"
+const val PRODUCT = "produk.php"
 
 /*
     Request Code

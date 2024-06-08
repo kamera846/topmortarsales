@@ -31,7 +31,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.InstallException
 import com.google.android.play.core.install.model.AppUpdateType
+import com.google.android.play.core.install.model.InstallErrorCode
 import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -46,6 +48,7 @@ import com.topmortar.topmortarsales.commons.AUTH_LEVEL_MARKETING
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_IS_ALLOWED_LOGOUT
 import com.topmortar.topmortarsales.commons.LOGGED_IN
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -114,7 +117,7 @@ class SplashScreenActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private lateinit var firebaseReference: DatabaseReference
 
-    private val splashScreenDuration = 2000L
+    private val splashScreenDuration = 1000L
     private var isPasswordShow = false
     private var currentSubmitStep = 0
     private var idUserResetPassword: String? = null
@@ -138,10 +141,21 @@ class SplashScreenActivity : AppCompatActivity() {
             } else {
                 initView()
             }
-        }. addOnFailureListener {
-            Log.e("UPDATE HANDLER", "Error get information update $it")
+        }.addOnFailureListener { exception ->
+            Log.e("UPDATE HANDLER", "Error get information update $exception")
+            when ((exception as InstallException).errorCode) {
+                InstallErrorCode.ERROR_INSTALL_NOT_ALLOWED -> {
+                    // Berikan informasi yang lebih detail kepada pengguna
+                    Log.e("UPDATE HANDLER", "Install not allowed due to device state (e.g. low battery, low disk space)")
+                }
+                // Tangani error lainnya sesuai kebutuhan
+                else -> {
+                    Log.e("UPDATE HANDLER", "Other install error: ${exception.errorCode}")
+                }
+            }
             initView()
         }
+
 
     }
 
@@ -478,6 +492,11 @@ class SplashScreenActivity : AppCompatActivity() {
                                     }
 
                                 })
+
+                                // Reset isAllowedLogout value
+                                val absentChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
+                                absentChild.child(data.id_user).child(FIREBASE_CHILD_IS_ALLOWED_LOGOUT).setValue(false)
+
                             } catch (e: Exception) {
                                 Log.e("Firebase Auth", "$e")
                             }

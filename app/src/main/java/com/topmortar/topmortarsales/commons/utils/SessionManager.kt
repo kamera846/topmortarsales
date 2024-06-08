@@ -75,6 +75,15 @@ class SessionManager(context: Context) {
         return sharedPreferences.getString("userCityID", "")
     }
 
+    fun userCityName(userCityName: String) {
+        editor.putString("userCityName", userCityName)
+        editor.apply()
+    }
+
+    fun userCityName(): String? {
+        return sharedPreferences.getString("userCityName", "")
+    }
+
     fun pinMapHint(pinMapHint: Boolean) {
         editor.putBoolean("pinMapHint", pinMapHint)
         editor.apply()
@@ -216,6 +225,7 @@ class SessionManager(context: Context) {
             setUserName(tempData.username)
             setFullName(tempData.full_name)
             setUserCityID(tempData.id_city)
+            userCityName(tempData.nama_city)
             userBidLimit(tempData.bid_limit)
             userDistributor(tempData.id_distributor)
             userDistributorNumber(tempData.nomorhp_distributor)
@@ -225,6 +235,7 @@ class SessionManager(context: Context) {
             setUserName("")
             setFullName("")
             setUserCityID("")
+            userCityName("")
             userBidLimit("")
             userDistributor("")
             userDistributorNumber("")

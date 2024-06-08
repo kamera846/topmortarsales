@@ -37,6 +37,7 @@ import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_IS_ALLOWED_LOGOUT
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -89,7 +90,11 @@ class UserProfileActivity : AppCompatActivity() {
     private lateinit var firebaseReference: DatabaseReference
     private var childAbsent: DatabaseReference? = null
     private var childCourier: DatabaseReference? = null
+    private var userOnlineChild: DatabaseReference? = null
+    private var userAllowedLogoutChild: DatabaseReference? = null
+    private var userChildListener: ValueEventListener? = null
     private var courierTrackingListener: ValueEventListener? = null
+    private var userAllowLogoutListener: ValueEventListener? = null
 
     private var isAbsentMorningNow = false
     private var isAbsentEveningNow = false
@@ -371,16 +376,92 @@ class UserProfileActivity : AppCompatActivity() {
 
     }
 
-    private fun backHandler() {
+    private fun backHandler(unit: Unit? = null) {
         if (isRequestSync) {
             val resultIntent = Intent()
             resultIntent.putExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE", SYNC_NOW)
             setResult(RESULT_OK, resultIntent)
-            finish()
-        } else finish()
+            unit ?: finish()
+        } else unit ?: finish()
     }
 
+    private fun checkUserAllowLogout() {
+        val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+        val userChild = absentChild.child(iUserID ?: "0")
+        userAllowedLogoutChild = userChild.child(FIREBASE_CHILD_IS_ALLOWED_LOGOUT)
+        userAllowLogoutListener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
+                    if (snapshot.exists()) {
+                        val isAllowed = snapshot.getValue(Boolean::class.java)
+                        if (isAllowed == true) {
+                            binding.btnAllowLogout.visibility = View.GONE
+                            binding.allowedLogoutInfoText.visibility = View.VISIBLE
+                            binding.textCancelAllowLogout.setOnClickListener { allowedLogoutConfirmation(false) }
+                        } else {
+                            binding.btnAllowLogout.visibility = View.VISIBLE
+                            binding.allowedLogoutInfoText.visibility = View.GONE
+                            binding.btnAllowLogout.setOnClickListener { allowedLogoutConfirmation(true) }
+                        }
+                    } else {
+                        binding.btnAllowLogout.visibility = View.VISIBLE
+                        binding.allowedLogoutInfoText.visibility = View.GONE
+                        binding.btnAllowLogout.setOnClickListener { allowedLogoutConfirmation(true) }
+                    }
+                } else {
+                    if (snapshot.exists()) {
+                        val isAllowed = snapshot.getValue(Boolean::class.java)
+                        if (isAllowed == true) {
+                            binding.btnLogout.visibility = View.VISIBLE
+                            binding.lockedInfoText.visibility = View.GONE
+                        } else {
+                            binding.btnLogout.visibility = View.GONE
+                            binding.lockedInfoText.visibility = View.VISIBLE
+                        }
+                    } else {
+                        binding.btnLogout.visibility = View.GONE
+                        binding.lockedInfoText.visibility = View.VISIBLE
+                    }
+                }
+            }
 
+            override fun onCancelled(error: DatabaseError) {
+                if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
+                    binding.btnAllowLogout.visibility = View.VISIBLE
+                    binding.allowedLogoutInfoText.visibility = View.GONE
+                    binding.btnAllowLogout.setOnClickListener { allowedLogoutConfirmation(true) }
+                } else {
+                    binding.btnLogout.visibility = View.GONE
+                    binding.lockedInfoText.visibility = View.VISIBLE
+                }
+            }
+
+        }
+        userAllowedLogoutChild?.addValueEventListener(userAllowLogoutListener!!)
+    }
+
+    private fun allowLogoutHandler(state: Boolean) {
+        val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+        val userChild = absentChild.child(iUserID ?: "0")
+        userChild.child(FIREBASE_CHILD_IS_ALLOWED_LOGOUT).setValue(state)
+        checkUserAllowLogout()
+    }
+
+    private fun allowedLogoutConfirmation(state: Boolean) {
+        val message = "Apakah anda yakin akan " + (if (state) "mengizinkan" else "membatalkan izin") + " pengguna ini?"
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Konfirmasi Perizinan")
+            .setMessage(message)
+            .setNegativeButton("Tidak") { dialog, _ -> dialog.dismiss() }
+            .setPositiveButton("Iya") { dialog, _ ->
+
+                dialog.dismiss()
+                allowLogoutHandler(state)
+
+            }
+        val dialog = builder.create()
+        dialog.show()
+    }
 
     private fun logoutConfirmation() {
         val builder = AlertDialog.Builder(this)
@@ -420,6 +501,10 @@ class UserProfileActivity : AppCompatActivity() {
             userDevice.child("logout_at").setValue(DateFormat.now())
             userDevice.child("login_at").setValue("")
 
+            // Reset value allowed logout
+            val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+            absentChild.child(sessionManager.userID() ?: "0").child(FIREBASE_CHILD_IS_ALLOWED_LOGOUT).setValue(false)
+
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
 //                Log.d("Kurir Logout", "${sessionManager.userDistributor()} : ${sessionManager.userID()}")
                 CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor() ?: "-custom-019", sessionManager.userID().toString())
@@ -449,44 +534,57 @@ class UserProfileActivity : AppCompatActivity() {
     private fun  setupCourierMenu() {
         binding.absentDescription.text = getString(R.string.txt_loading)
 
-        val personCall = if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) "Anda" else "Pengguna"
-        val personcall = if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) "anda" else "pengguna"
+        val personCall = if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_COURIER) "Anda" else "Pengguna"
+        val personcall = if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_COURIER) "anda" else "pengguna"
 
         childAbsent = firebaseReference.child(FIREBASE_CHILD_ABSENT)
         childCourier = childAbsent?.child(iUserID ?: userId ?: "0")
+        userOnlineChild = childCourier?.child("isOnline")
 
-        if (userKind != USER_KIND_SALES && userKind != USER_KIND_PENAGIHAN) {
+        if (userKind != USER_KIND_SALES && userKind != USER_KIND_PENAGIHAN && userKind != USER_KIND_COURIER) {
             courierTrackingListener = object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     // Do something here
-                    if (snapshot.child("isOnline").exists()) {
+                    if (snapshot.exists()) {
 
                         val padding8 = convertDpToPx(8, this@UserProfileActivity)
                         val padding2 = convertDpToPx(2, this@UserProfileActivity)
                         binding.userStatus.visibility = View.VISIBLE
 
-                        val isOnline = snapshot.child("isOnline").getValue(Boolean::class.java) ?: false
+                        val isOnline = snapshot.getValue(Boolean::class.java) ?: false
                         if (isOnline) {
                             binding.userStatus.text = "Online"
                             binding.userStatus.setTextColor(getColor(R.color.white))
                             binding.userStatus.setBackgroundResource(R.drawable.bg_green_reseda_round_8)
                             binding.userStatus.setPadding(padding8, padding2, padding8, padding2)
                         } else {
-                            if (snapshot.child("lastSeen").exists()) {
-                                val lastSeen = snapshot.child("lastSeen").getValue(String::class.java).toString()
-                                val dateDescEvening = DateFormat.differenceDateNowDesc(lastSeen)
-                                val dateEvening =
-                                    DateFormat.format(lastSeen, "yyyy-MM-dd HH:mm:ss", "HH.mm")
-                                binding.userStatus.text = "Terakhir terlihat $dateEvening $dateDescEvening"
-                                binding.userStatus.setTextColor(getColor(R.color.black_200))
-                                binding.userStatus.setBackgroundResource(android.R.color.transparent)
-                                binding.userStatus.setPadding(0, padding2, 0, padding2)
-                            } else {
-                                binding.userStatus.text = "Offline"
-                                binding.userStatus.setTextColor(getColor(R.color.black_200))
-                                binding.userStatus.setBackgroundResource(R.drawable.bg_light_dark_round)
-                                binding.userStatus.setPadding(padding8, padding2, padding8, padding2)
-                            }
+                            childCourier!!.child("lastSeen").addListenerForSingleValueEvent(object : ValueEventListener {
+                                override fun onDataChange(lastSeenSnaphot: DataSnapshot) {
+                                    if (lastSeenSnaphot.exists()) {
+                                        val lastSeen = lastSeenSnaphot.getValue(String::class.java).toString()
+                                        val dateDescEvening = DateFormat.differenceDateNowDesc(lastSeen)
+                                        val dateEvening =
+                                            DateFormat.format(lastSeen, "yyyy-MM-dd HH:mm:ss", "HH.mm")
+                                        binding.userStatus.text = "Terakhir terlihat $dateEvening $dateDescEvening"
+                                        binding.userStatus.setTextColor(getColor(R.color.black_200))
+                                        binding.userStatus.setBackgroundResource(android.R.color.transparent)
+                                        binding.userStatus.setPadding(0, padding2, 0, padding2)
+                                    } else {
+                                        binding.userStatus.text = "Offline"
+                                        binding.userStatus.setTextColor(getColor(R.color.black_200))
+                                        binding.userStatus.setBackgroundResource(R.drawable.bg_light_dark_round)
+                                        binding.userStatus.setPadding(padding8, padding2, padding8, padding2)
+                                    }
+                                }
+
+                                override fun onCancelled(error: DatabaseError) {
+                                    binding.userStatus.text = "Offline"
+                                    binding.userStatus.setTextColor(getColor(R.color.black_200))
+                                    binding.userStatus.setBackgroundResource(R.drawable.bg_light_dark_round)
+                                    binding.userStatus.setPadding(padding8, padding2, padding8, padding2)
+                                }
+
+                            })
                         }
                     }
                 }
@@ -496,10 +594,10 @@ class UserProfileActivity : AppCompatActivity() {
                 }
 
             }
-            childCourier?.addValueEventListener(courierTrackingListener!!)
+            userOnlineChild?.addValueEventListener(courierTrackingListener!!)
         }
 
-        childCourier?.addListenerForSingleValueEvent(object : ValueEventListener {
+        userChildListener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
                     // Do something
@@ -530,6 +628,7 @@ class UserProfileActivity : AppCompatActivity() {
 
                                         if (DateFormat.dateAfterNow(absentEveningDate)) {
                                             // Absent evening false
+                                            if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) checkUserAllowLogout()
                                         } else {
                                             // Absent evening true
                                             val dateDescEvening = DateFormat.differenceDateNowDesc(eveningDateTime)
@@ -539,9 +638,11 @@ class UserProfileActivity : AppCompatActivity() {
                                         }
                                     } else {
                                         // Absent evening false
+                                        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) checkUserAllowLogout()
                                     }
                                 } else {
                                     // Absent evening false
+                                    if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) checkUserAllowLogout()
                                 }
 
                             }
@@ -567,7 +668,9 @@ class UserProfileActivity : AppCompatActivity() {
                 // Do something here
             }
 
-        })
+        }
+
+        childCourier?.addValueEventListener(userChildListener!!)
 
         binding.btnHistoryVisit.setOnClickListener { navigateHistoryVisit() }
         binding.btnCourierReport.setOnClickListener { navigateSalesReport() }
@@ -579,8 +682,7 @@ class UserProfileActivity : AppCompatActivity() {
         val currentHour = calendar.get(Calendar.HOUR_OF_DAY) // Mengambil jam saat ini dalam format 24 jam
 
         if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
-            binding.btnLogout.visibility = View.GONE
-            binding.lockedInfoText.visibility = View.VISIBLE
+            checkUserAllowLogout()
         } else {
             binding.btnLogout.visibility = View.VISIBLE
             binding.lockedInfoText.visibility = View.GONE
@@ -663,7 +765,8 @@ class UserProfileActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        backHandler()
+        val superBack = super.onBackPressed()
+        backHandler(superBack)
     }
 
     override fun onStart() {
@@ -698,6 +801,9 @@ class UserProfileActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        if (userChildListener != null) childCourier?.removeEventListener(userChildListener!!)
+        if (courierTrackingListener != null) userOnlineChild?.removeEventListener(courierTrackingListener!!)
+        if (userAllowLogoutListener != null) userAllowedLogoutChild?.removeEventListener(userAllowLogoutListener!!)
         if (sessionManager.isLoggedIn()) {
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
