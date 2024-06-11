@@ -657,6 +657,13 @@ interface ApiService {
         @Query("type") type: String,
     ): ResponseRencanaVisit
 
+    @GET(RENCANA_VISIT_PENAGIHAN)
+    suspend fun jatemPenagihanFilter(
+        @Query("dst") dst: String,
+        @Query("c") idCity: String,
+        @Query("type") type: String,
+    ): ResponseRencanaVisit
+
     @GET(GET_CONTACT_SALES)
     suspend fun getContactSales(
         @Query("contact") idContact: String,
