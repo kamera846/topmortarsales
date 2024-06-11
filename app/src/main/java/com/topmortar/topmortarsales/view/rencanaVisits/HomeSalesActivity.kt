@@ -1120,15 +1120,15 @@ class HomeSalesActivity : AppCompatActivity() {
                 )
             )
         }
-        listItem.add(
-            HomeMenuSalesModel(
-                icon = R.drawable.gudang_white,
-                bgColor = R.drawable.bg_blue_silver_lake_round_8,
-                title = "Semua Toko",
-                target = MainActivity::class.java,
-                isLocked = isLocked
-            )
-        )
+//        listItem.add(
+//            HomeMenuSalesModel(
+//                icon = R.drawable.gudang_white,
+//                bgColor = R.drawable.bg_blue_silver_lake_round_8,
+//                title = "Semua Toko",
+//                target = MainActivity::class.java,
+//                isLocked = isLocked
+//            )
+//        )
 
         setMenuItemAdapter(binding.rvVisit, listItem)
     }
