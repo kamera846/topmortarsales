@@ -37,7 +37,7 @@
 
     </LinearLayout>
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -195,144 +195,16 @@
                         android:background="@drawable/background_rounded_8_clickable"
                         android:orientation="vertical">
 
-                        <LinearLayout
-                            android:id="@+id/rencana_visit"
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvVisit"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/background_rounded_8_clickable"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:padding="12dp"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:padding="8dp"
-                                android:background="@drawable/bg_green_reseda_round_8"
-                                android:src="@drawable/store_white"/>
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Rencana Visit Sales"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:layout_marginHorizontal="16dp"
-                                android:ellipsize="marquee"
-                                android:singleLine="true"
-                                android:marqueeRepeatLimit="marquee_forever"
-                                android:focusable="true"
-                                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
-
-                            <ImageView
-                                android:id="@+id/rencana_visit_chevron"
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@drawable/chevron_right_dark"/>
-
-                        </LinearLayout>
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginHorizontal="24dp"
-                            android:theme="@style/Theme.TopMortarSales.BaseLine"/>
-
-                        <LinearLayout
-                            android:visibility="gone"
-                            android:id="@+id/rencana_visit_penagihan"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/background_rounded_8_clickable"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:padding="12dp"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:padding="8dp"
-                                android:background="@drawable/bg_green_reseda_round_8"
-                                android:src="@drawable/invoice_white_only"/>
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Rencana Visit Penagihan"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:layout_marginHorizontal="16dp"
-                                android:ellipsize="marquee"
-                                android:singleLine="true"
-                                android:marqueeRepeatLimit="marquee_forever"
-                                android:focusable="true"
-                                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
-
-                            <ImageView
-                                android:id="@+id/rencana_visit_penagihan_chevron"
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@drawable/chevron_right_dark"/>
-
-                        </LinearLayout>
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginHorizontal="24dp"
-                            android:theme="@style/Theme.TopMortarSales.BaseLine"/>
-
-                        <LinearLayout
-                            android:id="@+id/all_store"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/background_rounded_8_clickable"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:padding="12dp"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:padding="8dp"
-                                android:background="@drawable/bg_blue_silver_lake_round_8"
-                                android:src="@drawable/gudang_white"/>
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Semua Toko"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:layout_marginHorizontal="16dp"
-                                android:ellipsize="marquee"
-                                android:singleLine="true"
-                                android:marqueeRepeatLimit="marquee_forever"
-                                android:focusable="true"
-                                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
-
-                            <ImageView
-                                android:id="@+id/all_store_chevron"
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@drawable/chevron_right_dark"/>
-
-                        </LinearLayout>
+                            android:layout_height="wrap_content"/>
 
                     </LinearLayout>
 
                 </LinearLayout>
 
-                <!-- Visit Container -->
+                <!-- Store & Basecamp Container -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -353,189 +225,16 @@
                         android:background="@drawable/background_rounded_8_clickable"
                         android:orientation="vertical">
 
-                        <LinearLayout
-                            android:id="@+id/nearest_store_item"
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvStoreBasecamp"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/background_rounded_8_clickable"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:padding="12dp"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:padding="8dp"
-                                android:background="@drawable/bg_redwood_round_8"
-                                android:src="@drawable/location_white"/>
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Lihat Toko Terdekat"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:layout_marginHorizontal="16dp"
-                                android:ellipsize="marquee"
-                                android:singleLine="true"
-                                android:marqueeRepeatLimit="marquee_forever"
-                                android:focusable="true"
-                                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
-
-                            <ImageView
-                                android:id="@+id/nearest_store_item_chevron"
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@drawable/chevron_right_dark"/>
-
-                        </LinearLayout>
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginHorizontal="24dp"
-                            android:theme="@style/Theme.TopMortarSales.BaseLine"/>
-
-                        <LinearLayout
-                            android:id="@+id/register_new_store"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/background_rounded_8_clickable"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:padding="12dp"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:padding="8dp"
-                                android:background="@drawable/bg_yellow_hunyadi_round_8"
-                                android:src="@drawable/add_white"/>
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Daftarkan Toko Baru"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:layout_marginHorizontal="16dp"
-                                android:ellipsize="marquee"
-                                android:singleLine="true"
-                                android:marqueeRepeatLimit="marquee_forever"
-                                android:focusable="true"
-                                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
-
-                            <ImageView
-                                android:id="@+id/register_new_store_chevron"
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@drawable/chevron_right_dark"/>
-
-                        </LinearLayout>
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginHorizontal="24dp"
-                            android:theme="@style/Theme.TopMortarSales.BaseLine"/>
-
-                        <LinearLayout
-                            android:id="@+id/nearest_basecamp_item"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/background_rounded_8_clickable"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:padding="12dp"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:padding="8dp"
-                                android:background="@drawable/bg_redwood_round_8"
-                                android:src="@drawable/location_white"/>
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Lihat Basecamp Terdekat"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:layout_marginHorizontal="16dp"
-                                android:ellipsize="marquee"
-                                android:singleLine="true"
-                                android:marqueeRepeatLimit="marquee_forever"
-                                android:focusable="true"
-                                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
-
-                            <ImageView
-                                android:id="@+id/nearest_basecamp_item_chevron"
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@drawable/chevron_right_dark"/>
-
-                        </LinearLayout>
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginHorizontal="24dp"
-                            android:theme="@style/Theme.TopMortarSales.BaseLine"/>
-
-                        <LinearLayout
-                            android:id="@+id/register_new_basecamp"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/background_rounded_8_clickable"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:padding="12dp"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:padding="8dp"
-                                android:background="@drawable/bg_yellow_hunyadi_round_8"
-                                android:src="@drawable/add_white"/>
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Daftarkan Basecamp Baru"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:layout_marginHorizontal="16dp"
-                                android:ellipsize="marquee"
-                                android:singleLine="true"
-                                android:marqueeRepeatLimit="marquee_forever"
-                                android:focusable="true"
-                                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
-
-                            <ImageView
-                                android:id="@+id/register_new_basecamp_chevron"
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@drawable/chevron_right_dark"/>
-
-                        </LinearLayout>
+                            android:layout_height="wrap_content"/>
 
                     </LinearLayout>
 
                 </LinearLayout>
 
-                <!-- Visit Container -->
+                <!-- Others Container -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -556,133 +255,10 @@
                         android:background="@drawable/background_rounded_8_clickable"
                         android:orientation="vertical">
 
-                        <LinearLayout
-                            android:visibility="visible"
-                            android:id="@+id/products"
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rvOthers"
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/background_rounded_8_clickable"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:padding="12dp"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:padding="8dp"
-                                android:background="@drawable/bg_blue_indigo_dye_round_8"
-                                android:src="@drawable/boxes_stacked_solid"/>
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Lihat Produk"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:layout_marginHorizontal="16dp"
-                                android:ellipsize="marquee"
-                                android:singleLine="true"
-                                android:marqueeRepeatLimit="marquee_forever"
-                                android:focusable="true"
-                                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
-
-                            <ImageView
-                                android:id="@+id/products_chevron"
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@drawable/chevron_right_dark"/>
-
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:visibility="visible"
-                            android:id="@+id/report_detail"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/background_rounded_8_clickable"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:padding="12dp"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:padding="8dp"
-                                android:background="@drawable/bg_active_round_8"
-                                android:src="@drawable/file_list_white_only"/>
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Lihat Laporan Saya"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:layout_marginHorizontal="16dp"
-                                android:ellipsize="marquee"
-                                android:singleLine="true"
-                                android:marqueeRepeatLimit="marquee_forever"
-                                android:focusable="true"
-                                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
-
-                            <ImageView
-                                android:id="@+id/report_detail_chevron"
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@drawable/chevron_right_dark"/>
-
-                        </LinearLayout>
-
-                        <View
-                            android:layout_width="match_parent"
-                            android:layout_height="1dp"
-                            android:layout_marginHorizontal="24dp"
-                            android:theme="@style/Theme.TopMortarSales.BaseLine"/>
-
-                        <LinearLayout
-                            android:id="@+id/my_profile_item"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/background_rounded_8_clickable"
-                            android:clickable="true"
-                            android:focusable="true"
-                            android:padding="12dp"
-                            android:gravity="center_vertical"
-                            android:orientation="horizontal">
-
-                            <ImageView
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
-                                android:padding="8dp"
-                                android:background="@drawable/bg_primary_round_8"
-                                android:src="@drawable/user_add_white"/>
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="Profil Saya"
-                                android:textSize="16sp"
-                                android:textStyle="bold"
-                                android:layout_marginHorizontal="16dp"
-                                android:ellipsize="marquee"
-                                android:singleLine="true"
-                                android:marqueeRepeatLimit="marquee_forever"
-                                android:focusable="true"
-                                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
-
-                            <ImageView
-                                android:id="@+id/my_profile_item_chevron"
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@drawable/chevron_right_dark"/>
-
-                        </LinearLayout>
+                            android:layout_height="wrap_content"/>
 
                     </LinearLayout>
 
@@ -701,7 +277,7 @@
 
         </LinearLayout>
 
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
     <LinearLayout
         android:visibility="gone"

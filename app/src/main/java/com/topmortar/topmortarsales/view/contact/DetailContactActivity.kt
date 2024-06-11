@@ -277,6 +277,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private var isSearchCity = false
     private var isSearchPromo = false
+    private var isCitiesSuccessfullyLoad = false
 
     private lateinit var datePicker: DatePickerDialog
     private lateinit var searchModal: SearchModal
@@ -315,10 +316,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         getContact()
 //        dataActivityValidation()
         checkLocationPermission()
-
-        // Get List City
-        getCities()
-        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) getContactSales()
         if (userKind == USER_KIND_COURIER) {
             setupDelivery()
         } else {
@@ -1144,6 +1141,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     }
 
     private fun getContact() {
+
         contactId = intent.getStringExtra(CONST_CONTACT_ID) ?: "0"
         loadingState(true)
         if (!progressDialog.isShowing) progressDialog.show()
@@ -1283,6 +1281,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             setupPaymentMethodSpinner()
                             setupTerminSpinner()
                             setupReputationSpinner()
+                            setToGetCities()
 
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
@@ -1291,6 +1290,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             loadingState(false)
                             progressDialog.dismiss()
                             toggleEdit(false)
+                            setToGetCities()
 
                         }
                         else -> {
@@ -1299,6 +1299,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             loadingState(false)
                             progressDialog.dismiss()
                             toggleEdit(false)
+                            setToGetCities()
 
                         }
                     }
@@ -1309,6 +1310,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     loadingState(false)
                     progressDialog.dismiss()
                     toggleEdit(false)
+                    setToGetCities()
 
                 }
 
@@ -1319,9 +1321,18 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 loadingState(false)
                 progressDialog.dismiss()
                 toggleEdit(false)
+                setToGetCities()
 
             }
 
+        }
+    }
+
+    private fun setToGetCities() {
+        // Get List City
+        if (!isCitiesSuccessfullyLoad) {
+            if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) getContactSales()
+            else getCities()
         }
     }
 
@@ -1494,7 +1505,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
     }
 
-    private fun backHandler() {
+    private fun backHandler(unit: Unit? = null) {
 
         if (isEdit) toggleEdit(false)
         else {
@@ -1505,9 +1516,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 resultIntent.putExtra("$activityRequestCode", SYNC_NOW)
                 setResult(RESULT_OK, resultIntent)
 
-                finish()
+                unit ?: finish()
 
-            } else finish()
+            } else unit ?: finish()
 
         }
 
@@ -1736,22 +1747,23 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             // Membuat objek ContactSales baru
                             val contactSales = ContactSales(username = resultMap["username"].toString())
 
-                            println("Any data is object of $contactSales")
                             binding.textBy.visibility = View.VISIBLE
                             binding.textBy.text = " " + getString(R.string.text_by) + " " + contactSales.username
                         } else {
-                            println("Any data is $data")
                         }
+                        getCities()
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
                         // Empty creator name
+                        getCities()
 
                     }
                     else -> {
 
                         handleMessage(this@DetailContactActivity, "CONTACT SALES", getString(R.string.failed_get_data))
+                        getCities()
 
                     }
                 }
@@ -1760,16 +1772,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             } catch (e: Exception) {
 
                 handleMessage(this@DetailContactActivity, "CONTACT SALES", "Failed run service. Exception " + e.message)
+                getCities()
 
             }
-
-            getPromo()
 
         }
     }
 
     private fun getCities() {
-
         // Get Cities
         lifecycleScope.launch {
             try {
@@ -1800,6 +1810,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             etLocation.setText("")
                         }
 
+                        getPromo()
+
                         // Admin Access
 //                        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_SALES) {
 //                            icEdit.visibility = View.VISIBLE
@@ -1811,11 +1823,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     RESPONSE_STATUS_EMPTY -> {
 
                         handleMessage(this@DetailContactActivity, "LIST CITY", "Daftar kota kosong!")
+                        getPromo()
 
                     }
                     else -> {
 
                         handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        getPromo()
 
                     }
                 }
@@ -1824,10 +1838,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             } catch (e: Exception) {
 
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                getPromo()
 
             }
-
-            getPromo()
 
         }
     }
@@ -2253,8 +2266,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-//      return super.onBackPressed()
-        backHandler()
+        val superBack = super.onBackPressed()
+        backHandler(superBack)
     }
 
     // Interfade Search Modal

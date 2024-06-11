@@ -26,6 +26,8 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.database.DataSnapshot
@@ -33,6 +35,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.adapter.recyclerview.HomeSalesMenuRV
 import com.topmortar.topmortarsales.commons.ABSENT_MODE_BASECAMP
 import com.topmortar.topmortarsales.commons.ABSENT_MODE_STORE
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
@@ -79,6 +82,7 @@ import com.topmortar.topmortarsales.databinding.ActivityHomeSalesBinding
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.BaseCampModel
 import com.topmortar.topmortarsales.model.ContactModel
+import com.topmortar.topmortarsales.model.HomeMenuSalesModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MainActivity
 import com.topmortar.topmortarsales.view.MapsActivity
@@ -225,20 +229,7 @@ class HomeSalesActivity : AppCompatActivity() {
         initGlobalVariable()
         binding.fullName.text = userFullName
 
-        binding.rencanaVisit.setOnClickListener { if (isLocked) showDialogLockedFeature() else navigateToTargetVisit() }
-        if (userKind == USER_KIND_PENAGIHAN) {
-            binding.rencanaVisitPenagihan.visibility = View.VISIBLE
-            binding.rencanaVisitPenagihan.setOnClickListener { if (isLocked) showDialogLockedFeature() else navigateToTargetVisitPenagihan() }
-        } else binding.rencanaVisitPenagihan.visibility = View.GONE
-        binding.allStore.setOnClickListener { if (isLocked) showDialogLockedFeature() else navigateToAllStore()}
-        binding.nearestStoreItem.setOnClickListener { navigateToNearestStore()}
-        binding.registerNewStore.setOnClickListener { navigateToRegisterStore()}
-        binding.nearestBasecampItem.setOnClickListener { navigateToNearestBasecamp()}
-        binding.registerNewBasecamp.setOnClickListener { navigateToRegisterBasecamp()}
-        binding.myProfileItem.setOnClickListener { navigateToMyProfile() }
-        binding.btnLogout.setOnClickListener { logoutConfirmation() }
-        binding.reportDetail.setOnClickListener { navigateToListReport() }
-        binding.products.setOnClickListener { navigateToProduct() }
+        setListMenu()
 
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
         if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.selectedStoreContainer.componentFilter.background = AppCompatResources.getDrawable(this, R.color.black_400)
@@ -835,98 +826,6 @@ class HomeSalesActivity : AppCompatActivity() {
             absentProgressDialog?.dismiss()
             checkAbsent()
         }
-
-        return
-//        lifecycleScope.launch {
-//            try {
-//
-//                var visitReport = "Absen masuk\n•by system•"
-//                if (isAbsentMorningNow) visitReport = "Absen pulang\n•by system•"
-//
-//                val response = apiService.makeVisitReport(
-//                    idContact = createPartFromString(selectedStore?.id!!),
-//                    idUser = createPartFromString(userId!!),
-//                    laporanVisit = createPartFromString(visitReport),
-//                    distanceVisit = createPartFromString(shortDistance)
-//                )
-//
-//                if (response.isSuccessful) {
-//
-//                    val responseBody = response.body()!!
-//
-//                    when (responseBody.status) {
-//                        RESPONSE_STATUS_OK -> {
-//
-//                            val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
-//                            val userChild = absentChild.child(userId.toString())
-//
-//                            userChild.child("id").setValue(userId)
-//                            userChild.child("username").setValue(userName)
-//                            userChild.child("fullname").setValue(userFullName)
-//                            userChild.child("isOnline").setValue(true)
-//
-//                            if (!isAbsentMorningNow) {
-//
-//                                val absentDateTime = DateFormat.now()
-//                                userChild.child("morningDateTime").setValue(absentDateTime)
-//                                userChild.child("lastSeen").setValue(absentDateTime)
-//
-//                                sessionManager.absentDateTime(absentDateTime)
-//
-//                                if (!CustomUtility(this@HomeSalesActivity).isServiceRunning(
-//                                        TrackingService::class.java)) {
-//                                    val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
-//                                    serviceIntent.putExtra("userId", userId)
-//                                    serviceIntent.putExtra("userDistributorId", userDistributorId)
-//                                    serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
-//                                    this@HomeSalesActivity.startService(serviceIntent)
-//                                }
-//
-//                                absentProgressDialog?.dismiss()
-//                                checkAbsent()
-//                            } else {
-//
-//                                val absentDateTime = DateFormat.now()
-//                                userChild.child("eveningDateTime").setValue(absentDateTime)
-//                                userChild.child("lastSeen").setValue(absentDateTime)
-//
-//                                sessionManager.absentDateTime(absentDateTime)
-//
-//                                val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
-//                                this@HomeSalesActivity.stopService(serviceIntent)
-//
-//                                absentProgressDialog?.dismiss()
-//                                checkAbsent()
-//                            }
-//
-//                        }
-//                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
-//
-//                            absentProgressDialog?.dismiss()
-//                            handleMessage(this@HomeSalesActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan absen! Message: ${ responseBody.message }")
-//
-//                        }
-//                        else -> {
-//
-//                            absentProgressDialog?.dismiss()
-//                            handleMessage(this@HomeSalesActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
-//
-//                        }
-//                    }
-//                } else {
-//
-//                    absentProgressDialog?.dismiss()
-//                    handleMessage(this@HomeSalesActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan absen! Error: " + response.message())
-//
-//                }
-//
-//            } catch (e: Exception) {
-//
-//                handleMessage(this@HomeSalesActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
-//
-//            }
-//
-//        }
     }
 
     private fun checkAbsent() {
@@ -1046,13 +945,7 @@ class HomeSalesActivity : AppCompatActivity() {
         absentProgressDialog?.dismiss()
         isLocked = state
 
-        binding.rencanaVisit.alpha = if (state) 0.5f else 1f
-        binding.rencanaVisitPenagihan.alpha = if (state) 0.5f else 1f
-        binding.allStore.alpha = if (state) 0.5f else 1f
-
-        binding.rencanaVisitChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
-        binding.rencanaVisitPenagihanChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
-        binding.allStoreChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
+        setListMenu()
 
         if (isAbsentMorningNow && isAbsentEveningNow) {
 
@@ -1196,6 +1089,144 @@ class HomeSalesActivity : AppCompatActivity() {
 
         }
 
+    }
+
+    private fun setListMenu() {
+        setListVisit()
+        setListStoreBasecamp()
+        setListOthers()
+    }
+
+    private fun setListVisit() {
+        val listItem = arrayListOf<HomeMenuSalesModel>()
+
+        listItem.add(
+            HomeMenuSalesModel(
+                icon = R.drawable.store_white,
+                bgColor = R.drawable.bg_green_reseda_round_8,
+                title = "Rencana Visit Sales",
+                target = RencanaVisitActivity::class.java,
+                isLocked = isLocked
+            )
+        )
+        if (userKind == USER_KIND_PENAGIHAN) {
+            listItem.add(
+                HomeMenuSalesModel(
+                    icon = R.drawable.store_white,
+                    bgColor = R.drawable.bg_green_reseda_round_8,
+                    title = "Rencana Visit Penagihan",
+                    target = RencanaVisitPenagihanActivity::class.java,
+                    isLocked = isLocked
+                )
+            )
+        }
+//        listItem.add(
+//            HomeMenuSalesModel(
+//                icon = R.drawable.gudang_white,
+//                bgColor = R.drawable.bg_blue_silver_lake_round_8,
+//                title = "Semua Toko",
+//                target = MainActivity::class.java,
+//                isLocked = isLocked
+//            )
+//        )
+
+        setMenuItemAdapter(binding.rvVisit, listItem)
+    }
+
+    private fun setListStoreBasecamp() {
+        val listItem = arrayListOf<HomeMenuSalesModel>()
+
+        listItem.add(
+            HomeMenuSalesModel(
+                icon = R.drawable.location_white,
+                bgColor = R.drawable.bg_redwood_round_8,
+                title = "Lihat Toko Terdekat",
+                action = {navigateToNearestStore()},
+                isLocked = false
+            )
+        )
+        listItem.add(
+            HomeMenuSalesModel(
+                icon = R.drawable.add_white,
+                bgColor = R.drawable.bg_yellow_hunyadi_round_8,
+                title = "Daftar Toko Baru",
+                target = NewRoomChatFormActivity::class.java,
+                isLocked = false
+            )
+        )
+        listItem.add(
+            HomeMenuSalesModel(
+                icon = R.drawable.location_white,
+                bgColor = R.drawable.bg_redwood_round_8,
+                title = "Lihat Basecamp Terdekat",
+                action = {navigateToNearestBasecamp()},
+                isLocked = false
+            )
+        )
+        listItem.add(
+            HomeMenuSalesModel(
+                icon = R.drawable.add_white,
+                bgColor = R.drawable.bg_yellow_hunyadi_round_8,
+                title = "Daftar Basecamp Baru",
+                target = AddBaseCampActivity::class.java,
+                isLocked = false
+            )
+        )
+        setMenuItemAdapter(binding.rvStoreBasecamp, listItem)
+    }
+
+    private fun setListOthers() {
+        val listItem = arrayListOf<HomeMenuSalesModel>()
+
+        listItem.add(
+            HomeMenuSalesModel(
+                icon = R.drawable.boxes_stacked_solid,
+                bgColor = R.drawable.bg_blue_indigo_dye_round_8,
+                title = "Lihat Produk",
+                target = ProductsActivity::class.java,
+                isLocked = false
+            )
+        )
+        listItem.add(
+            HomeMenuSalesModel(
+                icon = R.drawable.file_list_white_only,
+                bgColor = R.drawable.bg_active_round_8,
+                title = "Lihat Laporan Saya",
+                action = { navigateToListReport() },
+                isLocked = false
+            )
+        )
+        listItem.add(
+            HomeMenuSalesModel(
+                icon = R.drawable.user_add_white,
+                bgColor = R.drawable.bg_primary_round_8,
+                title = "Profil Saya",
+                target = UserProfileActivity::class.java,
+                isLocked = false
+            )
+        )
+
+        setMenuItemAdapter(binding.rvOthers, listItem)
+    }
+
+    private fun setMenuItemAdapter(recyclerView: RecyclerView, listItem: ArrayList<HomeMenuSalesModel>) {
+        val menuItemAdapter = HomeSalesMenuRV()
+        menuItemAdapter.setList(listItem)
+        menuItemAdapter.setOnItemClickListener(object: HomeSalesMenuRV.OnItemClickListener {
+            override fun onItemClick(item: HomeMenuSalesModel) {
+                if (item.isLocked) showDialogLockedFeature()
+                else {
+                    if (item.target != null) startActivity(Intent(this@HomeSalesActivity, item.target))
+                    else item.action?.invoke()
+                }
+            }
+
+        })
+
+        recyclerView.apply {
+            adapter = menuItemAdapter
+            layoutManager = LinearLayoutManager(this@HomeSalesActivity)
+        }
     }
 
 // Override Class
