@@ -1505,7 +1505,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
     }
 
-    private fun backHandler() {
+    private fun backHandler(unit: Unit? = null) {
 
         if (isEdit) toggleEdit(false)
         else {
@@ -1516,9 +1516,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 resultIntent.putExtra("$activityRequestCode", SYNC_NOW)
                 setResult(RESULT_OK, resultIntent)
 
-                finish()
+                unit ?: finish()
 
-            } else finish()
+            } else unit ?: finish()
 
         }
 
@@ -2266,8 +2266,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-//      return super.onBackPressed()
-        backHandler()
+        val superBack = super.onBackPressed()
+        backHandler(superBack)
     }
 
     // Interfade Search Modal
