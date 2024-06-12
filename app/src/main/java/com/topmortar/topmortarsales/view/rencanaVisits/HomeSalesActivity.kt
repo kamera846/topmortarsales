@@ -1120,8 +1120,8 @@ class HomeSalesActivity : AppCompatActivity() {
                 )
             )
         }
-        // Number 4 is distributor ID for TKP (Special case for TKP )
-        if (userDistributorId == "4") {
+        // Number 1 is distributor ID for Center Distributor (Special case for Top Mortar Mitra)
+        if (userDistributorId != "1") {
             listItem.add(
                 HomeMenuSalesModel(
                     icon = R.drawable.gudang_white,
