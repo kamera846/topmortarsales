@@ -206,6 +206,7 @@ class TagihMingguanFragment : Fragment() {
 
         })
 
+        rvAdapter.setType("tagihMingguan")
         binding.rvChatList.layoutManager = LinearLayoutManager(requireContext())
         binding.rvChatList.adapter = rvAdapter
         binding.rvChatList.addOnScrollListener(object : RecyclerView.OnScrollListener() {

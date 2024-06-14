@@ -27,5 +27,6 @@ data class RencanaVisitModel(
     var reputation: String = "",
     var payment_method: String = "",
     var is_new: String? = null,
+    var jatuh_tempo: String = "",
     var date_invoice: String = ""
 )
