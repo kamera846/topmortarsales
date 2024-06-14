@@ -12,12 +12,12 @@ object DateFormat {
         return formatResult.format(calendar.time)
     }
 
-    fun format(dateString: String, input: String = "yyyy-MM-dd", format: String = "dd MMMM yyyy"): String {
-        val inputFormat = SimpleDateFormat(input, Locale.getDefault())
-        val outputFormat = SimpleDateFormat(format, Locale.getDefault())
+    fun format(dateString: String, inputFormat: String = "yyyy-MM-dd", outputFormat: String = "dd MMMM yyyy", inputLocale: Locale = Locale.getDefault(), outputLocale: Locale = Locale.getDefault()): String {
+        val dInputFormat = SimpleDateFormat(inputFormat, inputLocale)
+        val dOutputFormat = SimpleDateFormat(outputFormat, outputLocale)
 
-        val date = inputFormat.parse(dateString)
-        return outputFormat.format(date!!)
+        val date = dInputFormat.parse(dateString)
+        return dOutputFormat.format(date!!)
     }
 
     fun now(): String {
@@ -80,7 +80,7 @@ object DateFormat {
     }
 
     fun differenceDateNowDescCustom(dateString: String): Int {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val dateTime = dateFormat.parse(dateString)!!
 
         val calendar = Calendar.getInstance()

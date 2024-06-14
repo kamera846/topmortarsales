@@ -36,8 +36,8 @@ class VoucherRecyclerViewAdapter(private val chatList: ArrayList<VoucherModel>, 
             imgIcon.setImageResource(R.drawable.voucher_primary)
             tvContactName.text = item.no_voucher
 
-            if (item.exp_date.isNullOrEmpty()) tvPhoneNumber.text = "Berlaku " + DateFormat.format(item.date_voucher, format = "dd MMM yyyy") + " - belum ditentukan."
-            else tvPhoneNumber.text = "Berlaku " + DateFormat.format(item.date_voucher, format = "dd MMM yyyy") + " - " + DateFormat.format(item.exp_date!!, format = "dd MMM yyyy")
+            if (item.exp_date.isNullOrEmpty()) tvPhoneNumber.text = "Berlaku " + DateFormat.format(item.date_voucher, outputFormat = "dd MMM yyyy") + " - belum ditentukan."
+            else tvPhoneNumber.text = "Berlaku " + DateFormat.format(item.date_voucher, outputFormat = "dd MMM yyyy") + " - " + DateFormat.format(item.exp_date!!, outputFormat = "dd MMM yyyy")
 
             if (item.is_claimed == "1") {
                 textVerified.setBackgroundResource(R.drawable.bg_active_round)

@@ -33,7 +33,7 @@ class GudangRecyclerViewAdapter(private val chatList: ArrayList<GudangModel>, pr
         fun bind(chatItem: GudangModel) {
 
             tvContactName.text = chatItem.nama_warehouse
-            tvPhoneNumber.text = "Ditambahkan pada ${DateFormat.format(chatItem.created_at, format = "dd MMM yyyy")}"
+            tvPhoneNumber.text = "Ditambahkan pada ${DateFormat.format(chatItem.created_at, outputFormat = "dd MMM yyyy")}"
 
         }
 

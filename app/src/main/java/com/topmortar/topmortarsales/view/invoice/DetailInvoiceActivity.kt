@@ -128,7 +128,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         val iStatusInvoice = intent.getStringExtra(CONST_STATUS_INVOICE)
                         if (!iStatusInvoice.isNullOrEmpty()) {
                             if (iStatusInvoice == INVOICE_PAID || totalInvoice == "0") {
-                                tvDateInvoice.text = DateFormat.format(dateString = dateLastPayment, input = "yyyy-MM-dd HH:mm:ss", format = "EEEE, dd MMMM yyyy")
+                                tvDateInvoice.text = DateFormat.format(dateString = dateLastPayment, inputFormat = "yyyy-MM-dd HH:mm:ss", outputFormat = "EEEE, dd MMMM yyyy")
                                 tvStatus.text = "paid".uppercase(Locale.ROOT)
                                 tvStatus.setTextColor(getColor(R.color.white))
                                 tvStatus.setBackgroundResource(R.drawable.bg_active_round)
@@ -233,7 +233,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
         }
 
         if (!iDateInvoiceCreated.isNullOrEmpty()) {
-            binding.tvDateInvoiceCreated.text = DateFormat.format(dateString = iDateInvoiceCreated, input = "yyyy-MM-dd HH:mm:ss", format = "dd MMM yyyy HH.mm")
+            binding.tvDateInvoiceCreated.text = DateFormat.format(dateString = iDateInvoiceCreated, inputFormat = "yyyy-MM-dd HH:mm:ss", outputFormat = "dd MMM yyyy HH.mm")
         }
 
     }
