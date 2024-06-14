@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.RencanaVisitModel
+import java.util.Locale
 
 class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<RencanaVisitRVA.ChatViewHolder>() {
     private var context: Context? = null
@@ -45,30 +46,29 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
             }
 
             val dateCounter = DateFormat.differenceDateNowDescCustom(item.created_at)
-//            val formatDateCounter = when {
-//                dateCounter == 0 -> "hari ini"
-//                dateCounter == 1 -> "kemarin"
-//                dateCounter > 1 -> "$dateCounter hari"
-//                else -> ""
-//            }
 
             if (dateCounter > 4 && typeRencana == "jatemPenagihan") itemView.setBackgroundColor(context!!.getColor(R.color.primary15))
             else itemView.setBackgroundColor(context!!.getColor(R.color.baseBackground))
 
             var dateJatem = when (typeRencana) {
                 "voucher" -> "Didapatkan "
-                "passive" -> "Terakhir order "
+                "passive", "tagihMingguan" -> "Terakhir divisit "
                 else -> "Jatuh tempo "
             }
 
-            dateJatem += if (item.termin_payment.isNotEmpty() && item.termin_payment != "-1" && (typeRencana == "jatem" || typeRencana == "jatemPenagihan")) {
-                val terminPayment = item.termin_payment.toInt()
-                DateFormat.changeDateToDaysBeforeOrAfter(item.date_invoice, terminPayment, outputDateFormat = "dd MMMM yyyy")
+//            dateJatem += if (item.termin_payment.isNotEmpty() && item.termin_payment != "-1" && (typeRencana == "jatem" || typeRencana == "jatemPenagihan")) {
+//                val terminPayment = item.termin_payment.toInt()
+//                DateFormat.changeDateToDaysBeforeOrAfter(item.date_invoice, terminPayment, outputDateFormat = "dd MMMM yyyy")
+//            } else DateFormat.format(item.created_at)
+            dateJatem += if ((typeRencana == "jatem" || typeRencana == "jatemPenagihan") && item.jatuh_tempo.isNotEmpty()) {
+                DateFormat.format(dateString =  item.jatuh_tempo, inputFormat = "dd MMM yyyy", inputLocale = Locale.ENGLISH)
             } else DateFormat.format(item.created_at)
 
             if (!item.is_new.isNullOrEmpty()) {
-                if (item.is_new == "1") badgeNew.visibility = View.VISIBLE
-                else badgeNew.visibility = View.GONE
+                if (item.is_new == "1") {
+                    if (typeRencana == "passive" || typeRencana == "tagihMingguan") dateJatem = "Belum divisit"
+                    badgeNew.visibility = View.VISIBLE
+                } else badgeNew.visibility = View.GONE
             }
 
             tvContactName.text = item.nama

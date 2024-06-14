@@ -92,7 +92,7 @@ class FormGudangActivity : AppCompatActivity() {
 
         if (isEdit) {
             binding.dateSeparator.visibility = View.VISIBLE
-            binding.tvDate.text = iDate?.let { DateFormat.format(it, format = "dd MMM yyyy") }
+            binding.tvDate.text = iDate?.let { DateFormat.format(it, outputFormat = "dd MMM yyyy") }
         } else binding.dateSeparator.visibility = View.GONE
 
         setMapsAction()
