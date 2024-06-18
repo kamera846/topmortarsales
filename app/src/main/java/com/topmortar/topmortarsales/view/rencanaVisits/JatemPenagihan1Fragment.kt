@@ -106,10 +106,10 @@ class JatemPenagihan1Fragment : Fragment() {
 
         apiService = HttpClient.create()
 
-        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
+        if (userKind == USER_KIND_ADMIN) getCities()
         getList()
         binding.swipeRefreshLayout.setOnRefreshListener {
-            if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
+            if (userKind == USER_KIND_ADMIN) getCities()
             getList()
         }
 
@@ -125,10 +125,10 @@ class JatemPenagihan1Fragment : Fragment() {
             try {
 
                 val response = when (userKind) {
-                    USER_KIND_ADMIN, USER_KIND_PENAGIHAN -> {
+                    USER_KIND_ADMIN -> {
                         if (selectedCity != null) apiService.jatemPenagihanFilter(dst = userDistributorId, idCity = selectedCity?.id!!, type = "jatem1")
                         else apiService.jatemPenagihan(dst = userDistributorId, type = "jatem1")
-                    } else -> apiService.jatemPenagihan(dst = userDistributorId, type = "jatem1")
+                    } else -> apiService.jatemPenagihanFilter(dst = userDistributorId, idCity = userCity, type = "jatem1")
                 }
 
                 when (response.status) {
