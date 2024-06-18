@@ -45,4 +45,5 @@
     <color name="navMainMenuBackground">@color/black_300</color>
     <color name="navMainMenu">@color/white</color>
     <color name="navMainMenuTint">@color/white</color>
+    <color name="detailContactLine">@color/black_400</color>
 </resources>
