@@ -3,6 +3,9 @@
 package com.topmortar.topmortarsales.view.contact
 
 import android.Manifest
+import android.animation.Animator
+import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DatePickerDialog
@@ -23,7 +26,11 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
+import android.view.animation.AnimationSet
 import android.view.animation.AnimationUtils
+import android.view.animation.TranslateAnimation
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -42,6 +49,8 @@ import androidx.appcompat.widget.TooltipCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -126,6 +135,7 @@ import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.PingUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
+import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -493,6 +503,19 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 etKtp.setSelection(etKtp.length())
             } else etKtp.clearFocus()
         }
+
+//        binding.itemPhone1.setOnClickListener {
+//            if (binding.tvPhoneContainer.height < convertDpToPx(60, this@DetailContactActivity)) {
+//                val startHeight = binding.tvPhoneContainer.height
+//                binding.tvPhoneContainer.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+//                val targetHeight = binding.tvPhoneContainer.measuredHeight
+//                phoneAnimation(startHeight, targetHeight)
+//            } else {
+//                val startHeight = binding.tvPhoneContainer.height
+//                val targetHeight = binding.tvPhoneContainer.height - binding.itemPhone2.height
+//                phoneAnimation(startHeight, targetHeight)
+//            }
+//        }
         //////////
 
         // Change Listener
@@ -2560,6 +2583,19 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 binding.titleBar.tvTitleBar.text = iName
             }
         }
+    }
+
+    private fun phoneAnimation(startHeight: Int, targetHeight: Int) {
+        val animator = ValueAnimator.ofInt(startHeight, targetHeight)
+        animator.duration = 500
+        animator.addUpdateListener { valueAnimator ->
+            val animatedValue = valueAnimator.animatedValue as Int
+
+            val layoutParams = binding.tvPhoneContainer.layoutParams
+            layoutParams.height = animatedValue
+            binding.tvPhoneContainer.layoutParams = layoutParams
+        }
+        animator.start()
     }
 
     override fun onStart() {
