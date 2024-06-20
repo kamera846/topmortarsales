@@ -106,11 +106,11 @@ class PasifRenViFragment : Fragment() {
 
         apiService = HttpClient.create()
 
-        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
+        if (userKind == USER_KIND_ADMIN) getCities()
         getList()
 
         binding.swipeRefreshLayout.setOnRefreshListener {
-            if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
+            if (userKind == USER_KIND_ADMIN) getCities()
             getList()
         }
 
@@ -126,7 +126,7 @@ class PasifRenViFragment : Fragment() {
             try {
 
                 val response = when (userKind) {
-                    USER_KIND_ADMIN, USER_KIND_PENAGIHAN -> {
+                    USER_KIND_ADMIN -> {
                         if (selectedCity != null) apiService.targetPasif(idCity = selectedCity?.id!!)
                         else apiService.targetPasifDst(idDistributor = userDistributorId)
                     } else -> apiService.targetPasif(idCity = userCity)
