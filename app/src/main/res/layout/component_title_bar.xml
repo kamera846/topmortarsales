@@ -120,6 +120,16 @@
             android:layout_gravity="center_vertical"
             android:contentDescription="@string/icon_more_white" />
 
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/ic_road_map"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:padding="16dp"
+            android:src="@drawable/road_map_line_white_only"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="@string/icon_more_white" />
+
     </LinearLayout>
 
     <View

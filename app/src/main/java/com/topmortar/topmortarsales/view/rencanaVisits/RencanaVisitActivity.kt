@@ -1,28 +1,54 @@
 package com.topmortar.topmortarsales.view.rencanaVisits
 
+import android.app.ProgressDialog
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
+import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.viewpager.RencanaVisitVPA
+import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
+import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_CITY_ID
+import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
+import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_STATUS
+import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.handleMessage
+import com.topmortar.topmortarsales.data.ApiService
+import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityRencanaVisitBinding
+import com.topmortar.topmortarsales.view.MapsActivity
+import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
+import com.topmortar.topmortarsales.view.user.UserProfileActivity
+import kotlinx.coroutines.launch
 
 class RencanaVisitActivity : AppCompatActivity() {
 
     private var _binding: ActivityRencanaVisitBinding? = null
     private val binding get() = _binding!!
+    private lateinit var apiService: ApiService
     private lateinit var sessionManager: SessionManager
     private val userId get() = sessionManager.userID()
+    private val userCityID get() = sessionManager.userCityID()
+    private val userKind get() = sessionManager.userKind()
     private val userDistributorId get() = sessionManager.userDistributor()
 
     private lateinit var tabLayout: TabLayout
@@ -41,6 +67,8 @@ class RencanaVisitActivity : AppCompatActivity() {
         sessionManager = SessionManager(this@RencanaVisitActivity)
 
         setContentView(binding.root)
+
+        apiService = HttpClient.create()
 
         binding.titleBarDark.icBack.visibility = View.VISIBLE
         binding.titleBarDark.vBorder.visibility = View.GONE
@@ -119,8 +147,118 @@ class RencanaVisitActivity : AppCompatActivity() {
         activeTab = tabIndexFromIntent
         tabLayout.getTabAt(activeTab)?.select()
 
-        binding.titleBarDark.icSyncNow.visibility = View.VISIBLE
-        binding.titleBarDark.icSyncNow.setOnClickListener { pagerAdapter.setSyncAction(activeTab) }
+//        binding.titleBarDark.icSyncNow.visibility = View.VISIBLE
+//        binding.titleBarDark.icSyncNow.setOnClickListener { pagerAdapter.setSyncAction(activeTab) }
+
+//        val roadMapDrawable = AppCompatResources.getDrawable(this, R.drawable.road_map_line_white_only)
+//        roadMapDrawable?.setTint(ContextCompat.getColor(this, R.color.blue_silver_lake))
+//        binding.titleBarDark.icRoadMap.setImageDrawable(roadMapDrawable)
+        binding.titleBarDark.icRoadMap.visibility = View.VISIBLE
+        binding.titleBarDark.icRoadMap.setOnClickListener { showMapsOption() }
+
+    }
+
+    private fun showMapsOption() {
+        val popupMenu = PopupMenu(this, binding.titleBarDark.icRoadMap)
+        popupMenu.inflate(R.menu.option_maps_menu)
+
+        popupMenu.setOnMenuItemClickListener { item: MenuItem ->
+            when (item.itemId) {
+                R.id.option_all -> {
+                    navigateCheckLocationStore()
+                    true
+                }
+                R.id.option_choices -> {
+                    true
+                }
+                else -> false
+            }
+        }
+        popupMenu.show()
+    }
+
+    private fun navigateCheckLocationStore() {
+        val progressDialog = ProgressDialog(this)
+        progressDialog.setMessage(getString(R.string.txt_loading))
+        progressDialog.show()
+
+        lifecycleScope.launch {
+            try {
+
+                val response = when (userKind) {
+                    USER_KIND_ADMIN -> {
+                        when (activeTab) {
+                            0 -> apiService.targetJatemDst(idDistributor = userDistributorId ?: "0")
+                            1 -> apiService.targetVoucherDst(idDistributor = userDistributorId ?: "0")
+                            2 -> apiService.targetPasifDst(idDistributor = userDistributorId ?: "0")
+                            else -> apiService.targetWeeklyDst(idDistributor = userDistributorId ?: "0")
+                        }
+                    } else -> when (activeTab) {
+                        0 -> apiService.targetJatem(idCity = userCityID ?: "0")
+                        1 -> apiService.targetVoucher(idCity = userCityID ?: "0")
+                        2 -> apiService.targetPasif(idCity = userCityID ?: "0")
+                        else -> apiService.targetWeekly(idCity = userCityID ?: "0")
+                    }
+                }
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        val listCoordinate = arrayListOf<String>()
+                        val listCoordinateName = arrayListOf<String>()
+                        val listCoordinateStatus = arrayListOf<String>()
+                        val listCoordinateCityID = arrayListOf<String>()
+
+                        for (item in response.results.listIterator()) {
+                            listCoordinate.add(item.maps_url)
+                            listCoordinateName.add(item.nama)
+                            listCoordinateStatus.add(item.store_status)
+                            listCoordinateCityID.add(item.id_city)
+                        }
+
+                        val intent = Intent(this@RencanaVisitActivity, MapsActivity::class.java)
+
+                        intent.putExtra(CONST_NEAREST_STORE, true)
+                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
+                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
+                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
+
+                        progressDialog.dismiss()
+                        startActivity(intent)
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        val listCoordinate = arrayListOf<String>()
+                        val listCoordinateName = arrayListOf<String>()
+
+                        val intent = Intent(this@RencanaVisitActivity, MapsActivity::class.java)
+
+                        intent.putExtra(CONST_NEAREST_STORE, true)
+                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
+                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+
+                        progressDialog.dismiss()
+                        startActivity(intent)
+
+                    }
+                    else -> {
+
+                        handleMessage(this@RencanaVisitActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        progressDialog.dismiss()
+
+                    }
+                }
+
+            } catch (e: Exception) {
+
+                handleMessage(this@RencanaVisitActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                progressDialog.dismiss()
+
+            }
+
+        }
 
     }
 
