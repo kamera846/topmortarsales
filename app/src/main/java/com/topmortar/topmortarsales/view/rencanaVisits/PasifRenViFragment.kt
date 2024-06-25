@@ -204,6 +204,10 @@ class PasifRenViFragment : Fragment() {
                 startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
             }
 
+            override fun updateSelectedCount(count: Int?) {
+                //
+            }
+
         })
 
         rvAdapter.setType("passive")

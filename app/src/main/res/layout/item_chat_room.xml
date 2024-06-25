@@ -108,6 +108,14 @@
                 android:layout_gravity="center_vertical"
                 android:contentDescription="@string/logo_square" />
 
+            <CheckBox
+                android:visibility="gone"
+                android:id="@+id/checkbox"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_margin="16dp"
+                android:textSize="14sp" />
+
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"

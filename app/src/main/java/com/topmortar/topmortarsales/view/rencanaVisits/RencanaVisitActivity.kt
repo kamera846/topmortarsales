@@ -31,6 +31,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
+import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -40,6 +41,8 @@ import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.launch
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
 
 class RencanaVisitActivity : AppCompatActivity() {
 
@@ -288,6 +291,7 @@ class RencanaVisitActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        EventBus.getDefault().register(this)
         Handler(Looper.getMainLooper()).postDelayed({
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
@@ -300,8 +304,7 @@ class RencanaVisitActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
-        super.onStop()
-
+        EventBus.getDefault().unregister(this)
         if (sessionManager.isLoggedIn()) {
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
@@ -311,6 +314,7 @@ class RencanaVisitActivity : AppCompatActivity() {
                 )
             }
         }
+        super.onStop()
     }
 
     override fun onDestroy() {
@@ -324,6 +328,11 @@ class RencanaVisitActivity : AppCompatActivity() {
                 )
             }
         }
+    }
+
+    @Subscribe
+    fun onEventBus(event: EventBusUtils.IntEvent) {
+        binding.selectionTitle.text = "${event.data} Item Terpilih"
     }
 
 }

@@ -3,10 +3,12 @@ package com.topmortar.topmortarsales.adapter.recyclerview
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.util.SparseBooleanArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -19,13 +21,20 @@ import java.util.Locale
 class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<RencanaVisitRVA.ChatViewHolder>() {
     private var context: Context? = null
     private var typeRencana: String? = "jatem"
+    private var isSelectBarActive = false
+    private var selectedItems = SparseBooleanArray()
 
     interface ItemClickListener {
         fun onItemClick(data: RencanaVisitModel? = null)
+        fun updateSelectedCount(count: Int? = null)
     }
 
     fun setType(type: String) {
         this.typeRencana = type
+    }
+
+    fun setSelectBarActive(state: Boolean) {
+        this.isSelectBarActive = state
     }
 
     inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -36,8 +45,11 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
         private val imgProfile: ImageView = itemView.findViewById(R.id.iv_contact_profile)
         private val textVerified: TextView = itemView.findViewById(R.id.textVerified)
         private val badgeNew: TextView = itemView.findViewById(R.id.textCornerBadge)
+        val checkBoxItem: CheckBox = itemView.findViewById(R.id.checkbox)
 
         fun bind(item: RencanaVisitModel) {
+
+            val dateCounter = DateFormat.differenceDateNowDescCustom(item.created_at)
 
             when (typeRencana) {
                 "voucher" -> imgProfile.setImageResource(R.drawable.voucher_primary)
@@ -45,10 +57,23 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
                 else -> imgProfile.setImageResource(R.drawable.time_primary)
             }
 
-            val dateCounter = DateFormat.differenceDateNowDescCustom(item.created_at)
+            if (isSelectBarActive) {
+                imgProfile.visibility = View.GONE
+                checkBoxItem.visibility = View.VISIBLE
+            } else {
+                imgProfile.visibility = View.VISIBLE
+                checkBoxItem.visibility = View.GONE
+            }
 
-            if (dateCounter > 4 && (typeRencana == "jatemPenagihan1" || typeRencana == "jatemPenagihan2" || typeRencana == "jatemPenagihan3")) itemView.setBackgroundColor(context!!.getColor(R.color.primary15))
-            else itemView.setBackgroundColor(context!!.getColor(R.color.baseBackground))
+            checkBoxItem.isChecked = selectedItems.get(position, false)
+            itemView.setBackgroundColor(
+                if (selectedItems.get(position, false)) {
+                    itemView.context.resources.getColor(R.color.primary15)
+                } else {
+                    if (dateCounter > 4 && (typeRencana == "jatemPenagihan1" || typeRencana == "jatemPenagihan2" || typeRencana == "jatemPenagihan3")) itemView.context.resources.getColor(R.color.primary15)
+                    else itemView.context.resources.getColor(R.color.baseBackground)
+                }
+            )
 
             var dateJatem = when (typeRencana) {
                 "voucher" -> "Didapatkan "
@@ -94,10 +119,11 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
         val item = listItem[position]
 
         holder.bind(item)
-        holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
+        if (!isSelectBarActive) holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
 
-        holder.itemView.setOnClickListener { onItemClick(holder, position) }
+        holder.itemView.setOnClickListener { if (isSelectBarActive) toggleSelection(holder, position) else onItemClick(holder, position) }
         holder.checkListImage.setOnClickListener { onItemClick(holder, position) }
+        holder.checkBoxItem.setOnClickListener { toggleSelection(holder, position) }
 
     }
 
@@ -129,5 +155,30 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
             itemClickListener.onItemClick(data)
 
         }
+    }
+
+    private fun toggleSelection(holder: ChatViewHolder, position: Int) {
+        if (selectedItems.get(position, false)) {
+            selectedItems.delete(position)
+            holder.checkBoxItem.isChecked = false
+        } else {
+            selectedItems.put(position, true)
+            holder.checkBoxItem.isChecked = true
+        }
+        itemClickListener.updateSelectedCount(selectedItems.size())
+        notifyItemChanged(position)
+    }
+
+    fun clearSelections() {
+        selectedItems.clear()
+        notifyDataSetChanged()
+    }
+
+    fun getSelectedItems(): ArrayList<RencanaVisitModel> {
+        val items = arrayListOf<RencanaVisitModel>()
+        for (i in 0 until selectedItems.size()) {
+            items.add(listItem[selectedItems.keyAt(i)])
+        }
+        return items
     }
 }

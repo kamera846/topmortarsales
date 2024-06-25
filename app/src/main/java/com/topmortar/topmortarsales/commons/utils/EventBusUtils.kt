@@ -7,4 +7,5 @@ class EventBusUtils {
     data class MessageEvent(val message: String)
     data class ContactModelEvent(val data: ContactModel? = null)
     data class UserAbsentModelEvent(val data: UserAbsentModel? = null)
+    data class IntEvent(val data: Int? = null)
 }
