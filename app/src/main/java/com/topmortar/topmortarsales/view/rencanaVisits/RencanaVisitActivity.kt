@@ -8,6 +8,7 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -55,6 +56,7 @@ class RencanaVisitActivity : AppCompatActivity() {
     private lateinit var viewPager: ViewPager
     private lateinit var pagerAdapter: RencanaVisitVPA
     private var activeTab = 0
+    private var isSelectBarActive = false
 
     private val tabTitles = listOf("Jatuh Tempo", "Voucher", "Pasif", "Mingguan")
     private val tabTitleViews = mutableListOf<TextView>()
@@ -90,8 +92,11 @@ class RencanaVisitActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (activeTab != 0) tabLayout.getTabAt(0)?.select()
-        else super.onBackPressed()
+        if (isSelectBarActive) toggleSelectBar()
+        else {
+            if (activeTab != 0) tabLayout.getTabAt(0)?.select()
+            else super.onBackPressed()
+        }
     }
 
     private fun initLayout() {
@@ -155,6 +160,7 @@ class RencanaVisitActivity : AppCompatActivity() {
 //        binding.titleBarDark.icRoadMap.setImageDrawable(roadMapDrawable)
         binding.titleBarDark.icRoadMap.visibility = View.VISIBLE
         binding.titleBarDark.icRoadMap.setOnClickListener { showMapsOption() }
+        binding.icCloseSelect.setOnClickListener { toggleSelectBar() }
 
     }
 
@@ -169,6 +175,7 @@ class RencanaVisitActivity : AppCompatActivity() {
                     true
                 }
                 R.id.option_choices -> {
+                    toggleSelectBar()
                     true
                 }
                 else -> false
@@ -260,6 +267,23 @@ class RencanaVisitActivity : AppCompatActivity() {
 
         }
 
+    }
+
+    private fun toggleSelectBar() {
+        isSelectBarActive = !isSelectBarActive
+        pagerAdapter.setSelectBarActive(activeTab, isSelectBarActive)
+
+        val titleBar = findViewById<LinearLayout>(R.id.titleBarDark)
+
+        if (isSelectBarActive) {
+            binding.selectTitleBarDark.visibility = View.VISIBLE
+            titleBar.visibility = View.GONE
+            binding.tabLayout.visibility = View.GONE
+        } else {
+            binding.selectTitleBarDark.visibility = View.GONE
+            titleBar.visibility = View.VISIBLE
+            binding.tabLayout.visibility = View.VISIBLE
+        }
     }
 
     override fun onStart() {
