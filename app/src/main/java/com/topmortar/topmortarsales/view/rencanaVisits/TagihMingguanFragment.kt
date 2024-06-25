@@ -92,6 +92,10 @@ class TagihMingguanFragment : Fragment() {
     fun syncNow() {
         getList()
     }
+    fun isSelectBarActive(state: Boolean) {
+        if (state) binding.llFilter.componentFilter.visibility = View.GONE
+        else binding.llFilter.componentFilter.visibility = View.VISIBLE
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -202,6 +206,10 @@ class TagihMingguanFragment : Fragment() {
                 }
 
                 startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
+            }
+
+            override fun updateSelectedCount(count: Int?) {
+                //
             }
 
         })

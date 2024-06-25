@@ -202,9 +202,13 @@ class JatemPenagihan2Fragment : Fragment() {
                 startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
             }
 
+            override fun updateSelectedCount(count: Int?) {
+                //
+            }
+
         })
 
-        rvAdapter.setType("jatemPenagihan")
+        rvAdapter.setType("jatemPenagihan2")
         binding.rvChatList.layoutManager = LinearLayoutManager(requireContext())
         binding.rvChatList.adapter = rvAdapter
         binding.rvChatList.addOnScrollListener(object : RecyclerView.OnScrollListener() {

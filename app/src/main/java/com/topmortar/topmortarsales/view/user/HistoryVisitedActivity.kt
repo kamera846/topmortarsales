@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
@@ -144,7 +145,15 @@ class HistoryVisitedActivity : AppCompatActivity() {
 
     @Subscribe
     fun onEventBus(event: EventBusUtils.ContactModelEvent) {
-        navigateDetailContact(event.data)
+//        navigateDetailContact(event.data)
+        AlertDialog.Builder(this)
+            .setTitle("Peringatan!")
+            .setMessage("Untuk sementara ini anda tidak bisa mengakses toko melalui halaman ini.")
+            .setPositiveButton("Oke") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+
     }
 
     override fun onBackPressed() {
