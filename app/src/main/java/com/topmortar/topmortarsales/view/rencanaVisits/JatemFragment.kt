@@ -61,6 +61,7 @@ import com.topmortar.topmortarsales.model.RencanaVisitModel
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
 
 /**
  * A fragment representing a list of Items.
@@ -354,15 +355,4 @@ class JatemFragment : Fragment() {
         binding.llFilter.tvFilter.text = selectedCity?.title ?: getString(R.string.tidak_ada_filter)
 
     }
-
-    override fun onStart() {
-        super.onStart()
-        EventBus.getDefault().register(context)
-    }
-
-    override fun onStop() {
-        EventBus.getDefault().unregister(context)
-        super.onStop()
-    }
-
 }

@@ -155,15 +155,11 @@ class RencanaVisitActivity : AppCompatActivity() {
         activeTab = tabIndexFromIntent
         tabLayout.getTabAt(activeTab)?.select()
 
-//        binding.titleBarDark.icSyncNow.visibility = View.VISIBLE
-//        binding.titleBarDark.icSyncNow.setOnClickListener { pagerAdapter.setSyncAction(activeTab) }
-
-//        val roadMapDrawable = AppCompatResources.getDrawable(this, R.drawable.road_map_line_white_only)
-//        roadMapDrawable?.setTint(ContextCompat.getColor(this, R.color.blue_silver_lake))
-//        binding.titleBarDark.icRoadMap.setImageDrawable(roadMapDrawable)
-        binding.titleBarDark.icRoadMap.visibility = View.VISIBLE
-        binding.titleBarDark.icRoadMap.setOnClickListener { showMapsOption() }
-        binding.icCloseSelect.setOnClickListener { toggleSelectBar() }
+        binding.titleBarDark.icSyncNow.visibility = View.VISIBLE
+        binding.titleBarDark.icSyncNow.setOnClickListener { pagerAdapter.setSyncAction(activeTab) }
+//        binding.titleBarDark.icRoadMap.visibility = View.VISIBLE
+//        binding.titleBarDark.icRoadMap.setOnClickListener { showMapsOption() }
+//        binding.icCloseSelect.setOnClickListener { toggleSelectBar() }
 
     }
 
