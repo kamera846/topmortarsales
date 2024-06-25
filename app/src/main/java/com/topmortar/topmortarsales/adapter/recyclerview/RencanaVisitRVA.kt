@@ -47,12 +47,12 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
 
             val dateCounter = DateFormat.differenceDateNowDescCustom(item.created_at)
 
-            if (dateCounter > 4 && typeRencana == "jatemPenagihan") itemView.setBackgroundColor(context!!.getColor(R.color.primary15))
+            if (dateCounter > 4 && (typeRencana == "jatemPenagihan1" || typeRencana == "jatemPenagihan2" || typeRencana == "jatemPenagihan3")) itemView.setBackgroundColor(context!!.getColor(R.color.primary15))
             else itemView.setBackgroundColor(context!!.getColor(R.color.baseBackground))
 
             var dateJatem = when (typeRencana) {
                 "voucher" -> "Didapatkan "
-                "passive", "tagihMingguan" -> "Terakhir divisit "
+                "jatem","jatemPenagihan2","jatemPenagihan3", "passive", "tagihMingguan" -> "Terakhir divisit "
                 else -> "Jatuh tempo "
             }
 
@@ -60,13 +60,13 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
 //                val terminPayment = item.termin_payment.toInt()
 //                DateFormat.changeDateToDaysBeforeOrAfter(item.date_invoice, terminPayment, outputDateFormat = "dd MMMM yyyy")
 //            } else DateFormat.format(item.created_at)
-            dateJatem += if ((typeRencana == "jatem" || typeRencana == "jatemPenagihan") && item.jatuh_tempo.isNotEmpty()) {
+            dateJatem += if ((typeRencana == "jatemPenagihan1") && item.jatuh_tempo.isNotEmpty()) {
                 DateFormat.format(dateString =  item.jatuh_tempo, inputFormat = "dd MMM yyyy", inputLocale = Locale.ENGLISH)
             } else DateFormat.format(item.created_at)
 
             if (!item.is_new.isNullOrEmpty()) {
                 if (item.is_new == "1") {
-                    if (typeRencana == "passive" || typeRencana == "tagihMingguan") dateJatem = "Belum divisit"
+                    if (typeRencana == "jatem" || typeRencana == "jatemPenagihan2" || typeRencana == "jatemPenagihan3" || typeRencana == "passive" || typeRencana == "tagihMingguan") dateJatem = "Belum divisit"
                     badgeNew.visibility = View.VISIBLE
                 } else badgeNew.visibility = View.GONE
             }

@@ -204,7 +204,7 @@ class JatemPenagihan1Fragment : Fragment() {
 
         })
 
-        rvAdapter.setType("jatemPenagihan")
+        rvAdapter.setType("jatemPenagihan1")
         binding.rvChatList.layoutManager = LinearLayoutManager(requireContext())
         binding.rvChatList.adapter = rvAdapter
         binding.rvChatList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
