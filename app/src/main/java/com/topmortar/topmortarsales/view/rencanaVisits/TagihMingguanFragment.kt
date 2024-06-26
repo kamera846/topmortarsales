@@ -143,10 +143,13 @@ class TagihMingguanFragment : Fragment() {
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        setRecyclerView(response.results)
+                        val data = response.results
+                        data.sortBy { it.created_at }
+
+                        setRecyclerView(data)
                         loadingState(false)
                         showBadgeRefresh(false)
-                        listener?.counterItem(response.results.size)
+                        listener?.counterItem(data.size)
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
