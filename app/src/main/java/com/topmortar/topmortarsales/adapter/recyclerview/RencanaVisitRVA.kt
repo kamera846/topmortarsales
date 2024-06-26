@@ -19,6 +19,9 @@ import com.topmortar.topmortarsales.model.RencanaVisitModel
 import java.util.Locale
 
 class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<RencanaVisitRVA.ChatViewHolder>() {
+
+    var callback: ((ArrayList<RencanaVisitModel>) -> Unit)? = null
+
     private var context: Context? = null
     private var typeRencana: String? = "jatem"
     private var isSelectBarActive = false
@@ -178,11 +181,11 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
         notifyDataSetChanged()
     }
 
-    fun getSelectedItems(): ArrayList<RencanaVisitModel> {
+    fun getSelectedItems() {
         val items = arrayListOf<RencanaVisitModel>()
         for (i in 0 until selectedItems.size()) {
             items.add(listItem[selectedItems.keyAt(i)])
         }
-        return items
+        callback?.invoke(items)
     }
 }

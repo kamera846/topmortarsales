@@ -79,6 +79,7 @@ class VoucherRenViFragment : Fragment() {
 
     private var listener: CounterItem? = null
     private lateinit var apiService: ApiService
+    private lateinit var rvAdapter: RencanaVisitRVA
     interface CounterItem {
         fun counterItem(count: Int)
     }
@@ -91,6 +92,9 @@ class VoucherRenViFragment : Fragment() {
     fun isSelectBarActive(state: Boolean) {
         if (state) binding.llFilter.componentFilter.visibility = View.GONE
         else binding.llFilter.componentFilter.visibility = View.VISIBLE
+    }
+    fun onConfirmSelected() {
+        rvAdapter.getSelectedItems()
     }
 
     override fun onCreateView(
@@ -178,7 +182,7 @@ class VoucherRenViFragment : Fragment() {
 
     private fun setRecyclerView(listItem: ArrayList<RencanaVisitModel>) {
 
-        val rvAdapter = RencanaVisitRVA(listItem, object: RencanaVisitRVA.ItemClickListener {
+        rvAdapter = RencanaVisitRVA(listItem, object: RencanaVisitRVA.ItemClickListener {
             override fun onItemClick(data: RencanaVisitModel?) {
                 val intent = Intent(requireContext(), DetailContactActivity::class.java)
 

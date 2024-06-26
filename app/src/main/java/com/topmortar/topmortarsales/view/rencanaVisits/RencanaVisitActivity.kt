@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -17,8 +18,10 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
+import com.itextpdf.kernel.pdf.canvas.parser.EventType
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.viewpager.RencanaVisitVPA
+import com.topmortar.topmortarsales.commons.CONFIRM_SELECTED_CODE
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_CITY_ID
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
@@ -37,6 +40,7 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityRencanaVisitBinding
+import com.topmortar.topmortarsales.model.RencanaVisitModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
@@ -155,11 +159,14 @@ class RencanaVisitActivity : AppCompatActivity() {
         activeTab = tabIndexFromIntent
         tabLayout.getTabAt(activeTab)?.select()
 
-        binding.titleBarDark.icSyncNow.visibility = View.VISIBLE
-        binding.titleBarDark.icSyncNow.setOnClickListener { pagerAdapter.setSyncAction(activeTab) }
-//        binding.titleBarDark.icRoadMap.visibility = View.VISIBLE
-//        binding.titleBarDark.icRoadMap.setOnClickListener { showMapsOption() }
-//        binding.icCloseSelect.setOnClickListener { toggleSelectBar() }
+//        binding.titleBarDark.icSyncNow.visibility = View.VISIBLE
+//        binding.titleBarDark.icSyncNow.setOnClickListener { pagerAdapter.setSyncAction(activeTab) }
+        binding.titleBarDark.icRoadMap.visibility = View.VISIBLE
+        binding.titleBarDark.icRoadMap.setOnClickListener { showMapsOption() }
+        binding.icCloseSelect.setOnClickListener { toggleSelectBar() }
+        binding.icConfirmSelect.setOnClickListener {
+            pagerAdapter.onConfirmSelected(activeTab)
+        }
 
     }
 
@@ -283,6 +290,36 @@ class RencanaVisitActivity : AppCompatActivity() {
             titleBar.visibility = View.VISIBLE
             binding.tabLayout.visibility = View.VISIBLE
         }
+    }
+
+    fun onSelectedItems(items: ArrayList<RencanaVisitModel>) {
+        val progressDialog = ProgressDialog(this)
+        progressDialog.setMessage(getString(R.string.txt_loading))
+        progressDialog.show()
+
+        val listCoordinate = arrayListOf<String>()
+        val listCoordinateName = arrayListOf<String>()
+        val listCoordinateStatus = arrayListOf<String>()
+        val listCoordinateCityID = arrayListOf<String>()
+
+        for (item in items.listIterator()) {
+            listCoordinate.add(item.maps_url)
+            listCoordinateName.add(item.nama)
+            listCoordinateStatus.add(item.store_status)
+            listCoordinateCityID.add(item.id_city)
+        }
+
+        val intent = Intent(this@RencanaVisitActivity, MapsActivity::class.java)
+
+        intent.putExtra(CONST_NEAREST_STORE, true)
+        intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
+        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
+        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
+
+        toggleSelectBar()
+        progressDialog.dismiss()
+        startActivity(intent)
     }
 
     override fun onStart() {

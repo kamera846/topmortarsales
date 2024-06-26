@@ -5,6 +5,7 @@ package com.topmortar.topmortarsales.view.rencanaVisits
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.RencanaVisitRVA
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.CONFIRM_SELECTED_CODE
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
@@ -102,6 +104,9 @@ class JatemFragment : Fragment() {
         else binding.llFilter.componentFilter.visibility = View.VISIBLE
         val eventBusInt = EventBusUtils.IntEvent(0)
         EventBus.getDefault().post(eventBusInt)
+    }
+    fun onConfirmSelected() {
+        rvAdapter.getSelectedItems()
     }
 
     override fun onCreateView(
@@ -225,6 +230,9 @@ class JatemFragment : Fragment() {
 
         })
 
+        rvAdapter.callback = { result ->
+            (activity as? RencanaVisitActivity)?.onSelectedItems(result)
+        }
         binding.rvChatList.layoutManager = LinearLayoutManager(requireContext())
         binding.rvChatList.adapter = rvAdapter
         binding.rvChatList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
