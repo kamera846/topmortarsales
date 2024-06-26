@@ -49,7 +49,11 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
 
         fun bind(item: RencanaVisitModel) {
 
-            val dateCounter = DateFormat.differenceDateNowDescCustom(item.created_at)
+            val dateCounter = item.created_at.let {
+                if (it != null) {
+                    DateFormat.differenceDateNowDescCustom(it)
+                } else -1
+            }
 
             when (typeRencana) {
                 "voucher" -> imgProfile.setImageResource(R.drawable.voucher_primary)
@@ -87,10 +91,10 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
 //            } else DateFormat.format(item.created_at)
             dateJatem += if ((typeRencana == "jatemPenagihan1") && item.jatuh_tempo.isNotEmpty()) {
                 DateFormat.format(dateString =  item.jatuh_tempo, inputFormat = "dd MMM yyyy", inputLocale = Locale.ENGLISH)
-            } else DateFormat.format(item.created_at)
+            } else DateFormat.format(item.created_at ?: "0000-00-00")
 
             if (!item.is_new.isNullOrEmpty()) {
-                if (item.is_new == "1") {
+                if (item.is_new == "1" || item.created_at == null) {
                     if (typeRencana == "jatem" || typeRencana == "jatemPenagihan2" || typeRencana == "jatemPenagihan3" || typeRencana == "passive" || typeRencana == "tagihMingguan") dateJatem = "Belum divisit"
                     badgeNew.visibility = View.VISIBLE
                 } else badgeNew.visibility = View.GONE
@@ -98,7 +102,7 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
 
             tvContactName.text = item.nama
             tvPhoneNumber.text = dateJatem
-            textVerified.text = "$dateCounter hari"
+            textVerified.text = dateCounter.let { if (it != -1) "$it hari" else "error" }
             textVerified.setBackgroundResource(R.drawable.bg_passive_round)
             textVerified.visibility = View.VISIBLE
 
