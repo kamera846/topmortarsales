@@ -46,6 +46,7 @@ import com.topmortar.topmortarsales.commons.SALES_REPORT_RENVI
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
+import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -57,6 +58,7 @@ import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.model.RencanaVisitModel
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import kotlinx.coroutines.launch
+import org.greenrobot.eventbus.EventBus
 
 /**
  * A fragment representing a list of Items.
@@ -90,8 +92,13 @@ class VoucherRenViFragment : Fragment() {
         getList()
     }
     fun isSelectBarActive(state: Boolean) {
+        this.rvAdapter.clearSelections()
+        this.rvAdapter.setSelectBarActive(state)
+        this.binding.swipeRefreshLayout.isEnabled = !state
         if (state) binding.llFilter.componentFilter.visibility = View.GONE
         else binding.llFilter.componentFilter.visibility = View.VISIBLE
+        val eventBusInt = EventBusUtils.IntEvent(0)
+        EventBus.getDefault().post(eventBusInt)
     }
     fun onConfirmSelected() {
         rvAdapter.getSelectedItems()
@@ -212,11 +219,16 @@ class VoucherRenViFragment : Fragment() {
             }
 
             override fun updateSelectedCount(count: Int?) {
-                //
+                val eventBusInt = EventBusUtils.IntEvent(count)
+                EventBus.getDefault().post(eventBusInt)
             }
 
         })
 
+
+        rvAdapter.callback = { result ->
+            (activity as? RencanaVisitActivity)?.onSelectedItems(result)
+        }
         rvAdapter.setType("voucher")
         binding.rvChatList.layoutManager = LinearLayoutManager(requireContext())
         binding.rvChatList.adapter = rvAdapter

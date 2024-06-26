@@ -317,7 +317,7 @@ class RencanaVisitActivity : AppCompatActivity() {
         intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
         intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
 
-        toggleSelectBar()
+//        toggleSelectBar()
         progressDialog.dismiss()
         startActivity(intent)
     }
