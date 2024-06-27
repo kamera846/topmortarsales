@@ -45,7 +45,6 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SALES_REPORT_RENVI
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
-import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -310,7 +309,6 @@ class VoucherRenViFragment : Fragment() {
 
                         setupDialogSearch(items)
                         binding.llFilter.componentFilter.visibility = View.VISIBLE
-//                        binding.llFilter.componentFilter.visibility = View.GONE
 
                     }
                     RESPONSE_STATUS_EMPTY -> {

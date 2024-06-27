@@ -9,6 +9,7 @@ import androidx.appcompat.app.AlertDialog
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.LATEST_APP_VERSION
 import kotlin.system.exitProcess
 
 object AppUpdateHelper {
@@ -27,7 +28,7 @@ object AppUpdateHelper {
     fun checkForUpdate(activity: Activity, onUpToDate: () -> Unit = {}) {
         fetchRemoteConfig {
             val currentVersion = getCurrentVersionCode(activity)
-            val latestVersion = firebaseRemoteConfig.getLong("latest_app_version")
+            val latestVersion = firebaseRemoteConfig.getLong(LATEST_APP_VERSION)
             Log.d("Check Apps Update", "$currentVersion, $latestVersion")
             if (currentVersion < latestVersion) {
                 showUpdateDialog(activity)

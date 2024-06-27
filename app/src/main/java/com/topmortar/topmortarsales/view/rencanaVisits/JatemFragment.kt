@@ -5,7 +5,6 @@ package com.topmortar.topmortarsales.view.rencanaVisits
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +12,6 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -22,7 +20,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.RencanaVisitRVA
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
-import com.topmortar.topmortarsales.commons.CONFIRM_SELECTED_CODE
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
@@ -47,9 +44,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SALES_REPORT_RENVI
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
-import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
-import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -63,7 +58,6 @@ import com.topmortar.topmortarsales.model.RencanaVisitModel
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
 
 /**
  * A fragment representing a list of Items.
@@ -313,7 +307,6 @@ class JatemFragment : Fragment() {
 
                         setupDialogSearch(items)
                         binding.llFilter.componentFilter.visibility = View.VISIBLE
-//                        binding.llFilter.componentFilter.visibility = View.GONE
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
