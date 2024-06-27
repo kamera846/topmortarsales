@@ -30,11 +30,21 @@ class RencanaVisitPenagihanVPA(fm: FragmentManager, private var tabSize: Int) : 
             3 -> fragmentWeekly.syncNow()
         }
     }
-
-    fun clearData() {
-        fragmentJatem1 = JatemPenagihan1Fragment()
-        fragmentJatem2 = JatemPenagihan2Fragment()
-        fragmentJatem3 = JatemPenagihan3Fragment()
+    fun setSelectBarActive(index: Int, state: Boolean) {
+        when (index) {
+            0 -> fragmentJatem1.isSelectBarActive(state)
+            1 -> fragmentJatem2.isSelectBarActive(state)
+            2 -> fragmentJatem3.isSelectBarActive(state)
+            3 -> fragmentWeekly.isSelectBarActive(state)
+        }
+    }
+    fun onConfirmSelected(index: Int) {
+        when (index) {
+            0 -> fragmentJatem1.onConfirmSelected()
+            1 -> fragmentJatem2.onConfirmSelected()
+            2 -> fragmentJatem3.onConfirmSelected()
+            3 -> fragmentWeekly.onConfirmSelected()
+        }
     }
 
     override fun getItem(position: Int): Fragment {

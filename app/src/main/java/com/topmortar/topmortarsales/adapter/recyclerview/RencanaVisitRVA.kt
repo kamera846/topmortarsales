@@ -19,6 +19,9 @@ import com.topmortar.topmortarsales.model.RencanaVisitModel
 import java.util.Locale
 
 class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<RencanaVisitRVA.ChatViewHolder>() {
+
+    var callback: ((ArrayList<RencanaVisitModel>) -> Unit)? = null
+
     private var context: Context? = null
     private var typeRencana: String? = "jatem"
     private var isSelectBarActive = false
@@ -79,25 +82,24 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
                 }
             )
 
-            var dateJatem = when (typeRencana) {
-                "voucher" -> "Didapatkan "
-                "jatem","jatemPenagihan2","jatemPenagihan3", "passive", "tagihMingguan" -> "Terakhir divisit "
-                else -> "Jatuh tempo "
-            }
-
-//            dateJatem += if (item.termin_payment.isNotEmpty() && item.termin_payment != "-1" && (typeRencana == "jatem" || typeRencana == "jatemPenagihan")) {
-//                val terminPayment = item.termin_payment.toInt()
-//                DateFormat.changeDateToDaysBeforeOrAfter(item.date_invoice, terminPayment, outputDateFormat = "dd MMMM yyyy")
-//            } else DateFormat.format(item.created_at)
-            dateJatem += if ((typeRencana == "jatemPenagihan1") && item.jatuh_tempo.isNotEmpty()) {
-                DateFormat.format(dateString =  item.jatuh_tempo, inputFormat = "dd MMM yyyy", inputLocale = Locale.ENGLISH)
-            } else DateFormat.format(item.created_at ?: "0000-00-00")
+            var dateJatem =
+                if (typeRencana == "voucher") "Didapatkan " + DateFormat.format(item.created_at ?: "0000-00-00")
+                else if (typeRencana == "jatemPenagihan1" && item.jatuh_tempo.isNotEmpty()) "Jatuh tempo " + DateFormat.format(dateString =  item.jatuh_tempo, inputFormat = "dd MMM yyyy", inputLocale = Locale.ENGLISH)
+                else if (typeRencana == "passive") "Terakhir divisit " + DateFormat.format(item.last_visit ?: "0000-00-00")
+                else "Terakhir divisit " + DateFormat.format(item.created_at ?: "0000-00-00")
 
             if (!item.is_new.isNullOrEmpty()) {
-                if (item.is_new == "1" || item.created_at == null) {
-                    if (typeRencana == "jatem" || typeRencana == "jatemPenagihan2" || typeRencana == "jatemPenagihan3" || typeRencana == "passive" || typeRencana == "tagihMingguan") dateJatem = "Belum divisit"
+                val isNew = item.is_new == "1"
+                val isInvalidLastVisit = item.last_visit == "0000-00-00"
+                val isRelevantType = typeRencana in listOf("jatem", "jatemPenagihan2", "jatemPenagihan3", "passive", "tagihMingguan")
+
+                if (isNew) {
+                    if (isRelevantType && isInvalidLastVisit) dateJatem = "Belum pernah divisit"
                     badgeNew.visibility = View.VISIBLE
-                } else badgeNew.visibility = View.GONE
+                } else {
+                    if (isInvalidLastVisit) dateJatem = "Belum pernah divisit"
+                    badgeNew.visibility = View.GONE
+                }
             }
 
             tvContactName.text = item.nama
@@ -178,11 +180,11 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
         notifyDataSetChanged()
     }
 
-    fun getSelectedItems(): ArrayList<RencanaVisitModel> {
+    fun getSelectedItems() {
         val items = arrayListOf<RencanaVisitModel>()
         for (i in 0 until selectedItems.size()) {
             items.add(listItem[selectedItems.keyAt(i)])
         }
-        return items
+        callback?.invoke(items)
     }
 }

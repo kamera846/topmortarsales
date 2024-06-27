@@ -38,6 +38,14 @@ class RencanaVisitVPA(fm: FragmentManager, private var tabSize: Int) : FragmentP
             3 -> fragmentWeekly.isSelectBarActive(state)
         }
     }
+    fun onConfirmSelected(index: Int) {
+        when (index) {
+            0 -> frgamentJatem.onConfirmSelected()
+            1 -> fragmentVoucherRenVi.onConfirmSelected()
+            2 -> fragmentPasifRenViFragment.onConfirmSelected()
+            3 -> fragmentWeekly.onConfirmSelected()
+        }
+    }
 
     override fun getItem(position: Int): Fragment {
         return when (position) {

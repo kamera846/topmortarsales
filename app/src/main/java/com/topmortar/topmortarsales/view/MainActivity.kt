@@ -34,7 +34,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.view.GravityCompat
-import androidx.core.view.setMargins
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -177,6 +176,9 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        AppUpdateHelper.initialize()
+        AppUpdateHelper.checkForUpdate(this)
+
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
 
         if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
@@ -226,14 +228,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         binding.navView.setNavigationItemSelectedListener(this)
         binding.titleBar.icMenu.visibility = View.VISIBLE
         binding.titleBar.icMenu.setOnClickListener { binding.drawerLayout.openDrawer(GravityCompat.START) }
-//        val toggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav)
-//        drawerLayout.addDrawerListener(toggle)
-//        toggle.syncState()
-//        if (savedInstanceState == null) {
-//            supportFragmentManager.beginTransaction()
-//                .replace(R.id.fragment_container, HomeFragment()).commit()
-//            navigationView.setCheckedItem(R.id.option)
-//        }
 
         initVariable()
         initClickHandler()
@@ -407,18 +401,11 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         icCloseSearch.setOnClickListener { toggleSearchEvent(SEARCH_CLOSE) }
         icClearSearch.setOnClickListener { etSearchBox.setText("") }
         rlLoading.setOnTouchListener { _, event -> blurSearchBox(event) }
-//        rlParent.setOnTouchListener { _, event -> blurSearchBox(event) }
         rvListChat.setOnTouchListener { _, event -> blurSearchBox(event) }
-//        binding.llFilter.setOnClickListener { showSearchModal() }
         binding.llFilter.setOnClickListener {
             setupFilterTokoModal()
             showFilterModal()
         }
-//        if (userKind == USER_KIND_ADMIN) {
-//            binding.btnCheckLocation.visibility = View.VISIBLE
-//            binding.btnCheckLocation.setOnClickListener { navigateChecklocation() }
-//        }
-
     }
 
     private fun loadingState(state: Boolean, message: String = getString(R.string.txt_loading)) {
@@ -472,7 +459,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             intent.putExtra(CONST_OWNER, data.store_owner)
             intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
             intent.putExtra(CONST_LOCATION, data.id_city)
-//            intent.putExtra(CONST_LOCATION, "1")
         }
 
         startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
@@ -480,8 +466,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
     }
 
     private fun navigateDetailContact(data: ContactModel? = null) {
-
-//        toggleSearchEvent(SEARCH_CLOSE)
 
         val intent = Intent(this@MainActivity, DetailContactActivity::class.java)
 
@@ -728,13 +712,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         )
         slideOutToLeft.duration = animationDuration
 
-//        etSearchBox.setOnFocusChangeListener { _, hasFocus ->
-//            run {
-//                if (hasFocus) showKeyboard(etSearchBox, this@MainActivity)
-//                else hideKeyboard(etSearchBox, this@MainActivity)
-//            }
-//        }
-
         if (state == SEARCH_OPEN && !isSearchActive) {
 
             llSearchBox.visibility = View.VISIBLE
@@ -925,8 +902,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                             items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
                         }
 
-//                        setupFilterContacts(items)
-
                         setupFilterTokoModal()
                     }
                     RESPONSE_STATUS_EMPTY -> {
@@ -1007,7 +982,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                         } else {
                             sessionManager.setUserLoggedIn(data)
 
-//                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "Halo, ${ sessionManager.userName() }"}
                             if (userKind != USER_KIND_SALES && userKind != USER_KIND_PENAGIHAN) {
                                 tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
                                 tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
@@ -1274,8 +1248,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                     sessionManager.userID().toString()
                 )
             }
-            // Check apps for update
-            AppUpdateHelper.checkForUpdates(this)
             getUserLoggedIn(true)
         }, 1000)
     }

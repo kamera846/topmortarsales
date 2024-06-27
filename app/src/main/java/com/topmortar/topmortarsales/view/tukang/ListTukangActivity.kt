@@ -104,6 +104,9 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
 
         setContentView(R.layout.activity_list_tukang)
 
+        AppUpdateHelper.initialize()
+        AppUpdateHelper.checkForUpdate(this)
+
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
         val userDistributorIds = sessionManager.userDistributor()
         firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-016")
@@ -179,7 +182,6 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
             intent.putExtra(CONST_LOCATION, data.id_city)
             intent.putExtra(CONST_STATUS, data.tukang_status)
             intent.putExtra(CONST_SKILL, data.id_skill)
-//            intent.putExtra(CONST_LOCATION, "1")
         }
 
         startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
@@ -318,7 +320,6 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
                         val data = response.results[0]
                         sessionManager.setUserLoggedIn(data)
 
-//                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "Halo, ${ sessionManager.userName() }"}
                         tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
                         tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
 
@@ -467,8 +468,6 @@ class ListTukangActivity : AppCompatActivity(), ItemClickListener {
     override fun onResume() {
 
         super.onResume()
-        // Check apps for update
-        AppUpdateHelper.checkForUpdates(this)
         getUserLoggedIn()
 
     }

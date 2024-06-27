@@ -2,6 +2,7 @@ package com.topmortar.topmortarsales.view.rencanaVisits
 
 import android.app.ProgressDialog
 import android.content.Intent
+import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -12,8 +13,6 @@ import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
@@ -24,6 +23,7 @@ import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_CITY_ID
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_STATUS
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
+import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE_HIDE_FILTER
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
@@ -37,14 +37,13 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityRencanaVisitBinding
+import com.topmortar.topmortarsales.model.RencanaVisitModel
 import com.topmortar.topmortarsales.view.MapsActivity
-import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
-import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
-class RencanaVisitActivity : AppCompatActivity() {
+class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelectedItemListener {
 
     private var _binding: ActivityRencanaVisitBinding? = null
     private val binding get() = _binding!!
@@ -58,11 +57,18 @@ class RencanaVisitActivity : AppCompatActivity() {
     private lateinit var tabLayout: TabLayout
     private lateinit var viewPager: ViewPager
     private lateinit var pagerAdapter: RencanaVisitVPA
+    private lateinit var progressDialog: ProgressDialog
     private var activeTab = 0
+    private var selectedItemCount = 0
     private var isSelectBarActive = false
 
     private val tabTitles = listOf("Jatuh Tempo", "Voucher", "Pasif", "Mingguan")
     private val tabTitleViews = mutableListOf<TextView>()
+
+    private lateinit var listCoordinate: ArrayList<String>
+    private lateinit var listCoordinateName: ArrayList<String>
+    private lateinit var listCoordinateStatus: ArrayList<String>
+    private lateinit var listCoordinateCityID: ArrayList<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,6 +80,9 @@ class RencanaVisitActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         apiService = HttpClient.create()
+        progressDialog = ProgressDialog(this)
+        progressDialog.setMessage(getString(R.string.txt_loading))
+        binding.selectTitleBarDark.componentSelectTitleBarDark.visibility = View.GONE
 
         binding.titleBarDark.icBack.visibility = View.VISIBLE
         binding.titleBarDark.vBorder.visibility = View.GONE
@@ -155,11 +164,20 @@ class RencanaVisitActivity : AppCompatActivity() {
         activeTab = tabIndexFromIntent
         tabLayout.getTabAt(activeTab)?.select()
 
-        binding.titleBarDark.icSyncNow.visibility = View.VISIBLE
-        binding.titleBarDark.icSyncNow.setOnClickListener { pagerAdapter.setSyncAction(activeTab) }
-//        binding.titleBarDark.icRoadMap.visibility = View.VISIBLE
-//        binding.titleBarDark.icRoadMap.setOnClickListener { showMapsOption() }
-//        binding.icCloseSelect.setOnClickListener { toggleSelectBar() }
+//        binding.titleBarDark.icSyncNow.visibility = View.VISIBLE
+//        binding.titleBarDark.icSyncNow.setOnClickListener { pagerAdapter.setSyncAction(activeTab) }
+        binding.titleBarDark.icRoadMap.visibility = View.VISIBLE
+        binding.titleBarDark.icRoadMap.setOnClickListener { showMapsOption() }
+        binding.selectTitleBarDark.icCloseSelect.setOnClickListener { toggleSelectBar() }
+        binding.selectTitleBarDark.icConfirmSelect.alpha =
+            if (CustomUtility(this).isDarkMode()) 0.2f
+            else 0.5f
+        binding.selectTitleBarDark.icConfirmSelect.setOnClickListener {
+            if (selectedItemCount > 0) {
+                progressDialog.show()
+                pagerAdapter.onConfirmSelected(activeTab)
+            }
+        }
 
     }
 
@@ -184,8 +202,6 @@ class RencanaVisitActivity : AppCompatActivity() {
     }
 
     private fun navigateCheckLocationStore() {
-        val progressDialog = ProgressDialog(this)
-        progressDialog.setMessage(getString(R.string.txt_loading))
         progressDialog.show()
 
         lifecycleScope.launch {
@@ -210,17 +226,38 @@ class RencanaVisitActivity : AppCompatActivity() {
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        val listCoordinate = arrayListOf<String>()
-                        val listCoordinateName = arrayListOf<String>()
-                        val listCoordinateStatus = arrayListOf<String>()
-                        val listCoordinateCityID = arrayListOf<String>()
+                        listCoordinate = arrayListOf()
+                        listCoordinateName = arrayListOf()
+                        listCoordinateStatus = arrayListOf()
+                        listCoordinateCityID = arrayListOf()
 
-                        for (item in response.results.listIterator()) {
-                            listCoordinate.add(item.maps_url)
-                            listCoordinateName.add(item.nama)
-                            listCoordinateStatus.add(item.store_status)
-                            listCoordinateCityID.add(item.id_city)
-                        }
+                        LoopingTask(response.results).execute()
+
+//                        for (item in response.results.listIterator()) {
+//                            listCoordinate.add(item.maps_url)
+//                            listCoordinateName.add(item.nama)
+//                            listCoordinateStatus.add(item.store_status)
+//                            listCoordinateCityID.add(item.id_city)
+//                        }
+//
+//                        val intent = Intent(this@RencanaVisitActivity, MapsActivity::class.java)
+//
+//                        intent.putExtra(CONST_NEAREST_STORE, true)
+//                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
+//                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+//                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
+//                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
+//
+//                        progressDialog.dismiss()
+//                        startActivity(intent)
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        listCoordinate = arrayListOf()
+                        listCoordinateName = arrayListOf()
+                        listCoordinateStatus = arrayListOf()
+                        listCoordinateCityID = arrayListOf()
 
                         val intent = Intent(this@RencanaVisitActivity, MapsActivity::class.java)
 
@@ -229,21 +266,6 @@ class RencanaVisitActivity : AppCompatActivity() {
                         intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
                         intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
                         intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
-
-                        progressDialog.dismiss()
-                        startActivity(intent)
-
-                    }
-                    RESPONSE_STATUS_EMPTY -> {
-
-                        val listCoordinate = arrayListOf<String>()
-                        val listCoordinateName = arrayListOf<String>()
-
-                        val intent = Intent(this@RencanaVisitActivity, MapsActivity::class.java)
-
-                        intent.putExtra(CONST_NEAREST_STORE, true)
-                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
-                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
 
                         progressDialog.dismiss()
                         startActivity(intent)
@@ -275,13 +297,72 @@ class RencanaVisitActivity : AppCompatActivity() {
         val titleBar = findViewById<LinearLayout>(R.id.titleBarDark)
 
         if (isSelectBarActive) {
-            binding.selectTitleBarDark.visibility = View.VISIBLE
+            binding.selectTitleBarDark.componentSelectTitleBarDark.visibility = View.VISIBLE
             titleBar.visibility = View.GONE
             binding.tabLayout.visibility = View.GONE
         } else {
-            binding.selectTitleBarDark.visibility = View.GONE
+            binding.selectTitleBarDark.componentSelectTitleBarDark.visibility = View.GONE
             titleBar.visibility = View.VISIBLE
             binding.tabLayout.visibility = View.VISIBLE
+        }
+    }
+
+    fun onSelectedItems(items: ArrayList<RencanaVisitModel>) {
+
+        listCoordinate = arrayListOf()
+        listCoordinateName = arrayListOf()
+        listCoordinateStatus = arrayListOf()
+        listCoordinateCityID = arrayListOf()
+
+        LoopingTask(items).execute()
+//
+//        for (item in items.listIterator()) {
+//            listCoordinate.add(item.maps_url)
+//            listCoordinateName.add(item.nama)
+//            listCoordinateStatus.add(item.store_status)
+//            listCoordinateCityID.add(item.id_city)
+//        }
+//
+//        val intent = Intent(this@RencanaVisitActivity, MainActivity::class.java)
+//
+//        intent.putExtra(CONST_NEAREST_STORE, true)
+//        intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
+//        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+//        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
+//        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
+
+//        toggleSelectBar()
+//        Handler(Looper.getMainLooper()).postDelayed({
+//            progressDialog.dismiss()
+//            startActivity(intent)
+//        }, 1000)
+    }
+
+    private inner class LoopingTask(private var items: ArrayList<RencanaVisitModel>) : AsyncTask<Void, Void, Void>() {
+
+        override fun doInBackground(vararg params: Void?): Void? {
+            for (item in items.listIterator()) {
+                listCoordinate.add(item.maps_url)
+                listCoordinateName.add(item.nama)
+                listCoordinateStatus.add(item.store_status)
+                listCoordinateCityID.add(item.id_city)
+            }
+            return null
+        }
+
+        override fun onPostExecute(result: Void?) {
+            super.onPostExecute(result)
+
+            val intent = Intent(this@RencanaVisitActivity, MapsActivity::class.java)
+            intent.putExtra(CONST_NEAREST_STORE, true)
+            intent.putExtra(CONST_NEAREST_STORE_HIDE_FILTER, true)
+            intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
+            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
+            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
+
+            progressDialog.dismiss()
+            startActivity(intent)
         }
     }
 
@@ -328,7 +409,24 @@ class RencanaVisitActivity : AppCompatActivity() {
 
     @Subscribe
     fun onEventBus(event: EventBusUtils.IntEvent) {
-        binding.selectionTitle.text = "${event.data} Item Terpilih"
+        selectedItemCount = event.data!!
+        binding.selectTitleBarDark.selectionTitle.text = "$selectedItemCount Item Terpilih"
+        if (selectedItemCount > 0)
+            binding.selectTitleBarDark.icConfirmSelect.alpha = 1f
+        else
+            binding.selectTitleBarDark.icConfirmSelect.alpha =
+                if (CustomUtility(this).isDarkMode()) 0.2f
+                else 0.5f
+    }
+
+    override fun selectedItems(items: ArrayList<RencanaVisitModel>) {
+
+        listCoordinate = arrayListOf()
+        listCoordinateName = arrayListOf()
+        listCoordinateStatus = arrayListOf()
+        listCoordinateCityID = arrayListOf()
+
+        LoopingTask(items).execute()
     }
 
 }

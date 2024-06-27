@@ -12,7 +12,6 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -45,9 +44,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SALES_REPORT_RENVI
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
-import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
-import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -61,7 +58,6 @@ import com.topmortar.topmortarsales.model.RencanaVisitModel
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
 
 /**
  * A fragment representing a list of Items.
@@ -102,6 +98,9 @@ class JatemFragment : Fragment() {
         else binding.llFilter.componentFilter.visibility = View.VISIBLE
         val eventBusInt = EventBusUtils.IntEvent(0)
         EventBus.getDefault().post(eventBusInt)
+    }
+    fun onConfirmSelected() {
+        rvAdapter.getSelectedItems()
     }
 
     override fun onCreateView(
@@ -150,10 +149,13 @@ class JatemFragment : Fragment() {
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        setRecyclerView(response.results)
+                        val data = response.results
+                        data.sortBy { it.created_at }
+
+                        setRecyclerView(data)
                         loadingState(false)
                         showBadgeRefresh(false)
-                        listener?.counterItem(response.results.size)
+                        listener?.counterItem(data.size)
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
@@ -222,6 +224,9 @@ class JatemFragment : Fragment() {
 
         })
 
+        rvAdapter.callback = { result ->
+            (activity as? RencanaVisitActivity)?.onSelectedItems(result)
+        }
         binding.rvChatList.layoutManager = LinearLayoutManager(requireContext())
         binding.rvChatList.adapter = rvAdapter
         binding.rvChatList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -302,7 +307,6 @@ class JatemFragment : Fragment() {
 
                         setupDialogSearch(items)
                         binding.llFilter.componentFilter.visibility = View.VISIBLE
-//                        binding.llFilter.componentFilter.visibility = View.GONE
 
                     }
                     RESPONSE_STATUS_EMPTY -> {

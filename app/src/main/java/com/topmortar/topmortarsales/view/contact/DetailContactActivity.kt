@@ -3,8 +3,6 @@
 package com.topmortar.topmortarsales.view.contact
 
 import android.Manifest
-import android.animation.Animator
-import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -26,11 +24,7 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AlphaAnimation
-import android.view.animation.Animation
-import android.view.animation.AnimationSet
 import android.view.animation.AnimationUtils
-import android.view.animation.TranslateAnimation
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -49,8 +43,6 @@ import androidx.appcompat.widget.TooltipCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -135,7 +127,6 @@ import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.PingUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
-import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -170,6 +161,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     PingUtility.PingResultInterface, SendMessageModal.SendMessageModalInterface {
 
     private lateinit var progressDialog: ProgressDialog
+    private lateinit var apiService: ApiService
     private lateinit var sessionManager: SessionManager
     private val userKind get() = sessionManager.userKind().toString()
     private val userID get() = sessionManager.userID().toString()
@@ -316,6 +308,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         progressDialog = ProgressDialog(this)
         progressDialog.setCancelable(false)
         progressDialog.setMessage(getString(R.string.txt_loading))
+
+        apiService = HttpClient.create()
 
         if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
             CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-003", userID)
@@ -1039,7 +1033,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbReputation = createPartFromString(pReputation)
                 val rbPromoId = createPartFromString(pPromoID!!)
 
-                val apiService: ApiService = HttpClient.create()
                 val response = apiService.editContact(
                     id = rbId,
                     phone = rbPhone,
@@ -1167,12 +1160,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         contactId = intent.getStringExtra(CONST_CONTACT_ID) ?: "0"
         loadingState(true)
-        if (!progressDialog.isShowing) progressDialog.show()
+        progressDialog.show()
 
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
                 val response = contactId?.let { apiService.getContactDetail(contactId = it) }
 
                 if (response!!.isSuccessful) {
@@ -1295,8 +1287,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             if (!iAddress.isNullOrEmpty()) etAddress.setText(iAddress)
                             else etAddress.setText(EMPTY_FIELD_VALUE)
 
-                            loadingState(false)
-                            progressDialog.dismiss()
+//                            loadingState(false)
+//                            progressDialog.dismiss()
 
                             // Set Spinner
                             setupStatusSpinner()
@@ -1310,8 +1302,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
                             handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak! Message: Response status $RESPONSE_STATUS_FAIL or $RESPONSE_STATUS_FAILED")
-                            loadingState(false)
-                            progressDialog.dismiss()
+//                            loadingState(false)
+//                            progressDialog.dismiss()
                             toggleEdit(false)
                             setToGetCities()
 
@@ -1319,8 +1311,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         else -> {
 
                             handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak!")
-                            loadingState(false)
-                            progressDialog.dismiss()
+//                            loadingState(false)
+//                            progressDialog.dismiss()
                             toggleEdit(false)
                             setToGetCities()
 
@@ -1330,8 +1322,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 } else {
 
                     handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak! Error: " + response.message())
-                    loadingState(false)
-                    progressDialog.dismiss()
+//                    loadingState(false)
+//                    progressDialog.dismiss()
                     toggleEdit(false)
                     setToGetCities()
 
@@ -1366,7 +1358,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
                 val response = contactId?.let { apiService.getContactDetail(contactId = it) }
 
                 if (response!!.isSuccessful) {
@@ -1755,7 +1746,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
                 val response = apiService.getContactSales(idContact = contactId ?: "0")
 
                 when (response.status) {
@@ -1772,7 +1762,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                             binding.textBy.visibility = View.VISIBLE
                             binding.textBy.text = " " + getString(R.string.text_by) + " " + contactSales.username
-                        } else {
                         }
                         getCities()
 
@@ -1807,7 +1796,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
                 val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {
@@ -1874,7 +1862,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
                 val response = apiService.getPromo()
 
                 when (response.status) {
@@ -1909,15 +1896,24 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             indicatorImageView.visibility = View.VISIBLE
                             if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) tvKtpContainer.visibility = View.VISIBLE
                         }
+
+                        loadingState(false)
+                        progressDialog.dismiss()
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
                         handleMessage(this@DetailContactActivity, "LIST PROMO", "Daftar promo kosong!")
 
+                        loadingState(false)
+                        progressDialog.dismiss()
+
                     }
                     else -> {
 
                         handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+
+                        loadingState(false)
+                        progressDialog.dismiss()
 
                     }
                 }
@@ -1926,6 +1922,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             } catch (e: Exception) {
 
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+
+                loadingState(false)
+                progressDialog.dismiss()
 
             }
 

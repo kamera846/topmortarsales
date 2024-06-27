@@ -3,9 +3,7 @@
 package com.topmortar.topmortarsales.view
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -30,11 +28,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
-import com.google.android.play.core.appupdate.AppUpdateManagerFactory
-import com.google.android.play.core.install.InstallException
-import com.google.android.play.core.install.model.AppUpdateType
-import com.google.android.play.core.install.model.InstallErrorCode
-import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -64,6 +57,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_MARKETING
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
+import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.KeyboardHandler
@@ -131,32 +125,10 @@ class SplashScreenActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_splash_screen)
 
-        val appUpdateManager = AppUpdateManagerFactory.create(this)
-        val appUpdateInfoTask = appUpdateManager.appUpdateInfo
-        appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
-            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
-                appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
-            ) {
-                showUpdateDialog(this)
-            } else {
-                initView()
-            }
-        }.addOnFailureListener { exception ->
-            Log.e("UPDATE HANDLER", "Error get information update $exception")
-            when ((exception as InstallException).errorCode) {
-                InstallErrorCode.ERROR_INSTALL_NOT_ALLOWED -> {
-                    // Berikan informasi yang lebih detail kepada pengguna
-                    Log.e("UPDATE HANDLER", "Install not allowed due to device state (e.g. low battery, low disk space)")
-                }
-                // Tangani error lainnya sesuai kebutuhan
-                else -> {
-                    Log.e("UPDATE HANDLER", "Other install error: ${exception.errorCode}")
-                }
-            }
+        AppUpdateHelper.initialize()
+        AppUpdateHelper.checkForUpdate(this) {
             initView()
         }
-
-
     }
 
     private fun initView() {
@@ -351,12 +323,7 @@ class SplashScreenActivity : AppCompatActivity() {
     }
 
     private fun showCardLogin() {
-
-//        val layoutParams = ivLogo.layoutParams
-//        layoutParams.height = resources.getDimensionPixelSize(R.dimen.splashscreen_logo_height)
-//        ivLogo.layoutParams = layoutParams
         rlModal.visibility = View.VISIBLE
-
     }
 
     private fun showAlert(message: String) {
@@ -558,14 +525,6 @@ class SplashScreenActivity : AppCompatActivity() {
 
         loadingState(true)
 
-//        Handler(Looper.getMainLooper()).postDelayed({
-//            currentSubmitStep += 1
-//            submitHandler()
-//            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Success creating new OTP code!")
-//            loadingState(false)
-//        }, 1000)
-//        return
-
         lifecycleScope.launch {
             try {
 
@@ -641,15 +600,6 @@ class SplashScreenActivity : AppCompatActivity() {
 
         loadingState(true)
 
-//        Handler(Looper.getMainLooper()).postDelayed({
-//            currentSubmitStep += 1
-//            submitHandler()
-//            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "$otpCode")
-////            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "OTP code verified, please insert your new password!")
-//            loadingState(false)
-//        }, 1000)
-//        return
-
         lifecycleScope.launch {
             try {
 
@@ -713,15 +663,6 @@ class SplashScreenActivity : AppCompatActivity() {
         }
 
         loadingState(true)
-
-//        Handler(Looper.getMainLooper()).postDelayed({
-//            currentSubmitStep += 1
-//            submitHandler()
-////            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Success change password. Please login again!")
-//            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "$password : $userID")
-//            loadingState(false)
-//        }, 1000)
-//        return
 
         lifecycleScope.launch {
             try {
@@ -1121,26 +1062,6 @@ class SplashScreenActivity : AppCompatActivity() {
 
         }
 
-    }
-
-    private fun showUpdateDialog(context: Context) {
-        val builder = AlertDialog.Builder(context)
-        builder.setTitle("Update Diperlukan")
-            .setMessage("Versi baru aplikasi telah tersedia. Harap perbarui ke versi terbaru.")
-            .setCancelable(false)
-            .setNegativeButton("Nanti dulu") { _,_ -> finish() }
-            .setPositiveButton("Perbarui Sekarang") { dialog, _ ->
-                openPlayStore(context)
-                dialog.dismiss()
-            }
-        val dialog = builder.create()
-        dialog.show()
-    }
-
-    private fun openPlayStore(context: Context) {
-        val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}")
-        context.startActivity(intent)
     }
 
 }
