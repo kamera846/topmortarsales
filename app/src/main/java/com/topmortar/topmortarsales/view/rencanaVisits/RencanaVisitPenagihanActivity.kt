@@ -31,17 +31,19 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
+import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityRencanaVisitPenagihanBinding
 import com.topmortar.topmortarsales.model.RencanaVisitModel
-import com.topmortar.topmortarsales.view.MainActivity
 import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
 
-class RencanaVisitPenagihanActivity : AppCompatActivity() {
+class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment.OnSelectedItemListener {
 
     private var _binding: ActivityRencanaVisitPenagihanBinding? = null
     private val binding get() = _binding!!
@@ -57,6 +59,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity() {
     private lateinit var pagerAdapter: RencanaVisitPenagihanVPA
     private lateinit var progressDialog: ProgressDialog
     private var activeTab = 0
+    private var selectedItemCount = 0
     private var isSelectBarActive = false
 
     private val tabTitles = listOf("Jatem 0-7", "Jatem 8-15", "Jatem 16+", "Mingguan")
@@ -163,9 +166,14 @@ class RencanaVisitPenagihanActivity : AppCompatActivity() {
         binding.titleBarDark.icRoadMap.visibility = View.VISIBLE
         binding.titleBarDark.icRoadMap.setOnClickListener { showMapsOption() }
         binding.selectTitleBarDark.icCloseSelect.setOnClickListener { toggleSelectBar() }
+        binding.selectTitleBarDark.icConfirmSelect.alpha =
+            if (CustomUtility(this).isDarkMode()) 0.2f
+            else 0.5f
         binding.selectTitleBarDark.icConfirmSelect.setOnClickListener {
-            progressDialog.show()
-            pagerAdapter.onConfirmSelected(activeTab)
+            if (selectedItemCount > 0) {
+                progressDialog.show()
+                pagerAdapter.onConfirmSelected(activeTab)
+            }
         }
 
     }
@@ -358,6 +366,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        EventBus.getDefault().register(this)
         Handler(Looper.getMainLooper()).postDelayed({
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
@@ -370,8 +379,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
-        super.onStop()
-
+        EventBus.getDefault().unregister(this)
         if (sessionManager.isLoggedIn()) {
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
@@ -381,10 +389,10 @@ class RencanaVisitPenagihanActivity : AppCompatActivity() {
                 )
             }
         }
+        super.onStop()
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         if (sessionManager.isLoggedIn()) {
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
@@ -394,6 +402,29 @@ class RencanaVisitPenagihanActivity : AppCompatActivity() {
                 )
             }
         }
+        super.onDestroy()
+    }
+
+    @Subscribe
+    fun onEventBus(event: EventBusUtils.IntEvent) {
+        selectedItemCount = event.data!!
+        binding.selectTitleBarDark.selectionTitle.text = "$selectedItemCount Item Terpilih"
+        if (selectedItemCount > 0)
+            binding.selectTitleBarDark.icConfirmSelect.alpha = 1f
+        else
+            binding.selectTitleBarDark.icConfirmSelect.alpha =
+                if (CustomUtility(this).isDarkMode()) 0.2f
+                else 0.5f
+    }
+
+    override fun selectedItems(items: ArrayList<RencanaVisitModel>) {
+
+        listCoordinate = arrayListOf()
+        listCoordinateName = arrayListOf()
+        listCoordinateStatus = arrayListOf()
+        listCoordinateCityID = arrayListOf()
+
+        LoopingTask(items).execute()
     }
 
 }

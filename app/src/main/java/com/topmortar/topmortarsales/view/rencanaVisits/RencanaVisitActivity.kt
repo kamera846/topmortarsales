@@ -6,7 +6,6 @@ import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -14,15 +13,11 @@ import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
-import com.itextpdf.kernel.pdf.canvas.parser.EventType
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.viewpager.RencanaVisitVPA
-import com.topmortar.topmortarsales.commons.CONFIRM_SELECTED_CODE
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_CITY_ID
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
@@ -44,13 +39,11 @@ import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityRencanaVisitBinding
 import com.topmortar.topmortarsales.model.RencanaVisitModel
 import com.topmortar.topmortarsales.view.MapsActivity
-import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
-import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
-class RencanaVisitActivity : AppCompatActivity() {
+class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelectedItemListener {
 
     private var _binding: ActivityRencanaVisitBinding? = null
     private val binding get() = _binding!!
@@ -66,6 +59,7 @@ class RencanaVisitActivity : AppCompatActivity() {
     private lateinit var pagerAdapter: RencanaVisitVPA
     private lateinit var progressDialog: ProgressDialog
     private var activeTab = 0
+    private var selectedItemCount = 0
     private var isSelectBarActive = false
 
     private val tabTitles = listOf("Jatuh Tempo", "Voucher", "Pasif", "Mingguan")
@@ -175,8 +169,14 @@ class RencanaVisitActivity : AppCompatActivity() {
         binding.titleBarDark.icRoadMap.visibility = View.VISIBLE
         binding.titleBarDark.icRoadMap.setOnClickListener { showMapsOption() }
         binding.selectTitleBarDark.icCloseSelect.setOnClickListener { toggleSelectBar() }
+        binding.selectTitleBarDark.icConfirmSelect.alpha =
+            if (CustomUtility(this).isDarkMode()) 0.2f
+            else 0.5f
         binding.selectTitleBarDark.icConfirmSelect.setOnClickListener {
-            pagerAdapter.onConfirmSelected(activeTab)
+            if (selectedItemCount > 0) {
+                progressDialog.show()
+                pagerAdapter.onConfirmSelected(activeTab)
+            }
         }
 
     }
@@ -409,7 +409,24 @@ class RencanaVisitActivity : AppCompatActivity() {
 
     @Subscribe
     fun onEventBus(event: EventBusUtils.IntEvent) {
-        binding.selectTitleBarDark.selectionTitle.text = "${event.data} Item Terpilih"
+        selectedItemCount = event.data!!
+        binding.selectTitleBarDark.selectionTitle.text = "$selectedItemCount Item Terpilih"
+        if (selectedItemCount > 0)
+            binding.selectTitleBarDark.icConfirmSelect.alpha = 1f
+        else
+            binding.selectTitleBarDark.icConfirmSelect.alpha =
+                if (CustomUtility(this).isDarkMode()) 0.2f
+                else 0.5f
+    }
+
+    override fun selectedItems(items: ArrayList<RencanaVisitModel>) {
+
+        listCoordinate = arrayListOf()
+        listCoordinateName = arrayListOf()
+        listCoordinateStatus = arrayListOf()
+        listCoordinateCityID = arrayListOf()
+
+        LoopingTask(items).execute()
     }
 
 }

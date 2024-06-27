@@ -2,6 +2,7 @@
 
 package com.topmortar.topmortarsales.view.rencanaVisits
 
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
@@ -81,10 +82,14 @@ class TagihMingguanFragment : Fragment() {
 
     private var reportSource = SALES_REPORT_RENVI
     private var listener: CounterItem? = null
+    private var onSelectedItemListener: OnSelectedItemListener? = null
     private lateinit var apiService: ApiService
     private lateinit var rvAdapter: RencanaVisitRVA
     interface CounterItem {
         fun counterItem(count: Int)
+    }
+    interface OnSelectedItemListener {
+        fun selectedItems(items: ArrayList<RencanaVisitModel>)
     }
     fun setCounterItem(listener: CounterItem) {
         this.listener = listener
@@ -230,7 +235,7 @@ class TagihMingguanFragment : Fragment() {
         })
 
         rvAdapter.callback = { result ->
-            (activity as? RencanaVisitActivity)?.onSelectedItems(result)
+            onSelectedItemListener?.selectedItems(result)
         }
         rvAdapter.setType("tagihMingguan")
         binding.rvChatList.layoutManager = LinearLayoutManager(requireContext())
@@ -365,6 +370,20 @@ class TagihMingguanFragment : Fragment() {
         }
         binding.llFilter.tvFilter.text = selectedCity?.title ?: getString(R.string.tidak_ada_filter)
 
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        if (context is OnSelectedItemListener) {
+            onSelectedItemListener = context
+        } else {
+            throw ClassCastException("$context must implement OnSelectedItemsListener")
+        }
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        onSelectedItemListener = null
     }
 
 }
