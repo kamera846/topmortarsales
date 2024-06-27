@@ -28,6 +28,7 @@ import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_CITY_ID
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_NAME
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_STATUS
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
+import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE_HIDE_FILTER
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
@@ -354,6 +355,7 @@ class RencanaVisitActivity : AppCompatActivity() {
 
             val intent = Intent(this@RencanaVisitActivity, MapsActivity::class.java)
             intent.putExtra(CONST_NEAREST_STORE, true)
+            intent.putExtra(CONST_NEAREST_STORE_HIDE_FILTER, true)
             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
