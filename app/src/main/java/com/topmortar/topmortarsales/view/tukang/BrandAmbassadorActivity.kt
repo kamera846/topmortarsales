@@ -81,6 +81,9 @@ class BrandAmbassadorActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
+        AppUpdateHelper.initialize()
+        AppUpdateHelper.checkForUpdate(this)
+
         binding.titleBarDark.tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
         binding.titleBarDark.tvTitleBarDescription.visibility = binding.titleBarDark.tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
         binding.titleBarDark.tvTitleBar.setPadding(convertDpToPx(16, this), 0, 0, 0)
@@ -400,7 +403,6 @@ class BrandAmbassadorActivity : AppCompatActivity() {
                         val data = response.results[0]
                         sessionManager.setUserLoggedIn(data)
 
-//                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "Halo, ${ sessionManager.userName() }"}
                         binding.titleBarDark.tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
                         binding.titleBarDark.tvTitleBarDescription.visibility = binding.titleBarDark.tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
 
@@ -461,8 +463,6 @@ class BrandAmbassadorActivity : AppCompatActivity() {
     override fun onResume() {
 
         super.onResume()
-        // Check apps for update
-        AppUpdateHelper.checkForUpdates(this)
         getUserLoggedIn()
 
     }

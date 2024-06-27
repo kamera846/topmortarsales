@@ -85,22 +85,19 @@ class CourierActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
+        AppUpdateHelper.initialize()
+        AppUpdateHelper.checkForUpdate(this)
+
         val userDistributorIds = sessionManager.userDistributor()
         firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-010")
 
         binding.titleBarDark.tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
         binding.titleBarDark.tvTitleBarDescription.visibility = binding.titleBarDark.tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
-//        binding.titleBarDark.tvTitleBar.setPadding(convertDpToPx(16, this), 0, 0, 0)
-//        binding.titleBarDark.tvTitleBarDescription.setPadding(convertDpToPx(16, this), 0, 0, 0)
         binding.titleBarDark.icBack.visibility = View.VISIBLE
         binding.titleBarDark.icBack.setOnClickListener {
             if (activeTab != 0) tabLayout.getTabAt(0)?.select()
             else finish()
         }
-//        binding.titleBarDark.icMore.visibility = View.VISIBLE
-//        binding.titleBarDark.icMore.setOnClickListener { showPopupMenu(it) }
-//        binding.titleBarDark.icSyncNow.visibility = View.VISIBLE
-//        binding.titleBarDark.icSyncNow.setOnClickListener { pagerAdapter.setSyncAction(activeTab) }
         binding.titleBarDark.vBorder.visibility = View.GONE
         binding.titleBarDark.tvTitleBarDescription.isSelected = true
 
@@ -138,12 +135,6 @@ class CourierActivity : AppCompatActivity() {
 
         sessionManager.setLoggedIn(LOGGED_OUT)
         sessionManager.setUserLoggedIn(null)
-
-//        val isTracking = CustomUtility(this).isServiceRunning(TrackingService::class.java)
-//        if (isTracking) {
-//            val serviceIntent = Intent(this, TrackingService::class.java)
-//            this.stopService(serviceIntent)
-//        }
 
         val intent = Intent(this@CourierActivity, SplashScreenActivity::class.java)
         startActivity(intent)
@@ -452,8 +443,6 @@ class CourierActivity : AppCompatActivity() {
     override fun onResume() {
 
         super.onResume()
-        // Check apps for update
-        AppUpdateHelper.checkForUpdates(this)
         getUserLoggedIn()
 
     }

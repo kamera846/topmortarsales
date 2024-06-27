@@ -48,6 +48,8 @@ const val RESPONSE_STATUS_EMPTY = "empty"
 const val RESPONSE_STATUS_FAIL = "fail"
 const val RESPONSE_STATUS_FAILED = "failed"
 
+const val LATEST_APP_VERSION = "latest_app_version"
+
 const val CONTACT = "contacts.php"
 const val EDIT_CONTACT = "contacts.php"
 const val SEND_MESSAGE = "messages.php"
