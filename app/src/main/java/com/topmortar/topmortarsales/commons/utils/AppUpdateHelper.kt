@@ -68,16 +68,13 @@ object AppUpdateHelper {
             .setPositiveButton("Perbarui Sekarang") { _, _ ->
                 // Arahkan pengguna ke Google Play Store
                 val appPackageName = activity.packageName
-                try {
-                    activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$appPackageName")))
-                } catch (anfe: android.content.ActivityNotFoundException) {
-                    activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")))
-                }
+                activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")))
             }
             .setNegativeButton("Nanti dulu") { _, _ ->
-                activity.finishAffinity()
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     activity.finishAndRemoveTask()
+                } else {
+                    activity.finishAffinity()
                 }
                 exitProcess(0)
             }
