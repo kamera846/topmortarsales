@@ -91,6 +91,7 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS_STATUS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE_HIDE_FILTER
+import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE_WITH_DEFAULT_RANGE
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
@@ -131,11 +132,9 @@ import com.topmortar.topmortarsales.model.CityModel
 import com.topmortar.topmortarsales.model.DeliveryModel
 import com.topmortar.topmortarsales.model.GudangModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
-import com.topmortar.topmortarsales.model.RencanaVisitModel
 import com.topmortar.topmortarsales.model.UserAbsentModel
 import com.topmortar.topmortarsales.view.suratJalan.ListSuratJalanActivity
 import com.topmortar.topmortarsales.view.user.AllUserTrackingActivity
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -175,6 +174,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var isGetCoordinate = false
     private var isNearestStore = false
     private var isNearestStoreHideFilter = false
+    private var isNearestStoreDefaultRange = 1
     private var isBasecamp = false
     private var listCoordinate: ArrayList<String>? = null
     private var listCoordinateName: ArrayList<String>? = null
@@ -530,6 +530,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         isGetCoordinate = intent.getBooleanExtra(GET_COORDINATE, false)
         isNearestStore = intent.getBooleanExtra(CONST_NEAREST_STORE, false)
         isNearestStoreHideFilter = intent.getBooleanExtra(CONST_NEAREST_STORE_HIDE_FILTER, false)
+        isNearestStoreDefaultRange = intent.getIntExtra(CONST_NEAREST_STORE_WITH_DEFAULT_RANGE, 1)
         isTracking = intent.getBooleanExtra(CONST_IS_TRACKING, false)
         isTrackingHistory = intent.getBooleanExtra(CONST_IS_TRACKING_HISTORY, false)
         isTrackingCourier = intent.getBooleanExtra(CONST_IS_TRACKING_COURIER, false)
@@ -638,6 +639,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
 
                 mMap.addMarker(markerOptions)
+            }
+
+            if (isNearestStoreDefaultRange == -1) {
+
+                progressDialog.setMessage("Mencari ${listCoordinate?.size} ${ if (isBasecamp) "basecamp" else "toko"}…")
+                binding.radiusContainer.visibility = View.GONE
+
+                val cameraUpdate = CameraUpdateFactory.newLatLngZoom(centerPointLatLng!!, 11f)
+                mMap.animateCamera(cameraUpdate, 2000, null)
             }
 
             // Execute looping in background
@@ -826,7 +836,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                             val distance = urlUtility.calculateDistance(centerPointLatLng!!.latitude, centerPointLatLng!!.longitude, latitude, longitude)
 
-                            if (distance < limitKm) {
+                            if (distance < limitKm || isNearestStoreDefaultRange == -1) {
 
                                 val latLng = LatLng(latitude, longitude)
                                 binding.recyclerView.visibility = View.GONE
@@ -862,13 +872,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                         mMap.addMarker(markerOptions)
                                         currentFoundItemTotal ++
                                     }
+                                } else {
+                                    Log.d("NEAREST STORE LOG", "Filter handle false")
                                 }
 
+                            } else {
+                                Log.d("NEAREST STORE LOG", "Distance handle false")
                             }
 
+                        } else {
+                            Log.d("NEAREST STORE LOG", "Longitude & latitude handle false")
                         }
+                    } else {
+                        Log.d("NEAREST STORE LOG", "Coordinate size ${coordinates.size} handle false")
                     }
 
+                } else {
+                    Log.d("NEAREST STORE LOG", "Url handle false")
                 }
 
             } // End For Loop
@@ -892,7 +912,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 //                    progressDialog.setMessage("Sedang memuat…")
 
             val durationMs = 2000
-            val responsiveZoom = when {
+            var responsiveZoom = when {
                 limitKm >= 1 -> when {
                     limitKm >= 18 -> 10
                     limitKm >= 13 -> 11
@@ -902,15 +922,19 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 }
                 else -> 15
             }
+
+            val isLimitKmDisabled = isNearestStoreDefaultRange == -1
+            if (isLimitKmDisabled) responsiveZoom = 10
+
             val cameraUpdate = CameraUpdateFactory.newLatLngZoom(centerPointLatLng!!, responsiveZoom.toFloat())
             mMap.animateCamera(cameraUpdate, durationMs, null)
 
-            binding.textTotalNearest.text = "$currentFoundItemTotal / ${listCoordinate?.size} ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }ditemukan dalam radius $limitKm km"
+            binding.textTotalNearest.text = "$currentFoundItemTotal / ${listCoordinate?.size} ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }ditemukan ${ if (!isLimitKmDisabled) "dalam radius $limitKm km" else ""}"
             if (currentFoundItemTotal > 0) {
                 binding.textTitleTotalNearest.text = "Penelusuran ${if (isBasecamp) "Basecamp" else "Toko"} Terdekat"
 //                binding.textTotalNearest.text = "$currentFoundItemTotal / ${listCoordinate?.size} ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }ditemukan dalam radius $limitKm km"
             } else {
-                showDialog(message = "Tidak menemukan ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }di sekitar anda saat ini dalam radius jarak $limitKm km")
+                showDialog(message = "Tidak menemukan ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }${ if (!isLimitKmDisabled) "di sekitar anda saat ini dalam radius jarak $limitKm km" else ""}")
                 binding.textTitleTotalNearest.text = "Penelusuran ${if (isBasecamp) "Basecamp" else "Toko"} Terdekat"
 //                binding.textTotalNearest.text = "$currentFoundItemTotal / ${listCoordinate?.size} ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }ditemukan dalam radius $limitKm km"
             }

@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/option_all"
-        android:title="Lihat toko terdekat" />
+        android:title="Lihat lokasi toko" />
     <item
         android:id="@+id/option_choices"
         android:title="Lihat lokasi toko yang dipilih" />

@@ -77,6 +77,7 @@ class PasifRenViFragment : Fragment() {
     private lateinit var searchModal: SearchModal
     private var citiesResults: ArrayList<CityModel>? = null
     private var selectedCity: ModalSearchModel? = null
+    private var listItem: ArrayList<RencanaVisitModel> = arrayListOf()
 
     private var listener: CounterItem? = null
     private lateinit var apiService: ApiService
@@ -101,6 +102,10 @@ class PasifRenViFragment : Fragment() {
     }
     fun onConfirmSelected() {
         rvAdapter.getSelectedItems()
+    }
+
+    fun getAllListItem(): ArrayList<RencanaVisitModel> {
+        return listItem
     }
 
     override fun onCreateView(
@@ -149,17 +154,18 @@ class PasifRenViFragment : Fragment() {
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        val data = response.results
-                        data.sortBy { it.created_at }
+                        listItem = response.results
+                        listItem.sortBy { it.created_at }
 
-                        setRecyclerView(data)
+                        setRecyclerView(listItem)
                         loadingState(false)
                         showBadgeRefresh(false)
-                        listener?.counterItem(data.size)
+                        listener?.counterItem(listItem.size)
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
+                        listItem = arrayListOf()
                         loadingState(true, "Belum ada toko pasif!")
                         showBadgeRefresh(false)
                         listener?.counterItem(0)
@@ -167,6 +173,7 @@ class PasifRenViFragment : Fragment() {
                     }
                     else -> {
 
+                        listItem = arrayListOf()
                         handleMessage(requireContext(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
                         loadingState(true, getString(R.string.failed_request))
                         showBadgeRefresh(true)
@@ -176,6 +183,7 @@ class PasifRenViFragment : Fragment() {
 
             } catch (e: Exception) {
 
+                listItem = arrayListOf()
                 handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
