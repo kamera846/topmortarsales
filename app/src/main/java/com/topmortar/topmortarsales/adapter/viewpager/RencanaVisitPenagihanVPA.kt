@@ -4,6 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import com.topmortar.topmortarsales.commons.PENAGIHAN_REPORT_RENVI
+import com.topmortar.topmortarsales.model.RencanaVisitModel
 import com.topmortar.topmortarsales.view.rencanaVisits.JatemPenagihan1Fragment
 import com.topmortar.topmortarsales.view.rencanaVisits.JatemPenagihan2Fragment
 import com.topmortar.topmortarsales.view.rencanaVisits.JatemPenagihan3Fragment
@@ -44,6 +45,15 @@ class RencanaVisitPenagihanVPA(fm: FragmentManager, private var tabSize: Int) : 
             1 -> fragmentJatem2.onConfirmSelected()
             2 -> fragmentJatem3.onConfirmSelected()
             3 -> fragmentWeekly.onConfirmSelected()
+        }
+    }
+    fun getAllListItem(index: Int): ArrayList<RencanaVisitModel> {
+        return when (index) {
+            0 -> fragmentJatem1.getAllListItem()
+            1 -> fragmentJatem2.getAllListItem()
+            2 -> fragmentJatem3.getAllListItem()
+            3 -> fragmentWeekly.getAllListItem()
+            else -> arrayListOf()
         }
     }
 

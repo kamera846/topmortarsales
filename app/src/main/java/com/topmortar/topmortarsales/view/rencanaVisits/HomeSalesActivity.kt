@@ -1121,7 +1121,7 @@ class HomeSalesActivity : AppCompatActivity() {
             )
         }
         // Number 1 is distributor ID for Center Distributor (Special case for Top Mortar Mitra)
-        if (userDistributorId != "1") {
+//        if (userDistributorId != "1") {
             listItem.add(
                 HomeMenuSalesModel(
                     icon = R.drawable.gudang_white,
@@ -1131,7 +1131,7 @@ class HomeSalesActivity : AppCompatActivity() {
                     isLocked = isLocked
                 )
             )
-        }
+//        }
 
         setMenuItemAdapter(binding.rvVisit, listItem)
     }

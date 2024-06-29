@@ -364,6 +364,7 @@
                     android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
                 <LinearLayout
+                    android:id="@+id/radiusContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"

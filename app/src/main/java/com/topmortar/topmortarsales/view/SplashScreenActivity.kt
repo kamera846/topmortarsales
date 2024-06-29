@@ -125,10 +125,10 @@ class SplashScreenActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_splash_screen)
 
-        AppUpdateHelper.initialize()
-        AppUpdateHelper.checkForUpdate(this) {
-            initView()
-        }
+//        AppUpdateHelper.initialize()
+//        AppUpdateHelper.checkForUpdate(this) {
+//            initView()
+//        }
     }
 
     private fun initView() {
@@ -1062,6 +1062,15 @@ class SplashScreenActivity : AppCompatActivity() {
 
         }
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        AppUpdateHelper.initialize()
+        AppUpdateHelper.checkForUpdate(this) {
+            initView()
+        }
     }
 
 }

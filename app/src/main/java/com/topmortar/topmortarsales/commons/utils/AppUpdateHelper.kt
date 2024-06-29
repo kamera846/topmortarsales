@@ -19,7 +19,7 @@ object AppUpdateHelper {
     fun initialize() {
         firebaseRemoteConfig = FirebaseRemoteConfig.getInstance()
         val configSettings = FirebaseRemoteConfigSettings.Builder()
-            .setMinimumFetchIntervalInSeconds(3600)
+            .setMinimumFetchIntervalInSeconds(0)
             .build()
         firebaseRemoteConfig.setConfigSettingsAsync(configSettings)
         firebaseRemoteConfig.setDefaultsAsync(R.xml.default_app_version)
@@ -68,16 +68,13 @@ object AppUpdateHelper {
             .setPositiveButton("Perbarui Sekarang") { _, _ ->
                 // Arahkan pengguna ke Google Play Store
                 val appPackageName = activity.packageName
-                try {
-                    activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$appPackageName")))
-                } catch (anfe: android.content.ActivityNotFoundException) {
-                    activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")))
-                }
+                activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")))
             }
             .setNegativeButton("Nanti dulu") { _, _ ->
-                activity.finishAffinity()
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     activity.finishAndRemoveTask()
+                } else {
+                    activity.finishAffinity()
                 }
                 exitProcess(0)
             }

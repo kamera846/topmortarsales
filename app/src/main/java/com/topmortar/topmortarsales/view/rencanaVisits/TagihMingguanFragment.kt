@@ -78,6 +78,7 @@ class TagihMingguanFragment : Fragment() {
     private lateinit var searchModal: SearchModal
     private var citiesResults: ArrayList<CityModel>? = null
     private var selectedCity: ModalSearchModel? = null
+    private var listItem: ArrayList<RencanaVisitModel> = arrayListOf()
 
     private var reportSource = SALES_REPORT_RENVI
     private var listener: CounterItem? = null
@@ -110,6 +111,10 @@ class TagihMingguanFragment : Fragment() {
     }
     fun onConfirmSelected() {
         rvAdapter.getSelectedItems()
+    }
+
+    fun getAllListItem(): ArrayList<RencanaVisitModel> {
+        return listItem
     }
 
     override fun onCreateView(
@@ -158,17 +163,18 @@ class TagihMingguanFragment : Fragment() {
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        val data = response.results
-                        data.sortBy { it.created_at }
+                        listItem = response.results
+                        listItem.sortBy { it.created_at }
 
-                        setRecyclerView(data)
+                        setRecyclerView(listItem)
                         loadingState(false)
                         showBadgeRefresh(false)
-                        listener?.counterItem(data.size)
+                        listener?.counterItem(listItem.size)
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
+                        listItem = arrayListOf()
                         loadingState(true, "Belum ada daftar tagihan mingguan!")
                         showBadgeRefresh(false)
                         listener?.counterItem(0)
@@ -176,6 +182,7 @@ class TagihMingguanFragment : Fragment() {
                     }
                     else -> {
 
+                        listItem = arrayListOf()
                         handleMessage(requireContext(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
                         loadingState(true, getString(R.string.failed_request))
                         showBadgeRefresh(true)
@@ -185,6 +192,7 @@ class TagihMingguanFragment : Fragment() {
 
             } catch (e: Exception) {
 
+                listItem = arrayListOf()
                 handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
