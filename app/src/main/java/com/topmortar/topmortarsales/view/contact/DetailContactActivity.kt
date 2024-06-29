@@ -1551,7 +1551,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
 
         } else {
-            val parentLayout: ViewGroup = findViewById(R.id.detail_contact_activity) // Ganti dengan ID yang sesuai dari layout Anda
+            val parentLayout: ViewGroup = findViewById(R.id.detail_contact_activity)
             val bottomSheetLayout = layoutInflater.inflate(R.layout.fragment_bottom_sheet_detail_contact, parentLayout, false)
 
             val invoiceOption = bottomSheetLayout.findViewById<LinearLayout>(R.id.invoiceOption)
@@ -1570,10 +1570,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 reportsTitle.text = "Lihat Laporan Sales"
                 reportOption.visibility = View.VISIBLE
                 btnNewReport.visibility = View.GONE
-            } else if (sessionManager.userKind() == USER_KIND_SALES && iStatus == STATUS_CONTACT_BLACKLIST) {
-                invoiceOption.visibility = View.GONE
-                sjOption.visibility = View.GONE
-                voucherOption.visibility = View.GONE
+            } else if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+                if (userDistributorId == "1" && iReportSource == NORMAL_REPORT) btnNewReport.visibility = View.GONE
+//                else {
+//                    if (iStatus == STATUS_CONTACT_BLACKLIST) {
+//                        invoiceOption.visibility = View.GONE
+//                        sjOption.visibility = View.GONE
+//                        voucherOption.visibility = View.GONE
+//                    }
+//                }
             }
 
             bottomSheetDialog.setContentView(bottomSheetLayout)
