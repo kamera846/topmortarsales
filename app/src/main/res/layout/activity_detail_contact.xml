@@ -686,7 +686,7 @@
                             android:gravity="center_vertical"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                             android:textColorHint="@color/black_600"
-                            android:hint="Choose Skill Tukang"
+                            android:hint="Pilih Keahlian Tukang"
                             android:inputType="textCapWords"
                             android:autofillHints="Choose Owner Birthday"
                             android:textSize="16sp"

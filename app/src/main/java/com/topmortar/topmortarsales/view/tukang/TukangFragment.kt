@@ -50,8 +50,7 @@ import org.greenrobot.eventbus.Subscribe
  */
 class TukangFragment : Fragment() {
 
-    private var _binding: FragmentTukangBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var binding: FragmentTukangBinding
 
     private lateinit var sessionManager: SessionManager
     private lateinit var userKind: String
@@ -75,7 +74,7 @@ class TukangFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentTukangBinding.inflate(inflater, container, false)
+        binding = FragmentTukangBinding.inflate(inflater, container, false)
         val view = binding.root
 
         badgeRefresh = view.findViewById(R.id.badgeRefresh)
@@ -253,11 +252,6 @@ class TukangFragment : Fragment() {
 
     @Subscribe
     fun onEventBus(event: EventBusUtils.MessageEvent) {
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     private fun showBadgeRefresh(action: Boolean) {
