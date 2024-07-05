@@ -38,7 +38,9 @@ class TukangRecyclerViewAdapter(private val chatList: ArrayList<TukangModel>, pr
 
             ivProfile.setImageResource(R.drawable.person_red)
             tvContactName.text = chatItem.nama
-            tvPhoneNumber.text = if (chatItem.nomorhp != "") "+${ chatItem.nomorhp } (${chatItem.kode_skill})" else ""
+            val phoneNumber = "+${ chatItem.nomorhp }"
+            val skillCode = if (chatItem.kode_skill.isNotEmpty()) "(${chatItem.kode_skill})" else ""
+            tvPhoneNumber.text = if (chatItem.nomorhp != "") "$phoneNumber $skillCode" else ""
             setupStatus(chatItem.tukang_status)
 
         }
