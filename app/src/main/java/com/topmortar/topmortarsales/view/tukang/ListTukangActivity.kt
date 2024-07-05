@@ -23,9 +23,6 @@ class ListTukangActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.titleBarDark.tvTitleBar.text = "Daftar Tukang"
-//        binding.titleBarDark.tvTitleBarDescription.text = intent.getStringExtra(CONST_FULL_NAME)
-//        binding.titleBarDark.tvTitleBarDescription.visibility = View.VISIBLE
-//        binding.titleBarDark.icSyncNow.visibility = View.VISIBLE
         binding.titleBarDark.icBack.setOnClickListener { finish() }
 
         /*

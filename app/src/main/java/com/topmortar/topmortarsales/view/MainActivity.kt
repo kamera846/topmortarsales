@@ -109,6 +109,7 @@ import com.topmortar.topmortarsales.view.product.ProductsActivity
 import com.topmortar.topmortarsales.view.rencanaVisits.RencanaVisitActivity
 import com.topmortar.topmortarsales.view.rencanaVisits.RencanaVisitPenagihanActivity
 import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
+import com.topmortar.topmortarsales.view.tukang.ListTukangActivity
 import com.topmortar.topmortarsales.view.user.ManageUserActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.launch
@@ -195,6 +196,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         val searchItem = popupMenu.menu.findItem(R.id.nav_search)
         val productsItem = popupMenu.menu.findItem(R.id.nav_products)
         val userItem = popupMenu.menu.findItem(R.id.nav_user)
+        val tukangItem = popupMenu.menu.findItem(R.id.nav_tukang)
         val myProfile = popupMenu.menu.findItem(R.id.nav_my_profile)
         val cityItem = popupMenu.menu.findItem(R.id.nav_city)
         val skillItem = popupMenu.menu.findItem(R.id.nav_skill)
@@ -211,6 +213,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             if (userKind == USER_KIND_ADMIN) {
                 cityItem.isVisible = true
                 skillItem.isVisible = true
+                tukangItem.isVisible = true
             }
             productsItem.isVisible = true
             userItem.isVisible = true
@@ -276,6 +279,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 val intent = Intent(this@MainActivity, ManageCityActivity::class.java)
                 intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
                 startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
+                true
+            }
+            R.id.nav_tukang -> {
+                startActivity(Intent(this@MainActivity, ListTukangActivity::class.java))
                 true
             }
             R.id.nav_skill -> {

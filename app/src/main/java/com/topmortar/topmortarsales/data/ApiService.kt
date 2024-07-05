@@ -333,6 +333,8 @@ interface ApiService {
 
     @GET(TUKANG)
     suspend fun getTukang(@Query("c") cityId: String): ResponseTukangList
+    @GET(TUKANG)
+    suspend fun getTukangDst(@Query("dst") distributorID: String): ResponseTukangList
 
     @GET(TUKANG)
     suspend fun getDetailTukang(@Query("id") tukangId: String): Response<ResponseTukangList>
