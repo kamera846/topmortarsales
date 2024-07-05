@@ -280,6 +280,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var isSearchCity = false
     private var isSearchPromo = false
     private var isCitiesSuccessfullyLoad = false
+    private var isPhoneFieldOpened = true
 
     private lateinit var datePicker: DatePickerDialog
     private lateinit var searchModal: SearchModal
@@ -401,6 +402,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         // Setup Title Bar
         tvTitleBar.text = titlePage
 
+        // Setup Phone Toggle
+        binding.itemPhone2.visibility = View.VISIBLE
+        binding.togglePhoneSize.visibility = View.VISIBLE
+
         // Setup Date Picker Dialog
         setDatePickerDialog()
 
@@ -498,18 +503,20 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             } else etKtp.clearFocus()
         }
 
-//        binding.itemPhone1.setOnClickListener {
-//            if (binding.tvPhoneContainer.height < convertDpToPx(60, this@DetailContactActivity)) {
-//                val startHeight = binding.tvPhoneContainer.height
-//                binding.tvPhoneContainer.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-//                val targetHeight = binding.tvPhoneContainer.measuredHeight
-//                phoneAnimation(startHeight, targetHeight)
-//            } else {
-//                val startHeight = binding.tvPhoneContainer.height
-//                val targetHeight = binding.tvPhoneContainer.height - binding.itemPhone2.height
-//                phoneAnimation(startHeight, targetHeight)
-//            }
-//        }
+        binding.togglePhoneSize.setOnClickListener {
+            if (!isPhoneFieldOpened) {
+                isPhoneFieldOpened = true
+                val startHeight = binding.tvPhoneContainer.height
+                binding.tvPhoneContainer.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                val targetHeight = binding.tvPhoneContainer.measuredHeight
+                phoneAnimation(startHeight, targetHeight)
+            } else {
+                isPhoneFieldOpened = false
+                val startHeight = binding.tvPhoneContainer.height
+                val targetHeight = binding.tvPhoneContainer.height - binding.itemPhone2.height
+                phoneAnimation(startHeight, targetHeight)
+            }
+        }
         //////////
 
         // Change Listener
@@ -777,6 +784,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 tvDescription.visibility = View.GONE
 
                 tvPhoneContainer.visibility = View.GONE
+                binding.togglePhoneSize.visibility = View.GONE
+
                 tvOwnerContainer.visibility = View.GONE
                 tvLocationContainer.visibility = View.GONE
                 tvMapsContainer.visibility = View.GONE
@@ -857,6 +866,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 tvDescription.visibility = View.VISIBLE
 
                 tvPhoneContainer.visibility = View.VISIBLE
+                binding.togglePhoneSize.visibility = View.VISIBLE
+
                 tvOwnerContainer.visibility = View.VISIBLE
                 tvLocationContainer.visibility = View.VISIBLE
                 tvMapsContainer.visibility = View.VISIBLE
@@ -1071,8 +1082,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             setupDialogSendMessage(itemSendMessage)
 
                             tvName.text = "${ etName.text }"
+
                             tvPhone.text = "+" + formatPhoneNumber("${ etPhone.text }")
                             etPhone.setText(formatPhoneNumber("${ etPhone.text }"))
+                            binding.tvPhone2.text = "+" + formatPhoneNumber("${ etPhone.text }")
+                            etPhone.setText(formatPhoneNumber("${ etPhone.text }"))
+
                             iAddress = "${ etAddress.text }"
 
 //                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
@@ -1226,8 +1241,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             if (iPhone.isNotEmpty()) {
                                 tvPhone.text = "+$iPhone"
                                 etPhone.setText(iPhone)
+                                binding.tvPhone2.text = "+$iPhone"
+                                etPhone.setText(iPhone)
                             } else {
                                 tvPhone.text = EMPTY_FIELD_VALUE
+                                etPhone.setText("")
+                                binding.tvPhone2.text = EMPTY_FIELD_VALUE
                                 etPhone.setText("")
                             }
                             if (!iName.isNullOrEmpty()) {
@@ -2590,8 +2609,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     }
 
     private fun phoneAnimation(startHeight: Int, targetHeight: Int) {
+        val duration = 500L
         val animator = ValueAnimator.ofInt(startHeight, targetHeight)
-        animator.duration = 500
+        animator.duration = duration
         animator.addUpdateListener { valueAnimator ->
             val animatedValue = valueAnimator.animatedValue as Int
 
@@ -2600,6 +2620,20 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             binding.tvPhoneContainer.layoutParams = layoutParams
         }
         animator.start()
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (!isPhoneFieldOpened) {
+                binding.togglePhoneSizeText.text = "Lainnya"
+                binding.togglePhoneSizeIcon.setImageResource(R.drawable.chevron_down_only_white)
+//                val params = binding.togglePhoneSizeIcon.layoutParams as ViewGroup.MarginLayoutParams
+//                params.setMargins(0, convertDpToPx(1, this@DetailContactActivity), 0, 0)
+            } else {
+                binding.togglePhoneSizeText.text = "Tutup"
+                binding.togglePhoneSizeIcon.setImageResource(R.drawable.chevron_up_only_white)
+//                val params = binding.togglePhoneSizeIcon.layoutParams as ViewGroup.MarginLayoutParams
+//                params.setMargins(0, 0, 0, convertDpToPx(1, this@DetailContactActivity))
+            }
+        }, duration)
     }
 
     override fun onStart() {
