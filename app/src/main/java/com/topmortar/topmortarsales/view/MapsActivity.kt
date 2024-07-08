@@ -834,7 +834,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 processed ++
                 percentage = (processed * 100) / totalProcess
 
-                progressDialog.setMessage("Mencari ${listCoordinate?.size} ${ if (isBasecamp) "basecamp" else "toko"}…  ($percentage%)")
+                if (isNearestStoreDefaultRange == -1) {
+                    progressDialog.setMessage("Mencari ${listCoordinate?.size} ${ if (isBasecamp) "basecamp" else "toko"}…  ($percentage%)")
+                } else {
+                    progressDialog.setMessage("Mencari ${if (isBasecamp) "basecamp" else "toko"} terdekat… ($percentage%)")
+                }
 
                 if (!urlUtility.isUrl(item)) {
 
