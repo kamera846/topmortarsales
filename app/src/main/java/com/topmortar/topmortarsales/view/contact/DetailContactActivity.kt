@@ -944,6 +944,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             itemSendMessage = ContactModel(
                                 id_contact = contactId!!,
                                 nomorhp = pPhone,
+                                nomorhp_2 = pPhone2,
                                 nama = pName,
                                 store_owner = pOwner,
                                 id_city = pCityID,
@@ -958,16 +959,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             tvPhone.text = "+" + formatPhoneNumber("${ etPhone.text }")
                             etPhone.setText(formatPhoneNumber("${ etPhone.text }"))
 
-                            val iPhone2 = binding.etPhone2.text
-                            if (iPhone2.isNotEmpty() && iPhone2.toString() != "0") {
-                                binding.tvPhone2.text = "+$iPhone2"
-                                binding.etPhone2.text = iPhone2
+                            val iPhone2 = binding.etPhone2.text.toString()
+                            if (iPhone2.isNotEmpty() && iPhone2 != "0") {
+                                binding.tvPhone2.text = "+" + formatPhoneNumber(iPhone2)
+                                binding.etPhone2.setText(formatPhoneNumber(iPhone2))
                             } else {
                                 binding.tvPhone2.text = EMPTY_FIELD_VALUE
                                 binding.etPhone2.setText("")
                             }
-                            binding.tvPhone2.text = "+" + formatPhoneNumber("${ binding.etPhone2.text }")
-                            binding.etPhone2.setText(formatPhoneNumber("${ binding.etPhone2.text }"))
 
                             iAddress = "${ etAddress.text }"
 
@@ -1114,7 +1113,16 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                             activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
 
-                            itemSendMessage = ContactModel(id_contact = iContactId, nama = iName!!, nomorhp = iPhone, store_owner = iOwner, tgl_lahir = iBirthday, maps_url = iMapsUrl!!, id_city = iLocation!!)
+                            itemSendMessage = ContactModel(
+                                id_contact = iContactId,
+                                nama = iName!!,
+                                nomorhp = iPhone,
+                                nomorhp_2 = iPhone2,
+                                store_owner = iOwner,
+                                tgl_lahir = iBirthday,
+                                maps_url = iMapsUrl!!,
+                                id_city = iLocation!!
+                            )
                             setupDialogSendMessage(itemSendMessage)
 
                             if (iContactId.isNotEmpty()) {
@@ -1337,7 +1345,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     toggleEdit(false)
 
                 }
-
 
             } catch (e: Exception) {
 

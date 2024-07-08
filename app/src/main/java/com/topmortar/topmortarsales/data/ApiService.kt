@@ -112,6 +112,7 @@ interface ApiService {
     suspend fun insertContact(
         @Part("nama") name: RequestBody,
         @Part("nomorhp") phone: RequestBody,
+//        @Part("nomorhp_2") phone2: RequestBody,
         @Part("owner_name") ownerName: RequestBody,
         @Part("tgl_lahir") birthday: RequestBody,
         @Part("id_city") cityId: RequestBody,
@@ -126,6 +127,7 @@ interface ApiService {
     suspend fun sendMessage(
         @Part("nama") name: RequestBody,
         @Part("nomorhp") phone: RequestBody,
+//        @Part("nomorhp_2") phone2: RequestBody,
         @Part("owner_name") ownerName: RequestBody,
         @Part("tgl_lahir") birthday: RequestBody,
         @Part("id_city") cityId: RequestBody,

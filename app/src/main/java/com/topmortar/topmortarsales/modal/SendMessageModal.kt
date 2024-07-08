@@ -28,7 +28,7 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.updateTxtMaxLength
-import com.topmortar.topmortarsales.commons.utils.PhoneHandler
+import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -329,7 +329,8 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
                 val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
                 val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
 
-                val rbPhone = createPartFromString(PhoneHandler.formatPhoneNumber(data.nomorhp))
+                val rbPhone = createPartFromString(formatPhoneNumber(data.nomorhp))
+//                val rbPhone2 = createPartFromString(data.nomorhp_2.let{ if (it == "0") it else formatPhoneNumber(it) })
                 val rbName = createPartFromString(data.nama)
                 val rbLocation = createPartFromString(data.id_city)
                 val rbBirthday = createPartFromString(data.tgl_lahir)
@@ -349,7 +350,19 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 //                return@launch
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.sendMessage(name = rbName, phone = rbPhone, ownerName = rbOwner, birthday = rbBirthday, cityId = rbLocation, mapsUrl = rbMapsUrl, currentName = rbCurrentName, userId = rbUserId, termin = rbTermin, message = rbMessage)
+                val response = apiService.sendMessage(
+                    name = rbName,
+                    phone = rbPhone,
+//                    phone2 = rbPhone2,
+                    ownerName = rbOwner,
+                    birthday = rbBirthday,
+                    cityId = rbLocation,
+                    mapsUrl = rbMapsUrl,
+                    currentName = rbCurrentName,
+                    userId = rbUserId,
+                    termin = rbTermin,
+                    message = rbMessage
+                )
 
                 if (response.isSuccessful) {
 

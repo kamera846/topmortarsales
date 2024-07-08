@@ -384,7 +384,7 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:gravity="center_vertical"
-                                    android:text="Nomor 1"
+                                    android:text="Nomor 1 (wajib)"
                                     android:textSize="12sp"
                                     android:textColor="@color/black_500"
                                     android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
@@ -437,7 +437,7 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:gravity="center_vertical"
-                                    android:text="Nomor 2"
+                                    android:text="Nomor 2 (Opsional)"
                                     android:textSize="12sp"
                                     android:textColor="@color/black_500"
                                     android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
