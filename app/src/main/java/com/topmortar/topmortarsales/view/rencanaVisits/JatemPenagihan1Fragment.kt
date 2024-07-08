@@ -154,7 +154,7 @@ class JatemPenagihan1Fragment : Fragment() {
                     RESPONSE_STATUS_OK -> {
 
                         listItem = response.results
-                        listItem.sortBy { it.created_at }
+                        listItem.sortBy { it.jatuh_tempo }
 
                         setRecyclerView(listItem)
                         loadingState(false)

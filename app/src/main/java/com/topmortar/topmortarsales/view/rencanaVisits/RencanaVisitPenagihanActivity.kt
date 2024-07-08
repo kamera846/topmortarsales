@@ -13,6 +13,7 @@ import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import com.topmortar.topmortarsales.R
@@ -24,6 +25,9 @@ import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_STATUS
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE_HIDE_FILTER
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE_WITH_DEFAULT_RANGE
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
@@ -34,6 +38,7 @@ import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityRencanaVisitPenagihanBinding
 import com.topmortar.topmortarsales.model.RencanaVisitModel
 import com.topmortar.topmortarsales.view.MapsActivity
+import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
@@ -55,6 +60,9 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
     private var activeTab = 0
     private var selectedItemCount = 0
     private var isSelectBarActive = false
+    private var totalProcess = 0
+    private var processed = 0
+    private var percentage = 0
 
     private val tabTitles = listOf("Jatem 0-7", "Jatem 8-15", "Jatem 16+", "Mingguan")
     private val tabTitleViews = mutableListOf<TextView>()
@@ -63,6 +71,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
     private lateinit var listCoordinateName: ArrayList<String>
     private lateinit var listCoordinateStatus: ArrayList<String>
     private lateinit var listCoordinateCityID: ArrayList<String>
+    private lateinit var listAllRenvi: ArrayList<RencanaVisitModel>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -176,9 +185,27 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
         val popupMenu = PopupMenu(this, binding.titleBarDark.icRoadMap)
         popupMenu.inflate(R.menu.option_maps_menu)
 
+        val menuPerCategory = popupMenu.menu.findItem(R.id.option_per_category)
+
+        when (activeTab) {
+            0 -> {
+                menuPerCategory.title = "Lihat lokasi renvi Jatem 0-7"
+            } 1 -> {
+                menuPerCategory.title = "Lihat lokasi renvi Jatem 8-15"
+            } 2 -> {
+                menuPerCategory.title = "Lihat lokasi renvi Jatem 16+"
+            } 3 -> {
+                menuPerCategory.title = "Lihat lokasi renvi Mingguan"
+            }
+        }
+
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
                 R.id.option_all -> {
+                    getAllRenvi()
+                    true
+                }
+                R.id.option_per_category -> {
                     val listIem = pagerAdapter.getAllListItem(activeTab)
                     navigateCheckLocationStore(listIem)
                     true
@@ -203,91 +230,112 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
 
         LoopingTask(items).execute()
 
-//        lifecycleScope.launch {
-//            try {
-//
-//                val response = when (userKind) {
-//                    USER_KIND_ADMIN -> {
-//                        when (activeTab) {
-//                            0 -> apiService.targetJatemDst(idDistributor = userDistributorId ?: "0")
-//                            1 -> apiService.targetVoucherDst(idDistributor = userDistributorId ?: "0")
-//                            2 -> apiService.targetPasifDst(idDistributor = userDistributorId ?: "0")
-//                            else -> apiService.targetWeeklyDst(idDistributor = userDistributorId ?: "0")
-//                        }
-//                    } else -> when (activeTab) {
-//                        0 -> apiService.targetJatem(idCity = userCityID ?: "0")
-//                        1 -> apiService.targetVoucher(idCity = userCityID ?: "0")
-//                        2 -> apiService.targetPasif(idCity = userCityID ?: "0")
-//                        else -> apiService.targetWeekly(idCity = userCityID ?: "0")
-//                    }
-//                }
-//
-//                when (response.status) {
-//                    RESPONSE_STATUS_OK -> {
-//
-//                        listCoordinate = arrayListOf()
-//                        listCoordinateName = arrayListOf()
-//                        listCoordinateStatus = arrayListOf()
-//                        listCoordinateCityID = arrayListOf()
-//
-//                        LoopingTask(response.results).execute()
-//
-////                        for (item in response.results.listIterator()) {
-////                            listCoordinate.add(item.maps_url)
-////                            listCoordinateName.add(item.nama)
-////                            listCoordinateStatus.add(item.store_status)
-////                            listCoordinateCityID.add(item.id_city)
-////                        }
-////
-////                        val intent = Intent(this@RencanaVisitPenagihanActivity, MapsActivity::class.java)
-////
-////                        intent.putExtra(CONST_NEAREST_STORE, true)
-////                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
-////                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
-////                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
-////                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
-////
-////                        progressDialog.dismiss()
-////                        startActivity(intent)
-//
-//                    }
-//                    RESPONSE_STATUS_EMPTY -> {
-//
-//                        listCoordinate = arrayListOf()
-//                        listCoordinateName = arrayListOf()
-//                        listCoordinateStatus = arrayListOf()
-//                        listCoordinateCityID = arrayListOf()
-//
-//                        val intent = Intent(this@RencanaVisitPenagihanActivity, MapsActivity::class.java)
-//
-//                        intent.putExtra(CONST_NEAREST_STORE, true)
-//                        intent.putExtra(CONST_NEAREST_STORE_HIDE_FILTER, true)
-//                        intent.putExtra(CONST_NEAREST_STORE_WITH_DEFAULT_RANGE, -1)
-//                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
-//                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
-//                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
-//                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
-//
+    }
+
+    private fun getAllRenvi() {
+        progressDialog.show()
+
+        listCoordinate = arrayListOf()
+        listCoordinateName = arrayListOf()
+        listCoordinateStatus = arrayListOf()
+        listCoordinateCityID = arrayListOf()
+        listAllRenvi = arrayListOf()
+
+        totalProcess = 4
+        processed = 0
+        percentage = 0
+
+        getListRenviPerCategory("jatem1")
+    }
+    private fun getListRenviPerCategory(category: String) {
+        processed ++
+        progressDialog.setMessage(getString(R.string.txt_loading) + "($processed/$totalProcess)")
+
+        lifecycleScope.launch {
+            try {
+
+                val response = when (userKind) {
+                    USER_KIND_ADMIN -> {
+                        when (category) {
+                            "jatem1" -> apiService.jatemPenagihan(dst = userDistributorId ?: "0", type = "jatem1")
+                            "jatem2" -> apiService.jatemPenagihan(dst = userDistributorId ?: "0", type = "jatem2")
+                            "jatem3" -> apiService.jatemPenagihan(dst = userDistributorId ?: "0", type = "jatem3")
+                            else -> apiService.targetWeeklyDst(idDistributor = userDistributorId ?: "0")
+                        }
+                    } else -> {
+                        when (category) {
+                            "jatem1" -> apiService.jatemPenagihanFilter(dst = userDistributorId ?: "0", idCity = userCityID ?: "0", type = "jatem1")
+                            "jatem2" -> apiService.jatemPenagihanFilter(dst = userDistributorId ?: "0", idCity = userCityID ?: "0", type = "jatem2")
+                            "jatem3" -> apiService.jatemPenagihanFilter(dst = userDistributorId ?: "0", idCity = userCityID ?: "0", type = "jatem3")
+                            else -> apiService.targetWeekly(idCity = userCityID ?: "0")
+                        }
+                    }
+                }
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+                        listAllRenvi.addAll(response.results)
+                        when (category) {
+                            "jatem1" -> getListRenviPerCategory("jatem2")
+                            "jatem2" -> getListRenviPerCategory("jatem3")
+                            "jatem3" -> getListRenviPerCategory("weekly")
+                            "weekly" -> {
+                                totalProcess = listAllRenvi.size
+                                processed = 0
+                                LoopingTask(listAllRenvi).execute()
+//                                progressDialog.dismiss()
+                            }
+                        }
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        when (category) {
+                            "jatem1" -> getListRenviPerCategory("jatem2")
+                            "jatem2" -> getListRenviPerCategory("jatem3")
+                            "jatem3" -> getListRenviPerCategory("weekly")
+                            "weekly" -> {
+                                totalProcess = listAllRenvi.size
+                                processed = 0
+                                LoopingTask(listAllRenvi).execute()
+//                                progressDialog.dismiss()
+                            }
+                        }
+
+                    }
+                    else -> {
+
+                        when (category) {
+                            "jatem1" -> getListRenviPerCategory("jatem2")
+                            "jatem2" -> getListRenviPerCategory("jatem3")
+                            "jatem3" -> getListRenviPerCategory("weekly")
+                            "weekly" -> {
+                                totalProcess = listAllRenvi.size
+                                processed = 0
+                                LoopingTask(listAllRenvi).execute()
+//                                progressDialog.dismiss()
+                            }
+                        }
+
+                    }
+                }
+
+            } catch (e: Exception) {
+
+                when (category) {
+                    "jatem1" -> getListRenviPerCategory("jatem2")
+                    "jatem2" -> getListRenviPerCategory("jatem3")
+                    "jatem3" -> getListRenviPerCategory("weekly")
+                    "weekly" -> {
+                        totalProcess = listAllRenvi.size
+                        processed = 0
+                        LoopingTask(listAllRenvi).execute()
 //                        progressDialog.dismiss()
-//                        startActivity(intent)
-//
-//                    }
-//                    else -> {
-//
-//                        handleMessage(this@RencanaVisitPenagihanActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
-//                        progressDialog.dismiss()
-//
-//                    }
-//                }
-//
-//            } catch (e: Exception) {
-//
-//                handleMessage(this@RencanaVisitPenagihanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
-//                progressDialog.dismiss()
-//
-//            }
-//
-//        }
+                    }
+                }
+
+            }
+
+        }
 
     }
 

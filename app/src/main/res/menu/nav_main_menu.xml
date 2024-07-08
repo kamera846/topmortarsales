@@ -34,6 +34,11 @@
             android:title="@string/manage_user"
             android:visible="false"/>
         <item
+            android:id="@+id/nav_tukang"
+            android:icon="@drawable/person_group_black"
+            android:title="Kelola Tukang"
+            android:visible="false"/>
+        <item
             android:id="@+id/nav_skill"
             android:icon="@drawable/skill_black"
             android:title="@string/manage_skill"

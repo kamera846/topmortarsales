@@ -91,6 +91,7 @@ interface ApiService {
     suspend fun editContact(
         @Part("id") id: RequestBody,
         @Part("nomorhp") phone: RequestBody,
+        @Part("nomorhp_2") phone2: RequestBody,
         @Part("nama") name: RequestBody,
         @Part("owner_name") ownerName: RequestBody,
         @Part("tgl_lahir") birthday: RequestBody,
@@ -111,6 +112,7 @@ interface ApiService {
     suspend fun insertContact(
         @Part("nama") name: RequestBody,
         @Part("nomorhp") phone: RequestBody,
+//        @Part("nomorhp_2") phone2: RequestBody,
         @Part("owner_name") ownerName: RequestBody,
         @Part("tgl_lahir") birthday: RequestBody,
         @Part("id_city") cityId: RequestBody,
@@ -125,6 +127,7 @@ interface ApiService {
     suspend fun sendMessage(
         @Part("nama") name: RequestBody,
         @Part("nomorhp") phone: RequestBody,
+//        @Part("nomorhp_2") phone2: RequestBody,
         @Part("owner_name") ownerName: RequestBody,
         @Part("tgl_lahir") birthday: RequestBody,
         @Part("id_city") cityId: RequestBody,
@@ -333,6 +336,8 @@ interface ApiService {
 
     @GET(TUKANG)
     suspend fun getTukang(@Query("c") cityId: String): ResponseTukangList
+    @GET(TUKANG)
+    suspend fun getTukangDst(@Query("dst") distributorID: String): ResponseTukangList
 
     @GET(TUKANG)
     suspend fun getDetailTukang(@Query("id") tukangId: String): Response<ResponseTukangList>

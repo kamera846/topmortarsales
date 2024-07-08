@@ -91,6 +91,7 @@ import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
 import com.topmortar.topmortarsales.view.courier.AddBaseCampActivity
 import com.topmortar.topmortarsales.view.product.ProductsActivity
 import com.topmortar.topmortarsales.view.reports.ReportsActivity
+import com.topmortar.topmortarsales.view.tukang.ListTukangActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -1152,7 +1153,7 @@ class HomeSalesActivity : AppCompatActivity() {
             HomeMenuSalesModel(
                 icon = R.drawable.add_white,
                 bgColor = R.drawable.bg_yellow_hunyadi_round_8,
-                title = "Daftar Toko Baru",
+                title = "Daftarkan Toko Baru",
                 target = NewRoomChatFormActivity::class.java,
                 isLocked = false
             )
@@ -1170,8 +1171,17 @@ class HomeSalesActivity : AppCompatActivity() {
             HomeMenuSalesModel(
                 icon = R.drawable.add_white,
                 bgColor = R.drawable.bg_yellow_hunyadi_round_8,
-                title = "Daftar Basecamp Baru",
+                title = "Daftarkan Basecamp Baru",
                 target = AddBaseCampActivity::class.java,
+                isLocked = false
+            )
+        )
+        listItem.add(
+            HomeMenuSalesModel(
+                icon = R.drawable.user_add_white,
+                bgColor = R.drawable.bg_charcoal_round_8,
+                title = "Kelola Tukang",
+                target = ListTukangActivity::class.java,
                 isLocked = false
             )
         )

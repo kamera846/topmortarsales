@@ -225,6 +225,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var isTrackingHistory = false
     private var deliveryID: String? = null
     private var courierID: String? = null
+    private var totalProcess = 0
+    private var processed = 0
+    private var percentage = 0
 
 //    private val courierDrawable = R.drawable.pin_truck
     private val courierDrawable = R.drawable.pin_truck_pink_cyclamen
@@ -651,6 +654,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             }
 
             // Execute looping in background
+            totalProcess = listCoordinate!!.size
+            processed = 0
+            percentage = 0
             SearchCoordinateLoopingTask().execute()
 
 //            CoroutineScope(Dispatchers.Default).launch {
@@ -824,6 +830,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             val urlUtility = URLUtility(this@MapsActivity)
             // Start For Loop
             for ((i, item) in listCoordinate!!.iterator().withIndex()) {
+
+                processed ++
+                percentage = (processed * 100) / totalProcess
+
+                if (isNearestStoreDefaultRange == -1) {
+                    progressDialog.setMessage("Mencari ${listCoordinate?.size} ${ if (isBasecamp) "basecamp" else "toko"}…  ($percentage%)")
+                } else {
+                    progressDialog.setMessage("Mencari ${if (isBasecamp) "basecamp" else "toko"} terdekat… ($percentage%)")
+                }
 
                 if (!urlUtility.isUrl(item)) {
 

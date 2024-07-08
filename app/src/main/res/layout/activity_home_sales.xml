@@ -214,7 +214,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Toko &amp; Basecamp"
+                        android:text="Kelola Data"
                         android:textStyle="bold"
                         android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
 

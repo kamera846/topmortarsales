@@ -305,6 +305,8 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         skillContainer.visibility = View.VISIBLE
         binding.paymentMethodContainer.visibility = View.GONE
         binding.bottomAction.visibility = View.GONE
+        binding.textLoading.visibility = View.GONE
+        binding.btnDeliveryContainer.visibility = View.GONE
         terminContainer.visibility = View.GONE
         ownerSection.visibility = View.GONE
         binding.promoContainer.visibility = View.GONE
@@ -664,6 +666,9 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             etName.requestFocus()
             etName.setSelection(etName.text.length)
 
+            binding.bottomAction.visibility = View.VISIBLE
+            binding.contactAction.visibility = View.VISIBLE
+
         } else {
 
             // Show Case
@@ -713,6 +718,9 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             btnSaveEdit.visibility = View.GONE
 
             etName.clearFocus()
+
+            binding.bottomAction.visibility = View.GONE
+            binding.contactAction.visibility = View.GONE
 
         }
 
@@ -1170,15 +1178,15 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
     private fun showSearchModal() {
         isSearchCity = true
-        val searchKey = etLocation.text.toString()
-        if (searchKey.isNotEmpty()) searchModal.setSearchKey(searchKey)
+//        val searchKey = etLocation.text.toString()
+//        if (searchKey.isNotEmpty()) searchModal.setSearchKey(searchKey)
         searchModal.show()
     }
 
     private fun showSearchModalSkill() {
         isSearchSkill = true
-        val searchKey = etSkill.text.toString()
-        if (searchKey.isNotEmpty()) searchModalSkill.setSearchKey(searchKey)
+//        val searchKey = etSkill.text.toString()
+//        if (searchKey.isNotEmpty()) searchModalSkill.setSearchKey(searchKey)
         searchModalSkill.show()
     }
 

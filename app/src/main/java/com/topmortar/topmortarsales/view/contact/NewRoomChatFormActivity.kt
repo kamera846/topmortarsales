@@ -52,6 +52,7 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.databinding.ActivityNewRoomChatFormBinding
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MapsActivity
@@ -76,6 +77,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
     private lateinit var spinnerSearchBox: AutoCompleteTextView
 
     private lateinit var sessionManager: SessionManager
+    private lateinit var binding: ActivityNewRoomChatFormBinding
 
     private lateinit var spinnerAdapter: ArrayAdapter<CharSequence>
     private lateinit var datePicker: DatePickerDialog
@@ -97,8 +99,9 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
         supportActionBar?.hide()
         sessionManager = SessionManager(this)
+        binding = ActivityNewRoomChatFormBinding.inflate(layoutInflater)
 
-        setContentView(R.layout.activity_new_room_chat_form)
+        setContentView(binding.root)
 
         if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
             CustomUtility(this).setUserStatusOnline(
@@ -126,6 +129,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
     private fun sendMessage() {
 
         val phone = "${ etPhone.text }"
+//        val phone2 = "${ binding.etPhone2.text }"
         val name = "${ etName.text }"
         var birthday = "${ etBirthday.text }"
         val owner = "${ etOwner.text }"
@@ -156,6 +160,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             try {
 
                 val rbPhone = createPartFromString(formatPhoneNumber(phone))
+//                val rbPhone2 = createPartFromString(phone2.let{ if (it == "0") it else formatPhoneNumber(it) })
                 val rbName = createPartFromString(name)
 //                val rbLocation = createPartFromString(selectedCity!!.id)
                 val rbLocation = createPartFromString(cityId)
@@ -173,6 +178,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                         apiService.insertContact(
                             name = rbName,
                             phone = rbPhone,
+//                            phone2 = rbPhone2,
                             ownerName = rbOwner,
                             birthday = rbBirthday,
                             cityId = rbLocation,
@@ -185,6 +191,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                         apiService.sendMessage(
                             name = rbName,
                             phone = rbPhone,
+//                            phone2 = rbPhone2,
                             ownerName = rbOwner,
                             birthday = rbBirthday,
                             cityId = rbLocation,

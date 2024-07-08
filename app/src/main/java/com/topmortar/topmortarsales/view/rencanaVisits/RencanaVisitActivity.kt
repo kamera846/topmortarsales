@@ -13,6 +13,7 @@ import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import com.topmortar.topmortarsales.R
@@ -24,6 +25,9 @@ import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_STATUS
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE_HIDE_FILTER
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE_WITH_DEFAULT_RANGE
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
@@ -34,6 +38,7 @@ import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityRencanaVisitBinding
 import com.topmortar.topmortarsales.model.RencanaVisitModel
 import com.topmortar.topmortarsales.view.MapsActivity
+import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
@@ -55,6 +60,9 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
     private var activeTab = 0
     private var selectedItemCount = 0
     private var isSelectBarActive = false
+    private var totalProcess = 0
+    private var processed = 0
+    private var percentage = 0
 
     private val tabTitles = listOf("Jatuh Tempo", "Voucher", "Pasif", "Mingguan")
     private val tabTitleViews = mutableListOf<TextView>()
@@ -63,6 +71,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
     private lateinit var listCoordinateName: ArrayList<String>
     private lateinit var listCoordinateStatus: ArrayList<String>
     private lateinit var listCoordinateCityID: ArrayList<String>
+    private lateinit var listAllRenvi: ArrayList<RencanaVisitModel>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -179,9 +188,27 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
         val popupMenu = PopupMenu(this, binding.titleBarDark.icRoadMap)
         popupMenu.inflate(R.menu.option_maps_menu)
 
+        val menuPerCategory = popupMenu.menu.findItem(R.id.option_per_category)
+
+        when (activeTab) {
+            0 -> {
+                menuPerCategory.title = "Lihat lokasi renvi Jatuh Tempo"
+            } 1 -> {
+                menuPerCategory.title = "Lihat lokasi renvi Voucher"
+            } 2 -> {
+                menuPerCategory.title = "Lihat lokasi renvi Pasif"
+            } 3 -> {
+                menuPerCategory.title = "Lihat lokasi renvi Mingguan"
+            }
+        }
+
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
                 R.id.option_all -> {
+                    getAllRenvi()
+                    true
+                }
+                R.id.option_per_category -> {
                     val listIem = pagerAdapter.getAllListItem(activeTab)
                     navigateCheckLocationStore(listIem)
                     true
@@ -194,6 +221,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
             }
         }
         popupMenu.show()
+
     }
 
     private fun navigateCheckLocationStore(items: ArrayList<RencanaVisitModel>) {
@@ -294,6 +322,113 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
 
     }
 
+    private fun getAllRenvi() {
+        progressDialog.show()
+
+        listCoordinate = arrayListOf()
+        listCoordinateName = arrayListOf()
+        listCoordinateStatus = arrayListOf()
+        listCoordinateCityID = arrayListOf()
+        listAllRenvi = arrayListOf()
+
+        totalProcess = 4
+        processed = 0
+        percentage = 0
+
+        getListRenviPerCategory("jatem")
+    }
+    private fun getListRenviPerCategory(category: String) {
+        processed ++
+        progressDialog.setMessage(getString(R.string.txt_loading) + "($processed/$totalProcess)")
+
+        lifecycleScope.launch {
+            try {
+
+                val response = when (userKind) {
+                    USER_KIND_ADMIN -> {
+                        when (category) {
+                            "jatem" -> apiService.targetJatemDst(idDistributor = userDistributorId ?: "0")
+                            "voucher" -> apiService.targetVoucherDst(idDistributor = userDistributorId ?: "0")
+                            "passive" -> apiService.targetPasifDst(idDistributor = userDistributorId ?: "0")
+                            else -> apiService.targetWeeklyDst(idDistributor = userDistributorId ?: "0")
+                        }
+                    } else -> {
+                        when (category) {
+                            "jatem" -> apiService.targetJatem(idCity = userCityID ?: "0")
+                            "voucher" -> apiService.targetVoucher(idCity = userCityID ?: "0")
+                            "passive" -> apiService.targetPasif(idCity = userCityID ?: "0")
+                            else -> apiService.targetWeekly(idCity = userCityID ?: "0")
+                        }
+                    }
+                }
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+                        listAllRenvi.addAll(response.results)
+                        when (category) {
+                            "jatem" -> getListRenviPerCategory("voucher")
+                            "voucher" -> getListRenviPerCategory("passive")
+                            "passive" -> getListRenviPerCategory("weekly")
+                            "weekly" -> {
+                                totalProcess = listAllRenvi.size
+                                processed = 0
+                                LoopingTask(listAllRenvi).execute()
+//                                progressDialog.dismiss()
+                            }
+                        }
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        when (category) {
+                            "jatem" -> getListRenviPerCategory("voucher")
+                            "voucher" -> getListRenviPerCategory("passive")
+                            "passive" -> getListRenviPerCategory("weekly")
+                            "weekly" -> {
+                                totalProcess = listAllRenvi.size
+                                processed = 0
+                                LoopingTask(listAllRenvi).execute()
+//                                progressDialog.dismiss()
+                            }
+                        }
+
+                    }
+                    else -> {
+
+                        when (category) {
+                            "jatem" -> getListRenviPerCategory("voucher")
+                            "voucher" -> getListRenviPerCategory("passive")
+                            "passive" -> getListRenviPerCategory("weekly")
+                            "weekly" -> {
+                                totalProcess = listAllRenvi.size
+                                processed = 0
+                                LoopingTask(listAllRenvi).execute()
+//                                progressDialog.dismiss()
+                            }
+                        }
+
+                    }
+                }
+
+            } catch (e: Exception) {
+
+                when (category) {
+                    "jatem" -> getListRenviPerCategory("voucher")
+                    "voucher" -> getListRenviPerCategory("passive")
+                    "passive" -> getListRenviPerCategory("weekly")
+                    "weekly" -> {
+                        totalProcess = listAllRenvi.size
+                        processed = 0
+                        LoopingTask(listAllRenvi).execute()
+//                        progressDialog.dismiss()
+                    }
+                }
+
+            }
+
+        }
+
+    }
+
     private fun toggleSelectBar() {
         isSelectBarActive = !isSelectBarActive
         pagerAdapter.setSelectBarActive(activeTab, isSelectBarActive)
@@ -350,6 +485,10 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
                 listCoordinateName.add(item.nama)
                 listCoordinateStatus.add(item.store_status)
                 listCoordinateCityID.add(item.id_city)
+
+                processed ++
+                percentage = (processed * 100) / totalProcess
+                progressDialog.setMessage(getString(R.string.txt_loading) + "($percentage%)")
             }
             return null
         }
@@ -367,6 +506,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
 
             progressDialog.dismiss()
+            progressDialog.setMessage(getString(R.string.txt_loading))
             startActivity(intent)
         }
     }

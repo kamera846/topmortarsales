@@ -52,9 +52,11 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
 
         fun bind(item: RencanaVisitModel) {
 
-            val dateCounter = item.created_at.let {
-                if (it != null) {
-                    DateFormat.differenceDateNowDescCustom(it)
+            val responseDateCounter = if (typeRencana == "jatemPenagihan1") item.jatuh_tempo else item.created_at
+            val dateCounter = responseDateCounter.let {
+                if (!it.isNullOrEmpty()) {
+                    if (typeRencana == "jatemPenagihan1") DateFormat.differenceDateNowDescCustom(it, "dd MMM yyyy", Locale.ENGLISH)
+                    else DateFormat.differenceDateNowDescCustom(it)
                 } else -1
             }
 

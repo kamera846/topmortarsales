@@ -110,9 +110,9 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
         // Set Title Bar
         icBack.visibility = View.GONE
         icClose.visibility = View.VISIBLE
-        tvTitleBar.text = "Add New Skill"
-        tvSkillName.text = "Skill Name"
-        tvSkillCode.text = "Skill Code"
+        tvTitleBar.text = "Tambah Keahlian Baru"
+        tvSkillName.text = "Nama"
+        tvSkillCode.text = "Kode"
         etSkillName.hint = "e.g Tukang Batu"
         etSkillCode.hint = "e.g TB"
 

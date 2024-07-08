@@ -4,6 +4,7 @@ data class ContactModel(
     var id_contact: String = "",
     var nama: String = "",
     var nomorhp: String = "",
+    var nomorhp_2: String = "",
     var tgl_lahir: String = "0000-00-00",
     var store_owner: String = "",
     var id_city: String = "0",

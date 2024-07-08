@@ -206,7 +206,7 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
 //        Handler(Looper.getMainLooper()).postDelayed({
             addCityModal.setEditCase(true)
             addCityModal.setItem(data!!)
-            addCityModal.setTitle("Edit Skill")
+            addCityModal.setTitle("Edit Keahlian")
 //        }, 500)
     }
 

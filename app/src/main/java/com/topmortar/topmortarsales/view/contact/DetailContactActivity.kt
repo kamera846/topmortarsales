@@ -56,26 +56,14 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.BASE_URL
-import com.topmortar.topmortarsales.commons.CONST_ADDRESS
-import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
-import com.topmortar.topmortarsales.commons.CONST_DATE
 import com.topmortar.topmortarsales.commons.CONST_DELIVERY_ID
 import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING
 import com.topmortar.topmortarsales.commons.CONST_KTP
-import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
 import com.topmortar.topmortarsales.commons.CONST_MAPS_STATUS
 import com.topmortar.topmortarsales.commons.CONST_NAME
-import com.topmortar.topmortarsales.commons.CONST_OWNER
-import com.topmortar.topmortarsales.commons.CONST_PAYMENT_METHOD
-import com.topmortar.topmortarsales.commons.CONST_PHONE
-import com.topmortar.topmortarsales.commons.CONST_PROMO
-import com.topmortar.topmortarsales.commons.CONST_REPUTATION
-import com.topmortar.topmortarsales.commons.CONST_STATUS
-import com.topmortar.topmortarsales.commons.CONST_TERMIN
-import com.topmortar.topmortarsales.commons.CONST_WEEKLY_VISIT_STATUS
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
@@ -127,6 +115,7 @@ import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.PingUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
+import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -280,6 +269,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var isSearchCity = false
     private var isSearchPromo = false
     private var isCitiesSuccessfullyLoad = false
+    private var isPhoneFieldOpened = true
 
     private lateinit var datePicker: DatePickerDialog
     private lateinit var searchModal: SearchModal
@@ -401,6 +391,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         // Setup Title Bar
         tvTitleBar.text = titlePage
 
+        // Setup Phone Toggle
+        binding.itemPhone2.visibility = View.VISIBLE
+        binding.tvPhoneContainer.setPadding(0,0,0, convertDpToPx(12, this))
+        binding.togglePhoneSize.visibility = View.VISIBLE
+
         // Setup Date Picker Dialog
         setDatePickerDialog()
 
@@ -498,18 +493,20 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             } else etKtp.clearFocus()
         }
 
-//        binding.itemPhone1.setOnClickListener {
-//            if (binding.tvPhoneContainer.height < convertDpToPx(60, this@DetailContactActivity)) {
-//                val startHeight = binding.tvPhoneContainer.height
-//                binding.tvPhoneContainer.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-//                val targetHeight = binding.tvPhoneContainer.measuredHeight
-//                phoneAnimation(startHeight, targetHeight)
-//            } else {
-//                val startHeight = binding.tvPhoneContainer.height
-//                val targetHeight = binding.tvPhoneContainer.height - binding.itemPhone2.height
-//                phoneAnimation(startHeight, targetHeight)
-//            }
-//        }
+        binding.togglePhoneSize.setOnClickListener {
+            if (!isPhoneFieldOpened) {
+                isPhoneFieldOpened = true
+                val startHeight = binding.tvPhoneContainer.height
+                binding.tvPhoneContainer.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                val targetHeight = binding.tvPhoneContainer.measuredHeight
+                phoneAnimation(startHeight, targetHeight)
+            } else {
+                isPhoneFieldOpened = false
+                val startHeight = binding.tvPhoneContainer.height
+                val targetHeight = binding.tvPhoneContainer.height - binding.itemPhone2.height
+                phoneAnimation(startHeight, targetHeight)
+            }
+        }
         //////////
 
         // Change Listener
@@ -587,6 +584,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         // Tooltip Handler
         tooltipHandler(tooltipPhone, "Nomor Telpon (WA)")
+        tooltipHandler(binding.tooltipPhone2, "Nomor Telpon ke 2 (WA)")
         tooltipHandler(tooltipOwner, "Nama Pemilik")
         tooltipHandler(tooltipLocation, "Kota Pelanggan")
         tooltipHandler(tooltipBirthday, "Tanggal Lahir Pemilik")
@@ -614,128 +612,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             false
         }
         //////////
-    }
-
-    private fun dataActivityValidation() {
-
-        val iContactId = intent.getStringExtra(CONST_CONTACT_ID)
-        val iPhone = intent.getStringExtra(CONST_PHONE)
-        val iOwner = intent.getStringExtra(CONST_OWNER)
-        val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
-        val iDate = intent.getStringExtra(CONST_DATE)
-
-        if (iDate.isNullOrEmpty()) {
-            binding.dateSeparator.visibility = View.GONE
-            binding.line.visibility = View.VISIBLE
-        } else {
-            val date = DateFormat.format(iDate, outputFormat = "dd MMM yyyy")
-
-            binding.tvDate.text = date
-            binding.dateSeparator.visibility = View.VISIBLE
-            binding.line.visibility = View.GONE
-        }
-
-        iName = intent.getStringExtra(CONST_NAME)
-        iKtp = intent.getStringExtra(CONST_KTP)
-        iMapsUrl = intent.getStringExtra(CONST_MAPS)
-        iStatus = intent.getStringExtra(CONST_STATUS)
-        iWeeklyVisitStatus = intent.getStringExtra(CONST_WEEKLY_VISIT_STATUS)
-        iPaymentMethod = intent.getStringExtra(CONST_PAYMENT_METHOD)
-        iTermin = intent.getStringExtra(CONST_TERMIN)
-        iReputation = intent.getStringExtra(CONST_REPUTATION)
-
-        tooltipStatus.visibility = View.VISIBLE
-        binding.weeklyVisitContainer.visibility = View.VISIBLE
-        binding.tooltipWeeklyVisit.visibility = View.VISIBLE
-//        if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
-//        else btnInvoice.visibility = View.VISIBLE
-        btnInvoice.visibility = View.VISIBLE
-
-        iAddress = intent.getStringExtra(CONST_ADDRESS)
-        iLocation = intent.getStringExtra(CONST_LOCATION)
-        iPromo = intent.getStringExtra(CONST_PROMO)
-        iReportSource = intent.getStringExtra(REPORT_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
-        iRenviSource = intent.getStringExtra(RENVI_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
-
-        activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
-
-        itemSendMessage = ContactModel(id_contact = iContactId!!, nama = iName!!, nomorhp = iPhone!!, store_owner = iOwner!!, tgl_lahir = iBirthday!!, maps_url = iMapsUrl!!, id_city = iLocation!!)
-        setupDialogSendMessage(itemSendMessage)
-
-        if (iContactId.isNotEmpty()) {
-            contactId = iContactId
-        }
-        if (iPhone.isNotEmpty()) {
-            tvPhone.text = "+$iPhone"
-            etPhone.setText(iPhone)
-        } else {
-            tvPhone.text = EMPTY_FIELD_VALUE
-            etPhone.setText("")
-        }
-        if (!iName.isNullOrEmpty()) {
-            tvName.text = iName
-            etName.setText(iName)
-        } else {
-            tvName.text = EMPTY_FIELD_VALUE
-            etName.setText("")
-        }
-        if (iOwner.isNotEmpty()) {
-            tvOwner.text = iOwner
-            etOwner.setText(iOwner)
-        } else {
-            tvOwner.text = EMPTY_FIELD_VALUE
-            etOwner.setText("")
-        }
-        if (!iLocation.isNullOrEmpty()) {
-            tvLocation.text = getString(R.string.txt_loading)
-            etLocation.setText(getString(R.string.txt_loading))
-        } else {
-            tvLocation.text = EMPTY_FIELD_VALUE
-            etLocation.setText("")
-        }
-        if (!iPromo.isNullOrEmpty()) {
-            tvPromo.text = getString(R.string.txt_loading)
-            etPromo.setText(getString(R.string.txt_loading))
-        } else {
-            tvPromo.text = EMPTY_FIELD_VALUE
-            etPromo.setText("")
-        }
-        if (iBirthday.isNotEmpty()) {
-            if (iBirthday == "0000-00-00") {
-                tvBirthday.text = EMPTY_FIELD_VALUE
-            } else {
-                tvBirthday.text = DateFormat.format(iBirthday)
-                etBirthday.setText(DateFormat.format(iBirthday))
-            }
-        }
-        if (!iMapsUrl.isNullOrEmpty()) {
-            tvMaps.text = "Tekan untuk menampilkan lokasi"
-            etMaps.setText(iMapsUrl)
-        } else {
-            iMapsUrl = EMPTY_FIELD_VALUE
-            tvMaps.text = EMPTY_FIELD_VALUE
-            etMaps.setText("")
-        }
-        if (!iKtp.isNullOrEmpty()) {
-            tvKtp.text = "Tekan untuk menampilkan KTP"
-            etKtp.setText("")
-        } else {
-            iKtp = EMPTY_FIELD_VALUE
-            tvKtp.text = EMPTY_FIELD_VALUE
-            etKtp.setText("")
-        }
-
-        // Other columns handle
-        if (!iAddress.isNullOrEmpty()) etAddress.setText(iAddress)
-        else etAddress.setText(EMPTY_FIELD_VALUE)
-
-        // Set Spinner
-        setupStatusSpinner()
-        setupWeekliVisitStatusSpinner()
-        setupPaymentMethodSpinner()
-        setupTerminSpinner()
-        setupReputationSpinner()
-
     }
 
     private fun checkLocationPermission() {
@@ -777,6 +653,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 tvDescription.visibility = View.GONE
 
                 tvPhoneContainer.visibility = View.GONE
+                binding.togglePhoneSize.visibility = View.GONE
+
                 tvOwnerContainer.visibility = View.GONE
                 tvLocationContainer.visibility = View.GONE
                 tvMapsContainer.visibility = View.GONE
@@ -857,6 +735,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 tvDescription.visibility = View.VISIBLE
 
                 tvPhoneContainer.visibility = View.VISIBLE
+                binding.togglePhoneSize.visibility = View.VISIBLE
+
                 tvOwnerContainer.visibility = View.VISIBLE
                 tvLocationContainer.visibility = View.VISIBLE
                 tvMapsContainer.visibility = View.VISIBLE
@@ -936,7 +816,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun editConfirmation() {
 
-        if (!formValidation("${ etPhone.text }","${ etName.text }")) return
+        if (!formValidation("${ etPhone.text }","${ binding.etPhone2.text }","${ etName.text }")) return
 
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Konfirmasi Perubahan")
@@ -953,6 +833,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private fun saveEdit() {
 
         val pPhone = "${ etPhone.text }"
+        val pPhone2 = binding.etPhone2.text.let { if (it.toString().isEmpty()) "0" else "$it" }
         val pName = "${ etName.text }"
         val pOwner = "${ etOwner.text }"
         var pBirthday = "${ etBirthday.text }"
@@ -1020,6 +901,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 val rbId = createPartFromString(contactId!!)
                 val rbPhone = createPartFromString(formatPhoneNumber(pPhone))
+                val rbPhone2 = createPartFromString(pPhone2.let{ if (it == "0") it else formatPhoneNumber(it) })
                 val rbName = createPartFromString(pName)
                 val rbOwner = createPartFromString(pOwner)
                 val rbBirthday = createPartFromString(pBirthday)
@@ -1036,6 +918,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val response = apiService.editContact(
                     id = rbId,
                     phone = rbPhone,
+                    phone2 = rbPhone2,
                     name = rbName,
                     ownerName = rbOwner,
                     birthday = rbBirthday,
@@ -1061,6 +944,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             itemSendMessage = ContactModel(
                                 id_contact = contactId!!,
                                 nomorhp = pPhone,
+                                nomorhp_2 = pPhone2,
                                 nama = pName,
                                 store_owner = pOwner,
                                 id_city = pCityID,
@@ -1071,8 +955,19 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             setupDialogSendMessage(itemSendMessage)
 
                             tvName.text = "${ etName.text }"
+
                             tvPhone.text = "+" + formatPhoneNumber("${ etPhone.text }")
                             etPhone.setText(formatPhoneNumber("${ etPhone.text }"))
+
+                            val iPhone2 = binding.etPhone2.text.toString()
+                            if (iPhone2.isNotEmpty() && iPhone2 != "0") {
+                                binding.tvPhone2.text = "+" + formatPhoneNumber(iPhone2)
+                                binding.etPhone2.setText(formatPhoneNumber(iPhone2))
+                            } else {
+                                binding.tvPhone2.text = EMPTY_FIELD_VALUE
+                                binding.etPhone2.setText("")
+                            }
+
                             iAddress = "${ etAddress.text }"
 
 //                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
@@ -1178,6 +1073,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                             val iContactId = data.id_contact
                             val iPhone = data.nomorhp
+                            val iPhone2 = data.nomorhp_2
                             val iOwner = data.store_owner
                             val iBirthday = data.tgl_lahir
                             val iDate = data.created_at
@@ -1217,7 +1113,16 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                             activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
 
-                            itemSendMessage = ContactModel(id_contact = iContactId!!, nama = iName!!, nomorhp = iPhone!!, store_owner = iOwner!!, tgl_lahir = iBirthday!!, maps_url = iMapsUrl!!, id_city = iLocation!!)
+                            itemSendMessage = ContactModel(
+                                id_contact = iContactId,
+                                nama = iName!!,
+                                nomorhp = iPhone,
+                                nomorhp_2 = iPhone2,
+                                store_owner = iOwner,
+                                tgl_lahir = iBirthday,
+                                maps_url = iMapsUrl!!,
+                                id_city = iLocation!!
+                            )
                             setupDialogSendMessage(itemSendMessage)
 
                             if (iContactId.isNotEmpty()) {
@@ -1229,6 +1134,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             } else {
                                 tvPhone.text = EMPTY_FIELD_VALUE
                                 etPhone.setText("")
+                            }
+                            if (iPhone2.isNotEmpty() && iPhone2 != "0") {
+                                binding.tvPhone2.text = "+$iPhone2"
+                                binding.etPhone2.setText(iPhone2)
+                            } else {
+                                binding.tvPhone2.text = EMPTY_FIELD_VALUE
+                                binding.etPhone2.setText("")
                             }
                             if (!iName.isNullOrEmpty()) {
                                 tvName.text = iName
@@ -1434,7 +1346,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 }
 
-
             } catch (e: Exception) {
 
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
@@ -1490,7 +1401,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     }
 
-    private fun formValidation(phone: String, name: String): Boolean {
+    private fun formValidation(phone: String, phone2: String, name: String): Boolean {
         return if (name.isEmpty()) {
             etName.error = "Nama wajib diisi!"
             etName.requestFocus()
@@ -1502,6 +1413,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         } else if (!PhoneHandler.phoneValidation(phone, etPhone)) {
             etPhone.requestFocus()
             false
+        } else if (phone2.isNotEmpty()) {
+            if (!PhoneHandler.phoneValidation(phone2, binding.etPhone2)) {
+                binding.etPhone2.requestFocus()
+                false
+            } else {
+                binding.etPhone2.clearFocus()
+                binding.etPhone2.error = null
+                true
+            }
         } else {
             etName.error = null
             etName.clearFocus()
@@ -2590,8 +2510,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     }
 
     private fun phoneAnimation(startHeight: Int, targetHeight: Int) {
+        val duration = 500L
         val animator = ValueAnimator.ofInt(startHeight, targetHeight)
-        animator.duration = 500
+        animator.duration = duration
         animator.addUpdateListener { valueAnimator ->
             val animatedValue = valueAnimator.animatedValue as Int
 
@@ -2600,6 +2521,20 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             binding.tvPhoneContainer.layoutParams = layoutParams
         }
         animator.start()
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (!isPhoneFieldOpened) {
+                binding.togglePhoneSizeText.text = "Lainnya"
+                binding.togglePhoneSizeIcon.setImageResource(R.drawable.chevron_down_only_white)
+//                val params = binding.togglePhoneSizeIcon.layoutParams as ViewGroup.MarginLayoutParams
+//                params.setMargins(0, convertDpToPx(1, this@DetailContactActivity), 0, 0)
+            } else {
+                binding.togglePhoneSizeText.text = "Tutup"
+                binding.togglePhoneSizeIcon.setImageResource(R.drawable.chevron_up_only_white)
+//                val params = binding.togglePhoneSizeIcon.layoutParams as ViewGroup.MarginLayoutParams
+//                params.setMargins(0, 0, 0, convertDpToPx(1, this@DetailContactActivity))
+            }
+        }, duration)
     }
 
     override fun onStart() {
