@@ -79,8 +79,8 @@ object DateFormat {
         }
     }
 
-    fun differenceDateNowDescCustom(dateString: String): Int {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    fun differenceDateNowDescCustom(dateString: String, dateFormatString: String = "yyyy-MM-dd", inputLocale: Locale = Locale.getDefault(),): Int {
+        val dateFormat = SimpleDateFormat(dateFormatString, inputLocale)
         val dateTime = dateFormat.parse(dateString)!!
 
         val calendar = Calendar.getInstance()
