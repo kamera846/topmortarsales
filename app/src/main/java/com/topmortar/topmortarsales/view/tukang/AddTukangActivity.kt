@@ -5,6 +5,7 @@ package com.topmortar.topmortarsales.view.tukang
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
+import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -13,8 +14,7 @@ import android.os.Looper
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -36,6 +36,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.updateTxtMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
@@ -49,6 +50,7 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.databinding.ActivityAddTukangBinding
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.model.SkillModel
@@ -57,7 +59,7 @@ import kotlinx.coroutines.launch
 import java.util.Calendar
 
 @SuppressLint("SetTextI18n")
-class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
+class AddTukangActivity : AppCompatActivity() {
 
     private lateinit var icBack: ImageView
     private lateinit var tvTitleBar: TextView
@@ -70,14 +72,17 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
     private lateinit var etSkill: EditText
     private lateinit var etMapsUrl: EditText
     private lateinit var etMessage: EditText
-    private lateinit var spinnerSearchBox: AutoCompleteTextView
 
+    private lateinit var binding: ActivityAddTukangBinding
+    private lateinit var apiService: ApiService
+    private lateinit var progressDialog: ProgressDialog
     private lateinit var sessionManager: SessionManager
+    private val userKind get() = sessionManager.userKind().toString()
     private val userDistributorId get() = sessionManager.userDistributor().toString()
 
-    private lateinit var spinnerAdapter: ArrayAdapter<CharSequence>
     private lateinit var datePicker: DatePickerDialog
     private lateinit var searchModal: SearchModal
+    private lateinit var searchModalCities: SearchModal
 
     private var isLoaded = false
     private var activityRequestCode = MAIN_ACTIVITY_REQUEST_CODE
@@ -86,7 +91,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
     private var selectedDate: Calendar = Calendar.getInstance()
     private var selectedSkill: ModalSearchModel? = null
     private var skillResults: ArrayList<SkillModel> = ArrayList()
-    private var cities = listOf("Malang", "Gresik", "Sidoarjo", "Blitar", "Surabaya", "Jakarta", "Bandung", "Yogyakarta", "Kediri")
+    private var selectedCity: ModalSearchModel? = null
 
     private var iLocation: String? = null
 
@@ -95,9 +100,14 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
+        binding = ActivityAddTukangBinding.inflate(layoutInflater)
+        apiService = HttpClient.create()
+        progressDialog = ProgressDialog(this)
+        progressDialog.setMessage(getString(R.string.txt_loading))
+        progressDialog.setCancelable(false)
         sessionManager = SessionManager(this)
 
-        setContentView(R.layout.activity_add_tukang)
+        setContentView(binding.root)
 
         initVariable()
         initClickHandler()
@@ -105,8 +115,10 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         etMessageListener()
         checkLocationPermission()
 
+        progressDialog.show()
         Handler(Looper.getMainLooper()).postDelayed({
-            getSkills()
+            if (userKind == USER_KIND_ADMIN) getCities()
+            else getSkills()
         }, 500)
 
     }
@@ -116,7 +128,11 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         val phone = "${ etPhone.text }"
         val name = "${ etName.text }"
         var birthday = "${ etBirthday.text }"
-        val cityID = sessionManager.userCityID().let { if (!it.isNullOrEmpty()) it else "0" }
+        val cityID = if (userKind == USER_KIND_ADMIN) {
+            selectedCity?.id ?: "0"
+        } else {
+            sessionManager.userCityID().let { if (!it.isNullOrEmpty()) it else "0" }
+        }
         val skillID = if (selectedSkill != null) "${ selectedSkill!!.id }" else "0"
         val mapsUrl = "${ etMapsUrl.text }"
         val message = "${ etMessage.text }"
@@ -282,18 +298,17 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         etBirthday = findViewById(R.id.et_birthday)
         etSkill = findViewById(R.id.et_skill)
         etMessage = findViewById(R.id.et_message)
-        spinnerSearchBox = findViewById(R.id.spinner_search_box)
         etMapsUrl = findViewById(R.id.et_maps_url)
 
         // Set Title Bar
         tvTitleBar.text = "Tambah Tukang Baru"
         tvTitleBar.setPadding(0, 0, convertDpToPx(16, this), 0)
 
+        if (userKind == USER_KIND_ADMIN) binding.locationContainer.visibility = View.VISIBLE
+        else binding.locationContainer.visibility = View.GONE
+
         // Setup Date Picker Dialog
         setDatePickerDialog()
-
-        // Setup Spinner
-        setSpinnerCities()
 
         // Setup Dialog Search
         setupDialogSearch()
@@ -307,6 +322,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         etBirthday.setOnClickListener { datePicker.show() }
         etMapsUrl.setOnClickListener { getCoordinate() }
         etSkill.setOnClickListener { showSearchModal() }
+        binding.etLocation.setOnClickListener{ showSearchModalCities() }
 
         // Focus Listener
         etName.setOnFocusChangeListener { _, hasFocus ->
@@ -333,39 +349,12 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                 etSkill.setSelection(etSkill.length())
             } else etSkill.clearFocus()
         }
-
-        // Change Listener
-        etBirthday.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-                if (isLoaded) datePicker.show()
-            }
-
-        })
-        etSkill.addTextChangedListener (object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-                if (isLoaded) {
-                    if (s.toString().isNotEmpty()) etSkill.error = null
-                    showSearchModal()
-                }
-            }
-
-        })
+        binding.etLocation.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                showSearchModalCities()
+                binding.etLocation.setSelection(binding.etLocation.length())
+            } else binding.etLocation.clearFocus()
+        }
 
     }
 
@@ -479,23 +468,16 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
     }
 
-    private fun setSpinnerCities() {
-
-        spinnerAdapter = ArrayAdapter(
-            this@AddTukangActivity,
-            android.R.layout.simple_dropdown_item_1line,
-            cities
-        )
-
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line)
-        spinnerSearchBox.setAdapter(spinnerAdapter)
-
-    }
-
     private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
 
         searchModal = SearchModal(this, items)
-        searchModal.setCustomDialogListener(this)
+        searchModal.setCustomDialogListener(object : SearchModal.SearchModalListener {
+            override fun onDataReceived(data: ModalSearchModel) {
+                etSkill.setText(data.title)
+                selectedSkill = data
+            }
+
+        })
         searchModal.label = "Pilih Opsi Keahlian"
         searchModal.searchHint = "Ketik nama keahlian…"
         searchModal.setOnDismissListener {
@@ -509,6 +491,74 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         searchModal.show()
     }
 
+    private fun setupDialogSearchCities(items: ArrayList<ModalSearchModel> = ArrayList()) {
+
+        searchModalCities = SearchModal(this, items)
+        searchModalCities.setCustomDialogListener(object : SearchModal.SearchModalListener {
+            override fun onDataReceived(data: ModalSearchModel) {
+                binding.etLocation.setText(data.title)
+                selectedCity = data
+            }
+
+        })
+        searchModalCities.label = "Pilih Opsi Kota"
+        searchModalCities.searchHint = "Ketik nama kota…"
+        searchModalCities.setOnDismissListener {
+            binding.etLocation.clearFocus()
+        }
+    }
+
+    private fun showSearchModalCities() {
+        searchModalCities.show()
+    }
+
+    private fun getCities() {
+
+        // Get Cities
+        lifecycleScope.launch {
+            try {
+
+                val response = apiService.getCities(distributorID = userDistributorId)
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        val results = response.results
+                        val items: ArrayList<ModalSearchModel> = ArrayList()
+
+                        for (i in 0 until results.size) {
+                            val data = results[i]
+                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                        }
+
+                        setupDialogSearchCities(items)
+                        getSkills()
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        handleMessage(this@AddTukangActivity, "LIST CITY", "Daftar kota kosong!")
+                        getSkills()
+
+                    }
+                    else -> {
+
+                        handleMessage(this@AddTukangActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        getSkills()
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(this@AddTukangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                getSkills()
+
+            }
+
+        }
+    }
+
     private fun getSkills() {
         // Get Cities
         etSkill.setText(getString(R.string.txt_loading))
@@ -516,8 +566,6 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         lifecycleScope.launch {
             try {
-
-                val apiService: ApiService = HttpClient.create()
                 val response = apiService.getSkills(distributorID = userDistributorId)
 
                 when (response.status) {
@@ -543,6 +591,7 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                         }
 
                         etSkill.isEnabled = true
+                        progressDialog.dismiss()
                         isLoaded = true
 
                     }
@@ -550,12 +599,14 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
                         handleMessage(this@AddTukangActivity, "LIST CITY", "Daftar keahlian kosong!")
                         etSkill.isEnabled = true
+                        progressDialog.dismiss()
 
                     }
                     else -> {
 
                         handleMessage(this@AddTukangActivity, TAG_RESPONSE_CONTACT, "Gagal memuat data")
                         etSkill.isEnabled = true
+                        progressDialog.dismiss()
 
                     }
                 }
@@ -565,16 +616,11 @@ class AddTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
                 handleMessage(this@AddTukangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 etSkill.isEnabled = true
+                progressDialog.dismiss()
 
             }
 
         }
-    }
-
-    override fun onDataReceived(data: ModalSearchModel) {
-
-        etSkill.setText(data.title)
-        selectedSkill = data
     }
 
     @Deprecated("Deprecated in Java")
