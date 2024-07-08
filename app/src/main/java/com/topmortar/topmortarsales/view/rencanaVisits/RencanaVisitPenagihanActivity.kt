@@ -176,9 +176,26 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
         val popupMenu = PopupMenu(this, binding.titleBarDark.icRoadMap)
         popupMenu.inflate(R.menu.option_maps_menu)
 
+        val menuPerCategory = popupMenu.menu.findItem(R.id.option_per_category)
+
+        when (activeTab) {
+            0 -> {
+                menuPerCategory.title = "Lihat lokasi renvi Jatem 0-7"
+            } 1 -> {
+                menuPerCategory.title = "Lihat lokasi renvi Jatem 8-15"
+            } 2 -> {
+                menuPerCategory.title = "Lihat lokasi renvi Jatem 16+"
+            } 3 -> {
+                menuPerCategory.title = "Lihat lokasi renvi Mingguan"
+            }
+        }
+
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
                 R.id.option_all -> {
+                    true
+                }
+                R.id.option_per_category -> {
                     val listIem = pagerAdapter.getAllListItem(activeTab)
                     navigateCheckLocationStore(listIem)
                     true

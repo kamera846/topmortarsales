@@ -2,7 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/option_all"
-        android:title="Lihat lokasi toko" />
+        android:title="Lihat lokasi semua renvi" />
+    <item
+        android:id="@+id/option_per_category"
+        android:title="Lihat lokasi renvi Jatuh Tempo" />
     <item
         android:id="@+id/option_choices"
         android:title="Lihat lokasi toko yang dipilih" />

@@ -44,8 +44,6 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
     private lateinit var apiService: ApiService
     private lateinit var sessionManager: SessionManager
     private val userId get() = sessionManager.userID()
-    private val userCityID get() = sessionManager.userCityID()
-    private val userKind get() = sessionManager.userKind()
     private val userDistributorId get() = sessionManager.userDistributor()
 
     private lateinit var tabLayout: TabLayout
@@ -179,9 +177,26 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
         val popupMenu = PopupMenu(this, binding.titleBarDark.icRoadMap)
         popupMenu.inflate(R.menu.option_maps_menu)
 
+        val menuPerCategory = popupMenu.menu.findItem(R.id.option_per_category)
+
+        when (activeTab) {
+            0 -> {
+                menuPerCategory.title = "Lihat lokasi renvi Jatuh Tempo"
+            } 1 -> {
+                menuPerCategory.title = "Lihat lokasi renvi Voucher"
+            } 2 -> {
+                menuPerCategory.title = "Lihat lokasi renvi Pasif"
+            } 3 -> {
+                menuPerCategory.title = "Lihat lokasi renvi Mingguan"
+            }
+        }
+
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
                 R.id.option_all -> {
+                    true
+                }
+                R.id.option_per_category -> {
                     val listIem = pagerAdapter.getAllListItem(activeTab)
                     navigateCheckLocationStore(listIem)
                     true
@@ -194,6 +209,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
             }
         }
         popupMenu.show()
+
     }
 
     private fun navigateCheckLocationStore(items: ArrayList<RencanaVisitModel>) {
