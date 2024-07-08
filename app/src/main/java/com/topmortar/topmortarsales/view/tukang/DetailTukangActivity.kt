@@ -311,6 +311,8 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         ownerSection.visibility = View.GONE
         binding.promoContainer.visibility = View.GONE
         binding.reputationContainer.visibility = View.GONE
+        binding.etPhoneContainer2.visibility = View.GONE
+        binding.etPhoneLine.visibility = View.GONE
 
         // Setup Date Picker Dialog
         setDatePickerDialog()

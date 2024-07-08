@@ -276,32 +276,50 @@
                 <!-- Owner City -->
                 <LinearLayout
                     android:visibility="gone"
+                    android:id="@+id/location_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
                     android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/tv_city"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/customer_city"
-                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="8dp"/>
+                        android:layout_marginBottom="8dp"
+                        android:orientation="horizontal">
 
-                    <AutoCompleteTextView
-                        android:id="@+id/spinner_search_box"
+                        <TextView
+                            android:id="@+id/tv_location"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Kota"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:visibility="visible"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="@string/required_sign"
+                            android:textColor="@color/primary"/>
+
+                    </LinearLayout>
+
+                    <EditText
+                        android:id="@+id/et_location"
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                        android:textColorHint="@color/black_600"
+                        android:hint="Pilih kota tukang"
+                        android:inputType="textCapWords"
+                        android:autofillHints="e.g John Doe"
                         android:textSize="14sp"
-                        android:hint="@string/et_hint_city"
-                        android:imeOptions="actionDone"
-                        android:singleLine="true"
-                        android:completionThreshold="1"
                         android:background="@drawable/et_background"
-                        android:padding="12dp"/>
+                        android:padding="12dp"
+                        android:outlineProvider="none" />
 
                 </LinearLayout>
 
