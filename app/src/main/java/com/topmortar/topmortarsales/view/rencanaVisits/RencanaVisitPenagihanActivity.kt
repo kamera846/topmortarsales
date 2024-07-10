@@ -57,6 +57,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
     private lateinit var viewPager: ViewPager
     private lateinit var pagerAdapter: RencanaVisitPenagihanVPA
     private lateinit var progressDialog: ProgressDialog
+    private var pagerAdapterItemCount = arrayListOf(0,0,0,0)
     private var activeTab = 0
     private var selectedItemCount = 0
     private var isSelectBarActive = false
@@ -131,6 +132,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
         tabTitleViews[0].setTypeface(null, android.graphics.Typeface.BOLD)
         pagerAdapter.setCounterPageItem(object : RencanaVisitPenagihanVPA.CounterPageItem{
             override fun counterItem(count: Int, tabIndex: Int) {
+                pagerAdapterItemCount[tabIndex] = count
                 tabTitleViews[tabIndex].text = "${if (count != 0) "($count) " else ""}" + tabTitles[tabIndex]
             }
 
@@ -206,12 +208,14 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
                     true
                 }
                 R.id.option_per_category -> {
-                    val listIem = pagerAdapter.getAllListItem(activeTab)
-                    navigateCheckLocationStore(listIem)
+                    if (pagerAdapterItemCount[activeTab] != 0) {
+                        val listIem = pagerAdapter.getAllListItem(activeTab)
+                        navigateCheckLocationStore(listIem)
+                    }
                     true
                 }
                 R.id.option_choices -> {
-                    toggleSelectBar()
+                    if (pagerAdapterItemCount[activeTab] != 0) toggleSelectBar()
                     true
                 }
                 else -> false
@@ -228,6 +232,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
         listCoordinateStatus = arrayListOf()
         listCoordinateCityID = arrayListOf()
 
+        totalProcess = items.size
         LoopingTask(items).execute()
 
     }
@@ -363,6 +368,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
         listCoordinateStatus = arrayListOf()
         listCoordinateCityID = arrayListOf()
 
+        totalProcess = items.size
         LoopingTask(items).execute()
 //
 //        for (item in items.listIterator()) {
@@ -476,6 +482,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
         listCoordinateStatus = arrayListOf()
         listCoordinateCityID = arrayListOf()
 
+        totalProcess = items.size
         LoopingTask(items).execute()
     }
 
