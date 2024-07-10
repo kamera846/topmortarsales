@@ -160,6 +160,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
     private var searchRunnable: Runnable? = null
     private var previousSearchTerm = ""
     private var isSearchActive = false
+    private var selectedItemsId = mutableSetOf<String>()
     private var isSelectItemActive = false
     private var selectedItemCount = 0
     private var totalProcess = 0
@@ -1136,8 +1137,9 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 navigateDetailContact(data)
             }
 
-            override fun updateSelectedCount(count: Int) {
+            override fun updateSelectedItem(count: Int, selectedItemsId: MutableSet<String>) {
                 if (isSelectItemActive) {
+                    this@MainActivity.selectedItemsId = selectedItemsId
                     selectedItemCount = count
                     binding.titleBar.tvTitleBar.text = "$selectedItemCount Item terpilih"
                     if (selectedItemCount > 0)
@@ -1151,6 +1153,8 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
         })
 
+        rvAdapter.setSelectItemState(isSelectItemActive)
+        rvAdapter.setSelectedItemsId(selectedItemsId)
         rvAdapter.callback = { result ->
             onSelectedItems(result)
         }
@@ -1255,16 +1259,24 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
         isSelectItemActive = !isSelectItemActive
 
-        binding.swipeRefreshLayout.isEnabled = !isSelectItemActive
+        selectedItemCount = 0
         rvAdapter.clearSelections()
         rvAdapter.setSelectItemState(isSelectItemActive)
+        binding.swipeRefreshLayout.isEnabled = !isSelectItemActive
 
         if (isSelectItemActive) {
             icMore.visibility = View.GONE
+            binding.btnFab.visibility = View.GONE
             binding.titleBar.icConfirmSelect.visibility = View.VISIBLE
             binding.titleBar.tvTitleBar.text = "0 Item terpilih"
+
+            binding.titleBar.icConfirmSelect.alpha =
+                if (CustomUtility(this@MainActivity).isDarkMode()) 0.2f
+                else 0.5f
+
         } else {
             icMore.visibility = View.VISIBLE
+            if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) binding.btnFab.visibility = View.VISIBLE
             binding.titleBar.icConfirmSelect.visibility = View.GONE
             binding.titleBar.tvTitleBar.text = "Semua Toko"
         }

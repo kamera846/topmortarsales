@@ -3,7 +3,6 @@ package com.topmortar.topmortarsales.adapter
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
-import android.util.SparseBooleanArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,17 +31,22 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
 
     private var context: Context? = null
     private var isSelectedItemActive = false
-    private var selectedItems = SparseBooleanArray()
+//    private var selectedItems = SparseBooleanArray()
+    private var selectedItemsId = mutableSetOf<String>()
 
     interface ItemClickListener {
         fun onItemClick(data: ContactModel? = null)
-        fun updateSelectedCount(count: Int = 0) {
+        fun updateSelectedItem(count: Int = 0, selectedItemsId: MutableSet<String> = mutableSetOf()) {
 
         }
     }
 
     fun setSelectItemState(state: Boolean) {
         this.isSelectedItemActive = state
+    }
+
+    fun setSelectedItemsId(items: MutableSet<String>) {
+        this.selectedItemsId = items
     }
 
     inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -74,9 +78,11 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
                 checkBoxItem.visibility = View.GONE
             }
 
-            checkBoxItem.isChecked = selectedItems.get(position, false)
+//            checkBoxItem.isChecked = selectedItems.get(position, false)
+            checkBoxItem.isChecked = selectedItemsId.contains(chatItem.id_contact)
             itemView.setBackgroundColor(
-                if (selectedItems.get(position, false)) itemView.context.resources.getColor(R.color.primary15)
+//                if (selectedItems.get(position, false)) itemView.context.resources.getColor(R.color.primary15)
+                if (selectedItemsId.contains(chatItem.id_contact)) itemView.context.resources.getColor(R.color.primary15)
                 else itemView.context.resources.getColor(R.color.baseBackground)
             )
         }
@@ -176,27 +182,41 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
     }
 
     private fun toggleSelection(holder: ContactsRecyclerViewAdapter.ChatViewHolder, position: Int) {
-        if (selectedItems.get(position, false)) {
-            selectedItems.delete(position)
+//        if (selectedItems.get(position, false)) {
+//            selectedItems.delete(position)
+//            holder.checkBoxItem.isChecked = false
+//        } else {
+//            selectedItems.put(position, true)
+//            holder.checkBoxItem.isChecked = true
+//        }
+        val item = chatList[position]
+        if (selectedItemsId.contains(item.id_contact)) {
+            selectedItemsId.remove(item.id_contact)
             holder.checkBoxItem.isChecked = false
         } else {
-            selectedItems.put(position, true)
+            selectedItemsId.add(item.id_contact)
             holder.checkBoxItem.isChecked = true
         }
-        itemClickListener.updateSelectedCount(selectedItems.size())
+        itemClickListener.updateSelectedItem(selectedItemsId.size, selectedItemsId)
         notifyItemChanged(position)
     }
 
     fun clearSelections() {
-        selectedItems.clear()
+//        selectedItems.clear()
+        selectedItemsId.clear()
         notifyDataSetChanged()
     }
 
     fun getSelectedItems() {
-        val items = arrayListOf<ContactModel>()
-        for (i in 0 until selectedItems.size()) {
-            items.add(chatList[selectedItems.keyAt(i)])
-        }
-        callback?.invoke(items)
+//        val items = arrayListOf<ContactModel>()
+//        for (i in 0 until selectedItems.size()) {
+//            items.add(chatList[selectedItems.keyAt(i)])
+//        }
+//        callback?.invoke(items)
+        callback?.invoke(
+            chatList.filter {
+                selectedItemsId.contains(it.id_contact)
+            }.toCollection(ArrayList())
+        )
     }
 }
