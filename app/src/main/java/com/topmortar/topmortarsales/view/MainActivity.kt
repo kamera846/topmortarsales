@@ -8,6 +8,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
+import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -42,7 +43,6 @@ import com.google.android.material.navigation.NavigationView
 import com.google.firebase.database.DatabaseReference
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter
-import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter.ItemClickListener
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
@@ -57,6 +57,8 @@ import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
+import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE_HIDE_FILTER
+import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE_WITH_DEFAULT_RANGE
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PAYMENT_METHOD
 import com.topmortar.topmortarsales.commons.CONST_PHONE
@@ -116,7 +118,7 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 @SuppressLint("SetTextI18n")
-class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchModalListener,
+class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
     NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var scaleAnimation: Animation
@@ -146,9 +148,11 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
     private val userKind get() = sessionManager.userKind().toString()
     private val userId get() = sessionManager.userID().toString()
     private val userDistributorId get() = sessionManager.userDistributor().toString()
+    private lateinit var rvAdapter: ContactsRecyclerViewAdapter
     private var contacts: ArrayList<ContactModel> = arrayListOf()
     private var cities: ArrayList<CityModel> = arrayListOf()
     private lateinit var firebaseReference: DatabaseReference
+    private lateinit var progressDialog: ProgressDialog
 
     // Initialize Search Engine
     private val searchDelayMillis = 500L
@@ -156,11 +160,22 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
     private var searchRunnable: Runnable? = null
     private var previousSearchTerm = ""
     private var isSearchActive = false
+    private var selectedItemsId = mutableSetOf<String>()
+    private var isSelectItemActive = false
+    private var selectedItemCount = 0
+    private var totalProcess = 0
+    private var processed = 0
+    private var percentage = 0
 
     // Setup Filter
     private var selectedStatusID: String = "-1"
     private var selectedVisitedID: String = "-1"
     private var selectedCitiesID: CityModel? = null
+
+    private lateinit var listCoordinate: ArrayList<String>
+    private lateinit var listCoordinateName: ArrayList<String>
+    private lateinit var listCoordinateStatus: ArrayList<String>
+    private lateinit var listCoordinateCityID: ArrayList<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -179,6 +194,9 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
         AppUpdateHelper.initialize()
         AppUpdateHelper.checkForUpdate(this)
+
+        progressDialog = ProgressDialog(this)
+        progressDialog.setMessage(getString(R.string.txt_loading))
 
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
 
@@ -239,11 +257,11 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             if (isSearchActive) {
                 searchContact()
             } else {
-                if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
+                if (userKind == USER_KIND_ADMIN) getCities()
                 else getContacts()
             }
         }
-        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
+        if (userKind == USER_KIND_ADMIN) getCities()
         else getContacts()
 
     }
@@ -337,12 +355,12 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
         // Set Title Bar
         if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
-            icMore.visibility = View.GONE
+            icMore.visibility = View.VISIBLE
             binding.titleBar.icMenu.visibility = View.GONE
             tvTitleBarDescription.visibility = View.GONE
             binding.titleBar.tvTitleBar.text = "Semua Toko"
             binding.titleBar.icBack.visibility = View.VISIBLE
-            binding.titleBar.icBack.setOnClickListener { finish() }
+            binding.titleBar.icBack.setOnClickListener { if (isSelectItemActive) toggleSelectItem() else finish() }
         } else {
             if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
                 val contentWidht = convertDpToPx(40, this)
@@ -412,6 +430,11 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         binding.llFilter.setOnClickListener {
             setupFilterTokoModal()
             showFilterModal()
+        }
+        binding.titleBar.icConfirmSelect.setOnClickListener {
+            if (selectedItemCount > 0) {
+                rvAdapter.getSelectedItems()
+            }
         }
     }
 
@@ -501,8 +524,6 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
     }
 
     private fun navigateChecklocation() {
-        val progressDialog = ProgressDialog(this)
-        progressDialog.setMessage("Memuat data toko…")
         progressDialog.show()
 
         Handler(Looper.getMainLooper()).postDelayed({
@@ -520,28 +541,31 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                     when (response.status) {
                         RESPONSE_STATUS_OK -> {
 
-                            val listCoordinate = arrayListOf<String>()
-                            val listCoordinateName = arrayListOf<String>()
-                            val listCoordinateStatus = arrayListOf<String>()
-                            val listCoordinateCityID = arrayListOf<String>()
+                            listCoordinate = arrayListOf()
+                            listCoordinateName = arrayListOf()
+                            listCoordinateStatus = arrayListOf()
+                            listCoordinateCityID = arrayListOf()
 
-                            for (item in response.results.listIterator()) {
-                                listCoordinate.add(item.maps_url)
-                                listCoordinateName.add(item.nama)
-                                listCoordinateStatus.add(item.store_status)
-                                listCoordinateCityID.add(item.id_city)
-                            }
+                            totalProcess = response.results.size
+                            LoopingTask(response.results).execute()
 
-                            val intent = Intent(this@MainActivity, MapsActivity::class.java)
-
-                            intent.putExtra(CONST_NEAREST_STORE, true)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
-
-                            progressDialog.dismiss()
-                            startActivity(intent)
+//                            for (item in response.results.listIterator()) {
+//                                listCoordinate.add(item.maps_url)
+//                                listCoordinateName.add(item.nama)
+//                                listCoordinateStatus.add(item.store_status)
+//                                listCoordinateCityID.add(item.id_city)
+//                            }
+//
+//                            val intent = Intent(this@MainActivity, MapsActivity::class.java)
+//
+//                            intent.putExtra(CONST_NEAREST_STORE, true)
+//                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
+//                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+//                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
+//                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
+//
+//                            progressDialog.dismiss()
+//                            startActivity(intent)
 
                         }
                         RESPONSE_STATUS_EMPTY -> {
@@ -584,9 +608,11 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         val popupMenu = PopupMenu(this@MainActivity, icMore)
         popupMenu.inflate(R.menu.option_main_menu)
 
+        val syncNow = popupMenu.menu.findItem(R.id.option_sync_now)
         val searchItem = popupMenu.menu.findItem(R.id.option_search)
         val userItem = popupMenu.menu.findItem(R.id.option_user)
         val myProfile = popupMenu.menu.findItem(R.id.option_my_profile)
+        val selectedStore = popupMenu.menu.findItem(R.id.selected_store)
         val cityItem = popupMenu.menu.findItem(R.id.option_city)
         val skillItem = popupMenu.menu.findItem(R.id.option_skill)
         val basecamp = popupMenu.menu.findItem(R.id.option_basecamp)
@@ -594,6 +620,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         val delivery = popupMenu.menu.findItem(R.id.option_delivery)
         val rencanaVisit = popupMenu.menu.findItem(R.id.rencana_visit)
         val rencanaVisitPenagihan = popupMenu.menu.findItem(R.id.rencana_visit_penagihan)
+        val logout = popupMenu.menu.findItem(R.id.option_logout)
 
         searchItem.isVisible = false
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
@@ -620,6 +647,13 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             myProfile.isVisible = false
         }
 
+        if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
+            syncNow.isVisible = false
+            myProfile.isVisible = false
+            logout.isVisible = false
+            selectedStore.isVisible = true
+        }
+
         popupMenu.setOnMenuItemClickListener { item: MenuItem ->
             when (item.itemId) {
                 R.id.option_sync_now -> {
@@ -628,6 +662,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 }
                 R.id.nearest_store -> {
                     navigateChecklocation()
+                    true
+                }
+                R.id.selected_store -> {
+                    toggleSelectItem()
                     true
                 }
                 R.id.option_my_profile -> {
@@ -828,7 +866,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                     USER_KIND_COURIER -> apiService.getCourierStore(processNumber = "1", courierId = userId)
                     else -> {
                         val statusFilter = selectedStatusID.toLowerCase(Locale.ROOT)
-                        val cityID = if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) selectedCitiesID?.id_city
+                        val cityID = if (userKind == USER_KIND_ADMIN) selectedCitiesID?.id_city
                         else userCity
 
                         if (cityID != null && statusFilter != "-1") {
@@ -945,10 +983,10 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
             binding.llFilter.visibility = View.VISIBLE
 
             filterModal = FilterTokoModal(this)
-            if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) {
+            if (userKind == USER_KIND_ADMIN) {
                 filterModal.setStatuses(selected = selectedStatusID)
                 filterModal.setCities(items = cities, selected = selectedCitiesID)
-            } else if (userKind == USER_KIND_SALES || userKind == USER_KIND_ADMIN_CITY) filterModal.setStatuses(selected = selectedStatusID)
+            } else if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_ADMIN_CITY) filterModal.setStatuses(selected = selectedStatusID)
             filterModal.setSendFilterListener(object: FilterTokoModal.SendFilterListener {
                 override fun onSendFilter(
                     selectedStatusID: String,
@@ -998,7 +1036,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                                 if (isSearchActive) {
                                     searchContact()
                                 } else {
-                                    if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
+                                    if (userKind == USER_KIND_ADMIN) getCities()
                                     else getContacts()
                                 }
                             }
@@ -1026,7 +1064,7 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                 val searchKey = createPartFromString(key)
 
                 val statusFilter = selectedStatusID.toLowerCase(Locale.ROOT)
-                val cityID = if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) selectedCitiesID?.id_city
+                val cityID = if (userKind == USER_KIND_ADMIN) selectedCitiesID?.id_city
                 else userCity
 
                 val apiService: ApiService = HttpClient.create()
@@ -1094,8 +1132,32 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
 
     private fun setRecyclerView(listItem: ArrayList<ContactModel>) {
 
-        val rvAdapter = ContactsRecyclerViewAdapter(listItem, this@MainActivity)
+        rvAdapter = ContactsRecyclerViewAdapter(listItem, object: ContactsRecyclerViewAdapter.ItemClickListener {
+            override fun onItemClick(data: ContactModel?) {
+                navigateDetailContact(data)
+            }
 
+            override fun updateSelectedItem(count: Int, selectedItemsId: MutableSet<String>) {
+                if (isSelectItemActive) {
+                    this@MainActivity.selectedItemsId = selectedItemsId
+                    selectedItemCount = count
+                    binding.titleBar.tvTitleBar.text = "$selectedItemCount Item terpilih"
+                    if (selectedItemCount > 0)
+                        binding.titleBar.icConfirmSelect.alpha = 1f
+                    else
+                        binding.titleBar.icConfirmSelect.alpha =
+                            if (CustomUtility(this@MainActivity).isDarkMode()) 0.2f
+                            else 0.5f
+                }
+            }
+
+        })
+
+        rvAdapter.setSelectItemState(isSelectItemActive)
+        rvAdapter.setSelectedItemsId(selectedItemsId)
+        rvAdapter.callback = { result ->
+            onSelectedItems(result)
+        }
         rvListChat.layoutManager = LinearLayoutManager(this@MainActivity)
         rvListChat.adapter = rvAdapter
         rvListChat.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -1193,6 +1255,83 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
         } else binding.includeSwipeRefreshHint.swipeRefreshHint.visibility = View.GONE
     }
 
+    private fun toggleSelectItem() {
+
+        isSelectItemActive = !isSelectItemActive
+
+        selectedItemCount = 0
+        rvAdapter.clearSelections()
+        rvAdapter.setSelectItemState(isSelectItemActive)
+        binding.swipeRefreshLayout.isEnabled = !isSelectItemActive
+
+        if (isSelectItemActive) {
+            icMore.visibility = View.GONE
+            binding.btnFab.visibility = View.GONE
+            binding.titleBar.icConfirmSelect.visibility = View.VISIBLE
+            binding.titleBar.tvTitleBar.text = "0 Item terpilih"
+
+            binding.titleBar.icConfirmSelect.alpha =
+                if (CustomUtility(this@MainActivity).isDarkMode()) 0.2f
+                else 0.5f
+
+        } else {
+            icMore.visibility = View.VISIBLE
+            if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) binding.btnFab.visibility = View.VISIBLE
+            binding.titleBar.icConfirmSelect.visibility = View.GONE
+            binding.titleBar.tvTitleBar.text = "Semua Toko"
+        }
+
+    }
+
+    private fun onSelectedItems(items: ArrayList<ContactModel>) {
+
+        progressDialog.show()
+
+        listCoordinate = arrayListOf()
+        listCoordinateName = arrayListOf()
+        listCoordinateStatus = arrayListOf()
+        listCoordinateCityID = arrayListOf()
+
+        totalProcess = items.size
+        LoopingTask(items).execute()
+    }
+
+    private inner class LoopingTask(private var items: ArrayList<ContactModel>) : AsyncTask<Void, Void, Void>() {
+
+        override fun doInBackground(vararg params: Void?): Void? {
+            for (item in items.listIterator()) {
+                listCoordinate.add(item.maps_url)
+                listCoordinateName.add(item.nama)
+                listCoordinateStatus.add(item.store_status)
+                listCoordinateCityID.add(item.id_city)
+
+                processed ++
+                percentage = (processed * 100) / totalProcess
+                progressDialog.setMessage(getString(R.string.txt_loading) + "($percentage%)")
+            }
+            return null
+        }
+
+        override fun onPostExecute(result: Void?) {
+            super.onPostExecute(result)
+
+            val intent = Intent(this@MainActivity, MapsActivity::class.java)
+            intent.putExtra(CONST_NEAREST_STORE, true)
+            if (isSelectItemActive) {
+                intent.putExtra(CONST_NEAREST_STORE_HIDE_FILTER, true)
+                intent.putExtra(CONST_NEAREST_STORE_WITH_DEFAULT_RANGE, -1)
+            }
+            intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
+            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
+            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
+
+            progressDialog.dismiss()
+            progressDialog.setMessage(getString(R.string.txt_loading))
+            startActivity(intent)
+        }
+    }
+
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -1214,14 +1353,18 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
 
-        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            binding.drawerLayout.closeDrawer(GravityCompat.START)
-        } else {
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) binding.drawerLayout.closeDrawer(GravityCompat.START)
+        else {
+
             if (isSearchActive) toggleSearchEvent(SEARCH_CLOSE)
+
+            else if (isSelectItemActive) toggleSelectItem()
+
             else {
 
                 if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) super.onBackPressed()
                 else {
+
                     if (doubleBackToExitPressedOnce) {
                         super.onBackPressed()
                         return
@@ -1233,15 +1376,12 @@ class MainActivity : AppCompatActivity(), ItemClickListener, SearchModal.SearchM
                     Handler(Looper.getMainLooper()).postDelayed({
                         doubleBackToExitPressedOnce = false
                     }, 2000)
+
                 }
+
             }
+
         }
-
-    }
-
-    override fun onItemClick(data: ContactModel?) {
-
-        navigateDetailContact(data)
 
     }
 

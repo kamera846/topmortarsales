@@ -104,8 +104,10 @@ class TagihMingguanFragment : Fragment() {
         this.rvAdapter.clearSelections()
         this.rvAdapter.setSelectBarActive(state)
         this.binding.swipeRefreshLayout.isEnabled = !state
-        if (state) binding.llFilter.componentFilter.visibility = View.GONE
-        else binding.llFilter.componentFilter.visibility = View.VISIBLE
+        if (userKind == USER_KIND_ADMIN) {
+            if (state) binding.llFilter.componentFilter.visibility = View.GONE
+            else binding.llFilter.componentFilter.visibility = View.VISIBLE
+        }
         val eventBusInt = EventBusUtils.IntEvent(0)
         EventBus.getDefault().post(eventBusInt)
     }
@@ -175,6 +177,7 @@ class TagihMingguanFragment : Fragment() {
                     RESPONSE_STATUS_EMPTY -> {
 
                         listItem = arrayListOf()
+                        setRecyclerView(listItem)
                         loadingState(true, "Belum ada daftar tagihan mingguan!")
                         showBadgeRefresh(false)
                         listener?.counterItem(0)
@@ -183,6 +186,7 @@ class TagihMingguanFragment : Fragment() {
                     else -> {
 
                         listItem = arrayListOf()
+                        setRecyclerView(listItem)
                         handleMessage(requireContext(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
                         loadingState(true, getString(R.string.failed_request))
                         showBadgeRefresh(true)
@@ -193,6 +197,7 @@ class TagihMingguanFragment : Fragment() {
             } catch (e: Exception) {
 
                 listItem = arrayListOf()
+                setRecyclerView(listItem)
                 handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
