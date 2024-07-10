@@ -3,10 +3,12 @@ package com.topmortar.topmortarsales.adapter
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.util.SparseBooleanArray
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -25,10 +27,22 @@ import java.util.Date
 import java.util.Locale
 
 class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<ContactsRecyclerViewAdapter.ChatViewHolder>() {
+
+    var callback: ((ArrayList<ContactModel>) -> Unit)? = null
+
     private var context: Context? = null
+    private var isSelectedItemActive = false
+    private var selectedItems = SparseBooleanArray()
 
     interface ItemClickListener {
         fun onItemClick(data: ContactModel? = null)
+        fun updateSelectedCount(count: Int = 0) {
+
+        }
+    }
+
+    fun setSelectItemState(state: Boolean) {
+        this.isSelectedItemActive = state
     }
 
     inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -36,7 +50,9 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
         val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
         val tooltipStatus: ImageView = itemView.findViewById(R.id.tooltip_status)
-        val icCake: ImageView = itemView.findViewById(R.id.icCake)
+        private val icCake: ImageView = itemView.findViewById(R.id.icCake)
+        private val imgProfile: ImageView = itemView.findViewById(R.id.iv_contact_profile)
+        val checkBoxItem: CheckBox = itemView.findViewById(R.id.checkbox)
 
         fun bind(chatItem: ContactModel) {
 
@@ -50,6 +66,19 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
             }
             setupStatus(chatItem.store_status)
 
+            if (isSelectedItemActive) {
+                imgProfile.visibility = View.GONE
+                checkBoxItem.visibility = View.VISIBLE
+            } else {
+                imgProfile.visibility = View.VISIBLE
+                checkBoxItem.visibility = View.GONE
+            }
+
+            checkBoxItem.isChecked = selectedItems.get(position, false)
+            itemView.setBackgroundColor(
+                if (selectedItems.get(position, false)) itemView.context.resources.getColor(R.color.primary15)
+                else itemView.context.resources.getColor(R.color.baseBackground)
+            )
         }
 
         private fun setupStatus(status: String? = null) {
@@ -110,8 +139,9 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
         holder.bind(chatItem)
         holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
 
-        holder.itemView.setOnClickListener { onItemClick(holder, position) }
+        holder.itemView.setOnClickListener { if (isSelectedItemActive) toggleSelection(holder, position) else onItemClick(holder, position) }
         holder.tooltipStatus.setOnClickListener { onItemClick(holder, position) }
+        holder.checkBoxItem.setOnClickListener { toggleSelection(holder, position) }
 
     }
 
@@ -143,5 +173,30 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
             itemClickListener.onItemClick(data)
 
         }
+    }
+
+    private fun toggleSelection(holder: ContactsRecyclerViewAdapter.ChatViewHolder, position: Int) {
+        if (selectedItems.get(position, false)) {
+            selectedItems.delete(position)
+            holder.checkBoxItem.isChecked = false
+        } else {
+            selectedItems.put(position, true)
+            holder.checkBoxItem.isChecked = true
+        }
+        itemClickListener.updateSelectedCount(selectedItems.size())
+        notifyItemChanged(position)
+    }
+
+    fun clearSelections() {
+        selectedItems.clear()
+        notifyDataSetChanged()
+    }
+
+    fun getSelectedItems() {
+        val items = arrayListOf<ContactModel>()
+        for (i in 0 until selectedItems.size()) {
+            items.add(chatList[selectedItems.keyAt(i)])
+        }
+        callback?.invoke(items)
     }
 }
