@@ -256,11 +256,11 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             if (isSearchActive) {
                 searchContact()
             } else {
-                if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
+                if (userKind == USER_KIND_ADMIN) getCities()
                 else getContacts()
             }
         }
-        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
+        if (userKind == USER_KIND_ADMIN) getCities()
         else getContacts()
 
     }
@@ -865,7 +865,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                     USER_KIND_COURIER -> apiService.getCourierStore(processNumber = "1", courierId = userId)
                     else -> {
                         val statusFilter = selectedStatusID.toLowerCase(Locale.ROOT)
-                        val cityID = if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) selectedCitiesID?.id_city
+                        val cityID = if (userKind == USER_KIND_ADMIN) selectedCitiesID?.id_city
                         else userCity
 
                         if (cityID != null && statusFilter != "-1") {
@@ -982,10 +982,10 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             binding.llFilter.visibility = View.VISIBLE
 
             filterModal = FilterTokoModal(this)
-            if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) {
+            if (userKind == USER_KIND_ADMIN) {
                 filterModal.setStatuses(selected = selectedStatusID)
                 filterModal.setCities(items = cities, selected = selectedCitiesID)
-            } else if (userKind == USER_KIND_SALES || userKind == USER_KIND_ADMIN_CITY) filterModal.setStatuses(selected = selectedStatusID)
+            } else if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_ADMIN_CITY) filterModal.setStatuses(selected = selectedStatusID)
             filterModal.setSendFilterListener(object: FilterTokoModal.SendFilterListener {
                 override fun onSendFilter(
                     selectedStatusID: String,
@@ -1035,7 +1035,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                                 if (isSearchActive) {
                                     searchContact()
                                 } else {
-                                    if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
+                                    if (userKind == USER_KIND_ADMIN) getCities()
                                     else getContacts()
                                 }
                             }
@@ -1063,7 +1063,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 val searchKey = createPartFromString(key)
 
                 val statusFilter = selectedStatusID.toLowerCase(Locale.ROOT)
-                val cityID = if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) selectedCitiesID?.id_city
+                val cityID = if (userKind == USER_KIND_ADMIN) selectedCitiesID?.id_city
                 else userCity
 
                 val apiService: ApiService = HttpClient.create()
