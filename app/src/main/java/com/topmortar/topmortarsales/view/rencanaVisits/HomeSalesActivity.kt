@@ -199,6 +199,25 @@ class HomeSalesActivity : AppCompatActivity() {
         customUtility = CustomUtility(this)
         absentMode = selectedAbsentMode
 
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                Log.d("Detect Mock", "Succeed get lastLocation")
+                if (location == null) {
+                    Log.d("Detect Mock", "Location null")
+                } else {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && location.isMock) Log.d("Detect Mock", "Is Mock")
+                    else if (location.isFromMockProvider) Log.d("Detect Mock", "Is From Mock")
+                    else Log.d("Detect Mock", "Is Mock False")
+                }
+            }.addOnFailureListener {
+                Log.d("Detect Mock", "Failed get lastLocation. Err: ${it.message}. Stacktrace: ${it.stackTrace}")
+            }.addOnCanceledListener {
+                Log.d("Detect Mock", "Cancelled get lastLocation")
+            }.addOnCompleteListener {
+                Log.d("Detect Mock", "Completed get lastLocation")
+            }
+        }
+
         // Set User Absent Level (TEMP)
         val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
         val userChild = absentChild.child(userId.toString())
