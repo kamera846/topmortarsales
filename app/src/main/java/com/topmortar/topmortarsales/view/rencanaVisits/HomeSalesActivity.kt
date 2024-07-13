@@ -199,6 +199,25 @@ class HomeSalesActivity : AppCompatActivity() {
         customUtility = CustomUtility(this)
         absentMode = selectedAbsentMode
 
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                Log.d("Detect Mock", "Succeed get lastLocation")
+                if (location == null) {
+                    Log.d("Detect Mock", "Location null")
+                } else {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && location.isMock) Log.d("Detect Mock", "Is Mock")
+                    else if (location.isFromMockProvider) Log.d("Detect Mock", "Is From Mock")
+                    else Log.d("Detect Mock", "Is Mock False")
+                }
+            }.addOnFailureListener {
+                Log.d("Detect Mock", "Failed get lastLocation. Err: ${it.message}. Stacktrace: ${it.stackTrace}")
+            }.addOnCanceledListener {
+                Log.d("Detect Mock", "Cancelled get lastLocation")
+            }.addOnCompleteListener {
+                Log.d("Detect Mock", "Completed get lastLocation")
+            }
+        }
+
         // Set User Absent Level (TEMP)
         val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
         val userChild = absentChild.child(userId.toString())
@@ -1011,7 +1030,7 @@ class HomeSalesActivity : AppCompatActivity() {
             try {
 
                 val response = if (userKind == USER_KIND_PENAGIHAN) apiService.getContactsByDistributor(distributorID = userDistributorId ?: "0")
-                    else apiService.getContacts(cityId = userCity ?: "0", distributorID = userDistributorId ?: "0")
+                else apiService.getContacts(cityId = userCity ?: "0", distributorID = userDistributorId ?: "0")
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -1123,15 +1142,15 @@ class HomeSalesActivity : AppCompatActivity() {
         }
         // Number 1 is distributor ID for Center Distributor (Special case for Top Mortar Mitra)
 //        if (userDistributorId != "1") {
-            listItem.add(
-                HomeMenuSalesModel(
-                    icon = R.drawable.gudang_white,
-                    bgColor = R.drawable.bg_blue_silver_lake_round_8,
-                    title = "Semua Toko",
-                    target = MainActivity::class.java,
-                    isLocked = isLocked
-                )
+        listItem.add(
+            HomeMenuSalesModel(
+                icon = R.drawable.gudang_white,
+                bgColor = R.drawable.bg_blue_silver_lake_round_8,
+                title = "Semua Toko",
+                target = MainActivity::class.java,
+                isLocked = isLocked
             )
+        )
 //        }
 
         setMenuItemAdapter(binding.rvVisit, listItem)
