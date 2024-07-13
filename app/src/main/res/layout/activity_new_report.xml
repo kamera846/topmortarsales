@@ -88,14 +88,13 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Normal"
-                            android:textStyle="normal"
                             android:textAllCaps="true"
                             android:gravity="center"
                             android:paddingHorizontal="16dp"
                             android:paddingVertical="8dp"
                             android:layout_marginHorizontal="4dp"
                             android:background="@drawable/et_background_clickable"
-                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
                         <TextView
                             android:id="@+id/reportPaymentTrue"
@@ -103,7 +102,6 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Penagihan"
-                            android:textStyle="bold"
                             android:textAllCaps="true"
                             android:gravity="center"
                             android:paddingHorizontal="16dp"
@@ -111,7 +109,7 @@
                             android:layout_marginHorizontal="4dp"
                             android:textColor="@color/white"
                             android:background="@drawable/bg_primary_round_8"
-                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
                     </LinearLayout>
 
@@ -339,38 +337,41 @@
 
                     </LinearLayout>
 
-                    <LinearLayout
-                        android:id="@+id/checkboxGroup"
+                    <RadioGroup
+                        android:id="@+id/rgReportPaymentTrue"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp"
-                        android:orientation="vertical">
+                        android:layout_marginBottom="16dp">
 
-                        <CheckBox
-                            android:id="@+id/checkPaymentTrue"
+                        <RadioButton
+                            android:id="@+id/rbPayYes"
                             android:layout_width="match_parent"
                             android:layout_height="48dp"
                             android:gravity="center_vertical"
                             android:layout_marginStart="-6dp"
                             android:text="Iya"/>
-                        <CheckBox
-                            android:id="@+id/checkPaymentDate"
-                            android:layout_width="match_parent"
-                            android:layout_height="48dp"
-                            android:gravity="center_vertical"
-                            android:layout_marginStart="-6dp"
-                            android:text="Janji bayar nanti"/>
-                        <CheckBox
-                            android:id="@+id/checkPaymentFalse"
+
+                        <RadioButton
+                            android:id="@+id/rbNotPay"
                             android:layout_width="match_parent"
                             android:layout_height="48dp"
                             android:gravity="center_vertical"
                             android:layout_marginStart="-6dp"
                             android:text="Tidak"/>
-                    </LinearLayout>
 
+                        <RadioButton
+                            android:id="@+id/rbPayLater"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:gravity="center_vertical"
+                            android:layout_marginStart="-6dp"
+                            android:text="Tidak, janji bayar nanti"/>
+
+                    </RadioGroup>
+
+                    <!-- etPaymentYesContainer -->
                     <LinearLayout
-                        android:id="@+id/inputPaymentOptionContainer"
+                        android:id="@+id/etPaymentYesContainer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical">
@@ -382,7 +383,7 @@
                             android:orientation="horizontal">
 
                             <TextView
-                                android:id="@+id/tvPaymentTrue"
+                                android:id="@+id/tvPaymentYes"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Input nominal yang dibayarkan"
@@ -401,12 +402,10 @@
                         </LinearLayout>
 
                         <LinearLayout
-                            android:id="@+id/etPaymentTrueContainer"
                             android:layout_width="match_parent"
                             android:layout_height="48dp"
                             android:gravity="center_vertical"
                             android:background="@drawable/et_background"
-                            android:layout_marginBottom="16dp"
                             android:orientation="horizontal">
 
                             <TextView
@@ -421,19 +420,31 @@
                                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
                             <EditText
-                                android:id="@+id/etPaymentTrue"
+                                android:id="@+id/etPaymentYes"
                                 android:layout_width="match_parent"
                                 android:layout_height="48dp"
                                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                                 android:textColorHint="@color/black_600"
                                 android:maxLines="1"
+                                android:text="0"
                                 android:hint="Input nilai rupiah"
-                                android:textSize="14sp"
+                                android:inputType="numberDecimal"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
                                 android:paddingHorizontal="12dp"
                                 android:background="@android:color/transparent"
                                 android:outlineProvider="none"/>
 
                         </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!-- etPaymentLaterContainer -->
+                    <LinearLayout
+                        android:id="@+id/etPaymentLaterContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -442,7 +453,7 @@
                             android:orientation="horizontal">
 
                             <TextView
-                                android:id="@+id/tvPaymentDate"
+                                android:id="@+id/tvPaymentLater"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Input tanggal janji"
@@ -461,12 +472,10 @@
                         </LinearLayout>
 
                         <LinearLayout
-                            android:id="@+id/etPaymentDateContainer"
                             android:layout_width="match_parent"
                             android:layout_height="48dp"
                             android:gravity="center_vertical"
                             android:background="@drawable/et_background"
-                            android:layout_marginBottom="16dp"
                             android:orientation="horizontal">
 
                             <ImageView
@@ -477,7 +486,7 @@
                                 android:src="@drawable/date_black"/>
 
                             <EditText
-                                android:id="@+id/etPaymentDate"
+                                android:id="@+id/etPaymentLater"
                                 android:layout_width="match_parent"
                                 android:layout_height="48dp"
                                 android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
