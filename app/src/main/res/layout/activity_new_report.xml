@@ -138,7 +138,7 @@
                             android:textStyle="bold"/>
 
                         <TextView
-                            android:visibility="visible"
+                            android:visibility="gone"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"
@@ -239,7 +239,7 @@
                         android:text="Your error"
                         android:textColor="@color/primary"
                         android:textStyle="italic"
-                        android:textSize="16sp"/>
+                        android:textSize="12sp"/>
 
                 </LinearLayout>
 
@@ -336,6 +336,16 @@
                             android:textColor="@color/primary"/>
 
                     </LinearLayout>
+
+                    <TextView
+                        android:visibility="gone"
+                        android:id="@+id/rgReportPaymentError"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Silahkan pilih salah satu opsi dibawah"
+                        android:textColor="@color/primary"
+                        android:textStyle="italic"
+                        android:textSize="12sp"/>
 
                     <RadioGroup
                         android:id="@+id/rgReportPaymentTrue"

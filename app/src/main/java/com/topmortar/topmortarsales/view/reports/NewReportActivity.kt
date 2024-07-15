@@ -264,6 +264,7 @@ class NewReportActivity : AppCompatActivity() {
         binding.etPaymentLaterContainer.visibility = View.GONE
         binding.rgReportPaymentTrue.clearCheck()
         binding.etPaymentYes.setText("0")
+        binding.etPaymentYes.setSelection(binding.etPaymentYes.length())
         realPaymentValue = ""
         binding.etPaymentLater.setText("")
         realPaymentDateValue = ""
@@ -293,9 +294,11 @@ class NewReportActivity : AppCompatActivity() {
         binding.reportPaymentFalse.setOnClickListener { toggleReportPayment(false) }
         binding.rgReportPaymentTrue.setOnCheckedChangeListener { _, checkedId ->
             binding.etPaymentYes.setText("0")
+            binding.etPaymentYes.setSelection(binding.etPaymentYes.length())
             realPaymentValue = ""
             binding.etPaymentLater.setText("")
             realPaymentDateValue = ""
+            binding.rgReportPaymentError.visibility = View.GONE
 
             when (checkedId) {
                 R.id.rbPayYes -> {
@@ -564,8 +567,35 @@ class NewReportActivity : AppCompatActivity() {
             etMessage.requestFocus()
             return false
         }
+        if (isReportPaymentStatus) {
+            val checkedRadio = when (binding.rgReportPaymentTrue.checkedRadioButtonId) {
+                R.id.rbPayYes -> "pay"
+                R.id.rbPayLater -> "pay_later"
+                R.id.rbNotPay -> "not_pay"
+                else -> null
+            }
+            if (checkedRadio == null) {
+                binding.rgReportPaymentTrue.requestFocus()
+                binding.rgReportPaymentError.visibility = View.VISIBLE
+                return false
+            } else if (checkedRadio == "pay" && (realPaymentValue.isEmpty() || realPaymentValue == "0")) {
+                binding.etPaymentYes.error = "Jumlah yang di bayarkan harus lebih dari 0"
+                binding.etPaymentYes.requestFocus()
+                return false
+            } else if (checkedRadio == "pay_later" && realPaymentDateValue.isEmpty()) {
+                binding.etPaymentLater.error = "Silahkan pilih tanggal terlebih dahulu"
+                binding.etPaymentLater.requestFocus()
+                return false
+            }
+        }
+
         etMessage.error = null
         etMessage.clearFocus()
+        binding.rgReportPaymentTrue.clearFocus()
+        binding.etPaymentYes.error = null
+        binding.etPaymentYes.clearFocus()
+        binding.etPaymentLater.error = null
+        binding.etPaymentLater.clearFocus()
         return true
     }
 
@@ -587,16 +617,30 @@ class NewReportActivity : AppCompatActivity() {
             println("Form data message: ${binding.etMessage.text}")
             println("Form data reportSource: $iReportSource")
             println("Form data renviSource: $iRenviSource")
-            println("Form data reportPaymentStatus: $isReportPaymentStatus")
-            val checkedRadio = when (binding.rgReportPaymentTrue.checkedRadioButtonId) {
-                R.id.rbPayYes -> "Iya"
-                R.id.rbPayLater -> "Tidak, janji bayar nanti"
-                R.id.rbNotPay -> "Tidak"
-                else -> null
+            if (!isReportPaymentStatus) {
+                println("Form data is_pay: 0")
+            } else {
+                when (binding.rgReportPaymentTrue.checkedRadioButtonId) {
+                    R.id.rbPayYes -> {
+                        println("Form data is_pay: pay")
+                        println("Form data pay_value: $realPaymentValue")
+                    }
+                    R.id.rbPayLater -> {
+                        println("Form data is_pay: pay_later")
+                        println("Form data pay_date: $realPaymentDateValue")
+                    } else -> println("Form data is_pay: not_pay")
+                }
             }
-            println("Form data radioChecked: $checkedRadio")
-            println("Form data paymentValue: $realPaymentValue")
-            println("Form data dateValue: $realPaymentDateValue")
+//            println("Form data reportPaymentStatus: $isReportPaymentStatus")
+//            val checkedRadio = when (binding.rgReportPaymentTrue.checkedRadioButtonId) {
+//                R.id.rbPayYes -> "Iya"
+//                R.id.rbPayLater -> "Tidak, janji bayar nanti"
+//                R.id.rbNotPay -> "Tidak"
+//                else -> null
+//            }
+//            println("Form data radioChecked: $checkedRadio")
+//            println("Form data paymentValue: $realPaymentValue")
+//            println("Form data dateValue: $realPaymentDateValue")
             submitDialog.dismiss()
             loadingSubmit(false)
         }, 1000)
