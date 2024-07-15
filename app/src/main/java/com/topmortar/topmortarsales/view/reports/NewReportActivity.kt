@@ -608,44 +608,34 @@ class NewReportActivity : AppCompatActivity() {
         submitDialog.show()
         loadingSubmit(true)
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            Toast.makeText(this@NewReportActivity, "Berhasil membuat laporan", TOAST_SHORT).show()
-            println("===== Form Data =====")
-            println("Form data id: $id")
-            println("Form data id user: $idUser")
-            println("Form data distance: ${binding.etDistance.text}")
-            println("Form data message: ${binding.etMessage.text}")
-            println("Form data reportSource: $iReportSource")
-            println("Form data renviSource: $iRenviSource")
-            if (!isReportPaymentStatus) {
-                println("Form data is_pay: 0")
-            } else {
-                when (binding.rgReportPaymentTrue.checkedRadioButtonId) {
-                    R.id.rbPayYes -> {
-                        println("Form data is_pay: pay")
-                        println("Form data pay_value: $realPaymentValue")
-                    }
-                    R.id.rbPayLater -> {
-                        println("Form data is_pay: pay_later")
-                        println("Form data pay_date: $realPaymentDateValue")
-                    } else -> println("Form data is_pay: not_pay")
-                }
-            }
-//            println("Form data reportPaymentStatus: $isReportPaymentStatus")
-//            val checkedRadio = when (binding.rgReportPaymentTrue.checkedRadioButtonId) {
-//                R.id.rbPayYes -> "Iya"
-//                R.id.rbPayLater -> "Tidak, janji bayar nanti"
-//                R.id.rbNotPay -> "Tidak"
-//                else -> null
+//        Handler(Looper.getMainLooper()).postDelayed({
+//            Toast.makeText(this@NewReportActivity, "Berhasil membuat laporan", TOAST_SHORT).show()
+//            println("===== Form Data =====")
+//            println("Form data id: $id")
+//            println("Form data id user: $idUser")
+//            println("Form data distance: ${binding.etDistance.text}")
+//            println("Form data message: ${binding.etMessage.text}")
+//            println("Form data reportSource: $iReportSource")
+//            println("Form data renviSource: $iRenviSource")
+//            if (!isReportPaymentStatus) {
+//                println("Form data is_pay: 0")
+//            } else {
+//                when (binding.rgReportPaymentTrue.checkedRadioButtonId) {
+//                    R.id.rbPayYes -> {
+//                        println("Form data is_pay: pay")
+//                        println("Form data pay_value: $realPaymentValue")
+//                    }
+//                    R.id.rbPayLater -> {
+//                        println("Form data is_pay: pay_later")
+//                        println("Form data pay_date: $realPaymentDateValue")
+//                    } else -> println("Form data is_pay: not_pay")
+//                }
 //            }
-//            println("Form data radioChecked: $checkedRadio")
-//            println("Form data paymentValue: $realPaymentValue")
-//            println("Form data dateValue: $realPaymentDateValue")
-            submitDialog.dismiss()
-            loadingSubmit(false)
-        }, 1000)
-
-        return
+//            submitDialog.dismiss()
+//            loadingSubmit(false)
+//        }, 1000)
+//
+//        return
 
         lifecycleScope.launch {
             try {
@@ -666,14 +656,57 @@ class NewReportActivity : AppCompatActivity() {
                         laporanVisit = rblaporanVisit,
                         source = rbSource,
                         renviSource = rbRenviSource,
-                    ) else -> apiService.makeVisitReport(
-                        idContact = rbidContact,
-                        idUser = rbidUser,
-                        distanceVisit = rbdistanceVisit,
-                        laporanVisit = rblaporanVisit,
-                        source = rbSource,
-                        renviSource = rbRenviSource,
-                    )
+                    ) else -> {
+                        if (!isReportPaymentStatus) {
+                            apiService.makeVisitReport(
+                                idContact = rbidContact,
+                                idUser = rbidUser,
+                                distanceVisit = rbdistanceVisit,
+                                laporanVisit = rblaporanVisit,
+                                source = rbSource,
+                                renviSource = rbRenviSource,
+                                isPay = createPartFromString("0")
+                            )
+                        } else {
+                            when (binding.rgReportPaymentTrue.checkedRadioButtonId) {
+                                R.id.rbPayYes -> {
+                                    apiService.makeVisitReportPaymentYes(
+                                        idContact = rbidContact,
+                                        idUser = rbidUser,
+                                        distanceVisit = rbdistanceVisit,
+                                        laporanVisit = rblaporanVisit,
+                                        source = rbSource,
+                                        renviSource = rbRenviSource,
+                                        isPay = createPartFromString("pay"),
+                                        payValue = createPartFromString(realPaymentValue)
+                                    )
+                                }
+                                R.id.rbPayLater -> {
+                                    apiService.makeVisitReportPaymentLater(
+                                        idContact = rbidContact,
+                                        idUser = rbidUser,
+                                        distanceVisit = rbdistanceVisit,
+                                        laporanVisit = rblaporanVisit,
+                                        source = rbSource,
+                                        renviSource = rbRenviSource,
+                                        isPay = createPartFromString("pay_later"),
+                                        payDate = createPartFromString(realPaymentDateValue)
+                                    )
+                                }
+                                else -> {
+                                    apiService.makeVisitReport(
+                                        idContact = rbidContact,
+                                        idUser = rbidUser,
+                                        distanceVisit = rbdistanceVisit,
+                                        laporanVisit = rblaporanVisit,
+                                        source = rbSource,
+                                        renviSource = rbRenviSource,
+                                        isPay = createPartFromString("not_pay")
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
 
                 if (response.isSuccessful) {
@@ -713,7 +746,6 @@ class NewReportActivity : AppCompatActivity() {
                     loadingSubmit(false)
 
                 }
-
 
             } catch (e: Exception) {
 
