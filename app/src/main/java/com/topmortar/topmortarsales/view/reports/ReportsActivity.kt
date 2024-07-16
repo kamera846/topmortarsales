@@ -102,7 +102,10 @@ class ReportsActivity : AppCompatActivity() {
         else if (isPenagihan) binding.titleBarDark.tvTitleBar.text = if (!contactName.isNullOrEmpty()) contactName else "Laporan Penagihan"
         else binding.titleBarDark.tvTitleBar.text = if (!contactName.isNullOrEmpty()) contactName else "Laporan Sales"
         binding.titleBarDark.tvTitleBarDescription.visibility = View.VISIBLE
-        if (!contactName.isNullOrEmpty()) binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (iUserID.isNullOrEmpty()) "saya" else ""} di toko ini"
+        println("Laporan Visit: Contact Name $contactName")
+        println("Laporan Visit: User ID $iUserID")
+        println("Laporan Visit: User Full Name $userFullName")
+        if (!contactName.isNullOrEmpty()) binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (iUserID.isNullOrEmpty()) "saya" else "$userFullName"} di toko ini"
         else binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (userFullName.isNullOrEmpty()) "" else "$userFullName"}"
 
         if (userKind != USER_KIND_COURIER && userLevel != AUTH_LEVEL_COURIER && userKind != USER_KIND_BA && userLevel != AUTH_LEVEL_BA) {
@@ -284,6 +287,7 @@ class ReportsActivity : AppCompatActivity() {
         else mAdapter.setIsCourier(false)
         if (contactID.isNullOrEmpty()) mAdapter.setWithName(true)
 
+        mAdapter.setLayoutStatus(layoutStatus)
         mAdapter.setLayoutStatus(layoutStatus)
 
         binding.recyclerView.apply {

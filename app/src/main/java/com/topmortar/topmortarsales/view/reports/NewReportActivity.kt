@@ -35,6 +35,9 @@ import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
 import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.IS_PAY_STATUS_NOT_PAY
+import com.topmortar.topmortarsales.commons.IS_PAY_STATUS_PAY
+import com.topmortar.topmortarsales.commons.IS_PAY_STATUS_PAY_LATER
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAX_REPORT_DISTANCE
 import com.topmortar.topmortarsales.commons.NORMAL_REPORT
@@ -569,20 +572,20 @@ class NewReportActivity : AppCompatActivity() {
         }
         if (isReportPaymentStatus) {
             val checkedRadio = when (binding.rgReportPaymentTrue.checkedRadioButtonId) {
-                R.id.rbPayYes -> "pay"
-                R.id.rbPayLater -> "pay_later"
-                R.id.rbNotPay -> "not_pay"
+                R.id.rbPayYes -> IS_PAY_STATUS_PAY
+                R.id.rbPayLater -> IS_PAY_STATUS_PAY_LATER
+                R.id.rbNotPay -> IS_PAY_STATUS_NOT_PAY
                 else -> null
             }
             if (checkedRadio == null) {
                 binding.rgReportPaymentTrue.requestFocus()
                 binding.rgReportPaymentError.visibility = View.VISIBLE
                 return false
-            } else if (checkedRadio == "pay" && (realPaymentValue.isEmpty() || realPaymentValue == "0")) {
+            } else if (checkedRadio == IS_PAY_STATUS_PAY && (realPaymentValue.isEmpty() || realPaymentValue == "0")) {
                 binding.etPaymentYes.error = "Jumlah yang di bayarkan harus lebih dari 0"
                 binding.etPaymentYes.requestFocus()
                 return false
-            } else if (checkedRadio == "pay_later" && realPaymentDateValue.isEmpty()) {
+            } else if (checkedRadio == IS_PAY_STATUS_PAY_LATER && realPaymentDateValue.isEmpty()) {
                 binding.etPaymentLater.error = "Silahkan pilih tanggal terlebih dahulu"
                 binding.etPaymentLater.requestFocus()
                 return false
@@ -677,7 +680,7 @@ class NewReportActivity : AppCompatActivity() {
                                         laporanVisit = rblaporanVisit,
                                         source = rbSource,
                                         renviSource = rbRenviSource,
-                                        isPay = createPartFromString("pay"),
+                                        isPay = createPartFromString(IS_PAY_STATUS_PAY),
                                         payValue = createPartFromString(realPaymentValue)
                                     )
                                 }
@@ -689,7 +692,7 @@ class NewReportActivity : AppCompatActivity() {
                                         laporanVisit = rblaporanVisit,
                                         source = rbSource,
                                         renviSource = rbRenviSource,
-                                        isPay = createPartFromString("pay_later"),
+                                        isPay = createPartFromString(IS_PAY_STATUS_PAY_LATER),
                                         payDate = createPartFromString(realPaymentDateValue)
                                     )
                                 }
@@ -701,7 +704,7 @@ class NewReportActivity : AppCompatActivity() {
                                         laporanVisit = rblaporanVisit,
                                         source = rbSource,
                                         renviSource = rbRenviSource,
-                                        isPay = createPartFromString("not_pay")
+                                        isPay = createPartFromString(IS_PAY_STATUS_NOT_PAY)
                                     )
                                 }
                             }

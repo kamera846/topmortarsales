@@ -31,7 +31,7 @@
         <item name="android:background">@color/black_300</item>
     </style>
     <style name="Theme.TopMortarSales.TextBaseLine" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
-        <item name="android:textColor">@color/black_400</item>
+        <item name="android:textColor">@color/darkLight</item>
     </style>
 
     <!-- Base text title theme. -->

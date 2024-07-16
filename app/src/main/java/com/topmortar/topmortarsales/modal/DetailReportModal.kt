@@ -7,6 +7,10 @@ import android.util.DisplayMetrics
 import android.view.View
 import android.view.WindowManager
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.IS_PAY_STATUS_NOT_PAY
+import com.topmortar.topmortarsales.commons.IS_PAY_STATUS_PAY
+import com.topmortar.topmortarsales.commons.IS_PAY_STATUS_PAY_LATER
+import com.topmortar.topmortarsales.commons.utils.CurrencyFormat
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.databinding.ModalDetailReportBinding
@@ -62,11 +66,16 @@ class DetailReportModal(private val context: Context) : Dialog(context) {
         titleBar.icClose.visibility = View.VISIBLE
         titleBar.icClose.setOnClickListener { this.dismiss() }
 
-        binding.description.text = data.laporan_visit
-        binding.date.text = data.date_visit
         binding.tvDistance.text = " ${if (data.is_approved == "1") "Approved" else "Menunggu"} | ${data.distance_visit} km dari titik"
+        binding.date.text = data.date_visit
+        setDateReport()
+        binding.description.text = data.laporan_visit
+        setReportType()
         binding.approveMessage.text = data.approve_message.let { if (!it.isNullOrEmpty()) it else "Tidak ada feedback" }
 
+    }
+
+    private fun setDateReport() {
         val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(data.date_visit)
         val dateFormat = if (date != null) {
             val calendar = Calendar.getInstance()
@@ -79,7 +88,37 @@ class DetailReportModal(private val context: Context) : Dialog(context) {
         binding.date.text = " $dateFormat"
 
         if (data.is_approved == "1") binding.icStatus.setImageDrawable(context.getDrawable(R.drawable.checkbox_circle_green))
+    }
 
+    private fun setReportType() {
+        when (data.is_pay) {
+            IS_PAY_STATUS_PAY -> {
+                binding.reportTypeContainer.visibility = View.VISIBLE
+                binding.reportTypeTitle.text = "Tagihan yang dibayarkan"
+                val formattedCurrency = data.pay_value.let {
+                    if (it.isNullOrEmpty()) it
+                    else CurrencyFormat.format(it.toDouble())
+                }
+                binding.reportTypeDescription.text = formattedCurrency
+            }
+            IS_PAY_STATUS_PAY_LATER -> {
+                binding.reportTypeContainer.visibility = View.VISIBLE
+                binding.reportTypeTitle.text = "Tanggal yang dijanjikan"
+                val formattedDate = data.pay_date.let {
+                    if (it.isNullOrEmpty()) it
+                    else DateFormat.format(it, outputFormat = "EEEE, dd MMMM yyyy")
+                }
+                binding.reportTypeDescription.text = formattedDate
+            }
+            IS_PAY_STATUS_NOT_PAY -> {
+                binding.reportTypeContainer.visibility = View.VISIBLE
+                binding.reportTypeTitle.text = "Tagihan yang dibayarkan"
+                binding.reportTypeDescription.text = "Toko tidak membayar"
+            }
+            else -> {
+                binding.reportTypeContainer.visibility = View.GONE
+            }
+        }
     }
 
 }
