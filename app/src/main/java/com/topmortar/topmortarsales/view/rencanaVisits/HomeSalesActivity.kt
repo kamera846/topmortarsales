@@ -311,46 +311,11 @@ class HomeSalesActivity : AppCompatActivity() {
 
     }
 
-    private fun navigateToTargetVisit() {
-        val intent = Intent(this, RencanaVisitActivity::class.java)
-        startActivity(intent)
-    }
-
-    private fun navigateToTargetVisitPenagihan() {
-        val intent = Intent(this, RencanaVisitPenagihanActivity::class.java)
-        startActivity(intent)
-    }
-
-    private fun navigateToAllStore() {
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
-    }
-
-    private fun navigateToRegisterStore() {
-        val intent = Intent(this, NewRoomChatFormActivity::class.java)
-        startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
-    }
-
-    private fun navigateToRegisterBasecamp() {
-        val intent = Intent(this, AddBaseCampActivity::class.java)
-        startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
-    }
-
-    private fun navigateToMyProfile() {
-        val intent = Intent(this, UserProfileActivity::class.java)
-        startActivity(intent)
-    }
-
     private fun navigateToListReport() {
         val intent = Intent(this, ReportsActivity::class.java)
         intent.putExtra(CONST_USER_ID, userId)
         intent.putExtra(CONST_FULL_NAME, userFullName)
         intent.putExtra(CONST_USER_LEVEL, AUTH_LEVEL_SALES)
-        startActivity(intent)
-    }
-
-    private fun navigateToProduct() {
-        val intent = Intent(this, ProductsActivity::class.java)
         startActivity(intent)
     }
 
@@ -505,21 +470,6 @@ class HomeSalesActivity : AppCompatActivity() {
             }
 
         }, 1000)
-    }
-
-    private fun logoutConfirmation() {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Konfirmasi Logout")
-            .setMessage("Apakah anda yakin ingin keluar?")
-            .setNegativeButton("Tidak") { dialog, _ -> dialog.dismiss() }
-            .setPositiveButton("Iya") { dialog, _ ->
-
-                dialog.dismiss()
-                logoutHandler()
-
-            }
-        val dialog = builder.create()
-        dialog.show()
     }
 
     private fun missingDataHandler() {
@@ -745,7 +695,7 @@ class HomeSalesActivity : AppCompatActivity() {
                                         }
                                     builder.show()
                                 } else {
-                                    executeAbsentReport(shortDistance)
+                                    executeAbsentReport()
                                 }
 
                             } else {
@@ -793,7 +743,7 @@ class HomeSalesActivity : AppCompatActivity() {
         }
     }
 
-    private fun executeAbsentReport(shortDistance: String = "") {
+    private fun executeAbsentReport() {
 
         if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
 
@@ -1030,7 +980,7 @@ class HomeSalesActivity : AppCompatActivity() {
             try {
 
                 val response = if (userKind == USER_KIND_PENAGIHAN) apiService.getContactsByDistributor(distributorID = userDistributorId ?: "0")
-                    else apiService.getContacts(cityId = userCity ?: "0", distributorID = userDistributorId ?: "0")
+                else apiService.getContacts(cityId = userCity ?: "0", distributorID = userDistributorId ?: "0")
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -1142,15 +1092,15 @@ class HomeSalesActivity : AppCompatActivity() {
         }
         // Number 1 is distributor ID for Center Distributor (Special case for Top Mortar Mitra)
 //        if (userDistributorId != "1") {
-            listItem.add(
-                HomeMenuSalesModel(
-                    icon = R.drawable.gudang_white,
-                    bgColor = R.drawable.bg_blue_silver_lake_round_8,
-                    title = "Semua Toko",
-                    target = MainActivity::class.java,
-                    isLocked = isLocked
-                )
+        listItem.add(
+            HomeMenuSalesModel(
+                icon = R.drawable.gudang_white,
+                bgColor = R.drawable.bg_blue_silver_lake_round_8,
+                title = "Semua Toko",
+                target = MainActivity::class.java,
+                isLocked = isLocked
             )
+        )
 //        }
 
         setMenuItemAdapter(binding.rvVisit, listItem)

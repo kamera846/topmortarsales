@@ -4,6 +4,7 @@ package com.topmortar.topmortarsales.view.reports
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.DatePickerDialog
 import android.app.ProgressDialog
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -34,6 +35,9 @@ import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
 import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.IS_PAY_STATUS_NOT_PAY
+import com.topmortar.topmortarsales.commons.IS_PAY_STATUS_PAY
+import com.topmortar.topmortarsales.commons.IS_PAY_STATUS_PAY_LATER
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAX_REPORT_DISTANCE
 import com.topmortar.topmortarsales.commons.NORMAL_REPORT
@@ -51,6 +55,7 @@ import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -60,6 +65,9 @@ import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityNewReportBinding
 import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.Calendar
 
 @SuppressLint("SetTextI18n")
 class NewReportActivity : AppCompatActivity() {
@@ -71,21 +79,28 @@ class NewReportActivity : AppCompatActivity() {
 
     private val userId get() = sessionManager.userID()
     private val username get() = sessionManager.userName()
+    private val userKind get() = sessionManager.userKind()
     private val userDistributorId get() = sessionManager.userDistributor()
 
     private val msgMaxLines = 6
     private val msgMaxLength = 500
 
+    private var isSalesOrPenagihan = false
     private var isDistanceToLong = false
     private var isBaseCamp = false
+    private var isReportPaymentStatus = false
     private var reportType: String = "toko"
     private var id: String = ""
+    private var realPaymentValue = ""
+    private var selectedDate: Calendar = Calendar.getInstance()
+    private var realPaymentDateValue = ""
     private val idUser get() = sessionManager.userID().toString()
     private var name: String = ""
     private var coordinate: String = ""
     private lateinit var iReportSource: String
     private lateinit var iRenviSource: String
 
+    private lateinit var datePicker: DatePickerDialog
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -112,6 +127,8 @@ class NewReportActivity : AppCompatActivity() {
 
         iReportSource = intent.getStringExtra(REPORT_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
         iRenviSource = intent.getStringExtra(RENVI_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
+
+        checkLocationPermission()
     }
 
     private fun checkLocationPermission() {
@@ -160,6 +177,7 @@ class NewReportActivity : AppCompatActivity() {
     }
 
     private fun initContent() {
+        isSalesOrPenagihan = userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN
         binding.titleBarLight.tvTitleBar.text = "Buat Laporan"
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -185,6 +203,45 @@ class NewReportActivity : AppCompatActivity() {
             }
         }
 
+        if (isSalesOrPenagihan) {
+            binding.reportPaymentContainer.visibility = View.VISIBLE
+            binding.reportPaymentTrueContainer.visibility = View.VISIBLE
+
+            binding.etPaymentYes.addTextChangedListener(object: TextWatcher {
+                private var current = ""
+
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+                override fun afterTextChanged(s: Editable?) {
+                    if (s.toString() != current) {
+                        binding.etPaymentYes.removeTextChangedListener(this)
+
+                        val cleanString = s.toString().replace("""[Rp,.]""".toRegex(), "")
+                        val parsed = cleanString.toDoubleOrNull() ?: 0.0
+
+                        // Custom format without currency symbol and unnecessary zeros
+                        val decimalFormatSymbols = DecimalFormatSymbols().apply {
+                            groupingSeparator = ','
+                        }
+                        val decimalFormat = DecimalFormat("#,###", decimalFormatSymbols)
+                        val formatted = decimalFormat.format(parsed)
+
+                        current = formatted
+                        realPaymentValue = getCurrencyNormalValue(formatted).toString()
+                        binding.etPaymentYes.setText(formatted)
+                        binding.etPaymentYes.setSelection(formatted.length)
+
+                        binding.etPaymentYes.addTextChangedListener(this)
+                    }
+                }
+
+            })
+
+            changeReportPaymentTypeUI()
+        }
+
         initClickHandler()
         Handler(Looper.getMainLooper()).postDelayed({
 
@@ -195,10 +252,105 @@ class NewReportActivity : AppCompatActivity() {
         }, 500)
     }
 
+    private fun getCurrencyNormalValue(formattedString: String): Long {
+        val cleanString = formattedString.replace("""[,.]""".toRegex(), "")
+        return cleanString.toLongOrNull() ?: -1
+    }
+
+    private fun toggleReportPayment(state: Boolean? = null) {
+        isReportPaymentStatus = state ?: !isReportPaymentStatus
+        changeReportPaymentTypeUI()
+    }
+
+    private fun changeReportPaymentTypeUI() {
+        binding.etPaymentYesContainer.visibility = View.GONE
+        binding.etPaymentLaterContainer.visibility = View.GONE
+        binding.rgReportPaymentTrue.clearCheck()
+        binding.etPaymentYes.setText("0")
+        binding.etPaymentYes.setSelection(binding.etPaymentYes.length())
+        realPaymentValue = ""
+        binding.etPaymentLater.setText("")
+        realPaymentDateValue = ""
+
+        if (!isReportPaymentStatus) {
+            binding.reportPaymentFalse.setBackgroundResource(R.drawable.bg_primary_round_8)
+            binding.reportPaymentFalse.setTextColor(getColor(R.color.white))
+            binding.reportPaymentTrue.setBackgroundResource(R.drawable.et_background_clickable)
+            if (!customUtility.isDarkMode()) binding.reportPaymentTrue.setTextColor(getColor(R.color.black_200))
+            else binding.reportPaymentTrue.setTextColor(getColor(R.color.black_600))
+            binding.reportPaymentTrueContainer.visibility = View.GONE
+        } else {
+            binding.reportPaymentTrue.setBackgroundResource(R.drawable.bg_primary_round_8)
+            binding.reportPaymentTrue.setTextColor(getColor(R.color.white))
+            binding.reportPaymentFalse.setBackgroundResource(R.drawable.et_background_clickable)
+            if (!customUtility.isDarkMode()) binding.reportPaymentFalse.setTextColor(getColor(R.color.black_200))
+            else binding.reportPaymentFalse.setTextColor(getColor(R.color.black_600))
+            binding.reportPaymentTrueContainer.visibility = View.VISIBLE
+        }
+    }
+
     private fun initClickHandler() {
         binding.titleBarLight.icBack.setOnClickListener { finish() }
         binding.btnReport.setOnClickListener { submitValidation() }
         binding.lnrDistance.setOnClickListener { calculateDistance() }
+        binding.reportPaymentTrue.setOnClickListener { toggleReportPayment(true) }
+        binding.reportPaymentFalse.setOnClickListener { toggleReportPayment(false) }
+        binding.rgReportPaymentTrue.setOnCheckedChangeListener { _, checkedId ->
+            binding.etPaymentYes.setText("0")
+            binding.etPaymentYes.setSelection(binding.etPaymentYes.length())
+            realPaymentValue = ""
+            binding.etPaymentLater.setText("")
+            realPaymentDateValue = ""
+            binding.rgReportPaymentError.visibility = View.GONE
+
+            when (checkedId) {
+                R.id.rbPayYes -> {
+                    binding.etPaymentYesContainer.visibility = View.VISIBLE
+                    binding.etPaymentLaterContainer.visibility = View.GONE
+                } R.id.rbNotPay -> {
+                    binding.etPaymentYesContainer.visibility = View.GONE
+                    binding.etPaymentLaterContainer.visibility = View.GONE
+                } R.id.rbPayLater -> {
+                    binding.etPaymentYesContainer.visibility = View.GONE
+                    binding.etPaymentLaterContainer.visibility = View.VISIBLE
+                }
+            }
+        }
+        binding.etPaymentLater.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                setDatePickerDialog()
+                datePicker.show()
+                binding.etPaymentLater.setSelection(binding.etPaymentLater.length())
+            } else binding.etPaymentLater.clearFocus()
+        }
+    }
+
+    private fun setDatePickerDialog() {
+
+        datePicker = DatePickerDialog(
+            this,
+            { _, year, month, day ->
+                selectedDate.set(Calendar.YEAR, year)
+                selectedDate.set(Calendar.MONTH, month)
+                selectedDate.set(Calendar.DAY_OF_MONTH, day)
+
+                // Do something with the selected date
+                val formattedDate = DateFormat.format(selectedDate)
+                realPaymentDateValue =  DateFormat.format(selectedDate, "yyyy-MM-dd")
+                binding.etPaymentLater.setText(formattedDate)
+                binding.etPaymentLater.clearFocus()
+            },
+            selectedDate.get(Calendar.YEAR),
+            selectedDate.get(Calendar.MONTH),
+            selectedDate.get(Calendar.DAY_OF_MONTH)
+        )
+
+        datePicker.datePicker.minDate = System.currentTimeMillis() - 1000
+
+        datePicker.setOnDismissListener {
+            binding.etPaymentLater.clearFocus()
+        }
+
     }
 
     private fun etMessageListener() {
@@ -418,8 +570,35 @@ class NewReportActivity : AppCompatActivity() {
             etMessage.requestFocus()
             return false
         }
+        if (isReportPaymentStatus) {
+            val checkedRadio = when (binding.rgReportPaymentTrue.checkedRadioButtonId) {
+                R.id.rbPayYes -> IS_PAY_STATUS_PAY
+                R.id.rbPayLater -> IS_PAY_STATUS_PAY_LATER
+                R.id.rbNotPay -> IS_PAY_STATUS_NOT_PAY
+                else -> null
+            }
+            if (checkedRadio == null) {
+                binding.rgReportPaymentTrue.requestFocus()
+                binding.rgReportPaymentError.visibility = View.VISIBLE
+                return false
+            } else if (checkedRadio == IS_PAY_STATUS_PAY && (realPaymentValue.isEmpty() || realPaymentValue == "0")) {
+                binding.etPaymentYes.error = "Jumlah yang di bayarkan harus lebih dari 0"
+                binding.etPaymentYes.requestFocus()
+                return false
+            } else if (checkedRadio == IS_PAY_STATUS_PAY_LATER && realPaymentDateValue.isEmpty()) {
+                binding.etPaymentLater.error = "Silahkan pilih tanggal terlebih dahulu"
+                binding.etPaymentLater.requestFocus()
+                return false
+            }
+        }
+
         etMessage.error = null
         etMessage.clearFocus()
+        binding.rgReportPaymentTrue.clearFocus()
+        binding.etPaymentYes.error = null
+        binding.etPaymentYes.clearFocus()
+        binding.etPaymentLater.error = null
+        binding.etPaymentLater.clearFocus()
         return true
     }
 
@@ -434,7 +613,27 @@ class NewReportActivity : AppCompatActivity() {
 
 //        Handler(Looper.getMainLooper()).postDelayed({
 //            Toast.makeText(this@NewReportActivity, "Berhasil membuat laporan", TOAST_SHORT).show()
-//            println("Form Data: $id : $idUser : ${binding.etDistance.text} : ${binding.etMessage.text} : $iReportSource : $iRenviSource")
+//            println("===== Form Data =====")
+//            println("Form data id: $id")
+//            println("Form data id user: $idUser")
+//            println("Form data distance: ${binding.etDistance.text}")
+//            println("Form data message: ${binding.etMessage.text}")
+//            println("Form data reportSource: $iReportSource")
+//            println("Form data renviSource: $iRenviSource")
+//            if (!isReportPaymentStatus) {
+//                println("Form data is_pay: 0")
+//            } else {
+//                when (binding.rgReportPaymentTrue.checkedRadioButtonId) {
+//                    R.id.rbPayYes -> {
+//                        println("Form data is_pay: pay")
+//                        println("Form data pay_value: $realPaymentValue")
+//                    }
+//                    R.id.rbPayLater -> {
+//                        println("Form data is_pay: pay_later")
+//                        println("Form data pay_date: $realPaymentDateValue")
+//                    } else -> println("Form data is_pay: not_pay")
+//                }
+//            }
 //            submitDialog.dismiss()
 //            loadingSubmit(false)
 //        }, 1000)
@@ -460,14 +659,57 @@ class NewReportActivity : AppCompatActivity() {
                         laporanVisit = rblaporanVisit,
                         source = rbSource,
                         renviSource = rbRenviSource,
-                    ) else -> apiService.makeVisitReport(
-                        idContact = rbidContact,
-                        idUser = rbidUser,
-                        distanceVisit = rbdistanceVisit,
-                        laporanVisit = rblaporanVisit,
-                        source = rbSource,
-                        renviSource = rbRenviSource,
-                    )
+                    ) else -> {
+                        if (!isReportPaymentStatus) {
+                            apiService.makeVisitReport(
+                                idContact = rbidContact,
+                                idUser = rbidUser,
+                                distanceVisit = rbdistanceVisit,
+                                laporanVisit = rblaporanVisit,
+                                source = rbSource,
+                                renviSource = rbRenviSource,
+                                isPay = createPartFromString("0")
+                            )
+                        } else {
+                            when (binding.rgReportPaymentTrue.checkedRadioButtonId) {
+                                R.id.rbPayYes -> {
+                                    apiService.makeVisitReportPaymentYes(
+                                        idContact = rbidContact,
+                                        idUser = rbidUser,
+                                        distanceVisit = rbdistanceVisit,
+                                        laporanVisit = rblaporanVisit,
+                                        source = rbSource,
+                                        renviSource = rbRenviSource,
+                                        isPay = createPartFromString(IS_PAY_STATUS_PAY),
+                                        payValue = createPartFromString(realPaymentValue)
+                                    )
+                                }
+                                R.id.rbPayLater -> {
+                                    apiService.makeVisitReportPaymentLater(
+                                        idContact = rbidContact,
+                                        idUser = rbidUser,
+                                        distanceVisit = rbdistanceVisit,
+                                        laporanVisit = rblaporanVisit,
+                                        source = rbSource,
+                                        renviSource = rbRenviSource,
+                                        isPay = createPartFromString(IS_PAY_STATUS_PAY_LATER),
+                                        payDate = createPartFromString(realPaymentDateValue)
+                                    )
+                                }
+                                else -> {
+                                    apiService.makeVisitReport(
+                                        idContact = rbidContact,
+                                        idUser = rbidUser,
+                                        distanceVisit = rbdistanceVisit,
+                                        laporanVisit = rblaporanVisit,
+                                        source = rbSource,
+                                        renviSource = rbRenviSource,
+                                        isPay = createPartFromString(IS_PAY_STATUS_NOT_PAY)
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
 
                 if (response.isSuccessful) {
@@ -508,7 +750,6 @@ class NewReportActivity : AppCompatActivity() {
 
                 }
 
-
             } catch (e: Exception) {
 
                 handleMessage(this@NewReportActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
@@ -541,7 +782,7 @@ class NewReportActivity : AppCompatActivity() {
     }
     override fun onStart() {
         super.onStart()
-        checkLocationPermission()
+//        checkLocationPermission()
         Handler(Looper.getMainLooper()).postDelayed({
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(

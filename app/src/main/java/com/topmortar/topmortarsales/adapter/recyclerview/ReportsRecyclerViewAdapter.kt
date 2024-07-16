@@ -3,14 +3,13 @@ package com.topmortar.topmortarsales.adapter.recyclerview
 import android.app.Activity
 import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.IS_PAY_STATUS_PAY
+import com.topmortar.topmortarsales.commons.IS_PAY_STATUS_PAY_LATER
 import com.topmortar.topmortarsales.commons.LAYOUT_GRID
-import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.utils.DateFormat
-import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.databinding.ItemReportsBinding
 import com.topmortar.topmortarsales.model.ReportVisitModel
@@ -49,8 +48,8 @@ class ReportsRecyclerViewAdapter : RecyclerView.Adapter<ReportsRecyclerViewAdapt
 
         fun bind(item: ReportVisitModel, position: Int) {
             binding.description.text = item.laporan_visit
-            if (item.is_approved == "1") binding.icStatus.setImageDrawable(context!!.getDrawable(R.drawable.checkbox_circle_green))
-            else binding.icStatus.setImageDrawable(context!!.getDrawable(R.drawable.checkbox_circle_light))
+            if (item.is_approved == "1") binding.icStatus.setImageResource(R.drawable.checkbox_circle_green)
+            else binding.icStatus.setImageResource(R.drawable.checkbox_circle_light)
 
             val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(item.date_visit)
             val dateFormat = if (date != null) {
@@ -79,6 +78,13 @@ class ReportsRecyclerViewAdapter : RecyclerView.Adapter<ReportsRecyclerViewAdapt
                 if (position == 0) layoutParams.topMargin = convertDpToPx(16, context as Activity)
                 if (position == listItem.size - 1) layoutParams.bottomMargin = convertDpToPx(16, context as Activity)
             }
+
+            binding.dollarIndicator.setImageResource(R.drawable.dollar_circle_light)
+            binding.dateIndicator.setImageResource(R.drawable.date_light)
+            binding.commentIndicator.setImageResource(R.drawable.comment_light)
+            if (item.is_pay == IS_PAY_STATUS_PAY) binding.dollarIndicator.setImageResource(R.drawable.dollar_circle_green)
+            if (item.is_pay == IS_PAY_STATUS_PAY_LATER) binding.dateIndicator.setImageResource(R.drawable.date_yellow)
+            if (item.approve_message != null) binding.commentIndicator.setImageResource(R.drawable.comment_blue)
 
             itemView.setOnClickListener {
                 listener?.onItemClick(item)

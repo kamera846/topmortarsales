@@ -67,20 +67,63 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="16dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="16dp"
-        android:layout_marginTop="8dp"
-        android:textSize="16sp"
+        android:paddingVertical="8dp"
+        android:textSize="14sp"
         android:text="@string/lorem_desc"
         android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
     <LinearLayout
+        android:id="@+id/reportTypeContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <!-- Feedback Separator -->
+        <LinearLayout
+            android:id="@+id/reportTypeSeparator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
-        <!-- Date Separator -->
+            <TextView
+                android:id="@+id/reportTypeTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tagihan Dibayarkan"
+                android:layout_marginEnd="8dp"
+                android:textSize="14sp"
+                android:theme="@style/Theme.TopMortarSales.TextBaseLine" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:theme="@style/Theme.TopMortarSales.BaseLine"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/reportTypeDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="8dp"
+            android:textSize="14sp"
+            android:text="Rp. 500.000"
+            android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/feedbackContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:orientation="vertical">
+
+        <!-- Feedback Separator -->
         <LinearLayout
             android:id="@+id/date_separator"
             android:layout_width="match_parent"
@@ -98,7 +141,7 @@
                 android:theme="@style/Theme.TopMortarSales.TextBaseLine" />
 
             <View
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="1dp"
                 android:layout_weight="1"
                 android:theme="@style/Theme.TopMortarSales.BaseLine"/>
@@ -110,10 +153,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingHorizontal="16dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="16dp"
-            android:layout_marginTop="8dp"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:text="@string/lorem_desc"
             android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 

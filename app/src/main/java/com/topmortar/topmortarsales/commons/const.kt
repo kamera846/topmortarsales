@@ -208,6 +208,10 @@ const val RENVI_WEEKLY = "weekly"
 const val LAYOUT_GRID = "layout_grid"
 const val LAYOUT_ROW = "layout_row"
 
+const val IS_PAY_STATUS_PAY = "pay"
+const val IS_PAY_STATUS_PAY_LATER = "pay_later"
+const val IS_PAY_STATUS_NOT_PAY = "not_pay"
+
 /*
     User Kind
  */

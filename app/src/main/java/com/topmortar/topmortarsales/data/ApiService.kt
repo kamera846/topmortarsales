@@ -420,7 +420,32 @@ interface ApiService {
         @Part("distance_visit") distanceVisit: RequestBody,
         @Part("laporan_visit") laporanVisit: RequestBody,
         @Part("source") source: RequestBody? = createPartFromString(NORMAL_REPORT),
-        @Part("type_renvi") renviSource: RequestBody? = createPartFromString(NORMAL_REPORT)
+        @Part("type_renvi") renviSource: RequestBody? = createPartFromString(NORMAL_REPORT),
+        @Part("is_pay") isPay: RequestBody,
+    ): Response<ResponseReportVisit>
+    @Multipart
+    @POST(VISIT)
+    suspend fun makeVisitReportPaymentYes(
+        @Part("id_contact") idContact: RequestBody,
+        @Part("id_user") idUser: RequestBody,
+        @Part("distance_visit") distanceVisit: RequestBody,
+        @Part("laporan_visit") laporanVisit: RequestBody,
+        @Part("source") source: RequestBody? = createPartFromString(NORMAL_REPORT),
+        @Part("type_renvi") renviSource: RequestBody? = createPartFromString(NORMAL_REPORT),
+        @Part("is_pay") isPay: RequestBody,
+        @Part("pay_value") payValue: RequestBody,
+    ): Response<ResponseReportVisit>
+    @Multipart
+    @POST(VISIT)
+    suspend fun makeVisitReportPaymentLater(
+        @Part("id_contact") idContact: RequestBody,
+        @Part("id_user") idUser: RequestBody,
+        @Part("distance_visit") distanceVisit: RequestBody,
+        @Part("laporan_visit") laporanVisit: RequestBody,
+        @Part("source") source: RequestBody? = createPartFromString(NORMAL_REPORT),
+        @Part("type_renvi") renviSource: RequestBody? = createPartFromString(NORMAL_REPORT),
+        @Part("is_pay") isPay: RequestBody,
+        @Part("pay_date") payDate: RequestBody,
     ): Response<ResponseReportVisit>
 
     @GET(VISIT)

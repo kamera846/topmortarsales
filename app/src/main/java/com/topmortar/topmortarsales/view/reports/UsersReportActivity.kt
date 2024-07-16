@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.UsersRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
@@ -216,6 +217,7 @@ class UsersReportActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCl
         intent.putExtra(CONST_CONTACT_ID, iContactID)
         intent.putExtra(CONST_USER_ID, data?.id_user)
         intent.putExtra(CONST_NAME, iContactName)
+        intent.putExtra(CONST_FULL_NAME, data?.full_name)
 
         startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
     }

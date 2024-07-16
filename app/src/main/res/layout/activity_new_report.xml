@@ -40,6 +40,81 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
+                <!-- Report Payment -->
+                <LinearLayout
+                    android:visibility="gone"
+                    android:id="@+id/reportPaymentContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tvTypeReport"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tipe Laporan"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:visibility="gone"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="@string/required_sign"
+                            android:textColor="@color/primary"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:layout_marginLeft="-4dp"
+                        android:layout_marginRight="-4dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/reportPaymentFalse"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Normal"
+                            android:textAllCaps="true"
+                            android:gravity="center"
+                            android:paddingHorizontal="16dp"
+                            android:paddingVertical="8dp"
+                            android:layout_marginHorizontal="4dp"
+                            android:background="@drawable/et_background_clickable"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                        <TextView
+                            android:id="@+id/reportPaymentTrue"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Penagihan"
+                            android:textAllCaps="true"
+                            android:gravity="center"
+                            android:paddingHorizontal="16dp"
+                            android:paddingVertical="8dp"
+                            android:layout_marginHorizontal="4dp"
+                            android:textColor="@color/white"
+                            android:background="@drawable/bg_primary_round_8"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
                 <!-- Name -->
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -164,7 +239,7 @@
                         android:text="Your error"
                         android:textColor="@color/primary"
                         android:textStyle="italic"
-                        android:textSize="16sp"/>
+                        android:textSize="12sp"/>
 
                 </LinearLayout>
 
@@ -227,6 +302,214 @@
                         android:layout_gravity="end"
                         android:textColor="@color/primary"
                         android:text="0/500" />
+
+                </LinearLayout>
+
+                <!-- reportPaymentTrueContainer -->
+                <LinearLayout
+                    android:visibility="gone"
+                    android:id="@+id/reportPaymentTrueContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tvPaymentOptions"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Apakah toko membayar tagihan?"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:visibility="visible"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="@string/required_sign"
+                            android:textColor="@color/primary"/>
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:visibility="gone"
+                        android:id="@+id/rgReportPaymentError"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Silahkan pilih salah satu opsi dibawah"
+                        android:textColor="@color/primary"
+                        android:textStyle="italic"
+                        android:textSize="12sp"/>
+
+                    <RadioGroup
+                        android:id="@+id/rgReportPaymentTrue"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp">
+
+                        <RadioButton
+                            android:id="@+id/rbPayYes"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:gravity="center_vertical"
+                            android:layout_marginStart="-6dp"
+                            android:text="Iya"/>
+
+                        <RadioButton
+                            android:id="@+id/rbNotPay"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:gravity="center_vertical"
+                            android:layout_marginStart="-6dp"
+                            android:text="Tidak"/>
+
+                        <RadioButton
+                            android:id="@+id/rbPayLater"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:gravity="center_vertical"
+                            android:layout_marginStart="-6dp"
+                            android:text="Tidak, janji bayar nanti"/>
+
+                    </RadioGroup>
+
+                    <!-- etPaymentYesContainer -->
+                    <LinearLayout
+                        android:id="@+id/etPaymentYesContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/tvPaymentYes"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Input nominal yang dibayarkan"
+                                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                                android:textSize="16sp"
+                                android:textStyle="bold"/>
+
+                            <TextView
+                                android:visibility="visible"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="4dp"
+                                android:text="@string/required_sign"
+                                android:textColor="@color/primary"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:gravity="center_vertical"
+                            android:background="@drawable/et_background"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:text="Rp"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:paddingHorizontal="12dp"
+                                android:gravity="center"
+                                android:background="@drawable/et_background_disabled"
+                                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                            <EditText
+                                android:id="@+id/etPaymentYes"
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                                android:textColorHint="@color/black_600"
+                                android:maxLines="1"
+                                android:text="0"
+                                android:hint="Input nilai rupiah"
+                                android:inputType="numberDecimal"
+                                android:textSize="18sp"
+                                android:textStyle="bold"
+                                android:paddingHorizontal="12dp"
+                                android:background="@android:color/transparent"
+                                android:outlineProvider="none"/>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!-- etPaymentLaterContainer -->
+                    <LinearLayout
+                        android:id="@+id/etPaymentLaterContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="8dp"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:id="@+id/tvPaymentLater"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Input tanggal janji"
+                                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                                android:textSize="16sp"
+                                android:textStyle="bold"/>
+
+                            <TextView
+                                android:visibility="visible"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="4dp"
+                                android:text="@string/required_sign"
+                                android:textColor="@color/primary"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:gravity="center_vertical"
+                            android:background="@drawable/et_background"
+                            android:orientation="horizontal">
+
+                            <ImageView
+                                android:layout_width="48dp"
+                                android:layout_height="48dp"
+                                android:background="@drawable/et_background_disabled"
+                                android:padding="12dp"
+                                android:src="@drawable/date_black"/>
+
+                            <EditText
+                                android:id="@+id/etPaymentLater"
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                                android:textColorHint="@color/black_600"
+                                android:hint="Tekan untuk memilih tanggal"
+                                android:textSize="14sp"
+                                android:paddingHorizontal="12dp"
+                                android:background="@android:color/transparent"
+                                android:outlineProvider="none"/>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
