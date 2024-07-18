@@ -133,7 +133,6 @@ class HomeCourierActivity : AppCompatActivity() {
         val userDistributorIds = sessionManager.userDistributor()
         firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-011")
         apiService = HttpClient.create()
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         customUtility = CustomUtility(this)
 
         // Set User Absent Level (TEMP)
@@ -187,15 +186,21 @@ class HomeCourierActivity : AppCompatActivity() {
 
     private fun checkMockLocation() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+            fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
             fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
                 Log.d("Detect Mock", "Succeed get lastLocation")
                 if (location == null) {
                     Log.d("Detect Mock", "Location null")
                     checkLocationPermission()
                 } else {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && location.isMock) Log.d("Detect Mock", "Is Mock")
-                    else if (location.isFromMockProvider) Log.d("Detect Mock", "Is From Mock")
-                    else initView()
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && location.isMock) {
+                        Log.d("Detect Mock", "Is Mock")
+                        showDialogIsMock()
+                    } else if (location.isFromMockProvider) {
+                        Log.d("Detect Mock", "Is From Mock")
+                        showDialogIsMock()
+                    } else initView()
                 }
             }.addOnFailureListener {
                 Log.d("Detect Mock", "Failed get lastLocation. Err: ${it.message}. Stacktrace: ${it.stackTrace}")
@@ -204,7 +209,24 @@ class HomeCourierActivity : AppCompatActivity() {
             }.addOnCompleteListener {
                 Log.d("Detect Mock", "Completed get lastLocation")
             }
+        } else {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
         }
+    }
+
+    private fun showDialogIsMock() {
+        val serviceIntent = Intent(this, TrackingService::class.java)
+        stopService(serviceIntent)
+
+        AlertDialog.Builder(this)
+            .setMessage("Sistem mendeteksi lokasi yang tidak asli. Nonaktifkan mode (Mock Location) pada pengaturan, lalu tutup aplikasi dan nyalakan ulang lokasi anda")
+            .setCancelable(false)
+            .setPositiveButton("Pengaturan") { _, _ ->
+                // Buka pengaturan untuk mengaktifkan GPS
+                val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+                startActivityForResult(intent, LOCATION_PERMISSION_REQUEST_CODE)
+            }
+            .show()
     }
 
     private fun showGpsDisabledDialog() {
@@ -335,11 +357,11 @@ class HomeCourierActivity : AppCompatActivity() {
                                 Log.d("ABSENT COURIER", "Belum absen pagi")
                             } else {
 
-                                val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
-                                serviceIntent.putExtra("userId", userId)
-                                serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-004-$userName")
-                                serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
-                                this@HomeCourierActivity.startService(serviceIntent)
+                                val serviceIntentDD = Intent(this@HomeCourierActivity, TrackingService::class.java)
+                                serviceIntentDD.putExtra("userId", userId)
+                                serviceIntentDD.putExtra("userDistributorId", userDistributorId ?: "-start-004-$userName")
+                                serviceIntentDD.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
+                                this@HomeCourierActivity.startService(serviceIntentDD)
                                 Log.d("ABSENT COURIER", "Sudah absen pagi")
                                 isAbsentMorningNow = true
 
@@ -458,6 +480,7 @@ class HomeCourierActivity : AppCompatActivity() {
                 urlUtility.requestLocationUpdate()
 
                 if (!urlUtility.isUrl(mapsUrl) && mapsUrl.isNotEmpty()) {
+                    fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
                     fusedLocationClient.lastLocation.addOnSuccessListener { location: Location ->
 
                         // Courier Location

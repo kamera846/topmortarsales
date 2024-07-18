@@ -84,6 +84,7 @@ import com.topmortar.topmortarsales.model.BaseCampModel
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.HomeMenuSalesModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
+import com.topmortar.topmortarsales.view.MainActivity
 import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.SplashScreenActivity
 import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
@@ -174,9 +175,13 @@ class HomeSalesActivity : AppCompatActivity() {
                     Log.d("Detect Mock", "Location null")
                     checkLocationPermission()
                 } else {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && location.isMock) Log.d("Detect Mock", "Is Mock")
-                    else if (location.isFromMockProvider) Log.d("Detect Mock", "Is From Mock")
-                    else initView()
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && location.isMock) {
+                        Log.d("Detect Mock", "Is Mock")
+                        showDialogIsMock()
+                    } else if (location.isFromMockProvider) {
+                        Log.d("Detect Mock", "Is From Mock")
+                        showDialogIsMock()
+                    } else initView()
                 }
             }.addOnFailureListener {
                 Log.d("Detect Mock", "Failed get lastLocation. Err: ${it.message}. Stacktrace: ${it.stackTrace}")
@@ -185,7 +190,24 @@ class HomeSalesActivity : AppCompatActivity() {
             }.addOnCompleteListener {
                 Log.d("Detect Mock", "Completed get lastLocation")
             }
+        } else {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
         }
+    }
+
+    private fun showDialogIsMock() {
+        val serviceIntent = Intent(this, TrackingService::class.java)
+        stopService(serviceIntent)
+
+        AlertDialog.Builder(this)
+            .setMessage("Sistem mendeteksi lokasi yang tidak asli, nonaktifkan mode (Mock Location) pada pengaturan lalu matikan dan nyalakan ulang lokasi anda")
+            .setCancelable(false)
+            .setPositiveButton("Pengaturan") { _, _ ->
+                // Buka pengaturan untuk mengaktifkan GPS
+                val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+                startActivityForResult(intent, LOCATION_PERMISSION_REQUEST_CODE)
+            }
+            .show()
     }
 
     private fun showGpsDisabledDialog() {
@@ -1091,11 +1113,11 @@ class HomeSalesActivity : AppCompatActivity() {
                 icon = R.drawable.gudang_white,
                 bgColor = R.drawable.bg_blue_silver_lake_round_8,
                 title = "Semua Toko",
-//                target = MainActivity::class.java,
-                action = {
-                    val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
-                    this@HomeSalesActivity.stopService(serviceIntent)
-                },
+                target = MainActivity::class.java,
+//                action = {
+//                    val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
+//                    this@HomeSalesActivity.stopService(serviceIntent)
+//                },
                 isLocked = isLocked
             )
         )
