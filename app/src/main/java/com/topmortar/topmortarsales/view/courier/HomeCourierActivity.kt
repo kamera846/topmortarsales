@@ -160,7 +160,7 @@ class HomeCourierActivity : AppCompatActivity() {
         }
         setupDialogSearch()
 
-        checkLocationPermission()
+//        checkLocationPermission()
         CustomUtility(this).setUserStatusOnline(true, userDistributorId ?: "-custom-008", userId ?: "")
     }
 
@@ -181,7 +181,29 @@ class HomeCourierActivity : AppCompatActivity() {
             // GPS tidak aktif, munculkan dialog untuk mengaktifkannya
             showGpsDisabledDialog()
         } else {
-            initView()
+            checkMockLocation()
+        }
+    }
+
+    private fun checkMockLocation() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                Log.d("Detect Mock", "Succeed get lastLocation")
+                if (location == null) {
+                    Log.d("Detect Mock", "Location null")
+                    checkLocationPermission()
+                } else {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && location.isMock) Log.d("Detect Mock", "Is Mock")
+                    else if (location.isFromMockProvider) Log.d("Detect Mock", "Is From Mock")
+                    else initView()
+                }
+            }.addOnFailureListener {
+                Log.d("Detect Mock", "Failed get lastLocation. Err: ${it.message}. Stacktrace: ${it.stackTrace}")
+            }.addOnCanceledListener {
+                Log.d("Detect Mock", "Cancelled get lastLocation")
+            }.addOnCompleteListener {
+                Log.d("Detect Mock", "Completed get lastLocation")
+            }
         }
     }
 
@@ -313,8 +335,14 @@ class HomeCourierActivity : AppCompatActivity() {
                                 Log.d("ABSENT COURIER", "Belum absen pagi")
                             } else {
 
+                                val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
+                                serviceIntent.putExtra("userId", userId)
+                                serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-004-$userName")
+                                serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
+                                this@HomeCourierActivity.startService(serviceIntent)
                                 Log.d("ABSENT COURIER", "Sudah absen pagi")
                                 isAbsentMorningNow = true
+
                                 if (snapshot.child("eveningDateTime").exists()) {
                                     val eveningDateTime = snapshot.child("eveningDateTime").getValue(String::class.java).toString()
 
@@ -322,13 +350,13 @@ class HomeCourierActivity : AppCompatActivity() {
                                         val absentEveningDate = DateFormat.format(eveningDateTime, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd")
 
                                         if (DateFormat.dateAfterNow(absentEveningDate)) {
-                                            if (!CustomUtility(this@HomeCourierActivity).isServiceRunning(TrackingService::class.java)) {
-                                                val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
-                                                serviceIntent.putExtra("userId", userId)
-                                                serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-004-$userName")
-                                                serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
-                                                this@HomeCourierActivity.startService(serviceIntent)
-                                            }
+//                                            if (!CustomUtility(this@HomeCourierActivity).isServiceRunning(TrackingService::class.java)) {
+//                                                val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
+//                                                serviceIntent.putExtra("userId", userId)
+//                                                serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-004-$userName")
+//                                                serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
+//                                                this@HomeCourierActivity.startService(serviceIntent)
+//                                            }
                                             Log.d("ABSENT COURIER", "Belum absen sore")
                                             isAbsentEveningNow = false
                                             lockMenuItem(false)
@@ -341,25 +369,25 @@ class HomeCourierActivity : AppCompatActivity() {
                                         }
 
                                     } else {
-                                        if (!CustomUtility(this@HomeCourierActivity).isServiceRunning(TrackingService::class.java)) {
-                                            val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
-                                            serviceIntent.putExtra("userId", userId)
-                                            serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-004-$userName")
-                                            serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
-                                            this@HomeCourierActivity.startService(serviceIntent)
-                                        }
+//                                        if (!CustomUtility(this@HomeCourierActivity).isServiceRunning(TrackingService::class.java)) {
+//                                            val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
+//                                            serviceIntent.putExtra("userId", userId)
+//                                            serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-004-$userName")
+//                                            serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
+//                                            this@HomeCourierActivity.startService(serviceIntent)
+//                                        }
                                         Log.d("ABSENT COURIER", "Tgl absen sore tidak ada")
                                         isAbsentEveningNow = false
                                         lockMenuItem(false)
                                     }
                                 } else {
-                                    if (!CustomUtility(this@HomeCourierActivity).isServiceRunning(TrackingService::class.java)) {
-                                        val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
-                                        serviceIntent.putExtra("userId", userId)
-                                        serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-004-$userName")
-                                        serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
-                                        this@HomeCourierActivity.startService(serviceIntent)
-                                    }
+//                                    if (!CustomUtility(this@HomeCourierActivity).isServiceRunning(TrackingService::class.java)) {
+//                                        val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
+//                                        serviceIntent.putExtra("userId", userId)
+//                                        serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-004-$userName")
+//                                        serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
+//                                        this@HomeCourierActivity.startService(serviceIntent)
+//                                    }
                                     Log.d("ABSENT COURIER", "Kolom absen sore tidak ada")
                                     isAbsentEveningNow = false
                                     lockMenuItem(false)
@@ -888,13 +916,13 @@ class HomeCourierActivity : AppCompatActivity() {
 
                                 sessionManager.absentDateTime(absentDateTime)
 
-                                if (!CustomUtility(this@HomeCourierActivity).isServiceRunning(TrackingService::class.java)) {
+//                                if (!CustomUtility(this@HomeCourierActivity).isServiceRunning(TrackingService::class.java)) {
                                     val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
                                     serviceIntent.putExtra("userId", userId)
                                     serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-004-$userName")
                                     serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
                                     this@HomeCourierActivity.startService(serviceIntent)
-                                }
+//                                }
 
                                 absentProgressDialog?.dismiss()
                                 checkAbsent()
@@ -1032,7 +1060,7 @@ class HomeCourierActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        checkAbsent()
+//        checkAbsent()
         Handler(Looper.getMainLooper()).postDelayed({
             CustomUtility(this).setUserStatusOnline(true, userDistributorId ?: "-custom-008", userId ?: "")
             getUserLoggedIn()
@@ -1053,6 +1081,10 @@ class HomeCourierActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        checkLocationPermission()
+        super.onResume()
+    }
 
     override fun onDestroy() {
         super.onDestroy()

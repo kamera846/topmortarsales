@@ -513,11 +513,11 @@ class UserProfileActivity : AppCompatActivity() {
             Log.d("Firebase Auth", "$e")
         }
 
-        val isTracking = CustomUtility(this).isServiceRunning(TrackingService::class.java)
-        if (isTracking) {
+//        val isTracking = CustomUtility(this).isServiceRunning(TrackingService::class.java)
+//        if (isTracking) {
             val serviceIntent = Intent(this, TrackingService::class.java)
             this.stopService(serviceIntent)
-        }
+//        }
 
         Handler(Looper.getMainLooper()).postDelayed({
             sessionManager.setLoggedIn(LOGGED_OUT)

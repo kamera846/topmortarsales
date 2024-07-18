@@ -2482,14 +2482,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     }
 
     private fun checkServiceStatus() {
-        val isTracking = CustomUtility(this@DetailContactActivity).isServiceRunning(TrackingService::class.java)
-        if (!isTracking) {
+//        val isTracking = CustomUtility(this@DetailContactActivity).isServiceRunning(TrackingService::class.java)
+//        if (!isTracking) {
             val serviceIntent = Intent(this@DetailContactActivity, TrackingService::class.java)
             serviceIntent.putExtra("userId", userID)
             serviceIntent.putExtra("userDistributorId", userDistributorIds ?: "-start-002-$username")
-            serviceIntent.putExtra("deliveryId", deliveryId)
+            if (userKind == USER_KIND_COURIER) serviceIntent.putExtra("deliveryId", deliveryId)
             this@DetailContactActivity.startService(serviceIntent)
-        }
+//        }
     }
 
     private fun scrollViewListener() {

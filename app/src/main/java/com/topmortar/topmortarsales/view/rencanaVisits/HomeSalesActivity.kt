@@ -84,7 +84,6 @@ import com.topmortar.topmortarsales.model.BaseCampModel
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.HomeMenuSalesModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
-import com.topmortar.topmortarsales.view.MainActivity
 import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.SplashScreenActivity
 import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
@@ -141,8 +140,9 @@ class HomeSalesActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
 
         setContentView(binding.root)
-        initGlobalVariable()
+//        initGlobalVariable()
 
+//        checkLocationPermission()
         CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor() ?: "-custom-010", sessionManager.userID() ?: "")
 
     }
@@ -160,11 +160,31 @@ class HomeSalesActivity : AppCompatActivity() {
             getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
 
-        if (!isGpsEnabled) {
-            // GPS tidak aktif, munculkan dialog untuk mengaktifkannya
-            showGpsDisabledDialog()
-        } else {
-            initView()
+        if (!isGpsEnabled) showGpsDisabledDialog()
+        else checkMockLocation()
+    }
+
+    private fun checkMockLocation() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+            fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                Log.d("Detect Mock", "Succeed get lastLocation")
+                if (location == null) {
+                    Log.d("Detect Mock", "Location null")
+                    checkLocationPermission()
+                } else {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && location.isMock) Log.d("Detect Mock", "Is Mock")
+                    else if (location.isFromMockProvider) Log.d("Detect Mock", "Is From Mock")
+                    else initView()
+                }
+            }.addOnFailureListener {
+                Log.d("Detect Mock", "Failed get lastLocation. Err: ${it.message}. Stacktrace: ${it.stackTrace}")
+            }.addOnCanceledListener {
+                Log.d("Detect Mock", "Cancelled get lastLocation")
+            }.addOnCompleteListener {
+                Log.d("Detect Mock", "Completed get lastLocation")
+            }
         }
     }
 
@@ -195,28 +215,8 @@ class HomeSalesActivity : AppCompatActivity() {
         val userDistributorIds = sessionManager.userDistributor()
         firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-014")
         apiService = HttpClient.create()
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         customUtility = CustomUtility(this)
         absentMode = selectedAbsentMode
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-                Log.d("Detect Mock", "Succeed get lastLocation")
-                if (location == null) {
-                    Log.d("Detect Mock", "Location null")
-                } else {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && location.isMock) Log.d("Detect Mock", "Is Mock")
-                    else if (location.isFromMockProvider) Log.d("Detect Mock", "Is From Mock")
-                    else Log.d("Detect Mock", "Is Mock False")
-                }
-            }.addOnFailureListener {
-                Log.d("Detect Mock", "Failed get lastLocation. Err: ${it.message}. Stacktrace: ${it.stackTrace}")
-            }.addOnCanceledListener {
-                Log.d("Detect Mock", "Cancelled get lastLocation")
-            }.addOnCompleteListener {
-                Log.d("Detect Mock", "Completed get lastLocation")
-            }
-        }
 
         // Set User Absent Level (TEMP)
         val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
@@ -650,6 +650,8 @@ class HomeSalesActivity : AppCompatActivity() {
                 urlUtility.requestLocationUpdate()
 
                 if (!urlUtility.isUrl(mapsUrl) && mapsUrl.isNotEmpty()) {
+
+                    fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
                     fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
 
                         if (location != null) {
@@ -771,14 +773,10 @@ class HomeSalesActivity : AppCompatActivity() {
 
             sessionManager.absentDateTime(absentDateTime)
 
-            if (!CustomUtility(this@HomeSalesActivity).isServiceRunning(
-                    TrackingService::class.java)) {
-                val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
-                serviceIntent.putExtra("userId", userId)
-                serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
-                serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
-                this@HomeSalesActivity.startService(serviceIntent)
-            }
+            val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
+            serviceIntent.putExtra("userId", userId)
+            serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
+            this@HomeSalesActivity.startService(serviceIntent)
 
             absentProgressDialog?.dismiss()
             checkAbsent()
@@ -829,8 +827,13 @@ class HomeSalesActivity : AppCompatActivity() {
                                 Log.d("ABSENT COURIER", "Belum absen pagi")
                             } else {
 
+                                val serviceIntentDD = Intent(this@HomeSalesActivity, TrackingService::class.java)
+                                serviceIntentDD.putExtra("userId", userId)
+                                serviceIntentDD.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
+                                this@HomeSalesActivity.startService(serviceIntentDD)
                                 Log.d("ABSENT COURIER", "Sudah absen pagi")
                                 isAbsentMorningNow = true
+
                                 if (snapshot.child("eveningDateTime").exists()) {
                                     val eveningDateTime = snapshot.child("eveningDateTime").getValue(String::class.java).toString()
 
@@ -838,13 +841,10 @@ class HomeSalesActivity : AppCompatActivity() {
                                         val absentEveningDate = DateFormat.format(eveningDateTime, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd")
 
                                         if (DateFormat.dateAfterNow(absentEveningDate)) {
-                                            if (!CustomUtility(this@HomeSalesActivity).isServiceRunning(TrackingService::class.java)) {
-                                                val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
-                                                serviceIntent.putExtra("userId", userId)
-                                                serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
-                                                serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
-                                                this@HomeSalesActivity.startService(serviceIntent)
-                                            }
+//                                            val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
+//                                            serviceIntent.putExtra("userId", userId)
+//                                            serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
+//                                            this@HomeSalesActivity.startService(serviceIntent)
                                             Log.d("ABSENT COURIER", "Belum absen sore")
                                             isAbsentEveningNow = false
                                             lockMenuItem(false)
@@ -857,25 +857,19 @@ class HomeSalesActivity : AppCompatActivity() {
                                         }
 
                                     } else {
-                                        if (!CustomUtility(this@HomeSalesActivity).isServiceRunning(TrackingService::class.java)) {
-                                            val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
-                                            serviceIntent.putExtra("userId", userId)
-                                            serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
-                                            serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
-                                            this@HomeSalesActivity.startService(serviceIntent)
-                                        }
+//                                        val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
+//                                        serviceIntent.putExtra("userId", userId)
+//                                        serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
+//                                        this@HomeSalesActivity.startService(serviceIntent)
                                         Log.d("ABSENT COURIER", "Tgl absen sore tidak ada")
                                         isAbsentEveningNow = false
                                         lockMenuItem(false)
                                     }
                                 } else {
-                                    if (!CustomUtility(this@HomeSalesActivity).isServiceRunning(TrackingService::class.java)) {
-                                        val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
-                                        serviceIntent.putExtra("userId", userId)
-                                        serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
-                                        serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
-                                        this@HomeSalesActivity.startService(serviceIntent)
-                                    }
+//                                    val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
+//                                    serviceIntent.putExtra("userId", userId)
+//                                    serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
+//                                    this@HomeSalesActivity.startService(serviceIntent)
                                     Log.d("ABSENT COURIER", "Kolom absen sore tidak ada")
                                     isAbsentEveningNow = false
                                     lockMenuItem(false)
@@ -1097,7 +1091,11 @@ class HomeSalesActivity : AppCompatActivity() {
                 icon = R.drawable.gudang_white,
                 bgColor = R.drawable.bg_blue_silver_lake_round_8,
                 title = "Semua Toko",
-                target = MainActivity::class.java,
+//                target = MainActivity::class.java,
+                action = {
+                    val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
+                    this@HomeSalesActivity.stopService(serviceIntent)
+                },
                 isLocked = isLocked
             )
         )
@@ -1231,7 +1229,7 @@ class HomeSalesActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 //        checkAbsent()
-        checkLocationPermission()
+//        checkLocationPermission()
         Handler(Looper.getMainLooper()).postDelayed({
             if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
                 CustomUtility(this).setUserStatusOnline(
@@ -1256,6 +1254,11 @@ class HomeSalesActivity : AppCompatActivity() {
                 )
             }
         }
+    }
+
+    override fun onResume() {
+        checkLocationPermission()
+        super.onResume()
     }
 
     override fun onDestroy() {
@@ -1285,8 +1288,8 @@ class HomeSalesActivity : AppCompatActivity() {
                 else getListBasecamp(showModal = false)
 
             }
-//        } else if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-//            checkLocationPermission()
+        } else if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            checkLocationPermission()
         }
     }
 
@@ -1297,8 +1300,9 @@ class HomeSalesActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) checkLocationPermission()
-            else {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                checkLocationPermission()
+            } else {
                 AlertDialog.Builder(this)
                     .setCancelable(false)
                     .setTitle("Izin Diperlukan")
