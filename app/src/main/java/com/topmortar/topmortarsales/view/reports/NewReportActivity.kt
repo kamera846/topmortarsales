@@ -31,6 +31,7 @@ import com.google.android.gms.location.LocationServices
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
@@ -89,6 +90,7 @@ class NewReportActivity : AppCompatActivity() {
     private var isDistanceToLong = false
     private var isBaseCamp = false
     private var isReportPaymentStatus = false
+    private var iInvoiceId: String? = null
     private var reportType: String = "toko"
     private var id: String = ""
     private var realPaymentValue = ""
@@ -189,6 +191,7 @@ class NewReportActivity : AppCompatActivity() {
         name = intent.getStringExtra(CONST_NAME).toString()
         coordinate = intent.getStringExtra(CONST_MAPS).toString()
         isBaseCamp = intent.getBooleanExtra(CONST_IS_BASE_CAMP, false)
+        iInvoiceId = intent.getStringExtra(CONST_INVOICE_ID)
 
         when (isBaseCamp) {
             true -> {
@@ -616,6 +619,7 @@ class NewReportActivity : AppCompatActivity() {
 //            println("===== Form Data =====")
 //            println("Form data id: $id")
 //            println("Form data id user: $idUser")
+//            println("Form data id invoice: $iInvoiceId")
 //            println("Form data distance: ${binding.etDistance.text}")
 //            println("Form data message: ${binding.etMessage.text}")
 //            println("Form data reportSource: $iReportSource")
@@ -649,6 +653,7 @@ class NewReportActivity : AppCompatActivity() {
                 val rblaporanVisit = createPartFromString(binding.etMessage.text.toString())
                 val rbSource = createPartFromString(iReportSource)
                 val rbRenviSource = createPartFromString(iRenviSource)
+                val rbInvoiceId = createPartFromString(iInvoiceId ?: "")
 
                 val apiService: ApiService = HttpClient.create()
                 val response = when (isBaseCamp) {
@@ -668,6 +673,7 @@ class NewReportActivity : AppCompatActivity() {
                                 laporanVisit = rblaporanVisit,
                                 source = rbSource,
                                 renviSource = rbRenviSource,
+                                idInvoice = rbInvoiceId,
                                 isPay = createPartFromString("0")
                             )
                         } else {
@@ -680,6 +686,7 @@ class NewReportActivity : AppCompatActivity() {
                                         laporanVisit = rblaporanVisit,
                                         source = rbSource,
                                         renviSource = rbRenviSource,
+                                        idInvoice = rbInvoiceId,
                                         isPay = createPartFromString(IS_PAY_STATUS_PAY),
                                         payValue = createPartFromString(realPaymentValue)
                                     )
@@ -692,6 +699,7 @@ class NewReportActivity : AppCompatActivity() {
                                         laporanVisit = rblaporanVisit,
                                         source = rbSource,
                                         renviSource = rbRenviSource,
+                                        idInvoice = rbInvoiceId,
                                         isPay = createPartFromString(IS_PAY_STATUS_PAY_LATER),
                                         payDate = createPartFromString(realPaymentDateValue)
                                     )
@@ -704,6 +712,7 @@ class NewReportActivity : AppCompatActivity() {
                                         laporanVisit = rblaporanVisit,
                                         source = rbSource,
                                         renviSource = rbRenviSource,
+                                        idInvoice = rbInvoiceId,
                                         isPay = createPartFromString(IS_PAY_STATUS_NOT_PAY)
                                     )
                                 }

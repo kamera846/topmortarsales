@@ -24,6 +24,7 @@ import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_DATE
+import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
@@ -225,6 +226,7 @@ class PasifRenViFragment : Fragment() {
                     intent.putExtra(CONST_WEEKLY_VISIT_STATUS, data.tagih_mingguan)
                     intent.putExtra(REPORT_SOURCE, SALES_REPORT_RENVI)
                     intent.putExtra(RENVI_SOURCE, RENVI_PASSIVE)
+                    intent.putExtra(CONST_INVOICE_ID, data.id_invoice)
                 }
 
                 startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)

@@ -58,6 +58,7 @@ import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.BASE_URL
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_DELIVERY_ID
+import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING
 import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_MAPS
@@ -265,6 +266,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var iPromo: String? = null
     private var iReportSource: String? = NORMAL_REPORT
     private var iRenviSource: String? = NORMAL_REPORT
+    private var iInvoiceId: String? = null
 
     private var isSearchCity = false
     private var isSearchPromo = false
@@ -1110,6 +1112,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             iPromo = data.id_promo
                             iReportSource = intent.getStringExtra(REPORT_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
                             iRenviSource = intent.getStringExtra(RENVI_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
+                            iInvoiceId = intent.getStringExtra(CONST_INVOICE_ID)
 
                             activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
 
@@ -1553,6 +1556,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 intent.putExtra(REPORT_SOURCE, iReportSource)
                 intent.putExtra(RENVI_SOURCE, iRenviSource)
                 intent.putExtra(CONST_CONTACT_ID, contactId)
+                intent.putExtra(CONST_INVOICE_ID, iInvoiceId)
                 if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
                 else intent.putExtra(CONST_NAME, tvName.text)
                 if (iMapsUrl == EMPTY_FIELD_VALUE) intent.putExtra(CONST_MAPS, "")
