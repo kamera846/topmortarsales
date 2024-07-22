@@ -1491,7 +1491,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 reportOption.visibility = View.VISIBLE
                 btnNewReport.visibility = View.GONE
             } else if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
-                if (userDistributorId == "1" && iReportSource == NORMAL_REPORT) btnNewReport.visibility = View.GONE
+                if (iReportSource == NORMAL_REPORT) btnNewReport.visibility = View.GONE
+//                if (userDistributorId == "1" && iReportSource == NORMAL_REPORT) btnNewReport.visibility = View.GONE
 //                else {
 //                    if (iStatus == STATUS_CONTACT_BLACKLIST) {
 //                        invoiceOption.visibility = View.GONE
