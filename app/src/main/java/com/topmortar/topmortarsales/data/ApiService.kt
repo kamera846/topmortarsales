@@ -421,6 +421,7 @@ interface ApiService {
         @Part("laporan_visit") laporanVisit: RequestBody,
         @Part("source") source: RequestBody? = createPartFromString(NORMAL_REPORT),
         @Part("type_renvi") renviSource: RequestBody? = createPartFromString(NORMAL_REPORT),
+        @Part("id_invoice") idInvoice: RequestBody,
         @Part("is_pay") isPay: RequestBody,
     ): Response<ResponseReportVisit>
     @Multipart
@@ -432,6 +433,7 @@ interface ApiService {
         @Part("laporan_visit") laporanVisit: RequestBody,
         @Part("source") source: RequestBody? = createPartFromString(NORMAL_REPORT),
         @Part("type_renvi") renviSource: RequestBody? = createPartFromString(NORMAL_REPORT),
+        @Part("id_invoice") idInvoice: RequestBody,
         @Part("is_pay") isPay: RequestBody,
         @Part("pay_value") payValue: RequestBody,
     ): Response<ResponseReportVisit>
@@ -444,6 +446,7 @@ interface ApiService {
         @Part("laporan_visit") laporanVisit: RequestBody,
         @Part("source") source: RequestBody? = createPartFromString(NORMAL_REPORT),
         @Part("type_renvi") renviSource: RequestBody? = createPartFromString(NORMAL_REPORT),
+        @Part("id_invoice") idInvoice: RequestBody,
         @Part("is_pay") isPay: RequestBody,
         @Part("pay_date") payDate: RequestBody,
     ): Response<ResponseReportVisit>
