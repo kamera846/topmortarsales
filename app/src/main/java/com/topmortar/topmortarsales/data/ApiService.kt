@@ -111,6 +111,7 @@ interface ApiService {
     @POST(SEND_MESSAGE)
     suspend fun insertContact(
         @Part("nama") name: RequestBody,
+        @Part("nomor_cat_1") phoneCategory: RequestBody,
         @Part("nomorhp") phone: RequestBody,
 //        @Part("nomorhp_2") phone2: RequestBody,
         @Part("owner_name") ownerName: RequestBody,
@@ -126,6 +127,7 @@ interface ApiService {
     @POST(SEND_MESSAGE)
     suspend fun sendMessage(
         @Part("nama") name: RequestBody,
+        @Part("nomor_cat_1") phoneCategory: RequestBody,
         @Part("nomorhp") phone: RequestBody,
 //        @Part("nomorhp_2") phone2: RequestBody,
         @Part("owner_name") ownerName: RequestBody,

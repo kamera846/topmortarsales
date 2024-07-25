@@ -20,6 +20,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -37,6 +38,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SELECTED_ABSENT_MODE
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
@@ -120,14 +122,14 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         Handler(Looper.getMainLooper()).postDelayed({
             isLoaded = true
             isCitiesLoaded = true
-//            setSpinnerTermin()
-//            getCities()
         }, 500)
 
     }
 
     private fun sendMessage() {
 
+        val phoneCategoryId = binding.spinPhoneCategories.selectedItemId.toInt()
+        val phoneCategory = "${ binding.spinPhoneCategories.selectedItem }"
         val phone = "${ etPhone.text }"
 //        val phone2 = "${ binding.etPhone2.text }"
         val name = "${ etName.text }"
@@ -140,7 +142,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
         val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
 
-        if (!formValidation(phone = phone, name = name, owner = owner, mapsUrl = mapsUrl, message = message)) return
+        if (!formValidation(phone = phone, name = name, owner = owner, mapsUrl = mapsUrl, message = message, phoneCategoryId = phoneCategoryId)) return
 
         birthday = if (birthday.isEmpty()) "0000-00-00"
         else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
@@ -159,6 +161,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         lifecycleScope.launch {
             try {
 
+                val rbPhoneCategory = createPartFromString(formatPhoneNumber(phoneCategory))
                 val rbPhone = createPartFromString(formatPhoneNumber(phone))
 //                val rbPhone2 = createPartFromString(phone2.let{ if (it == "0") it else formatPhoneNumber(it) })
                 val rbName = createPartFromString(name)
@@ -177,6 +180,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                     if (it.isEmpty()) {
                         apiService.insertContact(
                             name = rbName,
+                            phoneCategory = rbPhoneCategory,
                             phone = rbPhone,
 //                            phone2 = rbPhone2,
                             ownerName = rbOwner,
@@ -190,6 +194,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                     } else {
                         apiService.sendMessage(
                             name = rbName,
+                            phoneCategory = rbPhoneCategory,
                             phone = rbPhone,
 //                            phone2 = rbPhone2,
                             ownerName = rbOwner,
@@ -420,10 +425,15 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
     }
 
-    private fun formValidation(phone: String, name: String, owner: String = "", mapsUrl: String = "", message: String = ""): Boolean {
-        return if (phone.isEmpty()) {
+    private fun formValidation(phone: String, name: String, owner: String = "", mapsUrl: String = "", message: String = "", phoneCategoryId: Int = 0): Boolean {
+        return if (phoneCategoryId == 0) {
+            Toast.makeText(this, "Pilih kategori untuk nomor telpon terlebih dahulu", TOAST_LONG).show()
+            binding.spinPhoneCategories.requestFocus()
+            false
+        } else if (phone.isEmpty()) {
             etPhone.error = "Nomor telpon wajib diisi!"
             etPhone.requestFocus()
+            binding.spinPhoneCategories.clearFocus()
             false
         } else if (!phoneValidation(phone, etPhone)) {
             etPhone.requestFocus()
