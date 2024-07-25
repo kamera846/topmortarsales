@@ -330,6 +330,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
                 val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
 
                 val rbPhone = createPartFromString(formatPhoneNumber(data.nomorhp))
+                val rbPhoneCategory = createPartFromString(formatPhoneNumber(data.nomor_cat_1))
 //                val rbPhone2 = createPartFromString(data.nomorhp_2.let{ if (it == "0") it else formatPhoneNumber(it) })
                 val rbName = createPartFromString(data.nama)
                 val rbLocation = createPartFromString(data.id_city)
@@ -352,6 +353,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
                 val apiService: ApiService = HttpClient.create()
                 val response = apiService.sendMessage(
                     name = rbName,
+                    phoneCategory = rbPhoneCategory,
                     phone = rbPhone,
 //                    phone2 = rbPhone2,
                     ownerName = rbOwner,

@@ -60,20 +60,36 @@
 
                     </LinearLayout>
 
-                    <EditText
-                        android:labelFor="@+id/tv_phone_label"
-                        android:id="@+id/et_phone"
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
-                        android:textColorHint="@color/black_600"
-                        android:hint="@string/input_phone_number_placeholder"
-                        android:inputType="phone"
-                        android:autofillHints="@string/input_phone_number_placeholder"
-                        android:textSize="14sp"
+                        android:layout_height="wrap_content"
                         android:background="@drawable/et_background"
-                        android:padding="12dp"
-                        android:outlineProvider="none"/>
+                        android:orientation="vertical">
+
+                        <Spinner
+                            android:id="@+id/spinPhoneCategories"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:paddingHorizontal="4dp"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                        <EditText
+                            android:labelFor="@+id/tv_phone_label"
+                            android:id="@+id/et_phone"
+                            android:layout_width="match_parent"
+                            android:layout_height="48dp"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                            android:textColorHint="@color/black_600"
+                            android:hint="@string/input_phone_number_placeholder"
+                            android:inputType="phone"
+                            android:autofillHints="@string/input_phone_number_placeholder"
+                            android:textSize="14sp"
+                            android:padding="12dp"
+                            android:background="@android:color/transparent"
+                            android:outlineProvider="none"/>
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
