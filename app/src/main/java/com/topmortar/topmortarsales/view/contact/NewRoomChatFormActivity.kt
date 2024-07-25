@@ -20,17 +20,19 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ABSENT_MODE_STORE
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.PHONE_CATEGORIES
 import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
@@ -38,7 +40,6 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SELECTED_ABSENT_MODE
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
-import com.topmortar.topmortarsales.commons.TOAST_LONG
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
@@ -59,6 +60,7 @@ import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
+import org.json.JSONArray
 import java.util.Calendar
 
 @SuppressLint("SetTextI18n")
@@ -94,6 +96,8 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
     private var selectedCity: ModalSearchModel? = null
     private var cities = listOf("Malang", "Gresik", "Sidoarjo", "Blitar", "Surabaya", "Jakarta", "Bandung", "Yogyakarta", "Kediri")
 
+    private lateinit var phoneCategoriesFRC: FirebaseRemoteConfig
+    private var spinPhoneCatItems: List<String> = listOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -113,6 +117,33 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             )
         }
 
+        phoneCategoriesFRC = FirebaseRemoteConfig.getInstance()
+        val configSettings = FirebaseRemoteConfigSettings.Builder()
+            .setMinimumFetchIntervalInSeconds(0)
+            .build()
+        phoneCategoriesFRC.setConfigSettingsAsync(configSettings)
+        phoneCategoriesFRC.setDefaultsAsync(R.xml.default_phone_categories)
+
+        phoneCategoriesFRC.fetchAndActivate()
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    val itemsJson = phoneCategoriesFRC.getString(PHONE_CATEGORIES)
+                    val itemsArray = JSONArray(itemsJson)
+                    val items = Array(itemsArray.length()) { i -> itemsArray.getString(i) }
+
+                    val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, items)
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+                    spinPhoneCatItems = items.toList()
+                    binding.spinPhoneCategories.adapter = adapter
+
+                    initView()
+                } else initView()
+            }
+
+    }
+
+    private fun initView() {
         initVariable()
         initClickHandler()
 //        dataActivityValidation()
@@ -123,12 +154,11 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             isLoaded = true
             isCitiesLoaded = true
         }, 500)
-
     }
 
     private fun sendMessage() {
 
-        val phoneCategoryId = binding.spinPhoneCategories.selectedItemId.toInt()
+        val phoneCategoryPosition = binding.spinPhoneCategories.selectedItemPosition
         val phoneCategory = "${ binding.spinPhoneCategories.selectedItem }"
         val phone = "${ etPhone.text }"
 //        val phone2 = "${ binding.etPhone2.text }"
@@ -142,7 +172,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
         val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
 
-        if (!formValidation(phone = phone, name = name, owner = owner, mapsUrl = mapsUrl, message = message, phoneCategoryId = phoneCategoryId)) return
+        if (!formValidation(phone = phone, name = name, owner = owner, mapsUrl = mapsUrl, message = message, phoneCategoryPosition = phoneCategoryPosition)) return
 
         birthday = if (birthday.isEmpty()) "0000-00-00"
         else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
@@ -425,12 +455,12 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
     }
 
-    private fun formValidation(phone: String, name: String, owner: String = "", mapsUrl: String = "", message: String = "", phoneCategoryId: Int = 0): Boolean {
-        return if (phoneCategoryId == 0) {
-            Toast.makeText(this, "Pilih kategori untuk nomor telpon terlebih dahulu", TOAST_LONG).show()
-            binding.spinPhoneCategories.requestFocus()
-            false
-        } else if (phone.isEmpty()) {
+    private fun formValidation(phone: String, name: String, owner: String = "", mapsUrl: String = "", message: String = "", phoneCategoryPosition: Int = 0): Boolean {
+//        if (phoneCategoryPosition == 0) {
+//            Toast.makeText(this, "Pilih kategori untuk nomor telpon terlebih dahulu", TOAST_LONG).show()
+//            false
+//        } else
+        return if (phone.isEmpty()) {
             etPhone.error = "Nomor telpon wajib diisi!"
             etPhone.requestFocus()
             binding.spinPhoneCategories.clearFocus()

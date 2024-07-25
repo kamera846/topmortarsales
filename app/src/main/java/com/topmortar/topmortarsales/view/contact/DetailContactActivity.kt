@@ -52,6 +52,8 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
@@ -76,6 +78,7 @@ import com.topmortar.topmortarsales.commons.NORMAL_REPORT
 import com.topmortar.topmortarsales.commons.PAYMENT_NOT_SET
 import com.topmortar.topmortarsales.commons.PAYMENT_TRANSFER
 import com.topmortar.topmortarsales.commons.PAYMENT_TUNAI
+import com.topmortar.topmortarsales.commons.PHONE_CATEGORIES
 import com.topmortar.topmortarsales.commons.PING_HOST
 import com.topmortar.topmortarsales.commons.PING_MEDIUM
 import com.topmortar.topmortarsales.commons.PING_NORMAL
@@ -137,6 +140,7 @@ import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import org.json.JSONArray
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -242,6 +246,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var terminItem: List<String> = listOf("Pilih Termin Payment", "COD", "COD + Transfer", "COD + Tunai", "30 Hari", "45 Hari", "60 Hari")
     private var paymentMethodItem: List<String> = listOf("Pilih Metode Pembayaran", "Tunai", "Transfer")
     private var reputationItem: List<String> = listOf("Pilih Reputasi Toko", "Good", "Bad")
+    private var spinPhoneCatItems: List<String> = listOf()
     private var selectedStatus: String = ""
     private var selectedWeeklyVisitStatus: String = ""
     private var selectedPaymentMethod: String = ""
@@ -287,6 +292,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var deliveryId: String = ""
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
+    private lateinit var phoneCategoriesFRC: FirebaseRemoteConfig
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -307,6 +314,53 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-003", userID)
         }
 
+        // Setup KTP Image Picker
+        cameraPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                chooseFile()
+            } else {
+                handleMessage(this@DetailContactActivity, "CAMERA ACCESS DENIED", "Izin kamera ditolak")
+            }
+            etKtp.clearFocus()
+        }
+        imagePicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val data: Intent? = result.data
+                selectedUri = if (data == null || data.data == null) currentPhotoUri else data.data
+                tvSelectedKtp.text = "File terpilih: " + selectedUri?.let { getFileNameFromUri(it) }
+//                navigateToPreviewKtp()
+            }
+            etKtp.clearFocus()
+        }
+
+        phoneCategoriesFRC = FirebaseRemoteConfig.getInstance()
+        val configSettings = FirebaseRemoteConfigSettings.Builder()
+            .setMinimumFetchIntervalInSeconds(0)
+            .build()
+        phoneCategoriesFRC.setConfigSettingsAsync(configSettings)
+        phoneCategoriesFRC.setDefaultsAsync(R.xml.default_phone_categories)
+
+        phoneCategoriesFRC.fetchAndActivate()
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    val itemsJson = phoneCategoriesFRC.getString(PHONE_CATEGORIES)
+                    val itemsArray = JSONArray(itemsJson)
+                    val items = Array(itemsArray.length()) { i -> itemsArray.getString(i) }
+
+                    val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, items)
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+                    spinPhoneCatItems = items.toList()
+                    binding.spinPhoneCategories1.adapter = adapter
+                    binding.spinPhoneCategories2.adapter = adapter
+
+                    initView()
+                } else initView()
+            }
+
+    }
+
+    private fun initView() {
         initVariable()
         initClickHandler()
         getContact()
@@ -407,25 +461,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         // Setup Dialog Send Message
         setupDialogSendMessage()
-
-        // Setup KTP Image Picker
-        cameraPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) {
-                chooseFile()
-            } else {
-                handleMessage(this@DetailContactActivity, "CAMERA ACCESS DENIED", "Izin kamera ditolak")
-            }
-            etKtp.clearFocus()
-        }
-        imagePicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val data: Intent? = result.data
-                selectedUri = if (data == null || data.data == null) currentPhotoUri else data.data
-                tvSelectedKtp.text = "File terpilih: " + selectedUri?.let { getFileNameFromUri(it) }
-//                navigateToPreviewKtp()
-            }
-            etKtp.clearFocus()
-        }
 
         bottomSheetDialog = BottomSheetDialog(this)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -970,15 +1005,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                             tvName.text = "${ etName.text }"
 
-                            val iPhoneCat1Id = binding.spinPhoneCategories1.selectedItemId.toInt()
-                            if (iPhoneCat1Id == 0) binding.tvPhoneCat1.text = "Nomor 1"
+                            val iPhoneCat1Position = binding.spinPhoneCategories1.selectedItemPosition
+                            if (iPhoneCat1Position == 0) binding.tvPhoneCat1.text = "Nomor 1"
                             else binding.tvPhoneCat1.text = "${ binding.spinPhoneCategories1.selectedItem }"
 
                             tvPhone.text = "+" + formatPhoneNumber("${ etPhone.text }")
                             etPhone.setText(formatPhoneNumber("${ etPhone.text }"))
 
-                            val iPhoneCat2Id = binding.spinPhoneCategories2.selectedItemId.toInt()
-                            if (iPhoneCat2Id == 0) binding.tvPhoneCat2.text = "Nomor 2"
+                            val iPhoneCat2Position = binding.spinPhoneCategories2.selectedItemPosition
+                            if (iPhoneCat2Position == 0) binding.tvPhoneCat2.text = "Nomor 2"
                             else binding.tvPhoneCat2.text = "${ binding.spinPhoneCategories2.selectedItem }"
 
                             val iPhone2 = binding.etPhone2.text.toString()
@@ -1092,7 +1127,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         RESPONSE_STATUS_OK -> {
 
                             val data = responseBody.results[0]
-                            val spinPhonCatItems = resources.getStringArray(R.array.phone_category_spinner_options)
 
                             val iContactId = data.id_contact
                             val iPhoneCategory1 = data.nomor_cat_1
@@ -1156,9 +1190,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             if (iContactId.isNotEmpty()) {
                                 contactId = iContactId
                             }
-                            println("Phone 1: $iPhoneCategory1")
+
                             if (iPhoneCategory1.isNotEmpty()) {
-                                val indexItem = spinPhonCatItems.indexOf(iPhoneCategory1)
+                                val indexItem = spinPhoneCatItems.indexOf(iPhoneCategory1)
                                 if (indexItem > 0) {
                                     binding.spinPhoneCategories1.setSelection(indexItem)
                                     binding.tvPhoneCat1.text = "${ binding.spinPhoneCategories1.selectedItem }"
@@ -1171,9 +1205,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 tvPhone.text = EMPTY_FIELD_VALUE
                                 etPhone.setText("")
                             }
-                            println("Phone 2: $iPhoneCategory2")
+
                             if (iPhoneCategory2.isNotEmpty()) {
-                                val indexItem = spinPhonCatItems.indexOf(iPhoneCategory2)
+                                val indexItem = spinPhoneCatItems.indexOf(iPhoneCategory2)
                                 if (indexItem > 0) {
                                     binding.spinPhoneCategories2.setSelection(indexItem)
                                     binding.tvPhoneCat2.text = "${ binding.spinPhoneCategories2.selectedItem }"

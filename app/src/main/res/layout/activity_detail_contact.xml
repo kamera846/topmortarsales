@@ -389,9 +389,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_marginStart="-8dp"
                                     android:layout_marginEnd="5dp"
-                                    android:layout_marginBottom="8dp"
-                                    android:textColor="@color/black_500"
-                                    android:entries="@array/phone_category_spinner_options"/>
+                                    android:textColor="@color/black_500"/>
 
                                 <EditText
                                     android:id="@+id/et_phone"
@@ -445,9 +443,7 @@
                                     android:layout_height="wrap_content"
                                     android:layout_marginStart="-8dp"
                                     android:layout_marginEnd="5dp"
-                                    android:layout_marginBottom="8dp"
-                                    android:textColor="@color/black_500"
-                                    android:entries="@array/phone_category_spinner_options"/>
+                                    android:textColor="@color/black_500"/>
 
                                 <EditText
                                     android:id="@+id/et_phone_2"

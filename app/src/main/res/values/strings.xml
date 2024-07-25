@@ -149,19 +149,6 @@
         <item>45 Hari</item>
         <item>60 Hari</item>
     </string-array>
-    <string-array name="phone_category_spinner_options">
-        <item>Pilih kategori</item>
-        <item>Team Leader (Owner)</item>
-        <item>Staff (Owner)</item>
-        <item>Team Leader (Konsultan)</item>
-        <item>Arsitek (Konsultan)</item>
-        <item>Team Leader (MK)</item>
-        <item>Lapangan (MK)</item>
-        <item>Project Manager (Kontraktor)</item>
-        <item>Site Manager (Kontraktor)</item>
-        <item>Logistik (Kontraktor)</item>
-        <item>Keuangan (Kontraktor)</item>
-    </string-array>
     <string name="title_activity_maps">MapsActivity</string>
     <string name="maps_key">AIzaSyDLMtfb0qTk0lNWo22mn8hblqCl5OnDELA</string>
     <string name="topmortar_wa_number">+6287826210888</string>
