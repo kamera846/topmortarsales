@@ -3,7 +3,9 @@ package com.topmortar.topmortarsales.model
 data class ContactModel(
     var id_contact: String = "",
     var nama: String = "",
+    var nomor_cat_1: String = "",
     var nomorhp: String = "",
+    var nomor_cat_2: String = "",
     var nomorhp_2: String = "",
     var tgl_lahir: String = "0000-00-00",
     var store_owner: String = "",

@@ -223,6 +223,7 @@
                                 android:orientation="vertical">
 
                                 <TextView
+                                    android:id="@+id/tvPhoneCat1"
                                     android:visibility="visible"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
@@ -288,6 +289,7 @@
                                     android:orientation="vertical">
 
                                     <TextView
+                                        android:id="@+id/tvPhoneCat2"
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
                                         android:gravity="center_vertical"
@@ -375,20 +377,19 @@
 
                             <LinearLayout
                                 android:layout_width="0dp"
-                                android:layout_height="match_parent"
+                                android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:gravity="center_vertical"
+                                android:layout_marginVertical="8dp"
                                 android:orientation="vertical">
 
-                                <TextView
-                                    android:visibility="visible"
+                                <Spinner
+                                    android:id="@+id/spinPhoneCategories1"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:gravity="center_vertical"
-                                    android:text="Nomor 1 (wajib)"
-                                    android:textSize="12sp"
-                                    android:textColor="@color/black_500"
-                                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+                                    android:layout_marginStart="-8dp"
+                                    android:layout_marginEnd="5dp"
+                                    android:textColor="@color/black_500"/>
 
                                 <EditText
                                     android:id="@+id/et_phone"
@@ -430,20 +431,19 @@
 
                             <LinearLayout
                                 android:layout_width="0dp"
-                                android:layout_height="match_parent"
+                                android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:gravity="center_vertical"
+                                android:layout_marginVertical="8dp"
                                 android:orientation="vertical">
 
-                                <TextView
-                                    android:visibility="visible"
+                                <Spinner
+                                    android:id="@+id/spinPhoneCategories2"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:gravity="center_vertical"
-                                    android:text="Nomor 2 (Opsional)"
-                                    android:textSize="12sp"
-                                    android:textColor="@color/black_500"
-                                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+                                    android:layout_marginStart="-8dp"
+                                    android:layout_marginEnd="5dp"
+                                    android:textColor="@color/black_500"/>
 
                                 <EditText
                                     android:id="@+id/et_phone_2"

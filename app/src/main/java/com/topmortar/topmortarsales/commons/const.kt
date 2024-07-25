@@ -49,6 +49,7 @@ const val RESPONSE_STATUS_FAIL = "fail"
 const val RESPONSE_STATUS_FAILED = "failed"
 
 const val LATEST_APP_VERSION = "latest_app_version"
+const val PHONE_CATEGORIES = "phone_categories"
 
 const val CONTACT = "contacts.php"
 const val EDIT_CONTACT = "contacts.php"

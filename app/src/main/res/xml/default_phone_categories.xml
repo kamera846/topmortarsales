@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<defaultsMap>
+    <entry>
+        <key>phone_categories</key>
+        <value>
+            <![CDATA[
+                ["Pilih Kategori","Team Leader (Owner)","Staff (Owner)","Team Leader (Konsultan)","Arsitek (Konsultan)","Team Leader (MK)","Lapangan (MK)","Project Manager (Kontraktor)","Site Manager (Kontraktor)","Logistik (Kontraktor)","Keuangan (Kontraktor)"]
+            ]]>
+        </value>
+    </entry>
+</defaultsMap>
