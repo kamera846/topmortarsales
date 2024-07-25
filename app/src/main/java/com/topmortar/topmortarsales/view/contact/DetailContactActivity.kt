@@ -834,7 +834,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun saveEdit() {
 
+        val pPhoneCategory1 = binding.spinPhoneCategories1.let {
+            if (it.selectedItemPosition < 1) "" else "${ it.selectedItem }"
+        }
         val pPhone = "${ etPhone.text }"
+        val pPhoneCategory2 = binding.spinPhoneCategories2.let {
+            if (it.selectedItemPosition < 1) "" else "${ it.selectedItem }"
+        }
         val pPhone2 = binding.etPhone2.text.let { if (it.toString().isEmpty()) "0" else "$it" }
         val pName = "${ etName.text }"
         val pOwner = "${ etOwner.text }"
@@ -902,7 +908,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             try {
 
                 val rbId = createPartFromString(contactId!!)
+                val rbPhoneCategory1 = createPartFromString(formatPhoneNumber(pPhoneCategory1))
                 val rbPhone = createPartFromString(formatPhoneNumber(pPhone))
+                val rbPhoneCategory2 = createPartFromString(pPhoneCategory2)
                 val rbPhone2 = createPartFromString(pPhone2.let{ if (it == "0") it else formatPhoneNumber(it) })
                 val rbName = createPartFromString(pName)
                 val rbOwner = createPartFromString(pOwner)
@@ -919,7 +927,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 val response = apiService.editContact(
                     id = rbId,
+                    phoneCategory1 = rbPhoneCategory1,
                     phone = rbPhone,
+                    phoneCategory2 = rbPhoneCategory2,
                     phone2 = rbPhone2,
                     name = rbName,
                     ownerName = rbOwner,
@@ -945,7 +955,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                             itemSendMessage = ContactModel(
                                 id_contact = contactId!!,
+                                nomor_cat_1 = pPhoneCategory1,
                                 nomorhp = pPhone,
+                                nomor_cat_2 = pPhoneCategory2,
                                 nomorhp_2 = pPhone2,
                                 nama = pName,
                                 store_owner = pOwner,
@@ -958,8 +970,16 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                             tvName.text = "${ etName.text }"
 
+                            val iPhoneCat1Id = binding.spinPhoneCategories1.selectedItemId.toInt()
+                            if (iPhoneCat1Id == 0) binding.tvPhoneCat1.text = "Nomor 1"
+                            else binding.tvPhoneCat1.text = "${ binding.spinPhoneCategories1.selectedItem }"
+
                             tvPhone.text = "+" + formatPhoneNumber("${ etPhone.text }")
                             etPhone.setText(formatPhoneNumber("${ etPhone.text }"))
+
+                            val iPhoneCat2Id = binding.spinPhoneCategories2.selectedItemId.toInt()
+                            if (iPhoneCat2Id == 0) binding.tvPhoneCat2.text = "Nomor 2"
+                            else binding.tvPhoneCat2.text = "${ binding.spinPhoneCategories2.selectedItem }"
 
                             val iPhone2 = binding.etPhone2.text.toString()
                             if (iPhone2.isNotEmpty() && iPhone2 != "0") {
@@ -1072,9 +1092,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         RESPONSE_STATUS_OK -> {
 
                             val data = responseBody.results[0]
+                            val spinPhonCatItems = resources.getStringArray(R.array.phone_category_spinner_options)
 
                             val iContactId = data.id_contact
+                            val iPhoneCategory1 = data.nomor_cat_1
                             val iPhone = data.nomorhp
+                            val iPhoneCategory2 = data.nomor_cat_2
                             val iPhone2 = data.nomorhp_2
                             val iOwner = data.store_owner
                             val iBirthday = data.tgl_lahir
@@ -1119,7 +1142,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             itemSendMessage = ContactModel(
                                 id_contact = iContactId,
                                 nama = iName!!,
+                                nomor_cat_1 = iPhoneCategory1,
                                 nomorhp = iPhone,
+                                nomor_cat_2 = iPhoneCategory2,
                                 nomorhp_2 = iPhone2,
                                 store_owner = iOwner,
                                 tgl_lahir = iBirthday,
@@ -1131,12 +1156,28 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             if (iContactId.isNotEmpty()) {
                                 contactId = iContactId
                             }
+                            println("Phone 1: $iPhoneCategory1")
+                            if (iPhoneCategory1.isNotEmpty()) {
+                                val indexItem = spinPhonCatItems.indexOf(iPhoneCategory1)
+                                if (indexItem > 0) {
+                                    binding.spinPhoneCategories1.setSelection(indexItem)
+                                    binding.tvPhoneCat1.text = "${ binding.spinPhoneCategories1.selectedItem }"
+                                }
+                            }
                             if (iPhone.isNotEmpty()) {
                                 tvPhone.text = "+$iPhone"
                                 etPhone.setText(iPhone)
                             } else {
                                 tvPhone.text = EMPTY_FIELD_VALUE
                                 etPhone.setText("")
+                            }
+                            println("Phone 2: $iPhoneCategory2")
+                            if (iPhoneCategory2.isNotEmpty()) {
+                                val indexItem = spinPhonCatItems.indexOf(iPhoneCategory2)
+                                if (indexItem > 0) {
+                                    binding.spinPhoneCategories2.setSelection(indexItem)
+                                    binding.tvPhoneCat2.text = "${ binding.spinPhoneCategories2.selectedItem }"
+                                }
                             }
                             if (iPhone2.isNotEmpty() && iPhone2 != "0") {
                                 binding.tvPhone2.text = "+$iPhone2"
@@ -1416,10 +1457,16 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         } else if (!PhoneHandler.phoneValidation(phone, etPhone)) {
             etPhone.requestFocus()
             false
+//        } else if (binding.spinPhoneCategories1.selectedItemPosition < 1) {
+//            Toast.makeText(this, "Pilih kategori untuk nomor ke 1", TOAST_LONG).show()
+//            false
         } else if (phone2.isNotEmpty()) {
             if (!PhoneHandler.phoneValidation(phone2, binding.etPhone2)) {
                 binding.etPhone2.requestFocus()
                 false
+//            } else if (binding.spinPhoneCategories2.selectedItemPosition < 1) {
+//                Toast.makeText(this, "Pilih kategori untuk nomor ke 2", TOAST_LONG).show()
+//                false
             } else {
                 binding.etPhone2.clearFocus()
                 binding.etPhone2.error = null
@@ -1442,7 +1489,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
     }
 
-    private fun backHandler(unit: Unit? = null) {
+    private fun backHandler() {
 
         if (isEdit) toggleEdit(false)
         else {
@@ -1453,9 +1500,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 resultIntent.putExtra("$activityRequestCode", SYNC_NOW)
                 setResult(RESULT_OK, resultIntent)
 
-                unit ?: finish()
+                finish()
 
-            } else unit ?: finish()
+            } else finish()
 
         }
 
@@ -2218,8 +2265,20 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        val superBack = super.onBackPressed()
-        backHandler(superBack)
+        if (isEdit) toggleEdit(false)
+        else {
+
+            if (hasEdited) {
+
+                val resultIntent = Intent()
+                resultIntent.putExtra("$activityRequestCode", SYNC_NOW)
+                setResult(RESULT_OK, resultIntent)
+
+                super.onBackPressed()
+
+            } else super.onBackPressed()
+
+        }
     }
 
     // Interfade Search Modal
