@@ -29,5 +29,6 @@ data class RencanaVisitModel(
     var is_new: String? = null,
     var jatuh_tempo: String = "",
     var last_visit: String? = null,
-    var date_invoice: String = ""
+    var date_invoice: String = "",
+    var date_counter: String = "",
 )

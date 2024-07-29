@@ -52,7 +52,12 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
 
         fun bind(item: RencanaVisitModel) {
 
-            val responseDateCounter = if (typeRencana == "jatemPenagihan1") item.jatuh_tempo else item.created_at
+            val responseDateCounter = if (typeRencana == "jatemPenagihan1") {
+                item.jatuh_tempo
+            } else if (typeRencana == "tagihMingguan" && item.is_new == "1") {
+                item.date_invoice
+            } else item.created_at
+
             val dateCounter = responseDateCounter.let {
                 if (!it.isNullOrEmpty()) {
                     if (typeRencana == "jatemPenagihan1") DateFormat.differenceDateNowDescCustom(it, "dd MMM yyyy", Locale.ENGLISH)
@@ -88,15 +93,17 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
                 if (typeRencana == "voucher") "Didapatkan " + DateFormat.format(item.created_at ?: "0000-00-00")
                 else if (typeRencana == "jatemPenagihan1" && item.jatuh_tempo.isNotEmpty()) "Jatuh tempo " + DateFormat.format(dateString =  item.jatuh_tempo, inputFormat = "dd MMM yyyy", inputLocale = Locale.ENGLISH)
                 else if (typeRencana == "passive") "Terakhir divisit " + DateFormat.format(item.last_visit ?: "0000-00-00")
+//                else if (typeRencana == "tagihMingguan") "Tanggal invoice " + DateFormat.format(item.date_invoice)
                 else "Terakhir divisit " + DateFormat.format(item.created_at ?: "0000-00-00")
 
             if (!item.is_new.isNullOrEmpty()) {
                 val isNew = item.is_new == "1"
                 val isInvalidLastVisit = item.last_visit == "0000-00-00"
-                val isRelevantType = typeRencana in listOf("jatem", "jatemPenagihan2", "jatemPenagihan3", "passive", "tagihMingguan")
+                val isRelevantType = typeRencana in listOf("jatem", "jatemPenagihan2", "jatemPenagihan3", "passive")
 
                 if (isNew) {
                     if (isRelevantType && isInvalidLastVisit) dateJatem = "Belum pernah divisit"
+                    if (typeRencana == "tagihMingguan") dateJatem = "Tanggal invoice " + DateFormat.format(item.date_invoice)
                     badgeNew.visibility = View.VISIBLE
                 } else {
                     if (isInvalidLastVisit) dateJatem = "Belum pernah divisit"
