@@ -5,6 +5,7 @@ package com.topmortar.topmortarsales.view.rencanaVisits
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
+import android.os.AsyncTask
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -80,6 +81,10 @@ class TagihMingguanFragment : Fragment() {
     private var citiesResults: ArrayList<CityModel>? = null
     private var selectedCity: ModalSearchModel? = null
     private var listItem: ArrayList<RencanaVisitModel> = arrayListOf()
+    private var totalProcess = 0
+    private var processed = 0
+    private var percentage = 0
+//    private lateinit var progressDialog: ProgressDialog
 
     private var reportSource = SALES_REPORT_RENVI
     private var listener: CounterItem? = null
@@ -136,6 +141,9 @@ class TagihMingguanFragment : Fragment() {
         userID = sessionManager.userID().toString()
 
         apiService = HttpClient.create()
+//        progressDialog = ProgressDialog(requireContext())
+//        progressDialog.setMessage(getString(R.string.txt_loading))
+//        progressDialog.setCancelable(false)
 
         if (userKind == USER_KIND_ADMIN) getCities()
         getList()
@@ -166,13 +174,20 @@ class TagihMingguanFragment : Fragment() {
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        listItem = response.results
-                        listItem.sortBy { it.created_at }
+                        listItem = arrayListOf()
+                        processed = 0
+                        percentage = 0
+                        totalProcess = response.results.size
+//                        progressDialog.show()
+                        LoopingTask(response.results).execute()
 
-                        setRecyclerView(listItem)
-                        loadingState(false)
-                        showBadgeRefresh(false)
-                        listener?.counterItem(listItem.size)
+//                        listItem = response.results
+//                        listItem.sortBy { it.created_at }
+//
+//                        setRecyclerView(listItem)
+//                        loadingState(false)
+//                        showBadgeRefresh(false)
+//                        listener?.counterItem(listItem.size)
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
@@ -207,6 +222,39 @@ class TagihMingguanFragment : Fragment() {
 
         }
 
+    }
+
+    private inner class LoopingTask(private var items: ArrayList<RencanaVisitModel>) : AsyncTask<Void, Void, Void>() {
+
+        override fun doInBackground(vararg params: Void?): Void? {
+            for (item in items.listIterator()) {
+//                Handler(Looper.getMainLooper()).postDelayed({
+                    if (item.is_new == "1") item.date_counter = item.date_invoice
+                    else item.date_counter = item.created_at ?: "0000-00-00"
+
+                    listItem.add(item)
+
+                    processed ++
+                    percentage = (processed * 100) / totalProcess
+//                    println(getString(R.string.txt_loading) + "($percentage%)")
+                    requireActivity().runOnUiThread {
+                        binding.txtLoading.text = getString(R.string.txt_loading) + "($percentage%)"
+                    }
+//                }, 100)
+            }
+            return null
+        }
+
+        override fun onPostExecute(result: Void?) {
+            super.onPostExecute(result)
+
+            listItem.sortBy { it.date_counter }
+
+            setRecyclerView(listItem)
+            loadingState(false)
+            showBadgeRefresh(false)
+            listener?.counterItem(listItem.size)
+        }
     }
 
     private fun setRecyclerView(listItem: ArrayList<RencanaVisitModel>) {
