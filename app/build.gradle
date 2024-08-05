@@ -60,7 +60,7 @@ android {
 dependencies {
 
     // Lifecycle Scope
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.3'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.4'
 
     // Default
     implementation 'androidx.core:core-ktx:1.13.1'
