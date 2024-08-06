@@ -24,7 +24,7 @@ android {
         release {
             keyAlias 'topmortarsalesrelease'
             keyPassword 'topmortarsalesrelease'
-            storeFile file('D:\\Pekerjaan\\Proyek Seluler\\topmortarsales\\app\\keystores\\release-keystore')
+            storeFile file('E:\\Pekerjaan\\AndroidStudio\\topmortarsales\\app\\keystores\\release-keystore')
             storePassword 'topmortarsalesrelease'
         }
 //        release {
