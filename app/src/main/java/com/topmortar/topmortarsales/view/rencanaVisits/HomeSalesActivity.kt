@@ -29,6 +29,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -125,6 +128,8 @@ class HomeSalesActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient : FusedLocationProviderClient
     private lateinit var customUtility : CustomUtility
 
+    private var locationCallback: LocationCallback? = null
+
     private lateinit var searchStoreAbsentModal: SearchModal
     private var selectedStore: ModalSearchModel? = null
     private var listStore: ArrayList<ContactModel> = arrayListOf()
@@ -149,9 +154,16 @@ class HomeSalesActivity : AppCompatActivity() {
     }
 
     private fun checkLocationPermission() {
+        if (absentProgressDialog == null) {
+            absentProgressDialog = ProgressDialog(this)
+            absentProgressDialog!!.setMessage(getString(R.string.txt_loading))
+            absentProgressDialog!!.setCancelable(false)
+        }
+        if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             checkGpsStatus()
         } else {
+            absentProgressDialog?.dismiss()
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
         }
     }
@@ -170,16 +182,39 @@ class HomeSalesActivity : AppCompatActivity() {
 
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
             fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-                Log.d("Detect Mock", "Succeed get lastLocation")
+//                Log.d("Detect Mock", "Succeed get lastLocation")
                 if (location == null) {
-                    Log.d("Detect Mock", "Location null")
-                    checkLocationPermission()
+//                    Log.d("Detect Mock", "Location null")
+//                    checkLocationPermission()
+                    if (locationCallback != null) {
+//                        Log.d("Detect Mock", "Callback not null")
+                        fusedLocationClient.removeLocationUpdates(locationCallback!!)
+                    }
+
+                    val locationRequest = LocationRequest.create().apply {
+                        interval = 3000
+                        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+                    }
+
+                    locationCallback = object : LocationCallback() {
+                        override fun onLocationResult(locationResult: LocationResult) {
+//                            Log.d("Detect Mock", "Location update result ${locationResult.locations}")
+                            fusedLocationClient.removeLocationUpdates(this)
+                            Handler(Looper.getMainLooper()).postDelayed({
+                                val intent = Intent(this@HomeSalesActivity, HomeSalesActivity::class.java)
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                                startActivity(intent)
+                            }, 3000)
+                        }
+                    }
+
+                    fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback!!, Looper.getMainLooper())
                 } else {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && location.isMock) {
-                        Log.d("Detect Mock", "Is Mock")
+//                        Log.d("Detect Mock", "Is Mock")
                         showDialogIsMock()
                     } else if (location.isFromMockProvider) {
-                        Log.d("Detect Mock", "Is From Mock")
+//                        Log.d("Detect Mock", "Is From Mock")
                         showDialogIsMock()
                     } else initView()
                 }
@@ -188,7 +223,7 @@ class HomeSalesActivity : AppCompatActivity() {
             }.addOnCanceledListener {
                 Log.d("Detect Mock", "Cancelled get lastLocation")
             }.addOnCompleteListener {
-                Log.d("Detect Mock", "Completed get lastLocation")
+//                Log.d("Detect Mock", "Completed get lastLocation")
             }
         } else {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
@@ -196,14 +231,18 @@ class HomeSalesActivity : AppCompatActivity() {
     }
 
     private fun showDialogIsMock() {
+        absentProgressDialog?.dismiss()
+
         val serviceIntent = Intent(this, TrackingService::class.java)
         stopService(serviceIntent)
 
+        val dialogView = layoutInflater.inflate(R.layout.modal_mock_location, null)
         AlertDialog.Builder(this)
-            .setMessage("Sistem mendeteksi lokasi yang tidak asli, nonaktifkan mode (Mock Location) pada pengaturan lalu matikan dan nyalakan ulang lokasi anda")
+            .setView(dialogView)
             .setCancelable(false)
+            .setTitle("Lokasi Mock")
             .setPositiveButton("Pengaturan") { _, _ ->
-                // Buka pengaturan untuk mengaktifkan GPS
+                // Buka pengaturan Developer Options
                 val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
                 startActivityForResult(intent, LOCATION_PERMISSION_REQUEST_CODE)
             }
@@ -211,6 +250,7 @@ class HomeSalesActivity : AppCompatActivity() {
     }
 
     private fun showGpsDisabledDialog() {
+        absentProgressDialog?.dismiss()
 
         val serviceIntent = Intent(this, TrackingService::class.java)
         stopService(serviceIntent)
@@ -291,7 +331,7 @@ class HomeSalesActivity : AppCompatActivity() {
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
 
-                        absentProgressDialog?.show()
+                        if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
                         if (selectedStore == null) getListAbsent()
                         else absentAction()
 
@@ -318,7 +358,7 @@ class HomeSalesActivity : AppCompatActivity() {
             } else {
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 //                    absentAction()
-                    absentProgressDialog?.show()
+                    if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
                     if (selectedStore == null) getListAbsent()
                     else absentAction()
                 } else {
@@ -826,7 +866,7 @@ class HomeSalesActivity : AppCompatActivity() {
             absentProgressDialog!!.setCancelable(false)
         }
 
-        absentProgressDialog!!.show()
+        if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
 
         val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
         val userChild = absentChild.child(userId.toString())
