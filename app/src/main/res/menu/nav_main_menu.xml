@@ -16,10 +16,6 @@
             android:icon="@drawable/person_black"
             android:title="@string/my_profile" />
         <item
-            android:id="@+id/nav_nearest_store"
-            android:icon="@drawable/store_black"
-            android:title="@string/nearest_store" />
-        <item
             android:id="@+id/nav_search"
             android:icon="@drawable/search_black"
             android:title="@string/search" />
@@ -83,6 +79,22 @@
 
         </item>
     </group>
+    <item
+        android:title="Maps">
+
+        <menu>
+            <item
+                android:id="@+id/nav_nearest_store"
+                android:icon="@drawable/store_black"
+                android:title="@string/nearest_store" />
+            <item
+                android:id="@+id/nav_city_store"
+                android:icon="@drawable/store_black"
+                android:title="Cari Toko Per Kota"
+                android:visible="false"/>
+        </menu>
+
+    </item>
     <item
         android:title="Lainnya">
 

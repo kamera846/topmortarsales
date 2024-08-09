@@ -153,6 +153,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
     private var cities: ArrayList<CityModel> = arrayListOf()
     private lateinit var firebaseReference: DatabaseReference
     private lateinit var progressDialog: ProgressDialog
+    private lateinit var searchCityForMaps: SearchModal
 
     // Initialize Search Engine
     private val searchDelayMillis = 500L
@@ -162,6 +163,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
     private var isSearchActive = false
     private var selectedItemsId = mutableSetOf<String>()
     private var isSelectItemActive = false
+    private var isSearchContactByCity = false
     private var selectedItemCount = 0
     private var totalProcess = 0
     private var processed = 0
@@ -224,6 +226,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         val rencanaVisitGroup = popupMenu.menu.findItem(R.id.rencana_visit_group)
         val rencanaVisit = popupMenu.menu.findItem(R.id.rencana_visit)
         val rencanaVisitPenagihan = popupMenu.menu.findItem(R.id.rencana_visit_penagihan)
+        val cityStore = popupMenu.menu.findItem(R.id.nav_city_store)
 
         searchItem.isVisible = false
         syncNowItem.isVisible = false
@@ -232,6 +235,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 cityItem.isVisible = true
                 skillItem.isVisible = true
                 tukangItem.isVisible = true
+                cityStore.isVisible = true
             }
             productsItem.isVisible = true
             userItem.isVisible = true
@@ -274,6 +278,10 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             }
             R.id.nav_nearest_store -> {
                 navigateChecklocation()
+                true
+            }
+            R.id.nav_city_store -> {
+                searchCityForMaps.show()
                 true
             }
             R.id.nav_my_profile -> {
@@ -604,6 +612,19 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         }, 1000)
     }
 
+    private fun setupDialogSearchForMaps(items: ArrayList<ModalSearchModel> = ArrayList()) {
+
+        searchCityForMaps = SearchModal(this, items)
+        searchCityForMaps.setCustomDialogListener(object: SearchModal.SearchModalListener{
+            override fun onDataReceived(data: ModalSearchModel) {
+                data.id?.let { getContactsForMaps(it) }
+            }
+
+        })
+        searchCityForMaps.searchHint = "Ketik untuk mencari…"
+
+    }
+
     private fun showPopupMenu() {
         val popupMenu = PopupMenu(this@MainActivity, icMore)
         popupMenu.inflate(R.menu.option_main_menu)
@@ -925,6 +946,47 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
     }
 
+    private fun getContactsForMaps(cityID: String) {
+
+        progressDialog.show()
+        isSearchContactByCity = true
+
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.getContacts(cityId = cityID, distributorID = userDistributorId)
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        listCoordinate = arrayListOf()
+                        listCoordinateName = arrayListOf()
+                        listCoordinateStatus = arrayListOf()
+                        listCoordinateCityID = arrayListOf()
+
+                        totalProcess = response.results.size
+                        LoopingTask(response.results).execute()
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+                        handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Daftar kontak kosong!")
+                    }
+                    else -> {
+                        handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                    }
+                }
+
+            } catch (e: Exception) {
+                handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+            } finally {
+                progressDialog.dismiss()
+            }
+
+        }
+
+    }
+
     private fun getCities() {
 
         loadingState(true)
@@ -941,12 +1003,12 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                         cities = response.results
                         val items: ArrayList<ModalSearchModel> = ArrayList()
 
-                        items.add(ModalSearchModel("-1", "Hapus filter"))
+//                        items.add(ModalSearchModel("-1", "Hapus filter"))
                         for (i in 0 until cities.size) {
                             val data = cities[i]
                             items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
                         }
-
+                        setupDialogSearchForMaps(items)
                         setupFilterTokoModal()
                     }
                     RESPONSE_STATUS_EMPTY -> {
@@ -1317,7 +1379,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
             val intent = Intent(this@MainActivity, MapsActivity::class.java)
             intent.putExtra(CONST_NEAREST_STORE, true)
-            if (isSelectItemActive) {
+            if (isSelectItemActive || isSearchContactByCity) {
                 intent.putExtra(CONST_NEAREST_STORE_HIDE_FILTER, true)
                 intent.putExtra(CONST_NEAREST_STORE_WITH_DEFAULT_RANGE, -1)
             }
@@ -1328,6 +1390,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
             progressDialog.dismiss()
             progressDialog.setMessage(getString(R.string.txt_loading))
+            isSearchContactByCity = false
             startActivity(intent)
         }
     }

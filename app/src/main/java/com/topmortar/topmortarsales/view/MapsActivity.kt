@@ -228,6 +228,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var totalProcess = 0
     private var processed = 0
     private var percentage = 0
+    private var selectedLatLng: LatLng? = null
 
 //    private val courierDrawable = R.drawable.pin_truck
     private val courierDrawable = R.drawable.pin_truck_pink_cyclamen
@@ -828,6 +829,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         override fun doInBackground(vararg params: Void?): Void? {
             val urlUtility = URLUtility(this@MapsActivity)
+            var firstItemSelected = false
             // Start For Loop
             for ((i, item) in listCoordinate!!.iterator().withIndex()) {
 
@@ -886,6 +888,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                     runOnUiThread {
                                         mMap.addMarker(markerOptions)
                                         currentFoundItemTotal ++
+                                        if (isNearestStoreHideFilter && !firstItemSelected) {
+                                            selectedLatLng = latLng
+                                            firstItemSelected = true
+                                        }
                                     }
                                 } else {
                                     Log.d("NEAREST STORE LOG", "Filter handle false")
@@ -941,8 +947,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             val isLimitKmDisabled = isNearestStoreDefaultRange == -1
             if (isLimitKmDisabled) responsiveZoom = 10
 
-            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(centerPointLatLng!!, responsiveZoom.toFloat())
-            mMap.animateCamera(cameraUpdate, durationMs, null)
+            if (isNearestStoreHideFilter && selectedLatLng != null) {
+                val cameraUpdate = CameraUpdateFactory.newLatLngZoom(selectedLatLng!!, responsiveZoom.toFloat())
+                mMap.animateCamera(cameraUpdate, durationMs, null)
+            } else {
+                val cameraUpdate = CameraUpdateFactory.newLatLngZoom(centerPointLatLng!!, responsiveZoom.toFloat())
+                mMap.animateCamera(cameraUpdate, durationMs, null)
+            }
 
             binding.textTotalNearest.text = "$currentFoundItemTotal / ${listCoordinate?.size} ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }ditemukan ${ if (!isLimitKmDisabled) "dalam radius $limitKm km" else ""}"
             if (currentFoundItemTotal > 0) {
@@ -955,7 +966,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             }
 
             binding.cardTelusuri.visibility = View.VISIBLE
-            if (listGudang.isNotEmpty()) {
+            if (listGudang.isNotEmpty() && !isNearestStoreHideFilter) {
                 binding.centerPointContainer.visibility = View.VISIBLE
                 binding.centerPointMore.setOnClickListener {
                     searchModal.show()
