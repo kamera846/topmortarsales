@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <ImageView
+        android:id="@+id/dialog_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/mock_path" />
+
+    <TextView
+        android:id="@+id/dialog_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sistem mendeteksi lokasi yang tidak asli, nonaktifkan mode (Mock Location) pada pengaturan sesuai petunjuk pada gambar. Matikan lokasi(GPS) pada perangkat anda dan mulai ulang aplikasi."
+        android:paddingTop="8dp"
+        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+</LinearLayout>

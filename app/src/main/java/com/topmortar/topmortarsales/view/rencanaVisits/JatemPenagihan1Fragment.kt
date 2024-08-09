@@ -46,6 +46,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -59,6 +60,7 @@ import com.topmortar.topmortarsales.model.RencanaVisitModel
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
+import java.util.Locale
 
 /**
  * A fragment representing a list of Items.
@@ -157,7 +159,7 @@ class JatemPenagihan1Fragment : Fragment() {
                     RESPONSE_STATUS_OK -> {
 
                         listItem = response.results
-                        listItem.sortBy { it.jatuh_tempo }
+                        listItem.sortBy { DateFormat.format(it.jatuh_tempo,"dd MMM yyyy", inputLocale = Locale.ENGLISH, outputFormat = "yyyy-MM-dd") }
 
                         setRecyclerView(listItem)
                         loadingState(false)

@@ -150,14 +150,14 @@ class NewReportActivity : AppCompatActivity() {
             // GPS tidak aktif, munculkan dialog untuk mengaktifkannya
             showGpsDisabledDialog()
         } else {
-            if (!CustomUtility(this).isServiceRunning(
-                    TrackingService::class.java)) {
+//            if (!CustomUtility(this).isServiceRunning(
+//                    TrackingService::class.java)) {
                 val serviceIntent = Intent(this, TrackingService::class.java)
                 serviceIntent.putExtra("userId", userId)
                 serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-001-$username")
-                serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
+                if (userKind == USER_KIND_COURIER) serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
                 startService(serviceIntent)
-            }
+//            }
             initContent()
         }
     }

@@ -20,6 +20,7 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.BID_VISITED
 import com.topmortar.topmortarsales.commons.PING_NORMAL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_ERROR
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -384,6 +385,13 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
                             handleMessage(context, TAG_RESPONSE_MESSAGE, "Gagal mengirim: ${ responseBody.message }")
+                            loadingState(false)
+
+                        }
+                        RESPONSE_STATUS_ERROR-> {
+
+                            val errorMessages = responseBody.error?.messages.let { if (it?.size != 0) it?.get(0) else "" }
+                            handleMessage(context, TAG_RESPONSE_MESSAGE, "Error Code ${ responseBody.error?.code } $errorMessages")
                             loadingState(false)
 
                         }

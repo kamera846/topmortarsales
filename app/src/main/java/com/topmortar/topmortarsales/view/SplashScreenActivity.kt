@@ -40,6 +40,7 @@ import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_MARKETING
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_IS_ALLOWED_LOGOUT
 import com.topmortar.topmortarsales.commons.LOGGED_IN
@@ -461,7 +462,7 @@ class SplashScreenActivity : AppCompatActivity() {
                                 })
 
                                 // Reset isAllowedLogout value
-                                val absentChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
+                                val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
                                 absentChild.child(data.id_user).child(FIREBASE_CHILD_IS_ALLOWED_LOGOUT).setValue(false)
 
                             } catch (e: Exception) {

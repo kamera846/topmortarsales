@@ -16,7 +16,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.location.LocationManager
+import android.location.Location
 import android.net.Uri
 import android.os.Build
 import android.os.Build.VERSION
@@ -52,6 +52,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dantsu.escposprinter.EscPosPrinter
 import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
 import com.dantsu.escposprinter.textparser.PrinterTextParserImg
+import com.google.android.gms.location.LocationServices
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.itextpdf.io.image.ImageDataFactory
 import com.itextpdf.io.source.ByteArrayOutputStream
@@ -523,47 +524,49 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                 urlUtility.requestLocationUpdate()
 
                 if (!urlUtility.isUrl(mapsUrl)) {
-                    val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
-                    val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+//                    val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
+//                    val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+                    fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                        if (location != null) {
 
-                    if (location != null) {
+                            // Courier Location
+                            val currentLatitude = location.latitude
+                            val currentLongitude = location.longitude
 
-                        // Courier Location
-                        val currentLatitude = location.latitude
-                        val currentLongitude = location.longitude
+                            // Store Location
+                            val coordinate = mapsUrl.split(",")
+                            val latitude = coordinate[0].toDoubleOrNull()
+                            val longitude = coordinate[1].toDoubleOrNull()
 
-                        // Store Location
-                        val coordinate = mapsUrl.split(",")
-                        val latitude = coordinate[0].toDoubleOrNull()
-                        val longitude = coordinate[1].toDoubleOrNull()
+                            if (latitude != null && longitude != null) {
 
-                        if (latitude != null && longitude != null) {
+                                // Calculate Distance
+                                val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
+                                var stringDistance = "%.3f".format(distance)
 
-                            // Calculate Distance
-                            val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
-                            var stringDistance = "%.3f".format(distance)
+                                if (stringDistance.contains(",")) stringDistance = stringDistance.replace(",", ".")
+                                shortDistance = stringDistance.toDouble()
 
-                            if (stringDistance.contains(",")) stringDistance = stringDistance.replace(",", ".")
-                            shortDistance = stringDistance.toDouble()
+                                if (distance > MAX_DISTANCE) {
+                                    val builder = AlertDialog.Builder(this)
+                                    builder.setTitle("Peringatan!")
+                                        .setMessage("Titik anda saat ini $shortDistance km dari titik toko. Cobalah untuk lebih dekat dengan toko!")
+                                        .setPositiveButton("Oke") { dialog, _ -> dialog.dismiss() }
+                                        .setNegativeButton("Buka Maps") { dialog, _ ->
+                                            val intent = Intent(this@DetailSuratJalanActivity, MapsActivity::class.java)
+                                            intent.putExtra(CONST_MAPS, mapsUrl)
+                                            intent.putExtra(CONST_MAPS_NAME, detailContact?.nama)
+                                            startActivity(intent)
+                                            dialog.dismiss()
+                                        }
+                                    builder.show()
+                                } else chooseFile()
 
-                            if (distance > MAX_DISTANCE) {
-                                val builder = AlertDialog.Builder(this)
-                                builder.setTitle("Peringatan!")
-                                    .setMessage("Titik anda saat ini $shortDistance km dari titik toko. Cobalah untuk lebih dekat dengan toko!")
-                                    .setPositiveButton("Oke") { dialog, _ -> dialog.dismiss() }
-                                    .setNegativeButton("Buka Maps") { dialog, _ ->
-                                        val intent = Intent(this@DetailSuratJalanActivity, MapsActivity::class.java)
-                                        intent.putExtra(CONST_MAPS, mapsUrl)
-                                        intent.putExtra(CONST_MAPS_NAME, detailContact?.nama)
-                                        startActivity(intent)
-                                        dialog.dismiss()
-                                    }
-                                builder.show()
-                            } else chooseFile()
+                            } else Toast.makeText(this, "Gagal memproses koordinat.", TOAST_SHORT).show()
 
-                        } else Toast.makeText(this, "Gagal memproses koordinat.", TOAST_SHORT).show()
-
-                    } else Toast.makeText(this, "Tidak dapat mengakses lokasi, refresh dan coba lagi", TOAST_SHORT).show()
+                        } else Toast.makeText(this, "Tidak dapat mengakses lokasi, refresh dan coba lagi", TOAST_SHORT).show()
+                    }
 
                 } else {
                     val message = "Untuk saat ini belum bisa closing, silahkan hubungi admin untuk update koordinatnya"
@@ -1014,7 +1017,16 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        backHandler()
+        if (isRequestSync) {
+
+            val resultIntent = Intent()
+            resultIntent.putExtra("$DETAIL_ACTIVITY_REQUEST_CODE", SYNC_NOW)
+            resultIntent.putExtra(IS_CLOSING, isClosingAction)
+            setResult(RESULT_OK, resultIntent)
+
+            super.onBackPressed()
+
+        } else super.onBackPressed()
     }
 
     /*

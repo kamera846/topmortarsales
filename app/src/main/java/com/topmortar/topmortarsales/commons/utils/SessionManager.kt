@@ -99,7 +99,7 @@ class SessionManager(context: Context) {
     }
 
     fun swipeRefreshHint(): Boolean {
-        return sharedPreferences.getBoolean("swipeRefreshHint", false)
+        return sharedPreferences.getBoolean("swipeRefreshHint", true) // set false to turn on it
     }
 
     fun userBidLimit(userBidLimit: String) {

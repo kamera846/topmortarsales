@@ -34,6 +34,7 @@ import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.PHONE_CATEGORIES
 import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_ERROR
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -259,6 +260,13 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
                             handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, message.let { if (it.isNotEmpty()) "Gagal mengirim pesan: ${ responseBody.message }" else "Gagal menyimpan kontak: ${ responseBody.message }" })
+                            loadingState(false)
+
+                        }
+                        RESPONSE_STATUS_ERROR -> {
+
+                            val errorMessages = responseBody.error?.messages.let { if (it?.size != 0) it?.get(0) else "" }
+                            handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Error Code ${ responseBody.error?.code } $errorMessages")
                             loadingState(false)
 
                         }

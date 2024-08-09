@@ -6,8 +6,10 @@ import android.Manifest
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -31,6 +33,7 @@ class TrackingService : Service() {
     private lateinit var childDelivery: DatabaseReference
     private lateinit var childAbsent: DatabaseReference
     private lateinit var childDriver: DatabaseReference
+    private var isLocationUpdating = false
 
     companion object {
         const val NOTIFICATION_ID = 1010
@@ -65,13 +68,25 @@ class TrackingService : Service() {
 
         val userId = intent?.getStringExtra("userId")
         val userDistributorId = intent?.getStringExtra("userDistributorId")
-        val deliveryId = intent?.getStringExtra("deliveryId").toString()
+        val deliveryId = intent?.getStringExtra("deliveryId")
 
         firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId ?: "-firebase-001")
         childDelivery = firebaseReference.child(FIREBASE_CHILD_DELIVERY)
         childAbsent = firebaseReference.child(FIREBASE_CHILD_ABSENT).child(userId.toString())
-        childDriver = childDelivery.child(deliveryId)
+        if (!deliveryId.isNullOrEmpty()) childDriver = childDelivery.child(deliveryId)
 
+        if (isLocationUpdating) {
+            Log.d("Service Status", "Starting, re run service")
+            stopLocationUpdates()
+            startListeningLocation(deliveryId)
+            return
+        }
+
+        startListeningLocation(deliveryId)
+    }
+
+    private fun startListeningLocation(deliveryId: String?) {
+        Log.d("Service Status", "Started")
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         locationRequest = LocationRequest.create()
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
@@ -79,13 +94,16 @@ class TrackingService : Service() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
 
-                val driverLocation = locationResult.lastLocation!!
-                childDriver.child("lat").setValue(driverLocation.latitude)
-                childDriver.child("lng").setValue(driverLocation.longitude)
+                val userLocation = locationResult.lastLocation!!
 
-                childAbsent.child("lat").setValue(driverLocation.latitude)
-                childAbsent.child("lng").setValue(driverLocation.longitude)
+                childAbsent.child("lat").setValue(userLocation.latitude)
+                childAbsent.child("lng").setValue(userLocation.longitude)
                 childAbsent.child("lastTracking").setValue(DateFormat.now())
+
+                if (!deliveryId.isNullOrEmpty()) {
+                    childDriver.child("lat").setValue(userLocation.latitude)
+                    childDriver.child("lng").setValue(userLocation.longitude)
+                }
 
             }
         }
@@ -95,11 +113,14 @@ class TrackingService : Service() {
             ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
         ) return
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback!!, Looper.getMainLooper())
+        isLocationUpdating = true
     }
 
     private fun stopLocationUpdates() {
+        Log.d("Service Status", "Stopped")
         fusedLocationClient.removeLocationUpdates(locationCallback!!)
-        if (locationCallback != null) locationCallback = null
+        locationCallback = null
+        isLocationUpdating = false
     }
 
     override fun onBind(intent: Intent?): IBinder? {
