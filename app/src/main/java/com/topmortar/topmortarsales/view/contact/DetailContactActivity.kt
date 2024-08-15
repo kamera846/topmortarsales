@@ -1559,7 +1559,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             val bottomSheetLayout = layoutInflater.inflate(R.layout.fragment_bottom_sheet_detail_contact, parentLayout, false)
 
             val invoiceOption = bottomSheetLayout.findViewById<LinearLayout>(R.id.invoiceOption)
-            val sjOption = bottomSheetLayout.findViewById<LinearLayout>(R.id.suratJalanOption)
             val reportOption = bottomSheetLayout.findViewById<LinearLayout>(R.id.reportOption)
             val btnNewReport = bottomSheetLayout.findViewById<Button>(R.id.btnNewReport)
             val reportsTitle = bottomSheetLayout.findViewById<TextView>(R.id.reportsTitle)
@@ -1766,10 +1765,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                         if (data is Map<*, *>) {
                             // Melakukan casting ke tipe Map<String, Any>
-                            val resultMap = data as Map<String, Any>
+                            val resultMap = data as? Map<*, *>
 
                             // Membuat objek ContactSales baru
-                            val contactSales = ContactSales(username = resultMap["username"].toString())
+                            val contactSales = ContactSales(username = resultMap?.get("username").toString())
 
                             binding.textBy.visibility = View.VISIBLE
                             binding.textBy.text = " " + getString(R.string.text_by) + " " + contactSales.username

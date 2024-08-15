@@ -144,7 +144,7 @@ class HistoryVisitedActivity : AppCompatActivity() {
     }
 
     @Subscribe
-    fun onEventBus(event: EventBusUtils.ContactModelEvent) {
+    fun onEventBus() {
 //        navigateDetailContact(event.data)
         AlertDialog.Builder(this)
             .setTitle("Peringatan!")

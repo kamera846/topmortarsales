@@ -12,6 +12,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.TooltipCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getDrawable
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
@@ -63,10 +64,8 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
             if (chatItem.is_birthday == "1") icCake.visibility = View.VISIBLE
             else icCake.visibility = View.GONE
             tvContactName.text = chatItem.nama
-            tvPhoneNumber.text = if (chatItem.deliveryStatus.isNotEmpty()) {
-                chatItem.deliveryStatus
-            } else {
-                if (chatItem.nomorhp.isNotEmpty()) "+${ chatItem.nomorhp }" else chatItem.created_at
+            tvPhoneNumber.text = chatItem.deliveryStatus.ifEmpty {
+                if (chatItem.nomorhp.isNotEmpty()) "+${chatItem.nomorhp}" else chatItem.created_at
             }
             setupStatus(chatItem.store_status)
 
@@ -81,9 +80,9 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
 //            checkBoxItem.isChecked = selectedItems.get(position, false)
             checkBoxItem.isChecked = selectedItemsId.contains(chatItem.id_contact)
             itemView.setBackgroundColor(
-//                if (selectedItems.get(position, false)) itemView.context.resources.getColor(R.color.primary15)
-                if (selectedItemsId.contains(chatItem.id_contact)) itemView.context.resources.getColor(R.color.primary15)
-                else itemView.context.resources.getColor(R.color.baseBackground)
+//                if (selectedItems.get(position, false)) ContextCompat.getColor(itemView.context, R.color.primary15)
+                if (selectedItemsId.contains(chatItem.id_contact)) ContextCompat.getColor(itemView.context, R.color.primary15)
+                else ContextCompat.getColor(itemView.context, R.color.baseBackground)
             )
         }
 
@@ -202,10 +201,13 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
     }
 
     fun clearSelections() {
-//        selectedItems.clear()
+        val selectedPositions = selectedItemsId.toMutableSet() // Clone untuk menghindari ConcurrentModificationException
         selectedItemsId.clear()
-        notifyDataSetChanged()
+        for ((position, _) in selectedPositions.withIndex() ) {
+            notifyItemChanged(position)
+        }
     }
+
 
     fun getSelectedItems() {
 //        val items = arrayListOf<ContactModel>()

@@ -173,7 +173,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
         val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
 
-        if (!formValidation(phone = phone, name = name, owner = owner, mapsUrl = mapsUrl, message = message, phoneCategoryPosition = phoneCategoryPosition)) return
+        if (!formValidation(phone = phone, name = name, owner = owner, mapsUrl = mapsUrl, message = message)) return
 
         birthday = if (birthday.isEmpty()) "0000-00-00"
         else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
@@ -463,11 +463,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
     }
 
-    private fun formValidation(phone: String, name: String, owner: String = "", mapsUrl: String = "", message: String = "", phoneCategoryPosition: Int = 0): Boolean {
-//        if (phoneCategoryPosition == 0) {
-//            Toast.makeText(this, "Pilih kategori untuk nomor telpon terlebih dahulu", TOAST_LONG).show()
-//            false
-//        } else
+    private fun formValidation(phone: String, name: String, owner: String = "", mapsUrl: String = "", message: String = ""): Boolean {
         return if (phone.isEmpty()) {
             etPhone.error = "Nomor telpon wajib diisi!"
             etPhone.requestFocus()

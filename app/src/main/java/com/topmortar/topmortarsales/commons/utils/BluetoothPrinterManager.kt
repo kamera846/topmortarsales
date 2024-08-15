@@ -1,19 +1,14 @@
 package com.topmortar.topmortarsales.commons.utils
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.content.Context
-import android.content.pm.PackageManager
-import android.util.Log
-import androidx.core.app.ActivityCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.OutputStream
-import java.util.*
-import kotlin.collections.ArrayList
+import java.util.UUID
 
 class BluetoothPrinterManager {
 
@@ -39,8 +34,8 @@ class BluetoothPrinterManager {
         val resetBoldCommand = byteArrayOf(0x1B, 0x45, 0x00) // ESC E n (n = 0: Reset Bold)
         val underlineCommand = byteArrayOf(0x1B, 0x2D, 0x01) // ESC - n (n = 1: Underline)
         val resetUnderlineCommand = byteArrayOf(0x1B, 0x2D, 0x00) // ESC - n (n = 0: Underline)
-        val text = (" ".repeat(spacesBeforeCenter) + text + "\n").toByteArray()
-        return boldCommand + underlineCommand + text + resetBoldCommand + resetUnderlineCommand
+        val newText = (" ".repeat(spacesBeforeCenter) + text + "\n").toByteArray()
+        return boldCommand + underlineCommand + newText + resetBoldCommand + resetUnderlineCommand
     }
     fun textBetween(textLeft: String, textRight: String): ByteArray {
         val spacesBeforeRightAligned = 48 - textLeft.length - textRight.length

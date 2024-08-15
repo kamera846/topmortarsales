@@ -1,9 +1,10 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.adapter.viewpager
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
-import com.topmortar.topmortarsales.view.user.UserOnGoingStoreFragment
 import com.topmortar.topmortarsales.view.user.UserVisitedStoreFragment
 
 class UserProfileViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
@@ -40,7 +41,7 @@ class UserProfileViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm
 //                    }
 //
 //                })
-//                return fragment
+//                fragment
 //
 //            } 0 -> {
 
@@ -53,7 +54,7 @@ class UserProfileViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm
                     }
 
                 })
-                return fragment
+                fragment
 
             } else -> {
 
@@ -66,7 +67,7 @@ class UserProfileViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm
                     }
 
                 })
-                return fragment
+                fragment
 
             }
         }

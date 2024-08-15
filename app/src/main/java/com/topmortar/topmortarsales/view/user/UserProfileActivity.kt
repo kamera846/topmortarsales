@@ -51,7 +51,6 @@ import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
-import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
@@ -353,7 +352,7 @@ class UserProfileActivity : AppCompatActivity() {
     }
 
     @Subscribe
-    fun onEventBus(event: EventBusUtils.ContactModelEvent) {
+    fun onEventBus() {
 //        navigateDetailContact(event.data)
     }
 

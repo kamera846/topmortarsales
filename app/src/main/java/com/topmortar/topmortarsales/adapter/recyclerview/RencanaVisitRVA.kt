@@ -12,6 +12,7 @@ import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.utils.DateFormat
@@ -50,7 +51,7 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
         private val badgeNew: TextView = itemView.findViewById(R.id.textCornerBadge)
         val checkBoxItem: CheckBox = itemView.findViewById(R.id.checkbox)
 
-        fun bind(item: RencanaVisitModel) {
+        fun bind(item: RencanaVisitModel, position: Int) {
 
             val responseDateCounter = if (typeRencana == "jatemPenagihan1") {
                 item.jatuh_tempo
@@ -82,10 +83,10 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
             checkBoxItem.isChecked = selectedItems.get(position, false)
             itemView.setBackgroundColor(
                 if (selectedItems.get(position, false)) {
-                    itemView.context.resources.getColor(R.color.primary15)
+                    ContextCompat.getColor(itemView.context, R.color.primary15)
                 } else {
-                    if (dateCounter > 4 && (typeRencana == "jatemPenagihan1" || typeRencana == "jatemPenagihan2" || typeRencana == "jatemPenagihan3")) itemView.context.resources.getColor(R.color.primary15)
-                    else itemView.context.resources.getColor(R.color.baseBackground)
+                    if (dateCounter > 4 && (typeRencana == "jatemPenagihan1" || typeRencana == "jatemPenagihan2" || typeRencana == "jatemPenagihan3")) ContextCompat.getColor(itemView.context, R.color.primary15)
+                    else ContextCompat.getColor(itemView.context, R.color.baseBackground)
                 }
             )
 
@@ -133,7 +134,7 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
 
         val item = listItem[position]
 
-        holder.bind(item)
+        holder.bind(item, position)
         if (!isSelectBarActive) holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
 
         holder.itemView.setOnClickListener { if (isSelectBarActive) toggleSelection(holder, position) else onItemClick(holder, position) }
@@ -185,9 +186,13 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
     }
 
     fun clearSelections() {
+        val selectedPositions = selectedItems.clone() // Clone untuk menghindari ConcurrentModificationException
         selectedItems.clear()
-        notifyDataSetChanged()
+        for (i in 0 until selectedPositions.size()) {
+            notifyItemChanged(selectedPositions.keyAt(i))
+        }
     }
+
 
     fun getSelectedItems() {
         val items = arrayListOf<RencanaVisitModel>()

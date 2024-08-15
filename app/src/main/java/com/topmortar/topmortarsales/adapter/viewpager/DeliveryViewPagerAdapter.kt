@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.adapter.viewpager
 
 import androidx.fragment.app.Fragment
@@ -40,29 +42,8 @@ class DeliveryViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
                     }
 
                 })
-                return targetFragment
+                targetFragment
 
-//            } 1 -> {
-//
-//                progressFragment = DeliveryProgressFragment()
-//                progressFragment.setCounterItem(object : DeliveryProgressFragment.CounterItem{
-//                    override fun counterItem(count: Int) {
-//                        listener?.counterItem(count, 1)
-//                    }
-//
-//                })
-//                return progressFragment
-//
-//            } 2 -> {
-//
-//                endedFragment = DeliveryEndedFragment()
-//                endedFragment.setCounterItem(object : DeliveryEndedFragment.CounterItem{
-//                    override fun counterItem(count: Int) {
-//                        listener?.counterItem(count, 2)
-//                    }
-//
-//                })
-//                return endedFragment
             } 1 -> {
 
                 endedFragment = DeliveryEndedFragment()
@@ -72,7 +53,7 @@ class DeliveryViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
                     }
 
                 })
-                return endedFragment
+                endedFragment
 
             } else -> {
 
@@ -83,7 +64,7 @@ class DeliveryViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
                     }
 
                 })
-                return targetFragment
+                targetFragment
 
             }
         }
@@ -96,8 +77,6 @@ class DeliveryViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
     override fun getPageTitle(position: Int): CharSequence {
         return when (position) {
             0 -> "Target"
-//            1 -> "Berlangsung"
-//            2 -> "Riwayat"
             1 -> "Riwayat"
             else -> "Target"
         }

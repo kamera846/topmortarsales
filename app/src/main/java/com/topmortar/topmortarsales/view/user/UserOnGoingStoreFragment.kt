@@ -389,7 +389,7 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
     }
 
     @Subscribe
-    fun onEventBus(event: EventBusUtils.MessageEvent) {
+    fun onEventBus() {
     }
 
     override fun onDestroyView() {

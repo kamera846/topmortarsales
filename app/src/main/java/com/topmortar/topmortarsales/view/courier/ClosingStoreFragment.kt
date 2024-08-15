@@ -56,7 +56,6 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
-import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -373,7 +372,7 @@ class ClosingStoreFragment : Fragment() {
     }
 
     @Subscribe
-    fun onEventBus(event: EventBusUtils.MessageEvent) {
+    fun onEventBus() {
     }
 
     override fun onDestroyView() {

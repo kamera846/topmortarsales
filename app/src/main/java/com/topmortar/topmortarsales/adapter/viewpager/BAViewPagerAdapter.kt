@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.adapter.viewpager
 
 import androidx.fragment.app.Fragment
@@ -33,7 +35,7 @@ class BAViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
                     }
 
                 })
-                return fragmentClosing
+                fragmentClosing
 
             } else -> {
 
@@ -44,7 +46,7 @@ class BAViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
                     }
 
                 })
-                return fragmentBasecamp
+                fragmentBasecamp
 
             }
         }
