@@ -21,6 +21,8 @@
 #-renamesourcefileattribute SourceFile
 -keep class com.example.** { *; }
 -keep interface com.example.** { *; }
+-keepattributes SourceFile,LineNumberTable
+-keep class com.google.firebase.crashlytics.** { *; }
 -dontwarn org.bouncycastle.asn1.ASN1Encodable
 -dontwarn org.bouncycastle.asn1.ASN1InputStream
 -dontwarn org.bouncycastle.asn1.ASN1Integer
