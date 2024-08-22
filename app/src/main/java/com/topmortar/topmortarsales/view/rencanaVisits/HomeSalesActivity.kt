@@ -63,11 +63,14 @@ import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAX_REPORT_DISTANCE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SELECTED_ABSENT_MODE
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
@@ -78,6 +81,7 @@ import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
+import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
@@ -753,7 +757,7 @@ class HomeSalesActivity : AppCompatActivity() {
                                         }
                                     builder.show()
                                 } else {
-                                    executeAbsentReport()
+                                    executeAbsentReport(shortDistance)
                                 }
 
                             } else {
@@ -801,54 +805,123 @@ class HomeSalesActivity : AppCompatActivity() {
         }
     }
 
-    private fun executeAbsentReport() {
+    private fun executeAbsentReport(shortDistance: String = "") {
 
         if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
 
-        val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
-        val userChild = absentChild.child(userId.toString())
-        val userLevel = when (userKind) {
-            USER_KIND_PENAGIHAN -> AUTH_LEVEL_PENAGIHAN
-            USER_KIND_SALES -> AUTH_LEVEL_SALES
-            USER_KIND_COURIER -> AUTH_LEVEL_COURIER
-            else -> ""
-        }
+        lifecycleScope.launch {
+            try {
 
-        userChild.child("userLevel").setValue(userLevel)
-        userChild.child("id").setValue(userId)
-        userChild.child("idCity").setValue(userCity)
-        userChild.child("username").setValue(userName)
-        userChild.child("fullname").setValue(userFullName)
-        userChild.child("isOnline").setValue(true)
+                var visitReport = "Absen masuk\n•by system•"
+                var absentType = "absen_in"
 
-        if (!isAbsentMorningNow) {
+                if (isAbsentMorningNow) {
+                    visitReport = "Absen pulang\n•by system•"
+                    absentType = "absen_out"
+                }
 
-            val absentDateTime = DateFormat.now()
-            userChild.child("morningDateTime").setValue(absentDateTime)
-            userChild.child("lastSeen").setValue(absentDateTime)
+                val response = if (absentMode == ABSENT_MODE_BASECAMP) {
+                    apiService.salesAbsentInBasecamp(
+                        idGudang = createPartFromString(selectedStore?.id!!),
+                        idUser = createPartFromString(userId!!),
+                        laporanVisit = createPartFromString(visitReport),
+                        source = createPartFromString(absentType),
+                        distanceVisit = createPartFromString(shortDistance),
+                        idInvoice = createPartFromString("0"),
+                        isPay = createPartFromString("0"),
+                    )
+                } else {
+                    apiService.salesAbsentInStore(
+                        idContact = createPartFromString(selectedStore?.id!!),
+                        idUser = createPartFromString(userId!!),
+                        laporanVisit = createPartFromString(visitReport),
+                        source = createPartFromString(absentType),
+                        distanceVisit = createPartFromString(shortDistance),
+                        idInvoice = createPartFromString("0"),
+                        isPay = createPartFromString("0"),
+                    )
+                }
 
-            sessionManager.absentDateTime(absentDateTime)
+                if (response.isSuccessful) {
 
-            val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
-            serviceIntent.putExtra("userId", userId)
-            serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
-            this@HomeSalesActivity.startService(serviceIntent)
+                    val responseBody = response.body()!!
 
-            absentProgressDialog?.dismiss()
-            checkAbsent()
-        } else {
+                    when (responseBody.status) {
+                        RESPONSE_STATUS_OK -> {
 
-            val absentDateTime = DateFormat.now()
-            userChild.child("eveningDateTime").setValue(absentDateTime)
-            userChild.child("lastSeen").setValue(absentDateTime)
+                            val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+                            val userChild = absentChild.child(userId.toString())
+                            val userLevel = when (userKind) {
+                                USER_KIND_PENAGIHAN -> AUTH_LEVEL_PENAGIHAN
+                                USER_KIND_SALES -> AUTH_LEVEL_SALES
+                                USER_KIND_COURIER -> AUTH_LEVEL_COURIER
+                                else -> ""
+                            }
 
-            sessionManager.absentDateTime(absentDateTime)
+                            userChild.child("userLevel").setValue(userLevel)
+                            userChild.child("id").setValue(userId)
+                            userChild.child("idCity").setValue(userCity)
+                            userChild.child("username").setValue(userName)
+                            userChild.child("fullname").setValue(userFullName)
+                            userChild.child("isOnline").setValue(true)
 
-            val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
-            this@HomeSalesActivity.stopService(serviceIntent)
+                            if (!isAbsentMorningNow) {
 
-            absentProgressDialog?.dismiss()
-            checkAbsent()
+                                val absentDateTime = DateFormat.now()
+                                userChild.child("morningDateTime").setValue(absentDateTime)
+                                userChild.child("lastSeen").setValue(absentDateTime)
+
+                                sessionManager.absentDateTime(absentDateTime)
+
+                                val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
+                                serviceIntent.putExtra("userId", userId)
+                                serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
+                                this@HomeSalesActivity.startService(serviceIntent)
+
+                                absentProgressDialog?.dismiss()
+                                checkAbsent()
+                            } else {
+
+                                val absentDateTime = DateFormat.now()
+                                userChild.child("eveningDateTime").setValue(absentDateTime)
+                                userChild.child("lastSeen").setValue(absentDateTime)
+
+                                sessionManager.absentDateTime(absentDateTime)
+
+                                val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
+                                this@HomeSalesActivity.stopService(serviceIntent)
+
+                                absentProgressDialog?.dismiss()
+                                checkAbsent()
+                            }
+
+                        }
+                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+
+                            absentProgressDialog?.dismiss()
+                            handleMessage(this@HomeSalesActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan absen! Message: ${ responseBody.message }")
+
+                        }
+                        else -> {
+
+                            absentProgressDialog?.dismiss()
+                            handleMessage(this@HomeSalesActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+
+                        }
+                    }
+                } else {
+
+                    absentProgressDialog?.dismiss()
+                    handleMessage(this@HomeSalesActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan absen! Error: " + response.message())
+
+                }
+
+            } catch (e: Exception) {
+
+                handleMessage(this@HomeSalesActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+
+            }
+
         }
     }
 

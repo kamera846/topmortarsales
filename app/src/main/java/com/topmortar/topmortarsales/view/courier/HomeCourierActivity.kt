@@ -18,7 +18,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -932,12 +931,17 @@ class HomeCourierActivity : AppCompatActivity() {
             try {
 
                 var visitReport = "Absen masuk\n•by system•"
-                if (isAbsentMorningNow) visitReport = "Absen pulang\n•by system•"
+                var absentType = "absen_in"
+                if (isAbsentMorningNow) {
+                    visitReport = "Absen pulang\n•by system•"
+                    absentType = "absen_out"
+                }
 
                 val response = apiService.makeVisitCourierReport(
                     idGudang = createPartFromString(selectedBasecamp?.id!!),
                     idUser = createPartFromString(userId!!),
                     laporanVisit = createPartFromString(visitReport),
+                    source = createPartFromString(absentType),
                     distanceVisit = createPartFromString(shortDistance)
                 )
 
