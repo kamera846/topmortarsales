@@ -389,8 +389,9 @@ class HomeSalesActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
 
-                    val response = if (userKind == USER_KIND_PENAGIHAN) apiService.getContactsByDistributor(distributorID = userDistributorId ?: "0")
-                    else apiService.getContacts(cityId = userCity ?: "0", distributorID = userDistributorId ?: "0")
+//                    val response = if (userKind == USER_KIND_PENAGIHAN) apiService.getContactsByDistributor(distributorID = userDistributorId ?: "0")
+//                    else apiService.getContacts(cityId = userCity ?: "0", distributorID = userDistributorId ?: "0")
+                    val response = apiService.getContacts(cityId = userCity ?: "0", distributorID = userDistributorId ?: "0")
 
                     when (response.status) {
                         RESPONSE_STATUS_OK -> {
