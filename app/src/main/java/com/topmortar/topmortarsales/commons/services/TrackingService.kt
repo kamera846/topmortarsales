@@ -9,7 +9,6 @@ import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -23,6 +22,7 @@ import com.topmortar.topmortarsales.commons.utils.CustomNotificationBuilder
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.view.SplashScreenActivity
+import java.util.Calendar
 
 class TrackingService : Service() {
 
@@ -43,6 +43,7 @@ class TrackingService : Service() {
 
         startForegroundService()
         startLocationUpdates(intent)
+        scheduleServiceStop()
         return START_STICKY
     }
 
@@ -114,6 +115,28 @@ class TrackingService : Service() {
         ) return
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback!!, Looper.getMainLooper())
         isLocationUpdating = true
+    }
+
+    private fun scheduleServiceStop() {
+        val now = System.currentTimeMillis()
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = now
+            set(Calendar.HOUR_OF_DAY, 22) // Set to 10 PM
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+        if (calendar.timeInMillis < now) {
+            calendar.add(Calendar.DAY_OF_MONTH, 1)
+        }
+
+        val stopTimeMillis = calendar.timeInMillis
+        val delayMillis = stopTimeMillis - now
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            stopSelf()
+        }, delayMillis)
     }
 
     private fun stopLocationUpdates() {
