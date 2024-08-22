@@ -505,7 +505,7 @@ class UserProfileActivity : AppCompatActivity() {
             absentChild.child(sessionManager.userID() ?: "0").child(FIREBASE_CHILD_IS_ALLOWED_LOGOUT).setValue(false)
 
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
-//                Log.d("Kurir Logout", "${sessionManager.userDistributor()} : ${sessionManager.userID()}")
+
                 CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor() ?: "-custom-019", sessionManager.userID().toString())
             }
         } catch (e: Exception) {

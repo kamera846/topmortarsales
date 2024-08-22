@@ -893,23 +893,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                             firstItemSelected = true
                                         }
                                     }
-                                } else {
-                                    Log.d("NEAREST STORE LOG", "Filter handle false")
                                 }
 
-                            } else {
-                                Log.d("NEAREST STORE LOG", "Distance handle false")
                             }
-
-                        } else {
-                            Log.d("NEAREST STORE LOG", "Longitude & latitude handle false")
                         }
-                    } else {
-                        Log.d("NEAREST STORE LOG", "Coordinate size ${coordinates.size} handle false")
                     }
-
-                } else {
-                    Log.d("NEAREST STORE LOG", "Url handle false")
                 }
 
             } // End For Loop
@@ -1832,7 +1820,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                     }
                                 } else {
                                     progressDialog.dismiss()
-                                    Log.d(TAG_RESPONSE_CONTACT, "Child Store Error!")
+
                                     handleMessage(
                                         this@MapsActivity, TAG_RESPONSE_CONTACT,
                                         "Failed run service. Exception child store not found"
@@ -1842,7 +1830,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                             override fun onCancelled(error: DatabaseError) {
                                 progressDialog.dismiss()
-                                Log.d(TAG_RESPONSE_CONTACT, "Child Stores Error!")
+
                                 handleMessage(
                                     this@MapsActivity, TAG_RESPONSE_CONTACT,
                                     "Failed run service. Exception $error"
@@ -1879,7 +1867,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             override fun onCancelled(error: DatabaseError) {
                 progressDialog.dismiss()
-                Log.d(TAG_RESPONSE_CONTACT, "Child Driver Error!")
+
                 handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
                     "Failed run service. Exception $error"
                 )
@@ -1960,14 +1948,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                             courierMarker?.position = courierLatLng
                         }
                     } else {
-                        Log.d("Tracking Courier", "Not exist")
+
                         progressDialog.dismiss()
                         handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
                             "Tidak dapat mendeteksi lokasi pengguna!"
                         )
                     }
                 } else {
-                    Log.d("Tracking Courier", "Not exist")
+
                     progressDialog.dismiss()
                     handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
                         "Tidak dapat mendeteksi lokasi pengguna!"
@@ -1977,7 +1965,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             override fun onCancelled(error: DatabaseError) {
                 progressDialog.dismiss()
-                Log.d("Tracking Courier", "On Cancelled")
+
                 handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
                     "Failed run service. Exception $error"
                 )
@@ -2065,7 +2053,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         binding.userTrackingSuggestion.visibility = View.GONE
                     }
                 } else {
-                    Log.d("Tracking Courier", "Absent not exist")
+
                     progressDialog.dismiss()
                     handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
                         "Tidak dapat mendeteksi lokasi kurir!"
@@ -2075,7 +2063,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             override fun onCancelled(error: DatabaseError) {
                 progressDialog.dismiss()
-                Log.d("Tracking Courier", "Absent on cancelled")
+
                 handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
                     "Failed run service. Exception $error"
                 )
@@ -2277,7 +2265,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-                        Log.d("Tracking History Delivery", "Empty")
+
                         progressDialog.dismiss()
                         handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
                             "Tidak dapat menemukan riwayat pengiriman"
@@ -2286,7 +2274,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     }
                     else -> {
 
-                        Log.d("Tracking History Delivery", "Empty")
+
                         progressDialog.dismiss()
                         handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
                             "Tidak dapat menemukan riwayat pengiriman. Error " + response.message
@@ -2297,7 +2285,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             } catch (e: Exception) {
 
-                Log.d("Tracking History Delivery", "Failed request")
+
                 progressDialog.dismiss()
                 handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
                     "Failed run service. Exception " + e.message
@@ -2366,7 +2354,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     @Subscribe
     fun onEventBus(event: EventBusUtils.UserAbsentModelEvent) {
-        Log.d("User Tracking", "${event.data}")
+
         refreshUserTracked(event.data!!)
     }
 

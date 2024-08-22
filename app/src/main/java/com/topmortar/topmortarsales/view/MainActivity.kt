@@ -1089,7 +1089,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                         }
 
                     } RESPONSE_STATUS_EMPTY -> missingDataHandler()
-                    else -> Log.d("TAG USER LOGGED IN", "Failed get data!")
+
                 }
 
             } catch (e: Exception) {

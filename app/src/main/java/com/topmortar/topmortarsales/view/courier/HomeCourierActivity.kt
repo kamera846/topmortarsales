@@ -200,12 +200,12 @@ class HomeCourierActivity : AppCompatActivity() {
 
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
             fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-//                Log.d("Detect Mock", "Succeed get lastLocation")
+
                 if (location == null) {
-//                    Log.d("Detect Mock", "Location null")
+
 //                    checkLocationPermission()
                     if (locationCallback != null) {
-//                        Log.d("Detect Mock", "Callback not null")
+
                         fusedLocationClient.removeLocationUpdates(locationCallback!!)
                     }
 
@@ -216,7 +216,7 @@ class HomeCourierActivity : AppCompatActivity() {
 
                     locationCallback = object : LocationCallback() {
                         override fun onLocationResult(locationResult: LocationResult) {
-//                            Log.d("Detect Mock", "Location update result ${locationResult.locations}")
+
                             fusedLocationClient.removeLocationUpdates(this)
                             Handler(Looper.getMainLooper()).postDelayed({
                                 val intent = Intent(this@HomeCourierActivity, HomeCourierActivity::class.java)
@@ -229,19 +229,13 @@ class HomeCourierActivity : AppCompatActivity() {
                     fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback!!, Looper.getMainLooper())
                 } else {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && location.isMock) {
-//                        Log.d("Detect Mock", "Is Mock")
+
                         showDialogIsMock()
                     } else if (location.isFromMockProvider) {
-//                        Log.d("Detect Mock", "Is From Mock")
+
                         showDialogIsMock()
                     } else initView()
                 }
-            }.addOnFailureListener {
-                Log.d("Detect Mock", "Failed get lastLocation. Err: ${it.message}. Stacktrace: ${it.stackTrace}")
-            }.addOnCanceledListener {
-                Log.d("Detect Mock", "Cancelled get lastLocation")
-            }.addOnCompleteListener {
-//                Log.d("Detect Mock", "Completed get lastLocation")
             }
         } else {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
@@ -393,7 +387,7 @@ class HomeCourierActivity : AppCompatActivity() {
                             if (DateFormat.dateAfterNow(absentMorningDate)) {
                                 isAbsentMorningNow = false
                                 lockMenuItem(true)
-                                Log.d("ABSENT COURIER", "Belum absen pagi")
+
                             } else {
 
                                 val serviceIntentDD = Intent(this@HomeCourierActivity, TrackingService::class.java)
@@ -401,7 +395,7 @@ class HomeCourierActivity : AppCompatActivity() {
                                 serviceIntentDD.putExtra("userDistributorId", userDistributorId ?: "-start-004-$userName")
                                 serviceIntentDD.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
                                 this@HomeCourierActivity.startService(serviceIntentDD)
-                                Log.d("ABSENT COURIER", "Sudah absen pagi")
+
                                 isAbsentMorningNow = true
 
                                 if (snapshot.child("eveningDateTime").exists()) {
@@ -418,13 +412,13 @@ class HomeCourierActivity : AppCompatActivity() {
 //                                                serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
 //                                                this@HomeCourierActivity.startService(serviceIntent)
 //                                            }
-                                            Log.d("ABSENT COURIER", "Belum absen sore")
+
                                             isAbsentEveningNow = false
                                             lockMenuItem(false)
                                         } else {
                                             val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
                                             this@HomeCourierActivity.stopService(serviceIntent)
-                                            Log.d("ABSENT COURIER", "Sudah absen sore")
+
                                             isAbsentEveningNow = true
                                             lockMenuItem(true)
                                         }
@@ -437,7 +431,7 @@ class HomeCourierActivity : AppCompatActivity() {
 //                                            serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
 //                                            this@HomeCourierActivity.startService(serviceIntent)
 //                                        }
-                                        Log.d("ABSENT COURIER", "Tgl absen sore tidak ada")
+
                                         isAbsentEveningNow = false
                                         lockMenuItem(false)
                                     }
@@ -449,7 +443,7 @@ class HomeCourierActivity : AppCompatActivity() {
 //                                        serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
 //                                        this@HomeCourierActivity.startService(serviceIntent)
 //                                    }
-                                    Log.d("ABSENT COURIER", "Kolom absen sore tidak ada")
+
                                     isAbsentEveningNow = false
                                     lockMenuItem(false)
                                 }
@@ -457,17 +451,17 @@ class HomeCourierActivity : AppCompatActivity() {
                             }
 
                         } else {
-                            Log.d("ABSENT COURIER", "Tgl absen pagi tidak ada")
+
                             isAbsentMorningNow = false
                             lockMenuItem(true)
                         }
                     } else {
-                        Log.d("ABSENT COURIER", "Kolom absen pagi tidak ada")
+
                         isAbsentMorningNow = false
                         lockMenuItem(true)
                     }
                 } else {
-                    Log.d("ABSENT COURIER", "Snapshot tidak ada")
+
                     isAbsentMorningNow = false
                     lockMenuItem(true)
                 }
@@ -1181,11 +1175,11 @@ class HomeCourierActivity : AppCompatActivity() {
                         }
 
                     } RESPONSE_STATUS_EMPTY -> logoutHandler()
-                    else -> Log.d("TAG USER LOGGED IN", "Failed get data!")
+
                 }
 
             } catch (e: Exception) {
-                Log.d("TAG USER LOGGED IN", "Failed run service. Exception " + e.message)
+
             }
 
         }
@@ -1210,7 +1204,7 @@ class HomeCourierActivity : AppCompatActivity() {
             userDevice.child("logout_at").setValue(DateFormat.now())
             userDevice.child("login_at").setValue("")
         } catch (e: Exception) {
-            Log.d("Firebase Auth", "$e")
+
         }
 
         sessionManager.setLoggedIn(LOGGED_OUT)

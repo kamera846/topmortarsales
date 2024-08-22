@@ -40,7 +40,7 @@ class TrackingService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-//        Log.d("Tracking Service", "On Start Service")
+
         startForegroundService()
         startLocationUpdates(intent)
         return START_STICKY
@@ -76,7 +76,7 @@ class TrackingService : Service() {
         if (!deliveryId.isNullOrEmpty()) childDriver = childDelivery.child(deliveryId)
 
         if (isLocationUpdating) {
-            Log.d("Service Status", "Starting, re run service")
+
             stopLocationUpdates()
             startListeningLocation(deliveryId)
             return
@@ -86,7 +86,7 @@ class TrackingService : Service() {
     }
 
     private fun startListeningLocation(deliveryId: String?) {
-        Log.d("Service Status", "Started")
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         locationRequest = LocationRequest.create()
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
@@ -117,7 +117,7 @@ class TrackingService : Service() {
     }
 
     private fun stopLocationUpdates() {
-        Log.d("Service Status", "Stopped")
+
         fusedLocationClient.removeLocationUpdates(locationCallback!!)
         locationCallback = null
         isLocationUpdating = false

@@ -298,9 +298,9 @@ class PreviewClosingActivity : AppCompatActivity() {
 
                         val courier = snapshot.child("courier").getValue(DeliveryModel.Courier::class.java)
                         val store = stores.getValue(DeliveryModel.Store::class.java)
-//                        Log.d("Item to closing", "$latLng")
-//                        Log.d("Item to closing", "$courier")
-//                        Log.d("Item to closing", "$store")
+
+
+
 
                         val endDateTime = DateFormat.now()
 
@@ -346,14 +346,14 @@ class PreviewClosingActivity : AppCompatActivity() {
                                                 RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
 
                                                     finishClosing(message)
-                                                    Log.d("Item to closing", "Success save item")
+
 
                                                 }
 
                                                 else -> {
 
                                                     finishClosing(message)
-                                                    Log.d("Item to closing", "Failed to save item: " + response.message)
+
 
                                                 }
                                             }
@@ -389,14 +389,14 @@ class PreviewClosingActivity : AppCompatActivity() {
                                                 RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
 
                                                     finishClosing(message)
-                                                    Log.d("Item to closing", "Success save item: With error listening location. " + it.message)
+
 
                                                 }
 
                                                 else -> {
 
                                                     finishClosing(message)
-                                                    Log.d("Item to closing", "Failed to save item: " + response.message)
+
 
                                                 }
                                             }

@@ -78,7 +78,6 @@ class SearchModalRecyclerViewAdapter(private val items: ArrayList<ModalSearchMod
             for (item in items) {
                 if (item.title!!.contains(filterText, ignoreCase = true)) {
                     filteredItemList.add(item)
-//                    Log.d("SEARCH MODAL", "$filteredItemList")
                 }
             }
         }

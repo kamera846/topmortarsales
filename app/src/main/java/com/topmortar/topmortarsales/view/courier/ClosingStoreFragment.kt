@@ -180,7 +180,7 @@ class ClosingStoreFragment : Fragment() {
                                                     val findItem = deliveryStore.find { it.id == contact.id_contact }
                                                     contacts[i].deliveryStatus = "Pengiriman sedang berlangsung"
                                                     if (findItem == null) {
-                                                        Log.d("Contact Item", "Start delivery on founded item")
+
                                                         startDelivery(contact)
                                                     }
                                                 }
@@ -192,7 +192,7 @@ class ClosingStoreFragment : Fragment() {
                                             } else {
 
                                                 for ((i, contact) in contacts.withIndex()) {
-                                                    Log.d("Contact Item", "Start delivery on empty stores")
+
                                                     contacts[i].deliveryStatus = "Pengiriman sedang berlangsung"
                                                     startDelivery(contact)
                                                 }

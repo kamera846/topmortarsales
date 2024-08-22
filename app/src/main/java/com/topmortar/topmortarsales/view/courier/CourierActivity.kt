@@ -162,7 +162,7 @@ class CourierActivity : AppCompatActivity() {
 
                     }
                     RESPONSE_STATUS_EMPTY -> missingDataHandler()
-                    else -> Log.d("TAG USER LOGGED IN", "Failed get data!")
+
                 }
 
 

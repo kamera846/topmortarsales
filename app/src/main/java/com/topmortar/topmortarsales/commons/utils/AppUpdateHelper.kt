@@ -29,7 +29,7 @@ object AppUpdateHelper {
         fetchRemoteConfig {
             val currentVersion = getCurrentVersionCode(activity)
             val latestVersion = firebaseRemoteConfig.getLong(LATEST_APP_VERSION)
-            Log.d("Check Apps Update", "$currentVersion, $latestVersion")
+
             if (currentVersion < latestVersion) {
                 showUpdateDialog(activity)
             } else {
@@ -40,13 +40,7 @@ object AppUpdateHelper {
 
     private fun fetchRemoteConfig(onComplete: () -> Unit) {
         firebaseRemoteConfig.fetchAndActivate()
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    val updated = task.result
-                    Log.d("UpdateChecker", "Config params updated: $updated")
-                } else {
-                    Log.e("UpdateChecker", "Fetch failed")
-                }
+            .addOnCompleteListener {
                 onComplete()
             }
     }
