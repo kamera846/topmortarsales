@@ -229,7 +229,7 @@
 
             <!-- Input OTP -->
             <LinearLayout
-                android:visibility="gone"
+                android:visibility="visible"
                 android:id="@+id/input_otp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -239,7 +239,7 @@
                 <EditText
                     android:id="@+id/otp_1"
                     android:layout_width="38dp"
-                    android:layout_height="38dp"
+                    android:layout_height="wrap_content"
                     android:background="@drawable/et_background"
                     android:inputType="number"
                     android:outlineProvider="none"
@@ -256,7 +256,7 @@
                 <EditText
                     android:id="@+id/otp_2"
                     android:layout_width="38dp"
-                    android:layout_height="38dp"
+                    android:layout_height="wrap_content"
                     android:background="@drawable/et_background"
                     android:inputType="number"
                     android:outlineProvider="none"
@@ -273,7 +273,7 @@
                 <EditText
                     android:id="@+id/otp_3"
                     android:layout_width="38dp"
-                    android:layout_height="38dp"
+                    android:layout_height="wrap_content"
                     android:background="@drawable/et_background"
                     android:inputType="number"
                     android:outlineProvider="none"
@@ -290,7 +290,7 @@
                 <EditText
                     android:id="@+id/otp_4"
                     android:layout_width="38dp"
-                    android:layout_height="38dp"
+                    android:layout_height="wrap_content"
                     android:background="@drawable/et_background"
                     android:inputType="number"
                     android:outlineProvider="none"
@@ -307,7 +307,7 @@
                 <EditText
                     android:id="@+id/otp_5"
                     android:layout_width="38dp"
-                    android:layout_height="38dp"
+                    android:layout_height="wrap_content"
                     android:background="@drawable/et_background"
                     android:inputType="number"
                     android:outlineProvider="none"
@@ -324,7 +324,7 @@
                 <EditText
                     android:id="@+id/otp_6"
                     android:layout_width="38dp"
-                    android:layout_height="38dp"
+                    android:layout_height="wrap_content"
                     android:background="@drawable/et_background"
                     android:inputType="number"
                     android:outlineProvider="none"

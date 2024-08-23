@@ -24,7 +24,6 @@ class HomeSalesMenuRV : RecyclerView.Adapter<HomeSalesMenuRV.ViewHolder>() {
             binding.itemChevron.setImageResource(if (item.isLocked) R.drawable.lock_dark else R.drawable.chevron_right_dark)
             if (position == listItem.size - 1) binding.itemLine.visibility = View.GONE
 
-            println("Item status is ${item.isLocked}")
             binding.itemContainer.setOnClickListener {
                 listener?.onItemClick(item)
             }
