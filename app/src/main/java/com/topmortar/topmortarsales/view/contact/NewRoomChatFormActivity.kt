@@ -159,7 +159,6 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
     private fun sendMessage() {
 
-        val phoneCategoryPosition = binding.spinPhoneCategories.selectedItemPosition
         val phoneCategory = "${ binding.spinPhoneCategories.selectedItem }"
         val phone = "${ etPhone.text }"
 //        val phone2 = "${ binding.etPhone2.text }"

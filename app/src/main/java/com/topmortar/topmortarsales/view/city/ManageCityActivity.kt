@@ -1,10 +1,7 @@
 package com.topmortar.topmortarsales.view.city
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -13,6 +10,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,13 +18,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.CityRecyclerViewAdapter
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
-import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.utils.SessionManager
-import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
@@ -225,7 +221,12 @@ class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClic
     }
 
     override fun onBackPressed() {
-        backHandler()
+        if (isRequestSync) {
+            val resultIntent = Intent()
+            resultIntent.putExtra("$MAIN_ACTIVITY_REQUEST_CODE", SYNC_NOW)
+            setResult(RESULT_OK, resultIntent)
+            super.onBackPressed()
+        } else super.onBackPressed()
     }
 
 }

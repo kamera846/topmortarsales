@@ -229,7 +229,7 @@
 
             <!-- Input OTP -->
             <LinearLayout
-                android:visibility="visible"
+                android:visibility="gone"
                 android:id="@+id/input_otp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

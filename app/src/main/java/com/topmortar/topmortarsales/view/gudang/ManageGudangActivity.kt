@@ -181,6 +181,7 @@ class ManageGudangActivity : AppCompatActivity() {
             intent.putExtra(CONST_LOCATION, data?.id_city)
             intent.putExtra(CONST_MAPS, data?.location_warehouse)
             intent.putExtra(CONST_DATE, data?.created_at)
+            @Suppress("DEPRECATION")
             startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
         } else {
 
@@ -218,6 +219,7 @@ class ManageGudangActivity : AppCompatActivity() {
     private fun navigateFab() {
 
         val intent = Intent(this@ManageGudangActivity, FormGudangActivity::class.java)
+        @Suppress("DEPRECATION")
         startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
 
     }
@@ -234,10 +236,7 @@ class ManageGudangActivity : AppCompatActivity() {
         } else badgeRefresh.visibility = View.GONE
     }
 
-    override fun onBackPressed() {
-        finish()
-    }
-
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == MAIN_ACTIVITY_REQUEST_CODE) {

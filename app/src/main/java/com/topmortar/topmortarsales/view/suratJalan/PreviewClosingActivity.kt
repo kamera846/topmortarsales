@@ -277,7 +277,15 @@ class PreviewClosingActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        onBackHandler()
+        if (!isLoading) {
+            super.onBackPressed()
+        } else {
+            val builder = AlertDialog.Builder(this)
+            builder.setMessage("Tunggu sebentar. Proses closing masih berjalan.")
+                .setPositiveButton("Oke") { dialog, _ -> dialog.dismiss() }
+            val dialog = builder.create()
+            dialog.show()
+        }
     }
 
     private fun onClosingFinished(message: String) {

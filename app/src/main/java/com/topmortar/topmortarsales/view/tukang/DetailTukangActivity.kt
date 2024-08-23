@@ -1475,8 +1475,20 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-//      return super.onBackPressed()
-        backHandler()
+        if (isEdit) toggleEdit(false)
+        else {
+
+            if (hasEdited) {
+
+                val resultIntent = Intent()
+                resultIntent.putExtra("$activityRequestCode", SYNC_NOW)
+                setResult(RESULT_OK, resultIntent)
+
+                super.onBackPressed()
+
+            } else super.onBackPressed()
+
+        }
     }
 
     // Interfade Search Modal

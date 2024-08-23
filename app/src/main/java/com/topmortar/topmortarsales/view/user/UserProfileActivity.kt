@@ -375,13 +375,13 @@ class UserProfileActivity : AppCompatActivity() {
 
     }
 
-    private fun backHandler(unit: Unit? = null) {
+    private fun backHandler() {
         if (isRequestSync) {
             val resultIntent = Intent()
             resultIntent.putExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE", SYNC_NOW)
             setResult(RESULT_OK, resultIntent)
-            unit ?: finish()
-        } else unit ?: finish()
+            finish()
+        } else finish()
     }
 
     private fun checkUserAllowLogout() {
@@ -764,8 +764,12 @@ class UserProfileActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        val superBack = super.onBackPressed()
-        backHandler(superBack)
+        if (isRequestSync) {
+            val resultIntent = Intent()
+            resultIntent.putExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE", SYNC_NOW)
+            setResult(RESULT_OK, resultIntent)
+            super.onBackPressed()
+        } else super.onBackPressed()
     }
 
     override fun onStart() {
