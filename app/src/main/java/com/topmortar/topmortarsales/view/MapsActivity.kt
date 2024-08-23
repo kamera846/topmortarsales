@@ -339,7 +339,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         mMap.uiSettings.isScrollGesturesEnabledDuringRotateOrZoom = true
 
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
-            if (isNearestStore && !isNearestStoreHideFilter) binding.llFilter.visibility = View.VISIBLE
+            if (isNearestStore && !isNearestStoreHideFilter && !isBasecamp) binding.llFilter.visibility = View.VISIBLE
             binding.llFilter.setOnClickListener {
                 setupFilterTokoModal()
                 filterModal.show()
