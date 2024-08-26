@@ -269,7 +269,7 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
     }
 
     @Subscribe
-    fun onEventBus() {
+    fun onEventBus(event: EventBusUtils.MessageEvent) {
     }
 
     override fun onDataReceived(data: ModalSearchModel) {

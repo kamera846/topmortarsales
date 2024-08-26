@@ -33,6 +33,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
+import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.databinding.ActivityHistoryVisitedBinding
 import com.topmortar.topmortarsales.model.ContactModel
@@ -143,7 +144,7 @@ class HistoryVisitedActivity : AppCompatActivity() {
     }
 
     @Subscribe
-    fun onEventBus() {
+    fun onEventBus(event: EventBusUtils.MessageEvent) {
 //        navigateDetailContact(event.data)
         AlertDialog.Builder(this)
             .setTitle("Peringatan!")
