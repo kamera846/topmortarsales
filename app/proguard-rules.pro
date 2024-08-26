@@ -19,10 +19,20 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
--keep class com.example.** { *; }
--keep interface com.example.** { *; }
+
 -keepattributes SourceFile,LineNumberTable
+-keepattributes Signature
+-keepattributes *Annotation*
+-keep class com.topmortar.** { *; }
+-keep interface com.topmortar.** { *; }
 -keep class com.google.firebase.crashlytics.** { *; }
+-keep class com.topmortar.model.** { *; }
+-keepclassmembers class com.topmortar.model.** {
+    *;
+}
+-keepclassmembers class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
 -dontwarn org.bouncycastle.asn1.ASN1Encodable
 -dontwarn org.bouncycastle.asn1.ASN1InputStream
 -dontwarn org.bouncycastle.asn1.ASN1Integer
