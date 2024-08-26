@@ -18,9 +18,9 @@
 -keep class retrofit2.** { *; }
 -keep class okhttp3.** { *; }
 
-# Pertahankan class dan method untuk Gson yang digunakan untuk deserialization
--keep class com.google.gson.** { *; }
--keepclassmembers class com.google.gson.** { *; }
+# Pertahankan class dan method dari google
+-keep class com.google.** { *; }
+-keepclassmembers class com.google.** { *; }
 
 # Pertahankan class dan method untuk handling API response
 -keepclassmembers class * {
