@@ -34,6 +34,7 @@ import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
+import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -248,7 +249,7 @@ class BasecampFragment : Fragment() {
     }
 
     @Subscribe
-    fun onEventBus() {
+    fun onEventBus(event: EventBusUtils.MessageEvent) {
     }
 
 //    override fun onDestroyView() {
