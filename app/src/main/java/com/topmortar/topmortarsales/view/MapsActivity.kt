@@ -835,10 +835,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 processed ++
                 percentage = (processed * 100) / totalProcess
 
-                if (isNearestStoreDefaultRange == -1) {
-                    progressDialog.setMessage("Mencari ${listCoordinate?.size} ${ if (isBasecamp) "basecamp" else "toko"}…  ($percentage%)")
-                } else {
-                    progressDialog.setMessage("Mencari ${if (isBasecamp) "basecamp" else "toko"} terdekat… ($percentage%)")
+                runOnUiThread {
+                    if (isNearestStoreDefaultRange == -1) {
+                        progressDialog.setMessage("Mencari ${listCoordinate?.size} ${ if (isBasecamp) "basecamp" else "toko"}…  ($percentage%)")
+                    } else {
+                        progressDialog.setMessage("Mencari ${if (isBasecamp) "basecamp" else "toko"} terdekat… ($percentage%)")
+                    }
                 }
 
                 if (!urlUtility.isUrl(item)) {
@@ -854,37 +856,37 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                             if (distance < limitKm || isNearestStoreDefaultRange == -1) {
 
-                                val latLng = LatLng(latitude, longitude)
-                                binding.recyclerView.visibility = View.GONE
-                                binding.rvLoading.visibility = View.GONE
+                                runOnUiThread {
+                                    val latLng = LatLng(latitude, longitude)
+                                    binding.recyclerView.visibility = View.GONE
+                                    binding.rvLoading.visibility = View.GONE
 
-                                val iconDrawable = when (listCoordinateStatus?.get(i)) {
-                                    STATUS_CONTACT_DATA -> R.drawable.store_location_status_data
-                                    STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active
-                                    STATUS_CONTACT_PASSIVE -> R.drawable.store_location_status_passive
-                                    STATUS_CONTACT_BID -> R.drawable.store_location_status_biding
-                                    else -> locationBlacklistDrawable
-                                }
+                                    val iconDrawable = when (listCoordinateStatus?.get(i)) {
+                                        STATUS_CONTACT_DATA -> R.drawable.store_location_status_data
+                                        STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active
+                                        STATUS_CONTACT_PASSIVE -> R.drawable.store_location_status_passive
+                                        STATUS_CONTACT_BID -> R.drawable.store_location_status_biding
+                                        else -> locationBlacklistDrawable
+                                    }
 
-                                val originalBitmap = BitmapFactory.decodeResource(resources, iconDrawable)
+                                    val originalBitmap = BitmapFactory.decodeResource(resources, iconDrawable)
 
-                                val newWidth = convertDpToPx(40, this@MapsActivity)
-                                val newHeight = convertDpToPx(40, this@MapsActivity)
+                                    val newWidth = convertDpToPx(40, this@MapsActivity)
+                                    val newHeight = convertDpToPx(40, this@MapsActivity)
 
-                                val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
+                                    val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
 
-                                selectedLocation = latLng
-                                val markerOptions = MarkerOptions()
-                                    .position(latLng)
-                                    .title(listCoordinateName?.get(i))
-                                    .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
+                                    selectedLocation = latLng
+                                    val markerOptions = MarkerOptions()
+                                        .position(latLng)
+                                        .title(listCoordinateName?.get(i))
+                                        .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
 
-                                val onlyStatus = selectedStatusID != "-1" && selectedCitiesID == null && listCoordinateStatus!![i] == selectedStatusID.lowercase(Locale.getDefault())
-                                val onlyCities = selectedCitiesID != null && selectedStatusID == "-1" && listCoordinateCityID!![i] == selectedCitiesID?.id_city
-                                val statusAndCities = selectedStatusID != "-1" && listCoordinateStatus!![i] == selectedStatusID.lowercase(Locale.getDefault()) && selectedCitiesID != null && listCoordinateCityID!![i] == selectedCitiesID?.id_city
+                                    val onlyStatus = selectedStatusID != "-1" && selectedCitiesID == null && listCoordinateStatus!![i] == selectedStatusID.lowercase(Locale.getDefault())
+                                    val onlyCities = selectedCitiesID != null && selectedStatusID == "-1" && listCoordinateCityID!![i] == selectedCitiesID?.id_city
+                                    val statusAndCities = selectedStatusID != "-1" && listCoordinateStatus!![i] == selectedStatusID.lowercase(Locale.getDefault()) && selectedCitiesID != null && listCoordinateCityID!![i] == selectedCitiesID?.id_city
 
-                                if (statusAndCities || onlyStatus || onlyCities || (selectedStatusID == "-1" && selectedCitiesID == null)) {
-                                    runOnUiThread {
+                                    if (statusAndCities || onlyStatus || onlyCities || (selectedStatusID == "-1" && selectedCitiesID == null)) {
                                         mMap.addMarker(markerOptions)
                                         currentFoundItemTotal ++
                                         if (isNearestStoreHideFilter && !firstItemSelected) {
