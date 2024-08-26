@@ -835,10 +835,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 processed ++
                 percentage = (processed * 100) / totalProcess
 
-                runOnUiThread {
-                    if (isNearestStoreDefaultRange == -1) {
+                if (isNearestStoreDefaultRange == -1) {
+                    runOnUiThread {
                         progressDialog.setMessage("Mencari ${listCoordinate?.size} ${ if (isBasecamp) "basecamp" else "toko"}…  ($percentage%)")
-                    } else {
+                    }
+                } else {
+                    runOnUiThread {
                         progressDialog.setMessage("Mencari ${if (isBasecamp) "basecamp" else "toko"} terdekat… ($percentage%)")
                     }
                 }
@@ -856,43 +858,46 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                             if (distance < limitKm || isNearestStoreDefaultRange == -1) {
 
+                                val latLng = LatLng(latitude, longitude)
+
                                 runOnUiThread {
-                                    val latLng = LatLng(latitude, longitude)
                                     binding.recyclerView.visibility = View.GONE
                                     binding.rvLoading.visibility = View.GONE
+                                }
 
-                                    val iconDrawable = when (listCoordinateStatus?.get(i)) {
-                                        STATUS_CONTACT_DATA -> R.drawable.store_location_status_data
-                                        STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active
-                                        STATUS_CONTACT_PASSIVE -> R.drawable.store_location_status_passive
-                                        STATUS_CONTACT_BID -> R.drawable.store_location_status_biding
-                                        else -> locationBlacklistDrawable
-                                    }
+                                val iconDrawable = when (listCoordinateStatus?.get(i)) {
+                                    STATUS_CONTACT_DATA -> R.drawable.store_location_status_data
+                                    STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active
+                                    STATUS_CONTACT_PASSIVE -> R.drawable.store_location_status_passive
+                                    STATUS_CONTACT_BID -> R.drawable.store_location_status_biding
+                                    else -> locationBlacklistDrawable
+                                }
 
-                                    val originalBitmap = BitmapFactory.decodeResource(resources, iconDrawable)
+                                val originalBitmap = BitmapFactory.decodeResource(resources, iconDrawable)
 
-                                    val newWidth = convertDpToPx(40, this@MapsActivity)
-                                    val newHeight = convertDpToPx(40, this@MapsActivity)
+                                val newWidth = convertDpToPx(40, this@MapsActivity)
+                                val newHeight = convertDpToPx(40, this@MapsActivity)
 
-                                    val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
+                                val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
 
-                                    selectedLocation = latLng
-                                    val markerOptions = MarkerOptions()
-                                        .position(latLng)
-                                        .title(listCoordinateName?.get(i))
-                                        .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
+                                selectedLocation = latLng
+                                val markerOptions = MarkerOptions()
+                                    .position(latLng)
+                                    .title(listCoordinateName?.get(i))
+                                    .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
 
-                                    val onlyStatus = selectedStatusID != "-1" && selectedCitiesID == null && listCoordinateStatus!![i] == selectedStatusID.lowercase(Locale.getDefault())
-                                    val onlyCities = selectedCitiesID != null && selectedStatusID == "-1" && listCoordinateCityID!![i] == selectedCitiesID?.id_city
-                                    val statusAndCities = selectedStatusID != "-1" && listCoordinateStatus!![i] == selectedStatusID.lowercase(Locale.getDefault()) && selectedCitiesID != null && listCoordinateCityID!![i] == selectedCitiesID?.id_city
+                                val onlyStatus = selectedStatusID != "-1" && selectedCitiesID == null && listCoordinateStatus!![i] == selectedStatusID.lowercase(Locale.getDefault())
+                                val onlyCities = selectedCitiesID != null && selectedStatusID == "-1" && listCoordinateCityID!![i] == selectedCitiesID?.id_city
+                                val statusAndCities = selectedStatusID != "-1" && listCoordinateStatus!![i] == selectedStatusID.lowercase(Locale.getDefault()) && selectedCitiesID != null && listCoordinateCityID!![i] == selectedCitiesID?.id_city
 
-                                    if (statusAndCities || onlyStatus || onlyCities || (selectedStatusID == "-1" && selectedCitiesID == null)) {
+                                if (statusAndCities || onlyStatus || onlyCities || (selectedStatusID == "-1" && selectedCitiesID == null)) {
+                                    runOnUiThread {
                                         mMap.addMarker(markerOptions)
-                                        currentFoundItemTotal ++
-                                        if (isNearestStoreHideFilter && !firstItemSelected) {
-                                            selectedLatLng = latLng
-                                            firstItemSelected = true
-                                        }
+                                    }
+                                    currentFoundItemTotal ++
+                                    if (isNearestStoreHideFilter && !firstItemSelected) {
+                                        selectedLatLng = latLng
+                                        firstItemSelected = true
                                     }
                                 }
 
@@ -1149,21 +1154,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                     } else {
                         progressDialog.dismiss()
-                        Toast.makeText(this@MapsActivity, "Tidak ada rute ditemukan", Toast.LENGTH_SHORT).show()
+                        runOnUiThread {
+                            Toast.makeText(this@MapsActivity, "Tidak ada rute ditemukan", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
 
             } catch (e: ApiException) {
                 progressDialog.dismiss()
-                Toast.makeText(this@MapsActivity, "Gagal memuat navigasi", Toast.LENGTH_SHORT).show()
+                handleMessage(this@MapsActivity, "getDirections" , "Gagal memuat navigasi. Err: ${e.message}")
                 e.printStackTrace()
             } catch (e: InterruptedException) {
                 progressDialog.dismiss()
-                Toast.makeText(this@MapsActivity, "Gagal memuat navigasi", Toast.LENGTH_SHORT).show()
+                handleMessage(this@MapsActivity, "getDirections" , "Gagal memuat navigasi. Err: ${e.message}")
                 e.printStackTrace()
             } catch (e: IOException) {
                 progressDialog.dismiss()
-                Toast.makeText(this@MapsActivity, "Gagal memuat navigasi", Toast.LENGTH_SHORT).show()
+                handleMessage(this@MapsActivity, "getDirections" , "Gagal memuat navigasi. Err: ${e.message}")
                 e.printStackTrace()
             }
         }
@@ -1788,42 +1795,26 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                                         } else {
                                             progressDialog.dismiss()
-                                            Toast.makeText(
-                                                this@MapsActivity,
-                                                "Tidak ada rute ditemukan",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
+                                            handleMessage(this@MapsActivity, "setupTracking" , "Tidak dapat menemukan rute.")
                                         }
                                     } catch (e: ApiException) {
                                         progressDialog.dismiss()
-                                        Toast.makeText(
-                                            this@MapsActivity,
-                                            "Gagal memuat navigasi",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        handleMessage(this@MapsActivity, "setupTracking" , "Gagal memuat navigasi. Err: ${e.message}")
                                         e.printStackTrace()
                                     } catch (e: InterruptedException) {
                                         progressDialog.dismiss()
-                                        Toast.makeText(
-                                            this@MapsActivity,
-                                            "Gagal memuat navigasi",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        handleMessage(this@MapsActivity, "setupTracking" , "Gagal memuat navigasi. Err: ${e.message}")
                                         e.printStackTrace()
                                     } catch (e: IOException) {
                                         progressDialog.dismiss()
-                                        Toast.makeText(
-                                            this@MapsActivity,
-                                            "Gagal memuat navigasi",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        handleMessage(this@MapsActivity, "setupTracking" , "Gagal memuat navigasi. Err: ${e.message}")
                                         e.printStackTrace()
                                     }
                                 } else {
                                     progressDialog.dismiss()
 
                                     handleMessage(
-                                        this@MapsActivity, TAG_RESPONSE_CONTACT,
+                                        this@MapsActivity, "setupTracking",
                                         "Failed run service. Exception child store not found"
                                     )
                                 }
@@ -1833,7 +1824,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                 progressDialog.dismiss()
 
                                 handleMessage(
-                                    this@MapsActivity, TAG_RESPONSE_CONTACT,
+                                    this@MapsActivity, "setupTracking",
                                     "Failed run service. Exception $error"
                                 )
                             }
@@ -1869,7 +1860,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             override fun onCancelled(error: DatabaseError) {
                 progressDialog.dismiss()
 
-                handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
+                handleMessage(this@MapsActivity, "setupTracking",
                     "Failed run service. Exception $error"
                 )
             }
@@ -2229,37 +2220,22 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                     mMap.isMyLocationEnabled = false
                                 }, 500)
 
+
                             } else {
                                 progressDialog.dismiss()
-                                Toast.makeText(
-                                    this@MapsActivity,
-                                    "Tidak ada rute ditemukan",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                handleMessage(this@MapsActivity, "setupTrackingHistory" , "Tidak dapat menemukan rute.")
                             }
                         } catch (e: ApiException) {
                             progressDialog.dismiss()
-                            Toast.makeText(
-                                this@MapsActivity,
-                                "Gagal memuat navigasi",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            handleMessage(this@MapsActivity, "setupTrackingHistory" , "Gagal memuat navigasi. Err: ${e.message}")
                             e.printStackTrace()
                         } catch (e: InterruptedException) {
                             progressDialog.dismiss()
-                            Toast.makeText(
-                                this@MapsActivity,
-                                "Gagal memuat navigasi",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            handleMessage(this@MapsActivity, "setupTrackingHistory" , "Gagal memuat navigasi. Err: ${e.message}")
                             e.printStackTrace()
                         } catch (e: IOException) {
                             progressDialog.dismiss()
-                            Toast.makeText(
-                                this@MapsActivity,
-                                "Gagal memuat navigasi",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            handleMessage(this@MapsActivity, "setupTrackingHistory" , "Gagal memuat navigasi. Err: ${e.message}")
                             e.printStackTrace()
                         }
 
@@ -2268,7 +2244,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
 
                         progressDialog.dismiss()
-                        handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
+                        handleMessage(this@MapsActivity, "setupTrackingHistory",
                             "Tidak dapat menemukan riwayat pengiriman"
                         )
 
@@ -2277,7 +2253,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
 
                         progressDialog.dismiss()
-                        handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
+                        handleMessage(this@MapsActivity, "setupTrackingHistory",
                             "Tidak dapat menemukan riwayat pengiriman. Error " + response.message
                         )
 
@@ -2288,7 +2264,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
 
                 progressDialog.dismiss()
-                handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
+                handleMessage(this@MapsActivity, "setupTrackingHistory",
                     "Failed run service. Exception " + e.message
                 )
 
