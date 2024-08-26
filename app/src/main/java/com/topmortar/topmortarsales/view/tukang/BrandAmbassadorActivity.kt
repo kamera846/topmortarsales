@@ -378,7 +378,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
             userDevice.child("logout_at").setValue(DateFormat.now())
             userDevice.child("login_at").setValue("")
         } catch (e: Exception) {
-            Log.d("Firebase Auth", "$e")
+
         }
 
         sessionManager.setLoggedIn(LOGGED_OUT)
@@ -408,7 +408,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
 
                     }
                     RESPONSE_STATUS_EMPTY -> missingDataHandler()
-                    else -> Log.d("TAG USER LOGGED IN", "Failed get data!")
+
                 }
 
 

@@ -37,7 +37,6 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
-import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -349,7 +348,7 @@ class TukangFragment : Fragment() {
     }
 
     @Subscribe
-    fun onEventBus(event: EventBusUtils.MessageEvent) {
+    fun onEventBus() {
     }
 
     private fun showBadgeRefresh(action: Boolean) {
@@ -369,8 +368,8 @@ class TukangFragment : Fragment() {
         val data = result.data
         // Process the result
         if (resultCode == RESULT_OK) {
-            val data = data?.getStringExtra("$MAIN_ACTIVITY_REQUEST_CODE")
-            if (!data.isNullOrEmpty() && data == SYNC_NOW) getList()
+            val newData = data?.getStringExtra("$MAIN_ACTIVITY_REQUEST_CODE")
+            if (!newData.isNullOrEmpty() && newData == SYNC_NOW) getList()
         }
     }
 

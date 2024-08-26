@@ -428,6 +428,33 @@ interface ApiService {
         @Part("id_invoice") idInvoice: RequestBody,
         @Part("is_pay") isPay: RequestBody,
     ): Response<ResponseReportVisit>
+
+    @Multipart
+    @POST(VISIT)
+    suspend fun salesAbsentInStore(
+        @Part("id_contact") idContact: RequestBody,
+        @Part("id_user") idUser: RequestBody,
+        @Part("distance_visit") distanceVisit: RequestBody,
+        @Part("laporan_visit") laporanVisit: RequestBody,
+        @Part("source") source: RequestBody,
+        @Part("type_renvi") renviSource: RequestBody? = createPartFromString(NORMAL_REPORT),
+        @Part("id_invoice") idInvoice: RequestBody? = createPartFromString("0"),
+        @Part("is_pay") isPay: RequestBody? = createPartFromString("0"),
+    ): Response<ResponseReportVisit>
+
+    @Multipart
+    @POST(VISIT)
+    suspend fun salesAbsentInBasecamp(
+        @Part("id_gudang") idGudang: RequestBody,
+        @Part("id_user") idUser: RequestBody,
+        @Part("distance_visit") distanceVisit: RequestBody,
+        @Part("laporan_visit") laporanVisit: RequestBody,
+        @Part("source") source: RequestBody,
+        @Part("type_renvi") renviSource: RequestBody? = createPartFromString(NORMAL_REPORT),
+        @Part("id_invoice") idInvoice: RequestBody? = createPartFromString("0"),
+        @Part("is_pay") isPay: RequestBody? = createPartFromString("0"),
+    ): Response<ResponseReportVisit>
+
     @Multipart
     @POST(VISIT)
     suspend fun makeVisitReportPaymentYes(

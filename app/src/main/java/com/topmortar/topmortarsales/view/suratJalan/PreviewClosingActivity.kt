@@ -277,7 +277,15 @@ class PreviewClosingActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        onBackHandler()
+        if (!isLoading) {
+            super.onBackPressed()
+        } else {
+            val builder = AlertDialog.Builder(this)
+            builder.setMessage("Tunggu sebentar. Proses closing masih berjalan.")
+                .setPositiveButton("Oke") { dialog, _ -> dialog.dismiss() }
+            val dialog = builder.create()
+            dialog.show()
+        }
     }
 
     private fun onClosingFinished(message: String) {
@@ -298,9 +306,9 @@ class PreviewClosingActivity : AppCompatActivity() {
 
                         val courier = snapshot.child("courier").getValue(DeliveryModel.Courier::class.java)
                         val store = stores.getValue(DeliveryModel.Store::class.java)
-//                        Log.d("Item to closing", "$latLng")
-//                        Log.d("Item to closing", "$courier")
-//                        Log.d("Item to closing", "$store")
+
+
+
 
                         val endDateTime = DateFormat.now()
 
@@ -346,14 +354,14 @@ class PreviewClosingActivity : AppCompatActivity() {
                                                 RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
 
                                                     finishClosing(message)
-                                                    Log.d("Item to closing", "Success save item")
+
 
                                                 }
 
                                                 else -> {
 
                                                     finishClosing(message)
-                                                    Log.d("Item to closing", "Failed to save item: " + response.message)
+
 
                                                 }
                                             }
@@ -389,14 +397,14 @@ class PreviewClosingActivity : AppCompatActivity() {
                                                 RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
 
                                                     finishClosing(message)
-                                                    Log.d("Item to closing", "Success save item: With error listening location. " + it.message)
+
 
                                                 }
 
                                                 else -> {
 
                                                     finishClosing(message)
-                                                    Log.d("Item to closing", "Failed to save item: " + response.message)
+
 
                                                 }
                                             }

@@ -182,12 +182,12 @@ class HomeSalesActivity : AppCompatActivity() {
 
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
             fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-//                Log.d("Detect Mock", "Succeed get lastLocation")
+
                 if (location == null) {
-//                    Log.d("Detect Mock", "Location null")
+
 //                    checkLocationPermission()
                     if (locationCallback != null) {
-//                        Log.d("Detect Mock", "Callback not null")
+
                         fusedLocationClient.removeLocationUpdates(locationCallback!!)
                     }
 
@@ -198,7 +198,7 @@ class HomeSalesActivity : AppCompatActivity() {
 
                     locationCallback = object : LocationCallback() {
                         override fun onLocationResult(locationResult: LocationResult) {
-//                            Log.d("Detect Mock", "Location update result ${locationResult.locations}")
+
                             fusedLocationClient.removeLocationUpdates(this)
                             Handler(Looper.getMainLooper()).postDelayed({
                                 val intent = Intent(this@HomeSalesActivity, HomeSalesActivity::class.java)
@@ -211,19 +211,13 @@ class HomeSalesActivity : AppCompatActivity() {
                     fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback!!, Looper.getMainLooper())
                 } else {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && location.isMock) {
-//                        Log.d("Detect Mock", "Is Mock")
+
                         showDialogIsMock()
                     } else if (location.isFromMockProvider) {
-//                        Log.d("Detect Mock", "Is From Mock")
+
                         showDialogIsMock()
                     } else initView()
                 }
-            }.addOnFailureListener {
-                Log.d("Detect Mock", "Failed get lastLocation. Err: ${it.message}. Stacktrace: ${it.stackTrace}")
-            }.addOnCanceledListener {
-                Log.d("Detect Mock", "Cancelled get lastLocation")
-            }.addOnCompleteListener {
-//                Log.d("Detect Mock", "Completed get lastLocation")
             }
         } else {
             ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
@@ -391,8 +385,9 @@ class HomeSalesActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
 
-                    val response = if (userKind == USER_KIND_PENAGIHAN) apiService.getContactsByDistributor(distributorID = userDistributorId ?: "0")
-                    else apiService.getContacts(cityId = userCity ?: "0", distributorID = userDistributorId ?: "0")
+//                    val response = if (userKind == USER_KIND_PENAGIHAN) apiService.getContactsByDistributor(distributorID = userDistributorId ?: "0")
+//                    else apiService.getContacts(cityId = userCity ?: "0", distributorID = userDistributorId ?: "0")
+                    val response = apiService.getContacts(cityId = userCity ?: "0", distributorID = userDistributorId ?: "0")
 
                     when (response.status) {
                         RESPONSE_STATUS_OK -> {
@@ -599,7 +594,7 @@ class HomeSalesActivity : AppCompatActivity() {
                         }
 
                     } RESPONSE_STATUS_EMPTY -> missingDataHandler()
-                    else -> Log.d("TAG USER LOGGED IN", "Failed get data!")
+
                 }
 
 
@@ -870,7 +865,7 @@ class HomeSalesActivity : AppCompatActivity() {
 
         val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
         val userChild = absentChild.child(userId.toString())
-        Log.d("ABSENT COURIER", "Check absent")
+
 
         userChild.addListenerForSingleValueEvent(object: ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -886,14 +881,14 @@ class HomeSalesActivity : AppCompatActivity() {
                             if (DateFormat.dateAfterNow(absentMorningDate)) {
                                 isAbsentMorningNow = false
                                 lockMenuItem(true)
-                                Log.d("ABSENT COURIER", "Belum absen pagi")
+
                             } else {
 
                                 val serviceIntentDD = Intent(this@HomeSalesActivity, TrackingService::class.java)
                                 serviceIntentDD.putExtra("userId", userId)
                                 serviceIntentDD.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
                                 this@HomeSalesActivity.startService(serviceIntentDD)
-                                Log.d("ABSENT COURIER", "Sudah absen pagi")
+
                                 isAbsentMorningNow = true
 
                                 if (snapshot.child("eveningDateTime").exists()) {
@@ -907,13 +902,13 @@ class HomeSalesActivity : AppCompatActivity() {
 //                                            serviceIntent.putExtra("userId", userId)
 //                                            serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
 //                                            this@HomeSalesActivity.startService(serviceIntent)
-                                            Log.d("ABSENT COURIER", "Belum absen sore")
+
                                             isAbsentEveningNow = false
                                             lockMenuItem(false)
                                         } else {
                                             val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
                                             this@HomeSalesActivity.stopService(serviceIntent)
-                                            Log.d("ABSENT COURIER", "Sudah absen sore")
+
                                             isAbsentEveningNow = true
                                             lockMenuItem(true)
                                         }
@@ -923,7 +918,7 @@ class HomeSalesActivity : AppCompatActivity() {
 //                                        serviceIntent.putExtra("userId", userId)
 //                                        serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
 //                                        this@HomeSalesActivity.startService(serviceIntent)
-                                        Log.d("ABSENT COURIER", "Tgl absen sore tidak ada")
+
                                         isAbsentEveningNow = false
                                         lockMenuItem(false)
                                     }
@@ -932,7 +927,7 @@ class HomeSalesActivity : AppCompatActivity() {
 //                                    serviceIntent.putExtra("userId", userId)
 //                                    serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
 //                                    this@HomeSalesActivity.startService(serviceIntent)
-                                    Log.d("ABSENT COURIER", "Kolom absen sore tidak ada")
+
                                     isAbsentEveningNow = false
                                     lockMenuItem(false)
                                 }
@@ -940,17 +935,17 @@ class HomeSalesActivity : AppCompatActivity() {
                             }
 
                         } else {
-                            Log.d("ABSENT COURIER", "Tgl absen pagi tidak ada")
+
                             isAbsentMorningNow = false
                             lockMenuItem(true)
                         }
                     } else {
-                        Log.d("ABSENT COURIER", "Kolom absen pagi tidak ada")
+
                         isAbsentMorningNow = false
                         lockMenuItem(true)
                     }
                 } else {
-                    Log.d("ABSENT COURIER", "Snapshot tidak ada")
+
                     isAbsentMorningNow = false
                     lockMenuItem(true)
                 }
@@ -958,7 +953,7 @@ class HomeSalesActivity : AppCompatActivity() {
 
             override fun onCancelled(error: DatabaseError) {
                 // Do something
-                Log.d("ABSENT COURIER", "On cancelled")
+
                 isAbsentMorningNow = false
                 isAbsentEveningNow = false
                 lockMenuItem(true)
@@ -1136,15 +1131,15 @@ class HomeSalesActivity : AppCompatActivity() {
             )
         )
 //        if (userKind == USER_KIND_PENAGIHAN) {
-            listItem.add(
-                HomeMenuSalesModel(
-                    icon = R.drawable.store_white,
-                    bgColor = R.drawable.bg_green_reseda_round_8,
-                    title = "Rencana Visit Penagihan",
-                    target = RencanaVisitPenagihanActivity::class.java,
-                    isLocked = isLocked
-                )
+        listItem.add(
+            HomeMenuSalesModel(
+                icon = R.drawable.store_white,
+                bgColor = R.drawable.bg_green_reseda_round_8,
+                title = "Rencana Visit Penagihan",
+                target = RencanaVisitPenagihanActivity::class.java,
+                isLocked = isLocked
             )
+        )
 //        }
         // Number 1 is distributor ID for Center Distributor (Special case for Top Mortar Mitra)
 //        if (userDistributorId != "1") {

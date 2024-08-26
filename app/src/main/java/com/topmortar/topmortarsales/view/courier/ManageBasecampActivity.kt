@@ -1,10 +1,9 @@
 package com.topmortar.topmortarsales.view.courier
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.databinding.ActivityManageBasecampBinding
-import com.topmortar.topmortarsales.databinding.FragmentBasecampBinding
 
 class ManageBasecampActivity : AppCompatActivity() {
 
@@ -42,8 +41,4 @@ class ManageBasecampActivity : AppCompatActivity() {
         _binding = null
     }
 
-    override fun onBackPressed() {
-//        super.onBackPressed()
-        finish()
-    }
 }

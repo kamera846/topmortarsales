@@ -9,7 +9,6 @@ import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -23,6 +22,7 @@ import com.topmortar.topmortarsales.commons.utils.CustomNotificationBuilder
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.view.SplashScreenActivity
+import java.util.Calendar
 
 class TrackingService : Service() {
 
@@ -40,9 +40,10 @@ class TrackingService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-//        Log.d("Tracking Service", "On Start Service")
+
         startForegroundService()
         startLocationUpdates(intent)
+        scheduleServiceStop()
         return START_STICKY
     }
 
@@ -76,7 +77,7 @@ class TrackingService : Service() {
         if (!deliveryId.isNullOrEmpty()) childDriver = childDelivery.child(deliveryId)
 
         if (isLocationUpdating) {
-            Log.d("Service Status", "Starting, re run service")
+
             stopLocationUpdates()
             startListeningLocation(deliveryId)
             return
@@ -86,7 +87,7 @@ class TrackingService : Service() {
     }
 
     private fun startListeningLocation(deliveryId: String?) {
-        Log.d("Service Status", "Started")
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         locationRequest = LocationRequest.create()
             .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
@@ -116,8 +117,30 @@ class TrackingService : Service() {
         isLocationUpdating = true
     }
 
+    private fun scheduleServiceStop() {
+        val now = System.currentTimeMillis()
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = now
+            set(Calendar.HOUR_OF_DAY, 22) // Set to 10 PM
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+        if (calendar.timeInMillis < now) {
+            calendar.add(Calendar.DAY_OF_MONTH, 1)
+        }
+
+        val stopTimeMillis = calendar.timeInMillis
+        val delayMillis = stopTimeMillis - now
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            stopSelf()
+        }, delayMillis)
+    }
+
     private fun stopLocationUpdates() {
-        Log.d("Service Status", "Stopped")
+
         fusedLocationClient.removeLocationUpdates(locationCallback!!)
         locationCallback = null
         isLocationUpdating = false

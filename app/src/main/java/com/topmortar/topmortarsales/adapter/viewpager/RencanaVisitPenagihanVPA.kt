@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.adapter.viewpager
 
 import androidx.fragment.app.Fragment
@@ -68,7 +70,7 @@ class RencanaVisitPenagihanVPA(fm: FragmentManager, private var tabSize: Int) : 
                     }
 
                 })
-                return fragmentJatem1
+                fragmentJatem1
 
             }
             1 -> {
@@ -80,7 +82,7 @@ class RencanaVisitPenagihanVPA(fm: FragmentManager, private var tabSize: Int) : 
                     }
 
                 })
-                return fragmentJatem2
+                fragmentJatem2
 
             }
             2 -> {
@@ -92,7 +94,7 @@ class RencanaVisitPenagihanVPA(fm: FragmentManager, private var tabSize: Int) : 
                     }
 
                 })
-                return fragmentJatem3
+                fragmentJatem3
 
             }
             else -> {
@@ -105,7 +107,7 @@ class RencanaVisitPenagihanVPA(fm: FragmentManager, private var tabSize: Int) : 
                     }
 
                 })
-                return fragmentWeekly
+                fragmentWeekly
 
             }
         }

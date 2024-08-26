@@ -58,9 +58,6 @@ class SendMessageTukangModal(private val context: Context, private val lifecycle
     }
 
     private var modalInterface : SendMessageModalInterface? = null
-    fun initializeInterface(data : SendMessageModalInterface) {
-        this.modalInterface = data
-    }
     interface SendMessageModalInterface {
         fun onSubmit(status: Boolean)
     }
@@ -182,7 +179,6 @@ class SendMessageTukangModal(private val context: Context, private val lifecycle
                 val rbLocation = createPartFromString(data.id_city)
                 val rbSkill = createPartFromString(data.id_skill)
                 val rbBirthday = createPartFromString(data.tgl_lahir)
-                val rbOwner = createPartFromString(data.nama_lengkap)
                 val rbMapsUrl = createPartFromString(data.maps_url)
                 val rbMessage = createPartFromString("${ etMessage.text }")
                 val rbUserId = createPartFromString(userId)

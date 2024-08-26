@@ -1,18 +1,14 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.commons.utils
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Context
-import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.AsyncTask
 import android.os.Bundle
-import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.model.LatLng
 import java.net.HttpURLConnection
 import java.net.URL
@@ -69,34 +65,16 @@ class URLUtility(private val context: Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun getDistance(mapsUrl: String): Double? {
-        val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-        return if (location != null) {
-            val currentLatitude = location.latitude
-            val currentLongitude = location.longitude
-
-            val regex = Pattern.compile("@(-?\\d+\\.\\d+),(-?\\d+\\.\\d+)")
-            val matcher = regex.matcher(mapsUrl)
-            if (matcher.find() && matcher.groupCount() == 2) {
-                val urlLatitude = matcher.group(1).toDouble()
-                val urlLongitude = matcher.group(2).toDouble()
-
-                return calculateDistance(currentLatitude, currentLongitude, urlLatitude, urlLongitude)
-
-            } else null
-        } else null
-    }
-
-    @SuppressLint("MissingPermission")
     fun getLatLng(mapsUrl: String): LatLng? {
         val regex = Pattern.compile("@(-?\\d+\\.\\d+),(-?\\d+\\.\\d+)")
         val matcher = regex.matcher(mapsUrl)
         return if (matcher.find() && matcher.groupCount() == 2) {
-            val urlLatitude = matcher.group(1).toDouble()
-            val urlLongitude = matcher.group(2).toDouble()
+            val urlLatitude = matcher.group(1)?.toDouble()
+            val urlLongitude = matcher.group(2)?.toDouble()
 
-            LatLng(urlLatitude, urlLongitude)
+            if (urlLatitude != null && urlLongitude != null) {
+                LatLng(urlLatitude, urlLongitude)
+            } else null
 
         } else null
     }

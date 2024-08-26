@@ -503,8 +503,16 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-//        super.onBackPressed()
-        backHandler()
+        if (isRequestSync) {
+
+            val resultIntent = Intent()
+            resultIntent.putExtra("$DETAIL_ACTIVITY_REQUEST_CODE", SYNC_NOW)
+            resultIntent.putExtra(IS_CLOSING, isClosingAction)
+            setResult(RESULT_OK, resultIntent)
+
+            super.onBackPressed()
+
+        } else super.onBackPressed()
     }
 
     override fun onStart() {

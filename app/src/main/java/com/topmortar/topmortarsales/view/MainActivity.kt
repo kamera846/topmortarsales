@@ -274,70 +274,54 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         when (item.itemId) {
             R.id.nav_sync_now -> {
                 getUserLoggedIn()
-                true
             }
             R.id.nav_nearest_store -> {
                 navigateChecklocation()
-                true
             }
             R.id.nav_city_store -> {
                 searchCityForMaps.show()
-                true
             }
             R.id.nav_my_profile -> {
                 val intent = Intent(this@MainActivity, UserProfileActivity::class.java)
                 startActivity(intent)
-                true
             }
             R.id.nav_search -> {
                 toggleSearchEvent(SEARCH_OPEN)
-                true
             }
             R.id.nav_products -> {
                 startActivity(Intent(this@MainActivity, ProductsActivity::class.java))
-                true
             }
             R.id.nav_user -> {
                 startActivity(Intent(this@MainActivity, ManageUserActivity::class.java))
-                true
             }
             R.id.nav_city -> {
                 val intent = Intent(this@MainActivity, ManageCityActivity::class.java)
                 intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
                 startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
-                true
             }
             R.id.nav_tukang -> {
                 startActivity(Intent(this@MainActivity, ListTukangActivity::class.java))
-                true
             }
             R.id.nav_skill -> {
                 startActivity(Intent(this@MainActivity, ManageSkillActivity::class.java))
-                true
             }
             R.id.nav_basecamp -> {
                 startActivity(Intent(this@MainActivity, ManageBasecampActivity::class.java))
-                true
             }
             R.id.nav_gudang -> {
                 startActivity(Intent(this@MainActivity, ManageGudangActivity::class.java))
-                true
             }
             R.id.nav_delivery -> {
                 startActivity(Intent(this@MainActivity, DeliveryActivity::class.java))
-                true
             }
             R.id.nav_logout -> {
                 logoutConfirmation()
-                true
             }
             R.id.rencana_visit -> {
                 startActivity(Intent(this@MainActivity, RencanaVisitActivity::class.java))
-                true
             }
             R.id.rencana_visit_penagihan -> {
                 startActivity(Intent(this@MainActivity, RencanaVisitPenagihanActivity::class.java))
-                true
             }
         }
         binding.drawerLayout.closeDrawer(GravityCompat.START)
@@ -1105,7 +1089,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                         }
 
                     } RESPONSE_STATUS_EMPTY -> missingDataHandler()
-                    else -> Log.d("TAG USER LOGGED IN", "Failed get data!")
+
                 }
 
             } catch (e: Exception) {

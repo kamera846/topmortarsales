@@ -1,10 +1,12 @@
+@file:Suppress("DEPRECATION")
+
 package com.topmortar.topmortarsales.adapter.viewpager
 
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
-import com.topmortar.topmortarsales.view.courier.ClosingStoreFragment
 import com.topmortar.topmortarsales.view.courier.BasecampFragment
+import com.topmortar.topmortarsales.view.courier.ClosingStoreFragment
 
 class CourierViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
 
@@ -33,7 +35,7 @@ class CourierViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
                     }
 
                 })
-                return fragmentClosing
+                fragmentClosing
 
             } else -> {
 
@@ -44,7 +46,7 @@ class CourierViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
                     }
 
                 })
-                return fragmentBasecamp
+                fragmentBasecamp
 
             }
         }

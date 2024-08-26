@@ -1,10 +1,8 @@
 package com.topmortar.topmortarsales.commons.utils
 
 import android.app.Activity
-import android.app.ActivityManager
 import android.content.ActivityNotFoundException
 import android.content.Context
-import android.content.Context.ACTIVITY_SERVICE
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
@@ -56,16 +54,6 @@ class CustomUtility(private val context: Context) {
 
     fun isDarkMode(): Boolean {
         return (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
-    }
-
-    fun isServiceRunning(serviceClass: Class<*>): Boolean {
-        val manager = context.getSystemService(ACTIVITY_SERVICE) as ActivityManager?
-        for (service in manager?.getRunningServices(Int.MAX_VALUE) ?: emptyList()) {
-            if (serviceClass.name == service.service.className) {
-                return true
-            }
-        }
-        return false
     }
 
     fun setUserStatusOnline(status: Boolean, userDistributorId: String, userId: String) {
@@ -120,14 +108,15 @@ class CustomUtility(private val context: Context) {
     }
 
     fun navigateChatAdmin(message: String, distributorNumber: String) {
-        val phoneNumber = if (distributorNumber.isNotEmpty()) distributorNumber else context.getString(R.string.topmortar_wa_number)
+        val phoneNumber = distributorNumber.ifEmpty { context.getString(R.string.topmortar_wa_number) }
 
         val intent = Intent(Intent.ACTION_VIEW)
         intent.data = Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")
 
         try {
-            (context as Activity).startActivity(intent)
-            (context as Activity).finishAffinity()
+            val context = (context as Activity)
+            context.startActivity(intent)
+            context.finishAffinity()
         } catch (e: ActivityNotFoundException) {
             Toast.makeText(context as Activity, "Gagal menghubungkan ke whatsapp", TOAST_SHORT).show()
         }

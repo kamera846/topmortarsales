@@ -51,7 +51,6 @@ import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
-import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
@@ -353,7 +352,7 @@ class UserProfileActivity : AppCompatActivity() {
     }
 
     @Subscribe
-    fun onEventBus(event: EventBusUtils.ContactModelEvent) {
+    fun onEventBus() {
 //        navigateDetailContact(event.data)
     }
 
@@ -376,13 +375,13 @@ class UserProfileActivity : AppCompatActivity() {
 
     }
 
-    private fun backHandler(unit: Unit? = null) {
+    private fun backHandler() {
         if (isRequestSync) {
             val resultIntent = Intent()
             resultIntent.putExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE", SYNC_NOW)
             setResult(RESULT_OK, resultIntent)
-            unit ?: finish()
-        } else unit ?: finish()
+            finish()
+        } else finish()
     }
 
     private fun checkUserAllowLogout() {
@@ -506,7 +505,7 @@ class UserProfileActivity : AppCompatActivity() {
             absentChild.child(sessionManager.userID() ?: "0").child(FIREBASE_CHILD_IS_ALLOWED_LOGOUT).setValue(false)
 
             if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
-//                Log.d("Kurir Logout", "${sessionManager.userDistributor()} : ${sessionManager.userID()}")
+
                 CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor() ?: "-custom-019", sessionManager.userID().toString())
             }
         } catch (e: Exception) {
@@ -765,8 +764,12 @@ class UserProfileActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        val superBack = super.onBackPressed()
-        backHandler(superBack)
+        if (isRequestSync) {
+            val resultIntent = Intent()
+            resultIntent.putExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE", SYNC_NOW)
+            setResult(RESULT_OK, resultIntent)
+            super.onBackPressed()
+        } else super.onBackPressed()
     }
 
     override fun onStart() {

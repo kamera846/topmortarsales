@@ -102,9 +102,9 @@ class ReportsActivity : AppCompatActivity() {
         else if (isPenagihan) binding.titleBarDark.tvTitleBar.text = if (!contactName.isNullOrEmpty()) contactName else "Laporan Penagihan"
         else binding.titleBarDark.tvTitleBar.text = if (!contactName.isNullOrEmpty()) contactName else "Laporan Sales"
         binding.titleBarDark.tvTitleBarDescription.visibility = View.VISIBLE
-        println("Laporan Visit: Contact Name $contactName")
-        println("Laporan Visit: User ID $iUserID")
-        println("Laporan Visit: User Full Name $userFullName")
+//        println("Laporan Visit: Contact Name $contactName")
+//        println("Laporan Visit: User ID $iUserID")
+//        println("Laporan Visit: User Full Name $userFullName")
         if (!contactName.isNullOrEmpty()) binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (iUserID.isNullOrEmpty()) "saya" else "$userFullName"} di toko ini"
         else binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (userFullName.isNullOrEmpty()) "" else "$userFullName"}"
 

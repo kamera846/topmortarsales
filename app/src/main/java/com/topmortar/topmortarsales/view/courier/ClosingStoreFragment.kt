@@ -56,7 +56,6 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
-import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -181,7 +180,7 @@ class ClosingStoreFragment : Fragment() {
                                                     val findItem = deliveryStore.find { it.id == contact.id_contact }
                                                     contacts[i].deliveryStatus = "Pengiriman sedang berlangsung"
                                                     if (findItem == null) {
-                                                        Log.d("Contact Item", "Start delivery on founded item")
+
                                                         startDelivery(contact)
                                                     }
                                                 }
@@ -193,7 +192,7 @@ class ClosingStoreFragment : Fragment() {
                                             } else {
 
                                                 for ((i, contact) in contacts.withIndex()) {
-                                                    Log.d("Contact Item", "Start delivery on empty stores")
+
                                                     contacts[i].deliveryStatus = "Pengiriman sedang berlangsung"
                                                     startDelivery(contact)
                                                 }
@@ -373,7 +372,7 @@ class ClosingStoreFragment : Fragment() {
     }
 
     @Subscribe
-    fun onEventBus(event: EventBusUtils.MessageEvent) {
+    fun onEventBus() {
     }
 
     override fun onDestroyView() {
