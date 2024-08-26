@@ -1,29 +1,41 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Pertahankan tipe generik pada class yang digunakan oleh Retrofit
+-keepattributes Signature
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
-
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
-
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Jangan obfuscate model data yang digunakan oleh Gson/Retrofit
 -keep class com.topmortar.** { *; }
 -keep interface com.topmortar.** { *; }
--keepattributes SourceFile,LineNumberTable
--keep class com.google.firebase.crashlytics.** { *; }
--dontoptimize
+
+# Pertahankan semua field yang dianotasi dengan @SerializedName
+-keepclassmembers class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+
+# Pertahankan semua class dan method di dalam package com.topmortar
+-keep class com.topmortar.** { *; }
+-keepclassmembers class com.topmortar.** { *; }
+
+# Pertahankan kelas-kelas Retrofit
+-keep class retrofit2.** { *; }
+-keep class okhttp3.** { *; }
+
+# Pertahankan class dan method untuk Gson yang digunakan untuk deserialization
+-keep class com.google.gson.** { *; }
+-keepclassmembers class com.google.gson.** { *; }
+
+# Pertahankan class dan method untuk handling API response
+-keepclassmembers class * {
+    public <init>(...);
+}
+
+# Pertahankan semua kelas di package org.bouncycastle
+-keep class org.bouncycastle.** { *; }
+
+# Pertahankan semua kelas di package org.conscrypt
+-keep class org.conscrypt.** { *; }
+
+# Pertahankan semua kelas di package org.openjsse
+-keep class org.openjsse.** { *; }
+
 -dontwarn org.bouncycastle.asn1.ASN1Encodable
 -dontwarn org.bouncycastle.asn1.ASN1InputStream
 -dontwarn org.bouncycastle.asn1.ASN1Integer
@@ -47,6 +59,14 @@
 -dontwarn org.bouncycastle.asn1.x509.AlgorithmIdentifier
 -dontwarn org.bouncycastle.asn1.x509.SubjectPublicKeyInfo
 -dontwarn org.bouncycastle.asn1.x509.TBSCertificateStructure
+-dontwarn org.bouncycastle.cert.X509CertificateHolder
+-dontwarn org.bouncycastle.cms.CMSEnvelopedData
+-dontwarn org.bouncycastle.cms.Recipient
+-dontwarn org.bouncycastle.cms.RecipientId
+-dontwarn org.bouncycastle.cms.RecipientInformation
+-dontwarn org.bouncycastle.cms.RecipientInformationStore
+-dontwarn org.bouncycastle.cms.jcajce.JceKeyTransEnvelopedRecipient
+-dontwarn org.bouncycastle.cms.jcajce.JceKeyTransRecipient
 -dontwarn org.bouncycastle.crypto.BlockCipher
 -dontwarn org.bouncycastle.crypto.CipherParameters
 -dontwarn org.bouncycastle.crypto.engines.AESFastEngine
