@@ -89,7 +89,7 @@ class NewReportActivity : AppCompatActivity() {
     private var isSalesOrPenagihan = false
     private var isDistanceToLong = false
     private var isBaseCamp = false
-    private var isReportPaymentStatus = false
+    private var isReportPaymentStatus = true
     private var iInvoiceId: String? = null
     private var reportType: String = "toko"
     private var id: String = ""
@@ -207,7 +207,7 @@ class NewReportActivity : AppCompatActivity() {
         }
 
         if (isSalesOrPenagihan) {
-            binding.reportPaymentContainer.visibility = View.VISIBLE
+//            binding.reportPaymentContainer.visibility = View.VISIBLE
             binding.reportPaymentTrueContainer.visibility = View.VISIBLE
 
             binding.etPaymentYes.addTextChangedListener(object: TextWatcher {
