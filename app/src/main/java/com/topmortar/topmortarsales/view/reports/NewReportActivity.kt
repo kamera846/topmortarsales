@@ -44,6 +44,7 @@ import com.topmortar.topmortarsales.commons.MAX_REPORT_DISTANCE
 import com.topmortar.topmortarsales.commons.NORMAL_REPORT
 import com.topmortar.topmortarsales.commons.RENVI_SOURCE
 import com.topmortar.topmortarsales.commons.REPORT_SOURCE
+import com.topmortar.topmortarsales.commons.REPORT_TYPE_IS_PAYMENT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -192,6 +193,7 @@ class NewReportActivity : AppCompatActivity() {
         coordinate = intent.getStringExtra(CONST_MAPS).toString()
         isBaseCamp = intent.getBooleanExtra(CONST_IS_BASE_CAMP, false)
         iInvoiceId = intent.getStringExtra(CONST_INVOICE_ID)
+        isReportPaymentStatus = intent.getBooleanExtra(REPORT_TYPE_IS_PAYMENT, false)
 
         when (isBaseCamp) {
             true -> {
