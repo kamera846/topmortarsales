@@ -43,6 +43,7 @@ import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RENVI_SOURCE
 import com.topmortar.topmortarsales.commons.RENVI_WEEKLY
 import com.topmortar.topmortarsales.commons.REPORT_SOURCE
+import com.topmortar.topmortarsales.commons.REPORT_TYPE_IS_PAYMENT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SALES_REPORT_RENVI
@@ -284,6 +285,7 @@ class TagihMingguanFragment : Fragment() {
                     intent.putExtra(REPORT_SOURCE, SALES_REPORT_RENVI)
                     intent.putExtra(RENVI_SOURCE, RENVI_WEEKLY)
                     intent.putExtra(CONST_INVOICE_ID, data.id_invoice)
+                    intent.putExtra(REPORT_TYPE_IS_PAYMENT, true)
                 }
 
                 startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)

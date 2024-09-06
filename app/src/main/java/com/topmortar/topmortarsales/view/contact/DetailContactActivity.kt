@@ -84,6 +84,7 @@ import com.topmortar.topmortarsales.commons.PING_MEDIUM
 import com.topmortar.topmortarsales.commons.PING_NORMAL
 import com.topmortar.topmortarsales.commons.RENVI_SOURCE
 import com.topmortar.topmortarsales.commons.REPORT_SOURCE
+import com.topmortar.topmortarsales.commons.REPORT_TYPE_IS_PAYMENT
 import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
@@ -272,6 +273,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var iReportSource: String? = NORMAL_REPORT
     private var iRenviSource: String? = NORMAL_REPORT
     private var iInvoiceId: String? = null
+    private var iReportPaymentStatus: Boolean? = false
 
     private var isSearchCity = false
     private var isSearchPromo = false
@@ -1170,6 +1172,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             iReportSource = intent.getStringExtra(REPORT_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
                             iRenviSource = intent.getStringExtra(RENVI_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
                             iInvoiceId = intent.getStringExtra(CONST_INVOICE_ID)
+                            iReportPaymentStatus = intent.getBooleanExtra(REPORT_TYPE_IS_PAYMENT, false)
 
                             activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
 
@@ -1637,6 +1640,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 intent.putExtra(RENVI_SOURCE, iRenviSource)
                 intent.putExtra(CONST_CONTACT_ID, contactId)
                 intent.putExtra(CONST_INVOICE_ID, iInvoiceId)
+                intent.putExtra(REPORT_TYPE_IS_PAYMENT, iReportPaymentStatus)
                 if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
                 else intent.putExtra(CONST_NAME, tvName.text)
                 if (iMapsUrl == EMPTY_FIELD_VALUE) intent.putExtra(CONST_MAPS, "")
