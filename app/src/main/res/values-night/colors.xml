@@ -39,6 +39,7 @@
     <color name="status_data">#F9D923</color>
     <color name="status_passive">@color/black_600</color>
     <color name="status_active">#36AE7C</color>
+    <color name="status_active15">#2636AE7C</color>
     <color name="status_blacklist">#EB5353</color>
     <color name="status_bid">#187498</color>
     <color name="baseBackground">@color/black_200</color>
