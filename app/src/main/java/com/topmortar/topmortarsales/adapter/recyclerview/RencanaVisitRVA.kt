@@ -53,7 +53,7 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
 
         fun bind(item: RencanaVisitModel, position: Int) {
 
-            val responseDateCounter = if (typeRencana == "jatemPenagihan1") {
+            val responseDateCounter = if (typeRencana == "jatemPenagihan1" && item.is_new == "1") {
                 item.jatuh_tempo
             } else if (typeRencana == "tagihMingguan" && item.is_new == "1") {
                 item.date_invoice
@@ -61,7 +61,7 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
 
             val dateCounter = responseDateCounter.let {
                 if (!it.isNullOrEmpty()) {
-                    if (typeRencana == "jatemPenagihan1") DateFormat.differenceDateNowDescCustom(it, "dd MMM yyyy", Locale.ENGLISH)
+                    if (typeRencana == "jatemPenagihan1" && item.is_new == "1") DateFormat.differenceDateNowDescCustom(it, "dd MMM yyyy", Locale.ENGLISH)
                     else DateFormat.differenceDateNowDescCustom(it)
                 } else -1
             }
@@ -108,6 +108,10 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
                     badgeNew.visibility = View.VISIBLE
                 } else {
                     if (isInvalidLastVisit) dateJatem = "Belum pernah divisit"
+                    if (typeRencana == "jatemPenagihan1") {
+                        itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.status_active15))
+                        dateJatem = "Jatem " + DateFormat.format(dateString =  item.jatuh_tempo, inputFormat = "dd MMM yyyy", inputLocale = Locale.ENGLISH, outputFormat = "dd MMM") + ", Telah divisit " + DateFormat.format(item.created_at ?: "0000-00-00", outputFormat = "dd MMM")
+                    }
                     badgeNew.visibility = View.GONE
                 }
             }
