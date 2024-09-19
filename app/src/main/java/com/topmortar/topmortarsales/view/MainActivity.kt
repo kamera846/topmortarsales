@@ -213,6 +213,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         val popupMenu = binding.navView
 
         val syncNowItem = popupMenu.menu.findItem(R.id.nav_sync_now)
+        val chartItem = popupMenu.menu.findItem(R.id.nav_chart)
         val searchItem = popupMenu.menu.findItem(R.id.nav_search)
         val productsItem = popupMenu.menu.findItem(R.id.nav_products)
         val userItem = popupMenu.menu.findItem(R.id.nav_user)
@@ -232,6 +233,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         syncNowItem.isVisible = false
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
             if (userKind == USER_KIND_ADMIN) {
+                chartItem.isVisible = true
                 cityItem.isVisible = true
                 skillItem.isVisible = true
                 tukangItem.isVisible = true
@@ -274,6 +276,10 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         when (item.itemId) {
             R.id.nav_sync_now -> {
                 getUserLoggedIn()
+            }
+            R.id.nav_chart -> {
+                val intent = Intent(this@MainActivity, ChartActivity::class.java)
+                startActivity(intent)
             }
             R.id.nav_nearest_store -> {
                 navigateChecklocation()

@@ -61,6 +61,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".view.ChartActivity"
+            android:exported="false" />
+        <activity
             android:name=".view.product.ProductsActivity"
             android:exported="false" />
         <activity
@@ -87,9 +90,9 @@
 
         <service
             android:name=".commons.services.TrackingService"
-            android:foregroundServiceType="location"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="location" />
 
         <activity
             android:name=".view.delivery.DeliveryActivity"
