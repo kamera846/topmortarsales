@@ -13,7 +13,7 @@
             android:title="@string/sync_now" />
         <item
             android:id="@+id/nav_chart"
-            android:icon="@drawable/sync_now_black"
+            android:icon="@drawable/bar_chart_fill_black"
             android:title="Data Grafik"
             android:visible="false"/>
         <item
