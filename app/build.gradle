@@ -61,7 +61,7 @@ android {
 dependencies {
 
     // Lifecycle Scope
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.4'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.6'
 
     // Default
     implementation 'androidx.core:core-ktx:1.13.1'
@@ -95,7 +95,7 @@ dependencies {
     // Maps Resource
     implementation 'com.google.android.gms:play-services-location:21.3.0'
     implementation 'com.google.android.gms:play-services-maps:19.0.0'
-    implementation 'com.google.android.libraries.places:places:3.5.0'
+    implementation 'com.google.android.libraries.places:places:4.0.0'
     implementation 'com.google.maps:google-maps-services:2.2.0'
 
     // Event Bus
@@ -116,12 +116,15 @@ dependencies {
     // Firebase
     implementation 'com.google.firebase:firebase-database:21.0.0'
     implementation 'com.google.firebase:firebase-config:22.0.0'
-    implementation 'com.google.firebase:firebase-crashlytics:19.0.3'
+    implementation 'com.google.firebase:firebase-crashlytics:19.1.0'
 
     // Gson
     implementation 'com.google.code.gson:gson:2.10.1'
 
     // Swipe Refresh
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.2.0-alpha01"
+
+    // Chart
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 
 }
