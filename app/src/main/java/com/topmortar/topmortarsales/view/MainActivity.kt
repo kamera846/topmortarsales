@@ -233,7 +233,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         syncNowItem.isVisible = false
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
             if (userKind == USER_KIND_ADMIN) {
-                chartItem.isVisible = true
+//                chartItem.isVisible = true
                 cityItem.isVisible = true
                 skillItem.isVisible = true
                 tukangItem.isVisible = true
