@@ -247,12 +247,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var terminItem: List<String> = listOf("Pilih Termin Payment", "COD", "COD + Transfer", "COD + Tunai", "30 Hari", "45 Hari", "60 Hari")
     private var paymentMethodItem: List<String> = listOf("Pilih Metode Pembayaran", "Tunai", "Transfer")
     private var reputationItem: List<String> = listOf("Pilih Reputasi Toko", "Good", "Bad")
+    private var hariBayarItem: List<String> = listOf("Pilih Hari Bayar", "Bebas", "Senin", "Selasa", "Rabu", "Kamis", "Jum'at", "Sabtu")
     private var spinPhoneCatItems: List<String> = listOf()
     private var selectedStatus: String = ""
     private var selectedWeeklyVisitStatus: String = ""
     private var selectedPaymentMethod: String = ""
     private var selectedTermin: String = ""
     private var selectedReputation: String = ""
+    private var selectedHariBayar: String = ""
     private var cameraPermissionLauncher: ActivityResultLauncher<String>? = null
     private var imagePicker: ActivityResultLauncher<Intent>? = null
     private var selectedUri: Uri? = null
@@ -266,6 +268,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var iPaymentMethod: String? = null
     private var iTermin: String? = null
     private var iReputation: String? = null
+    private var iHariBayar: String? = null
     private var iAddress: String? = null
     private var iMapsUrl: String? = null
     private var iKtp: String? = null
@@ -753,6 +756,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 tvReputation.visibility = View.GONE
                 spinReputation.visibility = View.VISIBLE
 
+                // Hari Bayar
+                binding.hariBayarContainer.setBackgroundResource(R.drawable.et_background)
+                binding.tvHariBayar.visibility = View.GONE
+                binding.spinHariBayar.visibility = View.VISIBLE
+
                 // Promo
                 tvPromo.visibility = View.GONE
                 etPromo.visibility = View.VISIBLE
@@ -839,6 +847,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 tvReputation.visibility = View.VISIBLE
                 spinReputation.visibility = View.GONE
 
+                // Hari Bayar
+                binding.hariBayarContainer.setBackgroundResource(R.drawable.background_rounded_16)
+                binding.tvHariBayar.visibility = View.VISIBLE
+                binding.spinHariBayar.visibility = View.GONE
+
                 // Promo
                 tvPromo.visibility = View.VISIBLE
                 etPromo.visibility = View.GONE
@@ -909,6 +922,17 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 else -> "-1"
             }
         }
+        val pHariBayar = if (selectedHariBayar.isEmpty()) "-1" else {
+            when (selectedHariBayar) {
+                hariBayarItem[1] -> "1"
+                hariBayarItem[2] -> "2"
+                hariBayarItem[3] -> "3"
+                hariBayarItem[4] -> "4"
+                hariBayarItem[5] -> "5"
+                hariBayarItem[6] -> "6"
+                else -> "-1"
+            }
+        }
 
         var imagePart: MultipartBody.Part? = null
 
@@ -934,7 +958,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         progressDialog.show()
 
 //        Handler(Looper.getMainLooper()).postDelayed({
-//            handleMessage(this, "TAG SAVE", "${contactId!!}, ${formatPhoneNumber(pPhone)}, $pName, $pOwner, $pBirthday, $pMapsUrl, ${pCityID!!}, $pAddress, $pStatus, $imagePart, $pTermin, $pReputation, $pPromoID, $pWeeklyVisitStatus")
+//            handleMessage(this, "TAG SAVE", "${contactId!!}, ${formatPhoneNumber(pPhone)}, $pName, $pOwner, $pBirthday, $pMapsUrl, ${pCityID!!}, $pAddress, $pStatus, $imagePart, $pTermin, $pReputation, $pPromoID, $pWeeklyVisitStatus, $pHariBayar")
 //            loadingState(false)
 //            progressDialog.dismiss()
 //        }, 1000)
@@ -960,6 +984,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbPaymentMethod = createPartFromString(pPaymentMethod)
                 val rbTermin = createPartFromString(pTermin)
                 val rbReputation = createPartFromString(pReputation)
+                val rbHariBayar = createPartFromString(pHariBayar)
                 val rbPromoId = createPartFromString(pPromoID!!)
 
                 val response = apiService.editContact(
@@ -1056,6 +1081,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             iStatus = pStatus.ifEmpty { null }
                             iWeeklyVisitStatus = pWeeklyVisitStatus.ifEmpty { null }
                             iReputation = pReputation.ifEmpty { null }
+                            iHariBayar = pHariBayar.ifEmpty { null }
 
                             iPaymentMethod = pPaymentMethod.ifEmpty { null }
                             iTermin = pTermin.ifEmpty { null }
@@ -1158,9 +1184,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             iPaymentMethod = data.payment_method
                             iTermin = data.termin_payment
                             iReputation = data.reputation
+                            iHariBayar = data.hariBayar
 
                             tooltipStatus.visibility = View.VISIBLE
                             binding.weeklyVisitContainer.visibility = View.VISIBLE
+//                            binding.hariBayarContainer.visibility = View.VISIBLE
                             binding.tooltipWeeklyVisit.visibility = View.VISIBLE
 //        if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
 //        else btnInvoice.visibility = View.VISIBLE
@@ -1289,6 +1317,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             setupPaymentMethodSpinner()
                             setupTerminSpinner()
                             setupReputationSpinner()
+                            setupHariBayarSpinner()
                             setToGetCities()
 
                         }
@@ -1381,6 +1410,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 setupPaymentMethod(iPaymentMethod)
                                 setupTermin(iTermin)
                                 setupReputation(iReputation)
+                                setupHariBayar(iHariBayar)
                             } else {
 
 //                                if (data.store_status == STATUS_CONTACT_BLACKLIST) {
@@ -2119,6 +2149,34 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
     }
 
+    private fun setupHariBayar(hariBayar: String? = null) {
+        when (hariBayar) {
+            "1" -> {
+                binding.tvHariBayar.text = hariBayarItem[1]
+                binding.spinHariBayar.setSelection(1)
+            }"2" -> {
+                binding.tvHariBayar.text = hariBayarItem[2]
+                binding.spinHariBayar.setSelection(2)
+            }"3" -> {
+                binding.tvHariBayar.text = hariBayarItem[3]
+                binding.spinHariBayar.setSelection(3)
+            }"4" -> {
+                binding.tvHariBayar.text = hariBayarItem[4]
+                binding.spinHariBayar.setSelection(4)
+            }"5" -> {
+                binding.tvHariBayar.text = hariBayarItem[5]
+                binding.spinHariBayar.setSelection(5)
+            }"6" -> {
+                binding.tvHariBayar.text = hariBayarItem[6]
+                binding.spinHariBayar.setSelection(6)
+            }
+            else -> {
+                binding.tvHariBayar.text = EMPTY_FIELD_VALUE
+                binding.spinHariBayar.setSelection(0)
+            }
+        }
+    }
+
     private fun setupStatusSpinner() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, statusItem)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -2232,6 +2290,34 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             else -> "-1"
         }
         setupReputation(iReputation)
+    }
+
+    private fun setupHariBayarSpinner() {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, hariBayarItem)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        binding.spinHariBayar.adapter = adapter
+        binding.spinHariBayar.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedHariBayar = if (position != 0) hariBayarItem[position]
+                else ""
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+        }
+
+        selectedHariBayar = when (iHariBayar) {
+             "1" -> hariBayarItem[1]
+             "2" -> hariBayarItem[2]
+             "3" -> hariBayarItem[3]
+             "4" -> hariBayarItem[4]
+             "5" -> hariBayarItem[5]
+             "6" -> hariBayarItem[6]
+            else -> "-1"
+        }
+        setupHariBayar(iHariBayar)
     }
 
     private fun chooseFile() {
