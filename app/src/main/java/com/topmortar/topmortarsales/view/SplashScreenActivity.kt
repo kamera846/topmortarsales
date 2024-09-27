@@ -312,25 +312,24 @@ class SplashScreenActivity : AppCompatActivity() {
 
     }
 
-    private fun getFcmToken(): String? {
+    private fun getFcmToken() {
 
-        var fcmToken: String? = null
+        try {
 
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-            if (!task.isSuccessful) {
-                Log.w("FCM", "Fetching FCM registration token failed", task.exception)
-                fcmToken = null
-                return@addOnCompleteListener
+            FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Log.w("FCM", "Fetching FCM registration token failed", task.exception)
+                    return@addOnCompleteListener
+                }
+
+                // Dapatkan token
+                val token = task.result
+                Log.d("FCM", "FCM Token: $token")
+                // Kirim token ke server Anda jika diperlukan
             }
-
-            // Dapatkan token
-            val token = task.result
-            Log.d("FCM", "FCM Token: $token")
-            fcmToken = token
-            // Kirim token ke server Anda jika diperlukan
+        } catch (e: Exception) {
+            Log.e("FCM", "Error get fcm token exception: $e")
         }
-
-        return fcmToken
 
     }
 
