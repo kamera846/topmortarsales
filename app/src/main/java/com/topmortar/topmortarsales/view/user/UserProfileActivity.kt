@@ -21,6 +21,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.messaging.FirebaseMessaging
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
@@ -509,6 +510,7 @@ class UserProfileActivity : AppCompatActivity() {
 
                 CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor() ?: "-custom-019", sessionManager.userID().toString())
             }
+            deleteFcmToken()
         } catch (e: Exception) {
             Log.d("Firebase Auth", "$e")
         }
@@ -529,6 +531,21 @@ class UserProfileActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }, 1000)
+    }
+
+    private fun deleteFcmToken() {
+
+        FirebaseMessaging.getInstance().deleteToken().addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w("FCM", "Deleting FCM registration token failed", task.exception)
+                return@addOnCompleteListener
+            }
+
+            // Dapatkan token
+            val token = task.result
+            Log.d("FCM", "FCM Token successfully deleted")
+        }
+
     }
 
     private fun  setupCourierMenu() {
