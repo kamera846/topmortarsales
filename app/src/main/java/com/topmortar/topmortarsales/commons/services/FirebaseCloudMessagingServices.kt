@@ -43,7 +43,6 @@ class FirebaseCloudMessagingServices : FirebaseMessagingService() {
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         try {
-            Log.d("FCM", "Received messages: ${remoteMessage.data["id_user"]}")
             if (sessionManager == null) sessionManager = SessionManager(this)
             remoteMessage.data.let {
                 nNotificationLevel = it["notification_level"].toString()
