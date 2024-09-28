@@ -32,7 +32,6 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.messaging.FirebaseMessaging
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN_CITY
@@ -306,30 +305,8 @@ class SplashScreenActivity : AppCompatActivity() {
     private fun navigateToSales() {
 
         val intent = Intent(this, HomeSalesActivity::class.java)
-        getFcmToken()
         startActivity(intent)
         finish()
-
-    }
-
-    private fun getFcmToken() {
-
-        try {
-
-            FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-                if (!task.isSuccessful) {
-                    Log.w("FCM", "Fetching FCM registration token failed", task.exception)
-                    return@addOnCompleteListener
-                }
-
-                // Dapatkan token
-                val token = task.result
-                Log.d("FCM", "FCM Token: $token")
-                // Kirim token ke server Anda jika diperlukan
-            }
-        } catch (e: Exception) {
-            Log.e("FCM", "Error get fcm token exception: $e")
-        }
 
     }
 

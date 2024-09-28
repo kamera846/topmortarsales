@@ -37,6 +37,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.messaging.FirebaseMessaging
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.HomeSalesMenuRV
 import com.topmortar.topmortarsales.commons.ABSENT_MODE_BASECAMP
@@ -364,6 +365,25 @@ class HomeSalesActivity : AppCompatActivity() {
         lockMenuItem(true)
 
         checkAbsent()
+        getFcmToken()
+    }
+
+    private fun getFcmToken() {
+
+        try {
+
+            FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Log.w("FCM", "Fetching FCM registration token failed", task.exception)
+                    return@addOnCompleteListener
+                }
+
+                val token = task.result
+                Log.d("FCM", "FCM Token: $token")
+            }
+        } catch (e: Exception) {
+            Log.e("FCM", "Error get fcm token exception: $e")
+        }
 
     }
 

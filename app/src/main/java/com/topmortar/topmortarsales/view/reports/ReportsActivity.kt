@@ -1,6 +1,7 @@
 package com.topmortar.topmortarsales.view.reports
 
 import android.app.DatePickerDialog
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -47,6 +48,7 @@ import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityReportsBinding
 import com.topmortar.topmortarsales.modal.DetailReportModal
 import com.topmortar.topmortarsales.model.ReportVisitModel
+import com.topmortar.topmortarsales.view.rencanaVisits.HomeSalesActivity
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -73,6 +75,10 @@ class ReportsActivity : AppCompatActivity() {
     private lateinit var datePicker: DatePickerDialog
     private var selectedDate: Calendar = Calendar.getInstance()
 
+    private var notificationOpened = false
+    private var nTargetIntent: String? = null
+    private var nVisitId: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -87,6 +93,11 @@ class ReportsActivity : AppCompatActivity() {
         contactName = intent.getStringExtra(CONST_NAME)
         userFullName = intent.getStringExtra(CONST_FULL_NAME)
         userLevel = intent.getStringExtra(CONST_USER_LEVEL)
+
+        val isPendingIntent = intent.getStringExtra("notification_intent")
+        if (isPendingIntent != null) nTargetIntent = isPendingIntent.toString()
+        val visitId = intent.getStringExtra("nVisitId")
+        if (visitId != null) nVisitId = visitId.toString()
 
         if (userKind == USER_KIND_COURIER) isCourier = true
         else if (userLevel == AUTH_LEVEL_COURIER) isCourier = true
@@ -296,16 +307,30 @@ class ReportsActivity : AppCompatActivity() {
 
             mAdapter.setOnItemClickListener(object : ReportsRecyclerViewAdapter.OnItemClickListener{
                 override fun onItemClick(item: ReportVisitModel) {
-                    val modalDetail = DetailReportModal(this@ReportsActivity)
-                    modalDetail.setData(item)
-                    if (isCourier || isBA) modalDetail.setIsCourier(true)
-                    else modalDetail.setIsCourier(false)
-                    if (contactID.isNullOrEmpty()) modalDetail.setWithName(true)
-                    modalDetail.show()
+                    showModalDetail(item)
                 }
 
             })
         }
+
+        if (nTargetIntent != null && nTargetIntent == "to_detail_visit" && nVisitId != null && !notificationOpened) {
+//            Log.d("FCM", "Notification data from home screen: $nTargetIntent, $nVisitId")
+            val item= items.find { it.id_visit == nVisitId }
+            if (item != null) {
+                notificationOpened = true
+                showModalDetail(item)
+            }
+        }
+
+    }
+
+    private fun showModalDetail(item: ReportVisitModel) {
+        val modalDetail = DetailReportModal(this@ReportsActivity)
+        modalDetail.setData(item)
+        if (isCourier || isBA) modalDetail.setIsCourier(true)
+        else modalDetail.setIsCourier(false)
+        if (contactID.isNullOrEmpty()) modalDetail.setWithName(true)
+        modalDetail.show()
     }
 
     private fun loadingState(state: Boolean, message: String = getString(R.string.txt_loading)) {
@@ -332,7 +357,13 @@ class ReportsActivity : AppCompatActivity() {
 
     private fun initClickHandler() {
 
-        binding.titleBarDark.icBack.setOnClickListener { finish() }
+        binding.titleBarDark.icBack.setOnClickListener {
+            if (isTaskRoot) {
+                val intent = Intent(this, HomeSalesActivity::class.java)
+                startActivity(intent)
+                finish()
+            } else finish()
+        }
         binding.titleBarDark.icGrid.setOnClickListener {
             sessionManager.layoutReportStatus(LAYOUT_GRID)
             binding.titleBarDark.icRow.visibility = View.VISIBLE
@@ -417,5 +448,15 @@ class ReportsActivity : AppCompatActivity() {
                 )
             }
         }
+    }
+
+    override fun onBackPressed() {
+
+        if (isTaskRoot) {
+            val intent = Intent(this, HomeSalesActivity::class.java)
+            startActivity(intent)
+            finish()
+        } else super.onBackPressed()
+
     }
 }
