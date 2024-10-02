@@ -22,18 +22,18 @@ android {
     }
 
     signingConfigs {
-        release {
-            keyAlias 'topmortarsalesrelease'
-            keyPassword 'topmortarsalesrelease'
-            storeFile file('E:\\Pekerjaan\\AndroidStudio\\topmortarsales\\app\\keystores\\release-keystore')
-            storePassword 'topmortarsalesrelease'
-        }
 //        release {
 //            keyAlias 'topmortarsalesrelease'
 //            keyPassword 'topmortarsalesrelease'
-//            storeFile file('/Users/rafliram/Projects/ProjectMobile/topmortarsales/app/keystores/release-keystore')
+//            storeFile file('E:\\Pekerjaan\\AndroidStudio\\topmortarsales\\app\\keystores\\release-keystore')
 //            storePassword 'topmortarsalesrelease'
 //        }
+        release {
+            keyAlias 'topmortarsalesrelease'
+            keyPassword 'topmortarsalesrelease'
+            storeFile file('/Users/masple/Projects/AndroidStudio/topmortarsales/app/keystores/release-keystore')
+            storePassword 'topmortarsalesrelease'
+        }
     }
 
     buildTypes {
