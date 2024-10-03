@@ -5,6 +5,8 @@ import android.widget.CheckBox
 import android.widget.RadioButton
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.topmortar.topmortarsales.adapter.recyclerview.QnAFormReportRVA
 import com.topmortar.topmortarsales.databinding.ActivityChecklistReportBinding
 
 class ChecklistReportActivity : AppCompatActivity() {
@@ -23,10 +25,20 @@ class ChecklistReportActivity : AppCompatActivity() {
         binding.titleBar.icBack.setOnClickListener { finish() }
         binding.titleBar.tvTitleBar.text = "Form Laporan"
 
-        setupRadioButton()
-        setupCheckbox()
+        setupRecyclerView()
 
-        binding.submitReport.setOnClickListener { submitReport() }
+//        setupRadioButton()
+//        setupCheckbox()
+//
+//        binding.submitReport.setOnClickListener { submitReport() }
+    }
+
+    private fun setupRecyclerView() {
+        val rvAdapter = QnAFormReportRVA(arrayListOf("Siapa nama kamu?", "Kapan tanggal lahir kamu?", "Apa jenis kelamin kamu?", "Apa saja hobi kamu?"))
+        binding.recyclerView.apply {
+            adapter = rvAdapter
+            layoutManager = LinearLayoutManager(this@ChecklistReportActivity)
+        }
     }
 
     private fun setupRadioButton() {
