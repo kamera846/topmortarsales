@@ -133,6 +133,7 @@ import com.topmortar.topmortarsales.model.ContactSales
 import com.topmortar.topmortarsales.model.DeliveryModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MapsActivity
+import com.topmortar.topmortarsales.view.reports.ChecklistReportActivity
 import com.topmortar.topmortarsales.view.reports.NewReportActivity
 import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import com.topmortar.topmortarsales.view.reports.UsersReportActivity
@@ -1593,6 +1594,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             val invoiceOption = bottomSheetLayout.findViewById<LinearLayout>(R.id.invoiceOption)
             val reportOption = bottomSheetLayout.findViewById<LinearLayout>(R.id.reportOption)
+            val checklistReportOption = bottomSheetLayout.findViewById<LinearLayout>(R.id.btnChecklistReport)
             val btnNewReport = bottomSheetLayout.findViewById<Button>(R.id.btnNewReport)
             val reportsTitle = bottomSheetLayout.findViewById<TextView>(R.id.reportsTitle)
             val voucherOption = bottomSheetLayout.findViewById<LinearLayout>(R.id.voucherOption)
@@ -1602,12 +1604,17 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 reportOption.visibility = View.GONE
                 btnNewReport.visibility = View.GONE
                 voucherOption.visibility = View.GONE
+                checklistReportOption.visibility = View.GONE
             } else if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) {
                 reportsTitle.text = "Lihat Laporan Sales"
                 reportOption.visibility = View.VISIBLE
+                checklistReportOption.visibility = View.GONE
                 btnNewReport.visibility = View.GONE
             } else if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
-                if (iReportSource == NORMAL_REPORT) btnNewReport.visibility = View.GONE
+                if (iReportSource == NORMAL_REPORT) {
+                    btnNewReport.visibility = View.GONE
+                    checklistReportOption.visibility = View.GONE
+                }
 //                if (userDistributorId == "1" && iReportSource == NORMAL_REPORT) btnNewReport.visibility = View.GONE
 //                else {
 //                    if (iStatus == STATUS_CONTACT_BLACKLIST) {
@@ -1660,6 +1667,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
                 else intent.putExtra(CONST_NAME, tvName.text)
 
+                startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+
+            } R.id.btnChecklistReport -> {
+
+                val intent = Intent(this@DetailContactActivity, ChecklistReportActivity::class.java)
                 startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
 
             } else -> {
