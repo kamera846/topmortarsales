@@ -1,19 +1,18 @@
 package com.topmortar.topmortarsales.view.reports
 
 import android.os.Bundle
-import android.widget.CheckBox
-import android.widget.RadioButton
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.topmortar.topmortarsales.adapter.recyclerview.QnAFormReportRVA
 import com.topmortar.topmortarsales.databinding.ActivityChecklistReportBinding
+import com.topmortar.topmortarsales.model.QnAFormReportModel
 
 class ChecklistReportActivity : AppCompatActivity() {
     private lateinit var binding: ActivityChecklistReportBinding
-
-    private val genders = listOf("Laki-laki", "Perempuan")
-    private val hobbies = listOf("Olahraga", "Memasak", "Membaca", "Menggambar", "Lainnya...")
+    private val questions = "[{\"id\":\"1\",\"question\":\"Nama Toko\",\"is_required\":\"1\",\"answer_type\":\"text\",\"answer_option\":null},{\"id\":\"2\",\"question\":\"Nama customer yang ditemui (owner/karyawan)\",\"is_required\":\"1\",\"answer_type\":\"text\",\"answer_option\":null},{\"id\":\"3\",\"question\":\"Merchandise yang diberikan\",\"is_required\":\"1\",\"answer_type\":\"checkbox\",\"answer_option\":[\"Vouhcer\",\"Kantong Plastik\",\"Buletin (Flyer Cetak)\",\"Brosur Katalog\",\"Yang lainnya\"]},{\"id\":\"4\",\"question\":\"Stock mortar toko dan promonya\",\"is_required\":\"0\",\"answer_type\":\"text\",\"answer_option\":null},{\"id\":\"5\",\"question\":\"Tawarkan produk thinbed/perekat dan tunjukan kemasan\",\"is_required\":\"1\",\"answer_type\":\"checkbox\",\"answer_option\":[\"Produk\",\"Kemasan\"]},{\"id\":\"6\",\"question\":\"Validasi tanggal ultah toko\",\"is_required\":\"0\",\"answer_type\":\"date\",\"answer_option\":null},{\"id\":\"7\",\"question\":\"Validasi instagram toko, Follow topmortar untuk masuk ke giveaway\",\"is_required\":\"0\",\"answer_type\":\"checkbox\",\"answer_option\":[\"Sudah follow\"]},{\"id\":\"8\",\"question\":\"Tanya toko\",\"is_required\":\"1\",\"answer_type\":\"checkbox\",\"answer_option\":[\"Kapan mau order pak/bu?\",\"Ada kendala apa pak/bu?\",\"Kapan bisa saya temui kembali pak/bu?\"]}]"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,68 +26,19 @@ class ChecklistReportActivity : AppCompatActivity() {
 
         setupRecyclerView()
 
-//        setupRadioButton()
-//        setupCheckbox()
-//
-//        binding.submitReport.setOnClickListener { submitReport() }
     }
 
     private fun setupRecyclerView() {
-        val rvAdapter = QnAFormReportRVA(arrayListOf("Siapa nama kamu?", "Kapan tanggal lahir kamu?", "Apa jenis kelamin kamu?", "Apa saja hobi kamu?"))
+        val gson = Gson()
+        val listType = object : TypeToken<List<QnAFormReportModel>>() {}.type
+        val questionsList: ArrayList<QnAFormReportModel> = gson.fromJson(questions, listType)
+
+        val rvAdapter = QnAFormReportRVA()
+        rvAdapter.items = questionsList
         binding.recyclerView.apply {
             adapter = rvAdapter
             layoutManager = LinearLayoutManager(this@ChecklistReportActivity)
         }
-    }
-
-    private fun setupRadioButton() {
-        genders.forEach { gender ->
-            val radioButton = RadioButton(this).apply {
-                text = gender
-            }
-            binding.radioGroupContainer.addView(radioButton)
-        }
-    }
-
-    private fun setupCheckbox() {
-        hobbies.forEach { hobby ->
-            val checkBox = CheckBox(this).apply {
-                text = hobby
-            }
-            binding.checkboxContainer.addView(checkBox)
-        }
-    }
-
-    private fun submitReport() {
-
-        val name = binding.editTextAnswer.text.toString()
-
-        val datePicker = binding.datePickerAnswer
-        val day = datePicker.dayOfMonth
-        val month = datePicker.month + 1
-        val year = datePicker.year
-
-        val selectedDate = "$day/$month/$year"
-
-        val selectedGender = binding.radioGroupContainer.checkedRadioButtonId
-        val selectedGenderText = if (selectedGender != -1) {
-            findViewById<RadioButton>(selectedGender).text
-        } else {
-            "Belum dipilih"
-        }
-
-        val selectedHobbies = mutableListOf<String>()
-        for (i in 0 until binding.checkboxContainer.childCount) {
-            val checkBox = binding.checkboxContainer.getChildAt(i) as CheckBox
-            if (checkBox.isChecked) {
-                selectedHobbies.add(checkBox.text.toString())
-            }
-        }
-
-        println("Name: $name")
-        println("Birthday: $selectedDate")
-        println("Gender: $selectedGenderText")
-        println("Hobbies: $selectedHobbies")
     }
 
 }
