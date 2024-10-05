@@ -13,5 +13,8 @@ data class TukangModel(
     var id_skill: String = "",
     var kode_skill: String = "",
     var ktp_tukang: String = "",
-    var nama_skill: String = ""
+    var nama_skill: String = "",
+    var id_catcus: String = "",
+    var is_demo: String = "",
+    var is_valid: String = ""
 )

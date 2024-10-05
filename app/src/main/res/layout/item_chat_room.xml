@@ -144,11 +144,20 @@
                     <ImageView
                         android:visibility="gone"
                         android:id="@+id/icCake"
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
                         android:layout_marginStart="8dp"
                         android:scaleType="fitStart"
                         android:src="@drawable/cake"/>
+
+                    <ImageView
+                        android:visibility="gone"
+                        android:id="@+id/icCheckBlue"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_marginStart="8dp"
+                        android:scaleType="fitStart"
+                        android:src="@drawable/circle_check_bid"/>
 
                 </LinearLayout>
 

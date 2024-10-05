@@ -633,6 +633,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             tvMapsContainer.visibility = View.GONE
             tvBirthdayContainer.visibility = View.GONE
             tvKtpContainer.visibility = View.GONE
+            binding.spinPhoneCategories1.visibility = View.GONE
 
             btnSendMessage.visibility = View.GONE
 

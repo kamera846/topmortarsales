@@ -12,6 +12,11 @@
             android:icon="@drawable/sync_now_black"
             android:title="@string/sync_now" />
         <item
+            android:id="@+id/nav_chart"
+            android:icon="@drawable/bar_chart_fill_black"
+            android:title="Data Grafik"
+            android:visible="false"/>
+        <item
             android:id="@+id/nav_my_profile"
             android:icon="@drawable/person_black"
             android:title="@string/my_profile" />

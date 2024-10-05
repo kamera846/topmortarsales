@@ -2,9 +2,11 @@
 
 package com.topmortar.topmortarsales.view.user
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -12,15 +14,18 @@ import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.messaging.FirebaseMessaging
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
@@ -98,6 +103,15 @@ class UserProfileActivity : AppCompatActivity() {
 
     private var isAbsentMorningNow = false
     private var isAbsentEveningNow = false
+
+    private val requestNotificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                Log.d("FCM", "Notifikasi diizinkan")
+            } else {
+                Log.d("FCM", "Notifikasi ditolak")
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -267,6 +281,23 @@ class UserProfileActivity : AppCompatActivity() {
     }
 
     private fun dataActivityValidation() {
+
+        if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                // Cek apakah izin sudah diberikan
+                if (ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    // Izin sudah diberikan
+                    Log.d("FCM", "Notifikasi diizinkan")
+                } else {
+                    // Minta izin notifikasi
+                    requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+        }
 
         if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
             CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor() ?: "-custom-019", sessionManager.userID() ?: "")
@@ -509,6 +540,7 @@ class UserProfileActivity : AppCompatActivity() {
 
                 CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor() ?: "-custom-019", sessionManager.userID().toString())
             }
+            deleteFcmToken()
         } catch (e: Exception) {
             Log.d("Firebase Auth", "$e")
         }
@@ -529,6 +561,21 @@ class UserProfileActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }, 1000)
+    }
+
+    private fun deleteFcmToken() {
+
+        FirebaseMessaging.getInstance().deleteToken().addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w("FCM", "Deleting FCM registration token failed", task.exception)
+                return@addOnCompleteListener
+            }
+
+            // Dapatkan token
+            val token = task.result
+            Log.d("FCM", "FCM Token successfully deleted")
+        }
+
     }
 
     private fun  setupCourierMenu() {

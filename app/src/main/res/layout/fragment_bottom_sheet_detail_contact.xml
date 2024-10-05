@@ -139,6 +139,36 @@
 
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/btnChecklistReport"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="12dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:onClick="onBottomSheetOptionClick"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackground">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="16dp"
+                android:src="@drawable/file_flat_list_line_black"
+                android:contentDescription="Icon Report"/>
+
+            <TextView
+                android:id="@+id/checklistReportsTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Buat Laporan Checklist"
+                android:textSize="16sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+        </LinearLayout>
+
     </LinearLayout>
 
     <Button
