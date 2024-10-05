@@ -365,7 +365,8 @@ class HomeSalesActivity : AppCompatActivity() {
         lockMenuItem(true)
 
         checkAbsent()
-        getFcmToken()
+//        Disabled FCM
+//        getFcmToken()
     }
 
     private fun getFcmToken() {

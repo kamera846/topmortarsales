@@ -282,22 +282,23 @@ class UserProfileActivity : AppCompatActivity() {
 
     private fun dataActivityValidation() {
 
-        if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                // Cek apakah izin sudah diberikan
-                if (ContextCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.POST_NOTIFICATIONS
-                    ) == PackageManager.PERMISSION_GRANTED
-                ) {
-                    // Izin sudah diberikan
-                    Log.d("FCM", "Notifikasi diizinkan")
-                } else {
-                    // Minta izin notifikasi
-                    requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                }
-            }
-        }
+//         Disabled FCM
+//        if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//                // Cek apakah izin sudah diberikan
+//                if (ContextCompat.checkSelfPermission(
+//                        this,
+//                        Manifest.permission.POST_NOTIFICATIONS
+//                    ) == PackageManager.PERMISSION_GRANTED
+//                ) {
+//                    // Izin sudah diberikan
+//                    Log.d("FCM", "Notifikasi diizinkan")
+//                } else {
+//                    // Minta izin notifikasi
+//                    requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+//                }
+//            }
+//        }
 
         if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
             CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor() ?: "-custom-019", sessionManager.userID() ?: "")
@@ -540,7 +541,8 @@ class UserProfileActivity : AppCompatActivity() {
 
                 CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor() ?: "-custom-019", sessionManager.userID().toString())
             }
-            deleteFcmToken()
+//            Disabled FCM
+//            deleteFcmToken()
         } catch (e: Exception) {
             Log.d("Firebase Auth", "$e")
         }
