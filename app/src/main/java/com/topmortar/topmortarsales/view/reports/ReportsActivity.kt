@@ -314,7 +314,6 @@ class ReportsActivity : AppCompatActivity() {
         }
 
         if (nTargetIntent != null && nTargetIntent == "to_detail_visit" && nVisitId != null && !notificationOpened) {
-//            Log.d("FCM", "Notification data from home screen: $nTargetIntent, $nVisitId")
             val item= items.find { it.id_visit == nVisitId }
             if (item != null) {
                 notificationOpened = true
