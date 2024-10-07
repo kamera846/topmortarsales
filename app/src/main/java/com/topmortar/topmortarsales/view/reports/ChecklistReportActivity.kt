@@ -28,15 +28,24 @@ class ChecklistReportActivity : AppCompatActivity() {
         setupRecyclerView()
 
         binding.submitReport.setOnClickListener {
+            val QuestionSubmission: ArrayList<QuestionSubmission> = arrayListOf()
             val items = rvAdapter.submitForm()
             items.forEach { item ->
                 println("Question: ${item.question}")
                 println("Selected Options (true/false): ${item.selected_answer}")
                 println("User Answer: ${item.keterangan}")
+                QuestionSubmission.add(QuestionSubmission(id = item.id, keterangan = item.keterangan, selected_answer = item.selected_answer))
             }
+            println(Gson().toJson(QuestionSubmission))
         }
 
     }
+
+    private data class QuestionSubmission(
+        val id: String = "",
+        val keterangan: String = "",
+        val selected_answer: MutableList<Boolean>? = null
+    )
 
     private fun setupRecyclerView() {
         val gson = Gson()
