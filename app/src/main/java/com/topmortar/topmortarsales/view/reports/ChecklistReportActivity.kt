@@ -12,7 +12,8 @@ import com.topmortar.topmortarsales.model.QnAFormReportModel
 
 class ChecklistReportActivity : AppCompatActivity() {
     private lateinit var binding: ActivityChecklistReportBinding
-    private val questions = "[{\"id\":\"1\",\"question\":\"Nama Toko\",\"is_required\":\"1\",\"answer_type\":\"text\",\"answer_option\":null},{\"id\":\"2\",\"question\":\"Nama customer yang ditemui (owner/karyawan)\",\"is_required\":\"1\",\"answer_type\":\"text\",\"answer_option\":null},{\"id\":\"3\",\"question\":\"Merchandise yang diberikan\",\"is_required\":\"1\",\"answer_type\":\"checkbox\",\"answer_option\":[\"Vouhcer\",\"Kantong Plastik\",\"Buletin (Flyer Cetak)\",\"Brosur Katalog\",\"Yang lainnya\"]},{\"id\":\"4\",\"question\":\"Stock mortar toko dan promonya\",\"is_required\":\"0\",\"answer_type\":\"text\",\"answer_option\":null},{\"id\":\"5\",\"question\":\"Tawarkan produk thinbed/perekat dan tunjukan kemasan\",\"is_required\":\"1\",\"answer_type\":\"checkbox\",\"answer_option\":[\"Produk\",\"Kemasan\"]},{\"id\":\"6\",\"question\":\"Validasi tanggal ultah toko\",\"is_required\":\"0\",\"answer_type\":\"date\",\"answer_option\":null},{\"id\":\"7\",\"question\":\"Validasi instagram toko, Follow topmortar untuk masuk ke giveaway\",\"is_required\":\"0\",\"answer_type\":\"checkbox\",\"answer_option\":[\"Sudah follow\"]},{\"id\":\"8\",\"question\":\"Tanya toko\",\"is_required\":\"1\",\"answer_type\":\"checkbox\",\"answer_option\":[\"Kapan mau order pak/bu?\",\"Ada kendala apa pak/bu?\",\"Kapan bisa saya temui kembali pak/bu?\"]}]"
+    private val questions = "[{\"id\":\"1\",\"question\":\"Merchandise yang diberikan\",\"is_required\":\"0\",\"answer_type\":\"checkbox\",\"answer_option\":[\"Voucher\",\"Kantong Plastik\",\"Buletin (Flyer Cetak)\",\"Brosur Katalog\",\"Lainnya\"],\"selected_answer\":null,\"keterangan\":\"\"},{\"id\":\"2\",\"question\":\"Tawarkan produk thinbed/perekat dan tunjukan kemasan\",\"is_required\":\"0\",\"answer_type\":\"checkbox\",\"answer_option\":[\"Produk\",\"Kemasan\"],\"selected_answer\":null,\"keterangan\":\"\"},{\"id\":\"3\",\"question\":\"Tanya toko\",\"is_required\":\"0\",\"answer_type\":\"checkbox\",\"answer_option\":[\"Kapan mau order pak/bu\",\"Ada kendala apa pak/bu\",\"Bisa saya temui kembali kapan pak/bu\"],\"selected_answer\":null,\"keterangan\":\"\"},{\"id\":\"4\",\"question\":\"Merchandiseyangdiberikan\",\"is_required\":\"0\",\"answer_type\":\"checkbox\",\"answer_option\":[\"Voucher\",\"KantongPlastik\",\"Buletin(FlyerCetak)\",\"BrosurKatalog\",\"Lainnya\"],\"selected_answer\":null,\"keterangan\":\"\"},{\"id\":\"5\",\"question\":\"Tawarkanprodukthinbed/perekatdantujukankemasan\",\"is_required\":\"0\",\"answer_type\":\"checkbox\",\"answer_option\":[\"Produk\",\"Kemasan\"],\"selected_answer\":null,\"keterangan\":\"\"},{\"id\":\"6\",\"question\":\"Tanyatoko\",\"is_required\":\"0\",\"answer_type\":\"checkbox\",\"answer_option\":[\"Kapanmauorderpak/bu\",\"Adakendalaapapak/bu\",\"Bisasayatemuikembalikapanpak/bu\"],\"selected_answer\":null,\"keterangan\":\"\"}]"
+    private lateinit var rvAdapter: QnAFormReportRVA
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +27,15 @@ class ChecklistReportActivity : AppCompatActivity() {
 
         setupRecyclerView()
 
+        binding.submitReport.setOnClickListener {
+            val items = rvAdapter.submitForm()
+            items.forEach { item ->
+                println("Question: ${item.question}")
+                println("Selected Options (true/false): ${item.selected_answer}")
+                println("User Answer: ${item.keterangan}")
+            }
+        }
+
     }
 
     private fun setupRecyclerView() {
@@ -33,7 +43,7 @@ class ChecklistReportActivity : AppCompatActivity() {
         val listType = object : TypeToken<List<QnAFormReportModel>>() {}.type
         val questionsList: ArrayList<QnAFormReportModel> = gson.fromJson(questions, listType)
 
-        val rvAdapter = QnAFormReportRVA()
+        rvAdapter = QnAFormReportRVA()
         rvAdapter.items = questionsList
         binding.recyclerView.apply {
             adapter = rvAdapter

@@ -31,9 +31,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="16sp"
-                    android:textColor="@color/black_200"
                     android:layout_marginBottom="16dp"
-                    android:text="Pertanyaan?"/>
+                    android:text="Pertanyaan?"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
 
                 <EditText
                     android:id="@+id/textAnswer"
@@ -41,7 +41,8 @@
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
                     android:hint="Jawaban Anda"
-                    android:inputType="text"/>
+                    android:inputType="text"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
                 <LinearLayout
                     android:visibility="gone"
@@ -88,9 +89,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="16sp"
-                    android:textColor="@color/black_200"
                     android:layout_marginBottom="16dp"
-                    android:text="Pertanyaan?"/>
+                    android:text="Pertanyaan?"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
 
                 <LinearLayout
                     android:id="@+id/dateContainer"
@@ -106,7 +107,8 @@
                         android:layout_weight="1"
                         android:textSize="14sp"
                         android:hint="Tekan untuk memilih tanggal"
-                        android:inputType="text"/>
+                        android:inputType="text"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
                     <ImageView
                         android:id="@+id/dateIcon"
@@ -162,9 +164,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="16sp"
-                    android:textColor="@color/black_200"
                     android:layout_marginBottom="16dp"
-                    android:text="Pertanyaan?"/>
+                    android:text="Pertanyaan?"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
 
                 <RadioGroup
                     android:id="@+id/radioGroupContainer"
@@ -217,9 +219,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="16sp"
-                    android:textColor="@color/black_200"
                     android:layout_marginBottom="16dp"
-                    android:text="Pertanyaan"/>
+                    android:text="Pertanyaan"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
 
                 <LinearLayout
                     android:id="@+id/checkboxContainer"

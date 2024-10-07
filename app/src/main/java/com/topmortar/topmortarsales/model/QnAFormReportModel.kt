@@ -6,4 +6,6 @@ data class QnAFormReportModel(
     var is_required: String = "",
     var answer_type: String = "",
     var answer_option: ArrayList<String>? = null,
+    var selected_answer: MutableList<Boolean>? = null,
+    var keterangan: String = "",
 )

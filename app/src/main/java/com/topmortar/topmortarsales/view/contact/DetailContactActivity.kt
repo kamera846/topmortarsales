@@ -1598,7 +1598,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             val btnNewReport = bottomSheetLayout.findViewById<Button>(R.id.btnNewReport)
             val reportsTitle = bottomSheetLayout.findViewById<TextView>(R.id.reportsTitle)
             val voucherOption = bottomSheetLayout.findViewById<LinearLayout>(R.id.voucherOption)
-            checklistReportOption.visibility = View.GONE
+//            checklistReportOption.visibility = View.GONE
 
             if (sessionManager.userKind() == USER_KIND_COURIER) {
                 invoiceOption.visibility = View.GONE
