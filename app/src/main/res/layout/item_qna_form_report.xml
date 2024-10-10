@@ -40,7 +40,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="14sp"
-                    android:hint="Jawaban Anda"
+                    android:hint="Tambahkan keterangan"
                     android:inputType="text"
                     android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
