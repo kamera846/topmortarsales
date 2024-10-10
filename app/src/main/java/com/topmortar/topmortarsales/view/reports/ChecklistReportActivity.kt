@@ -1,7 +1,6 @@
 package com.topmortar.topmortarsales.view.reports
 
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
@@ -17,7 +16,6 @@ class ChecklistReportActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         supportActionBar?.hide()
         binding = ActivityChecklistReportBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -28,15 +26,15 @@ class ChecklistReportActivity : AppCompatActivity() {
         setupRecyclerView()
 
         binding.submitReport.setOnClickListener {
-            val QuestionSubmission: ArrayList<QuestionSubmission> = arrayListOf()
+            val questionSubmission: ArrayList<QuestionSubmission> = arrayListOf()
             val items = rvAdapter.submitForm()
             items.forEach { item ->
                 println("Question: ${item.question}")
                 println("Selected Options (true/false): ${item.selected_answer}")
                 println("User Answer: ${item.keterangan}")
-                QuestionSubmission.add(QuestionSubmission(id = item.id, keterangan = item.keterangan, selected_answer = item.selected_answer))
+                questionSubmission.add(QuestionSubmission(id = item.id, keterangan = item.keterangan, selected_answer = item.selected_answer))
             }
-            println(Gson().toJson(QuestionSubmission))
+            println(Gson().toJson(questionSubmission))
         }
 
     }

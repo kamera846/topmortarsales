@@ -114,7 +114,7 @@ class QnAFormReportRVA : RecyclerView.Adapter<QnAFormReportRVA.MyViewHolder>() {
             textSize = 14f
             inputType = android.text.InputType.TYPE_TEXT_VARIATION_NORMAL
             setText(data.keterangan)
-            hint = "Jawaban Anda"
+            hint = "Tambahkan keterangan"
             addTextChangedListener(object: TextWatcher {
                 override fun beforeTextChanged(
                     s: CharSequence?,
