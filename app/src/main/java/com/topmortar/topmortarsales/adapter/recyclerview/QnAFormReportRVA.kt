@@ -44,21 +44,61 @@ class QnAFormReportRVA : RecyclerView.Adapter<QnAFormReportRVA.MyViewHolder>() {
                 if (data.is_required == "1") binding.textRequired.visibility = View.VISIBLE
                 else binding.textRequired.visibility = View.GONE
                 binding.textCard.visibility = View.VISIBLE
-                binding.textQuestion.text = incrementNumber + data.question
+                binding.textQuestion.text = incrementNumber + data.text_question
+                binding.textAnswer.addTextChangedListener(object: TextWatcher {
+                    override fun beforeTextChanged(
+                        s: CharSequence?,
+                        start: Int,
+                        count: Int,
+                        after: Int
+                    ) {}
+
+                    override fun onTextChanged(
+                        s: CharSequence?,
+                        start: Int,
+                        before: Int,
+                        count: Int
+                    ) {
+                        data.text_answer = s.toString()
+                    }
+
+                    override fun afterTextChanged(s: Editable?) {}
+
+                })
             }
 
             "date" -> {
                 if (data.is_required == "1") binding.dateRequired.visibility = View.VISIBLE
                 else binding.dateRequired.visibility = View.GONE
                 binding.dateCard.visibility = View.VISIBLE
-                binding.dateQuestion.text = incrementNumber + data.question
+                binding.dateQuestion.text = incrementNumber + data.text_question
+                binding.dateInput.addTextChangedListener(object: TextWatcher {
+                    override fun beforeTextChanged(
+                        s: CharSequence?,
+                        start: Int,
+                        count: Int,
+                        after: Int
+                    ) {}
+
+                    override fun onTextChanged(
+                        s: CharSequence?,
+                        start: Int,
+                        before: Int,
+                        count: Int
+                    ) {
+                        data.text_answer = s.toString()
+                    }
+
+                    override fun afterTextChanged(s: Editable?) {}
+
+                })
             }
 
             "radio" -> {
                 if (data.is_required == "1") binding.radioRequired.visibility = View.VISIBLE
                 else binding.radioRequired.visibility = View.GONE
                 binding.radioCard.visibility = View.VISIBLE
-                binding.radioQuestion.text = incrementNumber + data.question
+                binding.radioQuestion.text = incrementNumber + data.text_question
                 binding.checkboxContainer.removeAllViews()
 
                 val options = data.answer_option
@@ -66,6 +106,10 @@ class QnAFormReportRVA : RecyclerView.Adapter<QnAFormReportRVA.MyViewHolder>() {
                     it.forEach { item ->
                         val radioButton = RadioButton(context).apply {
                             text = item
+                            setOnCheckedChangeListener { _, checked ->
+                                isChecked = checked
+                                if (checked) data.text_answer = item
+                            }
                         }
                         binding.radioGroupContainer.addView(radioButton)
                     }
@@ -76,18 +120,16 @@ class QnAFormReportRVA : RecyclerView.Adapter<QnAFormReportRVA.MyViewHolder>() {
                 if (data.is_required == "1") binding.checkboxRequired.visibility = View.VISIBLE
                 else binding.checkboxRequired.visibility = View.GONE
                 binding.checkboxCard.visibility = View.VISIBLE
-                binding.checkboxQuestion.text = incrementNumber + data.question
+                binding.checkboxQuestion.text = incrementNumber + data.text_question
                 binding.checkboxContainer.removeAllViews()
 
                 val options = data.answer_option
                 options?.let {
-                    data.selected_answer = MutableList(it.size) { false }
-                    it.forEachIndexed { index, item ->
-                        val checkBox = setupCheckbox(index, item, data)
+                    data.selected_answer = arrayListOf()
+                    it.forEach { item ->
+                        val checkBox = setupCheckbox(item, data)
                         binding.checkboxContainer.addView(checkBox)
                     }
-                    val editText = setupEditText(data)
-                    binding.checkboxContainer.addView(editText)
                 }
             }
         }
@@ -97,44 +139,13 @@ class QnAFormReportRVA : RecyclerView.Adapter<QnAFormReportRVA.MyViewHolder>() {
 
     fun submitForm(): ArrayList<QnAFormReportModel> = items
 
-    private fun setupCheckbox(index: Int, item: String, data: QnAFormReportModel): CheckBox {
+    private fun setupCheckbox(item: String, data: QnAFormReportModel): CheckBox {
         return CheckBox(context).apply {
             text = item
-            data.selected_answer?.let { selected ->
-                isChecked = selected[index]
-                setOnCheckedChangeListener {_, isChecked ->
-                    data.selected_answer!![index] = isChecked
-                }
+            setOnCheckedChangeListener {_, isChecked ->
+                if (isChecked) data.selected_answer!!.add(item)
+                else data.selected_answer!!.remove(item)
             }
-        }
-    }
-
-    private fun setupEditText(data: QnAFormReportModel): EditText {
-        return EditText(context).apply {
-            textSize = 14f
-            inputType = android.text.InputType.TYPE_TEXT_VARIATION_NORMAL
-            setText(data.keterangan)
-            hint = "Tambahkan keterangan"
-            addTextChangedListener(object: TextWatcher {
-                override fun beforeTextChanged(
-                    s: CharSequence?,
-                    start: Int,
-                    count: Int,
-                    after: Int
-                ) {}
-
-                override fun onTextChanged(
-                    s: CharSequence?,
-                    start: Int,
-                    before: Int,
-                    count: Int
-                ) {
-                    data.keterangan = s.toString()
-                }
-
-                override fun afterTextChanged(s: Editable?) {}
-
-            })
         }
     }
 }

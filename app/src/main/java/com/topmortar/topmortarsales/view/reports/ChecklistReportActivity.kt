@@ -2,17 +2,24 @@ package com.topmortar.topmortarsales.view.reports
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.QnAFormReportRVA
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
+import com.topmortar.topmortarsales.commons.utils.handleMessage
+import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityChecklistReportBinding
 import com.topmortar.topmortarsales.model.QnAFormReportModel
+import kotlinx.coroutines.launch
 
 class ChecklistReportActivity : AppCompatActivity() {
     private lateinit var binding: ActivityChecklistReportBinding
-    private val questions = "[{\"id\":\"1\",\"question\":\"Merchandise yang diberikan\",\"is_required\":\"0\",\"answer_type\":\"checkbox\",\"answer_option\":[\"Voucher\",\"Kantong Plastik\",\"Buletin (Flyer Cetak)\",\"Brosur Katalog\",\"Lainnya\"],\"selected_answer\":null,\"keterangan\":\"\"},{\"id\":\"2\",\"question\":\"Tawarkan produk thinbed/perekat dan tunjukan kemasan\",\"is_required\":\"0\",\"answer_type\":\"checkbox\",\"answer_option\":[\"Produk\",\"Kemasan\"],\"selected_answer\":null,\"keterangan\":\"\"},{\"id\":\"3\",\"question\":\"Tanya toko\",\"is_required\":\"0\",\"answer_type\":\"checkbox\",\"answer_option\":[\"Kapan mau order pak/bu\",\"Ada kendala apa pak/bu\",\"Bisa saya temui kembali kapan pak/bu\"],\"selected_answer\":null,\"keterangan\":\"\"},{\"id\":\"4\",\"question\":\"Merchandiseyangdiberikan\",\"is_required\":\"0\",\"answer_type\":\"checkbox\",\"answer_option\":[\"Voucher\",\"KantongPlastik\",\"Buletin(FlyerCetak)\",\"BrosurKatalog\",\"Lainnya\"],\"selected_answer\":null,\"keterangan\":\"\"},{\"id\":\"5\",\"question\":\"Tawarkanprodukthinbed/perekatdantujukankemasan\",\"is_required\":\"0\",\"answer_type\":\"checkbox\",\"answer_option\":[\"Produk\",\"Kemasan\"],\"selected_answer\":null,\"keterangan\":\"\"},{\"id\":\"6\",\"question\":\"Tanyatoko\",\"is_required\":\"0\",\"answer_type\":\"checkbox\",\"answer_option\":[\"Kapanmauorderpak/bu\",\"Adakendalaapapak/bu\",\"Bisasayatemuikembalikapanpak/bu\"],\"selected_answer\":null,\"keterangan\":\"\"}]"
     private lateinit var rvAdapter: QnAFormReportRVA
+    private lateinit var questions: ArrayList<QnAFormReportModel>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,16 +30,21 @@ class ChecklistReportActivity : AppCompatActivity() {
         binding.titleBar.icBack.setOnClickListener { finish() }
         binding.titleBar.tvTitleBar.text = "Form Laporan"
 
-        setupRecyclerView()
+        getQuestions()
 
         binding.submitReport.setOnClickListener {
             val questionSubmission: ArrayList<QuestionSubmission> = arrayListOf()
             val items = rvAdapter.submitForm()
-            items.forEach { item ->
-                println("Question: ${item.question}")
-                println("Selected Options (true/false): ${item.selected_answer}")
-                println("User Answer: ${item.keterangan}")
-                questionSubmission.add(QuestionSubmission(id = item.id, keterangan = item.keterangan, selected_answer = item.selected_answer))
+            items.forEachIndexed { index, item ->
+                println("${index + 1}. Question: ${item.text_question}")
+                when (item.answer_type) {
+                    "checkbox" -> {
+                        println("Answer: ${item.selected_answer}")
+                    } else -> {
+                        println("Answer: ${item.text_answer}")
+                    }
+                }
+                questionSubmission.add(QuestionSubmission(id_visit_question = item.id_visit_question, text_answer = item.text_answer, selected_answer = item.selected_answer))
             }
             println(Gson().toJson(questionSubmission))
         }
@@ -40,18 +52,43 @@ class ChecklistReportActivity : AppCompatActivity() {
     }
 
     private data class QuestionSubmission(
-        val id: String = "",
-        val keterangan: String = "",
-        val selected_answer: MutableList<Boolean>? = null
+        val id_visit_question: String = "",
+        val text_answer: String = "",
+        val selected_answer: MutableList<String>? = null
     )
 
-    private fun setupRecyclerView() {
-        val gson = Gson()
-        val listType = object : TypeToken<List<QnAFormReportModel>>() {}.type
-        val questionsList: ArrayList<QnAFormReportModel> = gson.fromJson(questions, listType)
+    private fun getQuestions() {
+        val apiService = HttpClient.create()
+        lifecycleScope.launch {
+            try {
+                val response = apiService.getVisitQuestion()
+                when(response.status) {
+                    RESPONSE_STATUS_OK -> {
+                        questions = response.results
+                        setupRecyclerView()
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
 
+                        handleMessage(this@ChecklistReportActivity, "GET QUESTION", "Belum ada pertanyaan")
+
+                    }
+                    else -> {
+
+                        handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+
+                    }
+                }
+            } catch (e: Exception) {
+
+                handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+
+            }
+        }
+    }
+
+    private fun setupRecyclerView() {
         rvAdapter = QnAFormReportRVA()
-        rvAdapter.items = questionsList
+        rvAdapter.items = questions
         binding.recyclerView.apply {
             adapter = rvAdapter
             layoutManager = LinearLayoutManager(this@ChecklistReportActivity)
