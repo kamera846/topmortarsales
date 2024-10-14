@@ -1,5 +1,6 @@
 package com.topmortar.topmortarsales.adapter.recyclerview
 
+import android.app.DatePickerDialog
 import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
@@ -10,9 +11,11 @@ import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.RadioButton
 import androidx.recyclerview.widget.RecyclerView
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.databinding.ItemQnaFormReportBinding
 import com.topmortar.topmortarsales.model.QnAFormReportModel
+import java.util.Calendar
 
 class QnAFormReportRVA : RecyclerView.Adapter<QnAFormReportRVA.MyViewHolder>() {
     private lateinit var context: Context
@@ -72,26 +75,16 @@ class QnAFormReportRVA : RecyclerView.Adapter<QnAFormReportRVA.MyViewHolder>() {
                 else binding.dateRequired.visibility = View.GONE
                 binding.dateCard.visibility = View.VISIBLE
                 binding.dateQuestion.text = incrementNumber + data.text_question
-                binding.dateInput.addTextChangedListener(object: TextWatcher {
-                    override fun beforeTextChanged(
-                        s: CharSequence?,
-                        start: Int,
-                        count: Int,
-                        after: Int
-                    ) {}
 
-                    override fun onTextChanged(
-                        s: CharSequence?,
-                        start: Int,
-                        before: Int,
-                        count: Int
-                    ) {
-                        data.text_answer = s.toString()
-                    }
-
-                    override fun afterTextChanged(s: Editable?) {}
-
-                })
+                val datePicker = setupDatePicker(binding.dateInput, data)
+                binding.dateIcon.setOnClickListener { datePicker.show() }
+                binding.dateInput.setOnClickListener { datePicker.show() }
+                binding.dateInput.setOnFocusChangeListener { _, hasFocus ->
+                    if (hasFocus) {
+                        datePicker.show()
+                        binding.dateInput.setSelection(binding.dateInput.length())
+                    } else binding.dateInput.clearFocus()
+                }
             }
 
             "radio" -> {
@@ -147,5 +140,30 @@ class QnAFormReportRVA : RecyclerView.Adapter<QnAFormReportRVA.MyViewHolder>() {
                 else data.selected_answer!!.remove(item)
             }
         }
+    }
+
+    private fun setupDatePicker(view: EditText, data: QnAFormReportModel): DatePickerDialog {
+        val selectedDate: Calendar = Calendar.getInstance()
+        val datePicker = DatePickerDialog(
+            context,
+            { _, year, month, day ->
+                selectedDate.set(Calendar.YEAR, year)
+                selectedDate.set(Calendar.MONTH, month)
+                selectedDate.set(Calendar.DAY_OF_MONTH, day)
+
+                // Do something with the selected date
+                val formattedDate = DateFormat.format(selectedDate)
+                data.text_answer = formattedDate
+                view.setText(formattedDate)
+                view.clearFocus()
+            },
+            selectedDate.get(Calendar.YEAR),
+            selectedDate.get(Calendar.MONTH),
+            selectedDate.get(Calendar.DAY_OF_MONTH)
+        )
+
+        datePicker.setOnDismissListener { view.clearFocus() }
+
+        return datePicker
     }
 }
