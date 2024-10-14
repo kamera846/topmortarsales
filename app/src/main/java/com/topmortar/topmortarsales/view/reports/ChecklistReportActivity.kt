@@ -1,34 +1,60 @@
 package com.topmortar.topmortarsales.view.reports
 
+import android.Manifest
 import android.app.ProgressDialog
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.view.View
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.gson.Gson
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.QnAFormReportRVA
+import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
+import com.topmortar.topmortarsales.commons.CONST_MAPS
+import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
 import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAX_REPORT_DISTANCE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.utils.CustomUtility
+import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityChecklistReportBinding
 import com.topmortar.topmortarsales.model.QnAFormReportModel
+import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
 
 class ChecklistReportActivity : AppCompatActivity() {
     private lateinit var binding: ActivityChecklistReportBinding
+    private lateinit var sessionManager: SessionManager
     private lateinit var progressDialog: ProgressDialog
     private lateinit var rvAdapter: QnAFormReportRVA
     private lateinit var questions: ArrayList<QnAFormReportModel>
 
     private var iName: String? = null
-    private var shortDistance = 0.5
+    private var iCoordinate: String? = null
+    private var iShortDistance = 0.5
+
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,14 +62,17 @@ class ChecklistReportActivity : AppCompatActivity() {
         binding = ActivityChecklistReportBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        sessionManager = SessionManager(this)
+        progressDialog = ProgressDialog(this)
+        progressDialog.setMessage(getString(R.string.txt_loading))
+        progressDialog.setCancelable(false)
+
         binding.titleBar.icBack.setOnClickListener { finish() }
         binding.titleBar.tvTitleBar.text = "Form Laporan"
-        progressDialog = ProgressDialog(this)
-        progressDialog.setMessage("Memperbarui jarak lokasi...")
-        progressDialog.setCancelable(false)
 
         iName = intent.getStringExtra(CONST_NAME)
         if (iName != null) binding.textStoreName.text = iName
+        iCoordinate = intent.getStringExtra(CONST_MAPS)
 
         getQuestions()
 
@@ -86,21 +115,163 @@ class ChecklistReportActivity : AppCompatActivity() {
     }
 
     private fun getDistance(isSubmit: Boolean = false) {
+
+        if (iCoordinate == null) {
+            handleMessage(this, "SUBMIT FORM VISIT", "Tidak dapa menemukan lokasi toko")
+            return
+        }
+
         progressDialog.show()
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
         Handler(Looper.getMainLooper()).postDelayed({
-            progressDialog.dismiss()
-            if (isSubmit) {
-                shortDistance = 0.2
-                submitForm()
+
+            val mapsUrl = iCoordinate!!
+            val urlUtility = URLUtility(this)
+
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+                if (urlUtility.isLocationEnabled(this)) {
+
+                    urlUtility.requestLocationUpdate()
+
+                    if (!urlUtility.isUrl(mapsUrl) && mapsUrl.isNotEmpty()) {
+                        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+
+                            if (location != null) {
+                                // Courier Location
+                                val currentLatitude = location.latitude
+                                val currentLongitude = location.longitude
+
+                                // Store Location
+                                val coordinate = mapsUrl.split(",")
+                                val latitude = coordinate[0].toDoubleOrNull()
+                                val longitude = coordinate[1].toDoubleOrNull()
+
+                                if (latitude != null && longitude != null) {
+
+                                    // Calculate Distance
+                                    val distance = urlUtility.calculateDistance(
+                                        currentLatitude,
+                                        currentLongitude,
+                                        latitude,
+                                        longitude
+                                    )
+                                    val shortDistance = "%.3f".format(distance)
+                                    iShortDistance = shortDistance.toDouble()
+
+                                    if (distance > MAX_REPORT_DISTANCE) {
+                                        val builder = AlertDialog.Builder(this)
+                                        builder.setCancelable(false)
+                                        builder.setOnDismissListener { progressDialog.dismiss() }
+                                        builder.setOnCancelListener { progressDialog.dismiss() }
+                                        builder.setTitle("Peringatan!")
+                                            .setMessage("Titik anda saat ini $shortDistance km dari titik toko. Cobalah untuk lebih dekat dengan toko!")
+                                            .setPositiveButton("Oke") { dialog, _ ->
+                                                progressDialog.dismiss()
+
+                                                binding.tvDistance.setTextColor(getColor(R.color.primary))
+                                                binding.tvDistance.text = "Jarak anda dengan toko $shortDistance km."
+                                                binding.tvDistanceBottom.setTextColor(getColor(R.color.primary))
+                                                binding.tvDistanceBottom.text = "Jarak anda dengan toko $shortDistance km."
+                                                dialog.dismiss()
+                                            }
+                                            .setNegativeButton("Buka Maps") { dialog, _ ->
+                                                val intent = Intent(
+                                                    this,
+                                                    MapsActivity::class.java
+                                                )
+                                                intent.putExtra(CONST_MAPS, mapsUrl)
+                                                intent.putExtra(CONST_MAPS_NAME, iName)
+                                                startActivity(intent)
+
+                                                progressDialog.dismiss()
+
+                                                binding.tvDistance.setTextColor(getColor(R.color.primary))
+                                                binding.tvDistance.text = "Jarak anda dengan toko $shortDistance km."
+                                                binding.tvDistanceBottom.setTextColor(getColor(R.color.primary))
+                                                binding.tvDistanceBottom.text = "Jarak anda dengan toko $shortDistance km."
+
+                                                dialog.dismiss()
+                                            }
+                                        builder.show()
+                                    } else {
+                                        progressDialog.dismiss()
+
+                                        var textColor = getColor(R.color.black_200)
+                                        if (CustomUtility(this).isDarkMode()) textColor =
+                                            getColor(R.color.black_600)
+
+                                        binding.tvDistance.setTextColor(textColor)
+                                        binding.tvDistance.text = "Jarak anda dengan toko $shortDistance km."
+                                        binding.tvDistanceBottom.setTextColor(textColor)
+                                        binding.tvDistanceBottom.text = "Jarak anda dengan toko $shortDistance km."
+
+                                        if (isSubmit) submitForm()
+                                    }
+
+                                } else {
+                                    progressDialog.dismiss()
+                                    Toast.makeText(this, "Gagal memproses koordinat", TOAST_SHORT)
+                                        .show()
+                                }
+                            } else {
+                                AlertDialog.Builder(this)
+                                    .setCancelable(false)
+                                    .setTitle("Gagal memproses lokasi")
+                                    .setMessage("Cobalah untuk menututup dan membuka ulang aplikasi")
+                                    .setPositiveButton("Tutup") { dialog, _ ->
+                                        finish()
+                                        dialog.dismiss()
+                                    }
+                                    .show()
+                            }
+
+                        }.addOnFailureListener {
+                            progressDialog.dismiss()
+                            handleMessage(this, "LOG REPORT", "Gagal mendapatkan lokasi anda. Err: " + it.message)
+//                            Toast.makeText(this, "Gagal mendapatkan lokasi anda", TOAST_SHORT).show()
+                        }
+
+                    } else {
+                        progressDialog.dismiss()
+                        val message = "Anda tidak dapat membuat laporan untuk saat ini, silakan hubungi admin untuk memperbarui koordinat toko ini"
+                        val actionTitle = "Hubungi Sekarang"
+                        CustomUtility(this).showPermissionDeniedSnackbar(message, actionTitle) { navigateChatAdmin() }
+                    }
+
+                } else {
+                    progressDialog.dismiss()
+                    val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                    startActivity(enableLocationIntent)
+                }
+
             } else {
-                shortDistance = 0.4
+                progressDialog.dismiss()
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
             }
-            binding.tvDistance.text =
-                "Jarak anda dengan toko " + shortDistance.toString() + "km."
-            binding.tvDistanceBottom.text =
-                "Jarak anda dengan toko " + shortDistance.toString() + "km."
-        }, 1000)
+
+        }, 500)
     }
+
+    private fun navigateChatAdmin() {
+        val distributorNumber = sessionManager.userDistributorNumber()!!
+        val phoneNumber = distributorNumber.ifEmpty { getString(R.string.topmortar_wa_number) }
+        val message = "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada toko *${ iName }*"
+
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")
+
+        try {
+            startActivity(intent)
+            finishAffinity()
+        } catch (e: ActivityNotFoundException) {
+            Toast.makeText(this, "Gagal menghubungkan ke whatsapp", TOAST_SHORT).show()
+        }
+
+    }
+
+
 
     private fun getQuestions() {
         loadingState(true)
@@ -147,7 +318,7 @@ class ChecklistReportActivity : AppCompatActivity() {
     }
 
     private fun submitForm() {
-        if (shortDistance <= MAX_REPORT_DISTANCE) {
+        if (iShortDistance <= MAX_REPORT_DISTANCE) {
             val questionSubmission: ArrayList<QuestionSubmission> = arrayListOf()
             val items = rvAdapter.submitForm()
             items.forEachIndexed { index, item ->

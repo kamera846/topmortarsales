@@ -1673,6 +1673,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             } R.id.btnChecklistReport -> {
 
                 val intent = Intent(this@DetailContactActivity, ChecklistReportActivity::class.java)
+                intent.putExtra(CONST_NAME, iName)
+                intent.putExtra(CONST_MAPS, iMapsUrl)
                 startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
 
             } else -> {
