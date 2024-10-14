@@ -321,18 +321,42 @@ class ChecklistReportActivity : AppCompatActivity() {
         if (iShortDistance <= MAX_REPORT_DISTANCE) {
             val questionSubmission: ArrayList<QuestionSubmission> = arrayListOf()
             val items = rvAdapter.submitForm()
-            items.forEachIndexed { index, item ->
-                println("${index + 1}. Question: ${item.text_question}")
-                when (item.answer_type) {
-                    "checkbox" -> {
-                        println("Answer: ${item.selected_answer}")
-                    } else -> {
-                    println("Answer: ${item.text_answer}")
+            var isAnswerValid = false
+
+            for (i in 0 until items.size) {
+                val item = items[i]
+                val isTextEmpty = (item.answer_type == "text" || item.answer_type == "date" || item.answer_type == "radio") && item.text_answer.isEmpty()
+                val isSelectedEmpty = item.answer_type == "checkbox" && item.selected_answer.isNullOrEmpty()
+                if (item.is_required == "1" && (isTextEmpty || isSelectedEmpty)) {
+                    AlertDialog.Builder(this)
+                        .setCancelable(false)
+                        .setTitle("Perhatian!")
+                        .setMessage("Pertanyaan no ${i + 1} harus dijawab")
+                        .setPositiveButton("Oke") { dialog, _ ->
+                            dialog.dismiss()
+                        }
+                        .show()
+                    isAnswerValid = false
+                    break
+
+                } else {
+                    println("${i + 1}. Question: ${item.text_question}")
+                    when (item.answer_type) {
+                        "checkbox" -> {
+                            println("Answer: ${item.selected_answer}")
+                        } else -> {
+                            println("Answer: ${item.text_answer}")
+                        }
+                    }
+                    questionSubmission.add(QuestionSubmission(id_visit_question = item.id_visit_question, text_answer = item.text_answer, selected_answer = item.selected_answer))
+                    isAnswerValid = true
                 }
-                }
-                questionSubmission.add(QuestionSubmission(id_visit_question = item.id_visit_question, text_answer = item.text_answer, selected_answer = item.selected_answer))
             }
-            println(Gson().toJson(questionSubmission))
+            if (isAnswerValid) {
+                println(Gson().toJson(questionSubmission))
+                handleMessage(this, "SUBMIT FORM VISIT", "Berhasil mengirim laporan")
+                finish()
+            }
         } else {
             handleMessage(this, "SUBMIT FORM VISIT", "Cobalah untuk lebih dekat dengan toko")
         }

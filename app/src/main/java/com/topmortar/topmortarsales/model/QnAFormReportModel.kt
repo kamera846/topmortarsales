@@ -8,6 +8,6 @@ data class QnAFormReportModel(
     var created_at: String = "",
     var updated_at: String? = "",
     var answer_option: ArrayList<String>? = null,
-    var selected_answer: MutableList<String>? = null,
+    var selected_answer: ArrayList<String>? = null,
     var text_answer: String = "",
 )
