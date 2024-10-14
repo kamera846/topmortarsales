@@ -12,7 +12,6 @@ import android.widget.EditText
 import android.widget.RadioButton
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.commons.utils.DateFormat
-import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.databinding.ItemQnaFormReportBinding
 import com.topmortar.topmortarsales.model.QnAFormReportModel
 import java.util.Calendar
@@ -32,11 +31,6 @@ class QnAFormReportRVA : RecyclerView.Adapter<QnAFormReportRVA.MyViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        if (position == 0) {
-            val layoutParams = holder.itemView.layoutParams as RecyclerView.LayoutParams
-            layoutParams.topMargin = convertDpToPx(8, context)
-            holder.itemView.layoutParams = layoutParams
-        }
 
         val binding = holder.binding
         val data = items[position]
