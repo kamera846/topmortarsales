@@ -21,21 +21,23 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.gson.Gson
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.QnAFormReportRVA
-import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAX_REPORT_DISTANCE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
+import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityChecklistReportBinding
@@ -52,6 +54,7 @@ class ChecklistReportActivity : AppCompatActivity() {
 
     private var iName: String? = null
     private var iCoordinate: String? = null
+    private var iVisitId: String? = null
     private var iShortDistance = 0.5
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -73,6 +76,7 @@ class ChecklistReportActivity : AppCompatActivity() {
         iName = intent.getStringExtra(CONST_NAME)
         if (iName != null) binding.textStoreName.text = iName
         iCoordinate = intent.getStringExtra(CONST_MAPS)
+        iVisitId = intent.getStringExtra("id_visit")
 
         getQuestions()
 
@@ -196,7 +200,6 @@ class ChecklistReportActivity : AppCompatActivity() {
                                             }
                                         builder.show()
                                     } else {
-                                        progressDialog.dismiss()
 
                                         var textColor = getColor(R.color.black_200)
                                         if (CustomUtility(this).isDarkMode()) textColor =
@@ -208,6 +211,7 @@ class ChecklistReportActivity : AppCompatActivity() {
                                         binding.tvDistanceBottom.text = "Jarak anda dengan toko $shortDistance km."
 
                                         if (isSubmit) submitForm()
+                                        else progressDialog.dismiss()
                                     }
 
                                 } else {
@@ -328,6 +332,7 @@ class ChecklistReportActivity : AppCompatActivity() {
                 val isTextEmpty = (item.answer_type == "text" || item.answer_type == "date" || item.answer_type == "radio") && item.text_answer.isEmpty()
                 val isSelectedEmpty = item.answer_type == "checkbox" && item.selected_answer.isNullOrEmpty()
                 if (item.is_required == "1" && (isTextEmpty || isSelectedEmpty)) {
+                    progressDialog.dismiss()
                     AlertDialog.Builder(this)
                         .setCancelable(false)
                         .setTitle("Perhatian!")
@@ -340,25 +345,80 @@ class ChecklistReportActivity : AppCompatActivity() {
                     break
 
                 } else {
-                    println("${i + 1}. Question: ${item.text_question}")
-                    when (item.answer_type) {
-                        "checkbox" -> {
-                            println("Answer: ${item.selected_answer}")
-                        } else -> {
-                            println("Answer: ${item.text_answer}")
-                        }
-                    }
                     questionSubmission.add(QuestionSubmission(id_visit_question = item.id_visit_question, text_answer = item.text_answer, selected_answer = item.selected_answer))
                     isAnswerValid = true
                 }
             }
             if (isAnswerValid) {
-                println(Gson().toJson(questionSubmission))
-                handleMessage(this, "SUBMIT FORM VISIT", "Berhasil mengirim laporan")
-                finish()
+                val arrayAnswer = convertToJsonString(questionSubmission)
+                postSubmitAnswer(arrayAnswer)
             }
         } else {
+            progressDialog.dismiss()
             handleMessage(this, "SUBMIT FORM VISIT", "Cobalah untuk lebih dekat dengan toko")
+        }
+    }
+
+    private fun convertToJsonString(questions: ArrayList<QuestionSubmission>): String {
+        val stringBuilder = StringBuilder()
+        stringBuilder.append("[")
+
+        for ((index, question) in questions.withIndex()) {
+            stringBuilder.append("{")
+            stringBuilder.append("\"id_visit_question\":\"${question.id_visit_question}\",")
+            stringBuilder.append("\"text_answer\":\"${question.text_answer}\"")
+
+            question.selected_answer?.let {
+                stringBuilder.append(",\"selected_answer\":[\"${it.joinToString("\",\"")}\"]")
+            }
+
+            stringBuilder.append("}")
+
+            if (index < questions.size - 1) {
+                stringBuilder.append(",")
+            }
+        }
+
+        stringBuilder.append("]")
+        return "\"" + stringBuilder.toString().replace("\"", "\\\"") + "\""
+    }
+
+    private fun postSubmitAnswer(arrayAnswer: String) {
+
+        val apiService = HttpClient.create()
+        lifecycleScope.launch {
+            try {
+                val response = apiService.postVisitQuestion(
+                    idVisit = createPartFromString(iVisitId ?: ""),
+                    arrayAnswer = createPartFromString(arrayAnswer)
+                )
+                if (response.isSuccessful) {
+                    val responseBody = response.body()!!
+                    when(responseBody.status) {
+                        RESPONSE_STATUS_OK -> {
+                            progressDialog.dismiss()
+                            handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, responseBody.message)
+                            finish()
+                        }
+                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+                            progressDialog.dismiss()
+                            handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan! Message: ${ responseBody.message }")
+                        }
+                        else -> {
+                            progressDialog.dismiss()
+                            handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan!: ${ responseBody.message }")
+                        }
+                    }
+                } else {
+                    progressDialog.dismiss()
+                    handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan! Error: " + response.message())
+                }
+            } catch (e: Exception) {
+
+                progressDialog.dismiss()
+                handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+
+            }
         }
     }
 

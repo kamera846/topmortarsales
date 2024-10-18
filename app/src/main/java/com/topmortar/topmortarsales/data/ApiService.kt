@@ -742,4 +742,11 @@ interface ApiService {
 
     @GET(VISIT_QUESTION)
     suspend fun getVisitQuestion(): ResponseQuestion
+
+    @Multipart
+    @POST(VISIT_QUESTION)
+    suspend fun postVisitQuestion(
+        @Part("id_visit") idVisit: RequestBody,
+        @Part("array_answer") arrayAnswer: RequestBody,
+    ): Response<ResponseQuestion>
 }
