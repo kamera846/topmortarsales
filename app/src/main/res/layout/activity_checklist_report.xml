@@ -10,7 +10,7 @@
     <!-- Title Bar -->
     <include
         android:id="@+id/title_bar"
-        layout="@layout/component_title_bar"/>
+        layout="@layout/component_title_bar_light"/>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"

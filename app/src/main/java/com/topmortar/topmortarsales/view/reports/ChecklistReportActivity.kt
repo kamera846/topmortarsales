@@ -1,6 +1,7 @@
 package com.topmortar.topmortarsales.view.reports
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -37,6 +38,7 @@ import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
+import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.HttpClient
@@ -70,8 +72,9 @@ class ChecklistReportActivity : AppCompatActivity() {
         progressDialog.setMessage(getString(R.string.txt_loading))
         progressDialog.setCancelable(false)
 
-        binding.titleBar.icBack.setOnClickListener { finish() }
-        binding.titleBar.tvTitleBar.text = "Form Laporan"
+        binding.titleBar.icBack.visibility = View.GONE
+        binding.titleBar.tvTitleBar.text = "Form Visit Checklist"
+        binding.titleBar.tvTitleBar.setPadding(convertDpToPx(16, this), 0, 0,0)
 
         iName = intent.getStringExtra(CONST_NAME)
         if (iName != null) binding.textStoreName.text = iName
@@ -420,6 +423,18 @@ class ChecklistReportActivity : AppCompatActivity() {
 
             }
         }
+    }
+
+    @SuppressLint("MissingSuperCall")
+    override fun onBackPressed() {
+        AlertDialog.Builder(this)
+            .setTitle("Peringatan!")
+            .setMessage("Laporan checklist tidak bisa dilewati, isi dan kirim laporan anda untuk melanjutkan.")
+            .setCancelable(false)
+            .setPositiveButton("Okay") { dialog, _, ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
 }
