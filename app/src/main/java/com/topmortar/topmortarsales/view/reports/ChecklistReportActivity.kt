@@ -431,7 +431,7 @@ class ChecklistReportActivity : AppCompatActivity() {
             .setTitle("Peringatan!")
             .setMessage("Laporan checklist tidak bisa dilewati, isi dan kirim laporan anda untuk melanjutkan.")
             .setCancelable(false)
-            .setPositiveButton("Okay") { dialog, _, ->
+            .setPositiveButton("Oke") { dialog, _, ->
                 dialog.dismiss()
             }
             .show()
