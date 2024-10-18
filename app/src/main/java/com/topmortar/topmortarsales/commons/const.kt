@@ -88,6 +88,7 @@ const val RENCANA_VISIT = "rencanaVisit.php"
 const val RENCANA_VISIT_PENAGIHAN = "renvisPenagihan.php"
 const val GET_CONTACT_SALES = "getContactSales.php"
 const val PRODUCT = "produk.php"
+const val VISIT_QUESTION = "visitQuestion.php"
 
 /*
     Request Code

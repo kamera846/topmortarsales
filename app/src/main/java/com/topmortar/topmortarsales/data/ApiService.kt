@@ -32,6 +32,7 @@ import com.topmortar.topmortarsales.commons.TUKANG_MESSAGE
 import com.topmortar.topmortarsales.commons.UPDATE_PASSWORD
 import com.topmortar.topmortarsales.commons.VERIFY_OTP
 import com.topmortar.topmortarsales.commons.VISIT
+import com.topmortar.topmortarsales.commons.VISIT_QUESTION
 import com.topmortar.topmortarsales.commons.VOUCHER
 import com.topmortar.topmortarsales.commons.WAREHOUSE
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -50,6 +51,7 @@ import com.topmortar.topmortarsales.response.ResponseMessage
 import com.topmortar.topmortarsales.response.ResponsePayment
 import com.topmortar.topmortarsales.response.ResponseProduct
 import com.topmortar.topmortarsales.response.ResponsePromo
+import com.topmortar.topmortarsales.response.ResponseQuestion
 import com.topmortar.topmortarsales.response.ResponseRencanaVisit
 import com.topmortar.topmortarsales.response.ResponseReportVisit
 import com.topmortar.topmortarsales.response.ResponseSkills
@@ -737,4 +739,14 @@ interface ApiService {
     suspend fun getProducts(
         @Query("c") idCity: String,
     ): ResponseProduct
+
+    @GET(VISIT_QUESTION)
+    suspend fun getVisitQuestion(): ResponseQuestion
+
+    @Multipart
+    @POST(VISIT_QUESTION)
+    suspend fun postVisitQuestion(
+        @Part("id_visit") idVisit: RequestBody,
+        @Part("array_answer") arrayAnswer: RequestBody,
+    ): Response<ResponseQuestion>
 }

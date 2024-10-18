@@ -6,5 +6,6 @@ data class ResponseReportVisit(
     var response: Int = 0,
     var status: String = "",
     var message: String = "",
+    var id_visit: String = "",
     var results: ArrayList<ReportVisitModel> = arrayListOf(),
 )

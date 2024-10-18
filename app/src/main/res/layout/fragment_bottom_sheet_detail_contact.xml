@@ -140,6 +140,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:visibility="gone"
             android:id="@+id/btnChecklistReport"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -153,11 +154,12 @@
             android:background="?android:attr/selectableItemBackground">
 
             <ImageView
-                android:layout_width="24dp"
+                android:layout_width="20dp"
                 android:layout_height="24dp"
-                android:layout_marginEnd="16dp"
-                android:src="@drawable/file_flat_list_line_black"
-                android:contentDescription="Icon Report"/>
+                android:layout_marginEnd="18dp"
+                android:layout_marginStart="2dp"
+                android:src="@drawable/list_check_black"
+                android:contentDescription="Icon Report Checklist"/>
 
             <TextView
                 android:id="@+id/checklistReportsTitle"
