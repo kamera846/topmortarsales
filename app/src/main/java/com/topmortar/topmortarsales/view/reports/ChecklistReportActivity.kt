@@ -57,7 +57,7 @@ class ChecklistReportActivity : AppCompatActivity() {
     private var iName: String? = null
     private var iCoordinate: String? = null
     private var iVisitId: String? = null
-    private var iShortDistance = 0.5
+    private var iDistance: Double? = null
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
@@ -90,6 +90,7 @@ class ChecklistReportActivity : AppCompatActivity() {
         binding.submitReport.setOnClickListener {
             getDistance(isSubmit = true)
         }
+        binding.swipeRefreshLayout.setOnRefreshListener { getQuestions() }
 
     }
 
@@ -110,12 +111,16 @@ class ChecklistReportActivity : AppCompatActivity() {
             binding.recyclerView.visibility = View.GONE
             binding.cardSubmit.visibility = View.GONE
 
+            binding.swipeRefreshLayout.isRefreshing = message === getString(R.string.txt_loading)
+
         } else {
 
             binding.cardLoading.visibility = View.GONE
             binding.cardInformation.visibility = View.VISIBLE
             binding.recyclerView.visibility = View.VISIBLE
             binding.cardSubmit.visibility = View.VISIBLE
+
+            binding.swipeRefreshLayout.isRefreshing = false
 
         }
 
@@ -165,7 +170,7 @@ class ChecklistReportActivity : AppCompatActivity() {
                                         longitude
                                     )
                                     val shortDistance = "%.3f".format(distance)
-                                    iShortDistance = shortDistance.toDouble()
+                                    iDistance = distance
 
                                     if (distance > MAX_REPORT_DISTANCE) {
                                         val builder = AlertDialog.Builder(this)
@@ -325,7 +330,7 @@ class ChecklistReportActivity : AppCompatActivity() {
     }
 
     private fun submitForm() {
-        if (iShortDistance <= MAX_REPORT_DISTANCE) {
+        if (iDistance != null && iDistance!! <= MAX_REPORT_DISTANCE) {
             val questionSubmission: ArrayList<QuestionSubmission> = arrayListOf()
             val items = rvAdapter.submitForm()
             var isAnswerValid = false
