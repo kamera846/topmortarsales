@@ -7,8 +7,10 @@ object PhoneHandler {
     fun formatPhoneNumber(input: String): String {
         val trimmedInput = input.trim()
 
-        return if (trimmedInput.startsWith("0") || trimmedInput.startsWith("8")) {
+        return if (trimmedInput.startsWith("0")) {
             "62${trimmedInput.substring(1)}"
+        } else if (trimmedInput.startsWith("8")) {
+            "62${trimmedInput.substring(0)}"
         } else {
             trimmedInput
         }
@@ -19,10 +21,10 @@ object PhoneHandler {
         val trimmedInput = input.trim()
 
         return if (!trimmedInput.startsWith("0") && !trimmedInput.startsWith("8") && !trimmedInput.startsWith("62")) {
-            etPhone.error = "Phone number must consist of starting with: 0, 8, 62"
+            etPhone.error = "Nomor telpon harus diawali dengan format: 08XXXX, 8XXXX, 628XXXX"
             false
         } else if (!pattern.matches(input)) {
-            etPhone.error = "Phone number must be 10 to 16 digits long"
+            etPhone.error = "Jumlah nomor telpon umumnya sekitar 10 - 16 digit"
             false
         } else true
     }

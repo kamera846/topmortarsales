@@ -1,7 +1,6 @@
 package com.topmortar.topmortarsales.view.reports
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
@@ -24,11 +23,16 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.QnAFormReportRVA
+import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAX_REPORT_DISTANCE
+import com.topmortar.topmortarsales.commons.NORMAL_REPORT
+import com.topmortar.topmortarsales.commons.RENVI_SOURCE
+import com.topmortar.topmortarsales.commons.REPORT_SOURCE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
@@ -38,9 +42,9 @@ import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
-import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
+import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityChecklistReportBinding
 import com.topmortar.topmortarsales.model.QnAFormReportModel
@@ -54,10 +58,16 @@ class ChecklistReportActivity : AppCompatActivity() {
     private lateinit var rvAdapter: QnAFormReportRVA
     private lateinit var questions: ArrayList<QnAFormReportModel>
 
+    private val idUser get() = sessionManager.userID().toString()
+    private var iContactId: String? = null
+    private var iInvoiceId: String? = null
     private var iName: String? = null
     private var iCoordinate: String? = null
     private var iVisitId: String? = null
     private var iDistance: Double? = null
+    private var shortDistance: String? = null
+    private lateinit var iReportSource: String
+    private lateinit var iRenviSource: String
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
@@ -72,17 +82,20 @@ class ChecklistReportActivity : AppCompatActivity() {
         progressDialog.setMessage(getString(R.string.txt_loading))
         progressDialog.setCancelable(false)
 
-        binding.titleBar.icBack.visibility = View.GONE
+        binding.titleBar.icBack.visibility = View.VISIBLE
         binding.titleBar.tvTitleBar.text = "Form Visit Checklist"
-        binding.titleBar.tvTitleBar.setPadding(convertDpToPx(16, this), 0, 0,0)
 
         iName = intent.getStringExtra(CONST_NAME)
         if (iName != null) binding.textStoreName.text = iName
         iCoordinate = intent.getStringExtra(CONST_MAPS)
-        iVisitId = intent.getStringExtra("id_visit")
+        iContactId = intent.getStringExtra(CONST_CONTACT_ID)
+        iInvoiceId = intent.getStringExtra(CONST_INVOICE_ID)
+        iReportSource = intent.getStringExtra(REPORT_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
+        iRenviSource = intent.getStringExtra(RENVI_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
 
         getQuestions()
 
+        binding.titleBar.icBack.setOnClickListener { finish() }
         binding.textDistance.setOnClickListener{ getDistance() }
         binding.ivDistance.setOnClickListener { getDistance() }
         binding.textDistanceBottom.setOnClickListener{ getDistance() }
@@ -106,7 +119,7 @@ class ChecklistReportActivity : AppCompatActivity() {
 
         if (state) {
 
-            binding.cardLoading.visibility = View.VISIBLE
+            binding.txtLoading.visibility = View.VISIBLE
             binding.cardInformation.visibility = View.GONE
             binding.recyclerView.visibility = View.GONE
             binding.cardSubmit.visibility = View.GONE
@@ -115,7 +128,7 @@ class ChecklistReportActivity : AppCompatActivity() {
 
         } else {
 
-            binding.cardLoading.visibility = View.GONE
+            binding.txtLoading.visibility = View.GONE
             binding.cardInformation.visibility = View.VISIBLE
             binding.recyclerView.visibility = View.VISIBLE
             binding.cardSubmit.visibility = View.VISIBLE
@@ -169,7 +182,7 @@ class ChecklistReportActivity : AppCompatActivity() {
                                         latitude,
                                         longitude
                                     )
-                                    val shortDistance = "%.3f".format(distance)
+                                    shortDistance = "%.3f".format(distance)
                                     iDistance = distance
 
                                     if (distance > MAX_REPORT_DISTANCE) {
@@ -218,7 +231,14 @@ class ChecklistReportActivity : AppCompatActivity() {
                                         binding.tvDistanceBottom.setTextColor(textColor)
                                         binding.tvDistanceBottom.text = "Jarak anda dengan toko $shortDistance km."
 
-                                        if (isSubmit) submitForm()
+                                        if (isSubmit) {
+                                            if (iDistance != null && iDistance!! <= MAX_REPORT_DISTANCE) {
+                                                submitForm()
+                                            } else {
+                                                progressDialog.dismiss()
+                                                handleMessage(this, "SUBMIT FORM VISIT", "Cobalah untuk lebih dekat dengan toko")
+                                            }
+                                        }
                                         else progressDialog.dismiss()
                                     }
 
@@ -296,6 +316,18 @@ class ChecklistReportActivity : AppCompatActivity() {
                     RESPONSE_STATUS_OK -> {
 
                         questions = response.results
+                        questions.add(QnAFormReportModel(
+                            id_visit_question = "-1",
+                            text_question = "Pesan Laporan",
+                            is_required = "1",
+                            answer_type = "text",
+                            created_at = "",
+                            updated_at = "",
+                            answer_option = null,
+                            selected_answer = null,
+                            text_answer = "",
+                            placeholder = getString(R.string.laporan_toko_hint)
+                        ))
                         setupRecyclerView()
                         loadingState(false)
                         getDistance()
@@ -329,8 +361,57 @@ class ChecklistReportActivity : AppCompatActivity() {
         }
     }
 
+    private fun submitReport(items: ArrayList<QnAFormReportModel>, arrayAnswer: String) {
+        lifecycleScope.launch {
+            try {
+                val rbidContact = createPartFromString(iContactId ?: "")
+                val rbidUser = createPartFromString(idUser)
+                val rbdistanceVisit = createPartFromString(shortDistance ?: "")
+                val rblaporanVisit = createPartFromString(items.last().text_answer)
+                val rbSource = createPartFromString(iReportSource)
+                val rbRenviSource = createPartFromString(iRenviSource)
+                val rbInvoiceId = createPartFromString(iInvoiceId ?: "")
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.makeVisitReport(
+                    idContact = rbidContact,
+                    idUser = rbidUser,
+                    distanceVisit = rbdistanceVisit,
+                    laporanVisit = rblaporanVisit,
+                    source = rbSource,
+                    renviSource = rbRenviSource,
+                    idInvoice = rbInvoiceId,
+                    isPay = createPartFromString("0")
+                )
+
+                if (response.isSuccessful) {
+                    val responseBody = response.body()!!
+                    when(responseBody.status) {
+                        RESPONSE_STATUS_OK -> {
+                            iVisitId = responseBody.id_visit
+                            postSubmitAnswer(arrayAnswer)
+                        }
+                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+                            progressDialog.dismiss()
+                            handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan! Message: ${ responseBody.message }")
+                        }
+                        else -> {
+                            progressDialog.dismiss()
+                            handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan!: ${ responseBody.message }")
+                        }
+                    }
+                } else {
+                    progressDialog.dismiss()
+                    handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan! Error: " + response.message())
+                }
+            } catch (e: Exception) {
+                progressDialog.dismiss()
+                handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+            }
+        }
+    }
+
     private fun submitForm() {
-        if (iDistance != null && iDistance!! <= MAX_REPORT_DISTANCE) {
             val questionSubmission: ArrayList<QuestionSubmission> = arrayListOf()
             val items = rvAdapter.submitForm()
             var isAnswerValid = false
@@ -353,18 +434,14 @@ class ChecklistReportActivity : AppCompatActivity() {
                     break
 
                 } else {
-                    questionSubmission.add(QuestionSubmission(id_visit_question = item.id_visit_question, text_answer = item.text_answer, selected_answer = item.selected_answer))
+                    if (item.id_visit_question != "-1") questionSubmission.add(QuestionSubmission(id_visit_question = item.id_visit_question, text_answer = item.text_answer, selected_answer = item.selected_answer))
                     isAnswerValid = true
                 }
             }
             if (isAnswerValid) {
                 val arrayAnswer = convertToJsonString(questionSubmission)
-                postSubmitAnswer(arrayAnswer)
+                submitReport(items, arrayAnswer)
             }
-        } else {
-            progressDialog.dismiss()
-            handleMessage(this, "SUBMIT FORM VISIT", "Cobalah untuk lebih dekat dengan toko")
-        }
     }
 
     private fun convertToJsonString(questions: ArrayList<QuestionSubmission>): String {
@@ -410,16 +487,16 @@ class ChecklistReportActivity : AppCompatActivity() {
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
                             progressDialog.dismiss()
-                            handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan! Message: ${ responseBody.message }")
+                            handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan checklist! Message: ${ responseBody.message }")
                         }
                         else -> {
                             progressDialog.dismiss()
-                            handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan!: ${ responseBody.message }")
+                            handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan checklist!: ${ responseBody.message }")
                         }
                     }
                 } else {
                     progressDialog.dismiss()
-                    handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan! Error: " + response.message())
+                    handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan checklist! Error: " + response.message())
                 }
             } catch (e: Exception) {
 
@@ -428,18 +505,6 @@ class ChecklistReportActivity : AppCompatActivity() {
 
             }
         }
-    }
-
-    @SuppressLint("MissingSuperCall")
-    override fun onBackPressed() {
-        AlertDialog.Builder(this)
-            .setTitle("Peringatan!")
-            .setMessage("Laporan checklist tidak bisa dilewati, isi dan kirim laporan anda untuk melanjutkan.")
-            .setCancelable(false)
-            .setPositiveButton("Oke") { dialog, _, ->
-                dialog.dismiss()
-            }
-            .show()
     }
 
 }

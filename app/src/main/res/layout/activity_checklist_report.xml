@@ -108,21 +108,14 @@
                     android:layout_height="wrap_content"
                     tools:listitem="@layout/item_qna_form_report"/>
 
-                <androidx.cardview.widget.CardView
-                    android:id="@+id/cardLoading"
+                <TextView
+                    android:id="@+id/txtLoading"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp">
-
-                    <TextView
-                        android:id="@+id/txtLoading"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/txt_loading"
-                        android:padding="32dp"
-                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
-
-                </androidx.cardview.widget.CardView>
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="@string/txt_loading"
+                    android:padding="32dp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
                 <androidx.cardview.widget.CardView
                     android:visibility="gone"
