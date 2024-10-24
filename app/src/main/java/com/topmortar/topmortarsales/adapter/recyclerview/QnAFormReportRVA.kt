@@ -42,6 +42,7 @@ class QnAFormReportRVA : RecyclerView.Adapter<QnAFormReportRVA.MyViewHolder>() {
                 else binding.textRequired.visibility = View.GONE
                 binding.textCard.visibility = View.VISIBLE
                 binding.textQuestion.text = incrementNumber + data.text_question
+                binding.textAnswer.hint = data.placeholder
                 binding.textAnswer.addTextChangedListener(object: TextWatcher {
                     override fun beforeTextChanged(
                         s: CharSequence?,

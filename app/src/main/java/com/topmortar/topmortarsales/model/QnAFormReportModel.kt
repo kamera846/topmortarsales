@@ -10,4 +10,5 @@ data class QnAFormReportModel(
     var answer_option: ArrayList<String>? = null,
     var selected_answer: ArrayList<String>? = null,
     var text_answer: String = "",
+    var placeholder: String = "Jawaban Anda",
 )

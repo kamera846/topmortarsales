@@ -1679,7 +1679,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             } else -> {
 
-                val intent = Intent(this@DetailContactActivity, NewReportActivity::class.java)
+                var intent = Intent(this@DetailContactActivity, NewReportActivity::class.java)
+
+                if (iRenviSource == "voucher" || iRenviSource == "passive") {
+                    intent = Intent(this@DetailContactActivity, ChecklistReportActivity::class.java)
+                }
 
                 intent.putExtra(REPORT_SOURCE, iReportSource)
                 intent.putExtra(RENVI_SOURCE, iRenviSource)
