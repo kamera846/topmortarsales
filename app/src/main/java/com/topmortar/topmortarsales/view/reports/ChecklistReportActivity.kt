@@ -24,6 +24,7 @@ import com.google.android.gms.location.LocationServices
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.QnAFormReportRVA
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
@@ -62,10 +63,12 @@ class ChecklistReportActivity : AppCompatActivity() {
     private var iContactId: String? = null
     private var iInvoiceId: String? = null
     private var iName: String? = null
+    private var iUserFullName: String? = null
     private var iCoordinate: String? = null
     private var iVisitId: String? = null
     private var iDistance: Double? = null
     private var shortDistance: String? = null
+    private var isAnswerChecklist: Boolean? = null
     private lateinit var iReportSource: String
     private lateinit var iRenviSource: String
 
@@ -85,25 +88,34 @@ class ChecklistReportActivity : AppCompatActivity() {
         binding.titleBar.icBack.visibility = View.VISIBLE
         binding.titleBar.tvTitleBar.text = "Form Visit Checklist"
 
+        isAnswerChecklist = intent.getBooleanExtra("is_answer_checklist", false)
         iName = intent.getStringExtra(CONST_NAME)
         if (iName != null) binding.textStoreName.text = iName
+        iUserFullName = intent.getStringExtra(CONST_FULL_NAME)
         iCoordinate = intent.getStringExtra(CONST_MAPS)
         iContactId = intent.getStringExtra(CONST_CONTACT_ID)
         iInvoiceId = intent.getStringExtra(CONST_INVOICE_ID)
+        shortDistance = intent.getStringExtra("shortDistance")
+        iVisitId = intent.getStringExtra("visitId")
         iReportSource = intent.getStringExtra(REPORT_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
         iRenviSource = intent.getStringExtra(RENVI_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
 
-        getQuestions()
+        loadContent()
 
         binding.titleBar.icBack.setOnClickListener { finish() }
-        binding.textDistance.setOnClickListener{ getDistance() }
-        binding.ivDistance.setOnClickListener { getDistance() }
-        binding.textDistanceBottom.setOnClickListener{ getDistance() }
-        binding.ivDistanceBottom.setOnClickListener { getDistance() }
-        binding.submitReport.setOnClickListener {
-            getDistance(isSubmit = true)
+        if (isAnswerChecklist != null && isAnswerChecklist == true) {
+            binding.textInfoTitle.text = "Laporan $iUserFullName di toko"
+            binding.ivDistance.visibility = View.GONE
+        } else {
+            binding.textDistance.setOnClickListener{ getDistance() }
+            binding.ivDistance.setOnClickListener { getDistance() }
+            binding.textDistanceBottom.setOnClickListener{ getDistance() }
+            binding.ivDistanceBottom.setOnClickListener { getDistance() }
+            binding.submitReport.setOnClickListener {
+                getDistance(isSubmit = true)
+            }
         }
-        binding.swipeRefreshLayout.setOnRefreshListener { getQuestions() }
+        binding.swipeRefreshLayout.setOnRefreshListener { loadContent() }
 
     }
 
@@ -112,6 +124,14 @@ class ChecklistReportActivity : AppCompatActivity() {
         val text_answer: String = "",
         val selected_answer: MutableList<String>? = null
     )
+
+    private fun loadContent() {
+        if (isAnswerChecklist != null && isAnswerChecklist == true) {
+            binding.cardSubmit.visibility = View.GONE
+            binding.tvDistance.text = "Jarak laporan pengguna di toko $shortDistance km."
+            getAnswers()
+        } else getQuestions()
+    }
 
     private fun loadingState(state: Boolean, message: String = getString(R.string.txt_loading)) {
 
@@ -131,7 +151,8 @@ class ChecklistReportActivity : AppCompatActivity() {
             binding.txtLoading.visibility = View.GONE
             binding.cardInformation.visibility = View.VISIBLE
             binding.recyclerView.visibility = View.VISIBLE
-            binding.cardSubmit.visibility = View.VISIBLE
+            if (isAnswerChecklist == null || isAnswerChecklist == false) binding.cardSubmit.visibility = View.VISIBLE
+            else binding.cardSubmit.visibility = View.GONE
 
             binding.swipeRefreshLayout.isRefreshing = false
 
@@ -303,7 +324,39 @@ class ChecklistReportActivity : AppCompatActivity() {
 
     }
 
+    private fun getAnswers() {
+        loadingState(true)
 
+        val apiService = HttpClient.create()
+        lifecycleScope.launch {
+            try {
+                val response = apiService.getVisitAnswers(idVisit = iVisitId ?: "")
+                when(response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        questions = response.results
+                        setupRecyclerView()
+                        loadingState(false)
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        loadingState(true, "Jawaban tidak ditemukan")
+
+                    }
+                    else -> {
+
+                        loadingState(true, getString(R.string.failed_get_data))
+
+                    }
+                }
+            } catch (e: Exception) {
+
+                loadingState(true, "Failed run service. Exception " + e.message)
+
+            }
+        }
+    }
 
     private fun getQuestions() {
         loadingState(true)
@@ -355,6 +408,7 @@ class ChecklistReportActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         rvAdapter = QnAFormReportRVA()
         rvAdapter.items = questions
+        rvAdapter.isAnswerChecklist = isAnswerChecklist
         binding.recyclerView.apply {
             adapter = rvAdapter
             layoutManager = LinearLayoutManager(this@ChecklistReportActivity)

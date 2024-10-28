@@ -85,6 +85,7 @@ class ReportsRecyclerViewAdapter : RecyclerView.Adapter<ReportsRecyclerViewAdapt
             if (item.is_pay == IS_PAY_STATUS_PAY) binding.dollarIndicator.setImageResource(R.drawable.dollar_circle_green)
             if (item.is_pay == IS_PAY_STATUS_PAY_LATER) binding.dateIndicator.setImageResource(R.drawable.date_yellow)
             if (!item.approve_message.isNullOrEmpty()) binding.commentIndicator.setImageResource(R.drawable.comment_blue)
+            if (item.has_checklist.isNotEmpty() && item.has_checklist == "1") binding.checklistIndicator.setImageResource(R.drawable.checklist_blue)
 
             itemView.setOnClickListener {
                 listener?.onItemClick(item)

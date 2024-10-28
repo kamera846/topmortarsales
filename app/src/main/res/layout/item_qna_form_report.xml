@@ -15,6 +15,57 @@
 
         <LinearLayout
             android:visibility="gone"
+            android:id="@+id/answerCard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/answerLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/textAnswerQuestion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="16dp"
+                    android:text="Pertanyaan?"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="8dp"
+                    android:background="@drawable/background_rounded_8"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="8dp"
+                        android:text="Jawaban pengguna"
+                        android:theme="@style/Theme.TopMortarSales.TextBaseLine"/>
+
+                    <TextView
+                        android:id="@+id/textUserAnswer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:text="Tidak dijawab"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:visibility="gone"
             android:id="@+id/textCard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

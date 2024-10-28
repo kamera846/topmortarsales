@@ -329,6 +329,7 @@ class ReportsActivity : AppCompatActivity() {
         if (isCourier || isBA) modalDetail.setIsCourier(true)
         else modalDetail.setIsCourier(false)
         if (contactID.isNullOrEmpty()) modalDetail.setWithName(true)
+        modalDetail.setUserFullName(iUserID, contactName, userFullName)
         modalDetail.show()
     }
 
