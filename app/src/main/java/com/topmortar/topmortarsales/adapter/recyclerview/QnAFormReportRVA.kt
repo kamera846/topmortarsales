@@ -19,6 +19,7 @@ import java.util.Calendar
 class QnAFormReportRVA : RecyclerView.Adapter<QnAFormReportRVA.MyViewHolder>() {
     private lateinit var context: Context
     var items = arrayListOf<QnAFormReportModel>()
+    var isAnswerChecklist: Boolean? = null
 
     inner class MyViewHolder(val binding: ItemQnaFormReportBinding) :
         RecyclerView.ViewHolder(binding.root)
@@ -35,6 +36,16 @@ class QnAFormReportRVA : RecyclerView.Adapter<QnAFormReportRVA.MyViewHolder>() {
         val binding = holder.binding
         val data = items[position]
         val incrementNumber = "${position + 1}. "
+
+        if (isAnswerChecklist != null && isAnswerChecklist == true) {
+            binding.answerCard.visibility = View.VISIBLE
+            binding.textAnswerQuestion.text = incrementNumber + data.text_question
+            if (data.answers.isNotEmpty()) {
+                if (data.answers[0].isEmpty()) binding.textUserAnswer.text = "Tidak dijawab"
+                else binding.textUserAnswer.text = data.answers.joinToString(separator = ",")
+            } else binding.textUserAnswer.text = "Tidak dijawab"
+            return
+        }
 
         when (data.answer_type) {
             "text" -> {

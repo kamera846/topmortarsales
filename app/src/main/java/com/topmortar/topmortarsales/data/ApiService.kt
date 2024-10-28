@@ -749,4 +749,9 @@ interface ApiService {
         @Part("id_visit") idVisit: RequestBody,
         @Part("array_answer") arrayAnswer: RequestBody,
     ): Response<ResponseQuestion>
+
+    @GET("visitChecklist.php")
+    suspend fun getVisitAnswers(
+        @Query("v") idVisit: String,
+    ): ResponseQuestion
 }

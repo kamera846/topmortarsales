@@ -2,11 +2,15 @@ package com.topmortar.topmortarsales.modal
 
 import android.app.Dialog
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.WindowManager
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
+import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.IS_PAY_STATUS_NOT_PAY
 import com.topmortar.topmortarsales.commons.IS_PAY_STATUS_PAY
 import com.topmortar.topmortarsales.commons.IS_PAY_STATUS_PAY_LATER
@@ -15,6 +19,7 @@ import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.databinding.ModalDetailReportBinding
 import com.topmortar.topmortarsales.model.ReportVisitModel
+import com.topmortar.topmortarsales.view.reports.ChecklistReportActivity
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -25,6 +30,9 @@ class DetailReportModal(private val context: Context) : Dialog(context) {
     private lateinit var data: ReportVisitModel
     private var withName = false
     private var isCourier = false
+    private var iUserID: String? = null
+    private var contactName: String? = null
+    private var userFullName: String? = null
 
     fun setData(data: ReportVisitModel) {
         this.data = data
@@ -34,6 +42,11 @@ class DetailReportModal(private val context: Context) : Dialog(context) {
     }
     fun setWithName(withName: Boolean) {
         this.withName = withName
+    }
+    fun setUserFullName(iUserID: String?, contactName: String?, userFullName: String?) {
+        this.iUserID = iUserID
+        this.contactName = contactName
+        this.userFullName = userFullName
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -127,7 +140,19 @@ class DetailReportModal(private val context: Context) : Dialog(context) {
     }
 
     private fun openChecklistReport() {
-        // Open checklist report
+        val userFullName = if (!contactName.isNullOrEmpty()) if (iUserID.isNullOrEmpty()) "saya" else "$userFullName"
+        else if (userFullName.isNullOrEmpty()) "" else "$userFullName"
+
+        val intent = Intent(context, ChecklistReportActivity::class.java)
+
+        intent.putExtra("is_answer_checklist", true)
+        intent.putExtra(CONST_CONTACT_ID, data.id_contact)
+        intent.putExtra(CONST_NAME, data.nama)
+        intent.putExtra(CONST_FULL_NAME, userFullName)
+        intent.putExtra("shortDistance", data.distance_visit)
+        intent.putExtra("visitId", data.id_visit)
+
+        context.startActivity(intent)
     }
 
 }
