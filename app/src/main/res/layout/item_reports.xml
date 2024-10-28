@@ -73,6 +73,7 @@
             android:id="@+id/indicatorContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <ImageView
@@ -91,7 +92,13 @@
                 android:id="@+id/commentIndicator"
                 android:layout_width="18dp"
                 android:layout_height="18dp"
+                android:layout_marginEnd="6dp"
                 android:src="@drawable/comment_light"/>
+            <ImageView
+                android:id="@+id/checklistIndicator"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/checklist_light"/>
 
         </LinearLayout>
 
