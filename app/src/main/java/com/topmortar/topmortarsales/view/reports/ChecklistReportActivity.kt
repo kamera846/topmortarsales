@@ -128,7 +128,7 @@ class ChecklistReportActivity : AppCompatActivity() {
     private fun loadContent() {
         if (isAnswerChecklist != null && isAnswerChecklist == true) {
             binding.cardSubmit.visibility = View.GONE
-            binding.tvDistance.text = "Jarak laporan $iUserFullName di toko $shortDistance km."
+            binding.tvDistance.text = "Jarak laporan pengguna di toko $shortDistance km."
             getAnswers()
         } else getQuestions()
     }

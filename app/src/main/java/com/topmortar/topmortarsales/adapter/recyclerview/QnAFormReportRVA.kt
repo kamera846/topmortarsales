@@ -42,7 +42,7 @@ class QnAFormReportRVA : RecyclerView.Adapter<QnAFormReportRVA.MyViewHolder>() {
             binding.textAnswerQuestion.text = incrementNumber + data.text_question
             if (data.answers.isNotEmpty()) {
                 if (data.answers[0].isEmpty()) binding.textUserAnswer.text = "Tidak dijawab"
-                else binding.textUserAnswer.text = data.answers.joinToString(separator = ",")
+                else binding.textUserAnswer.text = data.answers.joinToString(separator = ", ")
             } else binding.textUserAnswer.text = "Tidak dijawab"
             return
         }
