@@ -73,6 +73,11 @@ class DetailReportModal(private val context: Context) : Dialog(context) {
         setReportType()
         binding.approveMessage.text = data.approve_message.let { if (!it.isNullOrEmpty()) it else "Tidak ada feedback" }
 
+        if (data.has_checklist.isNotEmpty() && data.has_checklist == "1") {
+            binding.checklistContainer.visibility = View.VISIBLE
+            binding.btnOpenChecklist.setOnClickListener { openChecklistReport() }
+        }
+
     }
 
     private fun setDateReport() {
@@ -119,6 +124,10 @@ class DetailReportModal(private val context: Context) : Dialog(context) {
                 binding.reportTypeContainer.visibility = View.GONE
             }
         }
+    }
+
+    private fun openChecklistReport() {
+        // Open checklist report
     }
 
 }

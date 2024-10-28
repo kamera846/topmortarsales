@@ -159,4 +159,56 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/checklistContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:orientation="vertical">
+
+        <!-- Feedback Separator -->
+        <LinearLayout
+            android:id="@+id/checklist_separator"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Laporan Checklist"
+                android:layout_marginEnd="8dp"
+                android:textSize="14sp"
+                android:theme="@style/Theme.TopMortarSales.TextBaseLine" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:theme="@style/Theme.TopMortarSales.BaseLine"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/btnOpenChecklist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="16dp"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="8dp"
+            android:gravity="center"
+            android:textSize="14sp"
+            android:textColor="@color/white"
+            android:text="Lihat Laporan →"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="@drawable/bg_blue_silver_lake_round_8"/>
+
+    </LinearLayout>
+
 </LinearLayout>
