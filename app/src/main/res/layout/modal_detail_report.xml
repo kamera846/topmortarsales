@@ -193,6 +193,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/btnOpenChecklist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -203,11 +204,10 @@
             android:gravity="center"
             android:clickable="true"
             android:focusable="true"
-            android:background="@drawable/bg_blue_silver_lake_round_8"
+            android:background="@drawable/bg_blue_silver_lake_round_8_clickable"
             android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/btnOpenChecklist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="14sp"
