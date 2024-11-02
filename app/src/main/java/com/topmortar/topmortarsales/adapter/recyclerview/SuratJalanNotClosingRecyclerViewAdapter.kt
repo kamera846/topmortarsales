@@ -14,6 +14,7 @@ import android.widget.TextView
 import androidx.appcompat.widget.TooltipCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.SuratJalanNotClosingModel
 
 @SuppressLint("SetTextI18n")
@@ -30,28 +31,41 @@ class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<S
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
         val checkListImage: ImageView = itemView.findViewById(R.id.checklist)
         private val icPhone: ImageView = itemView.findViewById(R.id.icPhoneNumber)
+        private val deliveryStatus: LinearLayout = itemView.findViewById(R.id.deliveryStatus)
+        private val deliveryStatusText: TextView = itemView.findViewById(R.id.deliveryStatusText)
+        private val deliveryStatusIcon: ImageView = itemView.findViewById(R.id.deliveryStatusIcon)
 
         fun bind(item: SuratJalanNotClosingModel) {
             val dateProcessed = item.dateProcessed
+            var dateCounter = item.created_at.let {
+                if (it.isNotEmpty()) {
+                    DateFormat.differenceDateNowDescCustom(it)
+                } else -1
+            }
 
             if (dateProcessed.isNotEmpty()) {
-//                val date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(item.dateProcessed)
-//                dateProcessed = if (date != null) {
-//                    val calendar = Calendar.getInstance()
-//                    val currentYear = calendar.get(Calendar.YEAR)
-//                    val dateYear = SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
-//
-//                    if (currentYear == dateYear.toInt()) DateFormat.format(item.dateProcessed, "yyyy-MM-dd HH:mm:ss", "dd MMM, HH:mm")
-//                    else DateFormat.format(item.dateProcessed, "yyyy-MM-dd HH:mm:ss", "dd MMM yyyy, HH:mm")
-//                } else DateFormat.format(item.dateProcessed, "yyyy-MM-dd HH:mm:ss", "dd MMM, HH:mm")
+                deliveryStatusIcon.setImageResource(R.drawable.truck_fast_white_only)
+                dateCounter = dateProcessed.let {
+                    if (it.isNotEmpty()) {
+                        DateFormat.differenceDateNowDescCustom(it)
+                    } else -1
+                }
+            } else {
+                deliveryStatusIcon.setImageResource(R.drawable.time_line_dark_white_only)
+            }
 
-                checkListImage.setImageResource(R.drawable.truck_fast_black)
-            } else checkListImage.setImageResource(R.drawable.time_line_dark_light_only)
+            deliveryStatus.visibility = View.VISIBLE
+            dateCounter.let { if (it != -1) {
+                    deliveryStatusText.visibility = View.VISIBLE
+                    deliveryStatusText.text = "$it hari"
+                } else {
+                    deliveryStatusText.visibility = View.GONE
+                }
+            }
 
             tvContactName.text = item.nama
             tvPhoneNumber.text = "${item.full_name} - ${item.kode_city}"
 
-            checkListImage.visibility = View.VISIBLE
             icPhone.visibility = View.VISIBLE
 
             setupStatus(dateProcessed)
