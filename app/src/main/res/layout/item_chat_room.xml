@@ -225,6 +225,37 @@
                 android:src="@drawable/active_circle_check"
                 android:contentDescription="Icon Checklist"/>
 
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/deliveryStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp"
+                android:layout_marginHorizontal="16dp"
+                android:orientation="horizontal"
+                android:background="@drawable/bg_passive_round">
+
+                <TextView
+                    android:id="@+id/deliveryStatusText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1 hari"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:layout_marginEnd="8dp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                <ImageView
+                    android:id="@+id/deliveryStatusIcon"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:src="@drawable/truck_fast_white_only"
+                    android:contentDescription="Icon Checklist"/>
+
+            </LinearLayout>
+
             <TextView
                 android:visibility="gone"
                 android:id="@+id/textVerified"
