@@ -37,7 +37,7 @@ class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<S
 
         fun bind(item: SuratJalanNotClosingModel) {
             val dateProcessed = item.dateProcessed
-            var dateCounter = item.created_at.let {
+            var dateCounter = item.dalivery_date.let {
                 if (it.isNotEmpty()) {
                     DateFormat.differenceDateNowDescCustom(it)
                 } else -1
