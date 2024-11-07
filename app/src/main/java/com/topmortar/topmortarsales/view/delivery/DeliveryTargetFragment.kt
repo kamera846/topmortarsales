@@ -157,7 +157,7 @@ class DeliveryTargetFragment : Fragment() {
                                         val storeTarget = response.results
 
                                         for ((i, item) in storeTarget.withIndex()) {
-                                            val findStoreProcessed = storeList.find { it.id == item.id_contact }
+                                            val findStoreProcessed = storeList.find { it.id == item.id_contact && it.courier?.id == item.id_courier }
                                             if (findStoreProcessed != null) {
                                                 storeTarget[i].deliveryId = findStoreProcessed.deliveryId
                                                 storeTarget[i].dateProcessed = findStoreProcessed.startDatetime
