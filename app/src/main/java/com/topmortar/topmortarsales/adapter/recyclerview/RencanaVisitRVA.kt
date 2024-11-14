@@ -92,7 +92,7 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
 
             var dateJatem =
                 if (typeRencana == "voucher") "Didapatkan " + DateFormat.format(item.created_at ?: "0000-00-00")
-                else if (typeRencana == "jatemPenagihan1" && item.jatuh_tempo.isNotEmpty()) "Jatuh tempo " + DateFormat.format(dateString =  item.jatuh_tempo, inputFormat = "dd MMM yyyy", inputLocale = Locale.ENGLISH)
+                else if ((typeRencana == "jatemPenagihan1" || typeRencana == "jatemPenagihan2" || typeRencana == "jatemPenagihan3") && item.jatuh_tempo.isNotEmpty()) "Jatuh tempo " + DateFormat.format(dateString =  item.jatuh_tempo, inputFormat = "dd MMM yyyy", inputLocale = Locale.ENGLISH)
                 else if (typeRencana == "passive") "Terakhir divisit " + DateFormat.format(item.last_visit ?: "0000-00-00")
 //                else if (typeRencana == "tagihMingguan") "Tanggal invoice " + DateFormat.format(item.date_invoice)
                 else "Terakhir divisit " + DateFormat.format(item.created_at ?: "0000-00-00")
@@ -108,8 +108,8 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
                     badgeNew.visibility = View.VISIBLE
                 } else {
                     if (isInvalidLastVisit) dateJatem = "Belum pernah divisit"
-                    if (typeRencana == "jatemPenagihan1") {
-                        itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.status_active15))
+                    if ((typeRencana == "jatemPenagihan1" || typeRencana == "jatemPenagihan2" || typeRencana == "jatemPenagihan3")) {
+                        if (typeRencana == "jatemPenagihan1") itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.status_active15))
                         dateJatem = "Jatem " + DateFormat.format(dateString =  item.jatuh_tempo, inputFormat = "dd MMM yyyy", inputLocale = Locale.ENGLISH, outputFormat = "dd MMM") + ", Telah divisit " + DateFormat.format(item.created_at ?: "0000-00-00", outputFormat = "dd MMM")
                     }
                     badgeNew.visibility = View.GONE
