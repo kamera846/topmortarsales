@@ -412,7 +412,7 @@ class ReportsActivity : AppCompatActivity() {
 //        EventBus.getDefault().register(this)
         Handler(Looper.getMainLooper()).postDelayed({
             if (sessionManager.isLoggedIn()) {
-                if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+                if (CustomUtility(this).isUserWithOnlineStatus()) {
                     CustomUtility(this).setUserStatusOnline(
                         true,
                         sessionManager.userDistributor() ?: "-custom-013",
@@ -427,7 +427,7 @@ class ReportsActivity : AppCompatActivity() {
         super.onStop()
 //        EventBus.getDefault().unregister(this)
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor() ?: "-custom-013",
@@ -440,7 +440,7 @@ class ReportsActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor() ?: "-custom-013",

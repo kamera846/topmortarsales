@@ -14,9 +14,15 @@ import com.google.android.material.snackbar.Snackbar
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_MARKETING
+import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
+import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import java.util.Calendar
 
 class CustomUtility(private val context: Context) {
+    private lateinit var sessionManager: SessionManager
+
     fun showPermissionDeniedSnackbar(message: String, actionTitle: String = "Coba Lagi", unit: () -> Unit) {
         Snackbar.make(
             (context as Activity).findViewById(android.R.id.content), // Replace with your root view
@@ -133,5 +139,10 @@ class CustomUtility(private val context: Context) {
             }
             initials
         } else ""
+    }
+
+    fun isUserWithOnlineStatus(): Boolean {
+        sessionManager = SessionManager(context)
+        return sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN || sessionManager.userKind() == USER_KIND_MARKETING
     }
 }

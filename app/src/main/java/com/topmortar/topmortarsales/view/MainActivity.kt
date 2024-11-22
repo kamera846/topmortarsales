@@ -83,6 +83,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_MARKETING
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
@@ -202,7 +203,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
 
-        if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+        if (CustomUtility(this).isUserWithOnlineStatus()) {
             CustomUtility(this).setUserStatusOnline(
                 true,
                 sessionManager.userDistributor() ?: "-custom-001",
@@ -352,7 +353,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         etSearchBox = findViewById(R.id.et_search_box)
 
         // Set Title Bar
-        if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
+        if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_MARKETING) {
             icMore.visibility = View.VISIBLE
             binding.titleBar.icMenu.visibility = View.GONE
             tvTitleBarDescription.visibility = View.GONE
@@ -531,7 +532,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
                     val apiService: ApiService = HttpClient.create()
                     val response = when (userKind) {
-                        USER_KIND_ADMIN, USER_KIND_PENAGIHAN -> apiService.getContactsByDistributor(distributorID = userDistributorId)
+                        USER_KIND_ADMIN, USER_KIND_PENAGIHAN, USER_KIND_MARKETING -> apiService.getContactsByDistributor(distributorID = userDistributorId)
                         USER_KIND_COURIER -> apiService.getCourierStore(processNumber = "1", courierId = userId)
                         else -> apiService.getContacts(cityId = userCity, distributorID = userDistributorId)
                     }
@@ -658,7 +659,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             myProfile.isVisible = false
         }
 
-        if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
+        if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_MARKETING) {
             syncNow.isVisible = false
             myProfile.isVisible = false
             logout.isVisible = false
@@ -1038,7 +1039,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             if (userKind == USER_KIND_ADMIN) {
                 filterModal.setStatuses(selected = selectedStatusID)
                 filterModal.setCities(items = cities, selected = selectedCitiesID)
-            } else if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_ADMIN_CITY) filterModal.setStatuses(selected = selectedStatusID)
+            } else if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_MARKETING || userKind == USER_KIND_ADMIN_CITY) filterModal.setStatuses(selected = selectedStatusID)
             filterModal.setSendFilterListener(object: FilterTokoModal.SendFilterListener {
                 override fun onSendFilter(
                     selectedStatusID: String,
@@ -1079,7 +1080,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                         } else {
                             sessionManager.setUserLoggedIn(data)
 
-                            if (userKind != USER_KIND_SALES && userKind != USER_KIND_PENAGIHAN) {
+                            if (userKind != USER_KIND_SALES && userKind != USER_KIND_PENAGIHAN && userKind != USER_KIND_MARKETING) {
                                 tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
                                 tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
                             }
@@ -1328,7 +1329,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
         } else {
             icMore.visibility = View.VISIBLE
-            if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) binding.btnFab.visibility = View.VISIBLE
+            if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_MARKETING) binding.btnFab.visibility = View.VISIBLE
             binding.titleBar.icConfirmSelect.visibility = View.GONE
             binding.titleBar.tvTitleBar.text = "Semua Toko"
         }
@@ -1415,7 +1416,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
             else {
 
-                if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) super.onBackPressed()
+                if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_MARKETING) super.onBackPressed()
                 else {
 
                     if (doubleBackToExitPressedOnce) {
@@ -1441,7 +1442,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
     override fun onStart() {
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
-            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
                     true,
                     sessionManager.userDistributor() ?: "-custom-001",
@@ -1456,7 +1457,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         super.onStop()
 
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor() ?: "-custom-001",
@@ -1469,7 +1470,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
     override fun onDestroy() {
         super.onDestroy()
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor() ?: "-custom-001",

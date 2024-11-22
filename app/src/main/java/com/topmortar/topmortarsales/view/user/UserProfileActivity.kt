@@ -2,11 +2,9 @@
 
 package com.topmortar.topmortarsales.view.user
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -18,7 +16,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.database.DataSnapshot
@@ -28,6 +25,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_MARKETING
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.CONST_COURIER_ID
@@ -51,6 +49,7 @@ import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_MARKETING
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
@@ -268,7 +267,7 @@ class UserProfileActivity : AppCompatActivity() {
             binding.titleBarLight.icEdit.setOnClickListener { navigateEditUser() }
         }
 
-        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+        if (CustomUtility(this).isUserWithOnlineStatus()) {
             binding.btnLogout.setOnClickListener { logoutConfirmation() }
         }
 
@@ -300,11 +299,11 @@ class UserProfileActivity : AppCompatActivity() {
 //            }
 //        }
 
-        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN || sessionManager.userKind() == USER_KIND_MARKETING) {
             CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor() ?: "-custom-019", sessionManager.userID() ?: "")
             checkAbsent()
         }
-        if (iUserLevel == AUTH_LEVEL_COURIER || (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES) || (iUserLevel == AUTH_LEVEL_PENAGIHAN || userKind == USER_KIND_PENAGIHAN)) {
+        if (iUserLevel == AUTH_LEVEL_COURIER || (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES) || (iUserLevel == AUTH_LEVEL_PENAGIHAN || userKind == USER_KIND_PENAGIHAN) || (iUserLevel == AUTH_LEVEL_MARKETING || userKind == USER_KIND_MARKETING)) {
             binding.salesReportContainer.visibility = View.GONE
             binding.deliveryContainer.visibility = View.VISIBLE
 
@@ -312,10 +311,10 @@ class UserProfileActivity : AppCompatActivity() {
                 binding.btnHistoryVisit.visibility = View.GONE
                 binding.btnCourierHistoryDelivery.visibility = View.VISIBLE
                 if (userKind == USER_KIND_COURIER) binding.btnCourierTracking.visibility = View.GONE
-            } else if (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES || iUserLevel == AUTH_LEVEL_PENAGIHAN || userKind == USER_KIND_PENAGIHAN) {
+            } else if (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES || iUserLevel == AUTH_LEVEL_PENAGIHAN || userKind == USER_KIND_PENAGIHAN || iUserLevel == AUTH_LEVEL_MARKETING || userKind == USER_KIND_MARKETING) {
                 binding.btnHistoryVisit.visibility = View.VISIBLE
                 binding.btnCourierHistoryDelivery.visibility = View.GONE
-                if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) binding.btnCourierTracking.visibility = View.GONE
+                if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_MARKETING) binding.btnCourierTracking.visibility = View.GONE
             }
 
             setupCourierMenu()
@@ -537,7 +536,7 @@ class UserProfileActivity : AppCompatActivity() {
             val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
             absentChild.child(sessionManager.userID() ?: "0").child(FIREBASE_CHILD_IS_ALLOWED_LOGOUT).setValue(false)
 
-            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
 
                 CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor() ?: "-custom-019", sessionManager.userID().toString())
             }
@@ -583,14 +582,14 @@ class UserProfileActivity : AppCompatActivity() {
     private fun  setupCourierMenu() {
         binding.absentDescription.text = getString(R.string.txt_loading)
 
-        val personCall = if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_COURIER) "Anda" else "Pengguna"
-        val personcall = if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_COURIER) "anda" else "pengguna"
+        val personCall = if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_COURIER || userKind == USER_KIND_MARKETING) "Anda" else "Pengguna"
+        val personcall = if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_COURIER || userKind == USER_KIND_MARKETING) "anda" else "pengguna"
 
         childAbsent = firebaseReference.child(FIREBASE_CHILD_ABSENT)
         childCourier = childAbsent?.child(iUserID ?: userId ?: "0")
         userOnlineChild = childCourier?.child("isOnline")
 
-        if (userKind != USER_KIND_SALES && userKind != USER_KIND_PENAGIHAN && userKind != USER_KIND_COURIER) {
+        if (userKind != USER_KIND_SALES && userKind != USER_KIND_PENAGIHAN && userKind != USER_KIND_COURIER && userKind != USER_KIND_MARKETING) {
             courierTrackingListener = object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     // Do something here
@@ -827,7 +826,7 @@ class UserProfileActivity : AppCompatActivity() {
 //        EventBus.getDefault().register(this)
         Handler(Looper.getMainLooper()).postDelayed({
             if (sessionManager.isLoggedIn()) {
-                if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+                if (CustomUtility(this).isUserWithOnlineStatus()) {
                     CustomUtility(this).setUserStatusOnline(
                         true,
                         sessionManager.userDistributor() ?: "-custom-019",
@@ -842,7 +841,7 @@ class UserProfileActivity : AppCompatActivity() {
         super.onStop()
 //        EventBus.getDefault().unregister(this)
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor() ?: "-custom-019",
@@ -858,7 +857,7 @@ class UserProfileActivity : AppCompatActivity() {
         if (courierTrackingListener != null) userOnlineChild?.removeEventListener(courierTrackingListener!!)
         if (userAllowLogoutListener != null) userAllowedLogoutChild?.removeEventListener(userAllowLogoutListener!!)
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor() ?: "-custom-019",

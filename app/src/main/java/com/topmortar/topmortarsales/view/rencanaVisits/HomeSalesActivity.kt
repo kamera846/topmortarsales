@@ -43,6 +43,7 @@ import com.topmortar.topmortarsales.adapter.recyclerview.HomeSalesMenuRV
 import com.topmortar.topmortarsales.commons.ABSENT_MODE_BASECAMP
 import com.topmortar.topmortarsales.commons.ABSENT_MODE_STORE
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_MARKETING
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE
@@ -71,6 +72,7 @@ import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_MARKETING
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
@@ -282,6 +284,7 @@ class HomeSalesActivity : AppCompatActivity() {
             USER_KIND_PENAGIHAN -> AUTH_LEVEL_PENAGIHAN
             USER_KIND_SALES -> AUTH_LEVEL_SALES
             USER_KIND_COURIER -> AUTH_LEVEL_COURIER
+            USER_KIND_MARKETING -> AUTH_LEVEL_MARKETING
             else -> ""
         }
         userChild.child("userLevel").setValue(userLevel)
@@ -833,6 +836,7 @@ class HomeSalesActivity : AppCompatActivity() {
             USER_KIND_PENAGIHAN -> AUTH_LEVEL_PENAGIHAN
             USER_KIND_SALES -> AUTH_LEVEL_SALES
             USER_KIND_COURIER -> AUTH_LEVEL_COURIER
+            USER_KIND_MARKETING -> AUTH_LEVEL_MARKETING
             else -> ""
         }
 
@@ -1142,42 +1146,46 @@ class HomeSalesActivity : AppCompatActivity() {
     private fun setListVisit() {
         val listItem = arrayListOf<HomeMenuSalesModel>()
 
-        listItem.add(
-            HomeMenuSalesModel(
-                icon = R.drawable.store_white,
-                bgColor = R.drawable.bg_green_reseda_round_8,
-                title = "Rencana Visit Sales",
-                target = RencanaVisitActivity::class.java,
-                isLocked = isLocked
+        if (userKind == USER_KIND_MARKETING) {
+            listItem.add(
+                HomeMenuSalesModel(
+                    icon = R.drawable.store_white,
+                    bgColor = R.drawable.bg_green_reseda_round_8,
+                    title = "Rencana Visit Marketing",
+                    target = RencanaVisitPenagihanActivity::class.java,
+                    isLocked = isLocked
+                )
             )
-        )
-//        if (userKind == USER_KIND_PENAGIHAN) {
-        listItem.add(
-            HomeMenuSalesModel(
-                icon = R.drawable.store_white,
-                bgColor = R.drawable.bg_green_reseda_round_8,
-                title = "Rencana Visit Penagihan",
-                target = RencanaVisitPenagihanActivity::class.java,
-                isLocked = isLocked
+        } else {
+            listItem.add(
+                HomeMenuSalesModel(
+                    icon = R.drawable.store_white,
+                    bgColor = R.drawable.bg_green_reseda_round_8,
+                    title = "Rencana Visit Sales",
+                    target = RencanaVisitActivity::class.java,
+                    isLocked = isLocked
+                )
             )
-        )
-//        }
-        // Number 1 is distributor ID for Center Distributor (Special case for Top Mortar Mitra)
-//        if (userDistributorId != "1") {
+            listItem.add(
+                HomeMenuSalesModel(
+                    icon = R.drawable.store_white,
+                    bgColor = R.drawable.bg_green_reseda_round_8,
+                    title = "Rencana Visit Penagihan",
+                    target = RencanaVisitPenagihanActivity::class.java,
+                    isLocked = isLocked
+                )
+            )
+        }
+
         listItem.add(
             HomeMenuSalesModel(
                 icon = R.drawable.gudang_white,
                 bgColor = R.drawable.bg_blue_silver_lake_round_8,
                 title = "Semua Toko",
                 target = MainActivity::class.java,
-//                action = {
-//                    val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
-//                    this@HomeSalesActivity.stopService(serviceIntent)
-//                },
                 isLocked = isLocked
             )
         )
-//        }
 
         setMenuItemAdapter(binding.rvVisit, listItem)
     }
@@ -1309,7 +1317,7 @@ class HomeSalesActivity : AppCompatActivity() {
 //        checkAbsent()
 //        checkLocationPermission()
         Handler(Looper.getMainLooper()).postDelayed({
-            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
                     true,
                     sessionManager.userDistributor() ?: "-custom-010",
@@ -1324,7 +1332,7 @@ class HomeSalesActivity : AppCompatActivity() {
         super.onStop()
 
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor() ?: "-custom-010",
@@ -1342,7 +1350,7 @@ class HomeSalesActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor() ?: "-custom-010",

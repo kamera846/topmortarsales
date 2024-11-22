@@ -472,7 +472,7 @@ class SplashScreenActivity : AppCompatActivity() {
                             when (data.level_user) {
                                 AUTH_LEVEL_BA -> navigateToListTukang()
                                 AUTH_LEVEL_COURIER -> navigateToCourier()
-                                AUTH_LEVEL_SALES, AUTH_LEVEL_PENAGIHAN -> navigateToSales()
+                                AUTH_LEVEL_SALES, AUTH_LEVEL_PENAGIHAN, AUTH_LEVEL_MARKETING -> navigateToSales()
                                 else -> navigateToMain()
                             }
 
@@ -1038,7 +1038,7 @@ class SplashScreenActivity : AppCompatActivity() {
                             when (userKind) {
                                 USER_KIND_BA -> navigateToListTukang()
                                 USER_KIND_COURIER -> navigateToCourier()
-                                USER_KIND_SALES, USER_KIND_PENAGIHAN -> navigateToSales()
+                                USER_KIND_SALES, USER_KIND_PENAGIHAN, USER_KIND_MARKETING -> navigateToSales()
                                 else -> navigateToMain()
                             }
                         }

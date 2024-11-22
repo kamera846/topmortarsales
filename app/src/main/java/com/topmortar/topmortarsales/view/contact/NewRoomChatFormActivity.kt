@@ -110,7 +110,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
         setContentView(binding.root)
 
-        if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+        if (CustomUtility(this).isUserWithOnlineStatus()) {
             CustomUtility(this).setUserStatusOnline(
                 true,
                 sessionManager.userDistributor() ?: "-custom-004",
@@ -607,7 +607,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
     override fun onStart() {
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
-            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
                     true,
                     sessionManager.userDistributor() ?: "-custom-004",
@@ -621,7 +621,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         super.onStop()
 
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor() ?: "-custom-004",
@@ -634,7 +634,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
     override fun onDestroy() {
         super.onDestroy()
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor() ?: "-custom-004",

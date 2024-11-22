@@ -95,7 +95,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
             if (activeTab != 0) tabLayout.getTabAt(0)?.select()
             else finish()
         }
-        if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+        if (CustomUtility(this).isUserWithOnlineStatus()) {
             CustomUtility(this).setUserStatusOnline(
                 true,
                 userDistributorId ?: "-custom-011",
@@ -426,7 +426,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
         super.onStart()
         EventBus.getDefault().register(this)
         Handler(Looper.getMainLooper()).postDelayed({
-            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
                     true,
                     userDistributorId ?: "-custom-011",
@@ -439,7 +439,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
     override fun onStop() {
         EventBus.getDefault().unregister(this)
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     userDistributorId ?: "-custom-011",
@@ -452,7 +452,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
 
     override fun onDestroy() {
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     userDistributorId ?: "-custom-011",

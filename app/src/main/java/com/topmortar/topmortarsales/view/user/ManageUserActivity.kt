@@ -282,7 +282,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
     }
 
     override fun onItemClick(data: UserModel?) {
-        if (data?.level_user == AUTH_LEVEL_SALES || data?.level_user == AUTH_LEVEL_COURIER || data?.level_user == AUTH_LEVEL_BA || data?.level_user == AUTH_LEVEL_PENAGIHAN) navigateDetailUser(data)
+        if (data?.level_user == AUTH_LEVEL_SALES || data?.level_user == AUTH_LEVEL_COURIER || data?.level_user == AUTH_LEVEL_BA || data?.level_user == AUTH_LEVEL_PENAGIHAN  || data?.level_user == AUTH_LEVEL_MARKETING) navigateDetailUser(data)
         else navigateAddUser(data)
     }
 
