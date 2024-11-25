@@ -717,6 +717,18 @@ interface ApiService {
         @Query("dst") idDistributor: String,
     ): ResponseRencanaVisit
 
+    @GET(RENCANA_VISIT)
+    suspend fun targetMg(
+        @Query("type") type: String = "mg",
+        @Query("c") idCity: String,
+    ): ResponseRencanaVisit
+
+    @GET(RENCANA_VISIT)
+    suspend fun targetMgDst(
+        @Query("type") type: String = "mg",
+        @Query("dst") idDistributor: String,
+    ): ResponseRencanaVisit
+
     @GET(RENCANA_VISIT_PENAGIHAN)
     suspend fun jatemPenagihan(
         @Query("dst") dst: String,

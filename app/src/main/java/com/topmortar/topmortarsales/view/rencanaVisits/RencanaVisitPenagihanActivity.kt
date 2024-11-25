@@ -28,8 +28,6 @@ import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE_WITH_DEFAULT_RAN
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
-import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
-import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -57,7 +55,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
     private lateinit var viewPager: ViewPager
     private lateinit var pagerAdapter: RencanaVisitPenagihanVPA
     private lateinit var progressDialog: ProgressDialog
-    private var pagerAdapterItemCount = arrayListOf(0,0,0,0)
+    private var pagerAdapterItemCount = arrayListOf(0,0,0,0,0)
     private var activeTab = 0
     private var selectedItemCount = 0
     private var isSelectBarActive = false
@@ -65,7 +63,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
     private var processed = 0
     private var percentage = 0
 
-    private val tabTitles = listOf("Jatem 0-7", "Jatem 8-15", "Jatem 16+", "Mingguan")
+    private val tabTitles = listOf("Jatem 0-7", "Jatem 8-15", "Jatem 16+", "Mingguan", "MG")
     private val tabTitleViews = mutableListOf<TextView>()
 
     private lateinit var listCoordinate: ArrayList<String>
@@ -198,6 +196,8 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
                 menuPerCategory.title = "Lihat lokasi renvi Jatem 16+"
             } 3 -> {
                 menuPerCategory.title = "Lihat lokasi renvi Mingguan"
+            } 4 -> {
+                menuPerCategory.title = "Lihat lokasi renvi MG"
             }
         }
 
@@ -246,7 +246,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
         listCoordinateCityID = arrayListOf()
         listAllRenvi = arrayListOf()
 
-        totalProcess = 4
+        totalProcess = 5
         processed = 0
         percentage = 0
 
@@ -265,6 +265,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
                             "jatem1" -> apiService.jatemPenagihan(dst = userDistributorId ?: "0", type = "jatem1")
                             "jatem2" -> apiService.jatemPenagihan(dst = userDistributorId ?: "0", type = "jatem2")
                             "jatem3" -> apiService.jatemPenagihan(dst = userDistributorId ?: "0", type = "jatem3")
+                            "mg" -> apiService.targetMgDst(idDistributor = userDistributorId ?: "0")
                             else -> apiService.targetWeeklyDst(idDistributor = userDistributorId ?: "0")
                         }
                     } else -> {
@@ -272,6 +273,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
                             "jatem1" -> apiService.jatemPenagihanFilter(dst = userDistributorId ?: "0", idCity = userCityID ?: "0", type = "jatem1")
                             "jatem2" -> apiService.jatemPenagihanFilter(dst = userDistributorId ?: "0", idCity = userCityID ?: "0", type = "jatem2")
                             "jatem3" -> apiService.jatemPenagihanFilter(dst = userDistributorId ?: "0", idCity = userCityID ?: "0", type = "jatem3")
+                            "mg" -> apiService.targetMg(idCity = userCityID ?: "0")
                             else -> apiService.targetWeekly(idCity = userCityID ?: "0")
                         }
                     }
@@ -284,7 +286,8 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
                             "jatem1" -> getListRenviPerCategory("jatem2")
                             "jatem2" -> getListRenviPerCategory("jatem3")
                             "jatem3" -> getListRenviPerCategory("weekly")
-                            "weekly" -> {
+                            "weekly" -> getListRenviPerCategory("mg")
+                            "mg" -> {
                                 totalProcess = listAllRenvi.size
                                 processed = 0
                                 LoopingTask(listAllRenvi).execute()
@@ -298,7 +301,8 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
                             "jatem1" -> getListRenviPerCategory("jatem2")
                             "jatem2" -> getListRenviPerCategory("jatem3")
                             "jatem3" -> getListRenviPerCategory("weekly")
-                            "weekly" -> {
+                            "weekly" -> getListRenviPerCategory("mg")
+                            "mg" -> {
                                 totalProcess = listAllRenvi.size
                                 processed = 0
                                 LoopingTask(listAllRenvi).execute()
@@ -313,7 +317,8 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
                             "jatem1" -> getListRenviPerCategory("jatem2")
                             "jatem2" -> getListRenviPerCategory("jatem3")
                             "jatem3" -> getListRenviPerCategory("weekly")
-                            "weekly" -> {
+                            "weekly" -> getListRenviPerCategory("mg")
+                            "mg" -> {
                                 totalProcess = listAllRenvi.size
                                 processed = 0
                                 LoopingTask(listAllRenvi).execute()
@@ -330,7 +335,8 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
                     "jatem1" -> getListRenviPerCategory("jatem2")
                     "jatem2" -> getListRenviPerCategory("jatem3")
                     "jatem3" -> getListRenviPerCategory("weekly")
-                    "weekly" -> {
+                    "weekly" -> getListRenviPerCategory("mg")
+                    "mg" -> {
                         totalProcess = listAllRenvi.size
                         processed = 0
                         LoopingTask(listAllRenvi).execute()
