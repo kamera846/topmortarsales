@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.media.MediaPlayer
 import android.media.RingtoneManager
 import android.os.Build
 import android.util.Log
@@ -81,11 +82,11 @@ class FirebaseCloudMessagingServices : FirebaseMessagingService() {
                 nTitle = it["title"].toString()
                 nBody = it["body"].toString()
                 nUserId = it["id_user"]
+                nImageUrl = it["image_url"]
                 nChannelId = it["id_channel"].toString()
                 nVisitId = it["id_visit"].toString()
                 nChannelName = it["channel_name"].toString()
                 nChannelDescription = it["channel_description"].toString()
-                nImageUrl = it["image_url"]
                 nIntent = it["notification_intent"].toString()
             }
 
@@ -148,6 +149,13 @@ class FirebaseCloudMessagingServices : FirebaseMessagingService() {
             return
         }
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+
+        try {
+            val track = MediaPlayer.create(applicationContext, R.raw.notification_sound)
+            track?.start()
+        } catch (e: Exception) {
+            Log.d("FCM", "Error play sound: $e")
+        }
 //        manualRefreshToken()
     }
 
