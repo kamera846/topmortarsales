@@ -1,5 +1,6 @@
 package com.topmortar.topmortarsales.view.delivery
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -53,8 +54,13 @@ class HistoryDeliveryActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         _binding = null
+        super.onDestroy()
+    }
+
+    @SuppressLint("MissingSuperCall")
+    override fun onBackPressed() {
+        finish()
     }
 
 }

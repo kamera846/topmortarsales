@@ -316,7 +316,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         apiService = HttpClient.create()
 
-        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
+        if (CustomUtility(this).isUserWithOnlineStatus()) {
             CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-003", userID)
         }
 
@@ -1578,7 +1578,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun navigateToDetailInvoice() {
 
-        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_MARKETING) {
+        if (sessionManager.userKind() == USER_KIND_COURIER) {
 
             val intent = Intent(this@DetailContactActivity, ListSuratJalanActivity::class.java)
 
@@ -1611,7 +1611,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 reportOption.visibility = View.VISIBLE
 //                checklistReportOption.visibility = View.GONE
                 btnNewReport.visibility = View.GONE
-            } else if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            } else if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN || sessionManager.userKind() == USER_KIND_MARKETING) {
                 if (iReportSource == NORMAL_REPORT) {
                     btnNewReport.visibility = View.GONE
 //                    checklistReportOption.visibility = View.GONE
@@ -2746,7 +2746,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     override fun onStart() {
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
-            if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-003", userID)
             }
         }, 1000)
@@ -2754,7 +2754,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     override fun onStop() {
         super.onStop()
-        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
+        if (CustomUtility(this).isUserWithOnlineStatus()) {
             CustomUtility(this).setUserStatusOnline(false, userDistributorIds ?: "-custom-003", userID)
         }
     }
@@ -2762,7 +2762,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     override fun onDestroy() {
         super.onDestroy()
         if (pingUtility != null) pingUtility!!.stopPingMonitoring()
-        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
+        if (CustomUtility(this).isUserWithOnlineStatus()) {
             CustomUtility(this).setUserStatusOnline(false, userDistributorIds ?: "-custom-003", userID)
         }
     }

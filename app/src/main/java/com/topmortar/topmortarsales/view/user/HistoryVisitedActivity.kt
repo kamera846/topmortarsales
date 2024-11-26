@@ -183,4 +183,9 @@ class HistoryVisitedActivity : AppCompatActivity() {
         startActivity(intent)
 
     }
+
+    @SuppressLint("MissingSuperCall")
+    override fun onBackPressed() {
+        finish()
+    }
 }

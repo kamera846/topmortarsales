@@ -1151,8 +1151,8 @@ class HomeSalesActivity : AppCompatActivity() {
                 HomeMenuSalesModel(
                     icon = R.drawable.store_white,
                     bgColor = R.drawable.bg_green_reseda_round_8,
-                    title = "Rencana Visit Marketing",
-                    target = RencanaVisitPenagihanActivity::class.java,
+                    title = "Rencana Visit MG",
+                    target = RencanaVisitMGActivity::class.java,
                     isLocked = isLocked
                 )
             )
