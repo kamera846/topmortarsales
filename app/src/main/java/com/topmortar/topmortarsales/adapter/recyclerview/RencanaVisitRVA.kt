@@ -49,6 +49,7 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
         private val imgProfile: ImageView = itemView.findViewById(R.id.iv_contact_profile)
         private val textVerified: TextView = itemView.findViewById(R.id.textVerified)
         private val badgeNew: TextView = itemView.findViewById(R.id.textCornerBadge)
+        private val badgeSeller: TextView = itemView.findViewById(R.id.textSeller)
         val checkBoxItem: CheckBox = itemView.findViewById(R.id.checkbox)
 
         fun bind(item: RencanaVisitModel, position: Int) {
@@ -121,6 +122,9 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
             textVerified.text = dateCounter.let { if (it != -1) "$it hari" else "error" }
             textVerified.setBackgroundResource(R.drawable.bg_passive_round)
             textVerified.visibility = View.VISIBLE
+
+            if (item.pass_contact.isNotEmpty() && item.pass_contact != "0") badgeSeller.visibility = View.VISIBLE
+            else badgeSeller.visibility = View.GONE
 
         }
 

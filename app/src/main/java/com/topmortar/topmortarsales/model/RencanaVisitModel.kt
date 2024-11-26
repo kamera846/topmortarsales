@@ -31,4 +31,5 @@ data class RencanaVisitModel(
     var last_visit: String? = null,
     var date_invoice: String = "",
     var date_counter: String = "",
+    var pass_contact: String = "",
 )
