@@ -64,6 +64,7 @@ import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAX_REPORT_DISTANCE
+import com.topmortar.topmortarsales.commons.NOTIFICATION_LEVEL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SELECTED_ABSENT_MODE
@@ -120,6 +121,7 @@ class HomeSalesActivity : AppCompatActivity() {
     private val selectedStoreDefaultTitle get() = sessionManager.selectedStoreAbsentTitle()
     private val selectedStoreDefaultCoordinate get() = sessionManager.selectedStoreAbsentCoordinate()
     private val selectedAbsentMode get() = sessionManager.selectedAbsentMode()
+    private val userAuthLevel get() = sessionManager.userAuthLevel()
 
     private var doubleBackToExitPressedOnce = false
     private var isAbsentMorningNow = false
@@ -370,6 +372,7 @@ class HomeSalesActivity : AppCompatActivity() {
         checkAbsent()
 //        Disabled FCM
 //        getFcmToken()
+        subscribeFcmTopic()
     }
 
     private fun getFcmToken() {
@@ -389,6 +392,20 @@ class HomeSalesActivity : AppCompatActivity() {
             Log.e("FCM", "Error get fcm token exception: $e")
         }
 
+    }
+
+    private fun subscribeFcmTopic() {
+        val fcmTopic = "report_feedback_${userAuthLevel}_${userId}_${NOTIFICATION_LEVEL}"
+        FirebaseMessaging.getInstance().subscribeToTopic(fcmTopic)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Successfully subscribed to the fcmTopic
+//                    Toast.makeText(applicationContext, "Subscribed to $fcmTopic", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Handle failure
+                    Toast.makeText(applicationContext, "Subscribe notification failed. Error: ${task.exception?.stackTrace}", Toast.LENGTH_SHORT).show()
+                }
+            }
     }
 
     private fun navigateToListReport() {

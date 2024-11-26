@@ -28,7 +28,6 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.gson.Gson
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
@@ -735,7 +734,7 @@ class NewReportActivity : AppCompatActivity() {
                             loadingSubmit(false)
 
                             if (iRenviSource == "voucher" || iRenviSource == "passive") {
-                                println("RESPONSE REPORT: ${Gson().toJson(response.body())}")
+//                                println("RESPONSE REPORT: ${Gson().toJson(response.body())}")
                                 val intent = Intent(
                                     this@NewReportActivity,
                                     ChecklistReportActivity::class.java

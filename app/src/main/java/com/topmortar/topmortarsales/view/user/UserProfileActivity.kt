@@ -2,9 +2,11 @@
 
 package com.topmortar.topmortarsales.view.user
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -12,10 +14,12 @@ import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.database.DataSnapshot
@@ -43,6 +47,7 @@ import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_IS_ALLOWED_LOGOUT
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.NOTIFICATION_LEVEL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
@@ -76,7 +81,7 @@ import java.util.Calendar
 class UserProfileActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
-    private val userDistributorId get() = sessionManager.userDistributor()
+    private val userAuthLevel get() = sessionManager.userAuthLevel()
     private val userKind get() = sessionManager.userKind()
     private val userId get() = sessionManager.userID()
     private val userCity get() = sessionManager.userCityID()
@@ -282,22 +287,22 @@ class UserProfileActivity : AppCompatActivity() {
     private fun dataActivityValidation() {
 
 //         Disabled FCM
-//        if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-//                // Cek apakah izin sudah diberikan
-//                if (ContextCompat.checkSelfPermission(
-//                        this,
-//                        Manifest.permission.POST_NOTIFICATIONS
-//                    ) == PackageManager.PERMISSION_GRANTED
-//                ) {
-//                    // Izin sudah diberikan
-//                    Log.d("FCM", "Notifikasi diizinkan")
-//                } else {
-//                    // Minta izin notifikasi
-//                    requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-//                }
-//            }
-//        }
+        if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_MARKETING) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                // Cek apakah izin sudah diberikan
+                if (ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    // Izin sudah diberikan
+                    Log.d("FCM", "Notifikasi diizinkan")
+                } else {
+                    // Minta izin notifikasi
+                    requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+        }
 
         if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN || sessionManager.userKind() == USER_KIND_MARKETING) {
             CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor() ?: "-custom-019", sessionManager.userID() ?: "")
@@ -542,6 +547,7 @@ class UserProfileActivity : AppCompatActivity() {
             }
 //            Disabled FCM
 //            deleteFcmToken()
+            unSubscribeFcmTopic()
         } catch (e: Exception) {
             Log.d("Firebase Auth", "$e")
         }
@@ -577,6 +583,19 @@ class UserProfileActivity : AppCompatActivity() {
             Log.d("FCM", "FCM Token successfully deleted")
         }
 
+    }
+
+    private fun unSubscribeFcmTopic() {
+        val fcmTopic = "report_feedback_${userAuthLevel}_${userId}_${NOTIFICATION_LEVEL}"
+        FirebaseMessaging.getInstance().unsubscribeFromTopic(fcmTopic)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Successfully subscribed to the fcmTopic
+                } else {
+                    // Handle failure
+                    Toast.makeText(applicationContext, "Unsubscribe notification failed. Error: ${task.exception?.stackTrace}", Toast.LENGTH_SHORT).show()
+                }
+            }
     }
 
     private fun  setupCourierMenu() {

@@ -208,6 +208,15 @@ class SessionManager(context: Context) {
         return sharedPreferences.getString("layoutReportStatus", "")
     }
 
+    fun userAuthLevel(userAuthLevel: String) {
+        editor.putString("userAuthLevel", userAuthLevel)
+        editor.apply()
+    }
+
+    fun userAuthLevel(): String? {
+        return sharedPreferences.getString("userAuthLevel", "")
+    }
+
     fun setUserLoggedIn(data: UserModel?) {
         if (data != null) {
             val tempData = data.copy()
@@ -229,6 +238,7 @@ class SessionManager(context: Context) {
             userBidLimit(tempData.bid_limit)
             userDistributor(tempData.id_distributor)
             userDistributorNumber(tempData.nomorhp_distributor)
+            userAuthLevel(data.level_user)
         } else {
             setUserID("")
             setUserKind("")
@@ -239,6 +249,7 @@ class SessionManager(context: Context) {
             userBidLimit("")
             userDistributor("")
             userDistributorNumber("")
+            userAuthLevel("")
         }
     }
 }
