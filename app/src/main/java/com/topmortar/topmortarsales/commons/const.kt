@@ -8,7 +8,7 @@ import android.widget.Toast
 //const val BASE_URL = "https://saleswa.topmortarindonesia.com/" // Production
 //const val PING_HOST = "saleswa.topmortarindonesia.com" // Production
 //const val FIREBASE_REFERENCE = "db_prod" // Production
-//const val NOTIFICATION_LEVEL = "production"
+//const val NOTIFICATION_LEVEL = "prod"
 
 /*
     Dev Services

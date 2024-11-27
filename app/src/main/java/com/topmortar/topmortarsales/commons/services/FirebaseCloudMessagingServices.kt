@@ -26,7 +26,7 @@ import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
 import com.topmortar.topmortarsales.commons.utils.SessionManager
-import com.topmortar.topmortarsales.view.reports.ReportsActivity
+import com.topmortar.topmortarsales.view.SplashScreenActivity
 
 class FirebaseCloudMessagingServices : FirebaseMessagingService() {
     var sessionManager: SessionManager? = null
@@ -110,7 +110,7 @@ class FirebaseCloudMessagingServices : FirebaseMessagingService() {
             ""
         }
 
-        val nIntent = Intent(this, ReportsActivity::class.java).apply {
+        val nIntent = Intent(this, SplashScreenActivity::class.java).apply {
             putExtra(CONST_USER_ID, userId)
             putExtra(CONST_FULL_NAME, userFullName)
             putExtra(CONST_USER_LEVEL, AUTH_LEVEL_SALES)

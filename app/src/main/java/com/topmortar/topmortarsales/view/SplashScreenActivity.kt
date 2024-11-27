@@ -40,6 +40,9 @@ import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_MARKETING
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
+import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
+import com.topmortar.topmortarsales.commons.CONST_USER_ID
+import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_IS_ALLOWED_LOGOUT
@@ -71,6 +74,7 @@ import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.DeviceModel
 import com.topmortar.topmortarsales.view.courier.HomeCourierActivity
 import com.topmortar.topmortarsales.view.rencanaVisits.HomeSalesActivity
+import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import com.topmortar.topmortarsales.view.tukang.BrandAmbassadorActivity
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -1035,11 +1039,29 @@ class SplashScreenActivity : AppCompatActivity() {
                                 Log.e("Firebase Auth", "$e")
                             }
 
-                            when (userKind) {
-                                USER_KIND_BA -> navigateToListTukang()
-                                USER_KIND_COURIER -> navigateToCourier()
-                                USER_KIND_SALES, USER_KIND_PENAGIHAN, USER_KIND_MARKETING -> navigateToSales()
-                                else -> navigateToMain()
+                            val nUserId =  intent.getStringExtra(CONST_USER_ID)
+                            val nFullName =  intent.getStringExtra(CONST_FULL_NAME)
+                            val nUserLevel =  intent.getStringExtra(CONST_USER_LEVEL)
+                            val nIntent =  intent.getStringExtra("notification_intent")
+                            val nVisitId =  intent.getStringExtra("nVisitId")
+
+                            if (!nIntent.isNullOrEmpty()) {
+                                val intent = Intent(this@SplashScreenActivity, ReportsActivity::class.java).apply {
+                                    putExtra(CONST_USER_ID, nUserId)
+                                    putExtra(CONST_FULL_NAME, nFullName)
+                                    putExtra(CONST_USER_LEVEL, nUserLevel)
+                                    putExtra("notification_intent", nIntent)
+                                    putExtra("nVisitId", nVisitId)
+                                }
+                                startActivity(intent)
+                                finish()
+                            } else {
+                                when (userKind) {
+                                    USER_KIND_BA -> navigateToListTukang()
+                                    USER_KIND_COURIER -> navigateToCourier()
+                                    USER_KIND_SALES, USER_KIND_PENAGIHAN, USER_KIND_MARKETING -> navigateToSales()
+                                    else -> navigateToMain()
+                                }
                             }
                         }
 
