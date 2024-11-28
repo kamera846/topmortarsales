@@ -41,12 +41,16 @@ class FirebaseCloudMessagingServices : FirebaseMessagingService() {
     private var nUserId: String? = null
     private var nImageUrl: String? = null
     private var nChannelId: String = "general_notifications"
+    private var nGroupId: String = "report_feedback"
+    private var nGroupName: String = "Grup Notifikasi Umum"
     private var nChannelName: String = "Notifikasi Umum"
     private var nChannelDescription: String = "Notifikasi untuk kategori umum"
     private var soundUri: Uri? = null
 
+    private var notificationId: Int = 2020
+
     companion object {
-        const val NOTIFICATION_ID = 2020
+//        const val NOTIFICATION_ID = 2020
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
@@ -54,15 +58,19 @@ class FirebaseCloudMessagingServices : FirebaseMessagingService() {
         try {
             if (sessionManager == null) sessionManager = SessionManager(this)
             if (soundUri == null) soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-
+            notificationId = System.currentTimeMillis().toInt()
+//            println("notificationData: $remoteMessage")
+//            println("notificationData: $notificationId")
             remoteMessage.data.let {
                 nTitle = it["title"].toString()
                 nBody = it["body"].toString()
                 nUserId = it["id_user"]
+                nVisitId = it["id_visit"].toString()
                 nImageUrl = it["image_url"]
                 nChannelId = it["id_channel"].toString()
-                nVisitId = it["id_visit"].toString()
                 nChannelName = it["channel_name"].toString()
+                nGroupId = it["id_group"].toString()
+                nGroupName = it["group_name"].toString()
                 nChannelDescription = it["channel_description"].toString()
                 nIntent = it["notification_intent"].toString()
             }
@@ -112,6 +120,7 @@ class FirebaseCloudMessagingServices : FirebaseMessagingService() {
             setAutoCancel(true)
             setPriority(NotificationCompat.PRIORITY_HIGH)
             setSound(soundUri)
+            setGroup(nGroupId)
             if (!nImageUrl.isNullOrEmpty()) {
                 setStyle(
                     NotificationCompat.BigPictureStyle()
@@ -128,7 +137,7 @@ class FirebaseCloudMessagingServices : FirebaseMessagingService() {
         ) {
             return
         }
-        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+        notificationManager.notify(notificationId, notificationBuilder.build())
 //        manualRefreshToken()
     }
 
@@ -138,6 +147,7 @@ class FirebaseCloudMessagingServices : FirebaseMessagingService() {
         channelName: String
     ): String {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            val channelGroup = NotificationChannelGroup(nGroupId, nGroupName)
             val audioAttributes = AudioAttributes.Builder()
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .setUsage(AudioAttributes.USAGE_NOTIFICATION)
@@ -150,6 +160,7 @@ class FirebaseCloudMessagingServices : FirebaseMessagingService() {
                 lockscreenVisibility = Notification.VISIBILITY_PRIVATE
                 description = nChannelDescription
                 lightColor = Color.RED
+//                group = nGroupId
                 enableLights(true)
                 enableVibration(true)
                 setSound(soundUri, audioAttributes)
@@ -158,6 +169,7 @@ class FirebaseCloudMessagingServices : FirebaseMessagingService() {
             val service =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             service.createNotificationChannel(channel)
+//            service.createNotificationChannelGroup(channelGroup)
             channelId
         } else {
             ""
