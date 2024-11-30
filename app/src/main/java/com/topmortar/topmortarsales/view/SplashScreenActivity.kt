@@ -1045,6 +1045,8 @@ class SplashScreenActivity : AppCompatActivity() {
                             val nIntent =  intent.getStringExtra("notification_intent")
                             val nVisitId =  intent.getStringExtra("nVisitId")
 
+                            println("Notif intent: $nIntent")
+
                             if (!nIntent.isNullOrEmpty()) {
                                 val intent = Intent(this@SplashScreenActivity, ReportsActivity::class.java).apply {
                                     putExtra(CONST_USER_ID, nUserId)

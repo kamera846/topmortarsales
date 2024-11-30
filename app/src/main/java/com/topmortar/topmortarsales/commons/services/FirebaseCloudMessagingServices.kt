@@ -27,6 +27,7 @@ import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
+import com.topmortar.topmortarsales.commons.utils.CustomNotificationBuilder
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.view.SplashScreenActivity
 
@@ -86,48 +87,76 @@ class FirebaseCloudMessagingServices : FirebaseMessagingService() {
         }
     }
 
-    private fun showNotification(title: String?, message: String?) {
-        val channelId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createNotificationChannel(
-                this,
-                nChannelId,
-                nChannelName
-            )
-        } else {
-            ""
-        }
-
-        val nIntent = Intent(this, SplashScreenActivity::class.java).apply {
+    private fun showNotification(title: String, message: String) {
+//        val channelId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            createNotificationChannel(
+//                this,
+//                nChannelId,
+//                nChannelName
+//            )
+//        } else {
+//            ""
+//        }
+//
+//        val nIntent = Intent(this, SplashScreenActivity::class.java).apply {
+//            putExtra(CONST_USER_ID, userId)
+//            putExtra(CONST_FULL_NAME, userFullName)
+//            putExtra(CONST_USER_LEVEL, AUTH_LEVEL_SALES)
+//            putExtra("notification_intent", nIntent)
+//            putExtra("nVisitId", nVisitId)
+//        }
+//
+//        val pendingIntent = PendingIntent.getActivity(
+//            this,
+//            0,
+//            nIntent,
+//            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+//        )
+//
+//        val notificationBuilder = NotificationCompat.Builder(this, channelId).apply {
+//            setSmallIcon(R.drawable.notification_icon)
+//            setContentTitle(title)
+//            setContentText(message)
+//            setContentIntent(pendingIntent)
+//            setAutoCancel(true)
+//            setPriority(NotificationCompat.PRIORITY_HIGH)
+//            setSound(soundUri)
+//            setGroup(nGroupId)
+//            if (!nImageUrl.isNullOrEmpty()) {
+//                setStyle(
+//                    NotificationCompat.BigPictureStyle()
+//                        .bigPicture(Picasso.get().load(nImageUrl).get())
+//                )
+//            }
+//        }
+//
+//        val notificationManager = NotificationManagerCompat.from(this)
+//        if (ActivityCompat.checkSelfPermission(
+//                this,
+//                Manifest.permission.POST_NOTIFICATIONS
+//            ) != PackageManager.PERMISSION_GRANTED
+//        ) {
+//            return
+//        }
+//        notificationManager.notify(notificationId, notificationBuilder.build())
+//        manualRefreshToken()
+        val notificationIntent = Intent(this, SplashScreenActivity::class.java).apply {
             putExtra(CONST_USER_ID, userId)
             putExtra(CONST_FULL_NAME, userFullName)
             putExtra(CONST_USER_LEVEL, AUTH_LEVEL_SALES)
             putExtra("notification_intent", nIntent)
             putExtra("nVisitId", nVisitId)
         }
-
-        val pendingIntent = PendingIntent.getActivity(
-            this,
-            0,
-            nIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val notificationBuilder = NotificationCompat.Builder(this, channelId).apply {
-            setSmallIcon(R.drawable.notification_icon)
-            setContentTitle(title)
-            setContentText(message)
-            setContentIntent(pendingIntent)
-            setAutoCancel(true)
-            setPriority(NotificationCompat.PRIORITY_HIGH)
-            setSound(soundUri)
-            setGroup(nGroupId)
-            if (!nImageUrl.isNullOrEmpty()) {
-                setStyle(
-                    NotificationCompat.BigPictureStyle()
-                        .bigPicture(Picasso.get().load(nImageUrl).get())
-                )
-            }
-        }
+        val notification = CustomNotificationBuilder.with(this)
+            .setIntent(notificationIntent)
+            .setChannelId(nChannelId)
+            .setChannelName(nChannelName)
+            .setRequestCode(notificationId)
+            .setAutoCancel(true)
+            .setOnGoing(false)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setBigImageUrl(nImageUrl)
 
         val notificationManager = NotificationManagerCompat.from(this)
         if (ActivityCompat.checkSelfPermission(
@@ -137,8 +166,9 @@ class FirebaseCloudMessagingServices : FirebaseMessagingService() {
         ) {
             return
         }
-        notificationManager.notify(notificationId, notificationBuilder.build())
-//        manualRefreshToken()
+        notificationManager.notify(notificationId, notification.build())
+        println("Notif intent: $notificationId")
+//        startForeground(notificationId, notification)
     }
 
     private fun createNotificationChannel(
