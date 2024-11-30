@@ -37,7 +37,7 @@ class ChartActivity : AppCompatActivity() {
         _binding = ActivityChartBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.titleBarDark.tvTitleBar.text = "Data Grafik"
+        binding.titleBarDark.tvTitleBar.text = "Grafik Status Toko"
         binding.titleBarDark.icBack.setOnClickListener { finish() }
         chartTextColor = getColor(R.color.black_200)
         if (CustomUtility(this).isDarkMode()) chartTextColor = getColor(R.color.white)
@@ -101,8 +101,11 @@ class ChartActivity : AppCompatActivity() {
 
             } finally {
 
-                val dateFormat = SimpleDateFormat("MM", Locale.getDefault())
-                val currentMonth = dateFormat.format(Date()).toInt() + 1
+                val monthFormat = SimpleDateFormat("MM", Locale.getDefault())
+                val yearFormat = SimpleDateFormat("YYYY", Locale.getDefault())
+                val currentMonth = monthFormat.format(Date()).toInt() + 1
+                val beforeYear = (yearFormat.format(Date()).toInt() - 1).toString()
+                val currentYear = yearFormat.format(Date())
 
                 val sortedSalesData = salesData.sortedBy {
                     if (it.first >= currentMonth) it.first else it.first + 12
@@ -114,14 +117,21 @@ class ChartActivity : AppCompatActivity() {
                     entries.add(BarEntry(i.toFloat(), item.second))
                 }
 
-                val barDataSet = BarDataSet(entries, "Toko Aktif (2023 - 2024)")
-                barDataSet.color = getColor(R.color.status_active)
-                barDataSet.valueTextColor = chartTextColor
+                val barDataSet = BarDataSet(entries, null)
+                val colorList = mutableListOf<Int>()
+                for (item in sortedSalesData) {
+                    colorList.add(if (item.first >= currentMonth) getColor(R.color.status_passive) else getColor(R.color.status_active))
+                }
+                barDataSet.setValueTextColors(colorList)
+                barDataSet.colors = colorList
                 barDataSet.valueTextSize = 10f
 
                 val data = BarData(barDataSet)
                 data.barWidth = 0.8f
                 binding.barChart.data = data
+
+                binding.beforeYear.text = beforeYear
+                binding.currentYear.text = currentYear
 
                 setupBarChart()
 
