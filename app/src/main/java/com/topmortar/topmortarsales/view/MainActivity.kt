@@ -1315,6 +1315,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         selectedItemCount = 0
         rvAdapter.clearSelections()
         rvAdapter.setSelectItemState(isSelectItemActive)
+        rvAdapter.notifyDataSetChanged()
         binding.swipeRefreshLayout.isEnabled = !isSelectItemActive
 
         if (isSelectItemActive) {
@@ -1329,7 +1330,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
         } else {
             icMore.visibility = View.VISIBLE
-            if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_MARKETING) binding.btnFab.visibility = View.VISIBLE
+            if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) binding.btnFab.visibility = View.VISIBLE
             binding.titleBar.icConfirmSelect.visibility = View.GONE
             binding.titleBar.tvTitleBar.text = "Semua Toko"
         }

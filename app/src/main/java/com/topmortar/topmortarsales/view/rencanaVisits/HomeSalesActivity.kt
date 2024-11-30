@@ -1219,15 +1219,17 @@ class HomeSalesActivity : AppCompatActivity() {
                 isLocked = false
             )
         )
-        listItem.add(
-            HomeMenuSalesModel(
-                icon = R.drawable.add_white,
-                bgColor = R.drawable.bg_yellow_hunyadi_round_8,
-                title = "Daftarkan Toko Baru",
-                target = NewRoomChatFormActivity::class.java,
-                isLocked = false
+        if (userKind != USER_KIND_MARKETING) {
+            listItem.add(
+                HomeMenuSalesModel(
+                    icon = R.drawable.add_white,
+                    bgColor = R.drawable.bg_yellow_hunyadi_round_8,
+                    title = "Daftarkan Toko Baru",
+                    target = NewRoomChatFormActivity::class.java,
+                    isLocked = false
+                )
             )
-        )
+        }
         listItem.add(
             HomeMenuSalesModel(
                 icon = R.drawable.location_white,
@@ -1246,30 +1248,34 @@ class HomeSalesActivity : AppCompatActivity() {
                 isLocked = false
             )
         )
-        listItem.add(
-            HomeMenuSalesModel(
-                icon = R.drawable.user_add_white,
-                bgColor = R.drawable.bg_charcoal_round_8,
-                title = "Kelola Tukang",
-                target = ListTukangActivity::class.java,
-                isLocked = false
+        if (userKind != USER_KIND_MARKETING) {
+            listItem.add(
+                HomeMenuSalesModel(
+                    icon = R.drawable.user_add_white,
+                    bgColor = R.drawable.bg_charcoal_round_8,
+                    title = "Kelola Tukang",
+                    target = ListTukangActivity::class.java,
+                    isLocked = false
+                )
             )
-        )
+        }
         setMenuItemAdapter(binding.rvStoreBasecamp, listItem)
     }
 
     private fun setListOthers() {
         val listItem = arrayListOf<HomeMenuSalesModel>()
 
-        listItem.add(
-            HomeMenuSalesModel(
-                icon = R.drawable.boxes_stacked_solid,
-                bgColor = R.drawable.bg_blue_indigo_dye_round_8,
-                title = "Lihat Produk",
-                target = ProductsActivity::class.java,
-                isLocked = false
+        if (userKind != USER_KIND_MARKETING) {
+            listItem.add(
+                HomeMenuSalesModel(
+                    icon = R.drawable.boxes_stacked_solid,
+                    bgColor = R.drawable.bg_blue_indigo_dye_round_8,
+                    title = "Lihat Produk",
+                    target = ProductsActivity::class.java,
+                    isLocked = false
+                )
             )
-        )
+        }
         listItem.add(
             HomeMenuSalesModel(
                 icon = R.drawable.file_list_white_only,
