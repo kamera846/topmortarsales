@@ -84,6 +84,7 @@ class FirebaseCloudMessagingServices : FirebaseMessagingService() {
             .setChannelId(nChannelId)
             .setChannelName(nChannelName)
             .setRequestCode(notificationId)
+            .setVibrate(true)
             .setSound(soundUri!!)
             .setGroup(nGroupId)
             .setAutoCancel(true)
@@ -91,6 +92,7 @@ class FirebaseCloudMessagingServices : FirebaseMessagingService() {
             .setContentText(message)
             .setChannelDescription(nChannelDescription)
             .setBigImageUrl(nImageUrl)
+            .setLargeIcon(null)
 
         val notificationManager = NotificationManagerCompat.from(this)
         if (ActivityCompat.checkSelfPermission(

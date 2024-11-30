@@ -24,10 +24,11 @@ class CustomNotificationBuilder private constructor(private val context: Context
     private var requestCode: Int = 0
     private var nPriority: Int = NotificationManager.IMPORTANCE_DEFAULT
     private var nCategory: String = NotificationCompat.CATEGORY_REMINDER
+    private var vibrate: Boolean = false
     private var soundUri: Uri? = null
     private var groupId: String? = null
     private var smallIconResId: Int = R.drawable.notification_icon
-    private var largeIconResId: Int = R.mipmap.logo_topmortar_circle
+    private var largeIconResId: Int? = R.mipmap.logo_topmortar_circle
     private var bigImageUrl: String? = null
     private var contentTitle: String? = null
     private var contentText: String? = null
@@ -64,6 +65,11 @@ class CustomNotificationBuilder private constructor(private val context: Context
         return this
     }
 
+    fun setVibrate(vibrate: Boolean): CustomNotificationBuilder {
+        this.vibrate = vibrate
+        return this
+    }
+
     fun setSound(soundUri: Uri): CustomNotificationBuilder {
         this.soundUri = soundUri
         return this
@@ -89,7 +95,7 @@ class CustomNotificationBuilder private constructor(private val context: Context
         return this
     }
 
-    fun setLargeIcon(largeIconResId: Int): CustomNotificationBuilder {
+    fun setLargeIcon(largeIconResId: Int?): CustomNotificationBuilder {
         this.largeIconResId = largeIconResId
         return this
     }
@@ -131,7 +137,6 @@ class CustomNotificationBuilder private constructor(private val context: Context
                 ""
             }
 
-        val largeIconBitmap = BitmapFactory.decodeResource(context.resources, largeIconResId)
         val notificationBuilder = NotificationCompat.Builder(context, bChannelId)
 
         if (notificationIntent != null) {
@@ -149,7 +154,9 @@ class CustomNotificationBuilder private constructor(private val context: Context
 
         notificationBuilder.setOngoing(onGoing).apply {
             setSmallIcon(smallIconResId)
-            setLargeIcon(largeIconBitmap)
+            if (largeIconResId != null) {
+                setLargeIcon(BitmapFactory.decodeResource(context.resources, largeIconResId!!))
+            }
             setPriority(nPriority)
             setCategory(nCategory)
             setAutoCancel(autoCancel)
@@ -157,9 +164,7 @@ class CustomNotificationBuilder private constructor(private val context: Context
             setChannelId(bChannelId)
             setChannelName(channelName ?: "Topmortar Notifications")
             setBadgeIconType(badgeIconType ?: NotificationCompat.BADGE_ICON_SMALL)
-            if (soundUri != null) {
-                setSound(soundUri)
-            }
+            setSound(soundUri)
             if (!bigImageUrl.isNullOrEmpty()) {
                 setStyle(
                     NotificationCompat.BigPictureStyle()
@@ -189,9 +194,12 @@ class CustomNotificationBuilder private constructor(private val context: Context
             channel.description = channelDesc
             channel.lightColor = Color.RED
             channel.enableLights(true)
-            channel.enableVibration(true)
+            channel.enableVibration(vibrate)
+
             if (soundUri != null) {
                 channel.setSound(soundUri, audioAttributes)
+            } else {
+                channel.setSound(null, null)
             }
 
             val service = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
