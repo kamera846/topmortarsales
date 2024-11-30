@@ -11,57 +11,67 @@
         android:id="@+id/titleBarDark"
         layout="@layout/component_title_bar"/>
 
-    <LinearLayout
+    <androidx.cardview.widget.CardView
+        android:layout_below="@+id/card_others"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp"
-        android:orientation="vertical">
+        android:layout_margin="12dp"
+        app:cardCornerRadius="12dp"
+        android:theme="@style/Theme.TopMortarSales.CardView">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:padding="12dp"
+            android:orientation="vertical">
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Grafik Toko Aktif"
+                        android:textStyle="bold"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Menampilkan data di semua kota"
+                        android:theme="@style/Theme.TopMortarSales.TextBaseLine"/>
+
+                </LinearLayout>
 
                 <TextView
+                    android:visibility="gone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Grafik Toko Aktif"
-                    android:textStyle="bold"
-                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Menampilkan data di semua kota"
-                    android:theme="@style/Theme.TopMortarSales.TextBaseLine"/>
+                    android:text="Filter"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="2dp"
+                    android:background="@drawable/et_background_clickable"
+                    android:focusable="true"
+                    android:clickable="true"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
             </LinearLayout>
 
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Filter"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="2dp"
-                android:background="@drawable/et_background_clickable"
-                android:focusable="true"
-                android:clickable="true"
-                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/barChart"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"/>
 
         </LinearLayout>
 
-        <com.github.mikephil.charting.charts.BarChart
-            android:id="@+id/barChart"
-            android:layout_width="match_parent"
-            android:layout_height="250dp"/>
-
-    </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
 </LinearLayout>

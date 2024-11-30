@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
@@ -27,7 +26,7 @@ class ChartActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private val binding get() = _binding!!
 
-    private var textColor: Int?= null
+    private var chartTextColor: Int = 0
     private var startMonthIndex = 0 // (0 = Januari)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,50 +39,10 @@ class ChartActivity : AppCompatActivity() {
 
         binding.titleBarDark.tvTitleBar.text = "Data Grafik"
         binding.titleBarDark.icBack.setOnClickListener { finish() }
-        textColor = getColor(R.color.black_200)
-        if (CustomUtility(this).isDarkMode()) textColor = getColor(R.color.white)
+        chartTextColor = getColor(R.color.black_200)
+        if (CustomUtility(this).isDarkMode()) chartTextColor = getColor(R.color.white)
 
         loadBarChartData()
-//        setupBarChart()
-    }
-
-    private fun setupBarChart() {
-
-        // Mengkonfigurasi chart
-        binding.barChart.setDrawBarShadow(false)
-        binding.barChart.setDrawValueAboveBar(true)
-        binding.barChart.description.isEnabled = false
-        binding.barChart.setPinchZoom(false)
-        binding.barChart.setDrawGridBackground(false)
-        binding.barChart.legend.isEnabled = true
-        binding.barChart.legend.textColor = textColor!!
-        binding.barChart.legend.textSize = 12f
-
-        // Mengatur sumbu X
-        val dynamicMonths = getDynamicMonths(startMonthIndex)
-        val xAxis: XAxis = binding.barChart.xAxis
-        xAxis.position = XAxis.XAxisPosition.BOTTOM
-        xAxis.granularity = 1f
-        xAxis.setDrawGridLines(false)
-        xAxis.setDrawAxisLine(true)
-        xAxis.labelCount = 12
-        xAxis.textColor = textColor!!
-        xAxis.valueFormatter = MonthValueFormatter(dynamicMonths)
-
-        // Mengatur sumbu Y kiri
-        val leftAxis: YAxis = binding.barChart.axisLeft
-        leftAxis.setDrawGridLines(true)
-        leftAxis.textColor = textColor!!
-        leftAxis.axisMinimum = 0f // Memastikan Y dimulai dari 0
-
-        // Mengatur sumbu Y kanan
-        val rightAxis: YAxis = binding.barChart.axisRight
-        rightAxis.isEnabled = false // Menonaktifkan sumbu Y kanan
-
-        binding.barChart.setFitBars(true) // Mengatur agar bar chart menyesuaikan sumbu X
-        binding.barChart.invalidate() // Refresh chart
-
-        binding.barChart.animateY(1000)
     }
 
     private fun loadBarChartData() {
@@ -157,7 +116,7 @@ class ChartActivity : AppCompatActivity() {
 
                 val barDataSet = BarDataSet(entries, "Toko Aktif (2023 - 2024)")
                 barDataSet.color = getColor(R.color.status_active)
-                barDataSet.valueTextColor = textColor!!
+                barDataSet.valueTextColor = chartTextColor
                 barDataSet.valueTextSize = 10f
 
                 val data = BarData(barDataSet)
@@ -167,6 +126,54 @@ class ChartActivity : AppCompatActivity() {
                 setupBarChart()
 
             }
+        }
+    }
+
+    private fun setupBarChart() {
+
+        binding.barChart.apply {
+            setDrawBarShadow(false)
+            setDrawValueAboveBar(true)
+            description.isEnabled = false
+            setPinchZoom(false)
+            setDrawGridBackground(false)
+            setTouchEnabled(false)
+            isDoubleTapToZoomEnabled = false
+            legend.isEnabled = false
+            legend.textColor = chartTextColor
+            legend.textSize = 12f
+        }
+
+        // sumbu X
+        val dynamicMonths = getDynamicMonths(startMonthIndex)
+        binding.barChart.xAxis.apply {
+            position = XAxis.XAxisPosition.BOTTOM
+            granularity = 1f
+            setDrawGridLines(false)
+            setDrawAxisLine(true)
+            labelCount = 12
+            textColor = chartTextColor
+            valueFormatter = MonthValueFormatter(dynamicMonths)
+        }
+
+
+        // sumbu Y kiri
+        binding.barChart.axisLeft.apply {
+            setDrawGridLines(true)
+            textColor = chartTextColor
+            axisMinimum = 0f // Y dimulai dari 0
+        }
+
+        // sumbu Y kanan
+        binding.barChart.axisRight.apply {
+            isEnabled = false // Menonaktifkan sumbu Y kanan
+        }
+
+        binding.barChart.apply {
+            setFitBars(true) // bar chart menyesuaikan sumbu X
+            invalidate() // Refresh chart
+
+            animateY(1000)
         }
     }
 
