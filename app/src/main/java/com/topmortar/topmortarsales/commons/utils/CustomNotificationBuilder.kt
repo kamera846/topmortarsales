@@ -8,6 +8,9 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.media.AudioAttributes
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.squareup.picasso.Picasso
@@ -16,9 +19,14 @@ import com.topmortar.topmortarsales.R
 class CustomNotificationBuilder private constructor(private val context: Context) {
     private var channelId: String? = null
     private var channelName: String? = null
+    private var channelDesc: String? = null
     private var autoCancel: Boolean = false
-    private var onGoing: Boolean = true
+    private var onGoing: Boolean = false
     private var requestCode: Int = 0
+    private var nPriority: Int = NotificationManager.IMPORTANCE_DEFAULT
+    private var nCategory: String = NotificationCompat.CATEGORY_REMINDER
+    private var soundUri: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+    private var groupId: String? = null
     private var smallIconResId: Int = R.drawable.notification_icon
     private var largeIconResId: Int = R.mipmap.logo_topmortar_circle
     private var bigImageUrl: String? = null
@@ -37,8 +45,33 @@ class CustomNotificationBuilder private constructor(private val context: Context
         return this
     }
 
+    fun setChannelDescription(channelDesc: String): CustomNotificationBuilder {
+        this.channelDesc = channelDesc
+        return this
+    }
+
     fun setAutoCancel(autoCancel: Boolean): CustomNotificationBuilder {
         this.autoCancel = autoCancel
+        return this
+    }
+
+    fun setCategory(category: String): CustomNotificationBuilder {
+        this.nCategory = category
+        return this
+    }
+
+    fun setPriority(priority: Int): CustomNotificationBuilder {
+        this.nPriority = priority
+        return this
+    }
+
+    fun setSound(soundUri: Uri): CustomNotificationBuilder {
+        this.soundUri = soundUri
+        return this
+    }
+
+    fun setGroup(groupId: String): CustomNotificationBuilder {
+        this.groupId = groupId
         return this
     }
 
@@ -89,7 +122,12 @@ class CustomNotificationBuilder private constructor(private val context: Context
 
     fun build(): Notification {
         val bChannelId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                createNotificationChannel(context, channelId ?: "topmortar_notifications", channelName ?: "Topmortar Notifications")
+                createNotificationChannel(
+                    context,
+                    channelId ?: "topmortar_notifications",
+                    channelName ?: "Topmortar Notifications",
+                    channelDesc ?: "Notifikasi untuk kategori umum"
+                )
             } else {
                 ""
             }
@@ -113,9 +151,10 @@ class CustomNotificationBuilder private constructor(private val context: Context
         notificationBuilder.setOngoing(onGoing).apply {
             setSmallIcon(smallIconResId)
             setLargeIcon(largeIconBitmap)
-            setPriority(NotificationManager.IMPORTANCE_DEFAULT)
-            setCategory(Notification.CATEGORY_SERVICE)
-            setAutoCancel(true)
+            setPriority(nPriority)
+            setCategory(nCategory)
+            setAutoCancel(autoCancel)
+            setGroup(groupId)
             setChannelId(bChannelId)
             setChannelName(channelName ?: "Topmortar Notifications")
             setBadgeIconType(badgeIconType ?: NotificationCompat.BADGE_ICON_SMALL)
@@ -130,18 +169,31 @@ class CustomNotificationBuilder private constructor(private val context: Context
         return notificationBuilder.build()
     }
 
-    private fun createNotificationChannel(context: Context, channelId: String, channelName: String): String {
+    private fun createNotificationChannel(context: Context, channelId: String, channelName: String, channelDesc: String): String {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            val audioAttributes = AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                .build()
+
             val channel = NotificationChannel(
                 channelId,
                 channelName,
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_DEFAULT
             )
-            channel.lightColor = Color.BLUE
+
             channel.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+            channel.description = channelDesc
+            channel.lightColor = Color.RED
+            channel.enableLights(true)
+            channel.enableVibration(true)
+            channel.setSound(soundUri, audioAttributes)
+
             val service = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             service.createNotificationChannel(channel)
             channelId
+
         } else {
             ""
         }

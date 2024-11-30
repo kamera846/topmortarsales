@@ -124,8 +124,6 @@ class ChartActivity : AppCompatActivity() {
                             }
                         }
 
-                        println("Active data: $salesData")
-
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
@@ -150,8 +148,6 @@ class ChartActivity : AppCompatActivity() {
                 val sortedSalesData = salesData.sortedBy {
                     if (it.first >= currentMonth) it.first else it.first + 12
                 }
-
-                println("Active data: $sortedSalesData")
 
                 startMonthIndex = sortedSalesData[0].first.toInt() - 1
                 val entries = ArrayList<BarEntry>()
