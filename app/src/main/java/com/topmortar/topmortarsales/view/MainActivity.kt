@@ -1315,7 +1315,6 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         selectedItemCount = 0
         rvAdapter.clearSelections()
         rvAdapter.setSelectItemState(isSelectItemActive)
-        rvAdapter.notifyDataSetChanged()
         binding.swipeRefreshLayout.isEnabled = !isSelectItemActive
 
         if (isSelectItemActive) {

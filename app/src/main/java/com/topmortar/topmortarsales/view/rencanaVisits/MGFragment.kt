@@ -239,7 +239,11 @@ class MGFragment : Fragment() {
         })
 
         rvAdapter.callback = { result ->
-            (activity as? RencanaVisitPenagihanActivity)?.onSelectedItems(result)
+            if (activity is RencanaVisitPenagihanActivity) {
+                (activity as RencanaVisitPenagihanActivity).onSelectedItems(result)
+            } else if (activity is RencanaVisitMGActivity) {
+                (activity as RencanaVisitMGActivity).onSelectedItems(result)
+            }
         }
         rvAdapter.setType("mg")
         binding.rvChatList.layoutManager = LinearLayoutManager(requireContext())

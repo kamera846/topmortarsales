@@ -39,6 +39,9 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
 
     fun setSelectBarActive(state: Boolean) {
         this.isSelectBarActive = state
+        for (i in 0 until listItem.size) {
+            notifyItemChanged(i)
+        }
     }
 
     inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

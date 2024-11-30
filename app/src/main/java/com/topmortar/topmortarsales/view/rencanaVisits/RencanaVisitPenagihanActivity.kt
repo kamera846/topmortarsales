@@ -106,8 +106,11 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
     }
 
     override fun onBackPressed() {
-        if (activeTab != 0) tabLayout.getTabAt(0)?.select()
-        else super.onBackPressed()
+        if (isSelectBarActive) toggleSelectBar()
+        else {
+            if (activeTab != 0) tabLayout.getTabAt(0)?.select()
+            else super.onBackPressed()
+        }
     }
 
     private fun initLayout() {
