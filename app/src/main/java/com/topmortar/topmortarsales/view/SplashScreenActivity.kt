@@ -61,6 +61,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_MARKETING
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
+import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
@@ -328,6 +329,12 @@ class SplashScreenActivity : AppCompatActivity() {
     }
 
     private fun showCardLogin() {
+        sessionManager.setLoggedIn(LOGGED_OUT)
+        sessionManager.setUserLoggedIn(null)
+
+        val serviceIntent = Intent(this, TrackingService::class.java)
+        this.stopService(serviceIntent)
+
         rlModal.visibility = View.VISIBLE
     }
 
@@ -971,9 +978,6 @@ class SplashScreenActivity : AppCompatActivity() {
                                 Log.d("Firebase Auth", "$e")
                             }
 
-                            sessionManager.setLoggedIn(LOGGED_OUT)
-                            sessionManager.setUserLoggedIn(null)
-
                             showCardLogin()
                         } else {
                             val userLevel = when (userKind) {
@@ -1066,20 +1070,14 @@ class SplashScreenActivity : AppCompatActivity() {
                         }
 
                     } RESPONSE_STATUS_EMPTY -> {
-                        sessionManager.setLoggedIn(LOGGED_OUT)
-                        sessionManager.setUserLoggedIn(null)
                         showCardLogin()
                 }
                     else -> {
-                        sessionManager.setLoggedIn(LOGGED_OUT)
-                        sessionManager.setUserLoggedIn(null)
                         showCardLogin()
                     }
                 }
 
             } catch (e: Exception) {
-                sessionManager.setLoggedIn(LOGGED_OUT)
-                sessionManager.setUserLoggedIn(null)
                 showCardLogin()
             }
 
