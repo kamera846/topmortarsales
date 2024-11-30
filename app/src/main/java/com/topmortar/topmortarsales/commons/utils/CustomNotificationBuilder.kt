@@ -9,7 +9,6 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.media.AudioAttributes
-import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import androidx.core.app.NotificationCompat
@@ -25,7 +24,7 @@ class CustomNotificationBuilder private constructor(private val context: Context
     private var requestCode: Int = 0
     private var nPriority: Int = NotificationManager.IMPORTANCE_DEFAULT
     private var nCategory: String = NotificationCompat.CATEGORY_REMINDER
-    private var soundUri: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+    private var soundUri: Uri? = null
     private var groupId: String? = null
     private var smallIconResId: Int = R.drawable.notification_icon
     private var largeIconResId: Int = R.mipmap.logo_topmortar_circle
@@ -158,6 +157,9 @@ class CustomNotificationBuilder private constructor(private val context: Context
             setChannelId(bChannelId)
             setChannelName(channelName ?: "Topmortar Notifications")
             setBadgeIconType(badgeIconType ?: NotificationCompat.BADGE_ICON_SMALL)
+            if (soundUri != null) {
+                setSound(soundUri)
+            }
             if (!bigImageUrl.isNullOrEmpty()) {
                 setStyle(
                     NotificationCompat.BigPictureStyle()
@@ -188,7 +190,9 @@ class CustomNotificationBuilder private constructor(private val context: Context
             channel.lightColor = Color.RED
             channel.enableLights(true)
             channel.enableVibration(true)
-            channel.setSound(soundUri, audioAttributes)
+            if (soundUri != null) {
+                channel.setSound(soundUri, audioAttributes)
+            }
 
             val service = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             service.createNotificationChannel(channel)
