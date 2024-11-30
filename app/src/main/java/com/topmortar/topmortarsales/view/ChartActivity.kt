@@ -1,6 +1,7 @@
 package com.topmortar.topmortarsales.view
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.github.mikephil.charting.components.XAxis
@@ -103,15 +104,18 @@ class ChartActivity : AppCompatActivity() {
 
                 val monthFormat = SimpleDateFormat("MM", Locale.getDefault())
                 val yearFormat = SimpleDateFormat("YYYY", Locale.getDefault())
-                val currentMonth = monthFormat.format(Date()).toInt() + 1
+
+                val currentMonth = monthFormat.format(Date()).toInt()
+
                 val beforeYear = (yearFormat.format(Date()).toInt() - 1).toString()
                 val currentYear = yearFormat.format(Date())
 
                 val sortedSalesData = salesData.sortedBy {
-                    if (it.first >= currentMonth) it.first else it.first + 12
+                    if (it.first > currentMonth) it.first else it.first + 12
                 }
 
                 startMonthIndex = sortedSalesData[0].first.toInt() - 1
+
                 val entries = ArrayList<BarEntry>()
                 for ((i, item) in sortedSalesData.withIndex()) {
                     entries.add(BarEntry(i.toFloat(), item.second))
@@ -119,9 +123,11 @@ class ChartActivity : AppCompatActivity() {
 
                 val barDataSet = BarDataSet(entries, null)
                 val colorList = mutableListOf<Int>()
+
                 for (item in sortedSalesData) {
-                    colorList.add(if (item.first >= currentMonth) getColor(R.color.status_passive) else getColor(R.color.status_active))
+                    colorList.add(if (item.first > currentMonth) getColor(R.color.status_passive) else getColor(R.color.status_active))
                 }
+
                 barDataSet.setValueTextColors(colorList)
                 barDataSet.colors = colorList
                 barDataSet.valueTextSize = 10f
@@ -129,9 +135,12 @@ class ChartActivity : AppCompatActivity() {
                 val data = BarData(barDataSet)
                 data.barWidth = 0.8f
                 binding.barChart.data = data
-
-                binding.beforeYear.text = beforeYear
                 binding.currentYear.text = currentYear
+
+                if (currentMonth < 12) {
+                    binding.beforeYearContainer.visibility = View.VISIBLE
+                    binding.beforeYear.text = beforeYear
+                }
 
                 setupBarChart()
 

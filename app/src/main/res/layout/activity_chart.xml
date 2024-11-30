@@ -77,22 +77,30 @@
                 android:layout_marginTop="8dp"
                 android:orientation="horizontal">
 
-                <View
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:background="@drawable/status_passive"/>
-
-                <TextView
-                    android:id="@+id/beforeYear"
+                <LinearLayout
+                    android:visibility="gone"
+                    android:id="@+id/beforeYearContainer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
-                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+                    android:gravity="center_vertical"
+                    android:layout_marginEnd="16dp"
+                    android:orientation="horizontal">
+                    <View
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:background="@drawable/status_passive"/>
+
+                    <TextView
+                        android:id="@+id/beforeYear"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+                </LinearLayout>
 
                 <View
                     android:layout_width="16dp"
                     android:layout_height="16dp"
-                    android:layout_marginStart="16dp"
                     android:background="@drawable/status_active"/>
 
                 <TextView
