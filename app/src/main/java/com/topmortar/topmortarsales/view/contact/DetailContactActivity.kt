@@ -1681,7 +1681,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 var intent = Intent(this@DetailContactActivity, NewReportActivity::class.java)
 
-                if (iRenviSource == "voucher" || iRenviSource == "passive") {
+                if (iRenviSource == "voucher" || iRenviSource == "passive" || iRenviSource == "mg") {
                     intent = Intent(this@DetailContactActivity, ChecklistReportActivity::class.java)
                 }
 
