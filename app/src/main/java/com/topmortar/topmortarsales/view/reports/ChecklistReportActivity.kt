@@ -60,6 +60,7 @@ class ChecklistReportActivity : AppCompatActivity() {
     private lateinit var questions: ArrayList<QnAFormReportModel>
 
     private val idUser get() = sessionManager.userID().toString()
+    private val userDistributorId get() = sessionManager.userDistributor().toString()
     private var iContactId: String? = null
     private var iInvoiceId: String? = null
     private var iName: String? = null
@@ -559,6 +560,45 @@ class ChecklistReportActivity : AppCompatActivity() {
 
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
+                CustomUtility(this).setUserStatusOnline(
+                    true,
+                    userDistributorId ?: "-custom-011",
+                    idUser ?: ""
+                )
+            }
+        }, 1000)
+    }
+
+    override fun onStop() {
+        if (sessionManager.isLoggedIn()) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
+                CustomUtility(this).setUserStatusOnline(
+                    false,
+                    userDistributorId ?: "-custom-011",
+                    idUser ?: ""
+                )
+            }
+        }
+        super.onStop()
+    }
+
+    override fun onDestroy() {
+        if (sessionManager.isLoggedIn()) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
+                CustomUtility(this).setUserStatusOnline(
+                    false,
+                    userDistributorId ?: "-custom-011",
+                    idUser ?: ""
+                )
+            }
+        }
+        super.onDestroy()
     }
 
 }

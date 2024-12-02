@@ -5,18 +5,18 @@ import android.widget.Toast
 /*
     Prod Services
  */
-const val BASE_URL = "https://saleswa.topmortarindonesia.com/" // Production
-const val PING_HOST = "saleswa.topmortarindonesia.com" // Production
-const val FIREBASE_REFERENCE = "db_prod" // Production
-const val NOTIFICATION_LEVEL = "production"
+//const val BASE_URL = "https://saleswa.topmortarindonesia.com/" // Production
+//const val PING_HOST = "saleswa.topmortarindonesia.com" // Production
+//const val FIREBASE_REFERENCE = "db_prod" // Production
+//const val NOTIFICATION_LEVEL = "prod"
 
 /*
     Dev Services
  */
-//const val BASE_URL = "https://dev-saleswa.topmortarindonesia.com/" // Development
-//const val PING_HOST = "dev-saleswa.topmortarindonesia.com" // Development
-//const val FIREBASE_REFERENCE = "db_dev" // Development
-//const val NOTIFICATION_LEVEL = "dev"
+const val BASE_URL = "https://dev-saleswa.topmortarindonesia.com/" // Development
+const val PING_HOST = "dev-saleswa.topmortarindonesia.com" // Development
+const val FIREBASE_REFERENCE = "db_dev" // Development
+const val NOTIFICATION_LEVEL = "dev"
 
 /*
     Firebase Realtime Database
@@ -203,10 +203,12 @@ const val ALL_REPORT = "all"
 const val NORMAL_REPORT = "normal"
 const val SALES_REPORT_RENVI = "renvisales"
 const val PENAGIHAN_REPORT_RENVI = "renvipenagihan"
+const val MG_REPORT_RENVI = "renvimg"
 const val REPORT_TYPE_IS_PAYMENT = "reporttypeispayment"
 const val RENVI_JATEM1 = "jatem1"
 const val RENVI_JATEM2 = "jatem2"
 const val RENVI_JATEM3 = "jatem3"
+const val RENVI_MG = "mg"
 const val RENVI_VOUCHER = "voucher"
 const val RENVI_PASSIVE = "passive"
 const val RENVI_WEEKLY = "weekly"

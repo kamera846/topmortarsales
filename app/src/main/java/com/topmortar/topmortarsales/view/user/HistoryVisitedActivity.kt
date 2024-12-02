@@ -101,7 +101,7 @@ class HistoryVisitedActivity : AppCompatActivity() {
         _binding = null
 
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor() ?: "-custom-018",
@@ -117,7 +117,7 @@ class HistoryVisitedActivity : AppCompatActivity() {
 
         Handler(Looper.getMainLooper()).postDelayed({
             if (sessionManager.isLoggedIn()) {
-                if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+                if (CustomUtility(this).isUserWithOnlineStatus()) {
                     CustomUtility(this).setUserStatusOnline(
                         true,
                         sessionManager.userDistributor() ?: "-custom-018",
@@ -133,7 +133,7 @@ class HistoryVisitedActivity : AppCompatActivity() {
         EventBus.getDefault().unregister(this)
 
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor() ?: "-custom-018",
@@ -182,5 +182,10 @@ class HistoryVisitedActivity : AppCompatActivity() {
 
         startActivity(intent)
 
+    }
+
+    @SuppressLint("MissingSuperCall")
+    override fun onBackPressed() {
+        finish()
     }
 }

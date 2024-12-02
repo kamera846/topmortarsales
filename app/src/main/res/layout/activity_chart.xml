@@ -11,57 +11,132 @@
         android:id="@+id/titleBarDark"
         layout="@layout/component_title_bar"/>
 
-    <LinearLayout
+    <androidx.cardview.widget.CardView
+        android:layout_below="@+id/card_others"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp"
-        android:orientation="vertical">
+        android:layout_margin="12dp"
+        app:cardCornerRadius="12dp"
+        android:theme="@style/Theme.TopMortarSales.CardView">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:padding="12dp"
+            android:orientation="vertical">
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
+                android:orientation="horizontal">
 
-                <TextView
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Passive ke Active"
+                        android:textStyle="bold"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                    <TextView
+                        android:id="@+id/chartDesc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Menampilkan data di semua kota"
+                        android:theme="@style/Theme.TopMortarSales.TextBaseLine"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/filterContainer"
+                    android:visibility="gone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Grafik Toko Aktif"
-                    android:textStyle="bold"
-                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="3dp"
+                    android:background="@drawable/background_rounded_8_clickable"
+                    android:orientation="horizontal">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Menampilkan data di semua kota"
-                    android:theme="@style/Theme.TopMortarSales.TextBaseLine"/>
+                    <TextView
+                        android:id="@+id/filterCities"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="pilih kota"
+                        android:textAllCaps="true"
+                        android:focusable="true"
+                        android:clickable="true"
+                        android:textSize="11sp"
+                        android:background="@android:color/transparent"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                    <ImageView
+                        android:id="@+id/filterChange"
+                        android:visibility="gone"
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:layout_marginStart="3dp"
+                        android:src="@drawable/sync_now_black"
+                        android:background="@android:color/transparent"/>
+
+                </LinearLayout>
 
             </LinearLayout>
 
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/barChart"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"/>
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Filter"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="2dp"
-                android:background="@drawable/et_background_clickable"
-                android:focusable="true"
-                android:clickable="true"
-                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:visibility="gone"
+                    android:id="@+id/beforeYearContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:layout_marginEnd="16dp"
+                    android:orientation="horizontal">
+                    <View
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:background="@drawable/status_passive"/>
+
+                    <TextView
+                        android:id="@+id/beforeYear"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+                </LinearLayout>
+
+                <View
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:background="@drawable/status_active"/>
+
+                <TextView
+                    android:id="@+id/currentYear"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+            </LinearLayout>
 
         </LinearLayout>
 
-        <com.github.mikephil.charting.charts.BarChart
-            android:id="@+id/barChart"
-            android:layout_width="match_parent"
-            android:layout_height="250dp"/>
-
-    </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
 </LinearLayout>

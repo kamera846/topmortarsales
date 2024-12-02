@@ -36,6 +36,7 @@ import com.topmortar.topmortarsales.commons.VISIT_QUESTION
 import com.topmortar.topmortarsales.commons.VOUCHER
 import com.topmortar.topmortarsales.commons.WAREHOUSE
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
+import com.topmortar.topmortarsales.response.ResponseActiveStore
 import com.topmortar.topmortarsales.response.ResponseAuth
 import com.topmortar.topmortarsales.response.ResponseBaseCamp
 import com.topmortar.topmortarsales.response.ResponseCities
@@ -717,6 +718,18 @@ interface ApiService {
         @Query("dst") idDistributor: String,
     ): ResponseRencanaVisit
 
+    @GET(RENCANA_VISIT)
+    suspend fun targetMg(
+        @Query("type") type: String = "mg",
+        @Query("c") idCity: String,
+    ): ResponseRencanaVisit
+
+    @GET(RENCANA_VISIT)
+    suspend fun targetMgDst(
+        @Query("type") type: String = "mg",
+        @Query("dst") idDistributor: String,
+    ): ResponseRencanaVisit
+
     @GET(RENCANA_VISIT_PENAGIHAN)
     suspend fun jatemPenagihan(
         @Query("dst") dst: String,
@@ -754,4 +767,12 @@ interface ApiService {
     suspend fun getVisitAnswers(
         @Query("v") idVisit: String,
     ): ResponseQuestion
+
+    @GET("activeStore.php")
+    suspend fun getActiveStore(): ResponseActiveStore
+
+    @GET("activeStore.php")
+    suspend fun getActiveStore(
+        @Query("city") idCity: String,
+    ): ResponseActiveStore
 }

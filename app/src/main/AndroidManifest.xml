@@ -61,6 +61,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".view.rencanaVisits.RencanaVisitMGActivity"
+            android:exported="false" />
+        <activity
             android:name=".view.reports.ChecklistReportActivity"
             android:exported="false" />
         <activity
@@ -181,8 +184,11 @@
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="location" />
+
+<!--        Disabled FCM-->
 <!--        <service-->
 <!--            android:name=".commons.services.FirebaseCloudMessagingServices"-->
+<!--            android:permission="com.google.android.c2dm.permission.SEND"-->
 <!--            android:exported="false">-->
 <!--            <intent-filter>-->
 <!--                <action android:name="com.google.firebase.MESSAGING_EVENT" />-->

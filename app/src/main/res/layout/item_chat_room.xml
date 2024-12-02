@@ -159,6 +159,21 @@
                         android:scaleType="fitStart"
                         android:src="@drawable/circle_check_bid"/>
 
+                    <TextView
+                        android:visibility="gone"
+                        android:id="@+id/textSeller"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="SELLER"
+                        android:textColor="@color/white"
+                        android:textSize="8sp"
+                        android:textStyle="bold"
+                        android:paddingHorizontal="4dp"
+                        android:paddingVertical="2dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_primary_round_8"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
                 </LinearLayout>
 
                 <LinearLayout

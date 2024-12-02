@@ -39,6 +39,9 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
 
     fun setSelectBarActive(state: Boolean) {
         this.isSelectBarActive = state
+        for (i in 0 until listItem.size) {
+            notifyItemChanged(i)
+        }
     }
 
     inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -49,6 +52,7 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
         private val imgProfile: ImageView = itemView.findViewById(R.id.iv_contact_profile)
         private val textVerified: TextView = itemView.findViewById(R.id.textVerified)
         private val badgeNew: TextView = itemView.findViewById(R.id.textCornerBadge)
+        private val badgeSeller: TextView = itemView.findViewById(R.id.textSeller)
         val checkBoxItem: CheckBox = itemView.findViewById(R.id.checkbox)
 
         fun bind(item: RencanaVisitModel, position: Int) {
@@ -68,7 +72,7 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
 
             when (typeRencana) {
                 "voucher" -> imgProfile.setImageResource(R.drawable.voucher_primary)
-                "passive" -> imgProfile.setImageResource(R.drawable.store_primary)
+                "passive", "mg" -> imgProfile.setImageResource(R.drawable.store_primary)
                 else -> imgProfile.setImageResource(R.drawable.time_primary)
             }
 
@@ -93,14 +97,14 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
             var dateJatem =
                 if (typeRencana == "voucher") "Didapatkan " + DateFormat.format(item.created_at ?: "0000-00-00")
                 else if ((typeRencana == "jatemPenagihan1" || typeRencana == "jatemPenagihan2" || typeRencana == "jatemPenagihan3") && item.jatuh_tempo.isNotEmpty()) "Jatuh tempo " + DateFormat.format(dateString =  item.jatuh_tempo, inputFormat = "dd MMM yyyy", inputLocale = Locale.ENGLISH)
-                else if (typeRencana == "passive") "Terakhir divisit " + DateFormat.format(item.last_visit ?: "0000-00-00")
+                else if (typeRencana == "passive" || typeRencana == "mg") "Terakhir divisit " + DateFormat.format(item.last_visit ?: "0000-00-00")
 //                else if (typeRencana == "tagihMingguan") "Tanggal invoice " + DateFormat.format(item.date_invoice)
                 else "Terakhir divisit " + DateFormat.format(item.created_at ?: "0000-00-00")
 
             if (!item.is_new.isNullOrEmpty()) {
                 val isNew = item.is_new == "1"
                 val isInvalidLastVisit = item.last_visit == "0000-00-00"
-                val isRelevantType = typeRencana in listOf("jatem", "jatemPenagihan2", "jatemPenagihan3", "passive")
+                val isRelevantType = typeRencana in listOf("jatem", "jatemPenagihan2", "jatemPenagihan3", "passive", "mg")
 
                 if (isNew) {
                     if (isRelevantType && isInvalidLastVisit) dateJatem = "Belum pernah divisit"
@@ -121,6 +125,9 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
             textVerified.text = dateCounter.let { if (it != -1) "$it hari" else "error" }
             textVerified.setBackgroundResource(R.drawable.bg_passive_round)
             textVerified.visibility = View.VISIBLE
+
+            if (item.pass_contact.isNotEmpty() && item.pass_contact != "0") badgeSeller.visibility = View.VISIBLE
+            else badgeSeller.visibility = View.GONE
 
         }
 

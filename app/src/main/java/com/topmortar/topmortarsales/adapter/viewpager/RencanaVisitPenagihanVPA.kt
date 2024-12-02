@@ -10,6 +10,7 @@ import com.topmortar.topmortarsales.model.RencanaVisitModel
 import com.topmortar.topmortarsales.view.rencanaVisits.JatemPenagihan1Fragment
 import com.topmortar.topmortarsales.view.rencanaVisits.JatemPenagihan2Fragment
 import com.topmortar.topmortarsales.view.rencanaVisits.JatemPenagihan3Fragment
+import com.topmortar.topmortarsales.view.rencanaVisits.MGFragment
 import com.topmortar.topmortarsales.view.rencanaVisits.TagihMingguanFragment
 
 class RencanaVisitPenagihanVPA(fm: FragmentManager, private var tabSize: Int) : FragmentPagerAdapter(fm) {
@@ -25,12 +26,14 @@ class RencanaVisitPenagihanVPA(fm: FragmentManager, private var tabSize: Int) : 
     private lateinit var fragmentJatem2: JatemPenagihan2Fragment
     private lateinit var fragmentJatem3: JatemPenagihan3Fragment
     private lateinit var fragmentWeekly: TagihMingguanFragment
+    private lateinit var fragmentMg: MGFragment
     fun setSyncAction(index: Int) {
         when (index) {
             0 -> fragmentJatem1.syncNow()
             1 -> fragmentJatem2.syncNow()
             2 -> fragmentJatem3.syncNow()
             3 -> fragmentWeekly.syncNow()
+            4 -> fragmentMg.syncNow()
         }
     }
     fun setSelectBarActive(index: Int, state: Boolean) {
@@ -39,6 +42,7 @@ class RencanaVisitPenagihanVPA(fm: FragmentManager, private var tabSize: Int) : 
             1 -> fragmentJatem2.isSelectBarActive(state)
             2 -> fragmentJatem3.isSelectBarActive(state)
             3 -> fragmentWeekly.isSelectBarActive(state)
+            4 -> fragmentMg.isSelectBarActive(state)
         }
     }
     fun onConfirmSelected(index: Int) {
@@ -47,6 +51,7 @@ class RencanaVisitPenagihanVPA(fm: FragmentManager, private var tabSize: Int) : 
             1 -> fragmentJatem2.onConfirmSelected()
             2 -> fragmentJatem3.onConfirmSelected()
             3 -> fragmentWeekly.onConfirmSelected()
+            4 -> fragmentMg.onConfirmSelected()
         }
     }
     fun getAllListItem(index: Int): ArrayList<RencanaVisitModel> {
@@ -55,6 +60,7 @@ class RencanaVisitPenagihanVPA(fm: FragmentManager, private var tabSize: Int) : 
             1 -> fragmentJatem2.getAllListItem()
             2 -> fragmentJatem3.getAllListItem()
             3 -> fragmentWeekly.getAllListItem()
+            4 -> fragmentMg.getAllListItem()
             else -> arrayListOf()
         }
     }
@@ -97,7 +103,7 @@ class RencanaVisitPenagihanVPA(fm: FragmentManager, private var tabSize: Int) : 
                 fragmentJatem3
 
             }
-            else -> {
+            3 -> {
 
                 fragmentWeekly = TagihMingguanFragment()
                 fragmentWeekly.setReportSource(PENAGIHAN_REPORT_RENVI)
@@ -108,6 +114,18 @@ class RencanaVisitPenagihanVPA(fm: FragmentManager, private var tabSize: Int) : 
 
                 })
                 fragmentWeekly
+
+            }
+            else -> {
+
+                fragmentMg = MGFragment()
+                fragmentMg.setCounterItem(object : MGFragment.CounterItem{
+                    override fun counterItem(count: Int) {
+                        listener?.counterItem(count, position)
+                    }
+
+                })
+                fragmentMg
 
             }
         }

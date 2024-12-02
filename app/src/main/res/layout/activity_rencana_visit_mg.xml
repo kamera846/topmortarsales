@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".view.rencanaVisits.RencanaVisitMGActivity">
+
+    <include
+        android:id="@+id/titleBarDark"
+        layout="@layout/component_title_bar"/>
+
+    <include
+        android:id="@+id/selectTitleBarDark"
+        layout="@layout/component_select_title_bar"/>
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/renviMGFragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="com.topmortar.topmortarsales.view.delivery.HistoryDeliveryFragment"/>
+
+</LinearLayout>

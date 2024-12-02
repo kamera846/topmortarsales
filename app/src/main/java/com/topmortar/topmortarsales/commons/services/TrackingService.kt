@@ -10,6 +10,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -60,6 +61,9 @@ class TrackingService : Service() {
             .setChannelName("Topmortar Absent Notification")
             .setContentTitle("Kehadiran Sudah Tercatat")
             .setContentText("Pastikan untuk menyelesaikan target anda sebelum pulang...")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .setOnGoing(true)
             .build()
 
         startForeground(NOTIFICATION_ID, notification)

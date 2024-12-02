@@ -44,6 +44,9 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
 
     fun setSelectItemState(state: Boolean) {
         this.isSelectedItemActive = state
+        for (i in 0 until chatList.size) {
+            notifyItemChanged(i)
+        }
     }
 
     fun setSelectedItemsId(items: MutableSet<String>) {

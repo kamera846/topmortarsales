@@ -2,11 +2,9 @@
 
 package com.topmortar.topmortarsales.view.user
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -14,11 +12,11 @@ import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.database.DataSnapshot
@@ -28,6 +26,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_MARKETING
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
 import com.topmortar.topmortarsales.commons.CONST_COURIER_ID
@@ -45,12 +44,14 @@ import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_IS_ALLOWED_LOGOUT
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.NOTIFICATION_LEVEL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.USER_KIND_MARKETING
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
@@ -77,7 +78,7 @@ import java.util.Calendar
 class UserProfileActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
-    private val userDistributorId get() = sessionManager.userDistributor()
+    private val userAuthLevel get() = sessionManager.userAuthLevel()
     private val userKind get() = sessionManager.userKind()
     private val userId get() = sessionManager.userID()
     private val userCity get() = sessionManager.userCityID()
@@ -268,7 +269,7 @@ class UserProfileActivity : AppCompatActivity() {
             binding.titleBarLight.icEdit.setOnClickListener { navigateEditUser() }
         }
 
-        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+        if (CustomUtility(this).isUserWithOnlineStatus()) {
             binding.btnLogout.setOnClickListener { logoutConfirmation() }
         }
 
@@ -283,7 +284,7 @@ class UserProfileActivity : AppCompatActivity() {
     private fun dataActivityValidation() {
 
 //         Disabled FCM
-//        if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
+//        if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_MARKETING) {
 //            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 //                // Cek apakah izin sudah diberikan
 //                if (ContextCompat.checkSelfPermission(
@@ -300,11 +301,11 @@ class UserProfileActivity : AppCompatActivity() {
 //            }
 //        }
 
-        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+        if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN || sessionManager.userKind() == USER_KIND_MARKETING) {
             CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor() ?: "-custom-019", sessionManager.userID() ?: "")
             checkAbsent()
         }
-        if (iUserLevel == AUTH_LEVEL_COURIER || (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES) || (iUserLevel == AUTH_LEVEL_PENAGIHAN || userKind == USER_KIND_PENAGIHAN)) {
+        if (iUserLevel == AUTH_LEVEL_COURIER || (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES) || (iUserLevel == AUTH_LEVEL_PENAGIHAN || userKind == USER_KIND_PENAGIHAN) || (iUserLevel == AUTH_LEVEL_MARKETING || userKind == USER_KIND_MARKETING)) {
             binding.salesReportContainer.visibility = View.GONE
             binding.deliveryContainer.visibility = View.VISIBLE
 
@@ -312,10 +313,10 @@ class UserProfileActivity : AppCompatActivity() {
                 binding.btnHistoryVisit.visibility = View.GONE
                 binding.btnCourierHistoryDelivery.visibility = View.VISIBLE
                 if (userKind == USER_KIND_COURIER) binding.btnCourierTracking.visibility = View.GONE
-            } else if (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES || iUserLevel == AUTH_LEVEL_PENAGIHAN || userKind == USER_KIND_PENAGIHAN) {
+            } else if (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES || iUserLevel == AUTH_LEVEL_PENAGIHAN || userKind == USER_KIND_PENAGIHAN || iUserLevel == AUTH_LEVEL_MARKETING || userKind == USER_KIND_MARKETING) {
                 binding.btnHistoryVisit.visibility = View.VISIBLE
                 binding.btnCourierHistoryDelivery.visibility = View.GONE
-                if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) binding.btnCourierTracking.visibility = View.GONE
+                if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_MARKETING) binding.btnCourierTracking.visibility = View.GONE
             }
 
             setupCourierMenu()
@@ -537,12 +538,13 @@ class UserProfileActivity : AppCompatActivity() {
             val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
             absentChild.child(sessionManager.userID() ?: "0").child(FIREBASE_CHILD_IS_ALLOWED_LOGOUT).setValue(false)
 
-            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
 
                 CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor() ?: "-custom-019", sessionManager.userID().toString())
             }
 //            Disabled FCM
 //            deleteFcmToken()
+//            unSubscribeFcmTopic()
         } catch (e: Exception) {
             Log.d("Firebase Auth", "$e")
         }
@@ -580,17 +582,30 @@ class UserProfileActivity : AppCompatActivity() {
 
     }
 
+    private fun unSubscribeFcmTopic() {
+        val fcmTopic = "report_feedback_${userAuthLevel}_${userId}_${NOTIFICATION_LEVEL}"
+        FirebaseMessaging.getInstance().unsubscribeFromTopic(fcmTopic)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Successfully subscribed to the fcmTopic
+                } else {
+                    // Handle failure
+                    Toast.makeText(applicationContext, "Unsubscribe notification failed. Error: ${task.exception?.stackTrace}", Toast.LENGTH_SHORT).show()
+                }
+            }
+    }
+
     private fun  setupCourierMenu() {
         binding.absentDescription.text = getString(R.string.txt_loading)
 
-        val personCall = if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_COURIER) "Anda" else "Pengguna"
-        val personcall = if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_COURIER) "anda" else "pengguna"
+        val personCall = if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_COURIER || userKind == USER_KIND_MARKETING) "Anda" else "Pengguna"
+        val personcall = if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_COURIER || userKind == USER_KIND_MARKETING) "anda" else "pengguna"
 
         childAbsent = firebaseReference.child(FIREBASE_CHILD_ABSENT)
         childCourier = childAbsent?.child(iUserID ?: userId ?: "0")
         userOnlineChild = childCourier?.child("isOnline")
 
-        if (userKind != USER_KIND_SALES && userKind != USER_KIND_PENAGIHAN && userKind != USER_KIND_COURIER) {
+        if (userKind != USER_KIND_SALES && userKind != USER_KIND_PENAGIHAN && userKind != USER_KIND_COURIER && userKind != USER_KIND_MARKETING) {
             courierTrackingListener = object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     // Do something here
@@ -827,7 +842,7 @@ class UserProfileActivity : AppCompatActivity() {
 //        EventBus.getDefault().register(this)
         Handler(Looper.getMainLooper()).postDelayed({
             if (sessionManager.isLoggedIn()) {
-                if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+                if (CustomUtility(this).isUserWithOnlineStatus()) {
                     CustomUtility(this).setUserStatusOnline(
                         true,
                         sessionManager.userDistributor() ?: "-custom-019",
@@ -842,7 +857,7 @@ class UserProfileActivity : AppCompatActivity() {
         super.onStop()
 //        EventBus.getDefault().unregister(this)
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor() ?: "-custom-019",
@@ -858,7 +873,7 @@ class UserProfileActivity : AppCompatActivity() {
         if (courierTrackingListener != null) userOnlineChild?.removeEventListener(courierTrackingListener!!)
         if (userAllowLogoutListener != null) userAllowedLogoutChild?.removeEventListener(userAllowLogoutListener!!)
         if (sessionManager.isLoggedIn()) {
-            if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+            if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
                     false,
                     sessionManager.userDistributor() ?: "-custom-019",
