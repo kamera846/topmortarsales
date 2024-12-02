@@ -1,6 +1,7 @@
 package com.topmortar.topmortarsales.commons.services
 
 import android.Manifest
+import android.app.NotificationManager
 import android.content.ContentResolver
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -8,6 +9,7 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.util.Log
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -80,10 +82,12 @@ class FirebaseCloudMessagingServices : FirebaseMessagingService() {
             putExtra("nVisitId", nVisitId)
         }
         val notification = CustomNotificationBuilder.with(this)
+            .setRequestCode(notificationId)
             .setIntent(notificationIntent)
             .setChannelId(nChannelId)
             .setChannelName(nChannelName)
-            .setRequestCode(notificationId)
+            .setChannelImportance(NotificationManager.IMPORTANCE_HIGH)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setVibrate(true)
             .setSound(soundUri!!)
             .setGroup(nGroupId)

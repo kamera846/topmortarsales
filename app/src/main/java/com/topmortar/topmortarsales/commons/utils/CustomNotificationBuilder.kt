@@ -22,7 +22,8 @@ class CustomNotificationBuilder private constructor(private val context: Context
     private var autoCancel: Boolean = false
     private var onGoing: Boolean = false
     private var requestCode: Int = 0
-    private var nPriority: Int = NotificationManager.IMPORTANCE_DEFAULT
+    private var nPriority: Int = NotificationCompat.PRIORITY_DEFAULT
+    private var channelImportance: Int = NotificationManager.IMPORTANCE_DEFAULT
     private var nCategory: String = NotificationCompat.CATEGORY_REMINDER
     private var vibrate: Boolean = false
     private var soundUri: Uri? = null
@@ -47,6 +48,11 @@ class CustomNotificationBuilder private constructor(private val context: Context
 
     fun setChannelDescription(channelDesc: String): CustomNotificationBuilder {
         this.channelDesc = channelDesc
+        return this
+    }
+
+    fun setChannelImportance(channelImportance: Int): CustomNotificationBuilder {
+        this.channelImportance = channelImportance
         return this
     }
 
@@ -131,7 +137,8 @@ class CustomNotificationBuilder private constructor(private val context: Context
                     context,
                     channelId ?: "topmortar_notifications",
                     channelName ?: "Topmortar Notifications",
-                    channelDesc ?: "Notifikasi untuk kategori umum"
+                    channelDesc ?: "Notifikasi untuk kategori umum",
+                    channelImportance
                 )
             } else {
                 ""
@@ -176,7 +183,7 @@ class CustomNotificationBuilder private constructor(private val context: Context
         return notificationBuilder.build()
     }
 
-    private fun createNotificationChannel(context: Context, channelId: String, channelName: String, channelDesc: String): String {
+    private fun createNotificationChannel(context: Context, channelId: String, channelName: String, channelDesc: String, channelImportance: Int): String {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
             val audioAttributes = AudioAttributes.Builder()
@@ -187,7 +194,7 @@ class CustomNotificationBuilder private constructor(private val context: Context
             val channel = NotificationChannel(
                 channelId,
                 channelName,
-                NotificationManager.IMPORTANCE_DEFAULT
+                channelImportance
             )
 
             channel.lockscreenVisibility = Notification.VISIBILITY_PRIVATE
