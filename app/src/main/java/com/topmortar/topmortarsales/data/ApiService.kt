@@ -770,4 +770,9 @@ interface ApiService {
 
     @GET("activeStore.php")
     suspend fun getActiveStore(): ResponseActiveStore
+
+    @GET("activeStore.php")
+    suspend fun getActiveStore(
+        @Query("city") idCity: String,
+    ): ResponseActiveStore
 }

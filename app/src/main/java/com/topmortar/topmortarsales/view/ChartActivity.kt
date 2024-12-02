@@ -11,11 +11,16 @@ import com.github.mikephil.charting.data.BarEntry
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
+import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityChartBinding
+import com.topmortar.topmortarsales.modal.SearchModal
+import com.topmortar.topmortarsales.model.CityModel
+import com.topmortar.topmortarsales.model.ModalSearchModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -23,9 +28,15 @@ import java.util.Locale
 
 class ChartActivity : AppCompatActivity() {
 
-    private var _binding: ActivityChartBinding? = null
     private lateinit var sessionManager: SessionManager
+    private val userDistributorId get() = sessionManager.userDistributor()
+    private var _binding: ActivityChartBinding? = null
     private val binding get() = _binding!!
+
+    private lateinit var apiService: ApiService
+    private lateinit var searchModal: SearchModal
+    private var citiesResults: ArrayList<CityModel>? = null
+    private var selectedCity: ModalSearchModel? = null
 
     private var chartTextColor: Int = 0
     private var startMonthIndex = 0 // (0 = Januari)
@@ -38,11 +49,14 @@ class ChartActivity : AppCompatActivity() {
         _binding = ActivityChartBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        apiService = HttpClient.create()
+
         binding.titleBarDark.tvTitleBar.text = "Grafik Status Toko"
         binding.titleBarDark.icBack.setOnClickListener { finish() }
         chartTextColor = getColor(R.color.black_200)
         if (CustomUtility(this).isDarkMode()) chartTextColor = getColor(R.color.white)
 
+        getCities()
         loadBarChartData()
     }
 
@@ -63,10 +77,12 @@ class ChartActivity : AppCompatActivity() {
             12f to 0f,
         )
 
-        val apiService = HttpClient.create()
         lifecycleScope.launch {
             try {
-                val response = apiService.getActiveStore()
+                val response = when (selectedCity) {
+                    null -> apiService.getActiveStore()
+                    else -> apiService.getActiveStore(idCity = selectedCity?.id!!)
+                }
                 when(response.status) {
                     RESPONSE_STATUS_OK -> {
 
@@ -213,6 +229,84 @@ class ChartActivity : AppCompatActivity() {
             val index = value.toInt()
             return if (index in 0..11) months[index] else ""
         }
+    }
+
+    private fun getCities() {
+
+        lifecycleScope.launch {
+            try {
+
+                val response = apiService.getCities(distributorID = userDistributorId ?: "")
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        citiesResults = response.results
+                        val items: ArrayList<ModalSearchModel> = ArrayList()
+
+                        for (i in 0 until citiesResults!!.size) {
+                            val data = citiesResults!![i]
+                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                        }
+                        items.add(0, ModalSearchModel("-1", "Hapus Filter"))
+
+                        setupDialogSearch(items)
+                        binding.filterContainer.visibility = View.VISIBLE
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        handleMessage(this@ChartActivity, "LIST CITY", "Daftar kota kosong!")
+
+                    }
+                    else -> {
+
+                        handleMessage(this@ChartActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(this@ChartActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+
+            }
+
+        }
+    }
+
+    private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
+
+        searchModal = SearchModal(this, items)
+        searchModal.setCustomDialogListener(object: SearchModal.SearchModalListener{
+            override fun onDataReceived(data: ModalSearchModel) {
+                if (data.id == "-1") {
+                    selectedCity = null
+                    binding.filterCities.text = "pilih kota"
+                    binding.chartDesc.text = "Menampilkan data di semua kota"
+                    binding.filterChange.visibility = View.GONE
+                } else {
+                    selectedCity = data
+                    binding.filterCities.text = "ganti"
+                    binding.chartDesc.text = "Menampilkan data di kota ${data.title}"
+                    binding.filterChange.visibility = View.VISIBLE
+                }
+                loadBarChartData()
+            }
+
+        })
+        searchModal.searchHint = "Ketik untuk mencari…"
+
+//        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+//        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.filterCities.componentFilter.background = AppCompatResources.getDrawable(requireContext(), R.color.black_400)
+//        else binding.filterCities.componentFilter.background = AppCompatResources.getDrawable(requireContext(), R.color.light)
+        binding.filterContainer.visibility = View.GONE
+        binding.filterCities.setOnClickListener {
+            searchModal.show()
+        }
+        binding.filterCities.text = selectedCity?.title ?: "pilih kota"
+
     }
 
     override fun onDestroy() {

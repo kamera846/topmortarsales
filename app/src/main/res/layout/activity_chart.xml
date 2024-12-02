@@ -44,6 +44,7 @@
                         android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
 
                     <TextView
+                        android:id="@+id/chartDesc"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Menampilkan data di semua kota"
@@ -51,17 +52,39 @@
 
                 </LinearLayout>
 
-                <TextView
+                <LinearLayout
+                    android:id="@+id/filterContainer"
                     android:visibility="gone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Filter"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="2dp"
-                    android:background="@drawable/et_background_clickable"
-                    android:focusable="true"
-                    android:clickable="true"
-                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="3dp"
+                    android:background="@drawable/background_rounded_8_clickable"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/filterCities"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="pilih kota"
+                        android:textAllCaps="true"
+                        android:focusable="true"
+                        android:clickable="true"
+                        android:textSize="11sp"
+                        android:background="@android:color/transparent"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                    <ImageView
+                        android:id="@+id/filterChange"
+                        android:visibility="gone"
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:layout_marginStart="3dp"
+                        android:src="@drawable/sync_now_black"
+                        android:background="@android:color/transparent"/>
+
+                </LinearLayout>
 
             </LinearLayout>
 
