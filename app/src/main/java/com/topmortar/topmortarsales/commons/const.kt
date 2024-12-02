@@ -5,18 +5,18 @@ import android.widget.Toast
 /*
     Prod Services
  */
-//const val BASE_URL = "https://saleswa.topmortarindonesia.com/" // Production
-//const val PING_HOST = "saleswa.topmortarindonesia.com" // Production
-//const val FIREBASE_REFERENCE = "db_prod" // Production
-//const val NOTIFICATION_LEVEL = "prod"
+const val BASE_URL = "https://saleswa.topmortarindonesia.com/" // Production
+const val PING_HOST = "saleswa.topmortarindonesia.com" // Production
+const val FIREBASE_REFERENCE = "db_prod" // Production
+const val NOTIFICATION_LEVEL = "prod"
 
 /*
     Dev Services
  */
-const val BASE_URL = "https://dev-saleswa.topmortarindonesia.com/" // Development
-const val PING_HOST = "dev-saleswa.topmortarindonesia.com" // Development
-const val FIREBASE_REFERENCE = "db_dev" // Development
-const val NOTIFICATION_LEVEL = "dev"
+//const val BASE_URL = "https://dev-saleswa.topmortarindonesia.com/" // Development
+//const val PING_HOST = "dev-saleswa.topmortarindonesia.com" // Development
+//const val FIREBASE_REFERENCE = "db_dev" // Development
+//const val NOTIFICATION_LEVEL = "dev"
 
 /*
     Firebase Realtime Database
