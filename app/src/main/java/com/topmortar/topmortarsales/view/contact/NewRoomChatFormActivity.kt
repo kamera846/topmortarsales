@@ -41,8 +41,6 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SELECTED_ABSENT_MODE
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
-import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
-import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.updateTxtMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
@@ -159,7 +157,10 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
     private fun sendMessage() {
 
-        val phoneCategory = "${ binding.spinPhoneCategories.selectedItem }"
+        val phoneCategory = binding.spinPhoneCategories.let {
+            if (it.selectedItemPosition < 1) ""
+            else it.selectedItem.toString()
+        }
         val phone = "${ etPhone.text }"
 //        val phone2 = "${ binding.etPhone2.text }"
         val name = "${ etName.text }"
@@ -182,7 +183,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         loadingState(true)
 
 //        Handler(Looper.getMainLooper()).postDelayed({
-//            handleMessage(this, "SEND MESSAGE", "$phone : $name : $owner : $birthday : $cityId : $mapsUrl : $userId : $currentName : $termin : $message")
+//            handleMessage(this, "SEND MESSAGE", "$phoneCategory : $phone : $name : $owner : $birthday : $cityId : $mapsUrl : $userId : $currentName : $termin : $message")
 //            loadingState(false)
 //        }, 1000)
 //
@@ -191,7 +192,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         lifecycleScope.launch {
             try {
 
-                val rbPhoneCategory = createPartFromString(formatPhoneNumber(phoneCategory))
+                val rbPhoneCategory = createPartFromString(phoneCategory)
                 val rbPhone = createPartFromString(formatPhoneNumber(phone))
 //                val rbPhone2 = createPartFromString(phone2.let{ if (it == "0") it else formatPhoneNumber(it) })
                 val rbName = createPartFromString(name)
@@ -366,7 +367,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         setDatePickerDialog()
 
         // Setup Spinner
-        setSpinnerCities()
+        // setSpinnerCities()
 
         // Setup Dialog Search
         setupDialogSearch()
@@ -488,11 +489,11 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             etBirthday.clearFocus()
             etMapsUrl.error = "Pilih koordinat!"
             false
-        } else if (message.isEmpty()) {
-            etMapsUrl.error = null
-            etMapsUrl.clearFocus()
-            etMessage.error = "Tambahkan pesan untuk toko!"
-            false
+//        } else if (message.isEmpty()) {
+//            etMapsUrl.error = null
+//            etMapsUrl.clearFocus()
+//            etMessage.error = "Tambahkan pesan untuk toko!"
+//            false
         } else {
             etPhone.error = null
             etName.error = null
