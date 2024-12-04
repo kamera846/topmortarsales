@@ -113,7 +113,8 @@ interface ApiService {
     ): Response<ResponseMessage>
 
     @Multipart
-    @POST(SEND_MESSAGE)
+    @POST(CONTACT)
+//    @POST(SEND_MESSAGE)
     suspend fun insertContact(
         @Part("nama") name: RequestBody,
         @Part("nomor_cat_1") phoneCategory: RequestBody,
