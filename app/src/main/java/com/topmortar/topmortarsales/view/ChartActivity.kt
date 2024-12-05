@@ -80,8 +80,8 @@ class ChartActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val response = when (selectedCity) {
-                    null -> apiService.getActiveStore()
-                    else -> apiService.getActiveStore(idCity = selectedCity?.id!!)
+                    null -> apiService.getActiveStore(idDistributor = userDistributorId ?: "")
+                    else -> apiService.getActiveStore(idCity = selectedCity?.id!!, idDistributor = userDistributorId ?: "")
                 }
                 when(response.status) {
                     RESPONSE_STATUS_OK -> {
