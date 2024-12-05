@@ -136,6 +136,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     private lateinit var container: RelativeLayout
 
     private lateinit var previewInvoiceLayout: ScrollView
+    private lateinit var imgCompany: ImageView
+    private lateinit var tvCompany: TextView
     private lateinit var tvReferenceNumber: TextView
     private lateinit var tvDeliveryDate: TextView
     private lateinit var tvShipToName: TextView
@@ -173,6 +175,10 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     private var bluetoothAdapter: BluetoothAdapter? = null
     private var printerManager = BluetoothPrinterManager()
     private lateinit var bottomSheetDialog: BottomSheetDialog
+
+    private var companyLogoRetina: Int = 0
+    private var companyLogoBlack: Int = 0
+    private var companyName: String = ""
 
     companion object {
         private const val PRINT_METHOD_BLUETOOTH_TITLE = "Print Bluetooth"
@@ -233,6 +239,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         container = findViewById(R.id.container)
 
         previewInvoiceLayout = findViewById(R.id.preview_invoice_layout)
+        imgCompany = previewInvoiceLayout.findViewById(R.id.companyLogo)
+        tvCompany = previewInvoiceLayout.findViewById(R.id.companyName)
         tvReferenceNumber = previewInvoiceLayout.findViewById(R.id.tv_reference_number)
         tvDeliveryDate = previewInvoiceLayout.findViewById(R.id.tv_delivery_date)
         tvShipToName = previewInvoiceLayout.findViewById(R.id.tv_ship_to_name)
@@ -394,6 +402,20 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                         val data = response.results[0]
                         isClosing = data.is_closing == "1"
                         isCod = data.is_cod == "1"
+
+                        companyLogoRetina = R.drawable.logo_retina
+                        companyLogoBlack = R.drawable.logo_top_mortar
+                        companyName = "PT. TOP MORTAR INDONESIA"
+
+                        // 6 for distributor ngawi
+                        if (userDistributorId == "6") {
+                            companyLogoRetina = R.drawable.bumiperkasa_retina
+                            companyLogoBlack = R.drawable.bumiperkasa
+                            companyName = "PT. BUMI PERKASA"
+                        }
+
+                        imgCompany.setImageResource(companyLogoRetina)
+                        tvCompany.text = companyName
 
                         tvReferenceNumber.text = data.no_surat_jalan
 //                        tvDeliveryDate.text = "${ data.dalivery_date }"
@@ -823,7 +845,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
         // Change the desired width and height for your image (in pixels)
         val drawable = this.applicationContext.resources.getDrawableForDensity(
-            R.drawable.logo_top_mortar,
+            companyLogoBlack,
             DisplayMetrics.DENSITY_MEDIUM
         )
 
@@ -876,7 +898,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
             "[C]<img>$imageHexadecimal</img>\n\n" +
             "[C]$txtReferenceNumber\n\n" +
             "[C]Distributor Indonesia\n" +
-            "[C]PT. TOP MORTAR INDONESIA\n" +
+            "[C]$companyName\n" +
             "[L]Shipped to:\n" +
             "[L]$txtShipToName\n" +
             "[L]$txtShipToAddress\n" +
@@ -1074,7 +1096,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     }
 
     private fun drawPdf(document: Document, data: SuratJalanModel): Document {
-        val bitmap: Bitmap = BitmapFactory.decodeResource(resources, R.drawable.logo_retina)
+        val bitmap: Bitmap = BitmapFactory.decodeResource(resources, companyLogoRetina)
+
         val byteArrayOutputStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
         val byteArray = byteArrayOutputStream.toByteArray()
@@ -1089,7 +1112,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         cell.setBorder(Border.NO_BORDER)
 
         tableu.addCell(cell)
-        tableu.addCell(getCell(" Distributor Indonesia\nPT. TOP MORTAR INDONESIA", TextAlignment.CENTER))
+        tableu.addCell(getCell(" Distributor Indonesia\n$companyName", TextAlignment.CENTER))
         tableu.addCell(getCell(" SURAT JALAN\n${data.no_surat_jalan}", TextAlignment.RIGHT))
 
         document.add(tableu)

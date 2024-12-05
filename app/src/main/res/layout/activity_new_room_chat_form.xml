@@ -423,7 +423,6 @@
 
                 <!-- Termin Payment -->
                 <LinearLayout
-                    android:visibility="gone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
@@ -445,7 +444,7 @@
                             android:textStyle="bold"/>
 
                         <TextView
-                            android:visibility="visible"
+                            android:visibility="gone"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="4dp"

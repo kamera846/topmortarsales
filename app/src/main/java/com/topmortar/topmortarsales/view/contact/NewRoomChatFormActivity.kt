@@ -13,6 +13,8 @@ import android.os.Looper
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
@@ -39,6 +41,12 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SELECTED_ABSENT_MODE
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_30
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_45
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_60
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_COD
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_COD_TF
+import com.topmortar.topmortarsales.commons.STATUS_TERMIN_COD_TUNAI
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
@@ -97,6 +105,9 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
     private lateinit var phoneCategoriesFRC: FirebaseRemoteConfig
     private var spinPhoneCatItems: List<String> = listOf()
+
+    private var terminItem: List<String> = listOf("Pilih Termin Payment", "COD", "COD + Transfer", "COD + Tunai", "30 Hari", "45 Hari", "60 Hari")
+    private var selectedTermin: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -169,11 +180,21 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         val cityId = sessionManager.userCityID().let { if (!it.isNullOrEmpty()) it else "0" }
         val mapsUrl = "${ etMapsUrl.text }"
         val message = "${ etMessage.text }"
-        val termin = "-1"
+        val termin = if (selectedTermin.isEmpty()) "-1" else {
+            when (selectedTermin) {
+                terminItem[1] -> STATUS_TERMIN_COD
+                terminItem[2] -> STATUS_TERMIN_COD_TF
+                terminItem[3] -> STATUS_TERMIN_COD_TUNAI
+                terminItem[4] -> STATUS_TERMIN_30
+                terminItem[5] -> STATUS_TERMIN_45
+                terminItem[6] -> STATUS_TERMIN_60
+                else -> "-1"
+            }
+        }
         val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
         val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
 
-        if (!formValidation(phone = phone, name = name, owner = owner, mapsUrl = mapsUrl, message = message)) return
+        if (!formValidation(phone = phone, name = name, owner = owner, mapsUrl = mapsUrl, message = message, termin = termin)) return
 
         birthday = if (birthday.isEmpty()) "0000-00-00"
         else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
@@ -369,6 +390,9 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         // Setup Spinner
         // setSpinnerCities()
 
+        // Setup Termin
+        setupTerminSpinner()
+
         // Setup Dialog Search
         setupDialogSearch()
 
@@ -463,7 +487,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
     }
 
-    private fun formValidation(phone: String, name: String, owner: String = "", mapsUrl: String = "", message: String = ""): Boolean {
+    private fun formValidation(phone: String, name: String, owner: String = "", mapsUrl: String = "", message: String = "", termin: String = "-1"): Boolean {
         return if (phone.isEmpty()) {
             etPhone.error = "Nomor telpon wajib diisi!"
             etPhone.requestFocus()
@@ -490,6 +514,11 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             etMapsUrl.error = "Pilih koordinat!"
             false
 //        } else if (message.isEmpty()) {
+//            etMapsUrl.error = null
+//            etMapsUrl.clearFocus()
+//            etMessage.error = "Tambahkan pesan untuk toko!"
+//            false
+//        } else if (termin == "-1") {
 //            etMapsUrl.error = null
 //            etMapsUrl.clearFocus()
 //            etMessage.error = "Tambahkan pesan untuk toko!"
@@ -550,6 +579,23 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line)
         spinnerSearchBox.setAdapter(spinnerAdapter)
 
+    }
+
+    private fun setupTerminSpinner() {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, terminItem)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        spinTermin.adapter = adapter
+        spinTermin.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedTermin = if (position != 0) terminItem[position]
+                else ""
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+        }
     }
 
     private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
