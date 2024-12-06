@@ -33,7 +33,7 @@ class TukangRecyclerViewAdapter(private val chatList: ArrayList<TukangModel>, pr
         private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
         val tooltipStatus: ImageView = itemView.findViewById(R.id.tooltip_status)
-        val icCheckBlue: ImageView = itemView.findViewById(R.id.icCheckBlue)
+        private val icCheckBlue: ImageView = itemView.findViewById(R.id.icCheckBlue)
 
         fun bind(chatItem: TukangModel) {
 
@@ -41,7 +41,15 @@ class TukangRecyclerViewAdapter(private val chatList: ArrayList<TukangModel>, pr
             tvContactName.text = chatItem.nama
             val phoneNumber = "+${ chatItem.nomorhp }"
             val skillCode = if (chatItem.kode_skill.isNotEmpty()) "(${chatItem.kode_skill})" else ""
-            tvPhoneNumber.text = if (chatItem.nomorhp != "") "$phoneNumber $skillCode" else ""
+            val txtDescription = "$phoneNumber $skillCode"
+            val createdDate = ""
+//            chatItem.created_at.let {
+//                if (it.isNotEmpty()) {
+//                    createdDate = DateFormat.format(it)
+//                    txtDescription = "$phoneNumber $skillCode $createdDate"
+//                }
+//            }
+            tvPhoneNumber.text = if (chatItem.nomorhp != "") txtDescription else createdDate
             if (chatItem.is_valid == "1") icCheckBlue.visibility = View.VISIBLE
             else icCheckBlue.visibility = View.GONE
             setupStatus(chatItem.tukang_status)

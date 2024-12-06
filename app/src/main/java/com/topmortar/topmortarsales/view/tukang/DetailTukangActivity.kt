@@ -510,7 +510,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             binding.dateSeparator.visibility = View.GONE
             binding.line.visibility = View.VISIBLE
         } else {
-            val date = DateFormat.format(iDate, outputFormat = "dd MMM yyyy")
+            val date = DateFormat.format(iDate)
 
             binding.tvDate.text = date
             binding.dateSeparator.visibility = View.VISIBLE

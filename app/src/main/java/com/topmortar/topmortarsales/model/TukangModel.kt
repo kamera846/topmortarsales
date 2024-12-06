@@ -16,5 +16,6 @@ data class TukangModel(
     var nama_skill: String = "",
     var id_catcus: String = "",
     var is_demo: String = "",
+    var created_at: String = "",
     var is_valid: String = ""
 )
