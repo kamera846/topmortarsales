@@ -1,5 +1,6 @@
 package com.topmortar.topmortarsales.view.tukang
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.topmortar.topmortarsales.R
@@ -47,6 +48,11 @@ class ListTukangActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
+    }
+
+    @SuppressLint("MissingSuperCall")
+    override fun onBackPressed() {
+        finish()
     }
 
 }
