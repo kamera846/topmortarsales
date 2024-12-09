@@ -102,11 +102,11 @@ class TukangFragment : Fragment() {
         apiService = HttpClient.create()
 
         if (userKind == USER_KIND_ADMIN) getCities()
-        getList()
+        else getList()
 
         binding.swipeRefreshLayout.setOnRefreshListener {
             if (userKind == USER_KIND_ADMIN) getCities()
-            getList()
+            else getList()
         }
 
         return view
@@ -152,6 +152,8 @@ class TukangFragment : Fragment() {
 
                 handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
 
+            } finally {
+                getList()
             }
 
         }
@@ -201,6 +203,10 @@ class TukangFragment : Fragment() {
                     } else -> apiService.getTukang(cityId = userCity)
                 }
 
+                val textFilter = if (selectedCity != null) {
+                    selectedCity?.title!!
+                } else getString(R.string.tidak_ada_filter)
+
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
@@ -208,6 +214,7 @@ class TukangFragment : Fragment() {
                         loadingState(false)
                         showBadgeRefresh(false)
                         listener?.counterItem(response.results.size)
+                        binding.llFilter.tvFilter.text = "$textFilter (${response.results.size})"
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
@@ -215,6 +222,7 @@ class TukangFragment : Fragment() {
                         loadingState(true, "Belum ada tukang!")
                         showBadgeRefresh(false)
                         listener?.counterItem(0)
+                        binding.llFilter.tvFilter.text = "$textFilter (${response.results.size})"
 
                     }
                     else -> {
