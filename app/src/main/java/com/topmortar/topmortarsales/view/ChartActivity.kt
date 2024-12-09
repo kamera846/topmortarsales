@@ -1,5 +1,6 @@
 package com.topmortar.topmortarsales.view
 
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +13,7 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -30,6 +32,9 @@ class ChartActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
     private val userDistributorId get() = sessionManager.userDistributor()
+    private val userKind get() = sessionManager.userKind()
+    private val userCity get() = sessionManager.userCityID()
+    private val userCityName get() = sessionManager.userCityName()
     private var _binding: ActivityChartBinding? = null
     private val binding get() = _binding!!
 
@@ -56,7 +61,7 @@ class ChartActivity : AppCompatActivity() {
         chartTextColor = getColor(R.color.black_200)
         if (CustomUtility(this).isDarkMode()) chartTextColor = getColor(R.color.white)
 
-        getCities()
+        if (userKind == USER_KIND_ADMIN) getCities()
         loadBarChartData()
     }
 
@@ -80,8 +85,13 @@ class ChartActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val response = when (selectedCity) {
-                    null -> apiService.getActiveStore(idDistributor = userDistributorId ?: "")
-                    else -> apiService.getActiveStore(idCity = selectedCity?.id!!, idDistributor = userDistributorId ?: "")
+                    null -> {
+                        if (userKind == USER_KIND_ADMIN) apiService.getActiveStore(idDistributor = userDistributorId ?: "")
+                        else {
+                            binding.chartDesc.text = "Menampilkan data di kota $userCityName"
+                            apiService.getActiveStore(idCity = userCity ?: "", idDistributor = userDistributorId ?: "")
+                        }
+                    } else -> apiService.getActiveStore(idCity = selectedCity?.id!!, idDistributor = userDistributorId ?: "")
                 }
                 when(response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -298,9 +308,9 @@ class ChartActivity : AppCompatActivity() {
         })
         searchModal.searchHint = "Ketik untuk mencari…"
 
-//        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-//        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.filterCities.componentFilter.background = AppCompatResources.getDrawable(requireContext(), R.color.black_400)
-//        else binding.filterCities.componentFilter.background = AppCompatResources.getDrawable(requireContext(), R.color.light)
+        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.filterCities.setTextColor(getColor(R.color.white))
+        else binding.filterCities.setTextColor(getColor(R.color.black_200))
         binding.filterContainer.visibility = View.GONE
         binding.filterCities.setOnClickListener {
             searchModal.show()

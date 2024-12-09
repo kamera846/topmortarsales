@@ -91,6 +91,7 @@ import com.topmortar.topmortarsales.model.BaseCampModel
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.HomeMenuSalesModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
+import com.topmortar.topmortarsales.view.ChartActivity
 import com.topmortar.topmortarsales.view.MainActivity
 import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.SplashScreenActivity
@@ -1266,6 +1267,15 @@ class HomeSalesActivity : AppCompatActivity() {
         val listItem = arrayListOf<HomeMenuSalesModel>()
 
         if (userKind != USER_KIND_MARKETING) {
+            listItem.add(
+                HomeMenuSalesModel(
+                    icon = R.drawable.bar_chart_fill_white_only,
+                    bgColor = R.drawable.bg_blue_silver_lake_round_8,
+                    title = "Lihat Data Grafik",
+                    target = ChartActivity::class.java,
+                    isLocked = false
+                )
+            )
             listItem.add(
                 HomeMenuSalesModel(
                     icon = R.drawable.boxes_stacked_solid,
