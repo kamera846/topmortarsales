@@ -60,6 +60,7 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
         val tooltipStatus: ImageView = itemView.findViewById(R.id.tooltip_status)
         private val icCake: ImageView = itemView.findViewById(R.id.icCake)
         private val imgProfile: ImageView = itemView.findViewById(R.id.iv_contact_profile)
+        private val badgeSeller: TextView = itemView.findViewById(R.id.textSeller)
         val checkBoxItem: CheckBox = itemView.findViewById(R.id.checkbox)
 
         fun bind(chatItem: ContactModel) {
@@ -80,13 +81,15 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
                 checkBoxItem.visibility = View.GONE
             }
 
-//            checkBoxItem.isChecked = selectedItems.get(position, false)
             checkBoxItem.isChecked = selectedItemsId.contains(chatItem.id_contact)
+
             itemView.setBackgroundColor(
-//                if (selectedItems.get(position, false)) ContextCompat.getColor(itemView.context, R.color.primary15)
                 if (selectedItemsId.contains(chatItem.id_contact)) ContextCompat.getColor(itemView.context, R.color.primary15)
                 else ContextCompat.getColor(itemView.context, R.color.baseBackground)
             )
+
+            if (chatItem.pass_contact.isNotEmpty() && chatItem.pass_contact != "0") badgeSeller.visibility = View.VISIBLE
+            else badgeSeller.visibility = View.GONE
         }
 
         private fun setupStatus(status: String? = null) {

@@ -55,7 +55,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
     private lateinit var viewPager: ViewPager
     private lateinit var pagerAdapter: RencanaVisitPenagihanVPA
     private lateinit var progressDialog: ProgressDialog
-    private var pagerAdapterItemCount = arrayListOf(0,0,0,0,0)
+    private var pagerAdapterItemCount = mutableListOf(0,0,0,0)
     private var activeTab = 0
     private var selectedItemCount = 0
     private var isSelectBarActive = false
@@ -63,7 +63,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
     private var processed = 0
     private var percentage = 0
 
-    private val tabTitles = listOf("Jatem 0-7", "Jatem 8-15", "Jatem 16+", "Mingguan", "MG")
+    private val tabTitles = mutableListOf("Jatem 0-7", "Jatem 8-15", "Jatem 16+", "Mingguan")
     private val tabTitleViews = mutableListOf<TextView>()
 
     private lateinit var listCoordinate: ArrayList<String>
@@ -118,6 +118,11 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
 
         tabLayout = binding.tabLayout
         viewPager = binding.viewPager
+
+        if (userKind == USER_KIND_ADMIN) {
+            pagerAdapterItemCount.add(0)
+            tabTitles.add("MG")
+        }
 
         pagerAdapter = RencanaVisitPenagihanVPA(supportFragmentManager, tabTitles.size)
         viewPager.adapter = pagerAdapter
