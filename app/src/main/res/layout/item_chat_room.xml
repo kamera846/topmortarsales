@@ -138,7 +138,7 @@
                         android:layout_height="wrap_content"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:ellipsize="end"
+                        android:ellipsize="marquee"
                         android:maxLines="1"
                         android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
                         android:text="@string/list_chat_contact_name"/>

@@ -23,4 +23,5 @@ data class ContactModel(
     var is_birthday: String = "",
     var created_at: String = "",
     var deliveryStatus: String = "",
+    var pass_contact: String = "",
 )
