@@ -119,10 +119,10 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
         tabLayout = binding.tabLayout
         viewPager = binding.viewPager
 
-        if (userKind == USER_KIND_ADMIN) {
+//        if (userKind == USER_KIND_ADMIN) {
             pagerAdapterItemCount.add(0)
             tabTitles.add("MG")
-        }
+//        }
 
         pagerAdapter = RencanaVisitPenagihanVPA(supportFragmentManager, tabTitles.size)
         viewPager.adapter = pagerAdapter
