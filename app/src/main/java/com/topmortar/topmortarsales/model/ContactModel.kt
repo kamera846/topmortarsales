@@ -24,4 +24,5 @@ data class ContactModel(
     var created_at: String = "",
     var deliveryStatus: String = "",
     var pass_contact: String = "",
+    var id_surat_jalan: String = "",
 )

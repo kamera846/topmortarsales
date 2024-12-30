@@ -256,6 +256,12 @@ interface ApiService {
         @Query("cr") courierId: String
     ): ResponseContactList
 
+    @GET(SURAT_JALAN_NOT_CLOSING)
+    suspend fun getCourierStoreClosing(
+        @Query("c") idCity: String,
+        @Query("dst") distributorID: String
+    ): ResponseContactList
+
     @GET(SURAT_JALAN)
     suspend fun getSuratJalan(
         @Query("p") processNumber: String,
