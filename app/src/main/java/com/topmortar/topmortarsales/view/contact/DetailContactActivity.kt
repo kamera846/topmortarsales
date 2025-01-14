@@ -2624,7 +2624,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         tooltipStatus.visibility = View.VISIBLE
         binding.weeklyVisitContainer.visibility = View.VISIBLE
-//                            binding.hariBayarContainer.visibility = View.VISIBLE
+        binding.hariBayarContainer.visibility = View.VISIBLE
         binding.tooltipWeeklyVisit.visibility = View.VISIBLE
 //        if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
 //        else btnInvoice.visibility = View.VISIBLE
