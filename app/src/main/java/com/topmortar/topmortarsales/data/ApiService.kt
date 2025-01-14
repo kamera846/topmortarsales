@@ -109,6 +109,7 @@ interface ApiService {
         @Part("termin_payment") termin: RequestBody,
         @Part("reputation") reputation: RequestBody,
         @Part("id_promo") promoId: RequestBody,
+        @Part("hari_bayar") hariBayar: RequestBody,
         @Part ktp: MultipartBody.Part? = null,
     ): Response<ResponseMessage>
 

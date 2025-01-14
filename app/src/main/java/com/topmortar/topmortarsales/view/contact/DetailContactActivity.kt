@@ -348,20 +348,24 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         phoneCategoriesFRC.fetchAndActivate()
             .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
+//                if (task.isSuccessful) {
                     val itemsJson = phoneCategoriesFRC.getString(PHONE_CATEGORIES)
                     val itemsArray = JSONArray(itemsJson)
                     val items = Array(itemsArray.length()) { i -> itemsArray.getString(i) }
 
-                    val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, items)
-                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-
                     spinPhoneCatItems = items.toList()
-                    binding.spinPhoneCategories1.adapter = adapter
-                    binding.spinPhoneCategories2.adapter = adapter
+//                    println("Phone items: $spinPhoneCatItems")
 
-                    initView()
-                } else initView()
+//              }
+
+                val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, spinPhoneCatItems)
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+                binding.spinPhoneCategories1.adapter = adapter
+                binding.spinPhoneCategories2.adapter = adapter
+
+//                println("Phone items: ${task.exception}")
+                initView()
             }
 
     }
@@ -925,12 +929,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
         val pHariBayar = if (selectedHariBayar.isEmpty()) "-1" else {
             when (selectedHariBayar) {
-                hariBayarItem[1] -> "1"
-                hariBayarItem[2] -> "2"
-                hariBayarItem[3] -> "3"
-                hariBayarItem[4] -> "4"
-                hariBayarItem[5] -> "5"
-                hariBayarItem[6] -> "6"
+                hariBayarItem[1] -> "bebas"
+                hariBayarItem[2] -> "senin"
+                hariBayarItem[3] -> "selasa"
+                hariBayarItem[4] -> "rabu"
+                hariBayarItem[5] -> "kamis"
+                hariBayarItem[6] -> "jumat"
+                hariBayarItem[7] -> "sabtu"
                 else -> "-1"
             }
         }
@@ -1006,7 +1011,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     termin = rbTermin,
                     reputation = rbReputation,
                     promoId = rbPromoId,
-                    ktp = imagePart?.let { imagePart }
+                    ktp = imagePart?.let { imagePart },
+                    hariBayar = rbHariBayar
                 )
 
                 if (response.isSuccessful) {
@@ -1156,170 +1162,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         RESPONSE_STATUS_OK -> {
 
                             val data = responseBody.results[0]
-
-                            val iContactId = data.id_contact
-                            val iPhoneCategory1 = data.nomor_cat_1
-                            val iPhone = data.nomorhp
-                            val iPhoneCategory2 = data.nomor_cat_2
-                            val iPhone2 = data.nomorhp_2
-                            val iOwner = data.store_owner
-                            val iBirthday = data.tgl_lahir
-                            val iDate = data.created_at
-
-                            if (iDate.isEmpty()) {
-                                binding.dateSeparator.visibility = View.GONE
-                                binding.line.visibility = View.VISIBLE
-                            } else {
-                                val date = DateFormat.format(iDate, outputFormat = "dd MMM yyyy")
-
-                                binding.tvDate.text = date
-                                binding.dateSeparator.visibility = View.VISIBLE
-                                binding.line.visibility = View.GONE
-                            }
-
-                            iName = data.nama
-                            iKtp = data.ktp_owner
-                            iMapsUrl = data.maps_url
-                            iStatus = data.store_status
-                            iWeeklyVisitStatus = data.tagih_mingguan
-                            iPaymentMethod = data.payment_method
-                            iTermin = data.termin_payment
-                            iReputation = data.reputation
-                            iHariBayar = data.hariBayar
-
-                            tooltipStatus.visibility = View.VISIBLE
-                            binding.weeklyVisitContainer.visibility = View.VISIBLE
-//                            binding.hariBayarContainer.visibility = View.VISIBLE
-                            binding.tooltipWeeklyVisit.visibility = View.VISIBLE
-//        if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
-//        else btnInvoice.visibility = View.VISIBLE
-                            btnInvoice.visibility = View.VISIBLE
-
-                            iAddress = data.address
-                            iLocation = data.id_city
-                            iPromo = data.id_promo
-                            iReportSource = intent.getStringExtra(REPORT_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
-                            iRenviSource = intent.getStringExtra(RENVI_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
-                            iInvoiceId = intent.getStringExtra(CONST_INVOICE_ID)
-                            iReportPaymentStatus = intent.getBooleanExtra(REPORT_TYPE_IS_PAYMENT, false)
-
-                            activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
-
-                            itemSendMessage = ContactModel(
-                                id_contact = iContactId,
-                                nama = iName!!,
-                                nomor_cat_1 = iPhoneCategory1,
-                                nomorhp = iPhone,
-                                nomor_cat_2 = iPhoneCategory2,
-                                nomorhp_2 = iPhone2,
-                                store_owner = iOwner,
-                                tgl_lahir = iBirthday,
-                                maps_url = iMapsUrl!!,
-                                id_city = iLocation!!
-                            )
-                            setupDialogSendMessage(itemSendMessage)
-
-                            if (iContactId.isNotEmpty()) {
-                                contactId = iContactId
-                            }
-
-                            if (iPhoneCategory1.isNotEmpty()) {
-                                val indexItem = spinPhoneCatItems.indexOf(iPhoneCategory1)
-                                if (indexItem > 0) {
-                                    binding.spinPhoneCategories1.setSelection(indexItem)
-                                    binding.tvPhoneCat1.text = "${ binding.spinPhoneCategories1.selectedItem }"
-                                }
-                            }
-                            if (iPhone.isNotEmpty()) {
-                                tvPhone.text = "+$iPhone"
-                                etPhone.setText(iPhone)
-                            } else {
-                                tvPhone.text = EMPTY_FIELD_VALUE
-                                etPhone.setText("")
-                            }
-
-                            if (iPhoneCategory2.isNotEmpty()) {
-                                val indexItem = spinPhoneCatItems.indexOf(iPhoneCategory2)
-                                if (indexItem > 0) {
-                                    binding.spinPhoneCategories2.setSelection(indexItem)
-                                    binding.tvPhoneCat2.text = "${ binding.spinPhoneCategories2.selectedItem }"
-                                }
-                            }
-                            if (iPhone2.isNotEmpty() && iPhone2 != "0") {
-                                binding.tvPhone2.text = "+$iPhone2"
-                                binding.etPhone2.setText(iPhone2)
-                            } else {
-                                binding.tvPhone2.text = EMPTY_FIELD_VALUE
-                                binding.etPhone2.setText("")
-                            }
-                            if (!iName.isNullOrEmpty()) {
-                                tvName.text = iName
-                                etName.setText(iName)
-                            } else {
-                                tvName.text = EMPTY_FIELD_VALUE
-                                etName.setText("")
-                            }
-                            if (iOwner.isNotEmpty()) {
-                                tvOwner.text = iOwner
-                                etOwner.setText(iOwner)
-                            } else {
-                                tvOwner.text = EMPTY_FIELD_VALUE
-                                etOwner.setText("")
-                            }
-                            if (!iLocation.isNullOrEmpty()) {
-                                tvLocation.text = getString(R.string.txt_loading)
-                                etLocation.setText(getString(R.string.txt_loading))
-                            } else {
-                                tvLocation.text = EMPTY_FIELD_VALUE
-                                etLocation.setText("")
-                            }
-                            if (!iPromo.isNullOrEmpty()) {
-                                tvPromo.text = getString(R.string.txt_loading)
-                                etPromo.setText(getString(R.string.txt_loading))
-                            } else {
-                                tvPromo.text = EMPTY_FIELD_VALUE
-                                etPromo.setText("")
-                            }
-                            if (iBirthday.isNotEmpty()) {
-                                if (iBirthday == "0000-00-00") {
-                                    tvBirthday.text = EMPTY_FIELD_VALUE
-                                } else {
-                                    tvBirthday.text = DateFormat.format(iBirthday)
-                                    etBirthday.setText(DateFormat.format(iBirthday))
-                                }
-                            }
-                            if (!iMapsUrl.isNullOrEmpty()) {
-                                tvMaps.text = "Tekan untuk menampilkan lokasi"
-                                etMaps.setText(iMapsUrl)
-                            } else {
-                                iMapsUrl = EMPTY_FIELD_VALUE
-                                tvMaps.text = EMPTY_FIELD_VALUE
-                                etMaps.setText("")
-                            }
-                            if (!iKtp.isNullOrEmpty()) {
-                                tvKtp.text = "Tekan untuk menampilkan KTP"
-                                etKtp.setText("")
-                            } else {
-                                iKtp = EMPTY_FIELD_VALUE
-                                tvKtp.text = EMPTY_FIELD_VALUE
-                                etKtp.setText("")
-                            }
-
-                            // Other columns handle
-                            if (!iAddress.isNullOrEmpty()) etAddress.setText(iAddress)
-                            else etAddress.setText(EMPTY_FIELD_VALUE)
-
-//                            loadingState(false)
-//                            progressDialog.dismiss()
-
-                            // Set Spinner
-                            setupStatusSpinner()
-                            setupWeekliVisitStatusSpinner()
-                            setupPaymentMethodSpinner()
-                            setupTerminSpinner()
-                            setupReputationSpinner()
-                            setupHariBayarSpinner()
-                            setToGetCities()
+                            setupAllField(data)
 
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
@@ -1412,6 +1255,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 setupTermin(iTermin)
                                 setupReputation(iReputation)
                                 setupHariBayar(iHariBayar)
+                                setupAllField(data)
                             } else {
 
 //                                if (data.store_status == STATUS_CONTACT_BLACKLIST) {
@@ -2170,24 +2014,27 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun setupHariBayar(hariBayar: String? = null) {
         when (hariBayar) {
-            "1" -> {
+            "bebas" -> {
                 binding.tvHariBayar.text = hariBayarItem[1]
                 binding.spinHariBayar.setSelection(1)
-            }"2" -> {
+            }"senin" -> {
                 binding.tvHariBayar.text = hariBayarItem[2]
                 binding.spinHariBayar.setSelection(2)
-            }"3" -> {
+            }"selasa" -> {
                 binding.tvHariBayar.text = hariBayarItem[3]
                 binding.spinHariBayar.setSelection(3)
-            }"4" -> {
+            }"rabu" -> {
                 binding.tvHariBayar.text = hariBayarItem[4]
                 binding.spinHariBayar.setSelection(4)
-            }"5" -> {
+            }"kamis" -> {
                 binding.tvHariBayar.text = hariBayarItem[5]
                 binding.spinHariBayar.setSelection(5)
-            }"6" -> {
+            }"jumat" -> {
                 binding.tvHariBayar.text = hariBayarItem[6]
                 binding.spinHariBayar.setSelection(6)
+            }"sabtu" -> {
+                binding.tvHariBayar.text = hariBayarItem[7]
+                binding.spinHariBayar.setSelection(7)
             }
             else -> {
                 binding.tvHariBayar.text = EMPTY_FIELD_VALUE
@@ -2328,12 +2175,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
 
         selectedHariBayar = when (iHariBayar) {
-             "1" -> hariBayarItem[1]
-             "2" -> hariBayarItem[2]
-             "3" -> hariBayarItem[3]
-             "4" -> hariBayarItem[4]
-             "5" -> hariBayarItem[5]
-             "6" -> hariBayarItem[6]
+             "bebas" -> hariBayarItem[1]
+             "senin" -> hariBayarItem[2]
+             "selasa" -> hariBayarItem[3]
+             "rabu" -> hariBayarItem[4]
+             "kamis" -> hariBayarItem[5]
+             "jumat" -> hariBayarItem[6]
+             "sabtu" -> hariBayarItem[7]
             else -> "-1"
         }
         setupHariBayar(iHariBayar)
@@ -2741,6 +2589,172 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 //                params.setMargins(0, 0, 0, convertDpToPx(1, this@DetailContactActivity))
             }
         }, duration)
+    }
+
+    private fun setupAllField(data: ContactModel) {
+        val iContactId = data.id_contact
+        val iPhoneCategory1 = data.nomor_cat_1
+        val iPhone = data.nomorhp
+        val iPhoneCategory2 = data.nomor_cat_2
+        val iPhone2 = data.nomorhp_2
+        val iOwner = data.store_owner
+        val iBirthday = data.tgl_lahir
+        val iDate = data.created_at
+
+        if (iDate.isEmpty()) {
+            binding.dateSeparator.visibility = View.GONE
+            binding.line.visibility = View.VISIBLE
+        } else {
+            val date = DateFormat.format(iDate, outputFormat = "dd MMM yyyy")
+
+            binding.tvDate.text = date
+            binding.dateSeparator.visibility = View.VISIBLE
+            binding.line.visibility = View.GONE
+        }
+
+        iName = data.nama
+        iKtp = data.ktp_owner
+        iMapsUrl = data.maps_url
+        iStatus = data.store_status
+        iWeeklyVisitStatus = data.tagih_mingguan
+        iPaymentMethod = data.payment_method
+        iTermin = data.termin_payment
+        iReputation = data.reputation
+        iHariBayar = data.hari_bayar
+
+        tooltipStatus.visibility = View.VISIBLE
+        binding.weeklyVisitContainer.visibility = View.VISIBLE
+//                            binding.hariBayarContainer.visibility = View.VISIBLE
+        binding.tooltipWeeklyVisit.visibility = View.VISIBLE
+//        if (iStatus == STATUS_CONTACT_BLACKLIST) btnInvoice.visibility = View.GONE
+//        else btnInvoice.visibility = View.VISIBLE
+        btnInvoice.visibility = View.VISIBLE
+
+        iAddress = data.address
+        iLocation = data.id_city
+        iPromo = data.id_promo
+        iReportSource = intent.getStringExtra(REPORT_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
+        iRenviSource = intent.getStringExtra(RENVI_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
+        iInvoiceId = intent.getStringExtra(CONST_INVOICE_ID)
+        iReportPaymentStatus = intent.getBooleanExtra(REPORT_TYPE_IS_PAYMENT, false)
+
+        activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
+
+        itemSendMessage = ContactModel(
+            id_contact = iContactId,
+            nama = iName!!,
+            nomor_cat_1 = iPhoneCategory1,
+            nomorhp = iPhone,
+            nomor_cat_2 = iPhoneCategory2,
+            nomorhp_2 = iPhone2,
+            store_owner = iOwner,
+            tgl_lahir = iBirthday,
+            maps_url = iMapsUrl!!,
+            id_city = iLocation!!
+        )
+        setupDialogSendMessage(itemSendMessage)
+
+        if (iContactId.isNotEmpty()) {
+            contactId = iContactId
+        }
+
+        if (iPhoneCategory1.isNotEmpty()) {
+            val indexItem = spinPhoneCatItems.indexOf(iPhoneCategory1)
+            if (indexItem > 0) {
+                binding.spinPhoneCategories1.setSelection(indexItem)
+                binding.tvPhoneCat1.text = "${ binding.spinPhoneCategories1.selectedItem }"
+            }
+        }
+        if (iPhone.isNotEmpty()) {
+            tvPhone.text = "+$iPhone"
+            etPhone.setText(iPhone)
+        } else {
+            tvPhone.text = EMPTY_FIELD_VALUE
+            etPhone.setText("")
+        }
+
+        if (iPhoneCategory2.isNotEmpty()) {
+            val indexItem = spinPhoneCatItems.indexOf(iPhoneCategory2)
+            if (indexItem > 0) {
+                binding.spinPhoneCategories2.setSelection(indexItem)
+                binding.tvPhoneCat2.text = "${ binding.spinPhoneCategories2.selectedItem }"
+            }
+        }
+        if (iPhone2.isNotEmpty() && iPhone2 != "0") {
+            binding.tvPhone2.text = "+$iPhone2"
+            binding.etPhone2.setText(iPhone2)
+        } else {
+            binding.tvPhone2.text = EMPTY_FIELD_VALUE
+            binding.etPhone2.setText("")
+        }
+        if (!iName.isNullOrEmpty()) {
+            tvName.text = iName
+            etName.setText(iName)
+        } else {
+            tvName.text = EMPTY_FIELD_VALUE
+            etName.setText("")
+        }
+        if (iOwner.isNotEmpty()) {
+            tvOwner.text = iOwner
+            etOwner.setText(iOwner)
+        } else {
+            tvOwner.text = EMPTY_FIELD_VALUE
+            etOwner.setText("")
+        }
+        if (!iLocation.isNullOrEmpty()) {
+            tvLocation.text = getString(R.string.txt_loading)
+            etLocation.setText(getString(R.string.txt_loading))
+        } else {
+            tvLocation.text = EMPTY_FIELD_VALUE
+            etLocation.setText("")
+        }
+        if (!iPromo.isNullOrEmpty()) {
+            tvPromo.text = getString(R.string.txt_loading)
+            etPromo.setText(getString(R.string.txt_loading))
+        } else {
+            tvPromo.text = EMPTY_FIELD_VALUE
+            etPromo.setText("")
+        }
+        if (iBirthday.isNotEmpty()) {
+            if (iBirthday == "0000-00-00") {
+                tvBirthday.text = EMPTY_FIELD_VALUE
+            } else {
+                tvBirthday.text = DateFormat.format(iBirthday)
+                etBirthday.setText(DateFormat.format(iBirthday))
+            }
+        }
+        if (!iMapsUrl.isNullOrEmpty()) {
+            tvMaps.text = "Tekan untuk menampilkan lokasi"
+            etMaps.setText(iMapsUrl)
+        } else {
+            iMapsUrl = EMPTY_FIELD_VALUE
+            tvMaps.text = EMPTY_FIELD_VALUE
+            etMaps.setText("")
+        }
+        if (!iKtp.isNullOrEmpty()) {
+            tvKtp.text = "Tekan untuk menampilkan KTP"
+            etKtp.setText("")
+        } else {
+            iKtp = EMPTY_FIELD_VALUE
+            tvKtp.text = EMPTY_FIELD_VALUE
+            etKtp.setText("")
+        }
+
+        // Other columns handle
+        if (!iAddress.isNullOrEmpty()) etAddress.setText(iAddress)
+        else etAddress.setText(EMPTY_FIELD_VALUE)
+
+//                            loadingState(false)
+//                            progressDialog.dismiss()
+
+        // Set Spinner
+        setupStatusSpinner()
+        setupWeekliVisitStatusSpinner()
+        setupPaymentMethodSpinner()
+        setupTerminSpinner()
+        setupReputationSpinner()
+        setupHariBayarSpinner()
+        setToGetCities()
     }
 
     override fun onStart() {

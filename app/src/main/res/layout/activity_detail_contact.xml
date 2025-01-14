@@ -62,8 +62,8 @@
                         android:id="@+id/tv_name"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/store_name"
-                        android:textSize="20sp"
+                        android:text="@string/txt_loading"
+                        android:textSize="16sp"
                         android:textStyle="bold"
                         android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
 
@@ -146,7 +146,7 @@
                     android:id="@+id/tv_date"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="15 November 2023"
+                    android:text="@string/txt_loading"
                     android:textSize="14sp"
                     android:theme="@style/Theme.TopMortarSales.TextBaseLine" />
 
@@ -238,8 +238,8 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:gravity="center_vertical"
-                                    android:text="@string/phone_dummy"
-                                    android:textSize="16sp"
+                                    android:text="@string/txt_loading"
+                                    android:textSize="14sp"
                                     android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
                             </LinearLayout>
@@ -303,8 +303,8 @@
                                         android:layout_width="match_parent"
                                         android:layout_height="wrap_content"
                                         android:gravity="center_vertical"
-                                        android:text="@string/phone_dummy"
-                                        android:textSize="16sp"
+                                        android:text="@string/txt_loading"
+                                        android:textSize="14sp"
                                         android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
                                 </LinearLayout>
@@ -401,7 +401,7 @@
                                     android:hint="@string/input_phone_number_placeholder"
                                     android:inputType="phone"
                                     android:autofillHints="@string/input_phone_number_placeholder"
-                                    android:textSize="16sp"
+                                    android:textSize="14sp"
                                     android:background="@android:color/transparent"
                                     android:outlineProvider="none"/>
 
@@ -455,7 +455,7 @@
                                     android:hint="@string/input_phone_number_placeholder"
                                     android:inputType="phone"
                                     android:autofillHints="@string/input_phone_number_placeholder"
-                                    android:textSize="16sp"
+                                    android:textSize="14sp"
                                     android:background="@android:color/transparent"
                                     android:outlineProvider="none"/>
 
@@ -497,8 +497,8 @@
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:gravity="center_vertical"
-                            android:text="@string/owner_name"
-                            android:textSize="16sp"
+                            android:text="@string/txt_loading"
+                            android:textSize="14sp"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
                         <ImageView
@@ -540,7 +540,7 @@
                             android:hint="@string/enter_owner_name"
                             android:inputType="textCapWords"
                             android:autofillHints="Enter Owner Name"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:background="@android:color/transparent"
                             android:outlineProvider="none"/>
 
@@ -587,10 +587,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
-                            android:text="@string/maps_coordinates"
+                            android:text="@string/txt_loading"
                             android:maxLines="2"
                             android:ellipsize="end"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
                         <ImageView
@@ -634,7 +634,7 @@
                             android:hint="Tekan untuk mendapatkan koordinat"
                             android:inputType="textCapWords"
                             android:autofillHints="Tekan untuk mendapatkan koordinat"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:background="@android:color/transparent"
                             android:outlineProvider="none"/>
 
@@ -672,8 +672,8 @@
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:gravity="center_vertical"
-                            android:text="@string/dummy_city"
-                            android:textSize="16sp"
+                            android:text="@string/txt_loading"
+                            android:textSize="14sp"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
                         <ImageView
@@ -716,7 +716,7 @@
                             android:hint="@string/choose_customer_city"
                             android:inputType="textCapWords"
                             android:autofillHints="Choose Owner Birthday"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:background="@android:color/transparent"
                             android:outlineProvider="none"/>
 
@@ -756,7 +756,7 @@
                             android:layout_weight="1"
                             android:gravity="center_vertical"
                             android:text="Tukang Batu"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
                         <ImageView
@@ -799,7 +799,7 @@
                             android:hint="Pilih Keahlian Tukang"
                             android:inputType="textCapWords"
                             android:autofillHints="Choose Owner Birthday"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:background="@android:color/transparent"
                             android:outlineProvider="none"/>
 
@@ -837,8 +837,8 @@
                             android:layout_height="match_parent"
                             android:layout_weight="1"
                             android:gravity="center_vertical"
-                            android:text="@string/dummy_date"
-                            android:textSize="16sp"
+                            android:text="@string/txt_loading"
+                            android:textSize="14sp"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
                         <ImageView
@@ -881,7 +881,7 @@
                             android:hint="@string/choose_owner_birthday"
                             android:inputType="textCapWords"
                             android:autofillHints="Choose Owner Birthday"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:background="@android:color/transparent"
                             android:outlineProvider="none"/>
 
@@ -920,7 +920,7 @@
                             android:layout_weight="1"
                             android:gravity="center_vertical"
                             android:text="Preview KTP"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
                         <ImageView
@@ -963,7 +963,7 @@
                             android:hint="Tekan untuk meng-upload file"
                             android:inputType="textCapWords"
                             android:autofillHints="Choose Owner Birthday"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:background="@android:color/transparent"
                             android:outlineProvider="none"/>
 
@@ -980,7 +980,7 @@
                         android:textColorHint="@color/black_600"
                         android:inputType="textCapWords"
                         android:autofillHints="Choose Owner Birthday"
-                        android:textSize="16sp"
+                        android:textSize="14sp"
                         android:text="File terpilih: "
                         android:background="@android:color/transparent"
                         android:outlineProvider="none"/>
@@ -1054,7 +1054,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
-                            android:text="@string/active"
+                            android:text="@string/txt_loading"
                             android:layout_marginHorizontal="16dp"
                             android:layout_marginBottom="16dp"
                             android:textSize="14sp"
@@ -1145,7 +1145,7 @@
 
                 <!-- Hari Bayar -->
                 <LinearLayout
-                    android:visibility="gone"
+                    android:visibility="visible"
                     android:id="@+id/hari_bayar_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -1178,7 +1178,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
-                            android:text="Bebas"
+                            android:text="@string/txt_loading"
                             android:layout_marginHorizontal="16dp"
                             android:layout_marginBottom="16dp"
                             android:textSize="14sp"
@@ -1231,7 +1231,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
-                            android:text="Tunai"
+                            android:text="@string/txt_loading"
                             android:layout_marginHorizontal="16dp"
                             android:layout_marginBottom="16dp"
                             android:textSize="14sp"
@@ -1284,7 +1284,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
-                            android:text="Cash"
+                            android:text="@string/txt_loading"
                             android:layout_marginHorizontal="16dp"
                             android:layout_marginBottom="16dp"
                             android:textSize="14sp"
@@ -1338,7 +1338,7 @@
                             android:layout_marginHorizontal="16dp"
                             android:layout_marginBottom="16dp"
                             android:gravity="center_vertical"
-                            android:text="Good"
+                            android:text="@string/txt_loading"
                             android:textSize="14sp"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
                             android:visibility="visible" />
@@ -1389,7 +1389,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
-                            android:text="@string/tidak_ada_promo"
+                            android:text="@string/txt_loading"
                             android:layout_marginHorizontal="16dp"
                             android:layout_marginBottom="16dp"
                             android:textSize="14sp"
@@ -1407,7 +1407,7 @@
                             android:layout_marginHorizontal="16dp"
                             android:layout_marginBottom="16dp"
                             android:inputType="text"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:background="@android:color/transparent"
                             android:outlineProvider="none"/>
 
@@ -1440,12 +1440,12 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="16dp"
-                        android:textSize="16sp"
+                        android:textSize="14sp"
                         android:maxLines="5"
                         android:gravity="center_vertical"
                         android:textColorHint="@color/black_600"
                         android:hint="@string/enter_address"
-                        android:text="@string/dummy_address"
+                        android:text="@string/txt_loading"
                         android:inputType="textMultiLine"
                         android:autofillHints="Enter Owner Name"
                         android:background="@android:color/transparent"
@@ -1504,7 +1504,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textStyle="bold"
-                    android:textSize="16sp"
+                    android:textSize="14sp"
                     android:alpha="0.7"
                     android:text="Pengiriman berlangsung"
                     android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
