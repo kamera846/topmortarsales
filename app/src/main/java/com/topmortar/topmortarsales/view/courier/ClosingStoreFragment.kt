@@ -189,10 +189,16 @@ class ClosingStoreFragment : Fragment() {
 
                                                 // Remove expired item
                                                 for (store in deliveryStore.iterator()) {
+
                                                     val findItem = contacts.find { it.id_contact == store.id }
+
                                                     if (findItem == null) {
-                                                        myRef.child("stores/${store.id}").removeValue()
+
+                                                        val storeRef = myRef.child("stores")
+                                                        if (store.id.isNotEmpty()) storeRef.child(store.id).removeValue()
+
                                                     }
+
                                                 }
 
                                                 setRecyclerView(contacts)
