@@ -762,7 +762,9 @@ interface ApiService {
     ): ResponseProduct
 
     @GET(VISIT_QUESTION)
-    suspend fun getVisitQuestion(): ResponseQuestion
+    suspend fun getVisitQuestion(
+        @Query("dst") idDistributor: String,
+    ): ResponseQuestion
 
     @Multipart
     @POST(VISIT_QUESTION)
