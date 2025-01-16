@@ -48,6 +48,7 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
 
         private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
+        private val tvNotes: TextView = itemView.findViewById(R.id.tv_notes)
         val checkListImage: ImageView = itemView.findViewById(R.id.checklist)
         private val imgProfile: ImageView = itemView.findViewById(R.id.iv_contact_profile)
         private val textVerified: TextView = itemView.findViewById(R.id.textVerified)
@@ -119,6 +120,11 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
                     badgeNew.visibility = View.GONE
                 }
             }
+
+            if (item.hari_bayar.isNotEmpty()) {
+                tvNotes.text = "* hari bayar ${item.hari_bayar}"
+                tvNotes.visibility = View.VISIBLE
+            } else tvNotes.visibility = View.GONE
 
             tvContactName.text = item.nama
             tvPhoneNumber.text = dateJatem
