@@ -365,7 +365,7 @@ class ChecklistReportActivity : AppCompatActivity() {
         val apiService = HttpClient.create()
         lifecycleScope.launch {
             try {
-                val response = apiService.getVisitQuestion()
+                val response = apiService.getVisitQuestion(idDistributor = userDistributorId)
                 when(response.status) {
                     RESPONSE_STATUS_OK -> {
 

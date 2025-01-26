@@ -109,6 +109,7 @@ interface ApiService {
         @Part("termin_payment") termin: RequestBody,
         @Part("reputation") reputation: RequestBody,
         @Part("id_promo") promoId: RequestBody,
+        @Part("hari_bayar") hariBayar: RequestBody,
         @Part ktp: MultipartBody.Part? = null,
     ): Response<ResponseMessage>
 
@@ -254,6 +255,12 @@ interface ApiService {
     suspend fun getCourierStore(
         @Query("p") processNumber: String,
         @Query("cr") courierId: String
+    ): ResponseContactList
+
+    @GET(SURAT_JALAN_NOT_CLOSING)
+    suspend fun getCourierStoreClosing(
+        @Query("c") idCity: String,
+        @Query("dst") distributorID: String
     ): ResponseContactList
 
     @GET(SURAT_JALAN)
@@ -755,7 +762,9 @@ interface ApiService {
     ): ResponseProduct
 
     @GET(VISIT_QUESTION)
-    suspend fun getVisitQuestion(): ResponseQuestion
+    suspend fun getVisitQuestion(
+        @Query("dst") idDistributor: String,
+    ): ResponseQuestion
 
     @Multipart
     @POST(VISIT_QUESTION)

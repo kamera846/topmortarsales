@@ -19,6 +19,7 @@ object DeliveryModel {
     data class Store (
         var id: String = "",
         var deliveryId: String = "",
+        var idSuratJalan: String = "",
         var name: String = "",
         var lat: Double = 0.0,
         var lng: Double = 0.0,

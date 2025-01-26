@@ -81,6 +81,7 @@ class ClosingStoreFragment : Fragment() {
     private lateinit var sessionManager: SessionManager
     private val userFullName get() = sessionManager.fullName().toString()
     private val userID get() = sessionManager.userID().toString()
+    private val userCityID get() = sessionManager.userCityID().toString()
     private val userDistributorID get() = sessionManager.userDistributor().toString()
 
     // Delivery
@@ -138,7 +139,8 @@ class ClosingStoreFragment : Fragment() {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getCourierStore(processNumber = "1", courierId = userID)
+                val response = apiService.getCourierStoreClosing(idCity = userCityID, distributorID = userDistributorID)
+//                val response = apiService.getCourierStore(processNumber = "1", courierId = userID)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -178,12 +180,25 @@ class ClosingStoreFragment : Fragment() {
                                                 }
 
                                                 for ((i, contact) in contacts.withIndex()) {
-                                                    val findItem = deliveryStore.find { it.id == contact.id_contact }
+                                                    val findItem = deliveryStore.find { it.id == contact.id_contact && it.idSuratJalan == contact.id_surat_jalan }
                                                     contacts[i].deliveryStatus = "Pengiriman sedang berlangsung"
                                                     if (findItem == null) {
-
                                                         startDelivery(contact)
                                                     }
+                                                }
+
+                                                // Remove expired item
+                                                for (store in deliveryStore.iterator()) {
+
+                                                    val findItem = contacts.find { it.id_contact == store.id }
+
+                                                    if (findItem == null) {
+
+                                                        val storeRef = myRef.child("stores")
+                                                        if (store.id.isNotEmpty()) storeRef.child(store.id).removeValue()
+
+                                                    }
+
                                                 }
 
                                                 setRecyclerView(contacts)
@@ -417,6 +432,7 @@ class ClosingStoreFragment : Fragment() {
 
                     val store = DeliveryModel.Store(
                         id = contact.id_contact,
+                        idSuratJalan = contact.id_surat_jalan,
                         name = contact.nama,
                         lat = targetLatLng.latitude,
                         lng = targetLatLng.longitude,
@@ -426,6 +442,7 @@ class ClosingStoreFragment : Fragment() {
                     )
 
                     childDriver.child("id").setValue(deliveryId)
+                    childDriver.child("idSuratJalan").setValue(deliveryId)
                     childDriver.child("lat").setValue(currentLatLng.latitude)
                     childDriver.child("lng").setValue(currentLatLng.longitude)
                     childDriver.child("courier").setValue(courierModel)

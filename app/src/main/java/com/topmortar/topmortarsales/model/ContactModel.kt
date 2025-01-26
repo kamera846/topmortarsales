@@ -19,9 +19,10 @@ data class ContactModel(
     var termin_payment: String = "",
     var id_promo: String = "",
     var reputation: String = "",
-    var hariBayar: String = "",
+    var hari_bayar: String = "",
     var is_birthday: String = "",
     var created_at: String = "",
     var deliveryStatus: String = "",
     var pass_contact: String = "",
+    var id_surat_jalan: String = "",
 )
