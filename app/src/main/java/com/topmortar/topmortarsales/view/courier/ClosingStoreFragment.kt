@@ -139,8 +139,8 @@ class ClosingStoreFragment : Fragment() {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getCourierStoreClosing(idCity = userCityID, distributorID = userDistributorID)
-//                val response = apiService.getCourierStore(processNumber = "1", courierId = userID)
+//                val response = apiService.getCourierStoreClosing(idCity = userCityID, distributorID = userDistributorID)
+                val response = apiService.getCourierStore(processNumber = "1", courierId = userID)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
