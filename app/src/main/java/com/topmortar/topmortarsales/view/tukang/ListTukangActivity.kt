@@ -19,9 +19,12 @@ import com.topmortar.topmortarsales.commons.SEARCH_CLEAR
 import com.topmortar.topmortarsales.commons.SEARCH_CLOSE
 import com.topmortar.topmortarsales.commons.SEARCH_OPEN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.databinding.ActivityListTukangBinding
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
 
 class ListTukangActivity : AppCompatActivity() {
 
@@ -67,7 +70,6 @@ class ListTukangActivity : AppCompatActivity() {
         etSearchBox.hint = "Ketik nama atau nomor tukang$ELLIPSIS_TEXT"
         icCloseSearch.setOnClickListener { toggleSearchEvent(SEARCH_CLOSE) }
         icClearSearch.setOnClickListener { etSearchBox.setText("") }
-
 
         /*
         Call Fragment
@@ -155,7 +157,9 @@ class ListTukangActivity : AppCompatActivity() {
                         searchRunnable = Runnable {
 
                             toggleSearchEvent(SEARCH_CLEAR)
-                            handleMessage(this@ListTukangActivity, "TAG", searchTerm)
+                            val event = EventBusUtils.MessageEvent(searchTerm)
+                            EventBus.getDefault().post(event)
+//                            handleMessage(this@ListTukangActivity, "TAG", searchTerm)
                         }
 
                         searchRunnable?.let { searchHandler.postDelayed(it, searchDelayMillis) }
@@ -219,6 +223,20 @@ class ListTukangActivity : AppCompatActivity() {
 
     }
 
+    @Subscribe
+    fun onEventBus(event: EventBusUtils.MessageEvent) {
+    }
+
+    override fun onStart() {
+        super.onStart()
+        EventBus.getDefault().register(this)
+    }
+
+    override fun onStop() {
+        EventBus.getDefault().unregister(this)
+        super.onStop()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
@@ -226,7 +244,8 @@ class ListTukangActivity : AppCompatActivity() {
 
     @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
-        finish()
+        if (isSearchActive) toggleSearchEvent(SEARCH_CLOSE)
+        else finish()
     }
 
 }

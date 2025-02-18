@@ -360,6 +360,7 @@ class TukangFragment : Fragment() {
 
     @Subscribe
     fun onEventBus(event: EventBusUtils.MessageEvent) {
+        getList()
     }
 
     private fun showBadgeRefresh(action: Boolean) {
