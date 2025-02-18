@@ -2,11 +2,25 @@ package com.topmortar.topmortarsales.view.tukang
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.text.Editable
+import android.text.TextUtils
+import android.text.TextWatcher
 import android.view.View
+import android.view.animation.AnimationUtils
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.ELLIPSIS_TEXT
+import com.topmortar.topmortarsales.commons.SEARCH_CLEAR
+import com.topmortar.topmortarsales.commons.SEARCH_CLOSE
+import com.topmortar.topmortarsales.commons.SEARCH_OPEN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.databinding.ActivityListTukangBinding
 
 class ListTukangActivity : AppCompatActivity() {
@@ -16,6 +30,20 @@ class ListTukangActivity : AppCompatActivity() {
     private val userKind get() = sessionManager.userKind()
     private val userID get() = sessionManager.userID()
     private val binding get() = _binding!!
+
+    // Title & Search Bar
+    private lateinit var titleBarWrapper: LinearLayout
+    private lateinit var searchBoxWrapper: LinearLayout
+    private lateinit var icClearSearch: ImageView
+    private lateinit var icCloseSearch: ImageView
+    private lateinit var etSearchBox: EditText
+
+    // Initialize Search Engine
+    private val searchDelayMillis = 500L
+    private val searchHandler = Handler(Looper.getMainLooper())
+    private var searchRunnable: Runnable? = null
+    private var previousSearchTerm = ""
+    private var isSearchActive = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +55,19 @@ class ListTukangActivity : AppCompatActivity() {
 
         binding.titleBarDark.tvTitleBar.text = "Daftar Tukang"
         binding.titleBarDark.icBack.setOnClickListener { finish() }
+
+        titleBarWrapper = findViewById(R.id.titleBarDark)
+        searchBoxWrapper = findViewById(R.id.search_box)
+        icClearSearch = binding.searchBox.icClearSearch
+        icCloseSearch = binding.searchBox.icCloseSearch
+        etSearchBox = binding.searchBox.etSearchBox
+
+        binding.titleBarDark.icSearch.visibility = View.VISIBLE
+        binding.titleBarDark.icSearch.setOnClickListener { toggleSearchEvent(SEARCH_OPEN) }
+        etSearchBox.hint = "Ketik nama atau nomor tukang$ELLIPSIS_TEXT"
+        icCloseSearch.setOnClickListener { toggleSearchEvent(SEARCH_CLOSE) }
+        icClearSearch.setOnClickListener { etSearchBox.setText("") }
+
 
         /*
         Call Fragment
@@ -54,6 +95,128 @@ class ListTukangActivity : AppCompatActivity() {
         /*
         End Call Fragment
          */
+    }
+
+    private fun toggleSearchEvent(state: String) {
+
+        val animationDuration = 200L
+
+        val fadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in)
+        fadeIn.duration = animationDuration
+        val fadeOut = AnimationUtils.loadAnimation(this, R.anim.fade_out)
+        fadeOut.duration = animationDuration
+        val slideInFromLeft = AnimationUtils.loadAnimation(this,
+            R.anim.fade_slide_in_from_left
+        )
+        slideInFromLeft.duration = animationDuration
+        val slideOutToRight = AnimationUtils.loadAnimation(this,
+            R.anim.fade_slide_out_to_right
+        )
+        slideOutToRight.duration = animationDuration
+        val slideInFromRight = AnimationUtils.loadAnimation(this,
+            R.anim.fade_slide_in_from_right
+        )
+        slideInFromRight.duration = animationDuration
+        val slideOutToLeft = AnimationUtils.loadAnimation(this,
+            R.anim.fade_slide_out_to_left
+        )
+        slideOutToLeft.duration = animationDuration
+
+        if (state == SEARCH_OPEN && !isSearchActive) {
+
+            searchBoxWrapper.visibility = View.VISIBLE
+
+            searchBoxWrapper.startAnimation(slideInFromLeft)
+            titleBarWrapper.startAnimation(slideOutToRight)
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                titleBarWrapper.visibility = View.GONE
+                etSearchBox.requestFocus()
+                isSearchActive = true
+            }, animationDuration)
+
+            etSearchBox.addTextChangedListener(object: TextWatcher {
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {}
+
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+
+                    val searchTerm = s.toString()
+
+                    if (searchTerm != previousSearchTerm) {
+                        previousSearchTerm = searchTerm
+
+                        searchRunnable?.let { searchHandler.removeCallbacks(it) }
+
+                        searchRunnable = Runnable {
+
+                            toggleSearchEvent(SEARCH_CLEAR)
+                            handleMessage(this@ListTukangActivity, "TAG", searchTerm)
+                        }
+
+                        searchRunnable?.let { searchHandler.postDelayed(it, searchDelayMillis) }
+
+                    }
+
+                }
+
+                override fun afterTextChanged(s: Editable?) {}
+
+            })
+
+        }
+
+        if (state == SEARCH_CLOSE && isSearchActive) {
+
+            titleBarWrapper.visibility = View.VISIBLE
+
+            titleBarWrapper.startAnimation(slideInFromRight)
+            searchBoxWrapper.startAnimation(slideOutToLeft)
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                searchBoxWrapper.visibility = View.GONE
+                etSearchBox.clearFocus()
+                isSearchActive = false
+            }, animationDuration)
+
+            if (etSearchBox.text.toString() != "") etSearchBox.setText("")
+
+        }
+
+        if (state == SEARCH_CLEAR) {
+
+            if (TextUtils.isEmpty(etSearchBox.text)) {
+
+                if (icClearSearch.visibility == View.VISIBLE) {
+
+                    icClearSearch.startAnimation(fadeOut)
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        icClearSearch.visibility = View.GONE
+                    }, animationDuration)
+
+                }
+
+            } else {
+
+                if (icClearSearch.visibility == View.GONE) {
+
+                    etSearchBox.clearFocus()
+
+                    icClearSearch.startAnimation(fadeIn)
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        icClearSearch.visibility = View.VISIBLE
+                    }, animationDuration)
+
+                }
+
+            }
+
+        }
+
     }
 
     override fun onDestroy() {

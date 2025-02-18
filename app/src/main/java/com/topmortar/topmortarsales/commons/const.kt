@@ -30,6 +30,8 @@ const val FIREBASE_CHILD_IS_ALLOWED_LOGOUT = "isAllowedLogout"
 /*
     Global
  */
+const val ELLIPSIS_TEXT = "…"
+
 const val TOAST_LONG = Toast.LENGTH_LONG
 const val TOAST_SHORT = Toast.LENGTH_SHORT
 
