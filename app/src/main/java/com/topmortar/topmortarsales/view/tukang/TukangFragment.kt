@@ -73,6 +73,8 @@ class TukangFragment : Fragment() {
     private var selectedCity: ModalSearchModel? = null
     private var listItem: ArrayList<RencanaVisitModel> = arrayListOf()
 
+    private var searchKey: String = ""
+
     private var listener: CounterItem? = null
     interface CounterItem {
         fun counterItem(count: Int)
@@ -198,9 +200,9 @@ class TukangFragment : Fragment() {
 
                 val response = when (userKind) {
                     USER_KIND_ADMIN -> {
-                        if (selectedCity != null) apiService.getTukang(cityId = selectedCity?.id!!)
-                        else apiService.getTukangDst(distributorID = userDistributorId!!)
-                    } else -> apiService.getTukang(cityId = userCity)
+                        if (selectedCity != null) apiService.getTukang(cityId = selectedCity?.id!!, searchKey = searchKey)
+                        else apiService.getTukangDst(distributorID = userDistributorId!!, searchKey = searchKey)
+                    } else -> apiService.getTukang(cityId = userCity, searchKey = searchKey)
                 }
 
                 val textFilter = if (selectedCity != null) {
@@ -360,6 +362,16 @@ class TukangFragment : Fragment() {
 
     @Subscribe
     fun onEventBus(event: EventBusUtils.MessageEvent) {
+        searchKey = event.message
+        searchKey = if (searchKey.startsWith("0")) {
+            "62${searchKey.substring(1)}"
+        } else if (searchKey.startsWith("8")) {
+            "62${searchKey.substring(0)}"
+        } else if (searchKey.startsWith("+")) {
+            "${searchKey.substring(1)}"
+        } else {
+            searchKey
+        }
         getList()
     }
 

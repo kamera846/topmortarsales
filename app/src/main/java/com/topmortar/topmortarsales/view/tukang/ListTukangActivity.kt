@@ -80,9 +80,9 @@ class ListTukangActivity : AppCompatActivity() {
         val myFragment = TukangFragment()
 //        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) myFragment.setUserID(intent.getStringExtra(CONST_USER_ID)) else myFragment.setUserID(userID)
         if (userKind != USER_KIND_ADMIN) {
-            binding.titleBarDark.tvTitleBarDescription.visibility = View.VISIBLE
             myFragment.setCounterItem(object : TukangFragment.CounterItem {
                 override fun counterItem(count: Int) {
+                    binding.titleBarDark.tvTitleBarDescription.visibility = View.VISIBLE
                     binding.titleBarDark.tvTitleBarDescription.text = "Total $count data"
                 }
 
@@ -156,7 +156,7 @@ class ListTukangActivity : AppCompatActivity() {
 
                         searchRunnable = Runnable {
 
-                            toggleSearchEvent(SEARCH_CLEAR)
+//                            toggleSearchEvent(SEARCH_CLEAR)
                             val event = EventBusUtils.MessageEvent(searchTerm)
                             EventBus.getDefault().post(event)
 //                            handleMessage(this@ListTukangActivity, "TAG", searchTerm)
