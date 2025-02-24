@@ -801,7 +801,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
                         searchRunnable = Runnable {
 
-                            toggleSearchEvent(SEARCH_CLEAR)
+//                            toggleSearchEvent(SEARCH_CLEAR)
                             searchContact(searchTerm)
                         }
 
