@@ -404,10 +404,10 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 icMore.visibility = View.VISIBLE
             }
             binding.titleBar.icBack.visibility = View.GONE
-            tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
-            tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
+//            tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
+//            tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
             binding.titleBar.tvTitleBar.setPadding(convertDpToPx(16, this), 0, 0, 0)
-            binding.titleBar.tvTitleBarDescription.setPadding(convertDpToPx(16, this), 0, 0, 0)
+//            binding.titleBar.tvTitleBarDescription.setPadding(convertDpToPx(16, this), 0, 0, 0)
             etSearchBox.setPadding(0, 0, convertDpToPx(16, this), 0)
         }
 
@@ -804,7 +804,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
                         searchRunnable = Runnable {
 
-//                            toggleSearchEvent(SEARCH_CLEAR)
+                            toggleSearchEvent(SEARCH_CLEAR)
                             searchContact(searchTerm)
                         }
 
@@ -854,7 +854,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
                 if (icClearSearch.visibility == View.GONE) {
 
-                    etSearchBox.clearFocus()
+//                    etSearchBox.clearFocus()
 
                     icClearSearch.startAnimation(fadeIn)
                     Handler(Looper.getMainLooper()).postDelayed({
@@ -1083,10 +1083,10 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                         } else {
                             sessionManager.setUserLoggedIn(data)
 
-                            if (userKind != USER_KIND_SALES && userKind != USER_KIND_PENAGIHAN && userKind != USER_KIND_MARKETING) {
-                                tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
-                                tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
-                            }
+//                            if (userKind != USER_KIND_SALES && userKind != USER_KIND_PENAGIHAN && userKind != USER_KIND_MARKETING) {
+//                                tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
+//                                tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
+//                            }
 
                             if (!onlySession) {
                                 if (isSearchActive) {

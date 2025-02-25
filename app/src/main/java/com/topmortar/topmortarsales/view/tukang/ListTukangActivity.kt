@@ -158,7 +158,7 @@ class ListTukangActivity : AppCompatActivity() {
 
                         searchRunnable = Runnable {
 
-//                            toggleSearchEvent(SEARCH_CLEAR)
+                            toggleSearchEvent(SEARCH_CLEAR)
                             val event = EventBusUtils.MessageEvent(searchTerm)
                             EventBus.getDefault().post(event)
 //                            handleMessage(this@ListTukangActivity, "TAG", searchTerm)
@@ -210,7 +210,7 @@ class ListTukangActivity : AppCompatActivity() {
 
                 if (icClearSearch.visibility == View.GONE) {
 
-                    etSearchBox.clearFocus()
+//                    etSearchBox.clearFocus()
 
                     icClearSearch.startAnimation(fadeIn)
                     Handler(Looper.getMainLooper()).postDelayed({
