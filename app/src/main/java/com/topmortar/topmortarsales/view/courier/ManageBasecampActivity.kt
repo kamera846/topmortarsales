@@ -3,6 +3,7 @@ package com.topmortar.topmortarsales.view.courier
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.databinding.ActivityManageBasecampBinding
 
 class ManageBasecampActivity : AppCompatActivity() {
@@ -14,6 +15,8 @@ class ManageBasecampActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
+        applyMyEdgeToEdge()
+
         _binding = ActivityManageBasecampBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

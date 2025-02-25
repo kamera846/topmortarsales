@@ -14,6 +14,7 @@ import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.CONST_KTP
+import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 
 @SuppressLint("SetTextI18n")
 class PreviewKtpActivity : AppCompatActivity() {
@@ -28,6 +29,8 @@ class PreviewKtpActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
+        applyMyEdgeToEdge()
+
         setContentView(R.layout.activity_preview_ktp)
 
         tvTitleBar = findViewById(R.id.tv_title_bar)

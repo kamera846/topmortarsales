@@ -31,6 +31,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityRencanaVisitPenagihanBinding
@@ -76,6 +77,8 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
+        applyMyEdgeToEdge()
+
         _binding = ActivityRencanaVisitPenagihanBinding.inflate(layoutInflater)
         sessionManager = SessionManager(this@RencanaVisitPenagihanActivity)
 
