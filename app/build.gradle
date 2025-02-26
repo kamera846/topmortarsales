@@ -8,13 +8,13 @@ plugins {
 
 android {
     namespace 'com.topmortar.topmortarsales'
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
 //        archivesBaseName "Top Mortar Sales"
         applicationId "com.topmortar.topmortarsales"
         minSdk 24
-        targetSdk 34
+        targetSdk 35
         versionCode 142
         versionName "3.1.42"
 
