@@ -8,6 +8,7 @@ import com.google.android.material.tabs.TabLayout
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.viewpager.DeliveryViewPagerAdapter
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
+import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.databinding.ActivityDeliveryBinding
 
 
@@ -24,6 +25,8 @@ class DeliveryActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
+        applyMyEdgeToEdge()
+
         binding = ActivityDeliveryBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

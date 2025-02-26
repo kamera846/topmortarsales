@@ -9,8 +9,12 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat.Type
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -27,9 +31,6 @@ import com.topmortar.topmortarsales.commons.INVOICE_PAID
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
-import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
-import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
-import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CurrencyFormat
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
@@ -54,6 +55,14 @@ class DetailInvoiceActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
+        enableEdgeToEdge(SystemBarStyle.dark(getColor(R.color.primary)))
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
+            val systemBars = insets.getInsets(Type.systemBars())
+            val imeInsets = insets.getInsets(Type.ime())
+            v.setPadding(0, systemBars.top, 0, imeInsets.bottom)
+            insets
+        }
+
         sessionManager = SessionManager(this)
 
         binding = ActivityDetailInvoiceBinding.inflate(layoutInflater)

@@ -23,6 +23,7 @@ import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE_WITH_DEFAULT_RAN
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.databinding.ActivityRencanaVisitMgBinding
 import com.topmortar.topmortarsales.model.RencanaVisitModel
 import com.topmortar.topmortarsales.view.MapsActivity
@@ -57,6 +58,8 @@ class RencanaVisitMGActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
+        applyMyEdgeToEdge()
+
         sessionManager = SessionManager(this)
         _binding = ActivityRencanaVisitMgBinding.inflate(layoutInflater)
         setContentView(binding.root)

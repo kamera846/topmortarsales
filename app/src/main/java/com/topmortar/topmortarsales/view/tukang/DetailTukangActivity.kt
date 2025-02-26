@@ -77,6 +77,7 @@ import com.topmortar.topmortarsales.commons.utils.PhoneHandler
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.PingUtility
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -211,6 +212,8 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
+        applyMyEdgeToEdge(isPrimary = false)
+
         sessionManager = SessionManager(this)
         binding = ActivityDetailContactBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -669,8 +672,8 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             etName.requestFocus()
             etName.setSelection(etName.text.length)
 
-            binding.bottomAction.visibility = View.VISIBLE
-            binding.contactAction.visibility = View.VISIBLE
+//            binding.bottomAction.visibility = View.VISIBLE
+//            binding.contactAction.visibility = View.VISIBLE
 
         } else {
 
@@ -722,8 +725,8 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
             etName.clearFocus()
 
-            binding.bottomAction.visibility = View.GONE
-            binding.contactAction.visibility = View.GONE
+//            binding.bottomAction.visibility = View.GONE
+//            binding.contactAction.visibility = View.GONE
 
         }
 
@@ -1288,6 +1291,10 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                         if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY || sessionManager.userKind() == USER_KIND_BA) {
                             icEdit.visibility = View.VISIBLE
                             tvKtpContainer.visibility = View.VISIBLE
+                            if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) {
+                                binding.bottomAction.visibility = View.VISIBLE
+                                binding.contactAction.visibility = View.VISIBLE
+                            }
                         }
                     }
                     RESPONSE_STATUS_EMPTY -> {

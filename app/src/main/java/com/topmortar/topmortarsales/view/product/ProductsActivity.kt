@@ -20,6 +20,7 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
@@ -28,7 +29,6 @@ import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.CityModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.model.ProductModel
-import com.topmortar.topmortarsales.view.rencanaVisits.JatemFragment
 import kotlinx.coroutines.launch
 
 @SuppressLint("SetTextI18n")
@@ -55,6 +55,8 @@ class ProductsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
+        applyMyEdgeToEdge()
+
         sessionManager = SessionManager(this)
         _binding = ActivityProductsBinding.inflate(layoutInflater)
 

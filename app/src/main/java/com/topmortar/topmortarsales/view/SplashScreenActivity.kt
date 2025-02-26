@@ -24,9 +24,13 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.activity.SystemBarStyle
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat.Type
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -127,8 +131,15 @@ class SplashScreenActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
-        sessionManager = SessionManager(this)
+        enableEdgeToEdge(SystemBarStyle.dark(getColor(R.color.primary)))
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
+            val imeInsets = insets.getInsets(Type.ime())
+            v.setPadding(0, 0, 0, imeInsets.bottom)
+            insets
+        }
+        
 
+        sessionManager = SessionManager(this)
         setContentView(R.layout.activity_splash_screen)
 
 //        AppUpdateHelper.initialize()

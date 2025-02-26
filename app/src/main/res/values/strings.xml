@@ -31,7 +31,7 @@
     <string name="my_profile">Profil Saya</string>
     <string name="search">Cari</string>
     <string name="logout">Logout</string>
-    <string name="search_contact">Masukkan nama toko…</string>
+    <string name="search_contact">Ketik nama toko…</string>
     <string name="failed_request">Permintaan ke server gagal!</string>
     <string name="failed_get_data">Gagal memuat data!</string>
     <string name="card_auth_title">Authentication</string>

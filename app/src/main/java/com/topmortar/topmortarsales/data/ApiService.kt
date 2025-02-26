@@ -350,9 +350,10 @@ interface ApiService {
     ): Response<ResponseMessage>
 
     @GET(TUKANG)
-    suspend fun getTukang(@Query("c") cityId: String): ResponseTukangList
+    suspend fun getTukang(@Query("c") cityId: String, @Query("key") searchKey: String): ResponseTukangList
+
     @GET(TUKANG)
-    suspend fun getTukangDst(@Query("dst") distributorID: String): ResponseTukangList
+    suspend fun getTukangDst(@Query("dst") distributorID: String, @Query("key") searchKey: String): ResponseTukangList
 
     @GET(TUKANG)
     suspend fun getDetailTukang(@Query("id") tukangId: String): Response<ResponseTukangList>

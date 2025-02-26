@@ -28,11 +28,10 @@ import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE_WITH_DEFAULT_RAN
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
-import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
-import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityRencanaVisitBinding
@@ -78,6 +77,8 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
+        applyMyEdgeToEdge()
+
         _binding = ActivityRencanaVisitBinding.inflate(layoutInflater)
         sessionManager = SessionManager(this@RencanaVisitActivity)
 

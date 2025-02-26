@@ -91,6 +91,7 @@ import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -185,6 +186,8 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
+        applyMyEdgeToEdge()
+
         sessionManager = SessionManager(this@MainActivity)
         val userDistributorIds = sessionManager.userDistributor()
         firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-002")
@@ -401,10 +404,10 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 icMore.visibility = View.VISIBLE
             }
             binding.titleBar.icBack.visibility = View.GONE
-            tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
-            tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
+//            tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
+//            tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
             binding.titleBar.tvTitleBar.setPadding(convertDpToPx(16, this), 0, 0, 0)
-            binding.titleBar.tvTitleBarDescription.setPadding(convertDpToPx(16, this), 0, 0, 0)
+//            binding.titleBar.tvTitleBarDescription.setPadding(convertDpToPx(16, this), 0, 0, 0)
             etSearchBox.setPadding(0, 0, convertDpToPx(16, this), 0)
         }
 
@@ -851,7 +854,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
                 if (icClearSearch.visibility == View.GONE) {
 
-                    etSearchBox.clearFocus()
+//                    etSearchBox.clearFocus()
 
                     icClearSearch.startAnimation(fadeIn)
                     Handler(Looper.getMainLooper()).postDelayed({
@@ -1080,10 +1083,10 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                         } else {
                             sessionManager.setUserLoggedIn(data)
 
-                            if (userKind != USER_KIND_SALES && userKind != USER_KIND_PENAGIHAN && userKind != USER_KIND_MARKETING) {
-                                tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
-                                tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
-                            }
+//                            if (userKind != USER_KIND_SALES && userKind != USER_KIND_PENAGIHAN && userKind != USER_KIND_MARKETING) {
+//                                tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
+//                                tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
+//                            }
 
                             if (!onlySession) {
                                 if (isSearchActive) {

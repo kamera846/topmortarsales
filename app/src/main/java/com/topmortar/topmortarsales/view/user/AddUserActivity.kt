@@ -47,6 +47,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.phoneValidation
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -104,6 +105,8 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
+        applyMyEdgeToEdge(isPrimary = false)
+
         sessionManager = SessionManager(this)
         binding = ActivityAddUserBinding.inflate(layoutInflater)
 

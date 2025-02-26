@@ -35,6 +35,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.databinding.ActivityHistoryVisitedBinding
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
@@ -55,6 +56,8 @@ class HistoryVisitedActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
+        applyMyEdgeToEdge()
+
         sessionManager = SessionManager(this)
         _binding = ActivityHistoryVisitedBinding.inflate(layoutInflater)
         setContentView(binding.root)
