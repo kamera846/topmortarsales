@@ -30,7 +30,7 @@ fun AppCompatActivity.applyMyEdgeToEdge(
     ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
         val systemBars = insets.getInsets(Type.systemBars())
         val imeInsets = insets.getInsets(Type.ime())
-        v.setPadding(0, 0, 0, imeInsets.bottom)
+        v.setPadding(0, systemBars.top, 0, imeInsets.bottom)
         insets
     }
 }
