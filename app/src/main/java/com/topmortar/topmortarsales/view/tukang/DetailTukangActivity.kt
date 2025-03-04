@@ -47,6 +47,7 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
+import com.topmortar.topmortarsales.commons.CONST_POSTED_NAME
 import com.topmortar.topmortarsales.commons.CONST_SKILL
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
@@ -508,12 +509,26 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         val iName = intent.getStringExtra(CONST_NAME)
         val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
         val iDate = intent.getStringExtra(CONST_DATE)
+//        var iPostedBy = intent.getStringExtra(CONST_POSTED_BY)
+        var iPostedName = intent.getStringExtra(CONST_POSTED_NAME)
 
         if (iDate.isNullOrEmpty()) {
             binding.dateSeparator.visibility = View.GONE
             binding.line.visibility = View.VISIBLE
+            if (!iPostedName.isNullOrEmpty()) {
+                binding.textBy.text = "oleh $iPostedName"
+                binding.textBy.visibility = View.VISIBLE
+                binding.dateSeparator.visibility = View.VISIBLE
+                binding.tvDate.visibility = View.GONE
+                binding.line.visibility = View.GONE
+            }
         } else {
             val date = DateFormat.format(iDate)
+
+            if (!iPostedName.isNullOrEmpty()) {
+                binding.textBy.text = "oleh $iPostedName"
+                binding.textBy.visibility = View.VISIBLE
+            }
 
             binding.tvDate.text = date
             binding.dateSeparator.visibility = View.VISIBLE

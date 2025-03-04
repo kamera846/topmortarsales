@@ -30,6 +30,8 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
+import com.topmortar.topmortarsales.commons.CONST_POSTED_BY
+import com.topmortar.topmortarsales.commons.CONST_POSTED_NAME
 import com.topmortar.topmortarsales.commons.CONST_SKILL
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
@@ -301,6 +303,8 @@ class TukangFragment : Fragment() {
             intent.putExtra(CONST_SKILL, data.id_skill)
             intent.putExtra(CONST_KTP, data.ktp_tukang)
             intent.putExtra(CONST_DATE, data.created_at)
+            intent.putExtra(CONST_POSTED_BY, data.posted_by)
+            intent.putExtra(CONST_POSTED_NAME, data.posted_name)
         }
 
 //        (requireContext() as Activity).startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
