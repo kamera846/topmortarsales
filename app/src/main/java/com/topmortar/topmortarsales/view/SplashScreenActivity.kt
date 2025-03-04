@@ -131,13 +131,25 @@ class SplashScreenActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
-        enableEdgeToEdge(SystemBarStyle.dark(getColor(R.color.primary)))
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
-            val imeInsets = insets.getInsets(Type.ime())
-            v.setPadding(0, 0, 0, imeInsets.bottom)
-            insets
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            enableEdgeToEdge()
+            ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
+                val systemBars = insets.getInsets(Type.systemBars())
+                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+                insets
+            }
+        } else {
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+                enableEdgeToEdge(SystemBarStyle.dark(getColor(R.color.primary)))
+                ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
+                    val systemBars = insets.getInsets(Type.systemBars())
+                    v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+                    insets
+                }
+            } else {
+                window.statusBarColor = getColor(R.color.primary)
+            }
         }
-        
 
         sessionManager = SessionManager(this)
         setContentView(R.layout.activity_splash_screen)
