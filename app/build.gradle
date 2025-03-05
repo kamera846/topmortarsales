@@ -128,4 +128,7 @@ dependencies {
     // Chart
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 
+    // Expand FAB
+    implementation 'com.nambimobile.widgets:expandable-fab:1.1.1'
+
 }

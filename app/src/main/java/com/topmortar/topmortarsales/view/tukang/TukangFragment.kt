@@ -101,7 +101,9 @@ class TukangFragment : Fragment() {
         userKind = sessionManager.userKind().toString()
         userCity = sessionManager.userCityID().toString()
         userID = sessionManager.userID().toString()
-        binding.btnFabAdmin.setOnClickListener { navigateAddTukang() }
+//        binding.btnFabAdmin.setOnClickListener { navigateAddTukang() }
+        binding.eFabOptionAdd.setOnClickListener { navigateAddTukang() }
+        binding.eFabOptionScan.setOnClickListener { navigateAddTukang() }
 
         apiService = HttpClient.create()
 
