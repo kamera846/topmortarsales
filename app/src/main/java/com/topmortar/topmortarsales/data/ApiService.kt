@@ -349,6 +349,13 @@ interface ApiService {
         @Part ktp: MultipartBody.Part? = null,
     ): Response<ResponseMessage>
 
+    @Multipart
+    @POST(TUKANG)
+    suspend fun editUserInputTukang(
+        @Part("id") id: RequestBody,
+        @Part("id_user") idUser: RequestBody,
+    ): Response<ResponseMessage>
+
     @GET(TUKANG)
     suspend fun getTukang(@Query("c") cityId: String, @Query("key") searchKey: String): ResponseTukangList
 

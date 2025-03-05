@@ -17,6 +17,7 @@ import com.topmortar.topmortarsales.model.ModalSearchModel
 class SearchModalRecyclerViewAdapter(private val items: ArrayList<ModalSearchModel>, private val itemClickListener: ItemClickListener): RecyclerView.Adapter<SearchModalRecyclerViewAdapter.ViewHolder>() {
     private var filteredItemList: ArrayList<ModalSearchModel> = ArrayList(items)
     private var context: Context? = null
+    var withEtc: Boolean = false
 
     interface ItemClickListener {
         fun onItemClick(data: ModalSearchModel? = null)
@@ -25,7 +26,18 @@ class SearchModalRecyclerViewAdapter(private val items: ArrayList<ModalSearchMod
     inner class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
 
         private val title = itemView.findViewById<TextView>(R.id.title)
-        fun bind(item: ModalSearchModel) { title.text = item.title }
+        private val etc = itemView.findViewById<TextView>(R.id.etcText)
+        private val etcOverlay = itemView.findViewById<TextView>(R.id.etcTextOverlay)
+        fun bind(item: ModalSearchModel) {
+            title.text = item.title
+            etc.text = item.etc
+            if (withEtc) {
+                etcOverlay.visibility = View.INVISIBLE
+                etc.visibility = View.VISIBLE
+            } else {
+                etc.visibility = View.GONE
+            }
+        }
 
     }
 

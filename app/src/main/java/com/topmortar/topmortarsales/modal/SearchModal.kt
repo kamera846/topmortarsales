@@ -33,6 +33,7 @@ class SearchModal(private val context: Context, private val listItem: ArrayList<
     private var searchKeyListener: ((String) -> Unit)? = null
     var label = "Pilih Opsi Kota"
     var searchHint = "Masukkan judul…"
+    var withEtc = false
 
     private lateinit var txtLoading: TextView
     private lateinit var rvItems: RecyclerView
@@ -98,6 +99,7 @@ class SearchModal(private val context: Context, private val listItem: ArrayList<
 
     private fun setRecyclerView() {
         val rvAdapter = SearchModalRecyclerViewAdapter(listItem, this)
+        rvAdapter.withEtc = withEtc
 
         rvItems.layoutManager = LinearLayoutManager(context)
         rvItems.adapter = rvAdapter
