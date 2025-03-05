@@ -25,9 +25,13 @@
 
     <uses-feature
         android:name="android.hardware.camera"
-        android:required="true" />
-    <uses-feature android:name="android.hardware.camera.autofocus" />
-    <uses-feature android:name="android.hardware.camera.flash" />
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.autofocus"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera.flash"
+        android:required="false" />
     <uses-feature android:name="android.hardware.camera.any" />
 
     <queries>
@@ -60,6 +64,10 @@
         android:theme="@style/Theme.TopMortarSales"
         android:usesCleartextTraffic="true"
         tools:targetApi="35">
+        <activity
+            android:name=".view.ScannerActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:exported="false"/>
         <activity
             android:name=".view.rencanaVisits.RencanaVisitMGActivity"
             android:exported="false" />
@@ -183,18 +191,15 @@
             android:name=".commons.services.TrackingService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="location" />
-
-<!--        Disabled FCM-->
-<!--        <service-->
-<!--            android:name=".commons.services.FirebaseCloudMessagingServices"-->
-<!--            android:permission="com.google.android.c2dm.permission.SEND"-->
-<!--            android:exported="false">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="com.google.firebase.MESSAGING_EVENT" />-->
-<!--            </intent-filter>-->
-<!--        </service>-->
-
+            android:foregroundServiceType="location" /> <!-- Disabled FCM -->
+        <!-- <service -->
+        <!-- android:name=".commons.services.FirebaseCloudMessagingServices" -->
+        <!-- android:permission="com.google.android.c2dm.permission.SEND" -->
+        <!-- android:exported="false"> -->
+        <!-- <intent-filter> -->
+        <!-- <action android:name="com.google.firebase.MESSAGING_EVENT" /> -->
+        <!-- </intent-filter> -->
+        <!-- </service> -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/maps_key" />

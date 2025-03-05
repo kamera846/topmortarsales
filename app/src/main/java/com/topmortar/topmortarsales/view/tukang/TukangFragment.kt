@@ -1,7 +1,9 @@
 package com.topmortar.topmortarsales.view.tukang
 
 import android.app.Activity.RESULT_OK
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,6 +15,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -40,6 +43,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -51,6 +55,7 @@ import com.topmortar.topmortarsales.model.CityModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.model.RencanaVisitModel
 import com.topmortar.topmortarsales.model.TukangModel
+import com.topmortar.topmortarsales.view.ScannerActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -74,6 +79,15 @@ class TukangFragment : Fragment() {
     private var citiesResults: ArrayList<CityModel>? = null
     private var selectedCity: ModalSearchModel? = null
     private var listItem: ArrayList<RencanaVisitModel> = arrayListOf()
+
+    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+        isGranted: Boolean ->
+        if (isGranted) {
+            showQrCodeScanner()
+        } else {
+            CustomUtility(requireActivity()).showPermissionDeniedDialog("Membutuhkan izin penggunaan kamera. Harap aktifkan di pengaturan aplikasi.")
+        }
+    }
 
     private var searchKey: String = ""
 
@@ -103,7 +117,7 @@ class TukangFragment : Fragment() {
         userID = sessionManager.userID().toString()
 //        binding.btnFabAdmin.setOnClickListener { navigateAddTukang() }
         binding.eFabOptionAdd.setOnClickListener { navigateAddTukang() }
-        binding.eFabOptionScan.setOnClickListener { navigateAddTukang() }
+        binding.eFabOptionScan.setOnClickListener { checkPermissionCamera(requireActivity()) }
 
         apiService = HttpClient.create()
 
@@ -336,6 +350,27 @@ class TukangFragment : Fragment() {
 
     }
 
+    private fun showQrCodeScanner() {
+        val intent = Intent(requireContext(), ScannerActivity::class.java)
+        someActivityResultLauncher.launch(intent)
+    }
+
+    private fun checkPermissionCamera(context: Context) {
+        val permissionCamera = android.Manifest.permission.CAMERA
+        if (ContextCompat.checkSelfPermission(context, permissionCamera) == PackageManager.PERMISSION_GRANTED) {
+            showQrCodeScanner()
+        } else if (shouldShowRequestPermissionRationale(permissionCamera)) {
+            val message = "Membutuhkan izin penggunaan kamera"
+            CustomUtility(context).showPermissionDeniedSnackbar(message) { launchRequestPermission(permissionCamera) }
+        } else {
+            launchRequestPermission(permissionCamera)
+        }
+    }
+
+    private fun launchRequestPermission(permission: String) {
+        requestPermissionLauncher.launch(permission)
+    }
+
     private fun navigateAddTukang(data: TukangModel? = null) {
 
         val intent = Intent(requireContext(), AddTukangActivity::class.java)
@@ -350,7 +385,6 @@ class TukangFragment : Fragment() {
             intent.putExtra(CONST_LOCATION, data.id_city)
             intent.putExtra(CONST_STATUS, data.tukang_status)
             intent.putExtra(CONST_SKILL, data.id_skill)
-//            intent.putExtra(CONST_LOCATION, "1")
         }
         someActivityResultLauncher.launch(intent)
 

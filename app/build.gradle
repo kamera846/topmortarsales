@@ -131,4 +131,7 @@ dependencies {
     // Expand FAB
     implementation 'com.nambimobile.widgets:expandable-fab:1.1.1'
 
+    // Qr Scanner
+    implementation 'com.github.yuriy-budiyev:code-scanner:2.3.0'
+
 }
