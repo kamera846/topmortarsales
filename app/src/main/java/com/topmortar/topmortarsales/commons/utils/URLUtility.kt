@@ -30,7 +30,17 @@ class URLUtility(private val context: Context) {
                 locationManager.removeUpdates(this) // Stop listening for updates once you have a location
             }
 
-            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
+                super.onStatusChanged(provider, status, extras)
+            }
+
+            override fun onProviderEnabled(provider: String) {
+                super.onProviderEnabled(provider)
+            }
+
+            override fun onProviderDisabled(provider: String) {
+                super.onProviderDisabled(provider)
+            }
         }
 
         // Request location updates
