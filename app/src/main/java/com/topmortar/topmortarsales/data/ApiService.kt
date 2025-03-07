@@ -394,6 +394,13 @@ interface ApiService {
         @Part("message_body") message: RequestBody,
     ): Response<ResponseMessage>
 
+    @Multipart
+    @POST("assignTukangUser.php")
+    suspend fun assignTukang(
+        @Part("id_user") idUser: RequestBody,
+        @Part("id_md5") idMd5: RequestBody
+    ): Response<ResponseMessage>
+
     @GET(PROMO)
     suspend fun getPromo(): ResponsePromo
 
