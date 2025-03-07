@@ -22,6 +22,7 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
+import com.topmortar.topmortarsales.commons.utils.PhoneHandler
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -172,7 +173,7 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
         lifecycleScope.launch {
             try {
 
-                val searchKey = createPartFromString(key)
+                val searchKey = createPartFromString(PhoneHandler.formatPhoneNumber62(key))
                 val searchCity = createPartFromString(userCityParam!!.ifEmpty { userCity })
                 val distributorId = createPartFromString(userDistributorId)
 

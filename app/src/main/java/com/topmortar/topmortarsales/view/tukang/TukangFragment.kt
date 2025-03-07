@@ -45,6 +45,7 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
+import com.topmortar.topmortarsales.commons.utils.PhoneHandler
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -403,15 +404,7 @@ class TukangFragment : Fragment() {
     @Subscribe
     fun onEventBus(event: EventBusUtils.MessageEvent) {
         searchKey = event.message
-        searchKey = if (searchKey.startsWith("0")) {
-            "62${searchKey.substring(1)}"
-        } else if (searchKey.startsWith("8")) {
-            "62${searchKey.substring(0)}"
-        } else if (searchKey.startsWith("+")) {
-            "${searchKey.substring(1)}"
-        } else {
-            searchKey
-        }
+        searchKey = PhoneHandler.formatPhoneNumber(searchKey)
         getList()
     }
 
