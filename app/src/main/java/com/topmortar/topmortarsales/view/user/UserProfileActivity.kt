@@ -247,7 +247,11 @@ class UserProfileActivity : AppCompatActivity() {
 
     fun navigateHistoryAddTukang() {
 
-        // Do something
+        val intent = Intent(this, HistoryAddTukangActivity::class.java)
+        intent.putExtra(CONST_USER_ID, iUserID)
+        intent.putExtra(CONST_FULL_NAME, iFullName)
+        intent.putExtra(CONST_USER_LEVEL, iUserLevel)
+        startActivity(intent)
 
     }
 

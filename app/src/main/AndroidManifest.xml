@@ -65,9 +65,12 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="35">
         <activity
+            android:name=".view.user.HistoryAddTukangActivity"
+            android:exported="false" />
+        <activity
             android:name=".view.ScannerActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:exported="false"/>
+            android:exported="false" />
         <activity
             android:name=".view.rencanaVisits.RencanaVisitMGActivity"
             android:exported="false" />
