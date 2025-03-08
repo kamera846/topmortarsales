@@ -54,17 +54,15 @@ class ScannerActivity : AppCompatActivity() {
 
         codeScanner.camera = CodeScanner.CAMERA_BACK
         codeScanner.formats = CodeScanner.ALL_FORMATS
+        codeScanner.isAutoFocusEnabled = true
         codeScanner.autoFocusMode = AutoFocusMode.SAFE
         codeScanner.scanMode = ScanMode.SINGLE
-        codeScanner.isAutoFocusEnabled = true
         codeScanner.isFlashEnabled = false
 
         // Callbacks
         codeScanner.decodeCallback = DecodeCallback {
             runOnUiThread {
-                if (!it.text.isNullOrEmpty()) {
-                    executeAssignTukang(it)
-                }
+                executeAssignTukang(it)
             }
         }
         codeScanner.errorCallback = ErrorCallback {
@@ -74,9 +72,6 @@ class ScannerActivity : AppCompatActivity() {
             }
         }
 
-        scannerView.setOnClickListener {
-            codeScanner.startPreview()
-        }
     }
 
     private fun executeAssignTukang(scannResult: Result) {
