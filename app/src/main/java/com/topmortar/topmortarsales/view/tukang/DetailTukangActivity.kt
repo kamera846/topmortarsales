@@ -1386,7 +1386,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             binding.dateSeparator.visibility = View.GONE
             binding.line.visibility = View.VISIBLE
             if (!postedName.isNullOrEmpty()) {
-                binding.textBy.text = "oleh $postedName"
+                binding.textBy.text = " ${getString(R.string.text_by)} $postedName"
                 binding.textBy.visibility = View.VISIBLE
                 binding.dateSeparator.visibility = View.VISIBLE
                 binding.tvDate.visibility = View.GONE
@@ -1396,7 +1396,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             val date = DateFormat.format(iDate)
 
             if (!postedName.isNullOrEmpty()) {
-                binding.textBy.text = "oleh $postedName"
+                binding.textBy.text = " ${getString(R.string.text_by)} $postedName"
                 binding.textBy.visibility = View.VISIBLE
             }
 
