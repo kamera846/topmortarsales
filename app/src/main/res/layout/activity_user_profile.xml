@@ -577,6 +577,48 @@
                     </LinearLayout>
 
                     <LinearLayout
+                        android:visibility="gone"
+                        android:id="@+id/btnHistoryAddTukang"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/background_rounded_8_clickable"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:padding="12dp"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:padding="8dp"
+                            android:background="@drawable/bg_charcoal_round_8"
+                            android:src="@drawable/user_add_white"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Riwayat Input Tukang"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:layout_marginHorizontal="16dp"
+                            android:ellipsize="marquee"
+                            android:singleLine="true"
+                            android:marqueeRepeatLimit="marquee_forever"
+                            android:focusable="true"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                        <ImageView
+                            android:id="@+id/btnHistoryAddTukangChevron"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@drawable/chevron_right_dark"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:id="@+id/btnCourierReport"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

@@ -67,6 +67,7 @@ import com.topmortar.topmortarsales.commons.CONST_REPUTATION
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.CONST_TERMIN
 import com.topmortar.topmortarsales.commons.CONST_WEEKLY_VISIT_STATUS
+import com.topmortar.topmortarsales.commons.ELLIPSIS_TEXT
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
@@ -90,6 +91,7 @@ import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
+import com.topmortar.topmortarsales.commons.utils.PhoneHandler
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
@@ -408,6 +410,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 //            tvTitleBarDescription.visibility = tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
             binding.titleBar.tvTitleBar.setPadding(convertDpToPx(16, this), 0, 0, 0)
 //            binding.titleBar.tvTitleBarDescription.setPadding(convertDpToPx(16, this), 0, 0, 0)
+            etSearchBox.hint = "Ketik nama atau nomor toko$ELLIPSIS_TEXT"
             etSearchBox.setPadding(0, 0, convertDpToPx(16, this), 0)
         }
 
@@ -1117,7 +1120,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         lifecycleScope.launch {
             try {
 
-                val searchKey = createPartFromString(key)
+                val rbSearchKey = createPartFromString(PhoneHandler.formatPhoneNumber62(key))
 
                 val statusFilter = selectedStatusID.toLowerCase(Locale.ROOT)
                 val cityID = if (userKind == USER_KIND_ADMIN) selectedCitiesID?.id_city
@@ -1125,12 +1128,12 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
                 val apiService: ApiService = HttpClient.create()
                 val response = if (cityID != null && statusFilter != "-1") {
-                    apiService.searchContact(cityId = createPartFromString(cityID), status = createPartFromString(statusFilter), key = searchKey, distributorID = createPartFromString(userDistributorId))
+                    apiService.searchContact(cityId = createPartFromString(cityID), status = createPartFromString(statusFilter), key = rbSearchKey, distributorID = createPartFromString(userDistributorId))
                 } else if (cityID != null) {
-                    apiService.searchContact(cityId = createPartFromString(cityID), key = searchKey, distributorID = createPartFromString(userDistributorId))
+                    apiService.searchContact(cityId = createPartFromString(cityID), key = rbSearchKey, distributorID = createPartFromString(userDistributorId))
                 } else if (statusFilter != "-1" ) {
-                    apiService.searchContactByStatus(status = createPartFromString(statusFilter), key = searchKey, distributorID = createPartFromString(userDistributorId))
-                } else apiService.searchContact(key = searchKey, distributorID = createPartFromString(userDistributorId))
+                    apiService.searchContactByStatus(status = createPartFromString(statusFilter), key = rbSearchKey, distributorID = createPartFromString(userDistributorId))
+                } else apiService.searchContact(key = rbSearchKey, distributorID = createPartFromString(userDistributorId))
 
                 if (response.isSuccessful) {
 

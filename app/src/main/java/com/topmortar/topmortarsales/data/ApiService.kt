@@ -349,6 +349,13 @@ interface ApiService {
         @Part ktp: MultipartBody.Part? = null,
     ): Response<ResponseMessage>
 
+    @Multipart
+    @POST(TUKANG)
+    suspend fun editUserInputTukang(
+        @Part("id") id: RequestBody,
+        @Part("id_user") idUser: RequestBody,
+    ): Response<ResponseMessage>
+
     @GET(TUKANG)
     suspend fun getTukang(@Query("c") cityId: String, @Query("key") searchKey: String): ResponseTukangList
 
@@ -385,6 +392,13 @@ interface ApiService {
         @Part("full_name") currentName: RequestBody,
         @Part("id_user") userId: RequestBody,
         @Part("message_body") message: RequestBody,
+    ): Response<ResponseMessage>
+
+    @Multipart
+    @POST("assignTukangUser.php")
+    suspend fun assignTukang(
+        @Part("id_user") idUser: RequestBody,
+        @Part("id_md5") idMd5: RequestBody
     ): Response<ResponseMessage>
 
     @GET(PROMO)

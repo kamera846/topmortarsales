@@ -167,6 +167,8 @@ const val CONST_IS_BASE_CAMP = "const_is_base_camp"
 const val CONST_IS_TRACKING = "const_is_tracking"
 const val CONST_IS_TRACKING_COURIER = "const_is_tracking_courier"
 const val CONST_IS_TRACKING_HISTORY = "const_is_tracking_history"
+const val CONST_POSTED_BY = "const_posted_by"
+const val CONST_POSTED_NAME = "const_posted_name"
 
 /*
     Status

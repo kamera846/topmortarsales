@@ -17,5 +17,9 @@ data class TukangModel(
     var id_catcus: String = "",
     var is_demo: String = "",
     var created_at: String = "",
-    var is_valid: String = ""
+    var is_valid: String = "",
+    var id_contact_post: String = "",
+    var id_user_post: String = "",
+    var posted_by: String = "",
+    var posted_name: String = "",
 )

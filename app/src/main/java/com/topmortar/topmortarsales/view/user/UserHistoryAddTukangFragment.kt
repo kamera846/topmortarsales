@@ -1,6 +1,8 @@
 package com.topmortar.topmortarsales.view.user
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.app.DatePickerDialog
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.Gravity
@@ -28,7 +30,7 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
-import com.topmortar.topmortarsales.databinding.FragmentUserVisitedStoreBinding
+import com.topmortar.topmortarsales.databinding.FragmentUserHistoryAddTukangBinding
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
@@ -41,11 +43,10 @@ import java.util.Calendar
  * A fragment representing a list of Items.
  */
 @SuppressLint("SetTextI18n")
-class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemClickListener,
+class UserHistoryAddTukangFragment : Fragment(), ContactsRecyclerViewAdapter.ItemClickListener,
     SearchModal.SearchModalListener {
 
-//    private var _binding: FragmentUserVisitedStoreBinding? = null
-    private lateinit var binding: FragmentUserVisitedStoreBinding
+    private lateinit var binding: FragmentUserHistoryAddTukangBinding
 
     private lateinit var sessionManager: SessionManager
     private lateinit var userKind: String
@@ -54,14 +55,16 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
     private val userDistributorId get() = sessionManager.userDistributor().toString()
     private var userCityParam: String? = ""
     private var selectedCity: ModalSearchModel? = null
+    private lateinit var datePickerDialog: DatePickerDialog
 
     // Initialize Search Engine
     private var isSearchActive = false
 
     // Initialize Filter Month
     private val listMonthInt = arrayListOf(0,1,2,3,4,5,6,7,8,9,10,11,12)
-    private val listMonthString = arrayListOf("Tidak ada filter","Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember")
+    private val listMonthString = arrayListOf("== Pilih bulan ==","Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember")
     private var selectedMonth = 0
+    private var selectedYear = 0
 
     private var listener: CounterItem? = null
     interface CounterItem {
@@ -88,18 +91,22 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentUserVisitedStoreBinding.inflate(inflater, container, false)
+        binding = FragmentUserHistoryAddTukangBinding.inflate(inflater, container, false)
         val view = binding.root
 
         sessionManager = SessionManager(requireContext())
         userKind = sessionManager.userKind().toString()
         userCity = sessionManager.userCityID().toString()
 
+        initDatePickerDialog()
+
         // Get the current theme mode (light or dark)
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
         if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.filterBox.background = AppCompatResources.getDrawable(requireContext(), R.color.black_400)
         else binding.filterBox.background = AppCompatResources.getDrawable(requireContext(), R.color.light)
-        binding.filterBox.setOnClickListener { showDropdownMenu() }
+//        binding.filterBox.setOnClickListener { showDropdownMenu() }
+        binding.filterBox.setOnClickListener { datePickerDialog.show() }
+        binding.iconFilter.setImageResource(R.drawable.date_black)
 
         toggleFilter(Calendar.getInstance().get(Calendar.MONTH)+1)
 
@@ -107,6 +114,30 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
 //        getContacts()
 
         return view
+    }
+
+    private fun initDatePickerDialog() {
+        val dateListener = DatePickerDialog.OnDateSetListener { _, year, month, _ ->
+            selectedMonth = month + 1
+            selectedYear = year
+            binding.tvFilter.text = buildString {
+                append(listMonthString[selectedMonth])
+                append(" ")
+                append(selectedYear)
+            }
+            getContacts()
+        }
+
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+
+        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        val style = if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) AlertDialog.THEME_HOLO_DARK
+        else AlertDialog.THEME_HOLO_LIGHT
+
+        datePickerDialog = DatePickerDialog(requireActivity(), style, dateListener, year, month, 1)
+        datePickerDialog.datePicker.findViewById<View>(resources.getIdentifier("day", "id", "android"))?.visibility = View.GONE
     }
 
     private fun getContacts() {
@@ -130,21 +161,21 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
 
                         binding.recyclerView.apply {
                             layoutManager = LinearLayoutManager(requireContext())
-                            adapter = ContactsRecyclerViewAdapter(response.results, this@UserVisitedStoreFragment)
+                            adapter = ContactsRecyclerViewAdapter(response.results, this@UserHistoryAddTukangFragment)
                         }
 
 //                        if (userKind == USER_KIND_ADMIN) getCities()
 //                        else loadingState(false)
                         listener?.counterItem(response.results.size)
-                        binding.tvFilter.text = "${listMonthString[selectedMonth]} (${response.results.size} Toko)"
+                        binding.tvFilter.text = "${listMonthString[selectedMonth]} $selectedYear (${response.results.size} Tukang)"
                         loadingState(false)
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
                         listener?.counterItem(0)
-                        binding.tvFilter.text = listMonthString[selectedMonth]
-                        loadingState(true, "Belum ada kunjungan!")
+                        binding.tvFilter.text = "${listMonthString[selectedMonth]} $selectedYear"
+                        loadingState(true, "Belum ada tukang yang diinput!")
 
                     }
                     else -> {
@@ -197,7 +228,7 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
 
                             binding.recyclerView.apply {
                                 layoutManager = LinearLayoutManager(requireContext())
-                                adapter = ContactsRecyclerViewAdapter(responseBody.results, this@UserVisitedStoreFragment)
+                                adapter = ContactsRecyclerViewAdapter(responseBody.results, this@UserHistoryAddTukangFragment)
                             }
                             binding.tvFilter.text = "$textFilter (${responseBody.results.size})"
                             loadingState(false)
@@ -363,9 +394,14 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
         popupMenu.show()
     }
 
-    private fun toggleFilter(month: Int = 0) {
+    private fun toggleFilter(month: Int = 0, year: Int = Calendar.getInstance().get(Calendar.YEAR)) {
         selectedMonth = listMonthInt[month]
-        binding.tvFilter.text = listMonthString[month]
+        selectedYear = year
+        binding.tvFilter.text = buildString {
+            append(listMonthString[selectedMonth])
+            append(" ")
+            append(selectedYear)
+        }
         getContacts()
     }
 

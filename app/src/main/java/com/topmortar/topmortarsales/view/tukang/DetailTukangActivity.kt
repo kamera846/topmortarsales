@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DatePickerDialog
+import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -14,6 +15,7 @@ import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.MenuItem
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.AdapterView
@@ -22,6 +24,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.PopupMenu
 import android.widget.RelativeLayout
 import android.widget.Spinner
 import android.widget.TextView
@@ -36,6 +39,12 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN_CITY
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_BA
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_MARKETING
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
 import com.topmortar.topmortarsales.commons.BASE_URL
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
@@ -47,6 +56,7 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_OWNER
 import com.topmortar.topmortarsales.commons.CONST_PHONE
+import com.topmortar.topmortarsales.commons.CONST_POSTED_NAME
 import com.topmortar.topmortarsales.commons.CONST_SKILL
 import com.topmortar.topmortarsales.commons.CONST_STATUS
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
@@ -87,6 +97,7 @@ import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.modal.SendMessageTukangModal
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.model.TukangModel
+import com.topmortar.topmortarsales.model.UserModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.contact.PreviewKtpActivity
 import kotlinx.coroutines.launch
@@ -186,7 +197,9 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
     private var selectedDate: Calendar = Calendar.getInstance()
     private var selectedCity: ModalSearchModel? = null
     private var selectedSkill: ModalSearchModel? = null
+    private var selectedUser: ModalSearchModel? = null
     private var itemSendMessage: TukangModel? = null
+    private var users = arrayListOf<UserModel>()
 
     private var statusItem: List<String> = listOf("Pilih Status", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
     private var selectedStatus: String = ""
@@ -204,8 +217,10 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
     private lateinit var datePicker: DatePickerDialog
     private lateinit var searchModal: SearchModal
+    private lateinit var searchModalUsers: SearchModal
     private lateinit var searchModalSkill: SearchModal
     private lateinit var sendMessageModal: SendMessageTukangModal
+    private lateinit var progressDialog: ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -216,12 +231,14 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
         sessionManager = SessionManager(this)
         binding = ActivityDetailContactBinding.inflate(layoutInflater)
+        progressDialog = ProgressDialog(this)
         setContentView(binding.root)
 
         initVariable()
         initClickHandler()
         dataActivityValidation()
 
+        getUsers()
         getCities()
         getSkills()
 
@@ -351,7 +368,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
     private fun initClickHandler() {
 
         icBack.setOnClickListener { backHandler() }
-        icEdit.setOnClickListener { toggleEdit(true) }
+        icEdit.setOnClickListener { showEditOptions() }
         icClose.setOnClickListener { toggleEdit(false) }
 //        btnSendMessage.setOnClickListener { navigateAddNewRoom() }
         btnSendMessage.setOnClickListener { sendMessageModal.show() }
@@ -507,18 +524,8 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         val iOwner = intent.getStringExtra(CONST_OWNER)
         val iName = intent.getStringExtra(CONST_NAME)
         val iBirthday = intent.getStringExtra(CONST_BIRTHDAY)
-        val iDate = intent.getStringExtra(CONST_DATE)
 
-        if (iDate.isNullOrEmpty()) {
-            binding.dateSeparator.visibility = View.GONE
-            binding.line.visibility = View.VISIBLE
-        } else {
-            val date = DateFormat.format(iDate)
-
-            binding.tvDate.text = date
-            binding.dateSeparator.visibility = View.VISIBLE
-            binding.line.visibility = View.GONE
-        }
+        setCreatedAndAddBy(postedName = intent.getStringExtra(CONST_POSTED_NAME))
 
         iKtp = intent.getStringExtra(CONST_KTP)
         iMapsUrl = intent.getStringExtra(CONST_MAPS)
@@ -617,6 +624,31 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         startActivityForResult(intent, REQUEST_EDIT_CONTACT_COORDINATE)
     }
 
+    private fun showEditOptions() {
+        val popupMenu = PopupMenu(this, icEdit)
+        popupMenu.inflate(R.menu.option_edit_tukang)
+
+        val optionEditTukang = popupMenu.menu.findItem(R.id.option_edit_tukang)
+        optionEditTukang.isEnabled = false
+
+        popupMenu.setOnMenuItemClickListener { item: MenuItem ->
+            when (item.itemId) {
+                R.id.option_edit_add_by -> {
+                    searchModalUsers.show()
+                    true
+                }
+                R.id.option_edit_tukang -> {
+                    toggleEdit(true)
+                    true
+                }
+                else -> false
+            }
+        }
+
+        popupMenu.show()
+
+    }
+
     private fun toggleEdit(value: Boolean? = null) {
 
         isEdit = if (value!!) value else !isEdit
@@ -641,7 +673,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             btnSendMessage.visibility = View.GONE
 
             // Show Case
-            tvTitleBar.text = "Edit Contact"
+            tvTitleBar.text = "Edit Tukang"
             icClose.visibility = View.VISIBLE
 
             etName.visibility = View.VISIBLE
@@ -694,7 +726,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             btnSendMessage.visibility = View.VISIBLE
 
             // Hide Case
-            tvTitleBar.text = "Detail Contact"
+            tvTitleBar.text = "Detail Tukang"
             icClose.visibility = View.GONE
 
             etName.visibility = View.GONE
@@ -1194,6 +1226,184 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 //        val searchKey = etSkill.text.toString()
 //        if (searchKey.isNotEmpty()) searchModalSkill.setSearchKey(searchKey)
         searchModalSkill.show()
+    }
+
+    private fun getUsers() {
+
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.getUsers(distributorID = userDistributorId)
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        users = response.results
+                        setupDialogSearchUsers()
+
+                    }
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        handleMessage(this@DetailTukangActivity, "LIST CITY", "Daftar kota kosong!")
+
+                    }
+                    else -> {
+
+                        handleMessage(this@DetailTukangActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+
+                handleMessage(this@DetailTukangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+
+            }
+
+        }
+    }
+
+    private fun setupDialogSearchUsers(withShow: Boolean = false) {
+        val items: ArrayList<ModalSearchModel> = ArrayList()
+
+        for (i in 0 until users.size) {
+            val data = users[i]
+            val levelUser = when (data.level_user) {
+                AUTH_LEVEL_ADMIN -> "Admin"
+                AUTH_LEVEL_ADMIN_CITY -> "Admin"
+                AUTH_LEVEL_COURIER -> "Kurir"
+                AUTH_LEVEL_BA -> "Brand Ambassador"
+                AUTH_LEVEL_MARKETING -> "Marketing"
+                AUTH_LEVEL_PENAGIHAN -> "Penagihan"
+                else -> "Sales"
+            }
+            items.add(ModalSearchModel(data.id_user, data.full_name, "$levelUser - ${data.kode_city}"))
+        }
+        searchModalUsers = SearchModal(this, items)
+        searchModalUsers.withEtc = true
+        searchModalUsers.setCustomDialogListener(object: SearchModal.SearchModalListener{
+            override fun onDataReceived(data: ModalSearchModel) {
+                selectedUser = data
+                showDialogConfirmationEditDataUsersInput()
+            }
+
+        })
+        searchModalUsers.label = "Pilih User"
+        searchModalUsers.searchHint = "Ketik untuk mencari…"
+
+        if (withShow) {
+            searchModalUsers.show()
+        }
+
+    }
+
+    private fun showDialogConfirmationEditDataUsersInput() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Konfirmasi Edit Data")
+            .setMessage("Apakah anda yakin ingin merubah data penginput tukang?")
+            .setNegativeButton("Batal") { dialog, _ ->
+                setupDialogSearchUsers(withShow = true)
+                dialog.dismiss()
+            }
+            .setPositiveButton("Iya") { dialog, _ ->
+                progressDialog.setMessage(getString(R.string.txt_loading))
+                progressDialog.setCancelable(false)
+                progressDialog.show()
+
+                lifecycleScope.launch {
+                    try {
+
+                        val rbId = createPartFromString(contactId!!)
+                        val rbUserId = createPartFromString(selectedUser?.id!!)
+
+                        val apiService: ApiService = HttpClient.create()
+                        val response = apiService.editUserInputTukang(
+                            id = rbId,
+                            idUser = rbUserId,
+                        )
+
+                        if (response.isSuccessful) {
+
+                            val responseBody = response.body()!!
+
+                            when (responseBody.status) {
+                                RESPONSE_STATUS_OK -> {
+
+                                    setCreatedAndAddBy(postedName = selectedUser?.title)
+                                    hasEdited = true
+
+                                }
+                                RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+
+                                    handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Gagal mengubah! Message: ${ responseBody.message }")
+                                    loadingState(false)
+                                    toggleEdit(false)
+
+                                }
+                                else -> {
+
+                                    handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Gagal mengubah data!")
+                                    loadingState(false)
+                                    toggleEdit(false)
+
+                                }
+                            }
+
+                        } else {
+
+                            handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Gagal mengubah data! Error: " + response.message())
+                            loadingState(false)
+                            toggleEdit(false)
+
+                        }
+
+
+                    } catch (e: Exception) {
+
+                        handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                        loadingState(false)
+                        toggleEdit(false)
+
+                    } finally {
+                        selectedUser = null
+                        progressDialog.dismiss()
+                        dialog.dismiss()
+                    }
+
+                }
+
+            }
+        val dialog = builder.create()
+        dialog.show()
+    }
+
+    private fun setCreatedAndAddBy(postedName: String?) {
+        val iDate = intent.getStringExtra(CONST_DATE)
+
+        if (iDate.isNullOrEmpty()) {
+            binding.dateSeparator.visibility = View.GONE
+            binding.line.visibility = View.VISIBLE
+            if (!postedName.isNullOrEmpty()) {
+                binding.textBy.text = "oleh $postedName"
+                binding.textBy.visibility = View.VISIBLE
+                binding.dateSeparator.visibility = View.VISIBLE
+                binding.tvDate.visibility = View.GONE
+                binding.line.visibility = View.GONE
+            }
+        } else {
+            val date = DateFormat.format(iDate)
+
+            if (!postedName.isNullOrEmpty()) {
+                binding.textBy.text = "oleh $postedName"
+                binding.textBy.visibility = View.VISIBLE
+            }
+
+            binding.tvDate.text = date
+            binding.dateSeparator.visibility = View.VISIBLE
+            binding.line.visibility = View.GONE
+        }
     }
 
     private fun getCities() {

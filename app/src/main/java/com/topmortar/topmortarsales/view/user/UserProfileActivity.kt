@@ -228,16 +228,26 @@ class UserProfileActivity : AppCompatActivity() {
 
     private fun navigateHistoryVisit() {
 
-        val intent = Intent(this@UserProfileActivity, HistoryVisitedActivity::class.java)
+        val intent = Intent(this, HistoryVisitedActivity::class.java)
         intent.putExtra(CONST_USER_ID, iUserID ?: userId)
         intent.putExtra(CONST_USER_CITY, iUserCity ?: userCity)
         startActivity(intent)
 
     }
 
-    private fun navigateSalesReport() {
+    fun navigateSalesReport(view: View? = null) {
 
-        val intent = Intent(this@UserProfileActivity, ReportsActivity::class.java)
+        val intent = Intent(this, ReportsActivity::class.java)
+        intent.putExtra(CONST_USER_ID, iUserID)
+        intent.putExtra(CONST_FULL_NAME, iFullName)
+        intent.putExtra(CONST_USER_LEVEL, iUserLevel)
+        startActivity(intent)
+
+    }
+
+    fun navigateHistoryAddTukang() {
+
+        val intent = Intent(this, HistoryAddTukangActivity::class.java)
         intent.putExtra(CONST_USER_ID, iUserID)
         intent.putExtra(CONST_FULL_NAME, iFullName)
         intent.putExtra(CONST_USER_LEVEL, iUserLevel)
@@ -247,7 +257,7 @@ class UserProfileActivity : AppCompatActivity() {
 
     private fun navigateDeliveryCourierHistory() {
 
-        val intent = Intent(this@UserProfileActivity, HistoryDeliveryActivity::class.java)
+        val intent = Intent(this, HistoryDeliveryActivity::class.java)
         intent.putExtra(CONST_USER_ID, iUserID)
         intent.putExtra(CONST_FULL_NAME, iFullName)
         intent.putExtra(CONST_USER_LEVEL, iUserLevel)
@@ -313,13 +323,17 @@ class UserProfileActivity : AppCompatActivity() {
             binding.deliveryContainer.visibility = View.VISIBLE
 
             if (iUserLevel == AUTH_LEVEL_COURIER || userKind == USER_KIND_COURIER) {
+                binding.btnHistoryAddTukang.visibility = View.GONE
                 binding.btnHistoryVisit.visibility = View.GONE
                 binding.btnCourierHistoryDelivery.visibility = View.VISIBLE
                 if (userKind == USER_KIND_COURIER) binding.btnCourierTracking.visibility = View.GONE
             } else if (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES || iUserLevel == AUTH_LEVEL_PENAGIHAN || userKind == USER_KIND_PENAGIHAN || iUserLevel == AUTH_LEVEL_MARKETING || userKind == USER_KIND_MARKETING) {
                 binding.btnHistoryVisit.visibility = View.VISIBLE
                 binding.btnCourierHistoryDelivery.visibility = View.GONE
-                if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_MARKETING) binding.btnCourierTracking.visibility = View.GONE
+                if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_MARKETING) {
+                    binding.btnCourierTracking.visibility = View.GONE
+                    binding.btnHistoryAddTukang.visibility = View.GONE
+                }
             }
 
             setupCourierMenu()
@@ -741,6 +755,7 @@ class UserProfileActivity : AppCompatActivity() {
 
         binding.btnHistoryVisit.setOnClickListener { navigateHistoryVisit() }
         binding.btnCourierReport.setOnClickListener { navigateSalesReport() }
+        binding.btnHistoryAddTukang.setOnClickListener { navigateHistoryAddTukang() }
         binding.btnCourierTracking.setOnClickListener { navigateTrackingCourier() }
     }
 

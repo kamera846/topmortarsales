@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include
+        android:visibility="gone"
+        android:id="@+id/search_box"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/component_search_box"/>
+
+    <LinearLayout
+        android:visibility="visible"
+        android:id="@+id/filterBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
+        android:background="@color/light"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+            android:text="@string/filter"/>
+
+        <TextView
+            android:id="@+id/tv_filter"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+            android:textStyle="bold"
+            android:layout_marginStart="4dp"
+            android:text="@string/tidak_ada_filter"/>
+
+        <ImageView
+            android:id="@+id/icon_filter"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginLeft="16dp"
+            android:src="@drawable/up_down_black"/>
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/recyclerView"
+        android:name="com.topmortar.topmortarsales.view.user.UserTargetsFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layoutManager="LinearLayoutManager"
+        tools:context=".view.user.UserOnGoingStoreFragment"
+        tools:listitem="@layout/item_chat_room" />
+
+    <TextView
+        android:visibility="gone"
+        android:id="@+id/txt_loading"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:textAlignment="center"
+        android:text="@string/txt_loading"
+        android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+</LinearLayout>

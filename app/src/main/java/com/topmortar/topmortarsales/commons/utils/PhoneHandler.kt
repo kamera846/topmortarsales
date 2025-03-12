@@ -16,6 +16,20 @@ object PhoneHandler {
         }
     }
 
+    fun formatPhoneNumber62(input: String): String {
+        val trimmedInput = input.trim()
+
+        return if (trimmedInput.startsWith("0")) {
+            "62${trimmedInput.substring(1)}"
+        } else if (trimmedInput.startsWith("8")) {
+            "62${trimmedInput.substring(0)}"
+        } else if (trimmedInput.startsWith("+")) {
+            "${trimmedInput.substring(1)}"
+        } else {
+            trimmedInput
+        }
+    }
+
     fun phoneValidation(input: String, etPhone: EditText): Boolean {
         val pattern = Regex("^\\d{10,16}$")
         val trimmedInput = input.trim()

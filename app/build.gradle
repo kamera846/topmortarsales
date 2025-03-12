@@ -15,8 +15,8 @@ android {
         applicationId "com.topmortar.topmortarsales"
         minSdk 24
         targetSdk 35
-        versionCode 145
-        versionName "3.2.45"
+        versionCode 146
+        versionName "3.2.46"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -71,6 +71,7 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.recyclerview:recyclerview:1.3.2'
     implementation 'com.google.firebase:firebase-messaging:24.0.1'
+    implementation 'androidx.activity:activity:1.8.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
@@ -127,5 +128,11 @@ dependencies {
 
     // Chart
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+
+    // Expand FAB
+    implementation 'com.nambimobile.widgets:expandable-fab:1.1.1'
+
+    // Qr Scanner
+    implementation 'com.github.yuriy-budiyev:code-scanner:2.3.0'
 
 }
