@@ -73,7 +73,7 @@ class CustomUtility(private val context: Context) {
         val minute = calendar.get(Calendar.MINUTE).toString().padStart(2, '0')
         val second = calendar.get(Calendar.SECOND).toString().padStart(2, '0')
 
-        val firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId)
+        val firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorId)
         val userChild = firebaseReference.child("$FIREBASE_CHILD_ABSENT/$userId")
         userChild.child("isOnline").setValue(status)
         userChild.child("lastSeen").setValue("$year-$month-$day $hour:$minute:$second")

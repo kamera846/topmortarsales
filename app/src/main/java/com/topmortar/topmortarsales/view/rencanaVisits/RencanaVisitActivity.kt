@@ -30,6 +30,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.data.ApiService
@@ -417,6 +418,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@RencanaVisitActivity, "Failed RencanaVisitActivity on getListRenviPerCategory(). Catch: ${e.message}")
                 when (category) {
                     "jatem" -> getListRenviPerCategory("voucher")
                     "voucher" -> getListRenviPerCategory("passive")

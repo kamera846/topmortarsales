@@ -47,6 +47,7 @@ import com.topmortar.topmortarsales.commons.SALES_REPORT_RENVI
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -188,6 +189,7 @@ class JatemFragment : Fragment() {
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(requireContext(), "Failed JatemFragment on getList(). Catch: ${e.message}")
                 listItem = arrayListOf()
                 setRecyclerView(listItem)
                 handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
@@ -339,6 +341,7 @@ class JatemFragment : Fragment() {
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(requireContext(), "Failed JatemFragment on getCities(). Catch: ${e.message}")
                 handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
 
             }

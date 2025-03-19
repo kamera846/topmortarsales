@@ -33,10 +33,7 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.HomeSalesMenuRV
@@ -66,11 +63,14 @@ import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAX_REPORT_DISTANCE
 import com.topmortar.topmortarsales.commons.NOTIFICATION_LEVEL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SELECTED_ABSENT_MODE
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_MARKETING
@@ -102,7 +102,10 @@ import com.topmortar.topmortarsales.view.product.ProductsActivity
 import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import com.topmortar.topmortarsales.view.tukang.ListTukangActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 
 @SuppressLint("SetTextI18n")
@@ -131,9 +134,9 @@ class HomeSalesActivity : AppCompatActivity() {
     private var isLocked = false
 
     private lateinit var firebaseReference: DatabaseReference
-    private var absentProgressDialog : ProgressDialog? = null
-    private lateinit var fusedLocationClient : FusedLocationProviderClient
-    private lateinit var customUtility : CustomUtility
+    private var absentProgressDialog: ProgressDialog? = null
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var customUtility: CustomUtility
 
     private var locationCallback: LocationCallback? = null
 
@@ -158,115 +161,206 @@ class HomeSalesActivity : AppCompatActivity() {
 //        initGlobalVariable()
 
 //        checkLocationPermission()
-        CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor() ?: "-custom-010", sessionManager.userID() ?: "")
+        CustomUtility(this).setUserStatusOnline(
+            true,
+            sessionManager.userDistributor() ?: "-custom-010",
+            sessionManager.userID() ?: ""
+        )
 
     }
 
     private fun checkLocationPermission() {
-        if (absentProgressDialog == null) {
-            absentProgressDialog = ProgressDialog(this)
-            absentProgressDialog!!.setMessage(getString(R.string.txt_loading))
-            absentProgressDialog!!.setCancelable(false)
-        }
-        if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            checkGpsStatus()
-        } else {
-            absentProgressDialog?.dismiss()
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+        try {
+
+            if (absentProgressDialog == null) {
+                absentProgressDialog = ProgressDialog(this)
+                absentProgressDialog!!.setCancelable(false)
+            }
+            absentProgressDialog!!.setMessage(getString(R.string.txt_loading) + " 1 / 5")
+            if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                checkGpsStatus()
+            } else {
+                absentProgressDialog?.dismiss()
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    LOCATION_PERMISSION_REQUEST_CODE
+                )
+            }
+        } catch (e: Exception) {
+            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on checkLocationPermission(). Catch: ${e.message}")
+            handleMessage(
+                this,
+                "Home Sales Failed",
+                "Failed HomeSalesActivity on checkLocationPermission(). Error: ${e.message}"
+            )
         }
     }
 
     private fun checkGpsStatus() {
-        val locationManager =
-            getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        if (absentProgressDialog != null) {
+            absentProgressDialog!!.setMessage(getString(R.string.txt_loading) + " 2 / 5")
+        }
+        try {
 
-        if (!isGpsEnabled) showGpsDisabledDialog()
-        else checkMockLocation()
+            val locationManager =
+                getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+
+            if (!isGpsEnabled) showGpsDisabledDialog()
+            else checkMockLocation()
+        } catch (e: Exception) {
+            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on checkGpsStatus(). Catch: ${e.message}")
+            handleMessage(
+                this,
+                "Home Sales Failed",
+                "Failed HomeSalesActivity on checkGpsStatus(). Error: ${e.message}"
+            )
+//        } finally {
+//            if (absentProgressDialog != null) {
+//                absentProgressDialog!!.setMessage(getString(R.string.txt_loading))
+//            }
+        }
     }
 
     private fun checkMockLocation() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (absentProgressDialog != null) {
+            absentProgressDialog!!.setMessage(getString(R.string.txt_loading) + " 3 / 5")
+        }
+        try {
 
-            fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
 
-                if (location == null) {
+                fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+                fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
 
-//                    checkLocationPermission()
-                    if (locationCallback != null) {
+                    if (location == null) {
 
-                        fusedLocationClient.removeLocationUpdates(locationCallback!!)
-                    }
+                        //                    checkLocationPermission()
+                        if (locationCallback != null) {
 
-                    val locationRequest = LocationRequest.create().apply {
-                        interval = 3000
-                        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-                    }
-
-                    locationCallback = object : LocationCallback() {
-                        override fun onLocationResult(locationResult: LocationResult) {
-
-                            fusedLocationClient.removeLocationUpdates(this)
-                            Handler(Looper.getMainLooper()).postDelayed({
-                                val intent = Intent(this@HomeSalesActivity, HomeSalesActivity::class.java)
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-                                startActivity(intent)
-                            }, 3000)
+                            fusedLocationClient.removeLocationUpdates(locationCallback!!)
                         }
+
+                        val locationRequest = LocationRequest.create().apply {
+                            interval = 3000
+                            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+                        }
+
+                        locationCallback = object : LocationCallback() {
+                            override fun onLocationResult(locationResult: LocationResult) {
+
+                                fusedLocationClient.removeLocationUpdates(this)
+                                Handler(Looper.getMainLooper()).postDelayed({
+                                    val intent = Intent(
+                                        this@HomeSalesActivity,
+                                        HomeSalesActivity::class.java
+                                    )
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    startActivity(intent)
+                                }, 3000)
+                            }
+                        }
+
+                        fusedLocationClient.requestLocationUpdates(
+                            locationRequest,
+                            locationCallback!!,
+                            Looper.getMainLooper()
+                        )
+                    } else {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && location.isMock) {
+
+                            showDialogIsMock()
+                        } else if (location.isFromMockProvider) {
+
+                            showDialogIsMock()
+                        } else initView()
                     }
-
-                    fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback!!, Looper.getMainLooper())
-                } else {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && location.isMock) {
-
-                        showDialogIsMock()
-                    } else if (location.isFromMockProvider) {
-
-                        showDialogIsMock()
-                    } else initView()
                 }
+            } else {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    LOCATION_PERMISSION_REQUEST_CODE
+                )
             }
-        } else {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+        } catch (e: Exception) {
+            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on checkMockLocation(). Catch: ${e.message}")
+            handleMessage(
+                this,
+                "Home Sales Failed",
+                "Failed HomeSalesActivity on checkMockLocation(). Error: ${e.message}"
+            )
+//        } finally {
+//            if (absentProgressDialog != null) {
+//                absentProgressDialog!!.setMessage(getString(R.string.txt_loading))
+//            }
         }
     }
 
     private fun showDialogIsMock() {
-        absentProgressDialog?.dismiss()
+        try {
 
-        val serviceIntent = Intent(this, TrackingService::class.java)
-        stopService(serviceIntent)
+            absentProgressDialog?.dismiss()
 
-        val dialogView = layoutInflater.inflate(R.layout.modal_mock_location, null)
-        AlertDialog.Builder(this)
-            .setView(dialogView)
-            .setCancelable(false)
-            .setTitle("Lokasi Mock")
-            .setPositiveButton("Pengaturan") { _, _ ->
-                // Buka pengaturan Developer Options
-                val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
-                startActivityForResult(intent, LOCATION_PERMISSION_REQUEST_CODE)
-            }
-            .show()
+            val serviceIntent = Intent(this, TrackingService::class.java)
+            stopService(serviceIntent)
+
+            val dialogView = layoutInflater.inflate(R.layout.modal_mock_location, null)
+            AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(false)
+                .setTitle("Lokasi Mock")
+                .setPositiveButton("Pengaturan") { _, _ ->
+                    // Buka pengaturan Developer Options
+                    val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+                    startActivityForResult(intent, LOCATION_PERMISSION_REQUEST_CODE)
+                }
+                .show()
+        } catch (e: Exception) {
+            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on showDialogIsMock(). Catch: ${e.message}")
+            handleMessage(
+                this,
+                "Home Sales Failed",
+                "Failed HomeSalesActivity on showDialogIsMock(). Error: ${e.message}"
+            )
+        }
     }
 
     private fun showGpsDisabledDialog() {
-        absentProgressDialog?.dismiss()
+        try {
 
-        val serviceIntent = Intent(this, TrackingService::class.java)
-        stopService(serviceIntent)
+            absentProgressDialog?.dismiss()
 
-        AlertDialog.Builder(this)
-            .setMessage("Aplikasi memerlukan lokasi untuk berfungsi. Aktifkan lokasi sekarang?")
-            .setCancelable(false)
-            .setPositiveButton("Ya") { _, _ ->
-                // Buka pengaturan untuk mengaktifkan GPS
-                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                startActivityForResult(intent, LOCATION_PERMISSION_REQUEST_CODE)
-            }
-            .show()
+            val serviceIntent = Intent(this, TrackingService::class.java)
+            stopService(serviceIntent)
+
+            AlertDialog.Builder(this)
+                .setMessage("Aplikasi memerlukan lokasi untuk berfungsi. Aktifkan lokasi sekarang?")
+                .setCancelable(false)
+                .setPositiveButton("Ya") { _, _ ->
+                    // Buka pengaturan untuk mengaktifkan GPS
+                    val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                    startActivityForResult(intent, LOCATION_PERMISSION_REQUEST_CODE)
+                }
+                .show()
+        } catch (e: Exception) {
+            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on showGpsDisabledDialog(). Catch: ${e.message}")
+            handleMessage(
+                this,
+                "Home Sales Failed",
+                "Failed HomeSalesActivity on showGpsDisabledDialog(). Error: ${e.message}"
+            )
+        }
     }
 
     private fun initGlobalVariable() {
@@ -278,14 +372,15 @@ class HomeSalesActivity : AppCompatActivity() {
         }
 
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-014")
+        firebaseReference =
+            FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-014")
         apiService = HttpClient.create()
         customUtility = CustomUtility(this)
         absentMode = selectedAbsentMode
 
         // Set User Absent Level (TEMP)
         val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
-        val userChild = absentChild.child(userId.toString())
+        val userChild = absentChild.child(userId ?: "0")
         val userLevel = when (userKind) {
             USER_KIND_PENAGIHAN -> AUTH_LEVEL_PENAGIHAN
             USER_KIND_SALES -> AUTH_LEVEL_SALES
@@ -297,7 +392,8 @@ class HomeSalesActivity : AppCompatActivity() {
 
         binding.selectedStoreContainer.tvLabel.text = "Lokasi absen:"
 
-        if (selectedStoreDefaultID.isNullOrEmpty()) binding.selectedStoreContainer.tvFilter.text = "Pilih toko"
+        if (selectedStoreDefaultID.isNullOrEmpty()) binding.selectedStoreContainer.tvFilter.text =
+            "Pilih toko"
         else {
             binding.selectedStoreContainer.tvFilter.text = selectedStoreDefaultTitle
             selectedStore = ModalSearchModel(
@@ -311,72 +407,107 @@ class HomeSalesActivity : AppCompatActivity() {
     }
 
     private fun initView() {
-
-        initGlobalVariable()
-        binding.fullName.text = userFullName
-
-        setListMenu()
-
-        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.selectedStoreContainer.componentFilter.background = AppCompatResources.getDrawable(this, R.color.black_400)
-        else binding.selectedStoreContainer.componentFilter.background = AppCompatResources.getDrawable(this, R.color.light)
-        binding.selectedStoreContainer.componentFilter.setOnClickListener {
-            isSelectStoreOnly = true
-            getListAbsent()
+        if (absentProgressDialog != null) {
+            absentProgressDialog!!.setMessage(getString(R.string.txt_loading) + " 4 / 5")
         }
 
-        binding.btnAbsent.setOnClickListener {
+        try {
+            initGlobalVariable()
+            binding.fullName.text = userFullName
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            setListMenu()
+
+            val currentNightMode =
+                resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+            if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.selectedStoreContainer.componentFilter.background =
+                AppCompatResources.getDrawable(this, R.color.black_400)
+            else binding.selectedStoreContainer.componentFilter.background =
+                AppCompatResources.getDrawable(this, R.color.light)
+            binding.selectedStoreContainer.componentFilter.setOnClickListener {
+                isSelectStoreOnly = true
+                getListAbsent()
+            }
+
+            binding.btnAbsent.setOnClickListener {
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     if (ContextCompat.checkSelfPermission(
                             this,
-                            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                            Manifest.permission.ACCESS_FINE_LOCATION
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
+                        if (ContextCompat.checkSelfPermission(
+                                this,
+                                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                            ) == PackageManager.PERMISSION_GRANTED
+                        ) {
 
+                            if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
+                            if (selectedStore == null) getListAbsent()
+                            else absentAction()
+
+                        } else {
+                            val message = getString(R.string.bg_service_location_permission_message)
+                            val title = getString(R.string.bg_service_location_permission_title)
+                            AlertDialog.Builder(this)
+                                .setCancelable(false)
+                                .setTitle(title)
+                                .setMessage(message)
+                                .setPositiveButton(getString(R.string.open_settings)) { localDialog, _ ->
+                                    ActivityCompat.requestPermissions(
+                                        this,
+                                        arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                                        BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE
+                                    )
+                                    localDialog.dismiss()
+                                }
+                                .show()
+                        }
+                    } else {
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                            LOCATION_PERMISSION_REQUEST_CODE
+                        )
+                    }
+                } else {
+                    if (ContextCompat.checkSelfPermission(
+                            this,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
+//                    absentAction()
                         if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
                         if (selectedStore == null) getListAbsent()
                         else absentAction()
-
                     } else {
-                        val message = getString(R.string.bg_service_location_permission_message)
-                        val title = getString(R.string.bg_service_location_permission_title)
-                        AlertDialog.Builder(this)
-                            .setCancelable(false)
-                            .setTitle(title)
-                            .setMessage(message)
-                            .setPositiveButton(getString(R.string.open_settings)) { localDialog, _ ->
-                                ActivityCompat.requestPermissions(
-                                    this,
-                                    arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
-                                    BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE
-                                )
-                                localDialog.dismiss()
-                            }
-                            .show()
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                            LOCATION_PERMISSION_REQUEST_CODE
+                        )
                     }
-                } else {
-                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
-                }
-            } else {
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-//                    absentAction()
-                    if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
-                    if (selectedStore == null) getListAbsent()
-                    else absentAction()
-                } else {
-                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
                 }
             }
-        }
 
-        lockMenuItem(true)
+            lockMenuItem(true)
 
-        checkAbsent()
+            checkAbsent()
 //        getFcmToken()
 //        Disabled FCM
 //        subscribeFcmTopic()
+        } catch (e: Exception) {
+            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on initView(). Catch: ${e.message}")
+            handleMessage(
+                this,
+                "Home Sales Failed",
+                "Failed HomeSalesActivity on initView(). Error: ${e.message}"
+            )
+//        } finally {
+//            if (absentProgressDialog != null) {
+//                absentProgressDialog!!.setMessage(getString(R.string.txt_loading))
+//            }
+        }
     }
 
     private fun getFcmToken() {
@@ -393,6 +524,7 @@ class HomeSalesActivity : AppCompatActivity() {
                 Log.d("FCM", "FCM Token: $token")
             }
         } catch (e: Exception) {
+            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on getFcmToken(). Catch: ${e.message}")
             Log.e("FCM", "Error get fcm token exception: $e")
         }
 
@@ -407,7 +539,11 @@ class HomeSalesActivity : AppCompatActivity() {
 //                    Toast.makeText(applicationContext, "Subscribed to $fcmTopic", Toast.LENGTH_SHORT).show()
                 } else {
                     // Handle failure
-                    Toast.makeText(applicationContext, "Subscribe notification failed. Error: ${task.exception?.stackTrace}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        applicationContext,
+                        "Subscribe notification failed. Error: ${task.exception?.stackTrace}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
     }
@@ -432,7 +568,10 @@ class HomeSalesActivity : AppCompatActivity() {
 
 //                    val response = if (userKind == USER_KIND_PENAGIHAN) apiService.getContactsByDistributor(distributorID = userDistributorId ?: "0")
 //                    else apiService.getContacts(cityId = userCity ?: "0", distributorID = userDistributorId ?: "0")
-                    val response = apiService.getContacts(cityId = userCity ?: "0", distributorID = userDistributorId ?: "0")
+                    val response = apiService.getContacts(
+                        cityId = userCity ?: "0",
+                        distributorID = userDistributorId ?: "0"
+                    )
 
                     when (response.status) {
                         RESPONSE_STATUS_OK -> {
@@ -453,14 +592,24 @@ class HomeSalesActivity : AppCompatActivity() {
 
                             intent.putExtra(CONST_NEAREST_STORE, true)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_NAME,
+                                listCoordinateName
+                            )
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_STATUS,
+                                listCoordinateStatus
+                            )
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_CITY_ID,
+                                listCoordinateCityID
+                            )
 
                             progressDialog.dismiss()
                             startActivity(intent)
 
                         }
+
                         RESPONSE_STATUS_EMPTY -> {
 
                             val listCoordinate = arrayListOf<String>()
@@ -470,15 +619,33 @@ class HomeSalesActivity : AppCompatActivity() {
 
                             intent.putExtra(CONST_NEAREST_STORE, true)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_NAME,
+                                listCoordinateName
+                            )
 
                             progressDialog.dismiss()
                             startActivity(intent)
 
                         }
+
+                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+
+                            progressDialog.dismiss()
+                            handleMessage(
+                                this@HomeSalesActivity,
+                                TAG_RESPONSE_MESSAGE, "Response failed: ${response.message}"
+                            )
+
+                        }
+
                         else -> {
 
-                            handleMessage(this@HomeSalesActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                            handleMessage(
+                                this@HomeSalesActivity,
+                                TAG_RESPONSE_CONTACT,
+                                getString(R.string.failed_get_data) + response.message
+                            )
                             progressDialog.dismiss()
 
                         }
@@ -487,7 +654,12 @@ class HomeSalesActivity : AppCompatActivity() {
 
                 } catch (e: Exception) {
 
-                    handleMessage(this@HomeSalesActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                    FirebaseUtils.logErr(this@HomeSalesActivity, "Failed HomeSalesActivity on navigateToNearestStore(). Catch: ${e.message}")
+                    handleMessage(
+                        this@HomeSalesActivity,
+                        TAG_RESPONSE_CONTACT,
+                        "Failed run service. Exception " + e.message
+                    )
                     progressDialog.dismiss()
 
                 }
@@ -507,7 +679,8 @@ class HomeSalesActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
 
-                    val response = apiService.getListBaseCamp(distributorID = userDistributorId ?: "0")
+                    val response =
+                        apiService.getListBaseCamp(distributorID = userDistributorId ?: "0")
 
                     when (response.status) {
                         RESPONSE_STATUS_OK -> {
@@ -529,14 +702,24 @@ class HomeSalesActivity : AppCompatActivity() {
                             intent.putExtra(CONST_NEAREST_STORE, true)
                             intent.putExtra(CONST_IS_BASE_CAMP, true)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_NAME,
+                                listCoordinateName
+                            )
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_STATUS,
+                                listCoordinateStatus
+                            )
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_CITY_ID,
+                                listCoordinateCityID
+                            )
 
                             progressDialog.dismiss()
                             startActivity(intent)
 
                         }
+
                         RESPONSE_STATUS_EMPTY -> {
 
                             val listCoordinate = arrayListOf<String>()
@@ -547,15 +730,33 @@ class HomeSalesActivity : AppCompatActivity() {
                             intent.putExtra(CONST_NEAREST_STORE, true)
                             intent.putExtra(CONST_IS_BASE_CAMP, true)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_NAME,
+                                listCoordinateName
+                            )
 
                             progressDialog.dismiss()
                             startActivity(intent)
 
                         }
+
+                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+
+                            progressDialog.dismiss()
+                            handleMessage(
+                                this@HomeSalesActivity,
+                                TAG_RESPONSE_MESSAGE, "Response failed: ${response.message}"
+                            )
+
+                        }
+
                         else -> {
 
-                            handleMessage(this@HomeSalesActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                            handleMessage(
+                                this@HomeSalesActivity,
+                                TAG_RESPONSE_CONTACT,
+                                getString(R.string.failed_get_data) + response.message
+                            )
                             progressDialog.dismiss()
 
                         }
@@ -563,8 +764,12 @@ class HomeSalesActivity : AppCompatActivity() {
 
 
                 } catch (e: Exception) {
-
-                    handleMessage(this@HomeSalesActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                    FirebaseUtils.logErr(this@HomeSalesActivity, "Failed HomeSalesActivity on navigateToNearestBasecamp(). Catch: ${e.message}")
+                    handleMessage(
+                        this@HomeSalesActivity,
+                        TAG_RESPONSE_CONTACT,
+                        "Failed run service. Exception " + e.message
+                    )
                     progressDialog.dismiss()
 
                 }
@@ -608,6 +813,7 @@ class HomeSalesActivity : AppCompatActivity() {
             userDevice.child("logout_at").setValue(DateFormat.now())
             userDevice.child("login_at").setValue("")
         } catch (e: Exception) {
+            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on logoutHandler(). Catch: ${e.message}")
             Log.d("Firebase Auth", "$e")
         }
 
@@ -635,15 +841,41 @@ class HomeSalesActivity : AppCompatActivity() {
                             logoutHandler()
                         } else {
                             sessionManager.setUserLoggedIn(data)
-                            binding.fullName.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) it else "Selamat Datang"}
+                            binding.fullName.text = sessionManager.fullName()
+                                .let { if (!it.isNullOrEmpty()) it else "Selamat Datang" }
                         }
 
-                    } RESPONSE_STATUS_EMPTY -> missingDataHandler()
+                    }
+
+                    RESPONSE_STATUS_EMPTY -> missingDataHandler()
+
+                    RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+
+                        absentProgressDialog?.dismiss()
+                        handleMessage(
+                            this@HomeSalesActivity,
+                            TAG_RESPONSE_MESSAGE,
+                            "Gagal memuat data pengguna! Message: ${response.message}"
+                        )
+
+                    }
+
+                    else -> {
+
+                        handleMessage(
+                            this@HomeSalesActivity,
+                            TAG_RESPONSE_CONTACT,
+                            "Gagal memuat data pengguna! Error: ${response.message}"
+                        )
+                        absentProgressDialog?.dismiss()
+
+                    }
 
                 }
 
 
             } catch (e: Exception) {
+                FirebaseUtils.logErr(this@HomeSalesActivity, "Failed HomeSalesActivity on getUserLoggedIn(). Catch: ${e.message}")
                 Log.d("TAG USER LOGGED IN", "Failed run service. Exception " + e.message)
             }
 
@@ -651,7 +883,10 @@ class HomeSalesActivity : AppCompatActivity() {
 
     }
 
-    private fun setupDialogSearch(storeItems: ArrayList<ContactModel> = ArrayList(), basecampItems: ArrayList<BaseCampModel> = ArrayList()) {
+    private fun setupDialogSearch(
+        storeItems: ArrayList<ContactModel> = ArrayList(),
+        basecampItems: ArrayList<BaseCampModel> = ArrayList()
+    ) {
 
         val modalItems = arrayListOf<ModalSearchModel>()
         if (absentMode == ABSENT_MODE_STORE) {
@@ -679,7 +914,8 @@ class HomeSalesActivity : AppCompatActivity() {
         }
 
         searchStoreAbsentModal = SearchModal(this, modalItems)
-        searchStoreAbsentModal.label = if (absentMode == ABSENT_MODE_STORE) "Pilih Toko" else "Pilih Basecamp"
+        searchStoreAbsentModal.label =
+            if (absentMode == ABSENT_MODE_STORE) "Pilih Toko" else "Pilih Basecamp"
         searchStoreAbsentModal.searchHint = "Ketik untuk mencari…"
         searchStoreAbsentModal.setOnDismissListener { absentProgressDialog?.dismiss() }
         searchStoreAbsentModal.setCustomDialogListener(object : SearchModal.SearchModalListener {
@@ -691,13 +927,19 @@ class HomeSalesActivity : AppCompatActivity() {
                 } else {
                     selectedStore = data
                     binding.selectedStoreContainer.tvFilter.text = data.title
-                    sessionManager.selectedStoreAbsent(data.id ?: "", data.title ?: "", data.etc ?: "", absentMode ?: ABSENT_MODE_STORE)
+                    sessionManager.selectedStoreAbsent(
+                        data.id ?: "",
+                        data.title ?: "",
+                        data.etc ?: "",
+                        absentMode ?: ABSENT_MODE_STORE
+                    )
                     if (isSelectStoreOnly) isSelectStoreOnly = false
                     else absentAction()
                 }
             }
 
         })
+
     }
 
     private fun getListAbsent() {
@@ -724,7 +966,8 @@ class HomeSalesActivity : AppCompatActivity() {
 
         if (isAbsentMorningNow) {
             alertTitle = "Absen Pulang"
-            alertMessage = "Melakukan tindakan ini akan membatasi akses ke aplikasi sampai hari berikutnya!\nKonfirmasi absen pulang sekarang? "
+            alertMessage =
+                "Melakukan tindakan ini akan membatasi akses ke aplikasi sampai hari berikutnya!\nKonfirmasi absen pulang sekarang? "
         }
 
         AlertDialog.Builder(this)
@@ -745,7 +988,11 @@ class HomeSalesActivity : AppCompatActivity() {
         val mapsUrl = selectedStore?.etc.toString()
         val urlUtility = URLUtility(this)
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
 
             if (urlUtility.isLocationEnabled(this)) {
 
@@ -769,7 +1016,12 @@ class HomeSalesActivity : AppCompatActivity() {
                             if (latitude != null && longitude != null) {
 
                                 // Calculate Distance
-                                val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
+                                val distance = urlUtility.calculateDistance(
+                                    currentLatitude,
+                                    currentLongitude,
+                                    latitude,
+                                    longitude
+                                )
                                 val shortDistance = "%.3f".format(distance)
 
                                 if (distance > MAX_REPORT_DISTANCE) {
@@ -782,13 +1034,16 @@ class HomeSalesActivity : AppCompatActivity() {
                                         absentProgressDialog?.dismiss()
                                     }
                                     builder.setTitle("Peringatan!")
-                                        .setMessage("Titik anda saat ini $shortDistance km dari titik ${ selectedStore?.title }. Cobalah untuk lebih dekat dengan toko!")
+                                        .setMessage("Titik anda saat ini $shortDistance km dari titik ${selectedStore?.title}. Cobalah untuk lebih dekat dengan toko!")
                                         .setPositiveButton("Oke") { dialog, _ ->
                                             absentProgressDialog?.dismiss()
                                             dialog.dismiss()
                                         }
                                         .setNegativeButton("Buka Maps") { dialog, _ ->
-                                            val intent = Intent(this@HomeSalesActivity, MapsActivity::class.java)
+                                            val intent = Intent(
+                                                this@HomeSalesActivity,
+                                                MapsActivity::class.java
+                                            )
                                             intent.putExtra(CONST_IS_BASE_CAMP, true)
                                             intent.putExtra(CONST_MAPS, mapsUrl)
                                             intent.putExtra(CONST_MAPS_NAME, selectedStore?.title)
@@ -804,7 +1059,8 @@ class HomeSalesActivity : AppCompatActivity() {
 
                             } else {
                                 absentProgressDialog?.dismiss()
-                                Toast.makeText(this, "Gagal memproses koordinat", TOAST_SHORT).show()
+                                Toast.makeText(this, "Gagal memproses koordinat", TOAST_SHORT)
+                                    .show()
                             }
                         } else {
                             AlertDialog.Builder(this)
@@ -820,17 +1076,26 @@ class HomeSalesActivity : AppCompatActivity() {
 
                     }.addOnFailureListener {
                         absentProgressDialog?.dismiss()
-                        handleMessage(this, "LOG REPORT", "Gagal mendapatkan lokasi anda. Err: " + it.message)
+                        handleMessage(
+                            this,
+                            "LOG REPORT",
+                            "Gagal mendapatkan lokasi anda. Err: " + it.message
+                        )
 //                            Toast.makeText(this, "Gagal mendapatkan lokasi anda", TOAST_SHORT).show()
                     }
 
                 } else {
                     absentProgressDialog?.dismiss()
-                    val message = "Anda tidak dapat membuat laporan absen untuk saat ini, silakan hubungi admin untuk memperbarui koordinat toko ini"
+                    val message =
+                        "Anda tidak dapat membuat laporan absen untuk saat ini, silakan hubungi admin untuk memperbarui koordinat toko ini"
                     val actionTitle = "Hubungi Sekarang"
                     customUtility.showPermissionDeniedSnackbar(message, actionTitle) {
-                        val chatMessage = "*#Sales Service*\nHalo admin, tolong bantu saya [KETIK PESAN ANDA]"
-                        val number = if (!userDistributorNumber.isNullOrEmpty()) userDistributorNumber!! else getString(R.string.topmortar_wa_number)
+                        val chatMessage =
+                            "*#Sales Service*\nHalo admin, tolong bantu saya [KETIK PESAN ANDA]"
+                        val number =
+                            if (!userDistributorNumber.isNullOrEmpty()) userDistributorNumber!! else getString(
+                                R.string.topmortar_wa_number
+                            )
                         customUtility.navigateChatAdmin(chatMessage, number)
                     }
                 }
@@ -843,7 +1108,11 @@ class HomeSalesActivity : AppCompatActivity() {
 
         } else {
             absentProgressDialog?.dismiss()
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                LOCATION_PERMISSION_REQUEST_CODE
+            )
         }
     }
 
@@ -852,7 +1121,7 @@ class HomeSalesActivity : AppCompatActivity() {
         if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
 
         val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
-        val userChild = absentChild.child(userId.toString())
+        val userChild = absentChild.child(userId ?: "0")
         val userLevel = when (userKind) {
             USER_KIND_PENAGIHAN -> AUTH_LEVEL_PENAGIHAN
             USER_KIND_SALES -> AUTH_LEVEL_SALES
@@ -876,12 +1145,12 @@ class HomeSalesActivity : AppCompatActivity() {
 
             sessionManager.absentDateTime(absentDateTime)
 
-            val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
-            serviceIntent.putExtra("userId", userId)
-            serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
-            this@HomeSalesActivity.startService(serviceIntent)
-
-            absentProgressDialog?.dismiss()
+//            val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
+//            serviceIntent.putExtra("userId", userId)
+//            serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
+//            this@HomeSalesActivity.startService(serviceIntent)
+//
+//            absentProgressDialog?.dismiss()
             checkAbsent()
         } else {
 
@@ -891,125 +1160,153 @@ class HomeSalesActivity : AppCompatActivity() {
 
             sessionManager.absentDateTime(absentDateTime)
 
-            val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
-            this@HomeSalesActivity.stopService(serviceIntent)
-
-            absentProgressDialog?.dismiss()
+//            val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
+//            this@HomeSalesActivity.stopService(serviceIntent)
+//
+//            absentProgressDialog?.dismiss()
             checkAbsent()
         }
     }
 
     private fun checkAbsent() {
+        FirebaseUtils.firebaseLogging(this, "Absent", "Start checking")
+        try {
 
-        if (absentProgressDialog == null) {
-            absentProgressDialog = ProgressDialog(this)
-            absentProgressDialog!!.setMessage(getString(R.string.txt_loading))
-            absentProgressDialog!!.setCancelable(false)
-        }
+            if (absentProgressDialog == null) {
+                FirebaseUtils.firebaseLogging(this, "Absent", "Init Loading")
+                absentProgressDialog = ProgressDialog(this)
+                absentProgressDialog!!.setCancelable(false)
+            }
 
-        if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
+            absentProgressDialog!!.setMessage(getString(R.string.txt_loading) + " 5 / 5")
+            if (!absentProgressDialog!!.isShowing) {
+                FirebaseUtils.firebaseLogging(this, "Absent", "Show loading")
+                absentProgressDialog?.show()
+            }
 
-        val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
-        val userChild = absentChild.child(userId.toString())
+            val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+            val userChild = absentChild.child(userId ?: "0")
 
+            FirebaseUtils.firebaseLogging(this, "Absent", "Reaching firebase server")
+            lifecycleScope.launch(Dispatchers.IO) {
 
-        userChild.addListenerForSingleValueEvent(object: ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.exists()) {
-                    // Do something
-                    if (snapshot.child("morningDateTime").exists()) {
-                        val morningDateTime = snapshot.child("morningDateTime").getValue(String::class.java).toString()
-                        if (morningDateTime.isNotEmpty()) {
-                            sessionManager.absentDateTime(morningDateTime)
+                val snapshot = userChild.get().await()
 
-                            val absentMorningDate = DateFormat.format(morningDateTime, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd")
+                withContext(Dispatchers.Main) {
+                    FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Firebase server reached")
+                    if (snapshot.exists()) {
+                        FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Snapshot exist")
+                        // Do something
+                        if (snapshot.child("morningDateTime").exists()) {
+                            FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Morning date time exist")
+                            val morningDateTime =
+                                snapshot.child("morningDateTime").getValue(String::class.java)
+                                    .toString()
+                            if (morningDateTime.isNotEmpty()) {
+                                FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Morning date time not empty")
+                                sessionManager.absentDateTime(morningDateTime)
 
-                            if (DateFormat.dateAfterNow(absentMorningDate)) {
-                                isAbsentMorningNow = false
-                                lockMenuItem(true)
+                                val absentMorningDate = DateFormat.format(
+                                    morningDateTime,
+                                    "yyyy-MM-dd HH:mm:ss",
+                                    "yyyy-MM-dd"
+                                )
 
-                            } else {
+                                if (DateFormat.dateAfterNow(absentMorningDate)) {
+                                    FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Morning date time expired")
+                                    isAbsentMorningNow = false
+                                    lockMenuItem(true)
 
-                                val serviceIntentDD = Intent(this@HomeSalesActivity, TrackingService::class.java)
-                                serviceIntentDD.putExtra("userId", userId)
-                                serviceIntentDD.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
-                                this@HomeSalesActivity.startService(serviceIntentDD)
+                                } else {
+                                    val serviceIntentDD =
+                                        Intent(this@HomeSalesActivity, TrackingService::class.java)
+                                    serviceIntentDD.putExtra("userId", userId)
+                                    serviceIntentDD.putExtra(
+                                        "userDistributorId",
+                                        userDistributorId ?: "-start-005-$userName"
+                                    )
+                                    FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Morning date time start service")
+                                    this@HomeSalesActivity.startService(serviceIntentDD)
 
-                                isAbsentMorningNow = true
+                                    isAbsentMorningNow = true
+                                    FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Morning date time available")
+                                    if (snapshot.child("eveningDateTime").exists()) {
+                                        FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Evening date time exist")
+                                        val eveningDateTime = snapshot.child("eveningDateTime")
+                                            .getValue(String::class.java).toString()
 
-                                if (snapshot.child("eveningDateTime").exists()) {
-                                    val eveningDateTime = snapshot.child("eveningDateTime").getValue(String::class.java).toString()
+                                        if (eveningDateTime.isNotEmpty()) {
+                                            FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Evening date time not empty")
+                                            val absentEveningDate = DateFormat.format(
+                                                eveningDateTime,
+                                                "yyyy-MM-dd HH:mm:ss",
+                                                "yyyy-MM-dd"
+                                            )
 
-                                    if (eveningDateTime.isNotEmpty()) {
-                                        val absentEveningDate = DateFormat.format(eveningDateTime, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd")
+                                            if (DateFormat.dateAfterNow(absentEveningDate)) {
+                                                FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Evening date time expired")
+                                                isAbsentEveningNow = false
+                                                lockMenuItem(false)
+                                            } else {
+                                                FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Evening date time exist")
+                                                val serviceIntent = Intent(
+                                                    this@HomeSalesActivity,
+                                                    TrackingService::class.java
+                                                )
+                                                this@HomeSalesActivity.stopService(serviceIntent)
+                                                FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Evening date time stop service")
+                                                isAbsentEveningNow = true
+                                                lockMenuItem(true)
+                                            }
 
-                                        if (DateFormat.dateAfterNow(absentEveningDate)) {
-//                                            val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
-//                                            serviceIntent.putExtra("userId", userId)
-//                                            serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
-//                                            this@HomeSalesActivity.startService(serviceIntent)
-
+                                        } else {
+                                            FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Evening date time is empty")
                                             isAbsentEveningNow = false
                                             lockMenuItem(false)
-                                        } else {
-                                            val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
-                                            this@HomeSalesActivity.stopService(serviceIntent)
-
-                                            isAbsentEveningNow = true
-                                            lockMenuItem(true)
                                         }
-
                                     } else {
-//                                        val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
-//                                        serviceIntent.putExtra("userId", userId)
-//                                        serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
-//                                        this@HomeSalesActivity.startService(serviceIntent)
-
+                                        FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Evening date time not exist")
                                         isAbsentEveningNow = false
                                         lockMenuItem(false)
                                     }
-                                } else {
-//                                    val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
-//                                    serviceIntent.putExtra("userId", userId)
-//                                    serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
-//                                    this@HomeSalesActivity.startService(serviceIntent)
 
-                                    isAbsentEveningNow = false
-                                    lockMenuItem(false)
                                 }
 
+                            } else {
+                                FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Morning date time is empty")
+                                isAbsentMorningNow = false
+                                lockMenuItem(true)
                             }
-
                         } else {
-
+                            FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Morning date time not exist")
                             isAbsentMorningNow = false
                             lockMenuItem(true)
                         }
                     } else {
 
+                        FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "snapshot not exist")
                         isAbsentMorningNow = false
                         lockMenuItem(true)
                     }
-                } else {
 
-                    isAbsentMorningNow = false
-                    lockMenuItem(true)
                 }
+
             }
-
-            override fun onCancelled(error: DatabaseError) {
-                // Do something
-
-                isAbsentMorningNow = false
-                isAbsentEveningNow = false
-                lockMenuItem(true)
-            }
-
-        })
+        } catch (e: Exception) {
+            FirebaseUtils.logErr(this@HomeSalesActivity, "Failed HomeSalesActivity on checkAbsent(). Catch: ${e.message}")
+            lockMenuItem(false)
+            handleMessage(
+                this,
+                "Home Sales Failed",
+                "Failed HomeSalesActivity on checkAbsent(). Error: ${e.message}"
+            )
+        }
     }
 
     private fun lockMenuItem(state: Boolean) {
+        FirebaseUtils.firebaseLogging(this, "Absent", "Lock menu")
         absentProgressDialog?.dismiss()
+        FirebaseUtils.firebaseLogging(this, "Absent", "Loading dismissed")
         isLocked = state
 
         setListMenu()
@@ -1033,11 +1330,16 @@ class HomeSalesActivity : AppCompatActivity() {
                 getString(R.string.terimakasih_sudah_mencatat_kehadiran_hari_ini_without_clock)
             }
 
-            binding.btnAbsent.backgroundTintList = ContextCompat.getColorStateList(this, if (state) R.color.status_bid else R.color.red_claret)
-            binding.btnAbsent.text = if (state) getString(R.string.absen_sekarang) else getString(R.string.pulang_sekarang)
+            binding.btnAbsent.backgroundTintList = ContextCompat.getColorStateList(
+                this,
+                if (state) R.color.status_bid else R.color.red_claret
+            )
+            binding.btnAbsent.text =
+                if (state) getString(R.string.absen_sekarang) else getString(R.string.pulang_sekarang)
 
             val calendar = Calendar.getInstance()
-            val currentHour = calendar.get(Calendar.HOUR_OF_DAY) // Mengambil jam saat ini dalam format 24 jam
+            val currentHour =
+                calendar.get(Calendar.HOUR_OF_DAY) // Mengambil jam saat ini dalam format 24 jam
 
             if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
                 binding.btnAbsent.visibility = View.GONE
@@ -1071,13 +1373,22 @@ class HomeSalesActivity : AppCompatActivity() {
 
     private fun getListStore(showModal: Boolean = true) {
 
-        if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
+        if (!absentProgressDialog!!.isShowing) {
+            absentProgressDialog?.setMessage(getString(R.string.txt_loading))
+            absentProgressDialog?.show()
+        }
 
         lifecycleScope.launch {
             try {
 
-                val response = if (userKind == USER_KIND_PENAGIHAN) apiService.getContactsByDistributor(distributorID = userDistributorId ?: "0")
-                else apiService.getContacts(cityId = userCity ?: "0", distributorID = userDistributorId ?: "0")
+                val response =
+                    if (userKind == USER_KIND_PENAGIHAN) apiService.getContactsByDistributor(
+                        distributorID = userDistributorId ?: "0"
+                    )
+                    else apiService.getContacts(
+                        cityId = userCity ?: "0",
+                        distributorID = userDistributorId ?: "0"
+                    )
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -1088,6 +1399,7 @@ class HomeSalesActivity : AppCompatActivity() {
                         if (showModal) searchStoreAbsentModal.show()
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         absentProgressDialog?.dismiss()
@@ -1095,17 +1407,36 @@ class HomeSalesActivity : AppCompatActivity() {
                         if (showModal) searchStoreAbsentModal.show()
 
                     }
+
+                    RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+
+                        absentProgressDialog?.dismiss()
+                        handleMessage(
+                            this@HomeSalesActivity,
+                            TAG_RESPONSE_MESSAGE, "Response failed: ${response.message}"
+                        )
+
+                    }
+
                     else -> {
 
-                        handleMessage(this@HomeSalesActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@HomeSalesActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data) + response.message
+                        )
                         absentProgressDialog?.dismiss()
 
                     }
                 }
 
             } catch (e: Exception) {
-
-                handleMessage(this@HomeSalesActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                FirebaseUtils.logErr(this@HomeSalesActivity, "Failed HomeSalesActivity on getListStore(). Catch: ${e.message}")
+                handleMessage(
+                    this@HomeSalesActivity,
+                    TAG_RESPONSE_CONTACT,
+                    "Failed run service. Exception " + e.message
+                )
                 absentProgressDialog?.dismiss()
 
             }
@@ -1116,7 +1447,10 @@ class HomeSalesActivity : AppCompatActivity() {
 
     private fun getListBasecamp(showModal: Boolean = true) {
 
-        if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
+        if (!absentProgressDialog!!.isShowing) {
+            absentProgressDialog?.setMessage(getString(R.string.txt_loading))
+            absentProgressDialog?.show()
+        }
 
         lifecycleScope.launch {
             try {
@@ -1132,6 +1466,7 @@ class HomeSalesActivity : AppCompatActivity() {
                         if (showModal) searchStoreAbsentModal.show()
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         absentProgressDialog?.dismiss()
@@ -1139,9 +1474,24 @@ class HomeSalesActivity : AppCompatActivity() {
                         if (showModal) searchStoreAbsentModal.show()
 
                     }
+
+                    RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+
+                        absentProgressDialog?.dismiss()
+                        handleMessage(
+                            this@HomeSalesActivity,
+                            TAG_RESPONSE_MESSAGE, "Response failed: ${response.message}"
+                        )
+
+                    }
+
                     else -> {
 
-                        handleMessage(this@HomeSalesActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@HomeSalesActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data) + response.message
+                        )
                         absentProgressDialog?.dismiss()
 
                     }
@@ -1149,7 +1499,12 @@ class HomeSalesActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                handleMessage(this@HomeSalesActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                FirebaseUtils.logErr(this@HomeSalesActivity, "Failed HomeSalesActivity on getListBasecamp(). Catch: ${e.message}")
+                handleMessage(
+                    this@HomeSalesActivity,
+                    TAG_RESPONSE_CONTACT,
+                    "Failed run service. Exception " + e.message
+                )
                 absentProgressDialog?.dismiss()
 
             }
@@ -1219,7 +1574,7 @@ class HomeSalesActivity : AppCompatActivity() {
                 icon = R.drawable.location_white,
                 bgColor = R.drawable.bg_redwood_round_8,
                 title = "Lihat Toko Terdekat",
-                action = {navigateToNearestStore()},
+                action = { navigateToNearestStore() },
                 isLocked = false
             )
         )
@@ -1239,7 +1594,7 @@ class HomeSalesActivity : AppCompatActivity() {
                 icon = R.drawable.location_white,
                 bgColor = R.drawable.bg_redwood_round_8,
                 title = "Lihat Basecamp Terdekat",
-                action = {navigateToNearestBasecamp()},
+                action = { navigateToNearestBasecamp() },
                 isLocked = false
             )
         )
@@ -1311,14 +1666,22 @@ class HomeSalesActivity : AppCompatActivity() {
         setMenuItemAdapter(binding.rvOthers, listItem)
     }
 
-    private fun setMenuItemAdapter(recyclerView: RecyclerView, listItem: ArrayList<HomeMenuSalesModel>) {
+    private fun setMenuItemAdapter(
+        recyclerView: RecyclerView,
+        listItem: ArrayList<HomeMenuSalesModel>
+    ) {
         val menuItemAdapter = HomeSalesMenuRV()
         menuItemAdapter.setList(listItem)
-        menuItemAdapter.setOnItemClickListener(object: HomeSalesMenuRV.OnItemClickListener {
+        menuItemAdapter.setOnItemClickListener(object : HomeSalesMenuRV.OnItemClickListener {
             override fun onItemClick(item: HomeMenuSalesModel) {
                 if (item.isLocked) showDialogLockedFeature()
                 else {
-                    if (item.target != null) startActivity(Intent(this@HomeSalesActivity, item.target))
+                    if (item.target != null) startActivity(
+                        Intent(
+                            this@HomeSalesActivity,
+                            item.target
+                        )
+                    )
                     else item.action?.invoke()
                 }
             }
@@ -1341,7 +1704,12 @@ class HomeSalesActivity : AppCompatActivity() {
         }
 
         doubleBackToExitPressedOnce = true
-        handleMessage(this, TAG_ACTION_MAIN_ACTIVITY, getString(R.string.tekan_sekali_lagi), TOAST_SHORT)
+        handleMessage(
+            this,
+            TAG_ACTION_MAIN_ACTIVITY,
+            getString(R.string.tekan_sekali_lagi),
+            TOAST_SHORT
+        )
 
         Handler(Looper.getMainLooper()).postDelayed({
             doubleBackToExitPressedOnce = false
@@ -1460,4 +1828,5 @@ class HomeSalesActivity : AppCompatActivity() {
             }
         }
     }
+
 }

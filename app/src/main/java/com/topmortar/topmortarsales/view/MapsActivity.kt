@@ -1475,6 +1475,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@MapsActivity, "Failed MapsActivity on getCities(). Catch: ${e.message}")
 //                handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 progressDialog.dismiss()
 
@@ -1599,6 +1600,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@MapsActivity, "Failed MapsActivity on getListGudang(). Catch: ${e.message}")
                 handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 binding.centerPointTitle.visibility = View.GONE
                 binding.centerPointMoreIcon.visibility = View.GONE
@@ -1649,7 +1651,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         progressDialog.show()
 
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-003")
+        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-003")
         childDelivery = firebaseReference?.child(FIREBASE_CHILD_DELIVERY)
         childDriver = childDelivery?.child(deliveryID!!)
         val childStores = childDriver?.child("stores/$iContactID")
@@ -1891,7 +1893,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         progressDialog.show()
 
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-004")
+        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-004")
         childAbsent = firebaseReference?.child(FIREBASE_CHILD_ABSENT)
         childCourier = childAbsent?.child(courierID.toString())
 
@@ -2265,7 +2267,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             } catch (e: Exception) {
 
-
+                FirebaseUtils.logErr(this@MapsActivity, "Failed MapsActivity on setupTrackingHistory(). Catch: ${e.message}")
                 progressDialog.dismiss()
                 handleMessage(this@MapsActivity, "setupTrackingHistory",
                     "Failed run service. Exception " + e.message

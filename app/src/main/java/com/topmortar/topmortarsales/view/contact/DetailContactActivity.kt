@@ -1135,6 +1135,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on saveEdit(). Catch: ${e.message}")
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
                 progressDialog.dismiss()
@@ -1201,6 +1202,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getContact(). Catch: ${e.message}")
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
                 progressDialog.dismiss()
@@ -1307,6 +1309,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getDetailContact(). Catch: ${e.message}")
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
                 progressDialog.dismiss()
@@ -1693,6 +1696,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getContactSales(). Catch: ${e.message}")
                 handleMessage(this@DetailContactActivity, "CONTACT SALES", "Failed run service. Exception " + e.message)
                 getCities()
 
@@ -1758,6 +1762,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getCities(). Catch: ${e.message}")
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 getPromo()
 
@@ -1831,6 +1836,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getPromo(). Catch: ${e.message}")
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
 
                 loadingState(false)
@@ -2329,7 +2335,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         deliveryId = "$AUTH_LEVEL_COURIER$userID"
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-007")
+        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-007")
         childDelivery = firebaseReference?.child(FIREBASE_CHILD_DELIVERY)
         childDriver = childDelivery?.child(deliveryId)
 

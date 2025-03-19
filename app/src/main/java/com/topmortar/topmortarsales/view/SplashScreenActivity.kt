@@ -151,6 +151,8 @@ class SplashScreenActivity : AppCompatActivity() {
             }
         }
 
+        
+
         sessionManager = SessionManager(this)
         setContentView(R.layout.activity_splash_screen)
 
@@ -440,7 +442,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
                             // Firebase Auth Session
                             try {
-                                firebaseReference = FirebaseUtils().getReference(distributorId = data.id_distributor.ifEmpty { "-firebase-005" })
+                                firebaseReference = FirebaseUtils.getReference(distributorId = data.id_distributor.ifEmpty { "-firebase-005" })
                                 val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
                                 val userChild = authChild.child(data.username + data.id_user)
                                 val userDevicesChild = userChild.child("devices")
@@ -465,22 +467,32 @@ class SplashScreenActivity : AppCompatActivity() {
                                     override fun onDataChange(snapshot: DataSnapshot) {
                                         if (snapshot.exists()) {
                                             for (item in snapshot.children) {
-                                                val device = item.getValue(DeviceModel::class.java)
-                                                var userDeviceText = "${device?.manufacture}${device?.model}${device?.id}"
+
+                                                if (!item.hasChildren()) {
+                                                    item.ref.removeValue()
+                                                    return
+                                                }
+
+                                                val device = item.getValue(DeviceModel::class.java) ?: return
+
+                                                var userDeviceText = "${device.manufacture}${device.model}${device.id}"
+
+                                                if (userDeviceText.isEmpty()) return
+
                                                 userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
                                                 val userDevice = userDevicesChild.child(userDeviceText)
-                                                userDevice.child("id").setValue(device?.id)
-                                                userDevice.child("model").setValue(device?.model)
-                                                userDevice.child("manufacture").setValue(device?.manufacture)
-                                                userDevice.child("device").setValue(device?.device)
-                                                userDevice.child("product").setValue(device?.product)
-                                                userDevice.child("sdk_version").setValue(device?.sdk_version)
-                                                userDevice.child("version_release").setValue(device?.version_release)
-                                                userDevice.child("screen_width").setValue(device?.screen_width)
-                                                userDevice.child("screen_height").setValue(device?.screen_height)
-                                                userDevice.child("density").setValue(device?.density)
-                                                userDevice.child("login_at").setValue(device?.login_at)
-                                                userDevice.child("logout_at").setValue(device?.logout_at)
+                                                userDevice.child("id").setValue(device.id)
+                                                userDevice.child("model").setValue(device.model)
+                                                userDevice.child("manufacture").setValue(device.manufacture)
+                                                userDevice.child("device").setValue(device.device)
+                                                userDevice.child("product").setValue(device.product)
+                                                userDevice.child("sdk_version").setValue(device.sdk_version)
+                                                userDevice.child("version_release").setValue(device.version_release)
+                                                userDevice.child("screen_width").setValue(device.screen_width)
+                                                userDevice.child("screen_height").setValue(device.screen_height)
+                                                userDevice.child("density").setValue(device.density)
+                                                userDevice.child("login_at").setValue(device.login_at)
+                                                userDevice.child("logout_at").setValue(device.logout_at)
                                             }
 
                                             userDevice(userChild)
@@ -500,6 +512,7 @@ class SplashScreenActivity : AppCompatActivity() {
                                 absentChild.child(data.id_user).child(FIREBASE_CHILD_IS_ALLOWED_LOGOUT).setValue(false)
 
                             } catch (e: Exception) {
+                                FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on loginHandler(). Catch: ${e.message}")
                                 Log.e("Firebase Auth", "$e")
                             }
 
@@ -536,6 +549,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on loginHandler(). Catch: ${e.message}")
                 handleMessage(this@SplashScreenActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(false)
 
@@ -596,6 +610,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on requestOtpHandler(). Catch: ${e.message}")
                 handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
 
@@ -671,6 +686,7 @@ class SplashScreenActivity : AppCompatActivity() {
                 }
 
             } catch (e: Exception) {
+                FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on verifyOtpHandler(). Catch: ${e.message}")
                 handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
             }
@@ -746,6 +762,7 @@ class SplashScreenActivity : AppCompatActivity() {
                 }
 
             } catch (e: Exception) {
+                FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on resetPasswordHandler(). Catch: ${e.message}")
                 handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
             }
@@ -930,6 +947,9 @@ class SplashScreenActivity : AppCompatActivity() {
         // User Device Detail
         val userDevices = userChild.child("devices")
         var userDeviceText = "$manufacturer$model$androidId"
+
+        if (userDeviceText.isEmpty()) return
+
         userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
         val userDevice = userDevices.child(userDeviceText)
         userDevice.child("id").setValue(androidId)
@@ -992,12 +1012,16 @@ class SplashScreenActivity : AppCompatActivity() {
                                 val userChild = authChild.child(sessionManager.userName() + sessionManager.userID())
                                 val userDevices = userChild.child("devices")
                                 var userDeviceText = "$manufacturer$model$androidId"
+
+                                if (userDeviceText.isEmpty()) return@launch
+
                                 userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
                                 val userDevice = userDevices.child(userDeviceText)
 
                                 userDevice.child("logout_at").setValue(DateFormat.now())
                                 userDevice.child("login_at").setValue("")
                             } catch (e: Exception) {
+                                FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on getUserLoggedIn(). Catch: ${e.message}")
                                 Log.d("Firebase Auth", "$e")
                             }
 
@@ -1015,7 +1039,7 @@ class SplashScreenActivity : AppCompatActivity() {
                             // Firebase Auth Session
                             try {
                                 val userDistributorIds = sessionManager.userDistributor()
-                                firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-006")
+                                firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-006")
                                 val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
                                 val userChild = authChild.child(username + userId)
                                 val userDevicesChild = userChild.child("devices")
@@ -1033,22 +1057,32 @@ class SplashScreenActivity : AppCompatActivity() {
                                     override fun onDataChange(snapshot: DataSnapshot) {
                                         if (snapshot.exists()) {
                                             for (item in snapshot.children) {
-                                                val device = item.getValue(DeviceModel::class.java)
-                                                var userDeviceText = "${device?.manufacture}${device?.model}${device?.id}"
+
+                                                if (!item.hasChildren()) {
+                                                    item.ref.removeValue()
+                                                    return
+                                                }
+
+                                                val device = item.getValue(DeviceModel::class.java) ?: return
+
+                                                var userDeviceText = "${device.manufacture}${device.model}${device.id}"
+
+                                                if (userDeviceText.isEmpty()) return
+
                                                 userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
                                                 val userDevice = userDevicesChild.child(userDeviceText)
-                                                userDevice.child("id").setValue(device?.id)
-                                                userDevice.child("model").setValue(device?.model)
-                                                userDevice.child("manufacture").setValue(device?.manufacture)
-                                                userDevice.child("device").setValue(device?.device)
-                                                userDevice.child("product").setValue(device?.product)
-                                                userDevice.child("sdk_version").setValue(device?.sdk_version)
-                                                userDevice.child("version_release").setValue(device?.version_release)
-                                                userDevice.child("screen_width").setValue(device?.screen_width)
-                                                userDevice.child("screen_height").setValue(device?.screen_height)
-                                                userDevice.child("density").setValue(device?.density)
-                                                userDevice.child("login_at").setValue(device?.login_at)
-                                                userDevice.child("logout_at").setValue(device?.logout_at)
+                                                userDevice.child("id").setValue(device.id)
+                                                userDevice.child("model").setValue(device.model)
+                                                userDevice.child("manufacture").setValue(device.manufacture)
+                                                userDevice.child("device").setValue(device.device)
+                                                userDevice.child("product").setValue(device.product)
+                                                userDevice.child("sdk_version").setValue(device.sdk_version)
+                                                userDevice.child("version_release").setValue(device.version_release)
+                                                userDevice.child("screen_width").setValue(device.screen_width)
+                                                userDevice.child("screen_height").setValue(device.screen_height)
+                                                userDevice.child("density").setValue(device.density)
+                                                userDevice.child("login_at").setValue(device.login_at)
+                                                userDevice.child("logout_at").setValue(device.logout_at)
                                             }
 
                                             userDevice(userChild)
@@ -1063,6 +1097,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
                                 })
                             } catch (e: Exception) {
+                                FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on getUserLoggedIn(). Catch: ${e.message}")
                                 Log.e("Firebase Auth", "$e")
                             }
 
@@ -1101,6 +1136,7 @@ class SplashScreenActivity : AppCompatActivity() {
                 }
 
             } catch (e: Exception) {
+                FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on getUserLoggedIn(). Catch: ${e.message}")
                 showCardLogin()
             }
 

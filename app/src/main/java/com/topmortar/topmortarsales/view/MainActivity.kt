@@ -192,7 +192,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
         sessionManager = SessionManager(this@MainActivity)
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-002")
+        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-002")
 
         val isLoggedIn = sessionManager.isLoggedIn()
         if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()|| userDistributorId.isEmpty()) return missingDataHandler()
@@ -288,7 +288,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 startActivity(intent)
             }
             R.id.nav_nearest_store -> {
-                navigateChecklocation()
+                navigateCheckLocation()
             }
             R.id.nav_city_store -> {
                 searchCityForMaps.show()
@@ -528,7 +528,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
     }
 
-    private fun navigateChecklocation() {
+    private fun navigateCheckLocation() {
         progressDialog.show()
 
         Handler(Looper.getMainLooper()).postDelayed({
@@ -598,7 +598,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
 
                 } catch (e: Exception) {
-
+                    FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on navigateCheckLocation(). Catch: ${e.message}")
                     handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                     progressDialog.dismiss()
 
@@ -679,7 +679,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                     true
                 }
                 R.id.nearest_store -> {
-                    navigateChecklocation()
+                    navigateCheckLocation()
                     true
                 }
                 R.id.selected_store -> {
@@ -933,7 +933,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
 
             } catch (e: Exception) {
-
+                FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on getContacts(). Catch: ${e.message}")
                 handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
 
@@ -975,6 +975,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 }
 
             } catch (e: Exception) {
+                FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on getContactsForMaps(). Catch: ${e.message}")
                 handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
             } finally {
                 progressDialog.dismiss()
@@ -1023,6 +1024,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on getCities(). Catch: ${e.message}")
                 handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
 
             }
@@ -1106,6 +1108,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 }
 
             } catch (e: Exception) {
+                FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on getUserLoggedIn(). Catch: ${e.message}")
                 Log.d("TAG USER LOGGED IN", "Failed run service. Exception " + e.message)
             }
 
@@ -1180,6 +1183,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on searchContact(). Catch: ${e.message}")
                 handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
 
@@ -1291,6 +1295,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             userDevice.child("logout_at").setValue(DateFormat.now())
             userDevice.child("login_at").setValue("")
         } catch (e: Exception) {
+            FirebaseUtils.logErr(this, "Failed MainActivity on logoutHandler(). Catch: ${e.message}")
             Log.d("Firebase Auth", "$e")
         }
 

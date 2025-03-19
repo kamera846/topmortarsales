@@ -41,6 +41,7 @@ import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.updateTxtMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.phoneValidation
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -234,6 +235,7 @@ class AddTukangActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@AddTukangActivity, "Failed AddTukangActivity on sendMessage(). Catch: ${e.message}")
                 handleMessage(this@AddTukangActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
 
@@ -554,6 +556,7 @@ class AddTukangActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@AddTukangActivity, "Failed AddTukangActivity on getCities(). Catch: ${e.message}")
                 handleMessage(this@AddTukangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 getSkills()
 
@@ -617,6 +620,7 @@ class AddTukangActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@AddTukangActivity, "Failed AddTukangActivity on getSkill(). Catch: ${e.message}")
                 handleMessage(this@AddTukangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 etSkill.isEnabled = true
                 progressDialog.dismiss()

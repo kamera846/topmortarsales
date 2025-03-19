@@ -139,6 +139,7 @@ class PreviewClosingActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@PreviewClosingActivity, "Failed PreviewClosingActivity on executeClosing(). Catch: ${e.message}")
                 handleMessage(
                     this@PreviewClosingActivity,
                     TAG_RESPONSE_CONTACT,
@@ -183,6 +184,7 @@ class PreviewClosingActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@PreviewClosingActivity, "Failed PreviewClosingActivity on createInvoice(). Catch: ${e.message}")
                 handleMessage(
                     this@PreviewClosingActivity,
                     TAG_RESPONSE_CONTACT,
@@ -295,7 +297,7 @@ class PreviewClosingActivity : AppCompatActivity() {
 
         deliveryId = "$AUTH_LEVEL_COURIER$userID"
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-015")
+        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-015")
         childDelivery = firebaseReference?.child(FIREBASE_CHILD_DELIVERY)
         childDriver = childDelivery?.child(deliveryId)
 
@@ -372,6 +374,7 @@ class PreviewClosingActivity : AppCompatActivity() {
                                         } catch (e: Exception) {
 
                                             finishClosing(message)
+                                            FirebaseUtils.logErr(this@PreviewClosingActivity, "Failed PreviewClosingActivity on onClosingFinished(). Catch: ${e.message}")
                                             Log.d("Item to closing", "Failed to save item: Error request. " + e.message)
 
                                         }

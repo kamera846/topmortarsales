@@ -118,7 +118,7 @@ class ClosingStoreFragment : Fragment() {
 
         deliveryId = "$AUTH_LEVEL_COURIER$userID"
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-008")
+        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-008")
         childDelivery = firebaseReference.child(FIREBASE_CHILD_DELIVERY)
         childDriver = childDelivery.child(deliveryId)
 
@@ -162,7 +162,7 @@ class ClosingStoreFragment : Fragment() {
                         // Get a reference to your database
                         val deliveryId = AUTH_LEVEL_COURIER + userID
                         val userDistributorIds = sessionManager.userDistributor()
-                        val firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-009")
+                        val firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-009")
                         val myRef: DatabaseReference = firebaseReference.child("$FIREBASE_CHILD_DELIVERY/$deliveryId")
 
                         // Add a ValueEventListener to retrieve the data

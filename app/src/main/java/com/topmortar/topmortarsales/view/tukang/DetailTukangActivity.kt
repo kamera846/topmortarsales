@@ -83,6 +83,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
 import com.topmortar.topmortarsales.commons.utils.DateFormat
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.PingUtility
@@ -923,6 +924,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@DetailTukangActivity, "Failed DetailTukangActivity on saveEdit(). Catch: ${e.message}")
                 handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
                 toggleEdit(false)

@@ -92,7 +92,7 @@ class CourierActivity : AppCompatActivity() {
         AppUpdateHelper.checkForUpdate(this)
 
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-010")
+        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-010")
 
         binding.titleBarDark.tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
         binding.titleBarDark.tvTitleBarDescription.visibility = binding.titleBarDark.tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
@@ -133,6 +133,7 @@ class CourierActivity : AppCompatActivity() {
             userDevice.child("logout_at").setValue(DateFormat.now())
             userDevice.child("login_at").setValue("")
         } catch (e: Exception) {
+            FirebaseUtils.logErr(this, "Failed CourierActivity on logoutHandler(). Catch: ${e.message}")
             Log.d("Firebase Auth", "$e")
         }
 
@@ -170,6 +171,7 @@ class CourierActivity : AppCompatActivity() {
 
 
             } catch (e: Exception) {
+                FirebaseUtils.logErr(this@CourierActivity, "Failed CourierActivity on getUserLoggedIn(). Catch: ${e.message}")
                 Log.d("TAG USER LOGGED IN", "Failed run service. Exception " + e.message)
             }
 
