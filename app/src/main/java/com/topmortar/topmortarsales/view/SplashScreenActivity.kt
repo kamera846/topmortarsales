@@ -151,7 +151,7 @@ class SplashScreenActivity : AppCompatActivity() {
             }
         }
 
-        
+
 
         sessionManager = SessionManager(this)
         setContentView(R.layout.activity_splash_screen)
@@ -347,8 +347,9 @@ class SplashScreenActivity : AppCompatActivity() {
         val userCity = sessionManager.userCityID()!!
         val userKind = sessionManager.userKind()!!
         val userDistributor = sessionManager.userDistributor()!!
+        val availableLevel = checkAvailableAccount(sessionManager.userAuthLevel() ?: "0")
 
-        if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty() || userDistributor.isEmpty()) showCardLogin()
+        if (!isLoggedIn || !availableLevel || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty() || userDistributor.isEmpty()) showCardLogin()
         else getUserLoggedIn()
 
     }
@@ -432,99 +433,105 @@ class SplashScreenActivity : AppCompatActivity() {
 
                         val results = response.results
                         val data = results[0]
+                        val availableAccount = checkAvailableAccount(data.level_user)
 
-                        if (data.phone_user == "0") {
+                        if(!availableAccount) {
+                            showAlert("Akun tidak ditemukan!")
+                            loadingState(false)
+                            return@launch
+                        } else if (data.phone_user == "0") {
                             showAlert("Akun anda telah ditangguhkan!")
                             loadingState(false)
-                        } else {
-                            sessionManager.setUserLoggedIn(data)
-                            sessionManager.setLoggedIn(LOGGED_IN)
+                            return@launch
+                        }
 
-                            // Firebase Auth Session
-                            try {
-                                firebaseReference = FirebaseUtils.getReference(distributorId = data.id_distributor.ifEmpty { "-firebase-005" })
-                                val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
-                                val userChild = authChild.child(data.username + data.id_user)
-                                val userDevicesChild = userChild.child("devices")
+                        sessionManager.setUserLoggedIn(data)
+                        sessionManager.setLoggedIn(LOGGED_IN)
 
-                                userChild.child("id_user").setValue(data.id_user)
-                                userChild.child("phone_user").setValue(data.phone_user)
-                                userChild.child("username").setValue(data.username)
-                                userChild.child("password").setValue(data.password)
-                                userChild.child("level_user").setValue(data.level_user)
-                                userChild.child("id_city").setValue(data.id_city)
-                                userChild.child("nama_city").setValue(data.nama_city)
-                                userChild.child("kode_city").setValue(data.kode_city)
-                                userChild.child("bid_limit").setValue(data.bid_limit)
-                                userChild.child("full_name").setValue(data.full_name)
-                                userChild.child("id_distributor").setValue(data.id_distributor)
-                                userChild.child("nama_distributor").setValue(data.nama_distributor)
-                                userChild.child("nomorhp_distributor").setValue(data.nomorhp_distributor)
-                                userChild.child("alamat_distributor").setValue(data.alamat_distributor)
-                                userChild.child("jenis_distributor").setValue(data.jenis_distributor)
+                        // Firebase Auth Session
+                        try {
+                            firebaseReference = FirebaseUtils.getReference(distributorId = data.id_distributor.ifEmpty { "-firebase-005" })
+                            val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
+                            val userChild = authChild.child(data.username + data.id_user)
+                            val userDevicesChild = userChild.child("devices")
 
-                                userDevicesChild.addListenerForSingleValueEvent(object : ValueEventListener {
-                                    override fun onDataChange(snapshot: DataSnapshot) {
-                                        if (snapshot.exists()) {
-                                            for (item in snapshot.children) {
+                            userChild.child("id_user").setValue(data.id_user)
+                            userChild.child("phone_user").setValue(data.phone_user)
+                            userChild.child("username").setValue(data.username)
+                            userChild.child("password").setValue(data.password)
+                            userChild.child("level_user").setValue(data.level_user)
+                            userChild.child("id_city").setValue(data.id_city)
+                            userChild.child("nama_city").setValue(data.nama_city)
+                            userChild.child("kode_city").setValue(data.kode_city)
+                            userChild.child("bid_limit").setValue(data.bid_limit)
+                            userChild.child("full_name").setValue(data.full_name)
+                            userChild.child("id_distributor").setValue(data.id_distributor)
+                            userChild.child("nama_distributor").setValue(data.nama_distributor)
+                            userChild.child("nomorhp_distributor").setValue(data.nomorhp_distributor)
+                            userChild.child("alamat_distributor").setValue(data.alamat_distributor)
+                            userChild.child("jenis_distributor").setValue(data.jenis_distributor)
 
-                                                if (!item.hasChildren()) {
-                                                    item.ref.removeValue()
-                                                    return
-                                                }
+                            userDevicesChild.addListenerForSingleValueEvent(object : ValueEventListener {
+                                override fun onDataChange(snapshot: DataSnapshot) {
+                                    if (snapshot.exists()) {
+                                        for (item in snapshot.children) {
 
-                                                val device = item.getValue(DeviceModel::class.java) ?: return
-
-                                                var userDeviceText = "${device.manufacture}${device.model}${device.id}"
-
-                                                if (userDeviceText.isEmpty()) return
-
-                                                userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
-                                                val userDevice = userDevicesChild.child(userDeviceText)
-                                                userDevice.child("id").setValue(device.id)
-                                                userDevice.child("model").setValue(device.model)
-                                                userDevice.child("manufacture").setValue(device.manufacture)
-                                                userDevice.child("device").setValue(device.device)
-                                                userDevice.child("product").setValue(device.product)
-                                                userDevice.child("sdk_version").setValue(device.sdk_version)
-                                                userDevice.child("version_release").setValue(device.version_release)
-                                                userDevice.child("screen_width").setValue(device.screen_width)
-                                                userDevice.child("screen_height").setValue(device.screen_height)
-                                                userDevice.child("density").setValue(device.density)
-                                                userDevice.child("login_at").setValue(device.login_at)
-                                                userDevice.child("logout_at").setValue(device.logout_at)
+                                            if (!item.hasChildren()) {
+                                                item.ref.removeValue()
+                                                return
                                             }
 
-                                            userDevice(userChild)
-                                        } else {
-                                            userDevice(userChild)
-                                        }
-                                    }
+                                            val device = item.getValue(DeviceModel::class.java) ?: return
 
-                                    override fun onCancelled(error: DatabaseError) {
+                                            var userDeviceText = "${device.manufacture}${device.model}${device.id}"
+
+                                            if (userDeviceText.isEmpty()) return
+
+                                            userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
+                                            val userDevice = userDevicesChild.child(userDeviceText)
+                                            userDevice.child("id").setValue(device.id)
+                                            userDevice.child("model").setValue(device.model)
+                                            userDevice.child("manufacture").setValue(device.manufacture)
+                                            userDevice.child("device").setValue(device.device)
+                                            userDevice.child("product").setValue(device.product)
+                                            userDevice.child("sdk_version").setValue(device.sdk_version)
+                                            userDevice.child("version_release").setValue(device.version_release)
+                                            userDevice.child("screen_width").setValue(device.screen_width)
+                                            userDevice.child("screen_height").setValue(device.screen_height)
+                                            userDevice.child("density").setValue(device.density)
+                                            userDevice.child("login_at").setValue(device.login_at)
+                                            userDevice.child("logout_at").setValue(device.logout_at)
+                                        }
+
+                                        userDevice(userChild)
+                                    } else {
                                         userDevice(userChild)
                                     }
+                                }
 
-                                })
+                                override fun onCancelled(error: DatabaseError) {
+                                    userDevice(userChild)
+                                }
 
-                                // Reset isAllowedLogout value
-                                val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
-                                absentChild.child(data.id_user).child(FIREBASE_CHILD_IS_ALLOWED_LOGOUT).setValue(false)
+                            })
 
-                            } catch (e: Exception) {
-                                FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on loginHandler(). Catch: ${e.message}")
-                                Log.e("Firebase Auth", "$e")
-                            }
+                            // Reset isAllowedLogout value
+                            val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+                            absentChild.child(data.id_user).child(FIREBASE_CHILD_IS_ALLOWED_LOGOUT).setValue(false)
 
-                            when (data.level_user) {
-                                AUTH_LEVEL_BA -> navigateToListTukang()
-                                AUTH_LEVEL_COURIER -> navigateToCourier()
-                                AUTH_LEVEL_SALES, AUTH_LEVEL_PENAGIHAN, AUTH_LEVEL_MARKETING -> navigateToSales()
-                                else -> navigateToMain()
-                            }
-
-                            loadingState(false)
+                        } catch (e: Exception) {
+                            FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on loginHandler(). Catch: ${e.message}")
+                            Log.e("Firebase Auth", "$e")
                         }
+
+                        when (data.level_user) {
+                            AUTH_LEVEL_BA -> navigateToListTukang()
+                            AUTH_LEVEL_COURIER -> navigateToCourier()
+                            AUTH_LEVEL_SALES, AUTH_LEVEL_PENAGIHAN, AUTH_LEVEL_MARKETING -> navigateToSales()
+                            else -> navigateToMain()
+                        }
+
+                        loadingState(false)
 
                     }
                     RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
@@ -556,6 +563,16 @@ class SplashScreenActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    private fun checkAvailableAccount(dataLevel: String): Boolean {
+        return dataLevel == AUTH_LEVEL_ADMIN ||
+                dataLevel == AUTH_LEVEL_ADMIN_CITY ||
+                dataLevel == AUTH_LEVEL_SALES ||
+                dataLevel == AUTH_LEVEL_COURIER ||
+                dataLevel == AUTH_LEVEL_BA ||
+                dataLevel == AUTH_LEVEL_MARKETING ||
+                dataLevel == AUTH_LEVEL_PENAGIHAN
     }
 
     private fun requestOtpHandler() {
