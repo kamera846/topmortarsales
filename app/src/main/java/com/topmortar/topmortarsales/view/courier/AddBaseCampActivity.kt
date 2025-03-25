@@ -62,8 +62,7 @@ import kotlinx.coroutines.launch
 @SuppressLint("SetTextI18n")
 class AddBaseCampActivity : AppCompatActivity() {
 
-    private var _binding: ActivityAddBaseCampBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var binding: ActivityAddBaseCampBinding
     private lateinit var sessionManager: SessionManager
     private val userID get() = sessionManager.userID()
     private val userCityID get() = sessionManager.userCityID()
@@ -84,7 +83,7 @@ class AddBaseCampActivity : AppCompatActivity() {
         supportActionBar?.hide()
         applyMyEdgeToEdge(isPrimary = false)
 
-        _binding = ActivityAddBaseCampBinding.inflate(layoutInflater)
+        binding = ActivityAddBaseCampBinding.inflate(layoutInflater)
         sessionManager = SessionManager(this)
         setContentView(binding.root)
 
@@ -416,7 +415,6 @@ class AddBaseCampActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        _binding = null
         if (CustomUtility(this).isUserWithOnlineStatus()) {
             CustomUtility(this).setUserStatusOnline(false, userDistributorIds ?: "-custom-006", "$userID")
         }

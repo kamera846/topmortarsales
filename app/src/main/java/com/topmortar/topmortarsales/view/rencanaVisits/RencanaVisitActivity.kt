@@ -497,7 +497,9 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
 
                 processed ++
                 percentage = (processed * 100) / totalProcess
-                progressDialog.setMessage(getString(R.string.txt_loading) + "($percentage%)")
+                runOnUiThread {
+                    progressDialog.setMessage(getString(R.string.txt_loading) + "($percentage%)")
+                }
             }
             return null
         }

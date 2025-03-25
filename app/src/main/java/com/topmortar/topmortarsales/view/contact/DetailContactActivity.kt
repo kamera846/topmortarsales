@@ -350,16 +350,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         phoneCategoriesFRC.setDefaultsAsync(R.xml.default_phone_categories)
 
         phoneCategoriesFRC.fetchAndActivate()
-            .addOnCompleteListener(this) { task ->
-//                if (task.isSuccessful) {
+            .addOnCompleteListener(this) {
                     val itemsJson = phoneCategoriesFRC.getString(PHONE_CATEGORIES)
                     val itemsArray = JSONArray(itemsJson)
                     val items = Array(itemsArray.length()) { i -> itemsArray.getString(i) }
 
                     spinPhoneCatItems = items.toList()
-//                    println("Phone items: $spinPhoneCatItems")
-
-//              }
 
                 val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, spinPhoneCatItems)
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -367,7 +363,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 binding.spinPhoneCategories1.adapter = adapter
                 binding.spinPhoneCategories2.adapter = adapter
 
-//                println("Phone items: ${task.exception}")
                 initView()
             }
 
@@ -2255,9 +2250,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         } else if (requestCode == REQUEST_EDIT_CONTACT_COORDINATE) {
             val latitude = data?.getDoubleExtra("latitude", 0.0)
             val longitude = data?.getDoubleExtra("longitude", 0.0)
-            if (latitude != null && longitude != null) etMaps.setText("$latitude,$longitude")
-            etMaps.error = null
-            etMaps.clearFocus()
+            if (!::etMaps.isInitialized) etMaps = findViewById(R.id.et_maps)
+            etMaps.let {
+                if (latitude != null && longitude != null) it.setText("$latitude,$longitude")
+                it.error = null
+                it.clearFocus()
+            }
         }
 
     }

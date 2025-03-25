@@ -185,7 +185,7 @@ class HomeSalesActivity : AppCompatActivity() {
             ) {
                 checkGpsStatus()
             } else {
-                absentProgressDialog?.dismiss()
+                dismissProgressDialog()
                 ActivityCompat.requestPermissions(
                     this,
                     arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
@@ -310,7 +310,7 @@ class HomeSalesActivity : AppCompatActivity() {
     private fun showDialogIsMock() {
         try {
 
-            absentProgressDialog?.dismiss()
+            dismissProgressDialog()
 
             val serviceIntent = Intent(this, TrackingService::class.java)
             stopService(serviceIntent)
@@ -339,7 +339,7 @@ class HomeSalesActivity : AppCompatActivity() {
     private fun showGpsDisabledDialog() {
         try {
 
-            absentProgressDialog?.dismiss()
+            dismissProgressDialog()
 
             val serviceIntent = Intent(this, TrackingService::class.java)
             stopService(serviceIntent)
@@ -851,7 +851,7 @@ class HomeSalesActivity : AppCompatActivity() {
 
                     RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                        absentProgressDialog?.dismiss()
+                        dismissProgressDialog()
                         handleMessage(
                             this@HomeSalesActivity,
                             TAG_RESPONSE_MESSAGE,
@@ -867,7 +867,7 @@ class HomeSalesActivity : AppCompatActivity() {
                             TAG_RESPONSE_CONTACT,
                             "Gagal memuat data pengguna! Error: ${response.message}"
                         )
-                        absentProgressDialog?.dismiss()
+                        dismissProgressDialog()
 
                     }
 
@@ -917,7 +917,7 @@ class HomeSalesActivity : AppCompatActivity() {
         searchStoreAbsentModal.label =
             if (absentMode == ABSENT_MODE_STORE) "Pilih Toko" else "Pilih Basecamp"
         searchStoreAbsentModal.searchHint = "Ketik untuk mencari…"
-        searchStoreAbsentModal.setOnDismissListener { absentProgressDialog?.dismiss() }
+        searchStoreAbsentModal.setOnDismissListener { dismissProgressDialog() }
         searchStoreAbsentModal.setCustomDialogListener(object : SearchModal.SearchModalListener {
             override fun onDataReceived(data: ModalSearchModel) {
                 if (data.id == "-1") {
@@ -959,7 +959,7 @@ class HomeSalesActivity : AppCompatActivity() {
     }
 
     private fun absentAction() {
-        absentProgressDialog?.dismiss()
+        dismissProgressDialog()
 
         var alertTitle = "Absen Kehadiran"
         var alertMessage = "Konfirmasi absen kehadiran sekarang?"
@@ -1028,15 +1028,15 @@ class HomeSalesActivity : AppCompatActivity() {
                                     val builder = AlertDialog.Builder(this)
                                     builder.setCancelable(false)
                                     builder.setOnDismissListener {
-                                        absentProgressDialog?.dismiss()
+                                        dismissProgressDialog()
                                     }
                                     builder.setOnCancelListener {
-                                        absentProgressDialog?.dismiss()
+                                        dismissProgressDialog()
                                     }
                                     builder.setTitle("Peringatan!")
                                         .setMessage("Titik anda saat ini $shortDistance km dari titik ${selectedStore?.title}. Cobalah untuk lebih dekat dengan toko!")
                                         .setPositiveButton("Oke") { dialog, _ ->
-                                            absentProgressDialog?.dismiss()
+                                            dismissProgressDialog()
                                             dialog.dismiss()
                                         }
                                         .setNegativeButton("Buka Maps") { dialog, _ ->
@@ -1049,7 +1049,7 @@ class HomeSalesActivity : AppCompatActivity() {
                                             intent.putExtra(CONST_MAPS_NAME, selectedStore?.title)
                                             startActivity(intent)
 
-                                            absentProgressDialog?.dismiss()
+                                            dismissProgressDialog()
                                             dialog.dismiss()
                                         }
                                     builder.show()
@@ -1058,7 +1058,7 @@ class HomeSalesActivity : AppCompatActivity() {
                                 }
 
                             } else {
-                                absentProgressDialog?.dismiss()
+                                dismissProgressDialog()
                                 Toast.makeText(this, "Gagal memproses koordinat", TOAST_SHORT)
                                     .show()
                             }
@@ -1075,7 +1075,7 @@ class HomeSalesActivity : AppCompatActivity() {
                         }
 
                     }.addOnFailureListener {
-                        absentProgressDialog?.dismiss()
+                        dismissProgressDialog()
                         handleMessage(
                             this,
                             "LOG REPORT",
@@ -1085,7 +1085,7 @@ class HomeSalesActivity : AppCompatActivity() {
                     }
 
                 } else {
-                    absentProgressDialog?.dismiss()
+                    dismissProgressDialog()
                     val message =
                         "Anda tidak dapat membuat laporan absen untuk saat ini, silakan hubungi admin untuk memperbarui koordinat toko ini"
                     val actionTitle = "Hubungi Sekarang"
@@ -1101,13 +1101,13 @@ class HomeSalesActivity : AppCompatActivity() {
                 }
 
             } else {
-                absentProgressDialog?.dismiss()
+                dismissProgressDialog()
                 val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                 startActivity(enableLocationIntent)
             }
 
         } else {
-            absentProgressDialog?.dismiss()
+            dismissProgressDialog()
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
@@ -1150,7 +1150,7 @@ class HomeSalesActivity : AppCompatActivity() {
 //            serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-005-$userName")
 //            this@HomeSalesActivity.startService(serviceIntent)
 //
-//            absentProgressDialog?.dismiss()
+//            dismissProgressDialog()
             checkAbsent()
         } else {
 
@@ -1163,7 +1163,7 @@ class HomeSalesActivity : AppCompatActivity() {
 //            val serviceIntent = Intent(this@HomeSalesActivity, TrackingService::class.java)
 //            this@HomeSalesActivity.stopService(serviceIntent)
 //
-//            absentProgressDialog?.dismiss()
+//            dismissProgressDialog()
             checkAbsent()
         }
     }
@@ -1305,7 +1305,7 @@ class HomeSalesActivity : AppCompatActivity() {
 
     private fun lockMenuItem(state: Boolean) {
         FirebaseUtils.firebaseLogging(this, "Absent", "Lock menu")
-        absentProgressDialog?.dismiss()
+        dismissProgressDialog()
         FirebaseUtils.firebaseLogging(this, "Absent", "Loading dismissed")
         isLocked = state
 
@@ -1393,7 +1393,7 @@ class HomeSalesActivity : AppCompatActivity() {
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        absentProgressDialog?.dismiss()
+                        dismissProgressDialog()
                         listStore = response.results
                         setupDialogSearch(listStore)
                         if (showModal) searchStoreAbsentModal.show()
@@ -1402,7 +1402,7 @@ class HomeSalesActivity : AppCompatActivity() {
 
                     RESPONSE_STATUS_EMPTY -> {
 
-                        absentProgressDialog?.dismiss()
+                        dismissProgressDialog()
                         setupDialogSearch(listStore)
                         if (showModal) searchStoreAbsentModal.show()
 
@@ -1410,7 +1410,7 @@ class HomeSalesActivity : AppCompatActivity() {
 
                     RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                        absentProgressDialog?.dismiss()
+                        dismissProgressDialog()
                         handleMessage(
                             this@HomeSalesActivity,
                             TAG_RESPONSE_MESSAGE, "Response failed: ${response.message}"
@@ -1425,7 +1425,7 @@ class HomeSalesActivity : AppCompatActivity() {
                             TAG_RESPONSE_CONTACT,
                             getString(R.string.failed_get_data) + response.message
                         )
-                        absentProgressDialog?.dismiss()
+                        dismissProgressDialog()
 
                     }
                 }
@@ -1437,7 +1437,7 @@ class HomeSalesActivity : AppCompatActivity() {
                     TAG_RESPONSE_CONTACT,
                     "Failed run service. Exception " + e.message
                 )
-                absentProgressDialog?.dismiss()
+                dismissProgressDialog()
 
             }
 
@@ -1460,7 +1460,7 @@ class HomeSalesActivity : AppCompatActivity() {
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        absentProgressDialog?.dismiss()
+                        dismissProgressDialog()
                         listBaseCamp = response.results
                         setupDialogSearch(basecampItems = listBaseCamp)
                         if (showModal) searchStoreAbsentModal.show()
@@ -1469,7 +1469,7 @@ class HomeSalesActivity : AppCompatActivity() {
 
                     RESPONSE_STATUS_EMPTY -> {
 
-                        absentProgressDialog?.dismiss()
+                        dismissProgressDialog()
                         setupDialogSearch(basecampItems = listBaseCamp)
                         if (showModal) searchStoreAbsentModal.show()
 
@@ -1477,7 +1477,7 @@ class HomeSalesActivity : AppCompatActivity() {
 
                     RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                        absentProgressDialog?.dismiss()
+                        dismissProgressDialog()
                         handleMessage(
                             this@HomeSalesActivity,
                             TAG_RESPONSE_MESSAGE, "Response failed: ${response.message}"
@@ -1492,7 +1492,7 @@ class HomeSalesActivity : AppCompatActivity() {
                             TAG_RESPONSE_CONTACT,
                             getString(R.string.failed_get_data) + response.message
                         )
-                        absentProgressDialog?.dismiss()
+                        dismissProgressDialog()
 
                     }
                 }
@@ -1505,7 +1505,7 @@ class HomeSalesActivity : AppCompatActivity() {
                     TAG_RESPONSE_CONTACT,
                     "Failed run service. Exception " + e.message
                 )
-                absentProgressDialog?.dismiss()
+                dismissProgressDialog()
 
             }
 
@@ -1826,6 +1826,12 @@ class HomeSalesActivity : AppCompatActivity() {
                     }
                     .show()
             }
+        }
+    }
+    
+    private fun dismissProgressDialog() {
+        if (!isFinishing && !isDestroyed) {
+            absentProgressDialog?.dismiss()
         }
     }
 

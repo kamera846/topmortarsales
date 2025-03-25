@@ -91,7 +91,8 @@ class JatemFragment : Fragment() {
         this.listener = listener
     }
     fun syncNow() {
-        getList()
+        if (userKind == USER_KIND_ADMIN) getCities()
+        else getList()
     }
     fun isSelectBarActive(state: Boolean) {
         this.rvAdapter.clearSelections()
@@ -130,11 +131,11 @@ class JatemFragment : Fragment() {
         apiService = HttpClient.create()
 
         if (userKind == USER_KIND_ADMIN) getCities()
-        getList()
+        else getList()
 
         binding.swipeRefreshLayout.setOnRefreshListener {
             if (userKind == USER_KIND_ADMIN) getCities()
-            getList()
+            else getList()
         }
 
         return view
@@ -204,68 +205,76 @@ class JatemFragment : Fragment() {
 
     private fun setRecyclerView(listItem: ArrayList<RencanaVisitModel>) {
 
-        rvAdapter = RencanaVisitRVA(listItem, object: RencanaVisitRVA.ItemClickListener {
-            override fun onItemClick(data: RencanaVisitModel?) {
-                val intent = Intent(requireContext(), DetailContactActivity::class.java)
+        if (isAdded) {
+            rvAdapter = RencanaVisitRVA(listItem, object: RencanaVisitRVA.ItemClickListener {
+                override fun onItemClick(data: RencanaVisitModel?) {
+                    context?.let { ctx ->
+                        val intent = Intent(ctx, DetailContactActivity::class.java)
 
-                if (data != null) {
-                    intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
-                    intent.putExtra(CONST_CONTACT_ID, data.id_contact)
-                    intent.putExtra(CONST_NAME, data.nama)
-                    intent.putExtra(CONST_PHONE, data.nomorhp)
-                    intent.putExtra(CONST_BIRTHDAY, data.tgl_lahir)
-                    intent.putExtra(CONST_OWNER, data.store_owner)
-                    intent.putExtra(CONST_LOCATION, data.id_city)
-                    intent.putExtra(CONST_MAPS, data.maps_url)
-                    intent.putExtra(CONST_ADDRESS, data.address)
-                    intent.putExtra(CONST_STATUS, data.store_status)
-                    intent.putExtra(CONST_KTP, data.ktp_owner)
-                    intent.putExtra(CONST_PAYMENT_METHOD, data.payment_method)
-                    intent.putExtra(CONST_TERMIN, data.termin_payment)
-                    intent.putExtra(CONST_PROMO, data.id_promo)
-                    intent.putExtra(CONST_REPUTATION, data.reputation)
-                    intent.putExtra(CONST_DATE, data.created_at_store)
-                    intent.putExtra(CONST_WEEKLY_VISIT_STATUS, data.tagih_mingguan)
-                    intent.putExtra(REPORT_SOURCE, SALES_REPORT_RENVI)
-                    intent.putExtra(RENVI_SOURCE, RENVI_JATEM3)
-                    intent.putExtra(CONST_INVOICE_ID, data.id_invoice)
+                        if (data != null) {
+                            intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
+                            intent.putExtra(CONST_CONTACT_ID, data.id_contact)
+                            intent.putExtra(CONST_NAME, data.nama)
+                            intent.putExtra(CONST_PHONE, data.nomorhp)
+                            intent.putExtra(CONST_BIRTHDAY, data.tgl_lahir)
+                            intent.putExtra(CONST_OWNER, data.store_owner)
+                            intent.putExtra(CONST_LOCATION, data.id_city)
+                            intent.putExtra(CONST_MAPS, data.maps_url)
+                            intent.putExtra(CONST_ADDRESS, data.address)
+                            intent.putExtra(CONST_STATUS, data.store_status)
+                            intent.putExtra(CONST_KTP, data.ktp_owner)
+                            intent.putExtra(CONST_PAYMENT_METHOD, data.payment_method)
+                            intent.putExtra(CONST_TERMIN, data.termin_payment)
+                            intent.putExtra(CONST_PROMO, data.id_promo)
+                            intent.putExtra(CONST_REPUTATION, data.reputation)
+                            intent.putExtra(CONST_DATE, data.created_at_store)
+                            intent.putExtra(CONST_WEEKLY_VISIT_STATUS, data.tagih_mingguan)
+                            intent.putExtra(REPORT_SOURCE, SALES_REPORT_RENVI)
+                            intent.putExtra(RENVI_SOURCE, RENVI_JATEM3)
+                            intent.putExtra(CONST_INVOICE_ID, data.id_invoice)
+                        }
+
+                        startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
+                    }
                 }
 
-                startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
+                override fun updateSelectedCount(count: Int?) {
+                    val eventBusInt = EventBusUtils.IntEvent(count)
+                    EventBus.getDefault().post(eventBusInt)
+                }
+
+            })
+
+            rvAdapter.callback = { result ->
+                (activity as? RencanaVisitActivity)?.onSelectedItems(result)
             }
 
-            override fun updateSelectedCount(count: Int?) {
-                val eventBusInt = EventBusUtils.IntEvent(count)
-                EventBus.getDefault().post(eventBusInt)
+            context?.let { ctx ->
+                binding.rvChatList.layoutManager = LinearLayoutManager(ctx)
             }
 
-        })
+            binding.rvChatList.adapter = rvAdapter
+            binding.rvChatList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                private var lastScrollPosition = 0
 
-        rvAdapter.callback = { result ->
-            (activity as? RencanaVisitActivity)?.onSelectedItems(result)
-        }
-        binding.rvChatList.layoutManager = LinearLayoutManager(requireContext())
-        binding.rvChatList.adapter = rvAdapter
-        binding.rvChatList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            private var lastScrollPosition = 0
-
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                if (dy < 0) {
-                    // Scrolled up
-                    val firstVisibleItemPosition =
-                        (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-                    if (lastScrollPosition != firstVisibleItemPosition) {
-                        recyclerView.findViewHolderForAdapterPosition(firstVisibleItemPosition)?.itemView?.startAnimation(
-                            AnimationUtils.loadAnimation(
-                                recyclerView.context,
-                                R.anim.rv_item_fade_slide_down
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    if (dy < 0) {
+                        // Scrolled up
+                        val firstVisibleItemPosition =
+                            (recyclerView.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                        if (lastScrollPosition != firstVisibleItemPosition) {
+                            recyclerView.findViewHolderForAdapterPosition(firstVisibleItemPosition)?.itemView?.startAnimation(
+                                AnimationUtils.loadAnimation(
+                                    recyclerView.context,
+                                    R.anim.rv_item_fade_slide_down
+                                )
                             )
-                        )
-                        lastScrollPosition = firstVisibleItemPosition
-                    }
-                } else lastScrollPosition = -1
-            }
-        })
+                            lastScrollPosition = firstVisibleItemPosition
+                        }
+                    } else lastScrollPosition = -1
+                }
+            })
+        }
 
     }
 
@@ -344,6 +353,8 @@ class JatemFragment : Fragment() {
                 FirebaseUtils.logErr(requireContext(), "Failed JatemFragment on getCities(). Catch: ${e.message}")
                 handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
 
+            } finally {
+                getList()
             }
 
         }

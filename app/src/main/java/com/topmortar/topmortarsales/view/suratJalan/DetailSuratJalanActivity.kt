@@ -408,13 +408,13 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                         isClosing = data.is_closing == "1"
                         isCod = data.is_cod == "1"
 
-                        companyLogoRetina = R.drawable.logo_retina
+                        companyLogoRetina = R.drawable.logo_retina_11zon
                         companyLogoBlack = R.drawable.logo_top_mortar
                         companyName = "PT. TOP MORTAR INDONESIA"
 
                         // 6 for distributor ngawi
                         if (userDistributorId == "6") {
-                            companyLogoRetina = R.drawable.bumiperkasa_retina
+                            companyLogoRetina = R.drawable.bumiperkasa_retina_11zon
                             companyLogoBlack = R.drawable.bumiperkasa
                             companyName = "PT. BUMI PERKASA"
                         }

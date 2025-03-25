@@ -192,7 +192,7 @@ class HomeCourierActivity : AppCompatActivity() {
             ) {
                 checkGpsStatus()
             } else {
-                absentProgressDialog?.dismiss()
+                dismissProgressDialog()
                 ActivityCompat.requestPermissions(
                     this,
                     arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
@@ -349,7 +349,7 @@ class HomeCourierActivity : AppCompatActivity() {
     private fun showGpsDisabledDialog() {
         try {
 
-            absentProgressDialog?.dismiss()
+            dismissProgressDialog()
             AlertDialog.Builder(this)
                 .setMessage("Aplikasi memerlukan lokasi untuk berfungsi. Aktifkan lokasi sekarang?")
                 .setCancelable(false)
@@ -628,7 +628,7 @@ class HomeCourierActivity : AppCompatActivity() {
     }
 
     private fun absentAction() {
-        absentProgressDialog?.dismiss()
+        dismissProgressDialog()
 
         var alertTitle = "Absen Kehadiran"
         var alertMessage = "Konfirmasi absen kehadiran sekarang?"
@@ -694,15 +694,15 @@ class HomeCourierActivity : AppCompatActivity() {
                                 val builder = AlertDialog.Builder(this)
                                 builder.setCancelable(false)
                                 builder.setOnDismissListener {
-                                    absentProgressDialog?.dismiss()
+                                    dismissProgressDialog()
                                 }
                                 builder.setOnCancelListener {
-                                    absentProgressDialog?.dismiss()
+                                    dismissProgressDialog()
                                 }
                                 builder.setTitle("Peringatan!")
                                     .setMessage("Titik anda saat ini $shortDistance km dari titik ${selectedBasecamp?.title}. Cobalah untuk lebih dekat dengan basecamp!")
                                     .setPositiveButton("Oke") { dialog, _ ->
-                                        absentProgressDialog?.dismiss()
+                                        dismissProgressDialog()
                                         dialog.dismiss()
                                     }
                                     .setNegativeButton("Buka Maps") { dialog, _ ->
@@ -715,7 +715,7 @@ class HomeCourierActivity : AppCompatActivity() {
                                         intent.putExtra(CONST_MAPS_NAME, selectedBasecamp?.title)
                                         startActivity(intent)
 
-                                        absentProgressDialog?.dismiss()
+                                        dismissProgressDialog()
                                         dialog.dismiss()
                                     }
                                 builder.show()
@@ -724,12 +724,12 @@ class HomeCourierActivity : AppCompatActivity() {
                             }
 
                         } else {
-                            absentProgressDialog?.dismiss()
+                            dismissProgressDialog()
                             Toast.makeText(this, "Gagal memproses koordinat", TOAST_SHORT).show()
                         }
 
                     }.addOnFailureListener {
-                        absentProgressDialog?.dismiss()
+                        dismissProgressDialog()
                         handleMessage(
                             this,
                             "LOG REPORT",
@@ -739,7 +739,7 @@ class HomeCourierActivity : AppCompatActivity() {
                     }
 
                 } else {
-                    absentProgressDialog?.dismiss()
+                    dismissProgressDialog()
                     val message =
                         "Anda tidak dapat membuat laporan absen untuk saat ini, silakan hubungi admin untuk memperbarui koordinat basecamp ini"
                     val actionTitle = "Hubungi Sekarang"
@@ -750,13 +750,13 @@ class HomeCourierActivity : AppCompatActivity() {
                 }
 
             } else {
-                absentProgressDialog?.dismiss()
+                dismissProgressDialog()
                 val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                 startActivity(enableLocationIntent)
             }
 
         } else {
-            absentProgressDialog?.dismiss()
+            dismissProgressDialog()
             ActivityCompat.requestPermissions(
                 this,
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
@@ -768,7 +768,7 @@ class HomeCourierActivity : AppCompatActivity() {
     private fun lockMenuItem(state: Boolean) {
         try {
 
-            absentProgressDialog?.dismiss()
+            dismissProgressDialog()
             isLocked = state
 //        isAbsentMorningNow = !state
 
@@ -1124,7 +1124,7 @@ class HomeCourierActivity : AppCompatActivity() {
         searchBaseCampAbsentModal = SearchModal(this, modalItems)
         searchBaseCampAbsentModal.label = "Pilih Basecamp"
         searchBaseCampAbsentModal.searchHint = "Ketik untuk mencari…"
-        searchBaseCampAbsentModal.setOnDismissListener { absentProgressDialog?.dismiss() }
+        searchBaseCampAbsentModal.setOnDismissListener { dismissProgressDialog() }
         searchBaseCampAbsentModal.setCustomDialogListener(object : SearchModal.SearchModalListener {
             override fun onDataReceived(data: ModalSearchModel) {
                 selectedBasecamp = data
@@ -1157,7 +1157,7 @@ class HomeCourierActivity : AppCompatActivity() {
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        absentProgressDialog?.dismiss()
+                        dismissProgressDialog()
                         listBasecamp = response.results
                         setupDialogSearch(listBasecamp)
                         searchBaseCampAbsentModal.show()
@@ -1166,7 +1166,7 @@ class HomeCourierActivity : AppCompatActivity() {
 
                     RESPONSE_STATUS_EMPTY -> {
 
-                        absentProgressDialog?.dismiss()
+                        dismissProgressDialog()
                         setupDialogSearch(listBasecamp)
                         searchBaseCampAbsentModal.show()
 
@@ -1174,7 +1174,7 @@ class HomeCourierActivity : AppCompatActivity() {
 
                     RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                        absentProgressDialog?.dismiss()
+                        dismissProgressDialog()
                         handleMessage(
                             this@HomeCourierActivity,
                             TAG_RESPONSE_MESSAGE, "Response failed: ${response.message}"
@@ -1189,7 +1189,7 @@ class HomeCourierActivity : AppCompatActivity() {
                             TAG_RESPONSE_CONTACT,
                             getString(R.string.failed_get_data) + response.message
                         )
-                        absentProgressDialog?.dismiss()
+                        dismissProgressDialog()
 
                     }
                 }
@@ -1201,7 +1201,7 @@ class HomeCourierActivity : AppCompatActivity() {
                     TAG_RESPONSE_CONTACT,
                     "Failed run service. Exception " + e.message
                 )
-                absentProgressDialog?.dismiss()
+                dismissProgressDialog()
 
             }
 
@@ -1272,7 +1272,7 @@ class HomeCourierActivity : AppCompatActivity() {
 //                                serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
 //                                this@HomeCourierActivity.startService(serviceIntent)
 //
-//                                absentProgressDialog?.dismiss()
+//                                dismissProgressDialog()
                                 checkAbsent()
                             } else {
 
@@ -1286,7 +1286,7 @@ class HomeCourierActivity : AppCompatActivity() {
 //                                    Intent(this@HomeCourierActivity, TrackingService::class.java)
 //                                this@HomeCourierActivity.stopService(serviceIntent)
 //
-//                                absentProgressDialog?.dismiss()
+//                                dismissProgressDialog()
                                 checkAbsent()
                             }
 
@@ -1294,7 +1294,7 @@ class HomeCourierActivity : AppCompatActivity() {
 
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            absentProgressDialog?.dismiss()
+                            dismissProgressDialog()
                             handleMessage(
                                 this@HomeCourierActivity,
                                 TAG_RESPONSE_MESSAGE,
@@ -1310,13 +1310,13 @@ class HomeCourierActivity : AppCompatActivity() {
                                 TAG_RESPONSE_CONTACT,
                                 getString(R.string.failed_get_data) + responseBody.message
                             )
-                            absentProgressDialog?.dismiss()
+                            dismissProgressDialog()
 
                         }
                     }
                 } else {
 
-                    absentProgressDialog?.dismiss()
+                    dismissProgressDialog()
                     handleMessage(
                         this@HomeCourierActivity,
                         TAG_RESPONSE_MESSAGE,
@@ -1503,7 +1503,7 @@ class HomeCourierActivity : AppCompatActivity() {
 
                     RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                        absentProgressDialog?.dismiss()
+                        dismissProgressDialog()
                         handleMessage(
                             this@HomeCourierActivity,
                             TAG_RESPONSE_MESSAGE,
@@ -1519,14 +1519,14 @@ class HomeCourierActivity : AppCompatActivity() {
                             TAG_RESPONSE_CONTACT,
                             "Gagal memuat data pengguna! Error: ${response.message}"
                         )
-                        absentProgressDialog?.dismiss()
+                        dismissProgressDialog()
 
                     }
 
                 }
 
             } catch (e: Exception) {
-                absentProgressDialog?.dismiss()
+                dismissProgressDialog()
                 FirebaseUtils.logErr(this@HomeCourierActivity, "Failed HomeCourierActivity on getUserLoggedIn(). Catch: ${e.message}")
                 handleMessage(
                     this@HomeCourierActivity,
@@ -1557,7 +1557,7 @@ class HomeCourierActivity : AppCompatActivity() {
             userDevice.child("logout_at").setValue(DateFormat.now())
             userDevice.child("login_at").setValue("")
         } catch (e: Exception) {
-            absentProgressDialog?.dismiss()
+            dismissProgressDialog()
             FirebaseUtils.logErr(this@HomeCourierActivity, "Failed HomeCourierActivity on logoutHandler(). Catch: ${e.message}")
             handleMessage(
                 this@HomeCourierActivity,
@@ -1573,4 +1573,11 @@ class HomeCourierActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
+    
+    private fun dismissProgressDialog() {
+        if (!isFinishing && !isDestroyed) {
+            absentProgressDialog?.dismiss()
+        }
+    }
+    
 }

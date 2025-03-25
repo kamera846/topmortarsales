@@ -52,8 +52,7 @@ import kotlinx.coroutines.launch
 @SuppressLint("SetTextI18n")
 class CourierActivity : AppCompatActivity() {
 
-    private var _binding: ActivityCourierBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var binding: ActivityCourierBinding
 
     private lateinit var sessionManager: SessionManager
     private val userKind get() = sessionManager.userKind()!!
@@ -80,7 +79,7 @@ class CourierActivity : AppCompatActivity() {
         supportActionBar?.hide()
         applyMyEdgeToEdge()
 
-        _binding = ActivityCourierBinding.inflate(layoutInflater)
+        binding = ActivityCourierBinding.inflate(layoutInflater)
         sessionManager = SessionManager(this@CourierActivity)
         val isLoggedIn = sessionManager.isLoggedIn()
 
@@ -466,7 +465,6 @@ class CourierActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        _binding = null
         CustomUtility(this).setUserStatusOnline(false, userDistributorIds ?: "-custom-007", userId)
     }
 

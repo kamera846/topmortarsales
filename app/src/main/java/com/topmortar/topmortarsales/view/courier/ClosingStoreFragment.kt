@@ -75,14 +75,11 @@ import org.greenrobot.eventbus.Subscribe
  */
 class ClosingStoreFragment : Fragment() {
 
-    private var _binding: FragmentClosingStoreBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var binding: FragmentClosingStoreBinding
 
     private lateinit var sessionManager: SessionManager
     private val userFullName get() = sessionManager.fullName().toString()
     private val userID get() = sessionManager.userID().toString()
-    private val userCityID get() = sessionManager.userCityID().toString()
-    private val userDistributorID get() = sessionManager.userDistributor().toString()
 
     // Delivery
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -108,7 +105,7 @@ class ClosingStoreFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentClosingStoreBinding.inflate(inflater, container, false)
+        binding = FragmentClosingStoreBinding.inflate(inflater, container, false)
         val view = binding.root
 
         badgeRefresh = view.findViewById(R.id.badgeRefresh)
@@ -389,11 +386,6 @@ class ClosingStoreFragment : Fragment() {
 
     @Subscribe
     fun onEventBus(event: EventBusUtils.MessageEvent) {
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     private fun showBadgeRefresh(action: Boolean) {

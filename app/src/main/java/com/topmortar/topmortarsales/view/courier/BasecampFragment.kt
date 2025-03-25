@@ -54,8 +54,7 @@ import org.greenrobot.eventbus.Subscribe
  */
 class BasecampFragment : Fragment() {
 
-    private var _binding: FragmentBasecampBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var binding: FragmentBasecampBinding
 
     private lateinit var sessionManager: SessionManager
     private lateinit var userKind: String
@@ -84,7 +83,7 @@ class BasecampFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentBasecampBinding.inflate(inflater, container, false)
+        binding = FragmentBasecampBinding.inflate(inflater, container, false)
         val view = binding.root
 
         badgeRefresh = view.findViewById(R.id.badgeRefresh)
@@ -251,11 +250,6 @@ class BasecampFragment : Fragment() {
     @Subscribe
     fun onEventBus(event: EventBusUtils.MessageEvent) {
     }
-
-//    override fun onDestroyView() {
-//        super.onDestroyView()
-//        _binding = null
-//    }
 
     private fun showBadgeRefresh(action: Boolean) {
         val tvTitle = badgeRefresh.findViewById<TextView>(R.id.tvTitle)
