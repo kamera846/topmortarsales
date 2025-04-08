@@ -70,7 +70,7 @@ class ChartActivity : AppCompatActivity() {
     }
 
     private fun loadBarChartData() {
-
+        binding.filterContainer.visibility = View.GONE
         var salesData = listOf(
             1f to 0f,
             2f to 0f,
@@ -225,6 +225,7 @@ class ChartActivity : AppCompatActivity() {
 
             animateY(1000)
         }
+        binding.filterContainer.visibility = View.VISIBLE
     }
 
     private fun getDynamicMonths(startIndex: Int): Array<String> {
@@ -318,7 +319,13 @@ class ChartActivity : AppCompatActivity() {
         if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.filterCities.setTextColor(getColor(R.color.white))
         else binding.filterCities.setTextColor(getColor(R.color.black_200))
         binding.filterContainer.visibility = View.GONE
+        binding.filterContainer.setOnClickListener {
+            searchModal.show()
+        }
         binding.filterCities.setOnClickListener {
+            searchModal.show()
+        }
+        binding.filterChange.setOnClickListener {
             searchModal.show()
         }
         binding.filterCities.text = selectedCity?.title ?: "pilih kota"
