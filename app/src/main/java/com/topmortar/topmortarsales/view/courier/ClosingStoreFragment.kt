@@ -440,9 +440,15 @@ class ClosingStoreFragment : Fragment() {
                     childDriver.child("courier").setValue(courierModel)
                     childDriver.child("stores/${store.id}").setValue(store)
 
-                }.addOnFailureListener {
+                }.addOnFailureListener { e ->
                     handleMessage(requireContext(), "onStartDelivery", "Failed get user lastLocation")
-                    Log.e("onStartDelivery", "Failed get user lastLocation: $it")
+                    Log.e("onStartDelivery", "Failed get user lastLocation: $e")
+                    val context = requireContext()
+                    if (isAdded) {
+                        context.let {
+                            FirebaseUtils.logErr(context, "Failed get user lastLocation: $e")
+                        }
+                    }
                 }
         }
     }
