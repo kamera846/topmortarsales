@@ -126,7 +126,7 @@ class UserProfileActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-018")
+        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-018")
 
         iUserID = intent.getStringExtra(CONST_USER_ID)
         iPhone = intent.getStringExtra(CONST_PHONE)

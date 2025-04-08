@@ -39,6 +39,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
@@ -281,6 +282,7 @@ class ReportsActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@ReportsActivity, "Failed ReportsActivity on getList(). Catch: ${e.message}")
                 val message = "Failed run service. Exception " + e.message
                 handleMessage(this@ReportsActivity, TAG_RESPONSE_MESSAGE, message)
                 loadingState(true, message)

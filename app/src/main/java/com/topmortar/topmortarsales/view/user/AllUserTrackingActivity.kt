@@ -96,7 +96,7 @@ class AllUserTrackingActivity : AppCompatActivity() {
         loadingState(true)
         binding.llFilter.componentFilter.visibility = View.GONE
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-017")
+        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-017")
         childAbsent = firebaseReference?.child(FIREBASE_CHILD_ABSENT)
 
         try {
@@ -182,7 +182,7 @@ class AllUserTrackingActivity : AppCompatActivity() {
         loadingState(true)
         binding.llFilter.componentFilter.visibility = View.GONE
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-017")
+        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-017")
         childAbsent = firebaseReference?.child(FIREBASE_CHILD_ABSENT)
 
         try {

@@ -37,6 +37,7 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
@@ -286,6 +287,7 @@ class FormGudangActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@FormGudangActivity, "Failed FormGudangActivity on submitForm(). Catch: ${e.message}")
                 handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState.dismiss()
 
@@ -366,6 +368,7 @@ class FormGudangActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@FormGudangActivity, "Failed FormGudangActivity on getCities(). Catch: ${e.message}")
                 handleMessage(this@FormGudangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
 
             }

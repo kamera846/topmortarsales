@@ -2,13 +2,17 @@
 
 package com.topmortar.topmortarsales.commons.utils
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.AsyncTask
+import android.os.Build
 import android.os.Bundle
+import androidx.core.app.ActivityCompat
 import com.google.android.gms.maps.model.LatLng
 import java.net.HttpURLConnection
 import java.net.URL
@@ -20,30 +24,40 @@ import kotlin.math.sqrt
 
 class URLUtility(private val context: Context) {
 
-    @SuppressLint("MissingPermission")
     fun requestLocationUpdate() {
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        // Define a LocationListener to handle location updates
+
         val locationListener = object : LocationListener {
             override fun onLocationChanged(location: Location) {
-                // Handle the newly received location here
-                locationManager.removeUpdates(this) // Stop listening for updates once you have a location
+
+                locationManager.removeUpdates(this)
             }
 
+            @Suppress("DEPRECATION")
             override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
-                super.onStatusChanged(provider, status, extras)
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                    super.onStatusChanged(provider, status, extras)
+                }
             }
 
             override fun onProviderEnabled(provider: String) {
-                super.onProviderEnabled(provider)
             }
 
             override fun onProviderDisabled(provider: String) {
-                super.onProviderDisabled(provider)
             }
         }
 
         // Request location updates
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
         locationManager.requestLocationUpdates(
             LocationManager.GPS_PROVIDER, // Use the provider you need (GPS or NETWORK)
             0, // Minimum time interval between updates in milliseconds

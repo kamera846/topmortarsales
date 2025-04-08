@@ -31,10 +31,7 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
@@ -82,7 +79,10 @@ import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.SplashScreenActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 
 @SuppressLint("SetTextI18n")
@@ -108,10 +108,10 @@ class HomeCourierActivity : AppCompatActivity() {
     private var isAbsentEveningNow = false
     private var isLocked = false
 
-    private lateinit var firebaseReference : DatabaseReference
-    private var absentProgressDialog : ProgressDialog? = null
-    private lateinit var fusedLocationClient : FusedLocationProviderClient
-    private lateinit var customUtility : CustomUtility
+    private lateinit var firebaseReference: DatabaseReference
+    private var absentProgressDialog: ProgressDialog? = null
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var customUtility: CustomUtility
 
     private var locationCallback: LocationCallback? = null
 
@@ -138,13 +138,14 @@ class HomeCourierActivity : AppCompatActivity() {
         }
 
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-011")
+        firebaseReference =
+            FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-011")
         apiService = HttpClient.create()
         customUtility = CustomUtility(this)
 
         // Set User Absent Level (TEMP)
         val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
-        val userChild = absentChild.child(userId.toString())
+        val userChild = absentChild.child(userId ?: "0")
         val userLevel = when (userKind) {
             USER_KIND_PENAGIHAN -> AUTH_LEVEL_PENAGIHAN
             USER_KIND_SALES -> AUTH_LEVEL_SALES
@@ -155,7 +156,8 @@ class HomeCourierActivity : AppCompatActivity() {
 
         binding.selectedBasecampContainer.tvLabel.text = "Basecamp:"
 
-        if (selectedBasecampDefaultID.isNullOrEmpty()) binding.selectedBasecampContainer.tvFilter.text = "Pilih basecamp"
+        if (selectedBasecampDefaultID.isNullOrEmpty()) binding.selectedBasecampContainer.tvFilter.text =
+            "Pilih basecamp"
         else {
             binding.selectedBasecampContainer.tvFilter.text = selectedBasecampDefaultTitle
             selectedBasecamp = ModalSearchModel(
@@ -167,149 +169,292 @@ class HomeCourierActivity : AppCompatActivity() {
         setupDialogSearch()
 
 //        checkLocationPermission()
-        CustomUtility(this).setUserStatusOnline(true, userDistributorId ?: "-custom-008", userId ?: "")
+        CustomUtility(this).setUserStatusOnline(
+            true,
+            userDistributorId ?: "-custom-008",
+            userId ?: ""
+        )
     }
 
     private fun checkLocationPermission() {
-        if (absentProgressDialog == null) {
-            absentProgressDialog = ProgressDialog(this)
-            absentProgressDialog!!.setMessage(getString(R.string.txt_loading))
-            absentProgressDialog!!.setCancelable(false)
-        }
-        if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            checkGpsStatus()
-        } else {
-            absentProgressDialog?.dismiss()
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+        try {
+
+            if (absentProgressDialog == null) {
+                absentProgressDialog = ProgressDialog(this)
+                absentProgressDialog!!.setCancelable(false)
+            }
+            absentProgressDialog!!.setMessage(getString(R.string.txt_loading) + " 1 / 5")
+            if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                checkGpsStatus()
+            } else {
+                dismissProgressDialog()
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    LOCATION_PERMISSION_REQUEST_CODE
+                )
+            }
+        } catch (e: Exception) {
+            FirebaseUtils.logErr(this, "Failed HomeCourierActivity on checkLocationPermission(). Catch: ${e.message}")
+            handleMessage(
+                this,
+                "Home Courier Failed",
+                "Failed HomeCourierActivity on checkLocationPermission(). Error: ${e.message}"
+            )
         }
     }
 
     private fun checkGpsStatus() {
-        val locationManager =
-            getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        if (absentProgressDialog != null) {
+            absentProgressDialog!!.setMessage(getString(R.string.txt_loading) + " 2 / 5")
+        }
+        try {
 
-        if (!isGpsEnabled) {
-            showGpsDisabledDialog()
-        } else {
-            checkMockLocation()
+            val locationManager =
+                getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+
+            if (!isGpsEnabled) {
+                showGpsDisabledDialog()
+            } else {
+                checkMockLocation()
+            }
+        } catch (e: Exception) {
+            FirebaseUtils.logErr(this, "Failed HomeCourierActivity on checkGpsStatus(). Catch: ${e.message}")
+            handleMessage(
+                this,
+                "Home Courier Failed",
+                "Failed HomeCourierActivity on checkGpsStatus(). Error: ${e.message}"
+            )
+//        } finally {
+//            if (absentProgressDialog != null) {
+//                absentProgressDialog!!.setMessage(getString(R.string.txt_loading))
+//            }
         }
     }
 
     private fun checkMockLocation() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (absentProgressDialog != null) {
+            absentProgressDialog!!.setMessage(getString(R.string.txt_loading) + " 3 / 5")
+        }
+        try {
 
-            fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
 
-                if (location == null) {
+                fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+                fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+
+                    if (location == null) {
 
 //                    checkLocationPermission()
-                    if (locationCallback != null) {
+                        if (locationCallback != null) {
 
-                        fusedLocationClient.removeLocationUpdates(locationCallback!!)
-                    }
-
-                    val locationRequest = LocationRequest.create().apply {
-                        interval = 3000
-                        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-                    }
-
-                    locationCallback = object : LocationCallback() {
-                        override fun onLocationResult(locationResult: LocationResult) {
-
-                            fusedLocationClient.removeLocationUpdates(this)
-                            Handler(Looper.getMainLooper()).postDelayed({
-                                val intent = Intent(this@HomeCourierActivity, HomeCourierActivity::class.java)
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-                                startActivity(intent)
-                            }, 3000)
+                            fusedLocationClient.removeLocationUpdates(locationCallback!!)
                         }
+
+                        val locationRequest = LocationRequest.create().apply {
+                            interval = 3000
+                            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+                        }
+
+                        locationCallback = object : LocationCallback() {
+                            override fun onLocationResult(locationResult: LocationResult) {
+
+                                fusedLocationClient.removeLocationUpdates(this)
+                                Handler(Looper.getMainLooper()).postDelayed({
+                                    val intent = Intent(
+                                        this@HomeCourierActivity,
+                                        HomeCourierActivity::class.java
+                                    )
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    startActivity(intent)
+                                }, 3000)
+                            }
+                        }
+
+                        fusedLocationClient.requestLocationUpdates(
+                            locationRequest,
+                            locationCallback!!,
+                            Looper.getMainLooper()
+                        )
+                    } else {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && location.isMock) {
+
+                            showDialogIsMock()
+                        } else if (location.isFromMockProvider) {
+
+                            showDialogIsMock()
+                        } else initView()
                     }
-
-                    fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback!!, Looper.getMainLooper())
-                } else {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && location.isMock) {
-
-                        showDialogIsMock()
-                    } else if (location.isFromMockProvider) {
-
-                        showDialogIsMock()
-                    } else initView()
                 }
+            } else {
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    LOCATION_PERMISSION_REQUEST_CODE
+                )
             }
-        } else {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+        } catch (e: Exception) {
+            FirebaseUtils.logErr(this, "Failed HomeCourierActivity on checkMockLocation(). Catch: ${e.message}")
+            handleMessage(
+                this,
+                "Home Courier Failed",
+                "Failed HomeCourierActivity on checkMockLocation(). Error: ${e.message}"
+            )
+//        } finally {
+//            if (absentProgressDialog != null) {
+//                absentProgressDialog!!.setMessage(getString(R.string.txt_loading))
+//            }
         }
     }
 
     private fun showDialogIsMock() {
-        absentProgressDialog?.dismiss()
+        try {
 
-        val serviceIntent = Intent(this, TrackingService::class.java)
-        stopService(serviceIntent)
+            absentProgressDialog?.dismiss()
 
-        val dialogView = layoutInflater.inflate(R.layout.modal_mock_location, null)
-        AlertDialog.Builder(this)
-            .setView(dialogView)
-            .setCancelable(false)
-            .setTitle("Lokasi Mock")
-            .setPositiveButton("Pengaturan") { _, _ ->
-                // Buka pengaturan Developer Options
-                val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
-                startActivityForResult(intent, LOCATION_PERMISSION_REQUEST_CODE)
-            }
-            .show()
+            val serviceIntent = Intent(this, TrackingService::class.java)
+            stopService(serviceIntent)
+
+            val dialogView = layoutInflater.inflate(R.layout.modal_mock_location, null)
+            AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(false)
+                .setTitle("Lokasi Mock")
+                .setPositiveButton("Pengaturan") { _, _ ->
+                    // Buka pengaturan Developer Options
+                    val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+                    startActivityForResult(intent, LOCATION_PERMISSION_REQUEST_CODE)
+                }
+                .show()
+        } catch (e: Exception) {
+            FirebaseUtils.logErr(this, "Failed HomeCourierActivity on showDialogIsMock(). Catch: ${e.message}")
+            handleMessage(
+                this,
+                "Home Courier Failed",
+                "Failed HomeCourierActivity on showDialogIsMock(). Error: ${e.message}"
+            )
+        }
     }
 
     private fun showGpsDisabledDialog() {
-        absentProgressDialog?.dismiss()
-        AlertDialog.Builder(this)
-            .setMessage("Aplikasi memerlukan lokasi untuk berfungsi. Aktifkan lokasi sekarang?")
-            .setCancelable(false)
-            .setPositiveButton("Ya") { _, _ ->
-                // Buka pengaturan untuk mengaktifkan GPS
-                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                startActivityForResult(intent, LOCATION_PERMISSION_REQUEST_CODE)
-            }
-            .show()
+        try {
+
+            dismissProgressDialog()
+            AlertDialog.Builder(this)
+                .setMessage("Aplikasi memerlukan lokasi untuk berfungsi. Aktifkan lokasi sekarang?")
+                .setCancelable(false)
+                .setPositiveButton("Ya") { _, _ ->
+                    // Buka pengaturan untuk mengaktifkan GPS
+                    val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                    startActivityForResult(intent, LOCATION_PERMISSION_REQUEST_CODE)
+                }
+                .show()
+        } catch (e: Exception) {
+            FirebaseUtils.logErr(this, "Failed HomeCourierActivity on showGpsDisabledDialog(). Catch: ${e.message}")
+            handleMessage(
+                this,
+                "Home Courier Failed",
+                "Failed HomeCourierActivity on showGpsDisabledDialog(). Error: ${e.message}"
+            )
+        }
     }
 
     private fun initView() {
-
-        binding.fullName.text = userFullName
-
-        binding.deliveryItem.setOnClickListener { if (!isLocked) navigateToDelivery() else showDialogLockedFeature() }
-        binding.nearestStoreItem.setOnClickListener { if (!isLocked) navigateToNearestStore() else showDialogLockedFeature() }
-        binding.basecampItem.setOnClickListener { if (!isLocked) navigateToBasecamp() else showDialogLockedFeature() }
-        binding.nearestBasecampItem.setOnClickListener { if (!isLocked) navigateToNearestBasecamp() else showDialogLockedFeature() }
-        binding.myProfileItem.setOnClickListener { navigateToMyProfile() }
-        binding.contactAdminItem.setOnClickListener { navigateToContactAdmin() }
-
-        val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.selectedBasecampContainer.componentFilter.background = AppCompatResources.getDrawable(this, R.color.black_400)
-        else binding.selectedBasecampContainer.componentFilter.background = AppCompatResources.getDrawable(this, R.color.light)
-        binding.selectedBasecampContainer.componentFilter.setOnClickListener {
-            isSelectBasecampOnly = true
-            if (listBasecamp.isEmpty()) getListBasecamp()
-            else {
-                setupDialogSearch(listBasecamp)
-                searchBaseCampAbsentModal.show()
-            }
+        if (absentProgressDialog != null) {
+            absentProgressDialog!!.setMessage(getString(R.string.txt_loading) + " 4 / 5")
         }
 
-        binding.btnAbsent.setOnClickListener {
+        try {
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            binding.fullName.text = userFullName
+
+            binding.deliveryItem.setOnClickListener { if (!isLocked) navigateToDelivery() else showDialogLockedFeature() }
+            binding.nearestStoreItem.setOnClickListener { if (!isLocked) navigateToNearestStore() else showDialogLockedFeature() }
+            binding.basecampItem.setOnClickListener { if (!isLocked) navigateToBasecamp() else showDialogLockedFeature() }
+            binding.nearestBasecampItem.setOnClickListener { if (!isLocked) navigateToNearestBasecamp() else showDialogLockedFeature() }
+            binding.myProfileItem.setOnClickListener { navigateToMyProfile() }
+            binding.contactAdminItem.setOnClickListener { navigateToContactAdmin() }
+
+            val currentNightMode =
+                resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+            if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.selectedBasecampContainer.componentFilter.background =
+                AppCompatResources.getDrawable(this, R.color.black_400)
+            else binding.selectedBasecampContainer.componentFilter.background =
+                AppCompatResources.getDrawable(this, R.color.light)
+            binding.selectedBasecampContainer.componentFilter.setOnClickListener {
+                isSelectBasecampOnly = true
+                if (listBasecamp.isEmpty()) getListBasecamp()
+                else {
+                    setupDialogSearch(listBasecamp)
+                    searchBaseCampAbsentModal.show()
+                }
+            }
+
+            binding.btnAbsent.setOnClickListener {
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     if (ContextCompat.checkSelfPermission(
                             this,
-                            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                            Manifest.permission.ACCESS_FINE_LOCATION
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
+                        if (ContextCompat.checkSelfPermission(
+                                this,
+                                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                            ) == PackageManager.PERMISSION_GRANTED
+                        ) {
 
 //                        absentAction()
+                            if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
+                            if (selectedBasecamp == null) {
+                                if (listBasecamp.isEmpty()) getListBasecamp()
+                                else {
+                                    setupDialogSearch(listBasecamp)
+                                    searchBaseCampAbsentModal.show()
+                                }
+                            } else absentAction()
+
+                        } else {
+                            val message = getString(R.string.bg_service_location_permission_message)
+                            val title = getString(R.string.bg_service_location_permission_title)
+                            AlertDialog.Builder(this)
+                                .setCancelable(false)
+                                .setTitle(title)
+                                .setMessage(message)
+                                .setPositiveButton(getString(R.string.open_settings)) { localDialog, _ ->
+                                    ActivityCompat.requestPermissions(
+                                        this,
+                                        arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                                        BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE
+                                    )
+                                    localDialog.dismiss()
+                                }
+                                .show()
+                        }
+                    } else {
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                            LOCATION_PERMISSION_REQUEST_CODE
+                        )
+                    }
+                } else {
+                    if (ContextCompat.checkSelfPermission(
+                            this,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        ) == PackageManager.PERMISSION_GRANTED
+                    ) {
+//                    absentAction()
                         if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
                         if (selectedBasecamp == null) {
                             if (listBasecamp.isEmpty()) getListBasecamp()
@@ -318,169 +463,172 @@ class HomeCourierActivity : AppCompatActivity() {
                                 searchBaseCampAbsentModal.show()
                             }
                         } else absentAction()
-
                     } else {
-                        val message = getString(R.string.bg_service_location_permission_message)
-                        val title = getString(R.string.bg_service_location_permission_title)
-                        AlertDialog.Builder(this)
-                            .setCancelable(false)
-                            .setTitle(title)
-                            .setMessage(message)
-                            .setPositiveButton(getString(R.string.open_settings)) { localDialog, _ ->
-                                ActivityCompat.requestPermissions(
-                                    this,
-                                    arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
-                                    BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE
-                                )
-                                localDialog.dismiss()
-                            }
-                            .show()
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                            LOCATION_PERMISSION_REQUEST_CODE
+                        )
                     }
-                } else {
-                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
-                }
-            } else {
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-//                    absentAction()
-                    if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
-                    if (selectedBasecamp == null) {
-                        if (listBasecamp.isEmpty()) getListBasecamp()
-                        else {
-                            setupDialogSearch(listBasecamp)
-                            searchBaseCampAbsentModal.show()
-                        }
-                    } else absentAction()
-                } else {
-                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
                 }
             }
+
+            lockMenuItem(true)
+
+            checkAbsent()
+
+        } catch (e: Exception) {
+            FirebaseUtils.logErr(this, "Failed HomeCourierActivity on initView(). Catch: ${e.message}")
+            handleMessage(
+                this,
+                "Home Courier Failed",
+                "Failed HomeCourierActivity on initView(). Error: ${e.message}"
+            )
+//        } finally {
+//            if (absentProgressDialog != null) {
+//                absentProgressDialog!!.setMessage(getString(R.string.txt_loading))
+//            }
         }
-
-        lockMenuItem(true)
-
-        checkAbsent()
 
     }
 
     private fun checkAbsent() {
+        FirebaseUtils.firebaseLogging(this, "Absent", "Start checking")
+        try {
 
-        if (absentProgressDialog == null) {
-            absentProgressDialog = ProgressDialog(this)
-            absentProgressDialog!!.setMessage(getString(R.string.txt_loading))
-            absentProgressDialog!!.setCancelable(false)
-        }
+            if (absentProgressDialog == null) {
+                FirebaseUtils.firebaseLogging(this, "Absent", "Init Loading")
+                absentProgressDialog = ProgressDialog(this)
+                absentProgressDialog!!.setCancelable(false)
+            }
 
-        absentProgressDialog!!.show()
+            absentProgressDialog!!.setMessage(getString(R.string.txt_loading) + " 5 / 5")
+            if (!absentProgressDialog!!.isShowing) {
+                FirebaseUtils.firebaseLogging(this, "Absent", "Show loading")
+                absentProgressDialog?.show()
+            }
 
-        val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
-        val userChild = absentChild.child(userId.toString())
+            val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+            val userChild = absentChild.child(userId ?: "0")
 
-        userChild.addListenerForSingleValueEvent(object: ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                if (snapshot.exists()) {
-                    // Do something
-                    if (snapshot.child("morningDateTime").exists()) {
-                        val morningDateTime = snapshot.child("morningDateTime").getValue(String::class.java).toString()
-                        if (morningDateTime.isNotEmpty()) {
-                            sessionManager.absentDateTime(morningDateTime)
+            FirebaseUtils.firebaseLogging(this, "Absent", "Reaching firebase server")
+            lifecycleScope.launch(Dispatchers.IO) {
 
-                            val absentMorningDate = DateFormat.format(morningDateTime, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd")
+                val snapshot = userChild.get().await()
 
-                            if (DateFormat.dateAfterNow(absentMorningDate)) {
-                                isAbsentMorningNow = false
-                                lockMenuItem(true)
+                withContext(Dispatchers.Main) {
+                    FirebaseUtils.firebaseLogging(this@HomeCourierActivity, "Absent", "Firebase server reached")
+                    if (snapshot.exists()) {
+                        FirebaseUtils.firebaseLogging(this@HomeCourierActivity, "Absent", "Snapshot exist")
+                        // Do something
+                        if (snapshot.child("morningDateTime").exists()) {
+                            FirebaseUtils.firebaseLogging(this@HomeCourierActivity, "Absent", "Morning date time exist")
+                            val morningDateTime =
+                                snapshot.child("morningDateTime").getValue(String::class.java)
+                                    .toString()
+                            if (morningDateTime.isNotEmpty()) {
+                                FirebaseUtils.firebaseLogging(this@HomeCourierActivity, "Absent", "Morning date time not empty")
+                                sessionManager.absentDateTime(morningDateTime)
 
-                            } else {
+                                val absentMorningDate = DateFormat.format(
+                                    morningDateTime,
+                                    "yyyy-MM-dd HH:mm:ss",
+                                    "yyyy-MM-dd"
+                                )
 
-                                val serviceIntentDD = Intent(this@HomeCourierActivity, TrackingService::class.java)
-                                serviceIntentDD.putExtra("userId", userId)
-                                serviceIntentDD.putExtra("userDistributorId", userDistributorId ?: "-start-004-$userName")
-                                serviceIntentDD.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
-                                this@HomeCourierActivity.startService(serviceIntentDD)
+                                if (DateFormat.dateAfterNow(absentMorningDate)) {
+                                    FirebaseUtils.firebaseLogging(this@HomeCourierActivity, "Absent", "Morning date time expired")
+                                    isAbsentMorningNow = false
+                                    lockMenuItem(true)
 
-                                isAbsentMorningNow = true
+                                } else {
+                                    val serviceIntentDD =
+                                        Intent(this@HomeCourierActivity, TrackingService::class.java)
+                                    serviceIntentDD.putExtra("userId", userId)
+                                    serviceIntentDD.putExtra(
+                                        "userDistributorId",
+                                        userDistributorId ?: "-start-005-$userName"
+                                    )
+                                    FirebaseUtils.firebaseLogging(this@HomeCourierActivity, "Absent", "Morning date time start service")
+                                    this@HomeCourierActivity.startService(serviceIntentDD)
 
-                                if (snapshot.child("eveningDateTime").exists()) {
-                                    val eveningDateTime = snapshot.child("eveningDateTime").getValue(String::class.java).toString()
+                                    isAbsentMorningNow = true
+                                    FirebaseUtils.firebaseLogging(this@HomeCourierActivity, "Absent", "Morning date time available")
+                                    if (snapshot.child("eveningDateTime").exists()) {
+                                        FirebaseUtils.firebaseLogging(this@HomeCourierActivity, "Absent", "Evening date time exist")
+                                        val eveningDateTime = snapshot.child("eveningDateTime")
+                                            .getValue(String::class.java).toString()
 
-                                    if (eveningDateTime.isNotEmpty()) {
-                                        val absentEveningDate = DateFormat.format(eveningDateTime, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd")
+                                        if (eveningDateTime.isNotEmpty()) {
+                                            FirebaseUtils.firebaseLogging(this@HomeCourierActivity, "Absent", "Evening date time not empty")
+                                            val absentEveningDate = DateFormat.format(
+                                                eveningDateTime,
+                                                "yyyy-MM-dd HH:mm:ss",
+                                                "yyyy-MM-dd"
+                                            )
 
-                                        if (DateFormat.dateAfterNow(absentEveningDate)) {
-//                                            if (!CustomUtility(this@HomeCourierActivity).isServiceRunning(TrackingService::class.java)) {
-//                                                val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
-//                                                serviceIntent.putExtra("userId", userId)
-//                                                serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-004-$userName")
-//                                                serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
-//                                                this@HomeCourierActivity.startService(serviceIntent)
-//                                            }
+                                            if (DateFormat.dateAfterNow(absentEveningDate)) {
+                                                FirebaseUtils.firebaseLogging(this@HomeCourierActivity, "Absent", "Evening date time expired")
+                                                isAbsentEveningNow = false
+                                                lockMenuItem(false)
+                                            } else {
+                                                FirebaseUtils.firebaseLogging(this@HomeCourierActivity, "Absent", "Evening date time exist")
+                                                val serviceIntent = Intent(
+                                                    this@HomeCourierActivity,
+                                                    TrackingService::class.java
+                                                )
+                                                this@HomeCourierActivity.stopService(serviceIntent)
+                                                FirebaseUtils.firebaseLogging(this@HomeCourierActivity, "Absent", "Evening date time stop service")
+                                                isAbsentEveningNow = true
+                                                lockMenuItem(true)
+                                            }
 
+                                        } else {
+                                            FirebaseUtils.firebaseLogging(this@HomeCourierActivity, "Absent", "Evening date time is empty")
                                             isAbsentEveningNow = false
                                             lockMenuItem(false)
-                                        } else {
-                                            val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
-                                            this@HomeCourierActivity.stopService(serviceIntent)
-
-                                            isAbsentEveningNow = true
-                                            lockMenuItem(true)
                                         }
-
                                     } else {
-//                                        if (!CustomUtility(this@HomeCourierActivity).isServiceRunning(TrackingService::class.java)) {
-//                                            val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
-//                                            serviceIntent.putExtra("userId", userId)
-//                                            serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-004-$userName")
-//                                            serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
-//                                            this@HomeCourierActivity.startService(serviceIntent)
-//                                        }
-
+                                        FirebaseUtils.firebaseLogging(this@HomeCourierActivity, "Absent", "Evening date time not exist")
                                         isAbsentEveningNow = false
                                         lockMenuItem(false)
                                     }
-                                } else {
-//                                    if (!CustomUtility(this@HomeCourierActivity).isServiceRunning(TrackingService::class.java)) {
-//                                        val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
-//                                        serviceIntent.putExtra("userId", userId)
-//                                        serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-004-$userName")
-//                                        serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
-//                                        this@HomeCourierActivity.startService(serviceIntent)
-//                                    }
 
-                                    isAbsentEveningNow = false
-                                    lockMenuItem(false)
                                 }
 
+                            } else {
+                                FirebaseUtils.firebaseLogging(this@HomeCourierActivity, "Absent", "Morning date time is empty")
+                                isAbsentMorningNow = false
+                                lockMenuItem(true)
                             }
-
                         } else {
-
+                            FirebaseUtils.firebaseLogging(this@HomeCourierActivity, "Absent", "Morning date time not exist")
                             isAbsentMorningNow = false
                             lockMenuItem(true)
                         }
                     } else {
 
+                        FirebaseUtils.firebaseLogging(this@HomeCourierActivity, "Absent", "snapshot not exist")
                         isAbsentMorningNow = false
                         lockMenuItem(true)
                     }
-                } else {
 
-                    isAbsentMorningNow = false
-                    lockMenuItem(true)
                 }
-            }
 
-            override fun onCancelled(error: DatabaseError) {
-                // Do something
-                isAbsentMorningNow = false
-                isAbsentEveningNow = false
-                lockMenuItem(true)
             }
-
-        })
+        } catch (e: Exception) {
+            FirebaseUtils.logErr(this, "Failed HomeCourierActivity on checkAbsent(). Catch: ${e.message}")
+            lockMenuItem(false)
+            handleMessage(
+                this,
+                "Home Courier Failed",
+                "Failed HomeCourierActivity on checkAbsent(). Error: ${e.message}"
+            )
+        }
     }
 
     private fun absentAction() {
-        absentProgressDialog?.dismiss()
+        dismissProgressDialog()
 
         var alertTitle = "Absen Kehadiran"
         var alertMessage = "Konfirmasi absen kehadiran sekarang?"
@@ -508,7 +656,11 @@ class HomeCourierActivity : AppCompatActivity() {
         val mapsUrl = selectedBasecamp?.etc.toString()
         val urlUtility = URLUtility(this)
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
 
             if (urlUtility.isLocationEnabled(this)) {
 
@@ -530,32 +682,40 @@ class HomeCourierActivity : AppCompatActivity() {
                         if (latitude != null && longitude != null) {
 
                             // Calculate Distance
-                            val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
+                            val distance = urlUtility.calculateDistance(
+                                currentLatitude,
+                                currentLongitude,
+                                latitude,
+                                longitude
+                            )
                             val shortDistance = "%.3f".format(distance)
 
                             if (distance > MAX_REPORT_DISTANCE) {
                                 val builder = AlertDialog.Builder(this)
                                 builder.setCancelable(false)
                                 builder.setOnDismissListener {
-                                    absentProgressDialog?.dismiss()
+                                    dismissProgressDialog()
                                 }
                                 builder.setOnCancelListener {
-                                    absentProgressDialog?.dismiss()
+                                    dismissProgressDialog()
                                 }
                                 builder.setTitle("Peringatan!")
-                                    .setMessage("Titik anda saat ini $shortDistance km dari titik ${ selectedBasecamp?.title }. Cobalah untuk lebih dekat dengan basecamp!")
+                                    .setMessage("Titik anda saat ini $shortDistance km dari titik ${selectedBasecamp?.title}. Cobalah untuk lebih dekat dengan basecamp!")
                                     .setPositiveButton("Oke") { dialog, _ ->
-                                        absentProgressDialog?.dismiss()
+                                        dismissProgressDialog()
                                         dialog.dismiss()
                                     }
                                     .setNegativeButton("Buka Maps") { dialog, _ ->
-                                        val intent = Intent(this@HomeCourierActivity, MapsActivity::class.java)
+                                        val intent = Intent(
+                                            this@HomeCourierActivity,
+                                            MapsActivity::class.java
+                                        )
                                         intent.putExtra(CONST_IS_BASE_CAMP, true)
                                         intent.putExtra(CONST_MAPS, mapsUrl)
                                         intent.putExtra(CONST_MAPS_NAME, selectedBasecamp?.title)
                                         startActivity(intent)
 
-                                        absentProgressDialog?.dismiss()
+                                        dismissProgressDialog()
                                         dialog.dismiss()
                                     }
                                 builder.show()
@@ -564,88 +724,116 @@ class HomeCourierActivity : AppCompatActivity() {
                             }
 
                         } else {
-                            absentProgressDialog?.dismiss()
+                            dismissProgressDialog()
                             Toast.makeText(this, "Gagal memproses koordinat", TOAST_SHORT).show()
                         }
 
                     }.addOnFailureListener {
-                        absentProgressDialog?.dismiss()
-                        handleMessage(this, "LOG REPORT", "Gagal mendapatkan lokasi anda. Err: " + it.message)
+                        dismissProgressDialog()
+                        handleMessage(
+                            this,
+                            "LOG REPORT",
+                            "Gagal mendapatkan lokasi anda. Err: " + it.message
+                        )
 //                            Toast.makeText(this, "Gagal mendapatkan lokasi anda", TOAST_SHORT).show()
                     }
 
                 } else {
-                    absentProgressDialog?.dismiss()
-                    val message = "Anda tidak dapat membuat laporan absen untuk saat ini, silakan hubungi admin untuk memperbarui koordinat basecamp ini"
+                    dismissProgressDialog()
+                    val message =
+                        "Anda tidak dapat membuat laporan absen untuk saat ini, silakan hubungi admin untuk memperbarui koordinat basecamp ini"
                     val actionTitle = "Hubungi Sekarang"
-                    customUtility.showPermissionDeniedSnackbar(message, actionTitle) { navigateChatAdmin() }
+                    customUtility.showPermissionDeniedSnackbar(
+                        message,
+                        actionTitle
+                    ) { navigateChatAdmin() }
                 }
 
             } else {
-                absentProgressDialog?.dismiss()
+                dismissProgressDialog()
                 val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                 startActivity(enableLocationIntent)
             }
 
         } else {
-            absentProgressDialog?.dismiss()
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+            dismissProgressDialog()
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                LOCATION_PERMISSION_REQUEST_CODE
+            )
         }
     }
 
     private fun lockMenuItem(state: Boolean) {
-        absentProgressDialog?.dismiss()
-        isLocked = state
+        try {
+
+            dismissProgressDialog()
+            isLocked = state
 //        isAbsentMorningNow = !state
 
-        binding.deliveryItem.alpha = if (state) 0.5f else 1f
-        binding.nearestStoreItem.alpha = if (state) 0.5f else 1f
-        binding.basecampItem.alpha = if (state) 0.5f else 1f
-        binding.nearestBasecampItem.alpha = if (state) 0.5f else 1f
+            binding.deliveryItem.alpha = if (state) 0.5f else 1f
+            binding.nearestStoreItem.alpha = if (state) 0.5f else 1f
+            binding.basecampItem.alpha = if (state) 0.5f else 1f
+            binding.nearestBasecampItem.alpha = if (state) 0.5f else 1f
 //        binding.myProfileItem.alpha = if (state) 0.5f else 1f
 //        binding.contactAdminItem.alpha = if (state) 0.5f else 1f
 
-        binding.deliveryItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
-        binding.nearestStoreItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
-        binding.basecampItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
-        binding.nearestBasecampItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
+            binding.deliveryItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
+            binding.nearestStoreItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
+            binding.basecampItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
+            binding.nearestBasecampItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
 //        binding.myProfileItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
 //        binding.contactAdminItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
 
-        if (isAbsentMorningNow && isAbsentEveningNow) {
+            if (isAbsentMorningNow && isAbsentEveningNow) {
 
-            binding.absentTitle.text = getString(R.string.absen_pulang_sudah_tercatat)
-            binding.absentDescription.text = getString(R.string.terima_kasih_atas_kinerja_hari_ini)
+                binding.absentTitle.text = getString(R.string.absen_pulang_sudah_tercatat)
+                binding.absentDescription.text =
+                    getString(R.string.terima_kasih_atas_kinerja_hari_ini)
 
-            binding.btnAbsent.visibility = View.GONE
-        } else {
-
-            binding.absentTitle.text = if (state) {
-                getString(R.string.yuk_catat_kehadiranmu_hari_ini)
-            } else {
-                getString(R.string.kehadiranmu_telah_tercatat)
-            }
-            binding.absentDescription.text = if (state) {
-                getString(R.string.absenmu_penting)
-            } else {
-                getString(R.string.terimakasih_sudah_mencatat_kehadiran_hari_ini)
-            }
-
-            binding.btnAbsent.backgroundTintList = ContextCompat.getColorStateList(this, if (state) R.color.status_bid else R.color.red_claret)
-            binding.btnAbsent.text = if (state) getString(R.string.absen_sekarang) else getString(R.string.pulang_sekarang)
-
-            val calendar = Calendar.getInstance()
-            val currentHour = calendar.get(Calendar.HOUR_OF_DAY) // Mengambil jam saat ini dalam format 24 jam
-
-            if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
                 binding.btnAbsent.visibility = View.GONE
-                binding.absenEveningInfoText.visibility = View.VISIBLE
             } else {
-                binding.btnAbsent.visibility = View.VISIBLE
-                binding.absenEveningInfoText.visibility = View.GONE
-            }
-        }
 
+                binding.absentTitle.text = if (state) {
+                    getString(R.string.yuk_catat_kehadiranmu_hari_ini)
+                } else {
+                    getString(R.string.kehadiranmu_telah_tercatat)
+                }
+                binding.absentDescription.text = if (state) {
+                    getString(R.string.absenmu_penting)
+                } else {
+                    getString(R.string.terimakasih_sudah_mencatat_kehadiran_hari_ini)
+                }
+
+                binding.btnAbsent.backgroundTintList = ContextCompat.getColorStateList(
+                    this,
+                    if (state) R.color.status_bid else R.color.red_claret
+                )
+                binding.btnAbsent.text =
+                    if (state) getString(R.string.absen_sekarang) else getString(R.string.pulang_sekarang)
+
+                val calendar = Calendar.getInstance()
+                val currentHour =
+                    calendar.get(Calendar.HOUR_OF_DAY) // Mengambil jam saat ini dalam format 24 jam
+
+                if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
+                    binding.btnAbsent.visibility = View.GONE
+                    binding.absenEveningInfoText.visibility = View.VISIBLE
+                } else {
+                    binding.btnAbsent.visibility = View.VISIBLE
+                    binding.absenEveningInfoText.visibility = View.GONE
+                }
+            }
+
+        } catch (e: Exception) {
+            FirebaseUtils.logErr(this, "Failed HomeCourierActivity on lockMenuItem(). Catch: ${e.message}")
+            handleMessage(
+                this,
+                "Home Courier Failed",
+                "Failed HomeCourierActivity on lockMenuItem(). Error: ${e.message}"
+            )
+        }
     }
 
     private fun navigateToDelivery() {
@@ -664,7 +852,8 @@ class HomeCourierActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
 
-                    val response = apiService.getCourierStore(processNumber = "1", courierId = userId ?: "0")
+                    val response =
+                        apiService.getCourierStore(processNumber = "1", courierId = userId ?: "0")
 
                     when (response.status) {
                         RESPONSE_STATUS_OK -> {
@@ -685,14 +874,24 @@ class HomeCourierActivity : AppCompatActivity() {
 
                             intent.putExtra(CONST_NEAREST_STORE, true)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_NAME,
+                                listCoordinateName
+                            )
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_STATUS,
+                                listCoordinateStatus
+                            )
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_CITY_ID,
+                                listCoordinateCityID
+                            )
 
                             progressDialog.dismiss()
                             startActivity(intent)
 
                         }
+
                         RESPONSE_STATUS_EMPTY -> {
 
                             val listCoordinate = arrayListOf<String>()
@@ -702,15 +901,33 @@ class HomeCourierActivity : AppCompatActivity() {
 
                             intent.putExtra(CONST_NEAREST_STORE, true)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_NAME,
+                                listCoordinateName
+                            )
 
                             progressDialog.dismiss()
                             startActivity(intent)
 
                         }
+
+                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+
+                            progressDialog.dismiss()
+                            handleMessage(
+                                this@HomeCourierActivity,
+                                TAG_RESPONSE_MESSAGE, "Response failed: ${response.message}"
+                            )
+
+                        }
+
                         else -> {
 
-                            handleMessage(this@HomeCourierActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                            handleMessage(
+                                this@HomeCourierActivity,
+                                TAG_RESPONSE_CONTACT,
+                                getString(R.string.failed_get_data) + response.message
+                            )
                             progressDialog.dismiss()
 
                         }
@@ -718,8 +935,12 @@ class HomeCourierActivity : AppCompatActivity() {
 
 
                 } catch (e: Exception) {
-
-                    handleMessage(this@HomeCourierActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                    FirebaseUtils.logErr(this@HomeCourierActivity, "Failed HomeCourierActivity on navigateToNearestStore(). Catch: ${e.message}")
+                    handleMessage(
+                        this@HomeCourierActivity,
+                        TAG_RESPONSE_CONTACT,
+                        "Failed run service. Exception " + e.message
+                    )
                     progressDialog.dismiss()
 
                 }
@@ -747,7 +968,8 @@ class HomeCourierActivity : AppCompatActivity() {
 
                     val apiService: ApiService = HttpClient.create()
 //                    val response = apiService.getListBaseCamp(cityId = userCity ?: "0", distributorID = userDistributorId ?: "0")
-                    val response = apiService.getListBaseCamp(distributorID = userDistributorId ?: "0")
+                    val response =
+                        apiService.getListBaseCamp(distributorID = userDistributorId ?: "0")
 
                     when (response.status) {
                         RESPONSE_STATUS_OK -> {
@@ -769,14 +991,24 @@ class HomeCourierActivity : AppCompatActivity() {
                             intent.putExtra(CONST_NEAREST_STORE, true)
                             intent.putExtra(CONST_IS_BASE_CAMP, true)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_NAME,
+                                listCoordinateName
+                            )
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_STATUS,
+                                listCoordinateStatus
+                            )
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_CITY_ID,
+                                listCoordinateCityID
+                            )
 
                             progressDialog.dismiss()
                             startActivity(intent)
 
                         }
+
                         RESPONSE_STATUS_EMPTY -> {
 
                             val listCoordinate = arrayListOf<String>()
@@ -787,15 +1019,33 @@ class HomeCourierActivity : AppCompatActivity() {
                             intent.putExtra(CONST_NEAREST_STORE, true)
                             intent.putExtra(CONST_IS_BASE_CAMP, true)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_NAME,
+                                listCoordinateName
+                            )
 
                             progressDialog.dismiss()
                             startActivity(intent)
 
                         }
+
+                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+
+                            progressDialog.dismiss()
+                            handleMessage(
+                                this@HomeCourierActivity,
+                                TAG_RESPONSE_MESSAGE, "Response failed: ${response.message}"
+                            )
+
+                        }
+
                         else -> {
 
-                            handleMessage(this@HomeCourierActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                            handleMessage(
+                                this@HomeCourierActivity,
+                                TAG_RESPONSE_CONTACT,
+                                getString(R.string.failed_get_data) + response.message
+                            )
                             progressDialog.dismiss()
 
                         }
@@ -803,8 +1053,12 @@ class HomeCourierActivity : AppCompatActivity() {
 
 
                 } catch (e: Exception) {
-
-                    handleMessage(this@HomeCourierActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                    FirebaseUtils.logErr(this@HomeCourierActivity, "Failed HomeCourierActivity on navigateToNearestBasecamp(). Catch: ${e.message}")
+                    handleMessage(
+                        this@HomeCourierActivity,
+                        TAG_RESPONSE_CONTACT,
+                        "Failed run service. Exception " + e.message
+                    )
                     progressDialog.dismiss()
 
                 }
@@ -820,11 +1074,13 @@ class HomeCourierActivity : AppCompatActivity() {
     }
 
     private fun navigateToContactAdmin() {
-        val phoneNumber = if (!userDistributorNumber.isNullOrEmpty()) userDistributorNumber else getString(R.string.topmortar_wa_number)
+        val phoneNumber =
+            if (!userDistributorNumber.isNullOrEmpty()) userDistributorNumber else getString(R.string.topmortar_wa_number)
         val message = "*#Courier Service*\nHalo admin, tolong bantu saya [KETIK PESAN ANDA]"
 
         val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")
+        intent.data =
+            Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")
 
         try {
             startActivity(intent)
@@ -868,12 +1124,16 @@ class HomeCourierActivity : AppCompatActivity() {
         searchBaseCampAbsentModal = SearchModal(this, modalItems)
         searchBaseCampAbsentModal.label = "Pilih Basecamp"
         searchBaseCampAbsentModal.searchHint = "Ketik untuk mencari…"
-        searchBaseCampAbsentModal.setOnDismissListener { absentProgressDialog?.dismiss() }
+        searchBaseCampAbsentModal.setOnDismissListener { dismissProgressDialog() }
         searchBaseCampAbsentModal.setCustomDialogListener(object : SearchModal.SearchModalListener {
             override fun onDataReceived(data: ModalSearchModel) {
                 selectedBasecamp = data
                 binding.selectedBasecampContainer.tvFilter.text = data.title
-                sessionManager.selectedBasecampAbsent(data.id ?: "", data.title ?: "", data.etc ?: "")
+                sessionManager.selectedBasecampAbsent(
+                    data.id ?: "",
+                    data.title ?: "",
+                    data.etc ?: ""
+                )
                 if (isSelectBasecampOnly) isSelectBasecampOnly = false
                 else absentAction()
             }
@@ -883,7 +1143,10 @@ class HomeCourierActivity : AppCompatActivity() {
 
     private fun getListBasecamp() {
 
-        if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
+        if (!absentProgressDialog!!.isShowing) {
+            absentProgressDialog?.setMessage(getString(R.string.txt_loading))
+            absentProgressDialog?.show()
+        }
 
         lifecycleScope.launch {
             try {
@@ -894,31 +1157,51 @@ class HomeCourierActivity : AppCompatActivity() {
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        absentProgressDialog?.dismiss()
+                        dismissProgressDialog()
                         listBasecamp = response.results
                         setupDialogSearch(listBasecamp)
                         searchBaseCampAbsentModal.show()
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
-                        absentProgressDialog?.dismiss()
+                        dismissProgressDialog()
                         setupDialogSearch(listBasecamp)
                         searchBaseCampAbsentModal.show()
 
                     }
+
+                    RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+
+                        dismissProgressDialog()
+                        handleMessage(
+                            this@HomeCourierActivity,
+                            TAG_RESPONSE_MESSAGE, "Response failed: ${response.message}"
+                        )
+
+                    }
+
                     else -> {
 
-                        handleMessage(this@HomeCourierActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
-                        absentProgressDialog?.dismiss()
+                        handleMessage(
+                            this@HomeCourierActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data) + response.message
+                        )
+                        dismissProgressDialog()
 
                     }
                 }
 
             } catch (e: Exception) {
-
-                handleMessage(this@HomeCourierActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
-                absentProgressDialog?.dismiss()
+                FirebaseUtils.logErr(this@HomeCourierActivity, "Failed HomeCourierActivity on getListBasecamp(). Catch: ${e.message}")
+                handleMessage(
+                    this@HomeCourierActivity,
+                    TAG_RESPONSE_CONTACT,
+                    "Failed run service. Exception " + e.message
+                )
+                dismissProgressDialog()
 
             }
 
@@ -956,7 +1239,7 @@ class HomeCourierActivity : AppCompatActivity() {
                         RESPONSE_STATUS_OK -> {
 
                             val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
-                            val userChild = absentChild.child(userId.toString())
+                            val userChild = absentChild.child(userId ?: "0")
                             val userLevel = when (userKind) {
                                 USER_KIND_PENAGIHAN -> AUTH_LEVEL_PENAGIHAN
                                 USER_KIND_SALES -> AUTH_LEVEL_SALES
@@ -979,15 +1262,17 @@ class HomeCourierActivity : AppCompatActivity() {
 
                                 sessionManager.absentDateTime(absentDateTime)
 
-//                                if (!CustomUtility(this@HomeCourierActivity).isServiceRunning(TrackingService::class.java)) {
-                                    val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
-                                    serviceIntent.putExtra("userId", userId)
-                                    serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-004-$userName")
-                                    serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
-                                    this@HomeCourierActivity.startService(serviceIntent)
-//                                }
-
-                                absentProgressDialog?.dismiss()
+//                                val serviceIntent =
+//                                    Intent(this@HomeCourierActivity, TrackingService::class.java)
+//                                serviceIntent.putExtra("userId", userId)
+//                                serviceIntent.putExtra(
+//                                    "userDistributorId",
+//                                    userDistributorId ?: "-start-004-$userName"
+//                                )
+//                                serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
+//                                this@HomeCourierActivity.startService(serviceIntent)
+//
+//                                dismissProgressDialog()
                                 checkAbsent()
                             } else {
 
@@ -997,37 +1282,56 @@ class HomeCourierActivity : AppCompatActivity() {
 
                                 sessionManager.absentDateTime(absentDateTime)
 
-                                val serviceIntent = Intent(this@HomeCourierActivity, TrackingService::class.java)
-                                this@HomeCourierActivity.stopService(serviceIntent)
-
-                                absentProgressDialog?.dismiss()
+//                                val serviceIntent =
+//                                    Intent(this@HomeCourierActivity, TrackingService::class.java)
+//                                this@HomeCourierActivity.stopService(serviceIntent)
+//
+//                                dismissProgressDialog()
                                 checkAbsent()
                             }
 
                         }
+
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            absentProgressDialog?.dismiss()
-                            handleMessage(this@HomeCourierActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan absen! Message: ${ responseBody.message }")
+                            dismissProgressDialog()
+                            handleMessage(
+                                this@HomeCourierActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "Gagal mengirim laporan absen! Message: ${responseBody.message}"
+                            )
 
                         }
+
                         else -> {
 
-                            absentProgressDialog?.dismiss()
-                            handleMessage(this@HomeCourierActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                            handleMessage(
+                                this@HomeCourierActivity,
+                                TAG_RESPONSE_CONTACT,
+                                getString(R.string.failed_get_data) + responseBody.message
+                            )
+                            dismissProgressDialog()
 
                         }
                     }
                 } else {
 
-                    absentProgressDialog?.dismiss()
-                    handleMessage(this@HomeCourierActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan absen! Error: " + response.message())
+                    dismissProgressDialog()
+                    handleMessage(
+                        this@HomeCourierActivity,
+                        TAG_RESPONSE_MESSAGE,
+                        "Gagal mengirim laporan absen! Error: " + response.message()
+                    )
 
                 }
 
             } catch (e: Exception) {
-
-                handleMessage(this@HomeCourierActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                FirebaseUtils.logErr(this@HomeCourierActivity, "Failed HomeCourierActivity on executeAbsentReport(). Catch: ${e.message}")
+                handleMessage(
+                    this@HomeCourierActivity,
+                    TAG_RESPONSE_CONTACT,
+                    "Failed run service. Exception " + e.message
+                )
 
             }
 
@@ -1037,10 +1341,12 @@ class HomeCourierActivity : AppCompatActivity() {
     private fun navigateChatAdmin() {
         val distributorNumber = sessionManager.userDistributorNumber()!!
         val phoneNumber = distributorNumber.ifEmpty { getString(R.string.topmortar_wa_number) }
-        val message = "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada basecamp *${ selectedBasecamp?.title }*"
+        val message =
+            "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada basecamp *${selectedBasecamp?.title}*"
 
         val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")
+        intent.data =
+            Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")
 
         try {
             startActivity(intent)
@@ -1114,7 +1420,12 @@ class HomeCourierActivity : AppCompatActivity() {
         }
 
         doubleBackToExitPressedOnce = true
-        handleMessage(this, TAG_ACTION_MAIN_ACTIVITY, getString(R.string.tekan_sekali_lagi), TOAST_SHORT)
+        handleMessage(
+            this,
+            TAG_ACTION_MAIN_ACTIVITY,
+            getString(R.string.tekan_sekali_lagi),
+            TOAST_SHORT
+        )
 
         Handler(Looper.getMainLooper()).postDelayed({
             doubleBackToExitPressedOnce = false
@@ -1125,7 +1436,11 @@ class HomeCourierActivity : AppCompatActivity() {
         super.onStart()
 //        checkAbsent()
         Handler(Looper.getMainLooper()).postDelayed({
-            CustomUtility(this).setUserStatusOnline(true, userDistributorId ?: "-custom-008", userId ?: "")
+            CustomUtility(this).setUserStatusOnline(
+                true,
+                userDistributorId ?: "-custom-008",
+                userId ?: ""
+            )
             getUserLoggedIn()
         }, 1000)
     }
@@ -1178,15 +1493,46 @@ class HomeCourierActivity : AppCompatActivity() {
                             logoutHandler()
                         } else {
                             sessionManager.setUserLoggedIn(data)
-                            binding.fullName.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) it else "Selamat Datang"}
+                            binding.fullName.text = sessionManager.fullName()
+                                .let { if (!it.isNullOrEmpty()) it else "Selamat Datang" }
                         }
 
-                    } RESPONSE_STATUS_EMPTY -> logoutHandler()
+                    }
+
+                    RESPONSE_STATUS_EMPTY -> logoutHandler()
+
+                    RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+
+                        dismissProgressDialog()
+                        handleMessage(
+                            this@HomeCourierActivity,
+                            TAG_RESPONSE_MESSAGE,
+                            "Gagal memuat data pengguna! Message: ${response.message}"
+                        )
+
+                    }
+
+                    else -> {
+
+                        handleMessage(
+                            this@HomeCourierActivity,
+                            TAG_RESPONSE_CONTACT,
+                            "Gagal memuat data pengguna! Error: ${response.message}"
+                        )
+                        dismissProgressDialog()
+
+                    }
 
                 }
 
             } catch (e: Exception) {
-
+                dismissProgressDialog()
+                FirebaseUtils.logErr(this@HomeCourierActivity, "Failed HomeCourierActivity on getUserLoggedIn(). Catch: ${e.message}")
+                handleMessage(
+                    this@HomeCourierActivity,
+                    "Home Courier Failed",
+                    "Failed HomeCourierActivity on getUserLoggedIn(). Error: ${e.message}"
+                )
             }
 
         }
@@ -1211,7 +1557,13 @@ class HomeCourierActivity : AppCompatActivity() {
             userDevice.child("logout_at").setValue(DateFormat.now())
             userDevice.child("login_at").setValue("")
         } catch (e: Exception) {
-
+            dismissProgressDialog()
+            FirebaseUtils.logErr(this@HomeCourierActivity, "Failed HomeCourierActivity on logoutHandler(). Catch: ${e.message}")
+            handleMessage(
+                this@HomeCourierActivity,
+                "Home Courier Failed",
+                "Failed HomeCourierActivity on getUserLoggedIn(). Error: ${e.message}"
+            )
         }
 
         sessionManager.setLoggedIn(LOGGED_OUT)
@@ -1221,4 +1573,11 @@ class HomeCourierActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
+    
+    private fun dismissProgressDialog() {
+        if (!isFinishing && !isDestroyed) {
+            absentProgressDialog?.dismiss()
+        }
+    }
+    
 }

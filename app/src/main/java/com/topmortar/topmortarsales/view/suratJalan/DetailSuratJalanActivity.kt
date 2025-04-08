@@ -99,6 +99,7 @@ import com.topmortar.topmortarsales.commons.printUtils.Comman
 import com.topmortar.topmortarsales.commons.printUtils.PdfDocumentAdapter
 import com.topmortar.topmortarsales.commons.utils.BluetoothPrinterManager
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
@@ -380,6 +381,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@DetailSuratJalanActivity, "Failed DetailSuratJalanActivity on getDetail(). Catch: ${e.message}")
                 handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
 
@@ -406,13 +408,13 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                         isClosing = data.is_closing == "1"
                         isCod = data.is_cod == "1"
 
-                        companyLogoRetina = R.drawable.logo_retina
+                        companyLogoRetina = R.drawable.logo_retina_11zon
                         companyLogoBlack = R.drawable.logo_top_mortar
                         companyName = "PT. TOP MORTAR INDONESIA"
 
                         // 6 for distributor ngawi
                         if (userDistributorId == "6") {
-                            companyLogoRetina = R.drawable.bumiperkasa_retina
+                            companyLogoRetina = R.drawable.bumiperkasa_retina_11zon
                             companyLogoBlack = R.drawable.bumiperkasa
                             companyName = "PT. BUMI PERKASA"
                         }
@@ -459,6 +461,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@DetailSuratJalanActivity, "Failed DetailSuratJalanActivity on getDetailInvoice(). Catch: ${e.message}")
                 handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
 
@@ -784,6 +787,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@DetailSuratJalanActivity, "Failed DetailSuratJalanActivity on executePrinter(). Catch: ${e.message}")
                 handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 printingState(false)
 
@@ -830,6 +834,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
                 } catch (e: Exception) {
 
+                    FirebaseUtils.logErr(this@DetailSuratJalanActivity, "Failed DetailSuratJalanActivity on executeInkPrinter(). Catch: ${e.message}")
                     handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                     printingState(false)
 

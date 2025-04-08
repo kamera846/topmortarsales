@@ -230,9 +230,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var percentage = 0
     private var selectedLatLng: LatLng? = null
 
-//    private val courierDrawable = R.drawable.pin_truck
-    private val courierDrawable = R.drawable.pin_truck_pink_cyclamen
-    private val locationBlacklistDrawable = R.drawable.store_location_status_blacklist_copy
+//    private val courierDrawable = R.drawable.pin_truck_11zon
+    private val courierDrawable = R.drawable.pin_truck_pink_cyclamen_11zon
+    private val locationBlacklistDrawable = R.drawable.store_location_status_blacklist_copy_11zon
 
     private var listGudang: ArrayList<GudangModel> = arrayListOf()
     private var selectedCenterPoint: ModalSearchModel? = null
@@ -419,14 +419,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     val indexOfItem = listCoordinate!!.indexOf(itemToFind)
                     val selectedStatus = if (indexOfItem != -1) listCoordinateStatus!![indexOfItem] else ""
                     val imgDrawable = when (selectedStatus.lowercase(Locale.getDefault())) {
-                        STATUS_CONTACT_DATA -> R.drawable.store_location_status_data
-                        STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active
-                        STATUS_CONTACT_PASSIVE -> R.drawable.store_location_status_passive
-                        STATUS_CONTACT_BID -> R.drawable.store_location_status_biding
+                        STATUS_CONTACT_DATA -> R.drawable.store_location_status_data_11zon
+                        STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active_11zon
+                        STATUS_CONTACT_PASSIVE -> R.drawable.store_location_status_passive_11zon
+                        STATUS_CONTACT_BID -> R.drawable.store_location_status_biding_11zon
                         else -> {
                             if (selectedCenterPoint != null && selectedCenterPoint?.etc == itemToFind) {
                                 binding.textTargetRute.text = "Petunjuk rute menuju ke lokasi gudang"
-                                R.drawable.gudang
+                                R.drawable.gudang_11zon
                             } else locationBlacklistDrawable
                         }
                     }
@@ -632,7 +632,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     LatLng(latitude!!, longitude!!)
                 } else currentLatLng
 
-                val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.gudang)
+                val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.gudang_11zon)
 
                 val newWidth = convertDpToPx(50, this@MapsActivity)
                 val newHeight = convertDpToPx(50, this@MapsActivity)
@@ -686,10 +686,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 //                                        binding.rvLoading.visibility = View.GONE
 //
 //                                        val iconDrawable = when (listCoordinateStatus?.get(i)) {
-//                                            STATUS_CONTACT_DATA -> R.drawable.store_location_status_data
-//                                            STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active
-//                                            STATUS_CONTACT_PASSIVE -> R.drawable.store_location_status_passive
-//                                            STATUS_CONTACT_BID -> R.drawable.store_location_status_biding
+//                                            STATUS_CONTACT_DATA -> R.drawable.store_location_status_data_11zon
+//                                            STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active_11zon
+//                                            STATUS_CONTACT_PASSIVE -> R.drawable.store_location_status_passive_11zon
+//                                            STATUS_CONTACT_BID -> R.drawable.store_location_status_biding_11zon
 //                                            else -> locationBlacklistDrawable
 //                                        }
 //
@@ -869,10 +869,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                 }
 
                                 val iconDrawable = when (listCoordinateStatus?.get(i)) {
-                                    STATUS_CONTACT_DATA -> R.drawable.store_location_status_data
-                                    STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active
-                                    STATUS_CONTACT_PASSIVE -> R.drawable.store_location_status_passive
-                                    STATUS_CONTACT_BID -> R.drawable.store_location_status_biding
+                                    STATUS_CONTACT_DATA -> R.drawable.store_location_status_data_11zon
+                                    STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active_11zon
+                                    STATUS_CONTACT_PASSIVE -> R.drawable.store_location_status_passive_11zon
+                                    STATUS_CONTACT_BID -> R.drawable.store_location_status_biding_11zon
                                     else -> locationBlacklistDrawable
                                 }
 
@@ -1475,6 +1475,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@MapsActivity, "Failed MapsActivity on getCities(). Catch: ${e.message}")
 //                handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 progressDialog.dismiss()
 
@@ -1599,6 +1600,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@MapsActivity, "Failed MapsActivity on getListGudang(). Catch: ${e.message}")
                 handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 binding.centerPointTitle.visibility = View.GONE
                 binding.centerPointMoreIcon.visibility = View.GONE
@@ -1649,7 +1651,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         progressDialog.show()
 
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-003")
+        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-003")
         childDelivery = firebaseReference?.child(FIREBASE_CHILD_DELIVERY)
         childDriver = childDelivery?.child(deliveryID!!)
         val childStores = childDriver?.child("stores/$iContactID")
@@ -1891,7 +1893,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         progressDialog.show()
 
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-004")
+        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-004")
         childAbsent = firebaseReference?.child(FIREBASE_CHILD_ABSENT)
         childCourier = childAbsent?.child(courierID.toString())
 
@@ -2265,7 +2267,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             } catch (e: Exception) {
 
-
+                FirebaseUtils.logErr(this@MapsActivity, "Failed MapsActivity on setupTrackingHistory(). Catch: ${e.message}")
                 progressDialog.dismiss()
                 handleMessage(this@MapsActivity, "setupTrackingHistory",
                     "Failed run service. Exception " + e.message

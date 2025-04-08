@@ -75,14 +75,11 @@ import org.greenrobot.eventbus.Subscribe
  */
 class ClosingStoreFragment : Fragment() {
 
-    private var _binding: FragmentClosingStoreBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var binding: FragmentClosingStoreBinding
 
     private lateinit var sessionManager: SessionManager
     private val userFullName get() = sessionManager.fullName().toString()
     private val userID get() = sessionManager.userID().toString()
-    private val userCityID get() = sessionManager.userCityID().toString()
-    private val userDistributorID get() = sessionManager.userDistributor().toString()
 
     // Delivery
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -108,7 +105,7 @@ class ClosingStoreFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentClosingStoreBinding.inflate(inflater, container, false)
+        binding = FragmentClosingStoreBinding.inflate(inflater, container, false)
         val view = binding.root
 
         badgeRefresh = view.findViewById(R.id.badgeRefresh)
@@ -118,7 +115,7 @@ class ClosingStoreFragment : Fragment() {
 
         deliveryId = "$AUTH_LEVEL_COURIER$userID"
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-008")
+        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-008")
         childDelivery = firebaseReference.child(FIREBASE_CHILD_DELIVERY)
         childDriver = childDelivery.child(deliveryId)
 
@@ -162,7 +159,7 @@ class ClosingStoreFragment : Fragment() {
                         // Get a reference to your database
                         val deliveryId = AUTH_LEVEL_COURIER + userID
                         val userDistributorIds = sessionManager.userDistributor()
-                        val firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-009")
+                        val firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-009")
                         val myRef: DatabaseReference = firebaseReference.child("$FIREBASE_CHILD_DELIVERY/$deliveryId")
 
                         // Add a ValueEventListener to retrieve the data
@@ -391,11 +388,6 @@ class ClosingStoreFragment : Fragment() {
     fun onEventBus(event: EventBusUtils.MessageEvent) {
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
     private fun showBadgeRefresh(action: Boolean) {
         val tvTitle = badgeRefresh.findViewById<TextView>(R.id.tvTitle)
         val icClose = badgeRefresh.findViewById<ImageView>(R.id.icClose)
@@ -448,9 +440,15 @@ class ClosingStoreFragment : Fragment() {
                     childDriver.child("courier").setValue(courierModel)
                     childDriver.child("stores/${store.id}").setValue(store)
 
-                }.addOnFailureListener {
+                }.addOnFailureListener { e ->
                     handleMessage(requireContext(), "onStartDelivery", "Failed get user lastLocation")
-                    Log.e("onStartDelivery", "Failed get user lastLocation: $it")
+                    Log.e("onStartDelivery", "Failed get user lastLocation: $e")
+                    val context = requireContext()
+                    if (isAdded) {
+                        context.let {
+                            FirebaseUtils.logErr(context, "Failed get user lastLocation: $e")
+                        }
+                    }
                 }
         }
     }

@@ -52,8 +52,7 @@ import kotlinx.coroutines.launch
 @SuppressLint("SetTextI18n")
 class CourierActivity : AppCompatActivity() {
 
-    private var _binding: ActivityCourierBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var binding: ActivityCourierBinding
 
     private lateinit var sessionManager: SessionManager
     private val userKind get() = sessionManager.userKind()!!
@@ -80,7 +79,7 @@ class CourierActivity : AppCompatActivity() {
         supportActionBar?.hide()
         applyMyEdgeToEdge()
 
-        _binding = ActivityCourierBinding.inflate(layoutInflater)
+        binding = ActivityCourierBinding.inflate(layoutInflater)
         sessionManager = SessionManager(this@CourierActivity)
         val isLoggedIn = sessionManager.isLoggedIn()
 
@@ -92,7 +91,7 @@ class CourierActivity : AppCompatActivity() {
         AppUpdateHelper.checkForUpdate(this)
 
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-010")
+        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-010")
 
         binding.titleBarDark.tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
         binding.titleBarDark.tvTitleBarDescription.visibility = binding.titleBarDark.tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
@@ -133,6 +132,7 @@ class CourierActivity : AppCompatActivity() {
             userDevice.child("logout_at").setValue(DateFormat.now())
             userDevice.child("login_at").setValue("")
         } catch (e: Exception) {
+            FirebaseUtils.logErr(this, "Failed CourierActivity on logoutHandler(). Catch: ${e.message}")
             Log.d("Firebase Auth", "$e")
         }
 
@@ -170,6 +170,7 @@ class CourierActivity : AppCompatActivity() {
 
 
             } catch (e: Exception) {
+                FirebaseUtils.logErr(this@CourierActivity, "Failed CourierActivity on getUserLoggedIn(). Catch: ${e.message}")
                 Log.d("TAG USER LOGGED IN", "Failed run service. Exception " + e.message)
             }
 
@@ -464,7 +465,6 @@ class CourierActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        _binding = null
         CustomUtility(this).setUserStatusOnline(false, userDistributorIds ?: "-custom-007", userId)
     }
 

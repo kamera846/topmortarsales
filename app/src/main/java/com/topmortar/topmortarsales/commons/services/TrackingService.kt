@@ -6,6 +6,7 @@ import android.Manifest
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
@@ -42,7 +43,12 @@ class TrackingService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
-        startForegroundService()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService()
+        } else {
+            startService(intent)
+        }
+
         startLocationUpdates(intent)
         scheduleServiceStop()
         return START_STICKY
@@ -75,7 +81,7 @@ class TrackingService : Service() {
         val userDistributorId = intent?.getStringExtra("userDistributorId")
         val deliveryId = intent?.getStringExtra("deliveryId")
 
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorId ?: "-firebase-001")
+        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorId ?: "-firebase-001")
         childDelivery = firebaseReference.child(FIREBASE_CHILD_DELIVERY)
         childAbsent = firebaseReference.child(FIREBASE_CHILD_ABSENT).child(userId.toString())
         if (!deliveryId.isNullOrEmpty()) childDriver = childDelivery.child(deliveryId)
@@ -145,7 +151,8 @@ class TrackingService : Service() {
 
     private fun stopLocationUpdates() {
 
-        fusedLocationClient.removeLocationUpdates(locationCallback!!)
+        if (::fusedLocationClient.isInitialized) fusedLocationClient.removeLocationUpdates(locationCallback!!)
+
         locationCallback = null
         isLocationUpdating = false
     }

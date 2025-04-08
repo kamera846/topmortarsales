@@ -8,8 +8,7 @@ import com.topmortar.topmortarsales.databinding.ActivityManageBasecampBinding
 
 class ManageBasecampActivity : AppCompatActivity() {
 
-    private var _binding: ActivityManageBasecampBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var binding: ActivityManageBasecampBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -17,7 +16,7 @@ class ManageBasecampActivity : AppCompatActivity() {
         supportActionBar?.hide()
         applyMyEdgeToEdge()
 
-        _binding = ActivityManageBasecampBinding.inflate(layoutInflater)
+        binding = ActivityManageBasecampBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         binding.titleBarDark.tvTitleBar.text = "Kelola Basecamp"
@@ -37,11 +36,6 @@ class ManageBasecampActivity : AppCompatActivity() {
         /*
         End Call Fragment
          */
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        _binding = null
     }
 
 }

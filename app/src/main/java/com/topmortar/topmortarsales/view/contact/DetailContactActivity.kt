@@ -350,16 +350,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         phoneCategoriesFRC.setDefaultsAsync(R.xml.default_phone_categories)
 
         phoneCategoriesFRC.fetchAndActivate()
-            .addOnCompleteListener(this) { task ->
-//                if (task.isSuccessful) {
+            .addOnCompleteListener(this) {
                     val itemsJson = phoneCategoriesFRC.getString(PHONE_CATEGORIES)
                     val itemsArray = JSONArray(itemsJson)
                     val items = Array(itemsArray.length()) { i -> itemsArray.getString(i) }
 
                     spinPhoneCatItems = items.toList()
-//                    println("Phone items: $spinPhoneCatItems")
-
-//              }
 
                 val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, spinPhoneCatItems)
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -367,7 +363,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 binding.spinPhoneCategories1.adapter = adapter
                 binding.spinPhoneCategories2.adapter = adapter
 
-//                println("Phone items: ${task.exception}")
                 initView()
             }
 
@@ -1135,6 +1130,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on saveEdit(). Catch: ${e.message}")
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
                 progressDialog.dismiss()
@@ -1201,6 +1197,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getContact(). Catch: ${e.message}")
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
                 progressDialog.dismiss()
@@ -1307,6 +1304,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getDetailContact(). Catch: ${e.message}")
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
                 progressDialog.dismiss()
@@ -1693,6 +1691,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getContactSales(). Catch: ${e.message}")
                 handleMessage(this@DetailContactActivity, "CONTACT SALES", "Failed run service. Exception " + e.message)
                 getCities()
 
@@ -1758,6 +1757,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getCities(). Catch: ${e.message}")
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 getPromo()
 
@@ -1831,6 +1831,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getPromo(). Catch: ${e.message}")
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
 
                 loadingState(false)
@@ -2249,9 +2250,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         } else if (requestCode == REQUEST_EDIT_CONTACT_COORDINATE) {
             val latitude = data?.getDoubleExtra("latitude", 0.0)
             val longitude = data?.getDoubleExtra("longitude", 0.0)
-            if (latitude != null && longitude != null) etMaps.setText("$latitude,$longitude")
-            etMaps.error = null
-            etMaps.clearFocus()
+            if (!::etMaps.isInitialized) etMaps = findViewById(R.id.et_maps)
+            etMaps.let {
+                if (latitude != null && longitude != null) it.setText("$latitude,$longitude")
+                it.error = null
+                it.clearFocus()
+            }
         }
 
     }
@@ -2329,7 +2333,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         deliveryId = "$AUTH_LEVEL_COURIER$userID"
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-007")
+        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-007")
         childDelivery = firebaseReference?.child(FIREBASE_CHILD_DELIVERY)
         childDriver = childDelivery?.child(deliveryId)
 

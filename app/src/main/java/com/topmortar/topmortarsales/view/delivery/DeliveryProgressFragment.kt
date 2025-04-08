@@ -83,7 +83,7 @@ class DeliveryProgressFragment : Fragment() {
 
         sessionManager = SessionManager(requireContext())
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils().getReference(distributorId = userDistributorIds ?: "-firebase-012")
+        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-012")
 
         if (userKind == USER_KIND_ADMIN) getCities()
         getList()

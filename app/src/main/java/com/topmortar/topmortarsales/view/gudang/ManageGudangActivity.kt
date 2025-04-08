@@ -30,6 +30,7 @@ import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -128,6 +129,7 @@ class ManageGudangActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@ManageGudangActivity, "Failed ManageGudangActivity on getList(). Catch: ${e.message}")
                 handleMessage(this@ManageGudangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
@@ -292,6 +294,7 @@ class ManageGudangActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                FirebaseUtils.logErr(this@ManageGudangActivity, "Failed ManageGudangActivity on getCities(). Catch: ${e.message}")
                 handleMessage(this@ManageGudangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
 
             }
