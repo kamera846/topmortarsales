@@ -32,7 +32,9 @@
     <uses-feature
         android:name="android.hardware.camera.flash"
         android:required="false" />
-    <uses-feature android:name="android.hardware.camera.any" />
+    <uses-feature
+        android:name="android.hardware.camera.any"
+        android:required="false" />
 
     <queries>
         <intent>
