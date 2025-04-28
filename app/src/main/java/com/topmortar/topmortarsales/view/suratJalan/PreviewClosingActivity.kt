@@ -235,8 +235,17 @@ class PreviewClosingActivity : AppCompatActivity() {
 
         if (!imgUris.isNullOrEmpty()) {
 
-            imgPreview.setImageURI(imgUris[0])
-            imgUri = compressImage(this@PreviewClosingActivity, imgUris[0], 50)
+//            imgPreview.setImageURI(imgUris[0])
+//            imgUri = compressImage(this@PreviewClosingActivity, imgUris[0], 50)
+
+            if (imgUri != null) {
+                try {
+                    imgUri = compressImage(this@PreviewClosingActivity, imgUris[0], 50)
+                    imgPreview.setImageURI(imgUri)
+                } catch (e: Exception) {
+                    handleMessage(this, TAG_RESPONSE_CONTACT, "Gagal menampilkan gambar: ${e.message}")
+                }
+            }
 
             val contentResolver = contentResolver
             val inputStream = contentResolver.openInputStream(imgUri!!)
