@@ -941,15 +941,19 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         var imagePart: MultipartBody.Part? = null
 
         if (iKtp.isNullOrEmpty() && selectedUri != null || !iKtp.isNullOrEmpty() && selectedUri != null) {
-            val imgUri = CompressImageUtil.compressImage(this@DetailContactActivity, selectedUri!!, 50)
+
+            val imgUri = CompressImageUtil.compressImageOptimized(this, selectedUri!!)
+
             val contentResolver = contentResolver
-            val inputStream = contentResolver.openInputStream(imgUri!!)
+            val inputStream = contentResolver.openInputStream(imgUri)
             val byteArray = inputStream?.readBytes()
 
             if (byteArray != null) {
                 val requestFile: RequestBody = RequestBody.create("image/*".toMediaTypeOrNull(), byteArray)
                 imagePart = MultipartBody.Part.createFormData("ktp", "image.jpg", requestFile)
-            } else handleMessage(this, TAG_RESPONSE_CONTACT, "Gambar tidak ditemukan")
+            } else {
+                handleMessage(this, TAG_RESPONSE_CONTACT, "Gambar tidak ditemukan")
+            }
         }
 
         pBirthday = if (pBirthday.isEmpty() || pBirthday == EMPTY_FIELD_VALUE) "0000-00-00"
