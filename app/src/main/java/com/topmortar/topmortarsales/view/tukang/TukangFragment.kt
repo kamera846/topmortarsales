@@ -277,7 +277,10 @@ class TukangFragment : Fragment() {
 
         })
 
-        binding.rvChatList.layoutManager = LinearLayoutManager(requireContext())
+        context?.let { ctx ->
+            binding.rvChatList.layoutManager = LinearLayoutManager(ctx)
+        }
+
         binding.rvChatList.adapter = rvAdapter
         binding.rvChatList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             private var lastScrollPosition = 0

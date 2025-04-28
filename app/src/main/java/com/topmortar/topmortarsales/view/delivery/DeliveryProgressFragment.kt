@@ -216,7 +216,10 @@ class DeliveryProgressFragment : Fragment() {
 
         })
 
-        binding.recyclerview.layoutManager = LinearLayoutManager(requireContext())
+        context?.let { ctx ->
+            binding.recyclerview.layoutManager = LinearLayoutManager(ctx)
+        }
+
         binding.recyclerview.adapter = rvAdapter
         binding.recyclerview.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             private var lastScrollPosition = 0
