@@ -55,6 +55,7 @@ import com.topmortar.topmortarsales.modal.AddVoucherModal
 import com.topmortar.topmortarsales.model.VoucherModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
 
 @SuppressLint("SetTextI18n")
 class VoucherActivity : AppCompatActivity() {
@@ -139,6 +140,9 @@ class VoucherActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@VoucherActivity, "Failed VoucherActivity on getList(). Catch: ${e.message}")
                 handleMessage(this@VoucherActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))

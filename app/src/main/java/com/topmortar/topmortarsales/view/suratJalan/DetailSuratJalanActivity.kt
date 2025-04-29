@@ -119,6 +119,7 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.coroutines.cancellation.CancellationException
 
 @SuppressLint("SetTextI18n")
 class DetailSuratJalanActivity : AppCompatActivity() {
@@ -381,6 +382,9 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@DetailSuratJalanActivity, "Failed DetailSuratJalanActivity on getDetail(). Catch: ${e.message}")
                 handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
@@ -461,6 +465,9 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@DetailSuratJalanActivity, "Failed DetailSuratJalanActivity on getDetailInvoice(). Catch: ${e.message}")
                 handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
@@ -787,6 +794,9 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@DetailSuratJalanActivity, "Failed DetailSuratJalanActivity on executePrinter(). Catch: ${e.message}")
                 handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 printingState(false)
@@ -834,6 +844,9 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
                 } catch (e: Exception) {
 
+                    if (e is CancellationException) {
+                        return@launch
+                    }
                     FirebaseUtils.logErr(this@DetailSuratJalanActivity, "Failed DetailSuratJalanActivity on executeInkPrinter(). Catch: ${e.message}")
                     handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                     printingState(false)

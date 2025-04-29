@@ -35,6 +35,7 @@ import com.topmortar.topmortarsales.model.ModalSearchModel
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * A fragment representing a list of Items.
@@ -206,6 +207,9 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(requireContext(), "Failed UserOnGoingStoreFragment on getContacts(). Catch: ${e.message}")
                 handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
@@ -276,6 +280,9 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(requireContext(), "Failed UserOnGoingStoreFragment on searchContact(). Catch: ${e.message}")
                 handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
@@ -330,6 +337,9 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(requireContext(), "Failed UserOnGoingStoreFragment on getCities(). Catch: ${e.message}")
                 handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(false)

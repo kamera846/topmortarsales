@@ -24,6 +24,7 @@ import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityScannerBinding
 import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
 
 class ScannerActivity : AppCompatActivity() {
 
@@ -123,6 +124,9 @@ class ScannerActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 responseMessage = "Failed run service. Exception " + e.message
 
             } finally {

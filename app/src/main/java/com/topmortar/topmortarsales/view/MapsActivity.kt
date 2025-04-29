@@ -146,6 +146,7 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import kotlin.coroutines.cancellation.CancellationException
 
 @OptIn(DelicateCoroutinesApi::class)
 @SuppressLint("SetTextI18n")
@@ -1475,8 +1476,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@MapsActivity, "Failed MapsActivity on getCities(). Catch: ${e.message}")
-//                handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 progressDialog.dismiss()
 
             }
@@ -1600,6 +1603,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@MapsActivity, "Failed MapsActivity on getListGudang(). Catch: ${e.message}")
                 handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 binding.centerPointTitle.visibility = View.GONE
@@ -2267,6 +2273,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@MapsActivity, "Failed MapsActivity on setupTrackingHistory(). Catch: ${e.message}")
                 progressDialog.dismiss()
                 handleMessage(this@MapsActivity, "setupTrackingHistory",

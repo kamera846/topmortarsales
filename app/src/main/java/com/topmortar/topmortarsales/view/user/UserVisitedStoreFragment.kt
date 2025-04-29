@@ -37,6 +37,7 @@ import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import java.util.Calendar
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * A fragment representing a list of Items.
@@ -158,6 +159,9 @@ class UserVisitedStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
 
 
             } catch (e: Exception) {
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(requireContext(), "Failed UserVisitedStoreFragment on getContacts(). Catch: ${e.message}")
                 handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))

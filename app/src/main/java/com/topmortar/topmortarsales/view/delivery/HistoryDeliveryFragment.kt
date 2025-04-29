@@ -29,6 +29,7 @@ import com.topmortar.topmortarsales.databinding.FragmentHistoryDeliveryBinding
 import com.topmortar.topmortarsales.model.DeliveryModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * A fragment representing a list of Items.
@@ -127,6 +128,9 @@ class HistoryDeliveryFragment : Fragment() {
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(requireContext(), "Failed HistoryDeliveryFragment on getList(). Catch: ${e.message}")
                 handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))

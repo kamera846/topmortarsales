@@ -71,6 +71,7 @@ import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import java.util.Calendar
+import kotlin.coroutines.cancellation.CancellationException
 
 @SuppressLint("SetTextI18n")
 class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalListener {
@@ -313,6 +314,9 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@NewRoomChatFormActivity, "Failed NewRoomChatFormActivity on sendMessage(). Catch: ${e.message}")
                 handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)

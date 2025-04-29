@@ -150,6 +150,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import kotlin.coroutines.cancellation.CancellationException
 
 
 @Suppress("DEPRECATION")
@@ -1134,6 +1135,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on saveEdit(). Catch: ${e.message}")
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
@@ -1201,6 +1205,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getContact(). Catch: ${e.message}")
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
@@ -1308,6 +1315,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getDetailContact(). Catch: ${e.message}")
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
@@ -1695,6 +1705,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getContactSales(). Catch: ${e.message}")
                 handleMessage(this@DetailContactActivity, "CONTACT SALES", "Failed run service. Exception " + e.message)
                 getCities()
@@ -1761,6 +1774,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getCities(). Catch: ${e.message}")
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 getPromo()
@@ -1835,6 +1851,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getPromo(). Catch: ${e.message}")
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
 

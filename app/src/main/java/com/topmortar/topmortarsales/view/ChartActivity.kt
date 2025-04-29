@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.coroutines.cancellation.CancellationException
 
 class ChartActivity : AppCompatActivity() {
 
@@ -128,6 +129,9 @@ class ChartActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@ChartActivity, "Failed ChartActivity on loadBarChartData(). Catch: ${e.message}")
                 handleMessage(this@ChartActivity, "TAG_CHART_ACTIVE", "Failed run service. Exception " + e.message)
 
@@ -285,6 +289,9 @@ class ChartActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@ChartActivity, "Failed ChartActivity on getCities(). Catch: ${e.message}")
                 handleMessage(this@ChartActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
 

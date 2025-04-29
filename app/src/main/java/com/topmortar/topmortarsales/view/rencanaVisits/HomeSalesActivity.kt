@@ -107,6 +107,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.util.Calendar
+import kotlin.coroutines.cancellation.CancellationException
 
 @SuppressLint("SetTextI18n")
 class HomeSalesActivity : AppCompatActivity() {
@@ -193,6 +194,9 @@ class HomeSalesActivity : AppCompatActivity() {
                 )
             }
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
             FirebaseUtils.logErr(this, "Failed HomeSalesActivity on checkLocationPermission(). Catch: ${e.message}")
             handleMessage(
                 this,
@@ -215,6 +219,9 @@ class HomeSalesActivity : AppCompatActivity() {
             if (!isGpsEnabled) showGpsDisabledDialog()
             else checkMockLocation()
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
             FirebaseUtils.logErr(this, "Failed HomeSalesActivity on checkGpsStatus(). Catch: ${e.message}")
             handleMessage(
                 this,
@@ -294,6 +301,9 @@ class HomeSalesActivity : AppCompatActivity() {
                 )
             }
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
             FirebaseUtils.logErr(this, "Failed HomeSalesActivity on checkMockLocation(). Catch: ${e.message}")
             handleMessage(
                 this,
@@ -327,6 +337,9 @@ class HomeSalesActivity : AppCompatActivity() {
                 }
                 .show()
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
             FirebaseUtils.logErr(this, "Failed HomeSalesActivity on showDialogIsMock(). Catch: ${e.message}")
             handleMessage(
                 this,
@@ -354,6 +367,9 @@ class HomeSalesActivity : AppCompatActivity() {
                 }
                 .show()
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
             FirebaseUtils.logErr(this, "Failed HomeSalesActivity on showGpsDisabledDialog(). Catch: ${e.message}")
             handleMessage(
                 this,
@@ -497,6 +513,9 @@ class HomeSalesActivity : AppCompatActivity() {
 //        Disabled FCM
 //        subscribeFcmTopic()
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
             FirebaseUtils.logErr(this, "Failed HomeSalesActivity on initView(). Catch: ${e.message}")
             handleMessage(
                 this,
@@ -524,6 +543,9 @@ class HomeSalesActivity : AppCompatActivity() {
                 Log.d("FCM", "FCM Token: $token")
             }
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
             FirebaseUtils.logErr(this, "Failed HomeSalesActivity on getFcmToken(). Catch: ${e.message}")
             Log.e("FCM", "Error get fcm token exception: $e")
         }
@@ -654,6 +676,9 @@ class HomeSalesActivity : AppCompatActivity() {
 
                 } catch (e: Exception) {
 
+                    if (e is CancellationException) {
+                        return@launch
+                    }
                     FirebaseUtils.logErr(this@HomeSalesActivity, "Failed HomeSalesActivity on navigateToNearestStore(). Catch: ${e.message}")
                     handleMessage(
                         this@HomeSalesActivity,
@@ -764,6 +789,9 @@ class HomeSalesActivity : AppCompatActivity() {
 
 
                 } catch (e: Exception) {
+                    if (e is CancellationException) {
+                        return@launch
+                    }
                     FirebaseUtils.logErr(this@HomeSalesActivity, "Failed HomeSalesActivity on navigateToNearestBasecamp(). Catch: ${e.message}")
                     handleMessage(
                         this@HomeSalesActivity,
@@ -813,6 +841,9 @@ class HomeSalesActivity : AppCompatActivity() {
             userDevice.child("logout_at").setValue(DateFormat.now())
             userDevice.child("login_at").setValue("")
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
             FirebaseUtils.logErr(this, "Failed HomeSalesActivity on logoutHandler(). Catch: ${e.message}")
             Log.d("Firebase Auth", "$e")
         }
@@ -875,6 +906,9 @@ class HomeSalesActivity : AppCompatActivity() {
 
 
             } catch (e: Exception) {
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@HomeSalesActivity, "Failed HomeSalesActivity on getUserLoggedIn(). Catch: ${e.message}")
                 Log.d("TAG USER LOGGED IN", "Failed run service. Exception " + e.message)
             }
@@ -1293,6 +1327,9 @@ class HomeSalesActivity : AppCompatActivity() {
 
             }
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
             FirebaseUtils.logErr(this@HomeSalesActivity, "Failed HomeSalesActivity on checkAbsent(). Catch: ${e.message}")
             lockMenuItem(false)
             handleMessage(
@@ -1431,6 +1468,9 @@ class HomeSalesActivity : AppCompatActivity() {
                 }
 
             } catch (e: Exception) {
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@HomeSalesActivity, "Failed HomeSalesActivity on getListStore(). Catch: ${e.message}")
                 handleMessage(
                     this@HomeSalesActivity,
@@ -1499,6 +1539,9 @@ class HomeSalesActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@HomeSalesActivity, "Failed HomeSalesActivity on getListBasecamp(). Catch: ${e.message}")
                 handleMessage(
                     this@HomeSalesActivity,

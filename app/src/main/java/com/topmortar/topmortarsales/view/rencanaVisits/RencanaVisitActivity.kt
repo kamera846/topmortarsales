@@ -41,6 +41,7 @@ import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
+import kotlin.coroutines.cancellation.CancellationException
 
 class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelectedItemListener {
 
@@ -418,6 +419,9 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@RencanaVisitActivity, "Failed RencanaVisitActivity on getListRenviPerCategory(). Catch: ${e.message}")
                 when (category) {
                     "jatem" -> getListRenviPerCategory("voucher")
