@@ -1,6 +1,7 @@
 package com.topmortar.topmortarsales.view.courier
 
 import android.os.Bundle
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
@@ -19,7 +20,8 @@ class ManageBasecampActivity : AppCompatActivity() {
         binding = ActivityManageBasecampBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.titleBarDark.tvTitleBar.text = "Kelola Basecamp"
+        val titleBarText = "Kelola Basecamp"
+        binding.titleBarDark.tvTitleBar.text = titleBarText
         binding.titleBarDark.icBack.setOnClickListener { finish() }
 
         /*
@@ -36,6 +38,10 @@ class ManageBasecampActivity : AppCompatActivity() {
         /*
         End Call Fragment
          */
+
+        onBackPressedDispatcher.addCallback(this) {
+            finish()
+        }
     }
 
 }
