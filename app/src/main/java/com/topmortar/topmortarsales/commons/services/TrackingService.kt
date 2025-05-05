@@ -3,6 +3,7 @@
 package com.topmortar.topmortarsales.commons.services
 
 import android.Manifest
+import android.app.Notification
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -42,9 +43,15 @@ class TrackingService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val action = intent?.action
+
+        if (action == "STOP_SERVICE") {
+            stopSelf()
+            return START_NOT_STICKY
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService()
+            startForeground(NOTIFICATION_ID, createNotification())
         } else {
             startService(intent)
         }
@@ -59,9 +66,9 @@ class TrackingService : Service() {
         super.onDestroy()
     }
 
-    private fun startForegroundService() {
+    private fun createNotification() : Notification {
         val notificationIntent = Intent(this, SplashScreenActivity::class.java)
-        val notification = CustomNotificationBuilder.with(this)
+        return CustomNotificationBuilder.with(this)
             .setIntent(notificationIntent)
             .setChannelId("topmortar_delivery_notification")
             .setChannelName("Topmortar Absent Notification")
@@ -71,8 +78,6 @@ class TrackingService : Service() {
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setOnGoing(true)
             .build()
-
-        startForeground(NOTIFICATION_ID, notification)
     }
 
     private fun startLocationUpdates(intent: Intent?) {

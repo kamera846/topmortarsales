@@ -1260,7 +1260,11 @@ class HomeSalesActivity : AppCompatActivity() {
                                         userDistributorId ?: "-start-005-$userName"
                                     )
                                     FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Morning date time start service")
-                                    this@HomeSalesActivity.startService(serviceIntentDD)
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                        startForegroundService(serviceIntentDD)
+                                    } else {
+                                        startService(serviceIntentDD)
+                                    }
 
                                     isAbsentMorningNow = true
                                     FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Morning date time available")

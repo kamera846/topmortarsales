@@ -569,7 +569,7 @@ class UserProfileActivity : AppCompatActivity() {
 //        val isTracking = CustomUtility(this).isServiceRunning(TrackingService::class.java)
 //        if (isTracking) {
             val serviceIntent = Intent(this, TrackingService::class.java)
-            this.stopService(serviceIntent)
+            stopService(serviceIntent)
 //        }
 
         Handler(Looper.getMainLooper()).postDelayed({

@@ -360,7 +360,7 @@ class SplashScreenActivity : AppCompatActivity() {
         sessionManager.setUserLoggedIn(null)
 
         val serviceIntent = Intent(this, TrackingService::class.java)
-        this.stopService(serviceIntent)
+        stopService(serviceIntent)
 
         rlModal.visibility = View.VISIBLE
     }

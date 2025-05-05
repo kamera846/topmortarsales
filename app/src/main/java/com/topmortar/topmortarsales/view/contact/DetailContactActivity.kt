@@ -2572,7 +2572,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             serviceIntent.putExtra("userId", userID)
             serviceIntent.putExtra("userDistributorId", userDistributorIds ?: "-start-002-$username")
             if (userKind == USER_KIND_COURIER) serviceIntent.putExtra("deliveryId", deliveryId)
-            this@DetailContactActivity.startService(serviceIntent)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(serviceIntent)
+            } else {
+                startService(serviceIntent)
+            }
 //        }
     }
 

@@ -568,8 +568,13 @@ class HomeCourierActivity : AppCompatActivity() {
                                         "userDistributorId",
                                         userDistributorId ?: "-start-005-$userName"
                                     )
+
                                     FirebaseUtils.firebaseLogging(this@HomeCourierActivity, "Absent", "Morning date time start service")
-                                    this@HomeCourierActivity.startService(serviceIntentDD)
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                        startForegroundService(serviceIntentDD)
+                                    } else {
+                                        startService(serviceIntentDD)
+                                    }
 
                                     isAbsentMorningNow = true
                                     FirebaseUtils.firebaseLogging(this@HomeCourierActivity, "Absent", "Morning date time available")

@@ -291,7 +291,11 @@ class CourierActivity : AppCompatActivity() {
         serviceIntent.putExtra("userId", userId)
         serviceIntent.putExtra("userDistributorId", userDistributorIds ?: "-start-003-$username")
         serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
-        this.startService(serviceIntent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
 
         initLayout()
     }
