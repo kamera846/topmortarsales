@@ -3,6 +3,7 @@ package com.topmortar.topmortarsales.view.courier
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.net.Uri
@@ -281,7 +282,9 @@ class ClosingStoreFragment : Fragment() {
 
         val rvAdapter = ContactsRecyclerViewAdapter(listItem, object: ContactsRecyclerViewAdapter.ItemClickListener {
             override fun onItemClick(data: ContactModel?) {
-                navigateDetailContact(data)
+                context?.let {
+                    navigateDetailContact(it)
+                }
             }
 
         })
@@ -314,9 +317,9 @@ class ClosingStoreFragment : Fragment() {
 
     }
 
-    private fun navigateDetailContact(data: ContactModel? = null) {
+    private fun navigateDetailContact(mContext: Context, data: ContactModel? = null) {
 
-        val intent = Intent(requireContext(), DetailContactActivity::class.java)
+        val intent = Intent(mContext, DetailContactActivity::class.java)
 
         if (data != null) {
             intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)

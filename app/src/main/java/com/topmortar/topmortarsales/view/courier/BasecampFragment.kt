@@ -1,6 +1,7 @@
 package com.topmortar.topmortarsales.view.courier
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
@@ -158,7 +159,9 @@ class BasecampFragment : Fragment() {
 
         val rvAdapter = BaseCampRecyclerViewAdapter(listItem, object: BaseCampRecyclerViewAdapter.ItemClickListener {
             override fun onItemClick(data: BaseCampModel?) {
-                navigateItemAction(data)
+                context?.let {
+                    navigateItemAction(it, data)
+                }
             }
 
         })
@@ -191,11 +194,11 @@ class BasecampFragment : Fragment() {
 
     }
 
-    private fun navigateItemAction(data: BaseCampModel? = null) {
+    private fun navigateItemAction(mContext: Context, data: BaseCampModel? = null) {
 
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
 
-            val intent = Intent(requireContext(), AddBaseCampActivity::class.java)
+            val intent = Intent(mContext, AddBaseCampActivity::class.java)
             intent.putExtra(EDIT_CONTACT, true)
             intent.putExtra(CONST_CONTACT_ID, data?.id_gudang)
             intent.putExtra(CONST_PHONE, data?.nomorhp_gudang)
@@ -205,12 +208,12 @@ class BasecampFragment : Fragment() {
             someActivityResultLauncher.launch(intent)
         } else {
 
-            val intent = Intent(requireContext(), NewReportActivity::class.java)
+            val intent = Intent(mContext, NewReportActivity::class.java)
             intent.putExtra(CONST_IS_BASE_CAMP, true)
             intent.putExtra(CONST_CONTACT_ID, data?.id_gudang)
             intent.putExtra(CONST_NAME, data?.nama_gudang)
             intent.putExtra(CONST_MAPS, data?.location_gudang)
-            (requireContext() as Activity).startActivity(intent)
+            (mContext as Activity).startActivity(intent)
         }
 
     }

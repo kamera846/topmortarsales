@@ -272,7 +272,9 @@ class TukangFragment : Fragment() {
 
         val rvAdapter = TukangRecyclerViewAdapter(listItem, object: TukangRecyclerViewAdapter.ItemClickListener {
             override fun onItemClick(data: TukangModel?) {
-                navigateDetailContact(data)
+                context?.let {
+                    navigateDetailContact(it, data)
+                }
             }
 
         })
@@ -305,9 +307,9 @@ class TukangFragment : Fragment() {
 
     }
 
-    private fun navigateDetailContact(data: TukangModel? = null) {
+    private fun navigateDetailContact(mContext: Context, data: TukangModel? = null) {
 
-        val intent = Intent(requireContext(), DetailTukangActivity::class.java)
+        val intent = Intent(mContext, DetailTukangActivity::class.java)
 
         if (data != null) {
             intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)

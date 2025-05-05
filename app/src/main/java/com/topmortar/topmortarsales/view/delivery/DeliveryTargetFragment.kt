@@ -229,11 +229,13 @@ class DeliveryTargetFragment : Fragment() {
         val rvAdapter = SuratJalanNotClosingRecyclerViewAdapter(listItem, object: SuratJalanNotClosingRecyclerViewAdapter.ItemClickListener {
             override fun onItemClick(data: SuratJalanNotClosingModel?) {
                 if (data != null && data.dateProcessed.isNotEmpty()) {
-                    val intent = Intent(requireContext(), MapsActivity::class.java)
-                    intent.putExtra(CONST_IS_TRACKING, true)
-                    intent.putExtra(CONST_DELIVERY_ID, data.deliveryId)
-                    intent.putExtra(CONST_CONTACT_ID, data.id_contact)
-                    startActivity(intent)
+                    context?.let {
+                        val intent = Intent(it, MapsActivity::class.java)
+                        intent.putExtra(CONST_IS_TRACKING, true)
+                        intent.putExtra(CONST_DELIVERY_ID, data.deliveryId)
+                        intent.putExtra(CONST_CONTACT_ID, data.id_contact)
+                        startActivity(intent)
+                    }
                 }
             }
 
