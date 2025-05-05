@@ -283,7 +283,7 @@ class ClosingStoreFragment : Fragment() {
         val rvAdapter = ContactsRecyclerViewAdapter(listItem, object: ContactsRecyclerViewAdapter.ItemClickListener {
             override fun onItemClick(data: ContactModel?) {
                 context?.let {
-                    navigateDetailContact(it)
+                    navigateDetailContact(it, data)
                 }
             }
 
