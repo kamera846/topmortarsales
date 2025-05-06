@@ -84,6 +84,7 @@ import com.topmortar.topmortarsales.view.tukang.BrandAmbassadorActivity
 import kotlinx.coroutines.launch
 import java.util.Locale
 import java.util.UUID
+import kotlin.coroutines.cancellation.CancellationException
 
 @SuppressLint("CustomSplashScreen", "SetTextI18n")
 class SplashScreenActivity : AppCompatActivity() {
@@ -359,7 +360,7 @@ class SplashScreenActivity : AppCompatActivity() {
         sessionManager.setUserLoggedIn(null)
 
         val serviceIntent = Intent(this, TrackingService::class.java)
-        this.stopService(serviceIntent)
+        stopService(serviceIntent)
 
         rlModal.visibility = View.VISIBLE
     }
@@ -520,6 +521,9 @@ class SplashScreenActivity : AppCompatActivity() {
                             absentChild.child(data.id_user).child(FIREBASE_CHILD_IS_ALLOWED_LOGOUT).setValue(false)
 
                         } catch (e: Exception) {
+                            if (e is CancellationException) {
+                                return@launch
+                            }
                             FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on loginHandler(). Catch: ${e.message}")
                             Log.e("Firebase Auth", "$e")
                         }
@@ -627,6 +631,9 @@ class SplashScreenActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on requestOtpHandler(). Catch: ${e.message}")
                 handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
@@ -703,6 +710,9 @@ class SplashScreenActivity : AppCompatActivity() {
                 }
 
             } catch (e: Exception) {
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on verifyOtpHandler(). Catch: ${e.message}")
                 handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
@@ -779,6 +789,9 @@ class SplashScreenActivity : AppCompatActivity() {
                 }
 
             } catch (e: Exception) {
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on resetPasswordHandler(). Catch: ${e.message}")
                 handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
@@ -1038,6 +1051,9 @@ class SplashScreenActivity : AppCompatActivity() {
                                 userDevice.child("logout_at").setValue(DateFormat.now())
                                 userDevice.child("login_at").setValue("")
                             } catch (e: Exception) {
+                                if (e is CancellationException) {
+                                    return@launch
+                                }
                                 FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on getUserLoggedIn(). Catch: ${e.message}")
                                 Log.d("Firebase Auth", "$e")
                             }
@@ -1114,6 +1130,9 @@ class SplashScreenActivity : AppCompatActivity() {
 
                                 })
                             } catch (e: Exception) {
+                                if (e is CancellationException) {
+                                    return@launch
+                                }
                                 FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on getUserLoggedIn(). Catch: ${e.message}")
                                 Log.e("Firebase Auth", "$e")
                             }
@@ -1153,6 +1172,9 @@ class SplashScreenActivity : AppCompatActivity() {
                 }
 
             } catch (e: Exception) {
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on getUserLoggedIn(). Catch: ${e.message}")
                 showCardLogin()
             }

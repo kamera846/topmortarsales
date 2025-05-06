@@ -54,6 +54,7 @@ import com.topmortar.topmortarsales.model.SuratJalanModel
 import com.topmortar.topmortarsales.response.ResponseInvoice
 import com.topmortar.topmortarsales.view.invoice.DetailInvoiceActivity
 import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
 
 @Suppress("DEPRECATION")
 @SuppressLint("SetTextI18n")
@@ -213,6 +214,9 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@ListSuratJalanActivity, "Failed ListSuratJalanActivity on getList(). Catch: ${e.message}")
                 handleMessage(this@ListSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
@@ -272,6 +276,9 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@ListSuratJalanActivity, "Failed ListSuratJalanActivity on getListInvoice(). Catch: ${e.message}")
                 handleMessage(this@ListSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))

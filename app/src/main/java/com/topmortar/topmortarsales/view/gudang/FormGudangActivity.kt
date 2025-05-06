@@ -52,6 +52,7 @@ import com.topmortar.topmortarsales.model.CityModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
 
 @SuppressLint("SetTextI18n")
 class FormGudangActivity : AppCompatActivity() {
@@ -287,6 +288,9 @@ class FormGudangActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@FormGudangActivity, "Failed FormGudangActivity on submitForm(). Catch: ${e.message}")
                 handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState.dismiss()
@@ -368,6 +372,9 @@ class FormGudangActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@FormGudangActivity, "Failed FormGudangActivity on getCities(). Catch: ${e.message}")
                 handleMessage(this@FormGudangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
 

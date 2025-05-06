@@ -59,6 +59,7 @@ import com.topmortar.topmortarsales.model.RencanaVisitModel
 import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * A fragment representing a list of Items.
@@ -189,6 +190,9 @@ class VoucherRenViFragment : Fragment() {
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 listItem = arrayListOf()
                 setRecyclerView(listItem)
                 handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
@@ -350,6 +354,9 @@ class VoucherRenViFragment : Fragment() {
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
 
             } finally {

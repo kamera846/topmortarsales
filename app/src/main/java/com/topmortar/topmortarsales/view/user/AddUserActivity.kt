@@ -58,6 +58,7 @@ import com.topmortar.topmortarsales.model.CityModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import kotlinx.coroutines.launch
 import java.util.Locale
+import kotlin.coroutines.cancellation.CancellationException
 
 @SuppressLint("SetTextI18n")
 class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
@@ -225,6 +226,9 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
                 onSubmit = false

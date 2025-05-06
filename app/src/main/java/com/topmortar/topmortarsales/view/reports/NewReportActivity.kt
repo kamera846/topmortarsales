@@ -13,6 +13,7 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -161,7 +162,11 @@ class NewReportActivity : AppCompatActivity() {
                 serviceIntent.putExtra("userId", userId)
                 serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-001-$username")
                 if (userKind == USER_KIND_COURIER) serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
-                startService(serviceIntent)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(serviceIntent)
+                } else {
+                    startService(serviceIntent)
+                }
 //            }
             initContent()
         }

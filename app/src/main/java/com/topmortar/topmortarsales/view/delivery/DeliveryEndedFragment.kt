@@ -156,15 +156,20 @@ class DeliveryEndedFragment : Fragment() {
 
         val rvAdapter = HistoryDeliveryRecyclerViewAdapter(listItem, object: HistoryDeliveryRecyclerViewAdapter.ItemClickListener {
             override fun onItemClick(data: DeliveryModel.History?) {
-                val intent = Intent(requireContext(), MapsActivity::class.java)
-                intent.putExtra(CONST_IS_TRACKING_HISTORY, true)
-                intent.putExtra(CONST_DELIVERY_ID, data?.id_delivery)
-                startActivity(intent)
+                context?.let {
+                    val intent = Intent(it, MapsActivity::class.java)
+                    intent.putExtra(CONST_IS_TRACKING_HISTORY, true)
+                    intent.putExtra(CONST_DELIVERY_ID, data?.id_delivery)
+                    startActivity(intent)
+                }
             }
 
         })
 
-        binding.rvChatList.layoutManager = LinearLayoutManager(requireContext())
+        context?.let { ctx ->
+            binding.rvChatList.layoutManager = LinearLayoutManager(ctx)
+        }
+
         binding.rvChatList.adapter = rvAdapter
         binding.rvChatList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             private var lastScrollPosition = 0

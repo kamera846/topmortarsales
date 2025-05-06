@@ -1,6 +1,7 @@
 package com.topmortar.topmortarsales.view.courier
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
@@ -48,6 +49,7 @@ import com.topmortar.topmortarsales.view.reports.NewReportActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * A fragment representing a list of Items.
@@ -140,6 +142,9 @@ class BasecampFragment : Fragment() {
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
@@ -154,12 +159,17 @@ class BasecampFragment : Fragment() {
 
         val rvAdapter = BaseCampRecyclerViewAdapter(listItem, object: BaseCampRecyclerViewAdapter.ItemClickListener {
             override fun onItemClick(data: BaseCampModel?) {
-                navigateItemAction(data)
+                context?.let {
+                    navigateItemAction(it, data)
+                }
             }
 
         })
 
-        binding.rvChatList.layoutManager = LinearLayoutManager(requireContext())
+        context?.let { ctx ->
+            binding.rvChatList.layoutManager = LinearLayoutManager(ctx)
+        }
+
         binding.rvChatList.adapter = rvAdapter
         binding.rvChatList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             private var lastScrollPosition = 0
@@ -184,11 +194,11 @@ class BasecampFragment : Fragment() {
 
     }
 
-    private fun navigateItemAction(data: BaseCampModel? = null) {
+    private fun navigateItemAction(mContext: Context, data: BaseCampModel? = null) {
 
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
 
-            val intent = Intent(requireContext(), AddBaseCampActivity::class.java)
+            val intent = Intent(mContext, AddBaseCampActivity::class.java)
             intent.putExtra(EDIT_CONTACT, true)
             intent.putExtra(CONST_CONTACT_ID, data?.id_gudang)
             intent.putExtra(CONST_PHONE, data?.nomorhp_gudang)
@@ -198,12 +208,12 @@ class BasecampFragment : Fragment() {
             someActivityResultLauncher.launch(intent)
         } else {
 
-            val intent = Intent(requireContext(), NewReportActivity::class.java)
+            val intent = Intent(mContext, NewReportActivity::class.java)
             intent.putExtra(CONST_IS_BASE_CAMP, true)
             intent.putExtra(CONST_CONTACT_ID, data?.id_gudang)
             intent.putExtra(CONST_NAME, data?.nama_gudang)
             intent.putExtra(CONST_MAPS, data?.location_gudang)
-            (requireContext() as Activity).startActivity(intent)
+            (mContext as Activity).startActivity(intent)
         }
 
     }
@@ -321,6 +331,9 @@ class BasecampFragment : Fragment() {
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)

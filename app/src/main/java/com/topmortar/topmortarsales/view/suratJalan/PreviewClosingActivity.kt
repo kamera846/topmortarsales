@@ -41,10 +41,11 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_SUCCESS
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
-import com.topmortar.topmortarsales.commons.utils.CompressImageUtil.compressImage
+import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
+import com.topmortar.topmortarsales.commons.utils.GlideUtil
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -70,7 +71,7 @@ class PreviewClosingActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private val userID get() = sessionManager.userID()
     private val userDistributorId get() = sessionManager.userDistributor()
-    private var imgUri: Uri? = null
+    private lateinit var imgUri: Uri
 
     private var isLoading: Boolean = false
     private var isCod: Boolean = false
@@ -235,18 +236,27 @@ class PreviewClosingActivity : AppCompatActivity() {
 
         if (!imgUris.isNullOrEmpty()) {
 
-            imgPreview.setImageURI(imgUris[0])
-            imgUri = compressImage(this@PreviewClosingActivity, imgUris[0], 50)
+            imgUri = CompressImageUtil.compressImageOptimized(this@PreviewClosingActivity, imgUris[0])
+            GlideUtil.loadImage(this@PreviewClosingActivity, imgUri, imgPreview)
 
             val contentResolver = contentResolver
-            val inputStream = contentResolver.openInputStream(imgUri!!)
+            val inputStream = contentResolver.openInputStream(imgUri)
             val byteArray = inputStream?.readBytes()
 
             if (byteArray != null) {
                 val requestFile: RequestBody =
                     RequestBody.create("image/*".toMediaTypeOrNull(), byteArray)
                 imagePart = MultipartBody.Part.createFormData("pic", "image.jpg", requestFile)
-            } else handleMessage(this, TAG_RESPONSE_CONTACT, "Gambar tidak ditemukan")
+                bottomAction.visibility = View.VISIBLE
+            } else {
+                bottomAction.visibility = View.GONE
+                handleMessage(this, TAG_RESPONSE_CONTACT, "Gagal memproses gambar")
+            }
+
+        } else {
+
+            bottomAction.visibility = View.GONE
+            handleMessage(this, TAG_RESPONSE_CONTACT, "Gambar tidak ditemukan")
 
         }
 

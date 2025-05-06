@@ -27,7 +27,6 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:adjustViewBounds="true"
-                android:scaleType="centerInside"
                 android:src="@drawable/logo_retina" />
 
         </RelativeLayout>

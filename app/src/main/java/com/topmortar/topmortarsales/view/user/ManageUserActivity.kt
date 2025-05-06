@@ -55,6 +55,7 @@ import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityManageUserBinding
 import com.topmortar.topmortarsales.model.UserModel
 import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
 
 @SuppressLint("SetTextI18n")
 @Suppress("DEPRECATION")
@@ -187,6 +188,9 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 handleMessage(this@ManageUserActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
 

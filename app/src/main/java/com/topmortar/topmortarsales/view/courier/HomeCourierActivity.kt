@@ -84,6 +84,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.util.Calendar
+import kotlin.coroutines.cancellation.CancellationException
 
 @SuppressLint("SetTextI18n")
 class HomeCourierActivity : AppCompatActivity() {
@@ -200,6 +201,9 @@ class HomeCourierActivity : AppCompatActivity() {
                 )
             }
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
             FirebaseUtils.logErr(this, "Failed HomeCourierActivity on checkLocationPermission(). Catch: ${e.message}")
             handleMessage(
                 this,
@@ -225,6 +229,9 @@ class HomeCourierActivity : AppCompatActivity() {
                 checkMockLocation()
             }
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
             FirebaseUtils.logErr(this, "Failed HomeCourierActivity on checkGpsStatus(). Catch: ${e.message}")
             handleMessage(
                 this,
@@ -304,6 +311,9 @@ class HomeCourierActivity : AppCompatActivity() {
                 )
             }
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
             FirebaseUtils.logErr(this, "Failed HomeCourierActivity on checkMockLocation(). Catch: ${e.message}")
             handleMessage(
                 this,
@@ -337,6 +347,9 @@ class HomeCourierActivity : AppCompatActivity() {
                 }
                 .show()
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
             FirebaseUtils.logErr(this, "Failed HomeCourierActivity on showDialogIsMock(). Catch: ${e.message}")
             handleMessage(
                 this,
@@ -360,6 +373,9 @@ class HomeCourierActivity : AppCompatActivity() {
                 }
                 .show()
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
             FirebaseUtils.logErr(this, "Failed HomeCourierActivity on showGpsDisabledDialog(). Catch: ${e.message}")
             handleMessage(
                 this,
@@ -478,6 +494,9 @@ class HomeCourierActivity : AppCompatActivity() {
             checkAbsent()
 
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
             FirebaseUtils.logErr(this, "Failed HomeCourierActivity on initView(). Catch: ${e.message}")
             handleMessage(
                 this,
@@ -549,8 +568,13 @@ class HomeCourierActivity : AppCompatActivity() {
                                         "userDistributorId",
                                         userDistributorId ?: "-start-005-$userName"
                                     )
+
                                     FirebaseUtils.firebaseLogging(this@HomeCourierActivity, "Absent", "Morning date time start service")
-                                    this@HomeCourierActivity.startService(serviceIntentDD)
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                        startForegroundService(serviceIntentDD)
+                                    } else {
+                                        startService(serviceIntentDD)
+                                    }
 
                                     isAbsentMorningNow = true
                                     FirebaseUtils.firebaseLogging(this@HomeCourierActivity, "Absent", "Morning date time available")
@@ -617,6 +641,9 @@ class HomeCourierActivity : AppCompatActivity() {
 
             }
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
             FirebaseUtils.logErr(this, "Failed HomeCourierActivity on checkAbsent(). Catch: ${e.message}")
             lockMenuItem(false)
             handleMessage(
@@ -827,6 +854,9 @@ class HomeCourierActivity : AppCompatActivity() {
             }
 
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
             FirebaseUtils.logErr(this, "Failed HomeCourierActivity on lockMenuItem(). Catch: ${e.message}")
             handleMessage(
                 this,
@@ -935,6 +965,9 @@ class HomeCourierActivity : AppCompatActivity() {
 
 
                 } catch (e: Exception) {
+                    if (e is CancellationException) {
+                        return@launch
+                    }
                     FirebaseUtils.logErr(this@HomeCourierActivity, "Failed HomeCourierActivity on navigateToNearestStore(). Catch: ${e.message}")
                     handleMessage(
                         this@HomeCourierActivity,
@@ -1053,6 +1086,9 @@ class HomeCourierActivity : AppCompatActivity() {
 
 
                 } catch (e: Exception) {
+                    if (e is CancellationException) {
+                        return@launch
+                    }
                     FirebaseUtils.logErr(this@HomeCourierActivity, "Failed HomeCourierActivity on navigateToNearestBasecamp(). Catch: ${e.message}")
                     handleMessage(
                         this@HomeCourierActivity,
@@ -1195,6 +1231,9 @@ class HomeCourierActivity : AppCompatActivity() {
                 }
 
             } catch (e: Exception) {
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@HomeCourierActivity, "Failed HomeCourierActivity on getListBasecamp(). Catch: ${e.message}")
                 handleMessage(
                     this@HomeCourierActivity,
@@ -1326,6 +1365,9 @@ class HomeCourierActivity : AppCompatActivity() {
                 }
 
             } catch (e: Exception) {
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@HomeCourierActivity, "Failed HomeCourierActivity on executeAbsentReport(). Catch: ${e.message}")
                 handleMessage(
                     this@HomeCourierActivity,
@@ -1526,6 +1568,9 @@ class HomeCourierActivity : AppCompatActivity() {
                 }
 
             } catch (e: Exception) {
+                if (e is CancellationException) {
+                    return@launch
+                }
                 dismissProgressDialog()
                 FirebaseUtils.logErr(this@HomeCourierActivity, "Failed HomeCourierActivity on getUserLoggedIn(). Catch: ${e.message}")
                 handleMessage(
@@ -1557,6 +1602,9 @@ class HomeCourierActivity : AppCompatActivity() {
             userDevice.child("logout_at").setValue(DateFormat.now())
             userDevice.child("login_at").setValue("")
         } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
             dismissProgressDialog()
             FirebaseUtils.logErr(this@HomeCourierActivity, "Failed HomeCourierActivity on logoutHandler(). Catch: ${e.message}")
             handleMessage(

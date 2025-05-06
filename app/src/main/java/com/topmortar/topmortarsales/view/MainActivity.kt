@@ -118,8 +118,10 @@ import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
 import com.topmortar.topmortarsales.view.tukang.ListTukangActivity
 import com.topmortar.topmortarsales.view.user.ManageUserActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.util.Locale
+import kotlin.coroutines.cancellation.CancellationException
 
 @SuppressLint("SetTextI18n")
 class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
@@ -598,6 +600,9 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
 
                 } catch (e: Exception) {
+                    if (e is CancellationException) {
+                        return@launch
+                    }
                     FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on navigateCheckLocation(). Catch: ${e.message}")
                     handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                     progressDialog.dismiss()
@@ -933,6 +938,9 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
 
             } catch (e: Exception) {
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on getContacts(). Catch: ${e.message}")
                 handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
@@ -975,6 +983,9 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 }
 
             } catch (e: Exception) {
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on getContactsForMaps(). Catch: ${e.message}")
                 handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
             } finally {
@@ -1024,6 +1035,9 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on getCities(). Catch: ${e.message}")
                 handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
 
@@ -1108,6 +1122,9 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 }
 
             } catch (e: Exception) {
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on getUserLoggedIn(). Catch: ${e.message}")
                 Log.d("TAG USER LOGGED IN", "Failed run service. Exception " + e.message)
             }
@@ -1183,6 +1200,9 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on searchContact(). Catch: ${e.message}")
                 handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
@@ -1280,23 +1300,28 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
     private fun logoutHandler() {
 
         // Firebase Auth Session
-        try {
-            val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-            val model = Build.MODEL
-            val manufacturer = Build.MANUFACTURER
+        lifecycleScope.launch {
+            try {
+                val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+                val model = Build.MODEL
+                val manufacturer = Build.MANUFACTURER
 
-            val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
-            val userChild = authChild.child(sessionManager.userName() + sessionManager.userID())
-            val userDevices = userChild.child("devices")
-            var userDeviceText = "$manufacturer$model$androidId"
-            userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
-            val userDevice = userDevices.child(userDeviceText)
+                val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
+                val userChild = authChild.child(sessionManager.userName() + sessionManager.userID())
+                val userDevices = userChild.child("devices")
+                var userDeviceText = "$manufacturer$model$androidId"
+                userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
+                val userDevice = userDevices.child(userDeviceText)
 
-            userDevice.child("logout_at").setValue(DateFormat.now())
-            userDevice.child("login_at").setValue("")
-        } catch (e: Exception) {
-            FirebaseUtils.logErr(this, "Failed MainActivity on logoutHandler(). Catch: ${e.message}")
-            Log.d("Firebase Auth", "$e")
+                userDevice.child("logout_at").setValue(DateFormat.now())
+                userDevice.child("login_at").setValue("")
+            } catch (e: Exception) {
+                if (e is CancellationException) {
+                    return@launch
+                }
+                FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on logoutHandler(). Catch: ${e.message}")
+                Log.d("Firebase Auth", "$e")
+            }
         }
 
         sessionManager.setLoggedIn(LOGGED_OUT)

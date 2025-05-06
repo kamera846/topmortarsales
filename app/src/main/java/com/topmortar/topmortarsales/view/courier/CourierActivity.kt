@@ -48,6 +48,7 @@ import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityCourierBinding
 import com.topmortar.topmortarsales.view.SplashScreenActivity
 import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
 
 @SuppressLint("SetTextI18n")
 class CourierActivity : AppCompatActivity() {
@@ -117,23 +118,28 @@ class CourierActivity : AppCompatActivity() {
     private fun logoutHandler() {
 
         // Firebase Auth Session
-        try {
-            val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
-            val model = Build.MODEL
-            val manufacturer = Build.MANUFACTURER
+        lifecycleScope.launch {
+            try {
+                val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+                val model = Build.MODEL
+                val manufacturer = Build.MANUFACTURER
 
-            val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
-            val userChild = authChild.child(sessionManager.userName() + sessionManager.userID())
-            val userDevices = userChild.child("devices")
-            var userDeviceText = "$manufacturer$model$androidId"
-            userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
-            val userDevice = userDevices.child(userDeviceText)
+                val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
+                val userChild = authChild.child(sessionManager.userName() + sessionManager.userID())
+                val userDevices = userChild.child("devices")
+                var userDeviceText = "$manufacturer$model$androidId"
+                userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
+                val userDevice = userDevices.child(userDeviceText)
 
-            userDevice.child("logout_at").setValue(DateFormat.now())
-            userDevice.child("login_at").setValue("")
-        } catch (e: Exception) {
-            FirebaseUtils.logErr(this, "Failed CourierActivity on logoutHandler(). Catch: ${e.message}")
-            Log.d("Firebase Auth", "$e")
+                userDevice.child("logout_at").setValue(DateFormat.now())
+                userDevice.child("login_at").setValue("")
+            } catch (e: Exception) {
+                if (e is CancellationException) {
+                    return@launch
+                }
+                FirebaseUtils.logErr(this@CourierActivity, "Failed CourierActivity on logoutHandler(). Catch: ${e.message}")
+                Log.d("Firebase Auth", "$e")
+            }
         }
 
         sessionManager.setLoggedIn(LOGGED_OUT)
@@ -170,6 +176,9 @@ class CourierActivity : AppCompatActivity() {
 
 
             } catch (e: Exception) {
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@CourierActivity, "Failed CourierActivity on getUserLoggedIn(). Catch: ${e.message}")
                 Log.d("TAG USER LOGGED IN", "Failed run service. Exception " + e.message)
             }
@@ -282,7 +291,11 @@ class CourierActivity : AppCompatActivity() {
         serviceIntent.putExtra("userId", userId)
         serviceIntent.putExtra("userDistributorId", userDistributorIds ?: "-start-003-$username")
         serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
-        this.startService(serviceIntent)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
 
         initLayout()
     }

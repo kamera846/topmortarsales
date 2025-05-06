@@ -146,6 +146,7 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import kotlin.coroutines.cancellation.CancellationException
 
 @OptIn(DelicateCoroutinesApi::class)
 @SuppressLint("SetTextI18n")
@@ -237,6 +238,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var listGudang: ArrayList<GudangModel> = arrayListOf()
     private var selectedCenterPoint: ModalSearchModel? = null
     private lateinit var searchModal: SearchModal
+
+    private val bitmapCache = mutableMapOf<Int, Bitmap>()
 
     companion object {
         const val ALL_USER_TRACKING_REQUEST = 123
@@ -632,17 +635,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     LatLng(latitude!!, longitude!!)
                 } else currentLatLng
 
-                val originalBitmap = BitmapFactory.decodeResource(resources, R.drawable.gudang_11zon)
-
                 val newWidth = convertDpToPx(50, this@MapsActivity)
                 val newHeight = convertDpToPx(50, this@MapsActivity)
-
-                val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
 
                 val markerOptions = MarkerOptions()
                     .position(centerPointLatLng!!)
                     .title(selectedCenterPoint?.title!!)
-                    .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
+                    .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap(R.drawable.gudang_11zon, newWidth, newHeight)))
 
                 mMap.addMarker(markerOptions)
             }
@@ -876,18 +875,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                     else -> locationBlacklistDrawable
                                 }
 
-                                val originalBitmap = BitmapFactory.decodeResource(resources, iconDrawable)
-
                                 val newWidth = convertDpToPx(40, this@MapsActivity)
                                 val newHeight = convertDpToPx(40, this@MapsActivity)
-
-                                val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
 
                                 selectedLocation = latLng
                                 val markerOptions = MarkerOptions()
                                     .position(latLng)
                                     .title(listCoordinateName?.get(i))
-                                    .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
+                                    .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap(iconDrawable, newWidth, newHeight)))
 
                                 val onlyStatus = selectedStatusID != "-1" && selectedCitiesID == null && listCoordinateStatus!![i] == selectedStatusID.lowercase(Locale.getDefault())
                                 val onlyCities = selectedCitiesID != null && selectedStatusID == "-1" && listCoordinateCityID!![i] == selectedCitiesID?.id_city
@@ -1226,13 +1221,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     private fun setPin(latLng: LatLng, placeName: String, moveCamera: Boolean = true) {
 
-        val iconDrawable = locationBlacklistDrawable
-        val originalBitmap = BitmapFactory.decodeResource(resources, iconDrawable)
-
         val newWidth = convertDpToPx(40, this)
         val newHeight = convertDpToPx(40, this)
-
-        val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
 
         selectedLocation = latLng
         mMap.clear()
@@ -1240,7 +1230,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             MarkerOptions()
                 .position(latLng)
                 .title(placeName)
-                .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
+                .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap(locationBlacklistDrawable, newWidth, newHeight)))
         )
 
         if (moveCamera) {
@@ -1475,8 +1465,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@MapsActivity, "Failed MapsActivity on getCities(). Catch: ${e.message}")
-//                handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 progressDialog.dismiss()
 
             }
@@ -1600,6 +1592,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@MapsActivity, "Failed MapsActivity on getListGudang(). Catch: ${e.message}")
                 handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 binding.centerPointTitle.visibility = View.GONE
@@ -2267,6 +2262,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@MapsActivity, "Failed MapsActivity on setupTrackingHistory(). Catch: ${e.message}")
                 progressDialog.dismiss()
                 handleMessage(this@MapsActivity, "setupTrackingHistory",
@@ -2278,14 +2276,51 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     }
 
-    private fun resizedBitmap(drawable: Int): Bitmap {
+    private fun resizedBitmap(drawable: Int, targetWidth: Int = convertDpToPx(60, this@MapsActivity), targetHeight: Int = convertDpToPx(60, this@MapsActivity)): Bitmap {
+        // Check if the bitmap is already cached
+        bitmapCache[drawable]?.let { return it }
 
-        val originalBitmap = BitmapFactory.decodeResource(resources, drawable)
+        val options = BitmapFactory.Options().apply {
+            inJustDecodeBounds = true
+        }
+        BitmapFactory.decodeResource(resources, drawable, options)
 
-        val newWidth = convertDpToPx(60, this@MapsActivity)
-        val newHeight = convertDpToPx(60, this@MapsActivity)
+        options.inSampleSize = calculateInSampleSize(options, targetWidth, targetHeight)
+        options.inJustDecodeBounds = false
 
-        return Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
+        val originalBitmap = BitmapFactory.decodeResource(resources, drawable, options)
+        val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, targetWidth, targetHeight, false)
+
+        // Recycle the original bitmap
+        originalBitmap.recycle()
+
+        // Cache the scaled bitmap
+        bitmapCache[drawable] = scaledBitmap
+        return scaledBitmap
+    }
+
+    private fun calculateInSampleSize(
+        options: BitmapFactory.Options,
+        reqWidth: Int,
+        reqHeight: Int
+    ): Int {
+        // Raw height and width of image
+        val (height: Int, width: Int) = options.run { outHeight to outWidth }
+        var inSampleSize = 1
+
+        if (height > reqHeight || width > reqWidth) {
+
+            val halfHeight: Int = height / 2
+            val halfWidth: Int = width / 2
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
+                inSampleSize *= 2
+            }
+        }
+
+        return inSampleSize
     }
 
     private fun changeFocusCamera(latLng: LatLng, zoom: Float? = null) {
@@ -2375,5 +2410,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         if (locationListener != null) childDriver?.removeEventListener(locationListener!!)
         if (locationCallback != null) fusedLocationClient.removeLocationUpdates(locationCallback!!)
         if (courierTrackingListener != null) childCourier?.removeEventListener(courierTrackingListener!!)
+
+        clearBitmapCache()
+    }
+
+    private fun clearBitmapCache() {
+        bitmapCache.values.forEach { it.recycle() }
+        bitmapCache.clear()
     }
 }

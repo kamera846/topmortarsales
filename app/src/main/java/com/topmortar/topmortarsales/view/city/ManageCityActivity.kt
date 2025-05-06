@@ -32,6 +32,7 @@ import com.topmortar.topmortarsales.databinding.ActivityManageCityBinding
 import com.topmortar.topmortarsales.modal.AddCityModal
 import com.topmortar.topmortarsales.model.CityModel
 import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
 
 class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClickListener,
     AddCityModal.AddCityModalInterface {
@@ -144,6 +145,9 @@ class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClic
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 FirebaseUtils.logErr(this@ManageCityActivity, "Failed ManageCityActivity on getList(). Catch: ${e.message}")
                 handleMessage(this@ManageCityActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))

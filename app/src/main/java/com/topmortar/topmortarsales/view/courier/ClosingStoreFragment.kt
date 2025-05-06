@@ -3,6 +3,7 @@ package com.topmortar.topmortarsales.view.courier
 import android.annotation.SuppressLint
 import android.app.Activity.RESULT_OK
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.net.Uri
@@ -69,6 +70,7 @@ import com.topmortar.topmortarsales.view.contact.DetailContactActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * A fragment representing a list of Items.
@@ -263,6 +265,9 @@ class ClosingStoreFragment : Fragment() {
 
             } catch (e: Exception) {
 
+                if (e is CancellationException) {
+                    return@launch
+                }
                 handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
@@ -277,12 +282,17 @@ class ClosingStoreFragment : Fragment() {
 
         val rvAdapter = ContactsRecyclerViewAdapter(listItem, object: ContactsRecyclerViewAdapter.ItemClickListener {
             override fun onItemClick(data: ContactModel?) {
-                navigateDetailContact(data)
+                context?.let {
+                    navigateDetailContact(it, data)
+                }
             }
 
         })
 
-        binding.rvChatList.layoutManager = LinearLayoutManager(requireContext())
+        context?.let { ctx ->
+            binding.rvChatList.layoutManager = LinearLayoutManager(ctx)
+        }
+
         binding.rvChatList.adapter = rvAdapter
         binding.rvChatList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             private var lastScrollPosition = 0
@@ -307,9 +317,9 @@ class ClosingStoreFragment : Fragment() {
 
     }
 
-    private fun navigateDetailContact(data: ContactModel? = null) {
+    private fun navigateDetailContact(mContext: Context, data: ContactModel? = null) {
 
-        val intent = Intent(requireContext(), DetailContactActivity::class.java)
+        val intent = Intent(mContext, DetailContactActivity::class.java)
 
         if (data != null) {
             intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
