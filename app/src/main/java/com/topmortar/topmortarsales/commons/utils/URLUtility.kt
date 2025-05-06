@@ -10,7 +10,6 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.AsyncTask
-import android.os.Build
 import android.os.Bundle
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.maps.model.LatLng
@@ -33,17 +32,25 @@ class URLUtility(private val context: Context) {
                 locationManager.removeUpdates(this)
             }
 
-            @Suppress("DEPRECATION")
             override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                    super.onStatusChanged(provider, status, extras)
-                }
             }
 
             override fun onProviderEnabled(provider: String) {
+                FirebaseUtils.logErr(context, "Failed on UrlUtility. Catch: provider $provider")
+                handleMessage(
+                    context,
+                    "Home Courier Failed",
+                    "Failed on UrlUtility. Error: $provider"
+                )
             }
 
             override fun onProviderDisabled(provider: String) {
+                FirebaseUtils.logErr(context, "Failed on UrlUtility. Catch: provider $provider")
+                handleMessage(
+                    context,
+                    "Home Courier Failed",
+                    "Failed on UrlUtility. Error: $provider"
+                )
             }
         }
 

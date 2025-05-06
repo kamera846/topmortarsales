@@ -52,6 +52,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.dantsu.escposprinter.EscPosPrinter
 import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
 import com.dantsu.escposprinter.textparser.PrinterTextParserImg
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.itextpdf.io.image.ImageDataFactory
@@ -85,7 +87,6 @@ import com.topmortar.topmortarsales.commons.MAX_DISTANCE
 import com.topmortar.topmortarsales.commons.PRINT_METHOD_BLUETOOTH
 import com.topmortar.topmortarsales.commons.PRINT_METHOD_WIFI
 import com.topmortar.topmortarsales.commons.REQUEST_BLUETOOTH_PERMISSIONS
-import com.topmortar.topmortarsales.commons.REQUEST_ENABLE_BLUETOOTH
 import com.topmortar.topmortarsales.commons.REQUEST_STORAGE_PERMISSION
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -97,6 +98,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.printUtils.Comman
 import com.topmortar.topmortarsales.commons.printUtils.PdfDocumentAdapter
+import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.BluetoothPrinterManager
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
@@ -182,6 +184,32 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     private var companyLogoRetina: Int = 0
     private var companyLogoBlack: Int = 0
     private var companyName: String = ""
+
+    private val bluetoothResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == RESULT_OK) {
+            printNow()
+        } else {
+            Toast.makeText(this, "Bluetooth belum diaktifkan", TOAST_SHORT).show()
+        }
+    }
+
+    private val imageResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == RESULT_OK) {
+            val resultData = it.data?.getIntExtra("$IMG_PREVIEW_STATE", 0)
+            isClosingAction = it.data?.getBooleanExtra(IS_CLOSING, false) ?: false
+
+            if (resultData == RESULT_OK ) {
+                getDetail()
+                isRequestSync = true
+            }
+
+            // Remove image temp
+            currentPhotoUri?.let { uri ->
+                val contentResolver = contentResolver
+                contentResolver.delete(uri, null, null)
+            }
+        }
+    }
 
     companion object {
         private const val PRINT_METHOD_BLUETOOTH_TITLE = "Print Bluetooth"
@@ -308,7 +336,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         intent.putExtra(CONST_INVOICE_IS_COD, isCod)
         intent.putParcelableArrayListExtra(CONST_URI, uriList)
         intent.putExtra(CONST_DISTANCE, shortDistance)
-        startActivityForResult(intent, IMG_PREVIEW_STATE)
+        imageResultLauncher.launch(intent)
 
     }
 
@@ -559,8 +587,13 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                 urlUtility.requestLocationUpdate()
 
                 if (!urlUtility.isUrl(mapsUrl)) {
-//                    val locationManager = getSystemService(LOCATION_SERVICE) as LocationManager
-//                    val location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+
+                    val status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
+                    if (status != ConnectionResult.SUCCESS) {
+                        showDialogGooglePlayNotAvailable()
+                        return
+                    }
+
                     val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
                     fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
                         if (location != null) {
@@ -616,6 +649,34 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
         } else ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
 
+    }
+
+    private fun showDialogGooglePlayNotAvailable() {
+        try {
+
+            val serviceIntent = Intent(this, TrackingService::class.java)
+            stopService(serviceIntent)
+
+            AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setTitle("Peringatan!")
+                .setMessage("Perangkat anda tidak mendukung layanan 'Google Play Service', beberapa fitur di aplikasi mungkin tidak dapat berjalan.")
+                .setPositiveButton("Kembali") { dialog, _ ->
+                    dialog.dismiss()
+                    finish()
+                }
+                .show()
+        } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
+            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on showDialogGooglePlayNotAvailable(). Catch: ${e.message}")
+            handleMessage(
+                this,
+                "Home Courier Failed",
+                "Failed HomeSalesActivity on showDialogGooglePlayNotAvailable(). Error: ${e.message}"
+            )
+        }
     }
 
     private fun navigateChatAdmin() {
@@ -691,7 +752,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                         }
                     } else {
                         val enableBluetoothIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                        startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BLUETOOTH)
+                        bluetoothResultLauncher.launch(enableBluetoothIntent)
                     }
                 } else requestBluetoothPermissions()
             } else {
@@ -702,7 +763,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                     }
                 } else {
                     val enableBluetoothIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                    startActivityForResult(enableBluetoothIntent, REQUEST_ENABLE_BLUETOOTH)
+                    bluetoothResultLauncher.launch(enableBluetoothIntent)
                 }
             }
         } else {
@@ -1043,28 +1104,6 @@ class DetailSuratJalanActivity : AppCompatActivity() {
             }
         }
 
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_ENABLE_BLUETOOTH) {
-            if (resultCode == RESULT_OK) printNow()
-            else Toast.makeText(this, "Bluetooth belum diaktifkan", TOAST_SHORT).show()
-        } else if (requestCode == IMG_PREVIEW_STATE || "$requestCode" == "$IMG_PREVIEW_STATE") {
-            val resultData = data?.getIntExtra("$IMG_PREVIEW_STATE", 0)
-            isClosingAction = data?.getBooleanExtra(IS_CLOSING, false) ?: false
-
-            if (resultData == RESULT_OK ) {
-                getDetail()
-                isRequestSync = true
-            }
-            // Remove image temp
-            currentPhotoUri?.let {
-                val contentResolver = contentResolver
-                contentResolver.delete(it, null, null)
-            }
-        }
     }
 
     @Deprecated("Deprecated in Java")

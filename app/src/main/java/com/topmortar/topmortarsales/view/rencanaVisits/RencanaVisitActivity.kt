@@ -1,6 +1,5 @@
 package com.topmortar.topmortarsales.view.rencanaVisits
 
-import android.app.ProgressDialog
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
@@ -28,6 +27,7 @@ import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE_WITH_DEFAULT_RAN
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
@@ -57,7 +57,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
     private lateinit var tabLayout: TabLayout
     private lateinit var viewPager: ViewPager
     private lateinit var pagerAdapter: RencanaVisitVPA
-    private lateinit var progressDialog: ProgressDialog
+    private lateinit var progressBar: CustomProgressBar
     private var pagerAdapterItemCount = arrayListOf(0,0,0,0)
     private var activeTab = 0
     private var selectedItemCount = 0
@@ -87,8 +87,8 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
         setContentView(binding.root)
 
         apiService = HttpClient.create()
-        progressDialog = ProgressDialog(this)
-        progressDialog.setMessage(getString(R.string.txt_loading))
+        progressBar = CustomProgressBar(this)
+        progressBar.setMessage(getString(R.string.txt_loading))
         binding.selectTitleBarDark.componentSelectTitleBarDark.visibility = View.GONE
 
         binding.titleBarDark.icBack.visibility = View.VISIBLE
@@ -182,7 +182,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
             else 0.5f
         binding.selectTitleBarDark.icConfirmSelect.setOnClickListener {
             if (selectedItemCount > 0) {
-                progressDialog.show()
+                progressBar.show()
                 pagerAdapter.onConfirmSelected(activeTab)
             }
         }
@@ -232,7 +232,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
     }
 
     private fun navigateCheckLocationStore(items: ArrayList<RencanaVisitModel>) {
-        progressDialog.show()
+        progressBar.show()
 
         listCoordinate = arrayListOf()
         listCoordinateName = arrayListOf()
@@ -286,7 +286,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
 ////                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
 ////                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
 ////
-////                        progressDialog.dismiss()
+////                        progressBar.dismiss()
 ////                        startActivity(intent)
 //
 //                    }
@@ -307,14 +307,14 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
 //                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
 //                        intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
 //
-//                        progressDialog.dismiss()
+//                        progressBar.dismiss()
 //                        startActivity(intent)
 //
 //                    }
 //                    else -> {
 //
 //                        handleMessage(this@RencanaVisitActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
-//                        progressDialog.dismiss()
+//                        progressBar.dismiss()
 //
 //                    }
 //                }
@@ -322,7 +322,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
 //            } catch (e: Exception) {
 //
 //                handleMessage(this@RencanaVisitActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
-//                progressDialog.dismiss()
+//                progressBar.dismiss()
 //
 //            }
 //
@@ -331,7 +331,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
     }
 
     private fun getAllRenvi() {
-        progressDialog.show()
+        progressBar.show()
 
         listCoordinate = arrayListOf()
         listCoordinateName = arrayListOf()
@@ -347,7 +347,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
     }
     private fun getListRenviPerCategory(category: String) {
         processed ++
-        progressDialog.setMessage(getString(R.string.txt_loading) + "($processed/$totalProcess)")
+        progressBar.setMessage(getString(R.string.txt_loading) + "($processed/$totalProcess)")
 
         lifecycleScope.launch {
             try {
@@ -381,7 +381,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
                                 totalProcess = listAllRenvi.size
                                 processed = 0
                                 LoopingTask(listAllRenvi).execute()
-//                                progressDialog.dismiss()
+//                                progressBar.dismiss()
                             }
                         }
                     }
@@ -395,7 +395,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
                                 totalProcess = listAllRenvi.size
                                 processed = 0
                                 LoopingTask(listAllRenvi).execute()
-//                                progressDialog.dismiss()
+//                                progressBar.dismiss()
                             }
                         }
 
@@ -410,7 +410,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
                                 totalProcess = listAllRenvi.size
                                 processed = 0
                                 LoopingTask(listAllRenvi).execute()
-//                                progressDialog.dismiss()
+//                                progressBar.dismiss()
                             }
                         }
 
@@ -431,7 +431,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
                         totalProcess = listAllRenvi.size
                         processed = 0
                         LoopingTask(listAllRenvi).execute()
-//                        progressDialog.dismiss()
+//                        progressBar.dismiss()
                     }
                 }
 
@@ -485,7 +485,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
 
 //        toggleSelectBar()
 //        Handler(Looper.getMainLooper()).postDelayed({
-//            progressDialog.dismiss()
+//            progressBar.dismiss()
 //            startActivity(intent)
 //        }, 1000)
     }
@@ -502,7 +502,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
                 processed ++
                 percentage = (processed * 100) / totalProcess
                 runOnUiThread {
-                    progressDialog.setMessage(getString(R.string.txt_loading) + "($percentage%)")
+                    progressBar.setMessage(getString(R.string.txt_loading) + "($percentage%)")
                 }
             }
             return null
@@ -520,8 +520,8 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
 
-            progressDialog.dismiss()
-            progressDialog.setMessage(getString(R.string.txt_loading))
+            progressBar.dismiss()
+            progressBar.setMessage(getString(R.string.txt_loading))
             startActivity(intent)
         }
     }
@@ -556,6 +556,9 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
 
     override fun onDestroy() {
         super.onDestroy()
+        if (::progressBar.isInitialized && progressBar.isShowing()) {
+            progressBar.dismiss()
+        }
         if (sessionManager.isLoggedIn()) {
             if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(

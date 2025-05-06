@@ -1,10 +1,7 @@
-@file:Suppress("DEPRECATION")
-
 package com.topmortar.topmortarsales.view.courier
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.ProgressDialog
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -20,12 +17,15 @@ import android.os.Looper
 import android.provider.Settings
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -62,6 +62,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
+import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
@@ -110,7 +111,7 @@ class HomeCourierActivity : AppCompatActivity() {
     private var isLocked = false
 
     private lateinit var firebaseReference: DatabaseReference
-    private var absentProgressDialog: ProgressDialog? = null
+    private var absentProgressBar: CustomProgressBar? = null
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var customUtility: CustomUtility
 
@@ -120,6 +121,12 @@ class HomeCourierActivity : AppCompatActivity() {
     private var selectedBasecamp: ModalSearchModel? = null
     private var listBasecamp: ArrayList<BaseCampModel> = arrayListOf()
     private var isSelectBasecampOnly = false
+
+    private val locationResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == RESULT_OK) {
+            checkLocationPermission()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -132,10 +139,10 @@ class HomeCourierActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
-        if (absentProgressDialog == null) {
-            absentProgressDialog = ProgressDialog(this)
-            absentProgressDialog!!.setMessage(getString(R.string.txt_loading))
-            absentProgressDialog!!.setCancelable(false)
+        if (absentProgressBar == null) {
+            absentProgressBar = CustomProgressBar(this)
+            absentProgressBar!!.setMessage(getString(R.string.txt_loading))
+            absentProgressBar!!.setCancelable(false)
         }
 
         val userDistributorIds = sessionManager.userDistributor()
@@ -180,12 +187,12 @@ class HomeCourierActivity : AppCompatActivity() {
     private fun checkLocationPermission() {
         try {
 
-            if (absentProgressDialog == null) {
-                absentProgressDialog = ProgressDialog(this)
-                absentProgressDialog!!.setCancelable(false)
+            if (absentProgressBar == null) {
+                absentProgressBar = CustomProgressBar(this)
+                absentProgressBar!!.setCancelable(false)
             }
-            absentProgressDialog!!.setMessage(getString(R.string.txt_loading) + " 1 / 5")
-            if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
+            absentProgressBar!!.setMessage(getString(R.string.txt_loading) + " 1 / 5")
+            if (!absentProgressBar!!.isShowing()) absentProgressBar?.show()
             if (ContextCompat.checkSelfPermission(
                     this,
                     Manifest.permission.ACCESS_FINE_LOCATION
@@ -214,8 +221,8 @@ class HomeCourierActivity : AppCompatActivity() {
     }
 
     private fun checkGpsStatus() {
-        if (absentProgressDialog != null) {
-            absentProgressDialog!!.setMessage(getString(R.string.txt_loading) + " 2 / 5")
+        if (absentProgressBar != null) {
+            absentProgressBar!!.setMessage(getString(R.string.txt_loading) + " 2 / 5")
         }
         try {
 
@@ -238,17 +245,14 @@ class HomeCourierActivity : AppCompatActivity() {
                 "Home Courier Failed",
                 "Failed HomeCourierActivity on checkGpsStatus(). Error: ${e.message}"
             )
-//        } finally {
-//            if (absentProgressDialog != null) {
-//                absentProgressDialog!!.setMessage(getString(R.string.txt_loading))
-//            }
         }
     }
 
     private fun checkMockLocation() {
-        if (absentProgressDialog != null) {
-            absentProgressDialog!!.setMessage(getString(R.string.txt_loading) + " 3 / 5")
+        if (absentProgressBar != null) {
+            absentProgressBar!!.setMessage(getString(R.string.txt_loading) + " 3 / 5")
         }
+
         try {
 
             if (ContextCompat.checkSelfPermission(
@@ -257,12 +261,17 @@ class HomeCourierActivity : AppCompatActivity() {
                 ) == PackageManager.PERMISSION_GRANTED
             ) {
 
+                val status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
+                if (status != ConnectionResult.SUCCESS) {
+                    showDialogGooglePlayNotAvailable()
+                    return
+                }
+
                 fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
                 fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
 
                     if (location == null) {
 
-//                    checkLocationPermission()
                         if (locationCallback != null) {
 
                             fusedLocationClient.removeLocationUpdates(locationCallback!!)
@@ -302,6 +311,14 @@ class HomeCourierActivity : AppCompatActivity() {
                             showDialogIsMock()
                         } else initView()
                     }
+                }.addOnFailureListener { e ->
+                    initView()
+                    FirebaseUtils.logErr(this, "Failed HomeCourierActivity on checkMockLocation(). Catch: $e")
+                    handleMessage(
+                        this,
+                        "Home Courier Failed",
+                        "Failed HomeCourierActivity on checkMockLocation(). Error: $e"
+                    )
                 }
             } else {
                 ActivityCompat.requestPermissions(
@@ -320,17 +337,13 @@ class HomeCourierActivity : AppCompatActivity() {
                 "Home Courier Failed",
                 "Failed HomeCourierActivity on checkMockLocation(). Error: ${e.message}"
             )
-//        } finally {
-//            if (absentProgressDialog != null) {
-//                absentProgressDialog!!.setMessage(getString(R.string.txt_loading))
-//            }
         }
     }
 
     private fun showDialogIsMock() {
         try {
 
-            absentProgressDialog?.dismiss()
+            absentProgressBar?.dismiss()
 
             val serviceIntent = Intent(this, TrackingService::class.java)
             stopService(serviceIntent)
@@ -343,7 +356,7 @@ class HomeCourierActivity : AppCompatActivity() {
                 .setPositiveButton("Pengaturan") { _, _ ->
                     // Buka pengaturan Developer Options
                     val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
-                    startActivityForResult(intent, LOCATION_PERMISSION_REQUEST_CODE)
+                    locationResultLauncher.launch(intent)
                 }
                 .show()
         } catch (e: Exception) {
@@ -359,6 +372,48 @@ class HomeCourierActivity : AppCompatActivity() {
         }
     }
 
+    private fun showDialogGooglePlayNotAvailable() {
+        try {
+
+            absentProgressBar?.dismiss()
+
+            val serviceIntent = Intent(this, TrackingService::class.java)
+            stopService(serviceIntent)
+
+            AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setTitle("Peringatan!")
+                .setMessage("Perangkat anda tidak mendukung layanan 'Google Play Service', beberapa fitur di aplikasi mungkin tidak dapat berjalan.")
+                .setNegativeButton("Tutup aplikasi") { dialog, _ ->
+                    dialog.dismiss()
+                    finishAffinity()
+                }
+                .setPositiveButton("Oke") { dialog, _ ->
+                    dialog.dismiss()
+
+                    FirebaseUtils.logErr(this, "Failed HomeCourierActivity on checkMockLocation(). Catch: Google Play Services not available")
+                    handleMessage(
+                        this,
+                        "Home Courier Failed",
+                        "Failed HomeCourierActivity on checkMockLocation(). Error: Google Play Services not available"
+                    )
+
+                    initView()
+                }
+                .show()
+        } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
+            FirebaseUtils.logErr(this, "Failed HomeCourierActivity on showDialogGooglePlayNotAvailable(). Catch: ${e.message}")
+            handleMessage(
+                this,
+                "Home Courier Failed",
+                "Failed HomeCourierActivity on showDialogGooglePlayNotAvailable(). Error: ${e.message}"
+            )
+        }
+    }
+
     private fun showGpsDisabledDialog() {
         try {
 
@@ -369,7 +424,7 @@ class HomeCourierActivity : AppCompatActivity() {
                 .setPositiveButton("Ya") { _, _ ->
                     // Buka pengaturan untuk mengaktifkan GPS
                     val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                    startActivityForResult(intent, LOCATION_PERMISSION_REQUEST_CODE)
+                    locationResultLauncher.launch(intent)
                 }
                 .show()
         } catch (e: Exception) {
@@ -386,8 +441,8 @@ class HomeCourierActivity : AppCompatActivity() {
     }
 
     private fun initView() {
-        if (absentProgressDialog != null) {
-            absentProgressDialog!!.setMessage(getString(R.string.txt_loading) + " 4 / 5")
+        if (absentProgressBar != null) {
+            absentProgressBar!!.setMessage(getString(R.string.txt_loading) + " 4 / 5")
         }
 
         try {
@@ -431,7 +486,7 @@ class HomeCourierActivity : AppCompatActivity() {
                         ) {
 
 //                        absentAction()
-                            if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
+                            if (!absentProgressBar!!.isShowing()) absentProgressBar?.show()
                             if (selectedBasecamp == null) {
                                 if (listBasecamp.isEmpty()) getListBasecamp()
                                 else {
@@ -471,7 +526,7 @@ class HomeCourierActivity : AppCompatActivity() {
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
 //                    absentAction()
-                        if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
+                        if (!absentProgressBar!!.isShowing()) absentProgressBar?.show()
                         if (selectedBasecamp == null) {
                             if (listBasecamp.isEmpty()) getListBasecamp()
                             else {
@@ -504,8 +559,8 @@ class HomeCourierActivity : AppCompatActivity() {
                 "Failed HomeCourierActivity on initView(). Error: ${e.message}"
             )
 //        } finally {
-//            if (absentProgressDialog != null) {
-//                absentProgressDialog!!.setMessage(getString(R.string.txt_loading))
+//            if (absentProgressBar != null) {
+//                absentProgressBar!!.setMessage(getString(R.string.txt_loading))
 //            }
         }
 
@@ -515,16 +570,16 @@ class HomeCourierActivity : AppCompatActivity() {
         FirebaseUtils.firebaseLogging(this, "Absent", "Start checking")
         try {
 
-            if (absentProgressDialog == null) {
+            if (absentProgressBar == null) {
                 FirebaseUtils.firebaseLogging(this, "Absent", "Init Loading")
-                absentProgressDialog = ProgressDialog(this)
-                absentProgressDialog!!.setCancelable(false)
+                absentProgressBar = CustomProgressBar(this)
+                absentProgressBar!!.setCancelable(false)
             }
 
-            absentProgressDialog!!.setMessage(getString(R.string.txt_loading) + " 5 / 5")
-            if (!absentProgressDialog!!.isShowing) {
+            absentProgressBar!!.setMessage(getString(R.string.txt_loading) + " 5 / 5")
+            if (!absentProgressBar!!.isShowing()) {
                 FirebaseUtils.firebaseLogging(this, "Absent", "Show loading")
-                absentProgressDialog?.show()
+                absentProgressBar?.show()
             }
 
             val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
@@ -678,7 +733,7 @@ class HomeCourierActivity : AppCompatActivity() {
     }
 
     private fun executeAbsentAction() {
-        if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
+        if (!absentProgressBar!!.isShowing()) absentProgressBar?.show()
 
         val mapsUrl = selectedBasecamp?.etc.toString()
         val urlUtility = URLUtility(this)
@@ -694,6 +749,13 @@ class HomeCourierActivity : AppCompatActivity() {
                 urlUtility.requestLocationUpdate()
 
                 if (!urlUtility.isUrl(mapsUrl) && mapsUrl.isNotEmpty()) {
+
+                    val status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
+                    if (status != ConnectionResult.SUCCESS) {
+                        showDialogGooglePlayNotAvailable()
+                        return
+                    }
+
                     fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
                     fusedLocationClient.lastLocation.addOnSuccessListener { location: Location ->
 
@@ -873,9 +935,9 @@ class HomeCourierActivity : AppCompatActivity() {
     }
 
     private fun navigateToNearestStore() {
-        val progressDialog = ProgressDialog(this)
-        progressDialog.setMessage("Memuat data toko…")
-        progressDialog.show()
+        val progressBar = CustomProgressBar(this)
+        progressBar.setMessage("Memuat data toko…")
+        progressBar.show()
 
         Handler(Looper.getMainLooper()).postDelayed({
 
@@ -917,7 +979,7 @@ class HomeCourierActivity : AppCompatActivity() {
                                 listCoordinateCityID
                             )
 
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             startActivity(intent)
 
                         }
@@ -936,14 +998,14 @@ class HomeCourierActivity : AppCompatActivity() {
                                 listCoordinateName
                             )
 
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             startActivity(intent)
 
                         }
 
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             handleMessage(
                                 this@HomeCourierActivity,
                                 TAG_RESPONSE_MESSAGE, "Response failed: ${response.message}"
@@ -958,7 +1020,7 @@ class HomeCourierActivity : AppCompatActivity() {
                                 TAG_RESPONSE_CONTACT,
                                 getString(R.string.failed_get_data) + response.message
                             )
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
 
                         }
                     }
@@ -974,7 +1036,7 @@ class HomeCourierActivity : AppCompatActivity() {
                         TAG_RESPONSE_CONTACT,
                         "Failed run service. Exception " + e.message
                     )
-                    progressDialog.dismiss()
+                    progressBar.dismiss()
 
                 }
 
@@ -990,9 +1052,9 @@ class HomeCourierActivity : AppCompatActivity() {
     }
 
     private fun navigateToNearestBasecamp() {
-        val progressDialog = ProgressDialog(this)
-        progressDialog.setMessage("Memuat data basecamp…")
-        progressDialog.show()
+        val progressBar = CustomProgressBar(this)
+        progressBar.setMessage("Memuat data basecamp…")
+        progressBar.show()
 
         Handler(Looper.getMainLooper()).postDelayed({
 
@@ -1037,7 +1099,7 @@ class HomeCourierActivity : AppCompatActivity() {
                                 listCoordinateCityID
                             )
 
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             startActivity(intent)
 
                         }
@@ -1057,14 +1119,14 @@ class HomeCourierActivity : AppCompatActivity() {
                                 listCoordinateName
                             )
 
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             startActivity(intent)
 
                         }
 
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             handleMessage(
                                 this@HomeCourierActivity,
                                 TAG_RESPONSE_MESSAGE, "Response failed: ${response.message}"
@@ -1079,7 +1141,7 @@ class HomeCourierActivity : AppCompatActivity() {
                                 TAG_RESPONSE_CONTACT,
                                 getString(R.string.failed_get_data) + response.message
                             )
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
 
                         }
                     }
@@ -1095,7 +1157,7 @@ class HomeCourierActivity : AppCompatActivity() {
                         TAG_RESPONSE_CONTACT,
                         "Failed run service. Exception " + e.message
                     )
-                    progressDialog.dismiss()
+                    progressBar.dismiss()
 
                 }
 
@@ -1179,9 +1241,9 @@ class HomeCourierActivity : AppCompatActivity() {
 
     private fun getListBasecamp() {
 
-        if (!absentProgressDialog!!.isShowing) {
-            absentProgressDialog?.setMessage(getString(R.string.txt_loading))
-            absentProgressDialog?.show()
+        if (!absentProgressBar!!.isShowing()) {
+            absentProgressBar?.setMessage(getString(R.string.txt_loading))
+            absentProgressBar?.show()
         }
 
         lifecycleScope.launch {
@@ -1250,7 +1312,7 @@ class HomeCourierActivity : AppCompatActivity() {
 
     private fun executeAbsentReport(shortDistance: String = "") {
 
-        if (!absentProgressDialog!!.isShowing) absentProgressDialog?.show()
+        if (!absentProgressBar!!.isShowing()) absentProgressBar?.show()
 
         lifecycleScope.launch {
             try {
@@ -1300,18 +1362,6 @@ class HomeCourierActivity : AppCompatActivity() {
                                 userChild.child("lastSeen").setValue(absentDateTime)
 
                                 sessionManager.absentDateTime(absentDateTime)
-
-//                                val serviceIntent =
-//                                    Intent(this@HomeCourierActivity, TrackingService::class.java)
-//                                serviceIntent.putExtra("userId", userId)
-//                                serviceIntent.putExtra(
-//                                    "userDistributorId",
-//                                    userDistributorId ?: "-start-004-$userName"
-//                                )
-//                                serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
-//                                this@HomeCourierActivity.startService(serviceIntent)
-//
-//                                dismissProgressDialog()
                                 checkAbsent()
                             } else {
 
@@ -1320,12 +1370,6 @@ class HomeCourierActivity : AppCompatActivity() {
                                 userChild.child("lastSeen").setValue(absentDateTime)
 
                                 sessionManager.absentDateTime(absentDateTime)
-
-//                                val serviceIntent =
-//                                    Intent(this@HomeCourierActivity, TrackingService::class.java)
-//                                this@HomeCourierActivity.stopService(serviceIntent)
-//
-//                                dismissProgressDialog()
                                 checkAbsent()
                             }
 
@@ -1400,7 +1444,6 @@ class HomeCourierActivity : AppCompatActivity() {
     }
 
 // Override Class
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -1418,7 +1461,7 @@ class HomeCourierActivity : AppCompatActivity() {
                         localDialog.dismiss()
                         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                         intent.data = Uri.fromParts("package", packageName, null)
-                        startActivityForResult(intent, LOCATION_PERMISSION_REQUEST_CODE)
+                        locationResultLauncher.launch(intent)
                     }
                     .show()
             }
@@ -1443,14 +1486,6 @@ class HomeCourierActivity : AppCompatActivity() {
                     }
                     .show()
             }
-        }
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            checkLocationPermission()
         }
     }
 
@@ -1508,6 +1543,9 @@ class HomeCourierActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        if (absentProgressBar != null && absentProgressBar!!.isShowing()) {
+            absentProgressBar!!.dismiss()
+        }
         if (sessionManager.isLoggedIn()) {
             if (sessionManager.userKind() == USER_KIND_COURIER) {
                 CustomUtility(this).setUserStatusOnline(
@@ -1624,7 +1662,7 @@ class HomeCourierActivity : AppCompatActivity() {
     
     private fun dismissProgressDialog() {
         if (!isFinishing && !isDestroyed) {
-            absentProgressDialog?.dismiss()
+            absentProgressBar?.dismiss()
         }
     }
     

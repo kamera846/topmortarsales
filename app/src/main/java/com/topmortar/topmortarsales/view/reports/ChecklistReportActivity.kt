@@ -1,7 +1,6 @@
 package com.topmortar.topmortarsales.view.reports
 
 import android.Manifest
-import android.app.ProgressDialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -19,6 +18,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.topmortar.topmortarsales.R
@@ -40,6 +41,8 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.services.TrackingService
+import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -53,11 +56,12 @@ import com.topmortar.topmortarsales.databinding.ActivityChecklistReportBinding
 import com.topmortar.topmortarsales.model.QnAFormReportModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
 
 class ChecklistReportActivity : AppCompatActivity() {
     private lateinit var binding: ActivityChecklistReportBinding
     private lateinit var sessionManager: SessionManager
-    private lateinit var progressDialog: ProgressDialog
+    private lateinit var progressBar: CustomProgressBar
     private lateinit var rvAdapter: QnAFormReportRVA
     private lateinit var questions: ArrayList<QnAFormReportModel>
 
@@ -86,9 +90,9 @@ class ChecklistReportActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         sessionManager = SessionManager(this)
-        progressDialog = ProgressDialog(this)
-        progressDialog.setMessage(getString(R.string.txt_loading))
-        progressDialog.setCancelable(false)
+        progressBar = CustomProgressBar(this)
+        progressBar.setMessage(getString(R.string.txt_loading))
+        progressBar.setCancelable(false)
 
         binding.titleBar.icBack.visibility = View.VISIBLE
         binding.titleBar.tvTitleBar.text = "Form Visit Checklist"
@@ -172,7 +176,7 @@ class ChecklistReportActivity : AppCompatActivity() {
             return
         }
 
-        progressDialog.show()
+        progressBar.show()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         Handler(Looper.getMainLooper()).postDelayed({
@@ -187,6 +191,13 @@ class ChecklistReportActivity : AppCompatActivity() {
                     urlUtility.requestLocationUpdate()
 
                     if (!urlUtility.isUrl(mapsUrl) && mapsUrl.isNotEmpty()) {
+
+                        val status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
+                        if (status != ConnectionResult.SUCCESS) {
+                            showDialogGooglePlayNotAvailable()
+                            return@postDelayed
+                        }
+
                         fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
 
                             if (location != null) {
@@ -214,12 +225,12 @@ class ChecklistReportActivity : AppCompatActivity() {
                                     if (distance > MAX_REPORT_DISTANCE) {
                                         val builder = AlertDialog.Builder(this)
                                         builder.setCancelable(false)
-                                        builder.setOnDismissListener { progressDialog.dismiss() }
-                                        builder.setOnCancelListener { progressDialog.dismiss() }
+                                        builder.setOnDismissListener { progressBar.dismiss() }
+                                        builder.setOnCancelListener { progressBar.dismiss() }
                                         builder.setTitle("Peringatan!")
                                             .setMessage("Titik anda saat ini $shortDistance km dari titik toko. Cobalah untuk lebih dekat dengan toko!")
                                             .setPositiveButton("Oke") { dialog, _ ->
-                                                progressDialog.dismiss()
+                                                progressBar.dismiss()
 
                                                 binding.tvDistance.setTextColor(getColor(R.color.primary))
                                                 binding.tvDistance.text = "Jarak anda dengan toko $shortDistance km."
@@ -236,7 +247,7 @@ class ChecklistReportActivity : AppCompatActivity() {
                                                 intent.putExtra(CONST_MAPS_NAME, iName)
                                                 startActivity(intent)
 
-                                                progressDialog.dismiss()
+                                                progressBar.dismiss()
 
                                                 binding.tvDistance.setTextColor(getColor(R.color.primary))
                                                 binding.tvDistance.text = "Jarak anda dengan toko $shortDistance km."
@@ -261,15 +272,15 @@ class ChecklistReportActivity : AppCompatActivity() {
                                             if (iDistance != null && iDistance!! <= MAX_REPORT_DISTANCE) {
                                                 submitForm()
                                             } else {
-                                                progressDialog.dismiss()
+                                                progressBar.dismiss()
                                                 handleMessage(this, "SUBMIT FORM VISIT", "Cobalah untuk lebih dekat dengan toko")
                                             }
                                         }
-                                        else progressDialog.dismiss()
+                                        else progressBar.dismiss()
                                     }
 
                                 } else {
-                                    progressDialog.dismiss()
+                                    progressBar.dismiss()
                                     Toast.makeText(this, "Gagal memproses koordinat", TOAST_SHORT)
                                         .show()
                                 }
@@ -286,30 +297,60 @@ class ChecklistReportActivity : AppCompatActivity() {
                             }
 
                         }.addOnFailureListener {
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             handleMessage(this, "LOG REPORT", "Gagal mendapatkan lokasi anda. Err: " + it.message)
 //                            Toast.makeText(this, "Gagal mendapatkan lokasi anda", TOAST_SHORT).show()
                         }
 
                     } else {
-                        progressDialog.dismiss()
+                        progressBar.dismiss()
                         val message = "Anda tidak dapat membuat laporan untuk saat ini, silakan hubungi admin untuk memperbarui koordinat toko ini"
                         val actionTitle = "Hubungi Sekarang"
                         CustomUtility(this).showPermissionDeniedSnackbar(message, actionTitle) { navigateChatAdmin() }
                     }
 
                 } else {
-                    progressDialog.dismiss()
+                    progressBar.dismiss()
                     val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                     startActivity(enableLocationIntent)
                 }
 
             } else {
-                progressDialog.dismiss()
+                progressBar.dismiss()
                 ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
             }
 
         }, 500)
+    }
+
+    private fun showDialogGooglePlayNotAvailable() {
+        try {
+
+            progressBar.dismiss()
+
+            val serviceIntent = Intent(this, TrackingService::class.java)
+            stopService(serviceIntent)
+
+            AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setTitle("Peringatan!")
+                .setMessage("Perangkat anda tidak mendukung layanan 'Google Play Service', beberapa fitur di aplikasi mungkin tidak dapat berjalan.")
+                .setPositiveButton("Kembali") { dialog, _ ->
+                    dialog.dismiss()
+                    finish()
+                }
+                .show()
+        } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
+            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on showDialogGooglePlayNotAvailable(). Catch: ${e.message}")
+            handleMessage(
+                this,
+                "Home Courier Failed",
+                "Failed HomeSalesActivity on showDialogGooglePlayNotAvailable(). Error: ${e.message}"
+            )
+        }
     }
 
     private fun navigateChatAdmin() {
@@ -453,20 +494,20 @@ class ChecklistReportActivity : AppCompatActivity() {
                             postSubmitAnswer(arrayAnswer)
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan! Message: ${ responseBody.message }")
                         }
                         else -> {
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan!: ${ responseBody.message }")
                         }
                     }
                 } else {
-                    progressDialog.dismiss()
+                    progressBar.dismiss()
                     handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan! Error: " + response.message())
                 }
             } catch (e: Exception) {
-                progressDialog.dismiss()
+                progressBar.dismiss()
                 FirebaseUtils.logErr(this@ChecklistReportActivity, "Failed ChecklistReportActivity on submitReport(). Catch: ${e.message}")
                 handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
             }
@@ -483,7 +524,7 @@ class ChecklistReportActivity : AppCompatActivity() {
                 val isTextEmpty = (item.answer_type == "text" || item.answer_type == "date" || item.answer_type == "radio") && item.text_answer.isEmpty()
                 val isSelectedEmpty = item.answer_type == "checkbox" && item.selected_answer.isNullOrEmpty()
                 if (item.is_required == "1" && (isTextEmpty || isSelectedEmpty)) {
-                    progressDialog.dismiss()
+                    progressBar.dismiss()
                     AlertDialog.Builder(this)
                         .setCancelable(false)
                         .setTitle("Perhatian!")
@@ -543,26 +584,26 @@ class ChecklistReportActivity : AppCompatActivity() {
                     val responseBody = response.body()!!
                     when(responseBody.status) {
                         RESPONSE_STATUS_OK -> {
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, responseBody.message)
                             finish()
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan checklist! Message: ${ responseBody.message }")
                         }
                         else -> {
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan checklist!: ${ responseBody.message }")
                         }
                     }
                 } else {
-                    progressDialog.dismiss()
+                    progressBar.dismiss()
                     handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan checklist! Error: " + response.message())
                 }
             } catch (e: Exception) {
 
-                progressDialog.dismiss()
+                progressBar.dismiss()
                 FirebaseUtils.logErr(this@ChecklistReportActivity, "Failed ChecklistReportActivity on postSubmitReport(). Catch: ${e.message}")
                 handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
 
@@ -597,6 +638,10 @@ class ChecklistReportActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        super.onDestroy()
+        if (::progressBar.isInitialized && progressBar.isShowing()) {
+            progressBar.dismiss()
+        }
         if (sessionManager.isLoggedIn()) {
             if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
@@ -606,7 +651,6 @@ class ChecklistReportActivity : AppCompatActivity() {
                 )
             }
         }
-        super.onDestroy()
     }
 
 }

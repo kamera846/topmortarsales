@@ -205,7 +205,7 @@ class BasecampFragment : Fragment() {
             intent.putExtra(CONST_NAME, data?.nama_gudang)
             intent.putExtra(CONST_LOCATION, data?.id_city)
             intent.putExtra(CONST_MAPS, data?.location_gudang)
-            someActivityResultLauncher.launch(intent)
+            activityResultLauncher.launch(intent)
         } else {
 
             val intent = Intent(mContext, NewReportActivity::class.java)
@@ -243,7 +243,7 @@ class BasecampFragment : Fragment() {
     private fun navigateFab() {
 
         val intent = Intent(requireContext(), AddBaseCampActivity::class.java)
-        someActivityResultLauncher.launch(intent)
+        activityResultLauncher.launch(intent)
 
     }
 
@@ -272,14 +272,9 @@ class BasecampFragment : Fragment() {
         } else badgeRefresh.visibility = View.GONE
     }
 
-    private val someActivityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        // Handle the result
-        val resultCode = result.resultCode
-        val data = result.data
-        // Process the result
-
-        if (resultCode == RESULT_BASECAMP_FRAGMENT) {
-            val newData = data?.getStringExtra(REQUEST_BASECAMP_FRAGMENT)
+    private val activityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == RESULT_BASECAMP_FRAGMENT) {
+            val newData = it.data?.getStringExtra(REQUEST_BASECAMP_FRAGMENT)
             if (!newData.isNullOrEmpty() && newData == SYNC_NOW) getContacts()
         }
     }

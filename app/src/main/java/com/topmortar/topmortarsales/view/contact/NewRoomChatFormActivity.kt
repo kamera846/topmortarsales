@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package com.topmortar.topmortarsales.view.contact
 
 import android.Manifest
@@ -22,6 +20,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -35,7 +34,6 @@ import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.PHONE_CATEGORIES
-import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_ERROR
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
@@ -111,6 +109,16 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
     private var terminItem: List<String> = listOf("Pilih Termin Payment", "COD", "COD + Transfer", "COD + Tunai", "30 Hari", "45 Hari", "60 Hari")
     private var selectedTermin: String = ""
+
+    private val coordinateLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == RESULT_OK) {
+            val latitude = it.data?.getDoubleExtra("latitude", 0.0)
+            val longitude = it.data?.getDoubleExtra("longitude", 0.0)
+            if (latitude != null && longitude != null) etMapsUrl.setText("$latitude,$longitude")
+            etMapsUrl.error = null
+            etMapsUrl.clearFocus()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -369,7 +377,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             val intent = Intent(this, MapsActivity::class.java)
             intent.putExtra(CONST_MAPS, data)
             intent.putExtra(GET_COORDINATE, true)
-            startActivityForResult(intent, REQUEST_EDIT_CONTACT_COORDINATE)
+            coordinateLauncher.launch(intent)
         } else checkLocationPermission()
     }
 
@@ -628,20 +636,6 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
     override fun onDataReceived(data: ModalSearchModel) {
         etStoreLocated.setText(data.title)
         selectedCity = data
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == REQUEST_EDIT_CONTACT_COORDINATE) {
-            val latitude = data?.getDoubleExtra("latitude", 0.0)
-            val longitude = data?.getDoubleExtra("longitude", 0.0)
-            if (latitude != null && longitude != null) etMapsUrl.setText("$latitude,$longitude")
-            etMapsUrl.error = null
-            etMapsUrl.clearFocus()
-        }
-
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {

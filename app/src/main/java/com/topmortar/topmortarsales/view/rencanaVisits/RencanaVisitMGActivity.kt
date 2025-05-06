@@ -1,7 +1,6 @@
 package com.topmortar.topmortarsales.view.rencanaVisits
 
 import android.annotation.SuppressLint
-import android.app.ProgressDialog
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
@@ -20,6 +19,7 @@ import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_STATUS
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE_HIDE_FILTER
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE_WITH_DEFAULT_RANGE
+import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -39,7 +39,7 @@ class RencanaVisitMGActivity : AppCompatActivity() {
     private val binding get() = _binding!!
 
     private lateinit var myFragment: MGFragment
-    private lateinit var progressDialog: ProgressDialog
+    private lateinit var progressBar: CustomProgressBar
 
     private var itemCount = 0
     private var selectedItemCount = 0
@@ -52,7 +52,6 @@ class RencanaVisitMGActivity : AppCompatActivity() {
     private lateinit var listCoordinateName: ArrayList<String>
     private lateinit var listCoordinateStatus: ArrayList<String>
     private lateinit var listCoordinateCityID: ArrayList<String>
-    private lateinit var listAllRenvi: ArrayList<RencanaVisitModel>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,8 +63,8 @@ class RencanaVisitMGActivity : AppCompatActivity() {
         _binding = ActivityRencanaVisitMgBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        progressDialog = ProgressDialog(this)
-        progressDialog.setMessage(getString(R.string.txt_loading))
+        progressBar = CustomProgressBar(this)
+        progressBar.setMessage(getString(R.string.txt_loading))
 
         binding.titleBarDark.tvTitleBar.text = "Rencana Visit MG"
         binding.titleBarDark.icRoadMap.visibility = View.VISIBLE
@@ -102,7 +101,7 @@ class RencanaVisitMGActivity : AppCompatActivity() {
             else 0.5f
         binding.selectTitleBarDark.icConfirmSelect.setOnClickListener {
             if (selectedItemCount > 0) {
-                progressDialog.show()
+                progressBar.show()
                 myFragment.onConfirmSelected()
             }
         }
@@ -171,7 +170,7 @@ class RencanaVisitMGActivity : AppCompatActivity() {
                 processed ++
                 percentage = (processed * 100) / totalProcess
                 runOnUiThread {
-                    progressDialog.setMessage(getString(R.string.txt_loading) + "($percentage%)")
+                    progressBar.setMessage(getString(R.string.txt_loading) + "($percentage%)")
                 }
             }
             return null
@@ -189,8 +188,8 @@ class RencanaVisitMGActivity : AppCompatActivity() {
             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
 
-            progressDialog.dismiss()
-            progressDialog.setMessage(getString(R.string.txt_loading))
+            progressBar.dismiss()
+            progressBar.setMessage(getString(R.string.txt_loading))
             startActivity(intent)
         }
     }
@@ -224,6 +223,11 @@ class RencanaVisitMGActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
+        if (::progressBar.isInitialized && progressBar.isShowing()) {
+            progressBar.dismiss()
+        }
         if (sessionManager.isLoggedIn()) {
             if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
@@ -233,8 +237,6 @@ class RencanaVisitMGActivity : AppCompatActivity() {
                 )
             }
         }
-        _binding = null
-        super.onDestroy()
     }
 
     @SuppressLint("MissingSuperCall")

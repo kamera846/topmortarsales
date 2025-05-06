@@ -1,11 +1,8 @@
-@file:Suppress("DEPRECATION")
-
 package com.topmortar.topmortarsales.view.reports
 
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
-import android.app.ProgressDialog
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -27,6 +24,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.topmortar.topmortarsales.R
@@ -57,6 +56,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
+import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
@@ -73,14 +73,14 @@ import kotlinx.coroutines.launch
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Calendar
+import kotlin.coroutines.cancellation.CancellationException
 
-@SuppressLint("SetTextI18n")
 class NewReportActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityNewReportBinding
     private lateinit var sessionManager: SessionManager
     private lateinit var customUtility: CustomUtility
-    private lateinit var progressDialog: ProgressDialog
+    private lateinit var progressBar: CustomProgressBar
 
     private val userId get() = sessionManager.userID()
     private val username get() = sessionManager.userName()
@@ -121,9 +121,9 @@ class NewReportActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
         customUtility = CustomUtility(this)
 
-        progressDialog = ProgressDialog(this)
-        progressDialog.setCancelable(false)
-        progressDialog.setMessage("Sedang menghitung jarak...")
+        progressBar = CustomProgressBar(this)
+        progressBar.setCancelable(false)
+        progressBar.setMessage("Sedang menghitung jarak...")
 
         if (CustomUtility(this).isUserWithOnlineStatus()) {
             CustomUtility(this).setUserStatusOnline(
@@ -156,18 +156,15 @@ class NewReportActivity : AppCompatActivity() {
             // GPS tidak aktif, munculkan dialog untuk mengaktifkannya
             showGpsDisabledDialog()
         } else {
-//            if (!CustomUtility(this).isServiceRunning(
-//                    TrackingService::class.java)) {
-                val serviceIntent = Intent(this, TrackingService::class.java)
-                serviceIntent.putExtra("userId", userId)
-                serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-001-$username")
-                if (userKind == USER_KIND_COURIER) serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    startForegroundService(serviceIntent)
-                } else {
-                    startService(serviceIntent)
-                }
-//            }
+            val serviceIntent = Intent(this, TrackingService::class.java)
+            serviceIntent.putExtra("userId", userId)
+            serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-001-$username")
+            if (userKind == USER_KIND_COURIER) serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(serviceIntent)
+            } else {
+                startService(serviceIntent)
+            }
             initContent()
         }
     }
@@ -394,7 +391,7 @@ class NewReportActivity : AppCompatActivity() {
 
     @SuppressLint("MissingPermission")
     fun calculateDistance() {
-        progressDialog.show()
+        progressBar.show()
 
         Handler(Looper.getMainLooper()).postDelayed({
 
@@ -408,6 +405,13 @@ class NewReportActivity : AppCompatActivity() {
                     urlUtility.requestLocationUpdate()
 
                     if (!urlUtility.isUrl(mapsUrl) && mapsUrl.isNotEmpty()) {
+
+                        val status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
+                        if (status != ConnectionResult.SUCCESS) {
+                            showDialogGooglePlayNotAvailable()
+                            return@postDelayed
+                        }
+
                         fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
 
                             if (location != null) {
@@ -434,12 +438,12 @@ class NewReportActivity : AppCompatActivity() {
                                     if (distance > MAX_REPORT_DISTANCE) {
                                         val builder = AlertDialog.Builder(this)
                                         builder.setCancelable(false)
-                                        builder.setOnDismissListener { progressDialog.dismiss() }
-                                        builder.setOnCancelListener { progressDialog.dismiss() }
+                                        builder.setOnDismissListener { progressBar.dismiss() }
+                                        builder.setOnCancelListener { progressBar.dismiss() }
                                         builder.setTitle("Peringatan!")
                                             .setMessage("Titik anda saat ini $shortDistance km dari titik $reportType. Cobalah untuk lebih dekat dengan $reportType!")
                                             .setPositiveButton("Oke") { dialog, _ ->
-                                                progressDialog.dismiss()
+                                                progressBar.dismiss()
 
                                                 binding.etDistance.setTextColor(getColor(R.color.primary))
                                                 binding.etDistance.text = shortDistance
@@ -464,7 +468,7 @@ class NewReportActivity : AppCompatActivity() {
                                                 intent.putExtra(CONST_MAPS_NAME, name)
                                                 startActivity(intent)
 
-                                                progressDialog.dismiss()
+                                                progressBar.dismiss()
 
                                                 binding.etDistance.setTextColor(getColor(R.color.primary))
                                                 binding.etDistance.text = shortDistance
@@ -478,7 +482,7 @@ class NewReportActivity : AppCompatActivity() {
                                             }
                                         builder.show()
                                     } else {
-                                        progressDialog.dismiss()
+                                        progressBar.dismiss()
 
                                         var textColor = getColor(R.color.black_200)
                                         if (customUtility.isDarkMode()) textColor =
@@ -492,7 +496,7 @@ class NewReportActivity : AppCompatActivity() {
                                     }
 
                                 } else {
-                                    progressDialog.dismiss()
+                                    progressBar.dismiss()
                                     Toast.makeText(this, "Gagal memproses koordinat", TOAST_SHORT)
                                         .show()
                                 }
@@ -509,30 +513,60 @@ class NewReportActivity : AppCompatActivity() {
                             }
 
                         }.addOnFailureListener {
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             handleMessage(this, "LOG REPORT", "Gagal mendapatkan lokasi anda. Err: " + it.message)
 //                            Toast.makeText(this, "Gagal mendapatkan lokasi anda", TOAST_SHORT).show()
                         }
 
                     } else {
-                        progressDialog.dismiss()
+                        progressBar.dismiss()
                         val message = "Anda tidak dapat membuat laporan untuk saat ini, silakan hubungi admin untuk memperbarui koordinat $reportType ini"
                         val actionTitle = "Hubungi Sekarang"
                         customUtility.showPermissionDeniedSnackbar(message, actionTitle) { navigateChatAdmin() }
                     }
 
                 } else {
-                    progressDialog.dismiss()
+                    progressBar.dismiss()
                     val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                     startActivity(enableLocationIntent)
                 }
 
             } else {
-                progressDialog.dismiss()
+                progressBar.dismiss()
                 ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
             }
 
         }, 500)
+    }
+
+    private fun showDialogGooglePlayNotAvailable() {
+        try {
+
+            progressBar.dismiss()
+
+            val serviceIntent = Intent(this, TrackingService::class.java)
+            stopService(serviceIntent)
+
+            AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setTitle("Peringatan!")
+                .setMessage("Perangkat anda tidak mendukung layanan 'Google Play Service', beberapa fitur di aplikasi mungkin tidak dapat berjalan.")
+                .setPositiveButton("Kembali") { dialog, _ ->
+                    dialog.dismiss()
+                    finish()
+                }
+                .show()
+        } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
+            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on showDialogGooglePlayNotAvailable(). Catch: ${e.message}")
+            handleMessage(
+                this,
+                "Home Courier Failed",
+                "Failed HomeSalesActivity on showDialogGooglePlayNotAvailable(). Error: ${e.message}"
+            )
+        }
     }
 
     private fun navigateChatAdmin() {
@@ -618,7 +652,7 @@ class NewReportActivity : AppCompatActivity() {
 
     private fun submitReport() {
 
-        val submitDialog = ProgressDialog(this)
+        val submitDialog = CustomProgressBar(this)
         submitDialog.setCancelable(false)
         submitDialog.setMessage("Membuat laporan...")
 
@@ -743,7 +777,6 @@ class NewReportActivity : AppCompatActivity() {
                             loadingSubmit(false)
 
                             if (iRenviSource == "voucher" || iRenviSource == "passive") {
-//                                println("RESPONSE REPORT: ${Gson().toJson(response.body())}")
                                 val intent = Intent(
                                     this@NewReportActivity,
                                     ChecklistReportActivity::class.java
@@ -816,7 +849,6 @@ class NewReportActivity : AppCompatActivity() {
     }
     override fun onStart() {
         super.onStart()
-//        checkLocationPermission()
         Handler(Looper.getMainLooper()).postDelayed({
             if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
@@ -844,6 +876,9 @@ class NewReportActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        if (::progressBar.isInitialized && progressBar.isShowing()) {
+            progressBar.dismiss()
+        }
         if (sessionManager.isLoggedIn()) {
             if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(

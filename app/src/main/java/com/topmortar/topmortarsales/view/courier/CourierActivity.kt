@@ -1,10 +1,7 @@
-@file:Suppress("DEPRECATION")
-
 package com.topmortar.topmortarsales.view.courier
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.ProgressDialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -16,6 +13,7 @@ import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -38,6 +36,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
+import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
@@ -72,7 +71,13 @@ class CourierActivity : AppCompatActivity() {
     private lateinit var pagerAdapter: CourierViewPagerAdapter
     private var activeTab = 0
 
-    private lateinit var absentProgressDialog: ProgressDialog
+    private lateinit var absentProgressBar: CustomProgressBar
+
+    private val locationResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == RESULT_OK) {
+            checkUserAbsent()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,9 +109,9 @@ class CourierActivity : AppCompatActivity() {
         binding.titleBarDark.vBorder.visibility = View.GONE
         binding.titleBarDark.tvTitleBarDescription.isSelected = true
 
-        absentProgressDialog = ProgressDialog(this)
-        absentProgressDialog.setCancelable(false)
-        absentProgressDialog.setMessage(getString(R.string.txt_loading))
+        absentProgressBar = CustomProgressBar(this)
+        absentProgressBar.setCancelable(false)
+        absentProgressBar.setMessage(getString(R.string.txt_loading))
 
         CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-007", userId)
         checkSwipeRefreshLayoutHint()
@@ -209,7 +214,7 @@ class CourierActivity : AppCompatActivity() {
     }
 
     private fun checkUserAbsent() {
-        absentProgressDialog.show()
+        absentProgressBar.show()
 
         val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
         val userChild = absentChild.child(userId)
@@ -230,7 +235,7 @@ class CourierActivity : AppCompatActivity() {
                             setTitleBarAbsent(absentDateTime)
                         } else {
                             checkPermission {
-                                absentProgressDialog.dismiss()
+                                absentProgressBar.dismiss()
                                 setTitleBarAbsent(absentDateTime)
                                 initLayout()
                             }
@@ -254,7 +259,7 @@ class CourierActivity : AppCompatActivity() {
     }
 
     private fun showDialogAbsent(userChild: DatabaseReference) {
-        absentProgressDialog.dismiss()
+        absentProgressBar.dismiss()
 
         AlertDialog.Builder(this)
             .setCancelable(false)
@@ -270,7 +275,7 @@ class CourierActivity : AppCompatActivity() {
     }
 
     private fun initFirebase(userChild: DatabaseReference) {
-        absentProgressDialog.show()
+        absentProgressBar.show()
 
         userChild.child("id").setValue(userId)
         userChild.child("username").setValue(username)
@@ -359,7 +364,7 @@ class CourierActivity : AppCompatActivity() {
         binding.titleBarDark.icSyncNow.visibility = View.VISIBLE
         binding.titleBarDark.icSyncNow.setOnClickListener { pagerAdapter.setSyncAction(activeTab) }
 
-        absentProgressDialog.dismiss()
+        absentProgressBar.dismiss()
     }
 
     private fun setTitleBarAbsent(dateString: String) {
@@ -389,21 +394,12 @@ class CourierActivity : AppCompatActivity() {
                         localDialog.dismiss()
                         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
                         intent.data = Uri.fromParts("package", packageName, null)
-                        startActivityForResult(intent, LOCATION_PERMISSION_REQUEST_CODE)
+                        locationResultLauncher.launch(intent)
                     }
                     .show()
             }
         }
 
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            checkUserAbsent()
-        }
     }
 
     private fun checkPermission(userChild: DatabaseReference? = null, dialog: DialogInterface? = null, validAction: (() -> Unit)? = null) {
@@ -478,6 +474,9 @@ class CourierActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        if (::absentProgressBar.isInitialized && absentProgressBar.isShowing()) {
+            absentProgressBar.dismiss()
+        }
         CustomUtility(this).setUserStatusOnline(false, userDistributorIds ?: "-custom-007", userId)
     }
 

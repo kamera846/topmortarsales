@@ -17,6 +17,7 @@ import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.lifecycleScope
@@ -58,7 +59,6 @@ import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 
 @SuppressLint("SetTextI18n")
-@Suppress("DEPRECATION")
 class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemClickListener {
 
     private lateinit var scaleAnimation: Animation
@@ -85,6 +85,18 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
     private val userCityID get() = sessionManager.userCityID().toString()
     private var users: ArrayList<UserModel> = arrayListOf()
     private var activeFilter = EMPTY_FIELD_VALUE
+
+    private val userResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == RESULT_OK) {
+            val resultData = it.data?.getStringExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE")
+
+            if (resultData == SYNC_NOW) {
+
+                getList()
+
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -265,7 +277,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
             intent.putExtra(CONST_IS_NOTIFY, data.is_notify)
         }
 
-        startActivityForResult(intent, MANAGE_USER_ACTIVITY_REQUEST_CODE)
+        userResultLauncher.launch(intent)
 
     }
 
@@ -284,31 +296,13 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
             intent.putExtra(CONST_USER_CITY, data.id_city)
         }
 
-        startActivityForResult(intent, MANAGE_USER_ACTIVITY_REQUEST_CODE)
+        userResultLauncher.launch(intent)
 
     }
 
     override fun onItemClick(data: UserModel?) {
         if (data?.level_user == AUTH_LEVEL_SALES || data?.level_user == AUTH_LEVEL_COURIER || data?.level_user == AUTH_LEVEL_BA || data?.level_user == AUTH_LEVEL_PENAGIHAN  || data?.level_user == AUTH_LEVEL_MARKETING) navigateDetailUser(data)
         else navigateAddUser(data)
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == MANAGE_USER_ACTIVITY_REQUEST_CODE) {
-
-            val resultData = data?.getStringExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE")
-
-            if (resultData == SYNC_NOW) {
-
-                getList()
-
-            }
-
-        }
-
     }
 
     private fun showFilterMenu() {

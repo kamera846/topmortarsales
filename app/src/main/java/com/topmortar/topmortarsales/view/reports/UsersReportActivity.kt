@@ -23,10 +23,8 @@ import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
-import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
-import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
@@ -40,7 +38,6 @@ import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.UserModel
 import kotlinx.coroutines.launch
 
-@Suppress("DEPRECATION")
 class UsersReportActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemClickListener {
 
     private lateinit var scaleAnimation: Animation
@@ -225,23 +222,6 @@ class UsersReportActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCl
         intent.putExtra(CONST_FULL_NAME, data?.full_name)
 
         startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == MANAGE_USER_ACTIVITY_REQUEST_CODE) {
-
-            val resultData = data?.getStringExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE")
-
-            if (resultData == SYNC_NOW) {
-
-                getList()
-
-            }
-
-        }
-
     }
 
     override fun onStart() {

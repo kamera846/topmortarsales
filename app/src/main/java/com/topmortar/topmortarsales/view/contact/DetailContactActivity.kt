@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package com.topmortar.topmortarsales.view.contact
 
 import android.Manifest
@@ -7,7 +5,6 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DatePickerDialog
-import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
@@ -34,7 +31,6 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.Spinner
 import android.widget.TextView
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -85,7 +81,6 @@ import com.topmortar.topmortarsales.commons.PING_NORMAL
 import com.topmortar.topmortarsales.commons.RENVI_SOURCE
 import com.topmortar.topmortarsales.commons.REPORT_SOURCE
 import com.topmortar.topmortarsales.commons.REPORT_TYPE_IS_PAYMENT
-import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
@@ -112,6 +107,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
+import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
@@ -152,13 +148,10 @@ import java.util.Date
 import java.util.Locale
 import kotlin.coroutines.cancellation.CancellationException
 
-
-@Suppress("DEPRECATION")
-@SuppressLint("SetTextI18n")
 class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListener,
     PingUtility.PingResultInterface, SendMessageModal.SendMessageModalInterface {
 
-    private lateinit var progressDialog: ProgressDialog
+    private lateinit var progressBar: CustomProgressBar
     private lateinit var apiService: ApiService
     private lateinit var sessionManager: SessionManager
     private val userKind get() = sessionManager.userKind().toString()
@@ -258,8 +251,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var selectedTermin: String = ""
     private var selectedReputation: String = ""
     private var selectedHariBayar: String = ""
-    private var cameraPermissionLauncher: ActivityResultLauncher<String>? = null
-    private var imagePicker: ActivityResultLauncher<Intent>? = null
     private var selectedUri: Uri? = null
     private var currentPhotoUri: Uri? = null
 
@@ -302,6 +293,54 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private lateinit var phoneCategoriesFRC: FirebaseRemoteConfig
 
+    private val detailLauncher = registerForActivityResult(
+    ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data = result.data
+            val resultData = data?.getStringExtra("$DETAIL_ACTIVITY_REQUEST_CODE")
+            isClosingAction = data?.getBooleanExtra(IS_CLOSING, false) ?: false
+
+            if (isClosingAction) setupDelivery()
+            if (resultData == SYNC_NOW) hasEdited = true
+        }
+    }
+
+    private val coordinateLauncher = registerForActivityResult(
+    ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data = result.data
+            val latitude = data?.getDoubleExtra("latitude", 0.0)
+            val longitude = data?.getDoubleExtra("longitude", 0.0)
+
+            if (!::etMaps.isInitialized) etMaps = findViewById(R.id.et_maps)
+            etMaps.let {
+                if (latitude != null && longitude != null) it.setText("$latitude,$longitude")
+                it.error = null
+                it.clearFocus()
+            }
+        }
+    }
+
+    private val cameraPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        if (isGranted) {
+            chooseFile()
+        } else {
+            handleMessage(this@DetailContactActivity, "CAMERA ACCESS DENIED", "Izin kamera ditolak")
+        }
+        etKtp.clearFocus()
+    }
+
+    private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data: Intent? = result.data
+            selectedUri = if (data == null || data.data == null) currentPhotoUri else data.data
+            tvSelectedKtp.text = "File terpilih: " + selectedUri?.let { getFileNameFromUri(it) }
+        }
+        etKtp.clearFocus()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -314,33 +353,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         setContentView(binding.root)
 
-        progressDialog = ProgressDialog(this)
-        progressDialog.setCancelable(false)
-        progressDialog.setMessage(getString(R.string.txt_loading))
+        progressBar = CustomProgressBar(this)
+        progressBar.setCancelable(false)
+        progressBar.setMessage(getString(R.string.txt_loading))
 
         apiService = HttpClient.create()
 
         if (CustomUtility(this).isUserWithOnlineStatus()) {
             CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-003", userID)
-        }
-
-        // Setup KTP Image Picker
-        cameraPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) {
-                chooseFile()
-            } else {
-                handleMessage(this@DetailContactActivity, "CAMERA ACCESS DENIED", "Izin kamera ditolak")
-            }
-            etKtp.clearFocus()
-        }
-        imagePicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val data: Intent? = result.data
-                selectedUri = if (data == null || data.data == null) currentPhotoUri else data.data
-                tvSelectedKtp.text = "File terpilih: " + selectedUri?.let { getFileNameFromUri(it) }
-//                navigateToPreviewKtp()
-            }
-            etKtp.clearFocus()
         }
 
         phoneCategoriesFRC = FirebaseRemoteConfig.getInstance()
@@ -681,7 +701,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             val intent = Intent(this, MapsActivity::class.java)
             intent.putExtra(CONST_MAPS, data)
             intent.putExtra(GET_COORDINATE, true)
-            startActivityForResult(intent, REQUEST_EDIT_CONTACT_COORDINATE)
+            coordinateLauncher.launch(intent)
         } else checkLocationPermission()
     }
 
@@ -964,12 +984,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val pPromoID = if (selectedPromo != null) selectedPromo!!.id else "0"
 
         loadingState(true)
-        progressDialog.show()
+        progressBar.show()
 
 //        Handler(Looper.getMainLooper()).postDelayed({
 //            handleMessage(this, "TAG SAVE", "${contactId!!}, ${formatPhoneNumber(pPhone)}, $pName, $pOwner, $pBirthday, $pMapsUrl, ${pCityID!!}, $pAddress, $pStatus, $imagePart, $pTermin, $pReputation, $pPromoID, $pWeeklyVisitStatus, $pHariBayar")
 //            loadingState(false)
-//            progressDialog.dismiss()
+//            progressBar.dismiss()
 //        }, 1000)
 //
 //        return
@@ -1109,7 +1129,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                             handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal mengubah! Message: ${ responseBody.message }")
                             loadingState(false)
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             toggleEdit(false)
 
                         }
@@ -1117,7 +1137,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                             handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal mengubah data!")
                             loadingState(false)
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             toggleEdit(false)
 
                         }
@@ -1127,7 +1147,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                     handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal mengubah data! Error: " + response.message())
                     loadingState(false)
-                    progressDialog.dismiss()
+                    progressBar.dismiss()
                     toggleEdit(false)
 
                 }
@@ -1141,7 +1161,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on saveEdit(). Catch: ${e.message}")
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
-                progressDialog.dismiss()
+                progressBar.dismiss()
                 toggleEdit(false)
 
             }
@@ -1154,7 +1174,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         contactId = intent.getStringExtra(CONST_CONTACT_ID) ?: "0"
         loadingState(true)
-        progressDialog.show()
+        progressBar.show()
 
         lifecycleScope.launch {
             try {
@@ -1176,7 +1196,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                             handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak! Message: Response status $RESPONSE_STATUS_FAIL or $RESPONSE_STATUS_FAILED")
 //                            loadingState(false)
-//                            progressDialog.dismiss()
+//                            progressBar.dismiss()
                             toggleEdit(false)
                             setToGetCities()
 
@@ -1185,7 +1205,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                             handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak!")
 //                            loadingState(false)
-//                            progressDialog.dismiss()
+//                            progressBar.dismiss()
                             toggleEdit(false)
                             setToGetCities()
 
@@ -1196,7 +1216,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                     handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak! Error: " + response.message())
 //                    loadingState(false)
-//                    progressDialog.dismiss()
+//                    progressBar.dismiss()
                     toggleEdit(false)
                     setToGetCities()
 
@@ -1211,7 +1231,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getContact(). Catch: ${e.message}")
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
-                progressDialog.dismiss()
+                progressBar.dismiss()
                 toggleEdit(false)
                 setToGetCities()
 
@@ -1230,7 +1250,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun getDetailContact(withToggleEdit: Boolean = true) {
         loadingState(true)
-        if (!progressDialog.isShowing) progressDialog.show()
+        if (!progressBar.isShowing()) progressBar.show()
 
         lifecycleScope.launch {
             try {
@@ -1283,14 +1303,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                             hasEdited = true
                             loadingState(false)
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
 
                         }
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
                             handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak! Message: Response status $RESPONSE_STATUS_FAIL or $RESPONSE_STATUS_FAILED")
                             loadingState(false)
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             toggleEdit(false)
 
                         }
@@ -1298,7 +1318,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                             handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak!")
                             loadingState(false)
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             toggleEdit(false)
 
                         }
@@ -1308,7 +1328,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                     handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak! Error: " + response.message())
                     loadingState(false)
-                    progressDialog.dismiss()
+                    progressBar.dismiss()
                     toggleEdit(false)
 
                 }
@@ -1321,7 +1341,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getDetailContact(). Catch: ${e.message}")
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
                 loadingState(false)
-                progressDialog.dismiss()
+                progressBar.dismiss()
                 toggleEdit(false)
 
             }
@@ -1445,7 +1465,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
             else intent.putExtra(CONST_NAME, tvName.text)
 
-            startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+            detailLauncher.launch(intent)
 
         } else {
             val parentLayout: ViewGroup = findViewById(R.id.detail_contact_activity)
@@ -1504,7 +1524,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 if (iMapsUrl == EMPTY_FIELD_VALUE) intent.putExtra(CONST_MAPS, "")
                 else intent.putExtra(CONST_MAPS, iMapsUrl)
 
-                startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+                detailLauncher.launch(intent)
 
             } R.id.suratJalanOption, R.id.invoiceOption -> {
 
@@ -1515,7 +1535,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
                 else intent.putExtra(CONST_NAME, tvName.text)
 
-                startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+                detailLauncher.launch(intent)
 
             } R.id.reportOption -> {
 
@@ -1527,14 +1547,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
                 else intent.putExtra(CONST_NAME, tvName.text)
 
-                startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+                detailLauncher.launch(intent)
 
 //            } R.id.btnChecklistReport -> {
 //
 //                val intent = Intent(this@DetailContactActivity, ChecklistReportActivity::class.java)
 //                intent.putExtra(CONST_NAME, iName)
 //                intent.putExtra(CONST_MAPS, iMapsUrl)
-//                startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+//                detailLauncher.launch(intent)
 
             } else -> {
 
@@ -1554,7 +1574,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 if (iMapsUrl == EMPTY_FIELD_VALUE) intent.putExtra(CONST_MAPS, "")
                 else intent.putExtra(CONST_MAPS, iMapsUrl)
 
-                startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+                detailLauncher.launch(intent)
 
             }
         }
@@ -1828,14 +1848,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         }
 
                         loadingState(false)
-                        progressDialog.dismiss()
+                        progressBar.dismiss()
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
                         handleMessage(this@DetailContactActivity, "LIST PROMO", "Daftar promo kosong!")
 
                         loadingState(false)
-                        progressDialog.dismiss()
+                        progressBar.dismiss()
 
                     }
                     else -> {
@@ -1843,7 +1863,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
 
                         loadingState(false)
-                        progressDialog.dismiss()
+                        progressBar.dismiss()
 
                     }
                 }
@@ -1858,7 +1878,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
 
                 loadingState(false)
-                progressDialog.dismiss()
+                progressBar.dismiss()
 
             }
 
@@ -2231,7 +2251,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             val chooserIntent = Intent.createChooser(galleryIntent, "Pilih Gambar")
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(cameraIntent))
 
-            imagePicker!!.launch(chooserIntent)
+            imagePickerLauncher!!.launch(chooserIntent)
         } else {
             cameraPermissionLauncher!!.launch(Manifest.permission.CAMERA)
         }
@@ -2256,31 +2276,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
         }
         return fileName
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == DETAIL_ACTIVITY_REQUEST_CODE) {
-
-            val resultData = data?.getStringExtra("$DETAIL_ACTIVITY_REQUEST_CODE")
-            isClosingAction = data?.getBooleanExtra(IS_CLOSING, false) ?: false
-
-            if (isClosingAction) setupDelivery()
-            if (resultData == SYNC_NOW) hasEdited = true
-
-        } else if (requestCode == REQUEST_EDIT_CONTACT_COORDINATE) {
-            val latitude = data?.getDoubleExtra("latitude", 0.0)
-            val longitude = data?.getDoubleExtra("longitude", 0.0)
-            if (!::etMaps.isInitialized) etMaps = findViewById(R.id.et_maps)
-            etMaps.let {
-                if (latitude != null && longitude != null) it.setText("$latitude,$longitude")
-                it.error = null
-                it.clearFocus()
-            }
-        }
-
     }
 
     @Deprecated("Deprecated in Java")
@@ -2385,7 +2380,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                         intent.putExtra(CONST_IS_TRACKING, true)
                                         intent.putExtra(CONST_DELIVERY_ID, deliveryId)
                                         intent.putExtra(CONST_CONTACT_ID, contactId)
-                                        startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+                                        detailLauncher.launch(intent)
                                     }
                                     checkServiceStatus()
                                 } else setupBtnDelivery()
@@ -2467,7 +2462,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             intent.putExtra(CONST_IS_TRACKING, true)
                             intent.putExtra(CONST_DELIVERY_ID, deliveryId)
                             intent.putExtra(CONST_CONTACT_ID, contactId)
-                            startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+                            detailLauncher.launch(intent)
                         }
 
                         hasEdited = true
@@ -2779,7 +2774,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         else etAddress.setText(EMPTY_FIELD_VALUE)
 
 //                            loadingState(false)
-//                            progressDialog.dismiss()
+//                            progressBar.dismiss()
 
         // Set Spinner
         setupStatusSpinner()
@@ -2809,6 +2804,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     override fun onDestroy() {
         super.onDestroy()
+        if (::progressBar.isInitialized && progressBar.isShowing()) {
+            progressBar.dismiss()
+        }
         if (pingUtility != null) pingUtility!!.stopPingMonitoring()
         if (CustomUtility(this).isUserWithOnlineStatus()) {
             CustomUtility(this).setUserStatusOnline(false, userDistributorIds ?: "-custom-003", userID)

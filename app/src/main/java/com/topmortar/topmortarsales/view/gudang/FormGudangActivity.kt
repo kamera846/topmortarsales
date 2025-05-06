@@ -1,15 +1,12 @@
-@file:Suppress("DEPRECATION")
-
 package com.topmortar.topmortarsales.view.gudang
 
 import android.Manifest
-import android.annotation.SuppressLint
-import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -25,7 +22,6 @@ import com.topmortar.topmortarsales.commons.EDIT_CONTACT
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.REQUEST_BASECAMP_FRAGMENT
-import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
@@ -35,6 +31,7 @@ import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
@@ -54,12 +51,11 @@ import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 
-@SuppressLint("SetTextI18n")
 class FormGudangActivity : AppCompatActivity() {
 
-    private var _binding: ActivityFormGudangBinding? = null
-    private val binding get() = _binding!!
+    private lateinit var binding: ActivityFormGudangBinding
     private lateinit var sessionManager: SessionManager
+    private lateinit var progressBar: CustomProgressBar
     private val userCityID get() = sessionManager.userCityID()
     private val userKind get() = sessionManager.userKind()
     private val userDistributorId get() = sessionManager.userDistributor().toString()
@@ -71,19 +67,33 @@ class FormGudangActivity : AppCompatActivity() {
     private var name = ""
     private var idGudang = "-1"
 
+    private val coordinateLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == RESULT_OK) {
+            val latitude = it.data?.getDoubleExtra("latitude", 0.0)
+            val longitude = it.data?.getDoubleExtra("longitude", 0.0)
+            if (latitude != null && longitude != null) binding.etMapsUrl.setText("$latitude,$longitude")
+            binding.etMapsUrl.error = null
+            binding.etMapsUrl.clearFocus()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.hide()
         applyMyEdgeToEdge(isPrimary = false)
 
-        _binding = ActivityFormGudangBinding.inflate(layoutInflater)
+        binding = ActivityFormGudangBinding.inflate(layoutInflater)
         sessionManager = SessionManager(this)
         setContentView(binding.root)
 
         isEdit = intent.getBooleanExtra(EDIT_CONTACT, false)
         val iDate = intent.getStringExtra(CONST_DATE)
         if (isEdit) setDataEdit()
+
+        progressBar = CustomProgressBar(this)
+        progressBar.setCancelable(false)
+        progressBar.setMessage(getString(R.string.txt_saving))
 
         binding.titleBar.tvTitleBar.text = if (isEdit) "Edit Gudang" else "Buat Gudang Baru"
         binding.titleBar.icBack.setOnClickListener { finish() }
@@ -145,25 +155,15 @@ class FormGudangActivity : AppCompatActivity() {
     }
 
     private fun getCoordinate() {
-        val data = "${ binding.etMapsUrl.text }"
+        val data = "${binding.etMapsUrl.text}"
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             val intent = Intent(this, MapsActivity::class.java)
             intent.putExtra(CONST_MAPS, data)
             intent.putExtra(GET_COORDINATE, true)
-            startActivityForResult(intent, REQUEST_EDIT_CONTACT_COORDINATE)
-        } else checkLocationPermission()
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_EDIT_CONTACT_COORDINATE) {
-            val latitude = data?.getDoubleExtra("latitude", 0.0)
-            val longitude = data?.getDoubleExtra("longitude", 0.0)
-            if (latitude != null && longitude != null) binding.etMapsUrl.setText("$latitude,$longitude")
-            binding.etMapsUrl.error = null
-            binding.etMapsUrl.clearFocus()
+            coordinateLauncher.launch(intent)
+        } else {
+            checkLocationPermission()
         }
     }
 
@@ -202,10 +202,7 @@ class FormGudangActivity : AppCompatActivity() {
     private fun submitForm() {
         if (!isValidForm()) return
 
-        val loadingState = ProgressDialog(this)
-        loadingState.setCancelable(false)
-        loadingState.setMessage(getString(R.string.txt_saving))
-        loadingState.show()
+        progressBar.show()
 
         val phone = "${ binding.etPhone.text }"
         val name = "${ binding.etName.text }"
@@ -268,19 +265,16 @@ class FormGudangActivity : AppCompatActivity() {
                         resultIntent.putExtra(REQUEST_BASECAMP_FRAGMENT, SYNC_NOW)
                         setResult(RESULT_OK, resultIntent)
                         finish()
-                        loadingState.dismiss()
 
                     }
                     RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
                         handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, response.message)
-                        loadingState.dismiss()
 
                     }
                     else -> {
 
                         handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, "Gagal menyimpan!")
-                        loadingState.dismiss()
 
                     }
                 }
@@ -293,8 +287,9 @@ class FormGudangActivity : AppCompatActivity() {
                 }
                 FirebaseUtils.logErr(this@FormGudangActivity, "Failed FormGudangActivity on submitForm(). Catch: ${e.message}")
                 handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
-                loadingState.dismiss()
 
+            } finally {
+                progressBar.dismiss()
             }
 
         }
@@ -322,11 +317,6 @@ class FormGudangActivity : AppCompatActivity() {
             return false
         }
         return true
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        _binding = null
     }
 
     private fun getCities() {
@@ -404,6 +394,13 @@ class FormGudangActivity : AppCompatActivity() {
         val searchKey = binding.etCityOption.text.toString()
         if (searchKey.isNotEmpty()) searchModal.setSearchKey(searchKey)
         searchModal.show()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (::progressBar.isInitialized && progressBar.isShowing()) {
+            progressBar.dismiss()
+        }
     }
 
 }

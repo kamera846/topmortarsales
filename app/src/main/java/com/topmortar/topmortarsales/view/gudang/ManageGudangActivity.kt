@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.LinearLayout
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,7 +22,6 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.EDIT_CONTACT
-import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.REQUEST_BASECAMP_FRAGMENT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -56,6 +56,18 @@ class ManageGudangActivity : AppCompatActivity() {
     private lateinit var searchModal: SearchModal
     private var selectedCity: ModalSearchModel? = null
     private var citiesResults: ArrayList<CityModel> = arrayListOf()
+
+    private val activityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == RESULT_OK) {
+            val resultData = it.data?.getStringExtra(REQUEST_BASECAMP_FRAGMENT)
+
+            if (resultData == SYNC_NOW) {
+
+                getList()
+
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -186,8 +198,7 @@ class ManageGudangActivity : AppCompatActivity() {
             intent.putExtra(CONST_LOCATION, data?.id_city)
             intent.putExtra(CONST_MAPS, data?.location_warehouse)
             intent.putExtra(CONST_DATE, data?.created_at)
-            @Suppress("DEPRECATION")
-            startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
+            activityResultLauncher.launch(intent)
         } else {
 
             val intent = Intent(this@ManageGudangActivity, NewReportActivity::class.java)
@@ -224,8 +235,7 @@ class ManageGudangActivity : AppCompatActivity() {
     private fun navigateFab() {
 
         val intent = Intent(this@ManageGudangActivity, FormGudangActivity::class.java)
-        @Suppress("DEPRECATION")
-        startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
+        activityResultLauncher.launch(intent)
 
     }
 
@@ -239,20 +249,6 @@ class ManageGudangActivity : AppCompatActivity() {
             badgeRefresh.visibility = View.VISIBLE
             tvTitle.setOnClickListener { getList() }
         } else badgeRefresh.visibility = View.GONE
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == MAIN_ACTIVITY_REQUEST_CODE) {
-            val resultData = data?.getStringExtra(REQUEST_BASECAMP_FRAGMENT)
-
-            if (resultData == SYNC_NOW) {
-
-                getList()
-
-            }
-        }
     }
 
     private fun getCities() {
