@@ -29,7 +29,7 @@ import java.util.Calendar
 
 class TrackingService : Service() {
 
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private var fusedLocationClient: FusedLocationProviderClient? = null
     private lateinit var locationRequest: LocationRequest
     private var locationCallback: LocationCallback? = null
     private lateinit var firebaseReference: DatabaseReference
@@ -128,7 +128,9 @@ class TrackingService : Service() {
             &&
             ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
         ) return
-        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback!!, Looper.getMainLooper())
+        if (fusedLocationClient != null) {
+            fusedLocationClient?.requestLocationUpdates(locationRequest, locationCallback!!, Looper.getMainLooper())
+        }
         isLocationUpdating = true
     }
 
@@ -156,7 +158,9 @@ class TrackingService : Service() {
 
     private fun stopLocationUpdates() {
 
-        if (::fusedLocationClient.isInitialized) fusedLocationClient.removeLocationUpdates(locationCallback!!)
+        if (fusedLocationClient != null) {
+            fusedLocationClient?.removeLocationUpdates(locationCallback!!)
+        }
 
         locationCallback = null
         isLocationUpdating = false
