@@ -1,11 +1,7 @@
-@file:Suppress("DEPRECATION")
-
 package com.topmortar.topmortarsales.view.tukang
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.DatePickerDialog
-import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -19,6 +15,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -28,7 +25,6 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
-import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
@@ -39,6 +35,7 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.updateTxtMaxLength
+import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
@@ -60,7 +57,6 @@ import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
-@SuppressLint("SetTextI18n")
 class AddTukangActivity : AppCompatActivity() {
 
     private lateinit var icBack: ImageView
@@ -77,7 +73,7 @@ class AddTukangActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddTukangBinding
     private lateinit var apiService: ApiService
-    private lateinit var progressDialog: ProgressDialog
+    private lateinit var progressBar: CustomProgressBar
     private lateinit var sessionManager: SessionManager
     private val userKind get() = sessionManager.userKind().toString()
     private val userDistributorId get() = sessionManager.userDistributor().toString()
@@ -97,6 +93,17 @@ class AddTukangActivity : AppCompatActivity() {
 
     private var iLocation: String? = null
 
+    private val coordinateResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == RESULT_OK) {
+            val latitude = it.data?.getDoubleExtra("latitude", 0.0)
+            val longitude = it.data?.getDoubleExtra("longitude", 0.0)
+            val latLng = "$latitude,$longitude"
+            if (latitude != null && longitude != null) etMapsUrl.setText(latLng)
+            etMapsUrl.error = null
+            etMapsUrl.clearFocus()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -106,9 +113,9 @@ class AddTukangActivity : AppCompatActivity() {
 
         binding = ActivityAddTukangBinding.inflate(layoutInflater)
         apiService = HttpClient.create()
-        progressDialog = ProgressDialog(this)
-        progressDialog.setMessage(getString(R.string.txt_loading))
-        progressDialog.setCancelable(false)
+        progressBar = CustomProgressBar(this)
+        progressBar.setMessage(getString(R.string.txt_loading))
+        progressBar.setCancelable(false)
         sessionManager = SessionManager(this)
 
         setContentView(binding.root)
@@ -119,7 +126,7 @@ class AddTukangActivity : AppCompatActivity() {
         etMessageListener()
         checkLocationPermission()
 
-        progressDialog.show()
+        progressBar.show()
         Handler(Looper.getMainLooper()).postDelayed({
             if (userKind == USER_KIND_ADMIN) getCities()
             else getSkills()
@@ -287,7 +294,7 @@ class AddTukangActivity : AppCompatActivity() {
             val intent = Intent(this, MapsActivity::class.java)
             intent.putExtra(CONST_MAPS, data)
             intent.putExtra(GET_COORDINATE, true)
-            startActivityForResult(intent, REQUEST_EDIT_CONTACT_COORDINATE)
+            coordinateResultLauncher.launch(intent)
         } else checkLocationPermission()
     }
 
@@ -597,7 +604,7 @@ class AddTukangActivity : AppCompatActivity() {
                         }
 
                         etSkill.isEnabled = true
-                        progressDialog.dismiss()
+                        progressBar.dismiss()
                         isLoaded = true
 
                     }
@@ -605,14 +612,14 @@ class AddTukangActivity : AppCompatActivity() {
 
                         handleMessage(this@AddTukangActivity, "LIST CITY", "Daftar keahlian kosong!")
                         etSkill.isEnabled = true
-                        progressDialog.dismiss()
+                        progressBar.dismiss()
 
                     }
                     else -> {
 
                         handleMessage(this@AddTukangActivity, TAG_RESPONSE_CONTACT, "Gagal memuat data")
                         etSkill.isEnabled = true
-                        progressDialog.dismiss()
+                        progressBar.dismiss()
 
                     }
                 }
@@ -623,25 +630,11 @@ class AddTukangActivity : AppCompatActivity() {
                 FirebaseUtils.logErr(this@AddTukangActivity, "Failed AddTukangActivity on getSkill(). Catch: ${e.message}")
                 handleMessage(this@AddTukangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
                 etSkill.isEnabled = true
-                progressDialog.dismiss()
+                progressBar.dismiss()
 
             }
 
         }
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == REQUEST_EDIT_CONTACT_COORDINATE) {
-            val latitude = data?.getDoubleExtra("latitude", 0.0)
-            val longitude = data?.getDoubleExtra("longitude", 0.0)
-            if (latitude != null && longitude != null) etMapsUrl.setText("$latitude,$longitude")
-            etMapsUrl.error = null
-            etMapsUrl.clearFocus()
-        }
-
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
@@ -658,6 +651,13 @@ class AddTukangActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (::progressBar.isInitialized && progressBar.isShowing()) {
+            progressBar.dismiss()
+        }
     }
 
 }

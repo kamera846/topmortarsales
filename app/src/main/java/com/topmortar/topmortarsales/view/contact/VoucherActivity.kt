@@ -3,8 +3,6 @@
 package com.topmortar.topmortarsales.view.contact
 
 import android.Manifest
-import android.annotation.SuppressLint
-import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
@@ -22,6 +20,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.topmortar.topmortarsales.R
@@ -42,6 +42,8 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
+import com.topmortar.topmortarsales.commons.services.TrackingService
+import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -57,9 +59,9 @@ import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 
-@SuppressLint("SetTextI18n")
 class VoucherActivity : AppCompatActivity() {
 
+    private lateinit var progressBar: CustomProgressBar
     private lateinit var binding: ActivityVoucherBinding
     private lateinit var apiService: ApiService
     private var idContact = ""
@@ -92,6 +94,10 @@ class VoucherActivity : AppCompatActivity() {
         idContact = intent.getStringExtra(CONST_CONTACT_ID).toString()
         contactName = intent.getStringExtra(CONST_NAME).toString()
         contactMapsUrl = intent.getStringExtra(CONST_MAPS).toString()
+
+        progressBar = CustomProgressBar(this)
+        progressBar.setCancelable(false)
+        progressBar.setMessage("Sedang menghitung jarak...")
 
         binding.titleBarDark.icBack.setOnClickListener { finish() }
         binding.titleBarDark.tvTitleBar.text = "Daftar Voucher"
@@ -226,10 +232,7 @@ class VoucherActivity : AppCompatActivity() {
     }
 
     private fun setupShowModal(data: VoucherModel) {
-        val progressDialog = ProgressDialog(this)
-        progressDialog.setCancelable(false)
-        progressDialog.setMessage("Sedang menghitung jarak...")
-        progressDialog.show()
+        progressBar.show()
 
         Handler(Looper.getMainLooper()).postDelayed({
 
@@ -243,6 +246,13 @@ class VoucherActivity : AppCompatActivity() {
                     urlUtility.requestLocationUpdate()
 
                     if (!urlUtility.isUrl(mapsUrl) && mapsUrl.isNotEmpty()) {
+
+                        val status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
+                        if (status != ConnectionResult.SUCCESS) {
+                            showDialogGooglePlayNotAvailable()
+                            return@postDelayed
+                        }
+
                         fusedLocationClient.lastLocation.addOnSuccessListener { location: Location ->
 
                             // Courier Location
@@ -263,12 +273,12 @@ class VoucherActivity : AppCompatActivity() {
                                 if (distance > MAX_REPORT_DISTANCE) {
                                     val builder = AlertDialog.Builder(this)
                                     builder.setCancelable(false)
-                                    builder.setOnDismissListener { progressDialog.dismiss() }
-                                    builder.setOnCancelListener { progressDialog.dismiss() }
+                                    builder.setOnDismissListener { progressBar.dismiss() }
+                                    builder.setOnCancelListener { progressBar.dismiss() }
                                     builder.setTitle("Peringatan!")
                                         .setMessage("Titik anda saat ini $shortDistance km dari titik toko. Cobalah untuk lebih dekat dengan toko!")
                                         .setPositiveButton("Oke") { dialog, _ ->
-                                            progressDialog.dismiss()
+                                            progressBar.dismiss()
                                             isDistanceToLong = true
                                             dialog.dismiss()
                                         }
@@ -279,14 +289,14 @@ class VoucherActivity : AppCompatActivity() {
                                             intent.putExtra(CONST_MAPS_NAME, contactName)
                                             startActivity(intent)
 
-                                            progressDialog.dismiss()
+                                            progressBar.dismiss()
                                             isDistanceToLong = true
 
                                             dialog.dismiss()
                                         }
                                     builder.show()
                                 } else {
-                                    progressDialog.dismiss()
+                                    progressBar.dismiss()
                                     isDistanceToLong = false
 
                                     voucherModal = null
@@ -305,18 +315,18 @@ class VoucherActivity : AppCompatActivity() {
                                 }
 
                             } else {
-                                progressDialog.dismiss()
+                                progressBar.dismiss()
                                 Toast.makeText(this, "Gagal memproses koordinat", TOAST_SHORT).show()
                             }
 
                         }.addOnFailureListener {
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             handleMessage(this, "LOG REPORT", "Gagal mendapatkan lokasi anda. Err: " + it.message)
 //                            Toast.makeText(this, "Gagal mendapatkan lokasi anda", TOAST_SHORT).show()
                         }
 
                     } else {
-                        progressDialog.dismiss()
+                        progressBar.dismiss()
                         val message = "Anda tidak dapat membuat laporan untuk saat ini, silakan hubungi admin untuk memperbarui koordinat toko ini"
                         val actionTitle = "Hubungi Sekarang"
                         val customUtility = CustomUtility(this@VoucherActivity)
@@ -328,17 +338,47 @@ class VoucherActivity : AppCompatActivity() {
                     }
 
                 } else {
-                    progressDialog.dismiss()
+                    progressBar.dismiss()
                     val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                     startActivity(enableLocationIntent)
                 }
 
             } else {
-                progressDialog.dismiss()
+                progressBar.dismiss()
                 ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
             }
 
         }, 500)
+    }
+
+    private fun showDialogGooglePlayNotAvailable() {
+        try {
+
+            progressBar.dismiss()
+
+            val serviceIntent = Intent(this, TrackingService::class.java)
+            stopService(serviceIntent)
+
+            AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setTitle("Peringatan!")
+                .setMessage("Perangkat anda tidak mendukung layanan 'Google Play Service', beberapa fitur di aplikasi mungkin tidak dapat berjalan.")
+                .setPositiveButton("Kembali") { dialog, _ ->
+                    dialog.dismiss()
+                    finish()
+                }
+                .show()
+        } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
+            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on showDialogGooglePlayNotAvailable(). Catch: ${e.message}")
+            handleMessage(
+                this,
+                "Home Courier Failed",
+                "Failed HomeSalesActivity on showDialogGooglePlayNotAvailable(). Error: ${e.message}"
+            )
+        }
     }
 
     override fun onStart() {
@@ -359,6 +399,9 @@ class VoucherActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        if (::progressBar.isInitialized && progressBar.isShowing()) {
+            progressBar.dismiss()
+        }
         if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
             CustomUtility(this).setUserStatusOnline(false, userDistributors ?: "-custom-005", userId)
         }

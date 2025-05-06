@@ -1,9 +1,6 @@
-@file:Suppress("DEPRECATION")
-
 package com.topmortar.topmortarsales.view
 
 import android.annotation.SuppressLint
-import android.app.ProgressDialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.res.Configuration
@@ -31,6 +28,7 @@ import android.widget.PopupMenu
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
@@ -88,6 +86,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_MARKETING
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
+import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
@@ -118,12 +117,10 @@ import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
 import com.topmortar.topmortarsales.view.tukang.ListTukangActivity
 import com.topmortar.topmortarsales.view.user.ManageUserActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.util.Locale
 import kotlin.coroutines.cancellation.CancellationException
 
-@SuppressLint("SetTextI18n")
 class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
     NavigationView.OnNavigationItemSelectedListener {
 
@@ -158,7 +155,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
     private var contacts: ArrayList<ContactModel> = arrayListOf()
     private var cities: ArrayList<CityModel> = arrayListOf()
     private lateinit var firebaseReference: DatabaseReference
-    private lateinit var progressDialog: ProgressDialog
+    private lateinit var progressBar: CustomProgressBar
     private lateinit var searchCityForMaps: SearchModal
 
     // Initialize Search Engine
@@ -185,6 +182,18 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
     private lateinit var listCoordinateStatus: ArrayList<String>
     private lateinit var listCoordinateCityID: ArrayList<String>
 
+    private val activityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == RESULT_OK) {
+            val resultData = it.data?.getStringExtra("$MAIN_ACTIVITY_REQUEST_CODE")
+
+            if (resultData == SYNC_NOW) {
+
+                getUserLoggedIn()
+
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -205,8 +214,8 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         AppUpdateHelper.initialize()
         AppUpdateHelper.checkForUpdate(this)
 
-        progressDialog = ProgressDialog(this)
-        progressDialog.setMessage(getString(R.string.txt_loading))
+        progressBar = CustomProgressBar(this)
+        progressBar.setMessage(getString(R.string.txt_loading))
 
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
 
@@ -311,7 +320,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             R.id.nav_city -> {
                 val intent = Intent(this@MainActivity, ManageCityActivity::class.java)
                 intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
-                startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
+                activityLauncher.launch(intent)
             }
             R.id.nav_tukang -> {
                 startActivity(Intent(this@MainActivity, ListTukangActivity::class.java))
@@ -498,7 +507,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             intent.putExtra(CONST_LOCATION, data.id_city)
         }
 
-        startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
+        activityLauncher.launch(intent)
 
     }
 
@@ -526,12 +535,12 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             intent.putExtra(CONST_WEEKLY_VISIT_STATUS, data.tagih_mingguan)
         }
 
-        startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
+        activityLauncher.launch(intent)
 
     }
 
     private fun navigateCheckLocation() {
-        progressDialog.show()
+        progressBar.show()
 
         Handler(Looper.getMainLooper()).postDelayed({
 
@@ -571,7 +580,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 //                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
 //                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
 //
-//                            progressDialog.dismiss()
+//                            progressBar.dismiss()
 //                            startActivity(intent)
 
                         }
@@ -586,14 +595,14 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
 
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             startActivity(intent)
 
                         }
                         else -> {
 
                             handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
 
                         }
                     }
@@ -605,7 +614,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                     }
                     FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on navigateCheckLocation(). Catch: ${e.message}")
                     handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
-                    progressDialog.dismiss()
+                    progressBar.dismiss()
 
                 }
 
@@ -707,7 +716,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 R.id.option_city -> {
                     val intent = Intent(this@MainActivity, ManageCityActivity::class.java)
                     intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
-                    startActivityForResult(intent, MAIN_ACTIVITY_REQUEST_CODE)
+                    activityLauncher.launch(intent)
                     true
                 }
                 R.id.option_skill -> {
@@ -953,7 +962,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
     private fun getContactsForMaps(cityID: String) {
 
-        progressDialog.show()
+        progressBar.show()
         isSearchContactByCity = true
 
         lifecycleScope.launch {
@@ -989,7 +998,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on getContactsForMaps(). Catch: ${e.message}")
                 handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
             } finally {
-                progressDialog.dismiss()
+                progressBar.dismiss()
             }
 
         }
@@ -1374,7 +1383,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
     private fun onSelectedItems(items: ArrayList<ContactModel>) {
 
-        progressDialog.show()
+        progressBar.show()
 
         listCoordinate = arrayListOf()
         listCoordinateName = arrayListOf()
@@ -1397,7 +1406,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 processed ++
                 percentage = (processed * 100) / totalProcess
                 runOnUiThread {
-                    progressDialog.setMessage(getString(R.string.txt_loading) + "($percentage%)")
+                    progressBar.setMessage(getString(R.string.txt_loading) + "($percentage%)")
                 }
             }
             return null
@@ -1417,29 +1426,11 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
 
-            progressDialog.dismiss()
-            progressDialog.setMessage(getString(R.string.txt_loading))
+            progressBar.dismiss()
+            progressBar.setMessage(getString(R.string.txt_loading))
             isSearchContactByCity = false
             startActivity(intent)
         }
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == MAIN_ACTIVITY_REQUEST_CODE) {
-
-            val resultData = data?.getStringExtra("$MAIN_ACTIVITY_REQUEST_CODE")
-
-            if (resultData == SYNC_NOW) {
-
-                getUserLoggedIn()
-
-            }
-
-        }
-
     }
 
     @Deprecated("Deprecated in Java")
@@ -1507,6 +1498,9 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
     override fun onDestroy() {
         super.onDestroy()
+        if (::progressBar.isInitialized && progressBar.isShowing()) {
+            progressBar.dismiss()
+        }
         if (sessionManager.isLoggedIn()) {
             if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(

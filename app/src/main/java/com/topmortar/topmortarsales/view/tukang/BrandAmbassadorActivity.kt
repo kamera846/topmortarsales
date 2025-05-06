@@ -3,7 +3,6 @@
 package com.topmortar.topmortarsales.view.tukang
 
 import android.annotation.SuppressLint
-import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -36,6 +35,7 @@ import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
+import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
@@ -195,9 +195,9 @@ class BrandAmbassadorActivity : AppCompatActivity() {
     }
 
     private fun navigateChecklocationStore() {
-        val progressDialog = ProgressDialog(this)
-        progressDialog.setMessage("Memuat data tukang…")
-        progressDialog.show()
+        val progressBar = CustomProgressBar(this)
+        progressBar.setMessage("Memuat data tukang…")
+        progressBar.show()
 
         Handler(Looper.getMainLooper()).postDelayed({
 
@@ -230,7 +230,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
 
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             startActivity(intent)
 
                         }
@@ -245,14 +245,14 @@ class BrandAmbassadorActivity : AppCompatActivity() {
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
 
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             startActivity(intent)
 
                         }
                         else -> {
 
                             handleMessage(this@BrandAmbassadorActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
 
                         }
                     }
@@ -262,7 +262,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
 
                     FirebaseUtils.logErr(this@BrandAmbassadorActivity, "Failed BrandAmbassadorActivity on navigateCheckLocationStore(). Catch: ${e.message}")
                     handleMessage(this@BrandAmbassadorActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
-                    progressDialog.dismiss()
+                    progressBar.dismiss()
 
                 }
 
@@ -272,9 +272,9 @@ class BrandAmbassadorActivity : AppCompatActivity() {
     }
 
     private fun navigateChecklocationBasecamp() {
-        val progressDialog = ProgressDialog(this)
-        progressDialog.setMessage("Memuat data basecamp…")
-        progressDialog.show()
+        val progressBar = CustomProgressBar(this)
+        progressBar.setMessage("Memuat data basecamp…")
+        progressBar.show()
 
         Handler(Looper.getMainLooper()).postDelayed({
 
@@ -308,7 +308,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
 
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             startActivity(intent)
 
                         }
@@ -324,14 +324,14 @@ class BrandAmbassadorActivity : AppCompatActivity() {
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
 
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             startActivity(intent)
 
                         }
                         else -> {
 
                             handleMessage(this@BrandAmbassadorActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
 
                         }
                     }
@@ -341,7 +341,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
 
                     FirebaseUtils.logErr(this@BrandAmbassadorActivity, "Failed BrandAmbassadorActivity on navigateChecklocationBasecamp(). Catch: ${e.message}")
                     handleMessage(this@BrandAmbassadorActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
-                    progressDialog.dismiss()
+                    progressBar.dismiss()
 
                 }
 

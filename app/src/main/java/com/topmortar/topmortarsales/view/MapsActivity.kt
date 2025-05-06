@@ -1,10 +1,7 @@
-@file:Suppress("DEPRECATION")
-
 package com.topmortar.topmortarsales.view
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.ProgressDialog
 import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
@@ -27,6 +24,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
@@ -114,6 +112,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
+import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
@@ -149,7 +148,6 @@ import java.util.Locale
 import kotlin.coroutines.cancellation.CancellationException
 
 @OptIn(DelicateCoroutinesApi::class)
-@SuppressLint("SetTextI18n")
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private lateinit var sessionManager: SessionManager
@@ -196,7 +194,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private lateinit var icBack: ImageView
     private lateinit var etSearch: EditText
     private lateinit var icClear: ImageView
-    private lateinit var progressDialog: ProgressDialog
+    private lateinit var progressBar: CustomProgressBar
 
     // Setup Filter
     private lateinit var filterModal: FilterTokoModal
@@ -231,7 +229,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private var percentage = 0
     private var selectedLatLng: LatLng? = null
 
-//    private val courierDrawable = R.drawable.pin_truck_11zon
     private val courierDrawable = R.drawable.pin_truck_pink_cyclamen_11zon
     private val locationBlacklistDrawable = R.drawable.store_location_status_blacklist_copy_11zon
 
@@ -240,6 +237,31 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private lateinit var searchModal: SearchModal
 
     private val bitmapCache = mutableMapOf<Int, Bitmap>()
+
+    private val activityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == RESULT_OK) {
+            val resultData = it.data?.getStringExtra("$DETAIL_ACTIVITY_REQUEST_CODE")
+            val isClosingAction = it.data?.getBooleanExtra(IS_CLOSING, false) ?: false
+
+            if (resultData == SYNC_NOW) {
+                val resultIntent = Intent()
+                resultIntent.putExtra("$DETAIL_ACTIVITY_REQUEST_CODE", SYNC_NOW)
+                resultIntent.putExtra(IS_CLOSING, isClosingAction)
+                setResult(RESULT_OK, resultIntent)
+
+                finish()
+            }
+        }
+    }
+
+    private val trackingLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == RESULT_OK) {
+            val resultData = it.data?.getStringExtra(SYNC_NOW)
+            if (resultData == SYNC_NOW) {
+                setupTrackingCourier()
+            }
+        }
+    }
 
     companion object {
         const val ALL_USER_TRACKING_REQUEST = 123
@@ -257,11 +279,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         isBasecamp = intent.getBooleanExtra(CONST_IS_BASE_CAMP, false)
 
-        progressDialog = ProgressDialog(this)
-//        progressDialog.setTitle("Mencari ${if (isBasecamp) "basecamp" else "toko"} terdekat")
-//        progressDialog.setMessage("Sedang memuat…")
-        progressDialog.setMessage("Mencari ${if (isBasecamp) "basecamp" else "toko"} terdekat…")
-        progressDialog.setCancelable(false)
+        progressBar = CustomProgressBar(this)
+        progressBar.setMessage("Mencari ${if (isBasecamp) "basecamp" else "toko"} terdekat…")
+        progressBar.setCancelable(false)
 
         if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN){
             CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-002", userID)
@@ -361,7 +381,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         if (binding.btnGetLatLng.isVisible) {
             mMap.setPadding(0,0,0, convertDpToPx(80, this))
             mMap.setOnMapLongClickListener { latLng -> setPin(latLng, "Lokasi terpilih", moveCamera = false) }
-//            mMap.setOnMapLongClickListener { latLng -> setPin(latLng, getPlaceNameFromLatLng(latLng), moveCamera = false) }
             if (!sessionManager.pinMapHint()) {
                 showDialog(message = "Tekan dan tahan pada peta untuk menandai lokasi")
                 sessionManager.pinMapHint(true)
@@ -372,7 +391,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location: Location? ->
                     if (location != null) currentLatLng = LatLng(location.latitude,location.longitude)
-//                    if (location != null) currentLatLng = LatLng(-7.952356,112.692583)
                 }
 
             binding.btnGetDirection.setOnClickListener {
@@ -469,8 +487,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 img.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.direction_white))
                 title.text = "Aktifkan Navigasi"
 
-                // Live Location Update with Firebase Realtime Database
-//                if (userKind == USER_KIND_COURIER) stopTracking()
             }, 500)
 
             val limitKm = binding.etKm.text.toString().toDouble()
@@ -557,7 +573,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 fusedLocationClient.lastLocation
                     .addOnSuccessListener { location: Location? ->
                         if (location != null) currentLatLng = LatLng(location.latitude,location.longitude)
-//                    if (location != null) currentLatLng = LatLng(-7.952356,112.692583)
                     }
                 binding.cardGetDirection.visibility = View.VISIBLE
                 if (binding.llFilter.isVisible) mMap.setPadding(0, convertDpToPx(32, this@MapsActivity),0, convertDpToPx(16, this@MapsActivity))
@@ -593,7 +608,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     if (latitude != null && longitude != null) {
                         val latLng = LatLng(latitude, longitude)
                         etSearch.setText("")
-//                        etSearch.setText(getPlaceNameFromLatLng(latLng))
                         binding.recyclerView.visibility = View.GONE
                         binding.rvLoading.visibility = View.GONE
                         return initMaps(latLng, iMapsName)
@@ -610,23 +624,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     @SuppressLint("SuspiciousIndentation")
     private fun searchCoordinate() {
-        if (!progressDialog.isShowing) {
-            progressDialog.show()
-//            Handler(Looper.getMainLooper()).postDelayed({
-//                progressDialog.setMessage("Sedang memuat lebih banyak data ${if (isBasecamp) "basecamp" else "toko"}…")
-//            }, 1000)
+        if (!progressBar.isShowing()) {
+            progressBar.show()
         }
 
         Handler(Looper.getMainLooper()).postDelayed({
 
-//            val urlUtility = URLUtility(this)
             limitKm = binding.etKm.text.toString().toDouble()
             currentFoundItemTotal = 0
 
             mMap.clear()
 
             centerPointLatLng = currentLatLng
-//            println(selectedCenterPoint)
             if (selectedCenterPoint != null && selectedCenterPoint?.id != "-1") {
                 val coordinates = selectedCenterPoint?.etc!!.trim().split(",")
                 centerPointLatLng = if (coordinates.size == 2) {
@@ -648,7 +657,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             if (isNearestStoreDefaultRange == -1) {
 
-                progressDialog.setMessage("Mencari ${listCoordinate?.size} ${ if (isBasecamp) "basecamp" else "toko"}…")
+                progressBar.setMessage("Mencari ${listCoordinate?.size} ${ if (isBasecamp) "basecamp" else "toko"}…")
                 binding.radiusContainer.visibility = View.GONE
 
                 val cameraUpdate = CameraUpdateFactory.newLatLngZoom(centerPointLatLng!!, 11f)
@@ -660,169 +669,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             processed = 0
             percentage = 0
             SearchCoordinateLoopingTask().execute()
-
-//            CoroutineScope(Dispatchers.Default).launch {
-//                withContext(Dispatchers.Main) {
-
-//                    // Start For Loop
-//                    for ((i, item) in listCoordinate!!.iterator().withIndex()) {
-//
-//                        if (!urlUtility.isUrl(item)) {
-//
-//                            val coordinates = item.trim().split(",")
-//                            if (coordinates.size == 2) {
-//                                val latitude = coordinates[0].toDoubleOrNull()
-//                                val longitude = coordinates[1].toDoubleOrNull()
-//
-//                                if (latitude != null && longitude != null) {
-//
-//                                    val distance = urlUtility.calculateDistance(centerPointLatLng!!.latitude, centerPointLatLng.longitude, latitude, longitude)
-//
-//                                    if (distance < limitKm) {
-//
-//                                        val latLng = LatLng(latitude, longitude)
-//                                        binding.recyclerView.visibility = View.GONE
-//                                        binding.rvLoading.visibility = View.GONE
-//
-//                                        val iconDrawable = when (listCoordinateStatus?.get(i)) {
-//                                            STATUS_CONTACT_DATA -> R.drawable.store_location_status_data_11zon
-//                                            STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active_11zon
-//                                            STATUS_CONTACT_PASSIVE -> R.drawable.store_location_status_passive_11zon
-//                                            STATUS_CONTACT_BID -> R.drawable.store_location_status_biding_11zon
-//                                            else -> locationBlacklistDrawable
-//                                        }
-//
-//                                        val originalBitmap = BitmapFactory.decodeResource(resources, iconDrawable)
-//
-//                                        val newWidth = convertDpToPx(40, this@MapsActivity)
-//                                        val newHeight = convertDpToPx(40, this@MapsActivity)
-//
-//                                        val resizedBitmap = Bitmap.createScaledBitmap(originalBitmap, newWidth, newHeight, false)
-//
-//                                        selectedLocation = latLng
-//                                        val markerOptions = MarkerOptions()
-//                                            .position(latLng)
-//                                            .title(listCoordinateName?.get(i))
-//                                            .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap))
-//
-//                                        val onlyStatus = selectedStatusID != "-1" && selectedCitiesID == null && listCoordinateStatus!![i] == selectedStatusID.lowercase(Locale.getDefault())
-//                                        val onlyCities = selectedCitiesID != null && selectedStatusID == "-1" && listCoordinateCityID!![i] == selectedCitiesID?.id_city
-//                                        val statusAndCities = selectedStatusID != "-1" && listCoordinateStatus!![i] == selectedStatusID.lowercase(Locale.getDefault()) && selectedCitiesID != null && listCoordinateCityID!![i] == selectedCitiesID?.id_city
-//
-//                                        if (statusAndCities) {
-//                                            mMap.addMarker(markerOptions)
-//                                            currentFoundItemTotal ++
-//                                        } else if (onlyStatus) {
-//                                            mMap.addMarker(markerOptions)
-//                                            currentFoundItemTotal ++
-//                                        } else if (onlyCities) {
-//                                            mMap.addMarker(markerOptions)
-//                                            currentFoundItemTotal ++
-//                                        } else if (selectedStatusID == "-1" && selectedCitiesID == null) {
-//                                            mMap.addMarker(markerOptions)
-//                                            currentFoundItemTotal ++
-//                                        }
-//
-//                                    }
-//
-//                                }
-//                            }
-//
-//                        }
-//
-//                    } // End For Loop
-
-//                    var textFilter = ""
-//
-//                    if (selectedStatusID != "-1" || selectedVisitedID != "-1" || selectedCitiesID != null) {
-//                        textFilter += if (selectedCitiesID != null && selectedCitiesID?.id_city != "-1") selectedCitiesID?.nama_city else ""
-//                        textFilter += if (selectedStatusID != "-1") if (textFilter.isNotEmpty()) ", $selectedStatusID" else selectedStatusID else ""
-//                        textFilter += if (selectedVisitedID != "-1") if (textFilter.isNotEmpty()) ", $selectedVisitedID" else selectedVisitedID else ""
-//                    } else textFilter = getString(R.string.tidak_ada_filter)
-//
-//                    binding.tvFilter.text = "$textFilter ($currentFoundItemTotal)"
-//
-//                    progressDialog.dismiss()
-////                    progressDialog.setMessage("Sedang memuat…")
-//
-//                    val durationMs = 2000
-//                    val responsiveZoom = when {
-//                        limitKm >= 1 -> when {
-//                            limitKm >= 18 -> 10
-//                            limitKm >= 13 -> 11
-//                            limitKm >= 8 -> 12
-//                            limitKm >= 3 -> 13
-//                            else -> 14
-//                        }
-//                        else -> 15
-//                    }
-//                    val cameraUpdate = CameraUpdateFactory.newLatLngZoom(centerPointLatLng!!, responsiveZoom.toFloat())
-//                    mMap.animateCamera(cameraUpdate, durationMs, null)
-//
-//                    if (currentFoundItemTotal > 0) {
-//                        binding.textTitleTotalNearest.text = "Penelusuran ${if (isBasecamp) "Basecamp" else "Toko"} Terdekat"
-//                        binding.textTotalNearest.text = "$currentFoundItemTotal ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }ditemukan dalam radius $limitKm km"
-//                    } else {
-//                        showDialog(message = "Tidak menemukan ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }di sekitar anda saat ini dalam radius jarak $limitKm km")
-//                        binding.textTitleTotalNearest.text = "Penelusuran ${if (isBasecamp) "Basecamp" else "Toko"} Terdekat"
-//                        binding.textTotalNearest.text = "Tidak dapat menemukan ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }dalam radius $limitKm km"
-//                    }
-//
-//                    binding.cardTelusuri.visibility = View.VISIBLE
-//                    if (listGudang.isNotEmpty()) {
-//                        binding.centerPointContainer.visibility = View.VISIBLE
-//                        binding.centerPointMore.setOnClickListener {
-//                            searchModal.show()
-//                        }
-//                    } else binding.centerPointContainer.visibility = View.GONE
-//                    if (binding.llFilter.isVisible) mMap.setPadding(0, convertDpToPx(32, this@MapsActivity),0, convertDpToPx(16, this@MapsActivity))
-//                    else mMap.setPadding(0,0,0, convertDpToPx(16, this@MapsActivity))
-//                    binding.btnTelusuri.setOnClickListener {
-//                        if (binding.etKm.toString().isNotEmpty()) {
-//                            binding.etKm.error = null
-//                            binding.etKm.clearFocus()
-//                            searchCoordinate()
-//                        } else {
-//                            binding.etKm.error = "1-100"
-//                            binding.etKm.requestFocus()
-//                        }
-//                    }
-//                    binding.btnMinusKm.setOnClickListener {
-//                        binding.etKm.clearFocus()
-//                        binding.etKm.error = null
-//                        val etKm = binding.etKm.text.toString().toInt()
-//                        if (etKm > 1) binding.etKm.setText("${etKm - 1}")
-//                    }
-//                    binding.btnPlusKm.setOnClickListener {
-//                        binding.etKm.clearFocus()
-//                        binding.etKm.error = null
-//                        val etKm = binding.etKm.text.toString().toInt()
-//                        if (etKm < 100) binding.etKm.setText("${etKm + 1}")
-//                    }
-//                    binding.etKm.addTextChangedListener(object: TextWatcher {
-//                        override fun beforeTextChanged(
-//                            s: CharSequence?,
-//                            start: Int,
-//                            count: Int,
-//                            after: Int
-//                        ) {
-//                        }
-//
-//                        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-//                        }
-//
-//                        override fun afterTextChanged(s: Editable?) {
-//                            val etKm = s.toString()
-//                            if (etKm.isNotEmpty()) {
-//                                if (etKm.toInt() < 1) binding.etKm.setText("${1}")
-//                                else if (etKm.toInt() > 100) binding.etKm.setText("${100}")
-//                            }
-//                        }
-//
-//                    })
-//                }
-//            }
-
         }, 100)
     }
 
@@ -831,7 +677,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         override fun doInBackground(vararg params: Void?): Void? {
             val urlUtility = URLUtility(this@MapsActivity)
             var firstItemSelected = false
-            // Start For Loop
+
             for ((i, item) in listCoordinate!!.iterator().withIndex()) {
 
                 processed ++
@@ -839,11 +685,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                 if (isNearestStoreDefaultRange == -1) {
                     runOnUiThread {
-                        progressDialog.setMessage("Mencari ${listCoordinate?.size} ${ if (isBasecamp) "basecamp" else "toko"}…  ($percentage%)")
+                        progressBar.setMessage("Mencari ${listCoordinate?.size} ${ if (isBasecamp) "basecamp" else "toko"}…  ($percentage%)")
                     }
                 } else {
                     runOnUiThread {
-                        progressDialog.setMessage("Mencari ${if (isBasecamp) "basecamp" else "toko"} terdekat… ($percentage%)")
+                        progressBar.setMessage("Mencari ${if (isBasecamp) "basecamp" else "toko"} terdekat… ($percentage%)")
                     }
                 }
 
@@ -904,7 +750,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     }
                 }
 
-            } // End For Loop
+            }
             return null
         }
 
@@ -921,8 +767,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             binding.tvFilter.text = "$textFilter ($currentFoundItemTotal)"
 
-            progressDialog.dismiss()
-//                    progressDialog.setMessage("Sedang memuat…")
+            progressBar.dismiss()
 
             val durationMs = 2000
             var responsiveZoom = when {
@@ -950,11 +795,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             binding.textTotalNearest.text = "$currentFoundItemTotal / ${listCoordinate?.size} ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }ditemukan ${ if (!isLimitKmDisabled) "dalam radius $limitKm km" else ""}"
             if (currentFoundItemTotal > 0) {
                 binding.textTitleTotalNearest.text = "Penelusuran ${if (isBasecamp) "Basecamp" else "Toko"} Terdekat"
-//                binding.textTotalNearest.text = "$currentFoundItemTotal / ${listCoordinate?.size} ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }ditemukan dalam radius $limitKm km"
             } else {
                 showDialog(message = "Tidak menemukan ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }${ if (!isLimitKmDisabled) "di sekitar anda saat ini dalam radius jarak $limitKm km" else ""}")
                 binding.textTitleTotalNearest.text = "Penelusuran ${if (isBasecamp) "Basecamp" else "Toko"} Terdekat"
-//                binding.textTotalNearest.text = "$currentFoundItemTotal / ${listCoordinate?.size} ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }ditemukan dalam radius $limitKm km"
             }
 
             binding.cardTelusuri.visibility = View.VISIBLE
@@ -1086,10 +929,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     }
 
     private fun getDirections() {
-        val progressDialog = ProgressDialog(this)
-        progressDialog.setCancelable(false)
-        progressDialog.setMessage("Mencarikan rute…")
-        progressDialog.show()
+        progressBar.setMessage("Mencarikan rute…")
+        progressBar.show()
 
         GlobalScope.launch(Dispatchers.IO) {
 
@@ -1097,7 +938,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             val destination = selectedLocation ?: return@launch
 
             val directions = DirectionsApi.newRequest(getGeoContext())
-                .mode(TravelMode.DRIVING) // Ganti dengan mode perjalanan yang sesuai
+                .mode(TravelMode.DRIVING) // Menggunakan mode perjalanan mengemudi
                 .origin(com.google.maps.model.LatLng(currentLocation.latitude, currentLocation.longitude))
                 .destination(com.google.maps.model.LatLng(destination.latitude, destination.longitude))
                 .optimizeWaypoints(true)
@@ -1145,13 +986,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                             img.setImageDrawable(AppCompatResources.getDrawable(this@MapsActivity, R.drawable.direction_line_white))
                             title.text = "Matikan Navigasi"
 
-                            // Live Location Update with Firebase Realtime Database
-//                            if (userKind == USER_KIND_COURIER) startTracking()
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                         }, 500)
 
                     } else {
-                        progressDialog.dismiss()
+                        progressBar.dismiss()
                         runOnUiThread {
                             Toast.makeText(this@MapsActivity, "Tidak ada rute ditemukan", Toast.LENGTH_SHORT).show()
                         }
@@ -1159,15 +998,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 }
 
             } catch (e: ApiException) {
-                progressDialog.dismiss()
+                progressBar.dismiss()
                 handleMessage(this@MapsActivity, "getDirections" , "Gagal memuat navigasi. Err: ${e.message}")
                 e.printStackTrace()
             } catch (e: InterruptedException) {
-                progressDialog.dismiss()
+                progressBar.dismiss()
                 handleMessage(this@MapsActivity, "getDirections" , "Gagal memuat navigasi. Err: ${e.message}")
                 e.printStackTrace()
             } catch (e: IOException) {
-                progressDialog.dismiss()
+                progressBar.dismiss()
                 handleMessage(this@MapsActivity, "getDirections" , "Gagal memuat navigasi. Err: ${e.message}")
                 e.printStackTrace()
             }
@@ -1177,7 +1016,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private fun getGeoContext(): GeoApiContext {
 
         return GeoApiContext.Builder()
-            .apiKey(getString(R.string.maps_key)) // Ganti dengan kunci API Google Maps Anda
+            .apiKey(getString(R.string.maps_key)) // Key API Google Maps
             .build()
 
     }
@@ -1191,14 +1030,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 currentLatLng = LatLng(location.latitude, location.longitude)
 
                 if (targetLatLng != null) {
-//                    if (isTracking && userKind == USER_KIND_COURIER) {
-//                        selectedLocation = targetLatLng
-//                        if (currentLatLng == null) showDialog(message = "Gagal menemukan lokasi Anda saat ini. Pastikan lokasi Anda aktif dan coba buka kembali peta")
-//                        else {
-//                            isRouteActive = true
-//                            getDirections()
-//                        }
-//                    }
                     setPin(targetLatLng, targetLatLngName ?: "")
                 } else {
                     if (isTracking) setupTracking()
@@ -1329,7 +1160,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         val placeIds = predictions.map { prediction: AutocompletePrediction -> prediction.placeId }
                         val placeNames = predictions.map { prediction: AutocompletePrediction -> prediction.getPrimaryText(null).toString() }
                         val placeAddress = predictions.map { prediction: AutocompletePrediction -> prediction.getSecondaryText(null).toString() }
-//                        val placeDistance = predictions.map { prediction: AutocompletePrediction -> prediction.distanceMeters.toString() }
 
                         if (placeNames.isNotEmpty()) {
                             val placeAdapter = PlaceAdapter(placeNames, placeAddress) { position ->
@@ -1411,7 +1241,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     this@MapsActivity.selectedVisitedID = selectedVisitedID
                     this@MapsActivity.selectedCitiesID = selectedCitiesID
 
-//                    handleMessage(this@MapsActivity, "Filter Maps", "$selectedStatusID : $selectedVisitedID : ${selectedCitiesID?.id_city}")
                     searchCoordinate()
 
                 }
@@ -1422,7 +1251,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     private fun getCities() {
 
-        progressDialog.show()
+        progressBar.show()
 
         // Get Cities
         lifecycleScope.launch {
@@ -1443,21 +1272,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                             items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
                         }
 
-//                        setupFilterContacts(items)
-
                         setupFilterTokoModal()
                         searchCoordinate()
                     }
                     RESPONSE_STATUS_EMPTY -> {
 
-//                        handleMessage(this@MapsActivity, "LIST CITY", "Daftar kota kosong!")
-                        progressDialog.dismiss()
+                        progressBar.dismiss()
 
                     }
                     else -> {
 
-//                        handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
-                        progressDialog.dismiss()
+                        progressBar.dismiss()
 
                     }
                 }
@@ -1469,7 +1294,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     return@launch
                 }
                 FirebaseUtils.logErr(this@MapsActivity, "Failed MapsActivity on getCities(). Catch: ${e.message}")
-                progressDialog.dismiss()
+                progressBar.dismiss()
 
             }
 
@@ -1551,7 +1376,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 val apiService: ApiService = HttpClient.create()
                 val response = when (userKind) {
                     USER_KIND_ADMIN -> apiService.getListGudang(distributorID = userDistributorId)
-//                    else -> apiService.getListGudang(distributorID = userDistributorId)
                     else -> apiService.getListGudang(cityId = userCity, distributorID = userDistributorId)
                 }
 
@@ -1640,10 +1464,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     }
 
     private fun setupTracking() {
-        val progressDialog = ProgressDialog(this)
-        progressDialog.setCancelable(false)
-        progressDialog.setMessage("Mencarikan rute…")
-        progressDialog.show()
+        progressBar.setMessage("Mencarikan rute…")
+        progressBar.show()
 
         val userDistributorIds = sessionManager.userDistributor()
         firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-003")
@@ -1694,7 +1516,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                                     val directions =
                                         DirectionsApi.newRequest(getGeoContext())
-                                            .mode(TravelMode.DRIVING) // Ganti dengan mode perjalanan yang sesuai
+                                            .mode(TravelMode.DRIVING)
                                             .origin(
                                                 com.google.maps.model.LatLng(
                                                     startLatLng.latitude,
@@ -1770,17 +1592,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                                 binding.cardDelivery.visibility = View.VISIBLE
                                                 binding.deliveryCourier.text = deliveryData!!.courier?.name
                                                 binding.deliveryStore.text = store.name
-//                                                binding.deliveryDate.text = "Diproses pada " + DateFormat.format(store.startDatetime, "yyyy-MM-dd HH:mm:ss", "dd MMM YYYY, HH.mm")
                                                 binding.deliveryDate.text = "Diproses pada " + formatDateYear(store.startDatetime)
                                                 binding.btnSuratJalan.setOnClickListener {
                                                     val intent = Intent(this@MapsActivity, ListSuratJalanActivity::class.java)
                                                     intent.putExtra(CONST_CONTACT_ID, store.id)
                                                     intent.putExtra(CONST_NAME, "")
-                                                    startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+                                                    activityLauncher.launch(intent)
                                                 }
                                                 binding.courierContainer.setOnClickListener { changeFocusCamera(courierLatLng) }
                                                 binding.storeContainer.setOnClickListener { changeFocusCamera(destinationLatLng) }
-                                                progressDialog.dismiss()
+                                                progressBar.dismiss()
 
                                                 if (ActivityCompat.checkSelfPermission(
                                                         this@MapsActivity,
@@ -1794,24 +1615,24 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                             }, 500)
 
                                         } else {
-                                            progressDialog.dismiss()
+                                            progressBar.dismiss()
                                             handleMessage(this@MapsActivity, "setupTracking" , "Tidak dapat menemukan rute.")
                                         }
                                     } catch (e: ApiException) {
-                                        progressDialog.dismiss()
+                                        progressBar.dismiss()
                                         handleMessage(this@MapsActivity, "setupTracking" , "Gagal memuat navigasi. Err: ${e.message}")
                                         e.printStackTrace()
                                     } catch (e: InterruptedException) {
-                                        progressDialog.dismiss()
+                                        progressBar.dismiss()
                                         handleMessage(this@MapsActivity, "setupTracking" , "Gagal memuat navigasi. Err: ${e.message}")
                                         e.printStackTrace()
                                     } catch (e: IOException) {
-                                        progressDialog.dismiss()
+                                        progressBar.dismiss()
                                         handleMessage(this@MapsActivity, "setupTracking" , "Gagal memuat navigasi. Err: ${e.message}")
                                         e.printStackTrace()
                                     }
                                 } else {
-                                    progressDialog.dismiss()
+                                    progressBar.dismiss()
 
                                     handleMessage(
                                         this@MapsActivity, "setupTracking",
@@ -1821,7 +1642,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                             }
 
                             override fun onCancelled(error: DatabaseError) {
-                                progressDialog.dismiss()
+                                progressBar.dismiss()
 
                                 handleMessage(
                                     this@MapsActivity, "setupTracking",
@@ -1848,9 +1669,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                         )
                                     )
                             )
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                         } else {
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             courierMarker?.position = courierLatLng
                         }
                     }
@@ -1858,7 +1679,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             }
 
             override fun onCancelled(error: DatabaseError) {
-                progressDialog.dismiss()
+                progressBar.dismiss()
 
                 handleMessage(this@MapsActivity, "setupTracking",
                     "Failed run service. Exception $error"
@@ -1882,10 +1703,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         }
         mMap.isMyLocationEnabled = false
 
-        val progressDialog = ProgressDialog(this)
-        progressDialog.setCancelable(false)
-        progressDialog.setMessage("Mendeteksi lokasi pengguna…")
-        progressDialog.show()
+        progressBar.setMessage("Mendeteksi lokasi pengguna…")
+        progressBar.show()
 
         val userDistributorIds = sessionManager.userDistributor()
         firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-004")
@@ -1933,22 +1752,22 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                         )
                                     )
                             )
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             changeFocusCamera(courierLatLng)
                         } else {
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             courierMarker?.position = courierLatLng
                         }
                     } else {
 
-                        progressDialog.dismiss()
+                        progressBar.dismiss()
                         handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
                             "Tidak dapat mendeteksi lokasi pengguna!"
                         )
                     }
                 } else {
 
-                    progressDialog.dismiss()
+                    progressBar.dismiss()
                     handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
                         "Tidak dapat mendeteksi lokasi pengguna!"
                     )
@@ -1956,7 +1775,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             }
 
             override fun onCancelled(error: DatabaseError) {
-                progressDialog.dismiss()
+                progressBar.dismiss()
 
                 handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
                     "Failed run service. Exception $error"
@@ -2013,12 +1832,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                     if (listUserTracking.isNotEmpty()) {
                         binding.userTrackingSuggestion.visibility = View.VISIBLE
-//                        if (listUserTracking.size > 5) {
-//                            binding.allUserTracking.visibility = View.VISIBLE
-//                            binding.allUserTracking.setOnClickListener {
-//                                // Do something here
-//                            }
-//                        }
 
                         // Acak urutan item dalam daftar
                         val shuffledList = listUserTracking.shuffled()
@@ -2027,7 +1840,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         binding.allUserTracking.visibility = View.VISIBLE
                         binding.allUserTracking.setOnClickListener {
                             val intent = Intent(this@MapsActivity, AllUserTrackingActivity::class.java)
-                            startActivityForResult(intent, ALL_USER_TRACKING_REQUEST)
+                            trackingLauncher.launch(intent)
                         }
 
                         val rvAdapter = UserTrackingRecyclerViewAdapter()
@@ -2046,7 +1859,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     }
                 } else {
 
-                    progressDialog.dismiss()
+                    progressBar.dismiss()
                     handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
                         "Tidak dapat mendeteksi lokasi kurir!"
                     )
@@ -2054,7 +1867,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             }
 
             override fun onCancelled(error: DatabaseError) {
-                progressDialog.dismiss()
+                progressBar.dismiss()
 
                 handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
                     "Failed run service. Exception $error"
@@ -2076,10 +1889,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     }
 
     private fun setupTrackingHistory() {
-        val progressDialog = ProgressDialog(this)
-        progressDialog.setCancelable(false)
-        progressDialog.setMessage(getString(R.string.txt_loading))
-        progressDialog.show()
+        progressBar.setMessage(getString(R.string.txt_loading))
+        progressBar.show()
 
         lifecycleScope.launch {
             try {
@@ -2203,11 +2014,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                         val intent = Intent(this@MapsActivity, ListSuratJalanActivity::class.java)
                                         intent.putExtra(CONST_CONTACT_ID, item.id_contact)
                                         intent.putExtra(CONST_NAME, "")
-                                        startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+                                        activityLauncher.launch(intent)
                                     }
                                     binding.courierContainer.setOnClickListener { changeFocusCamera(courierLatLng) }
                                     binding.storeContainer.setOnClickListener { changeFocusCamera(destinationLatLng) }
-                                    progressDialog.dismiss()
+                                    progressBar.dismiss()
 
                                     if (ActivityCompat.checkSelfPermission(
                                             this@MapsActivity,
@@ -2222,19 +2033,19 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
 
                             } else {
-                                progressDialog.dismiss()
+                                progressBar.dismiss()
                                 handleMessage(this@MapsActivity, "setupTrackingHistory" , "Tidak dapat menemukan rute.")
                             }
                         } catch (e: ApiException) {
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             handleMessage(this@MapsActivity, "setupTrackingHistory" , "Gagal memuat navigasi. Err: ${e.message}")
                             e.printStackTrace()
                         } catch (e: InterruptedException) {
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             handleMessage(this@MapsActivity, "setupTrackingHistory" , "Gagal memuat navigasi. Err: ${e.message}")
                             e.printStackTrace()
                         } catch (e: IOException) {
-                            progressDialog.dismiss()
+                            progressBar.dismiss()
                             handleMessage(this@MapsActivity, "setupTrackingHistory" , "Gagal memuat navigasi. Err: ${e.message}")
                             e.printStackTrace()
                         }
@@ -2243,7 +2054,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     RESPONSE_STATUS_EMPTY -> {
 
 
-                        progressDialog.dismiss()
+                        progressBar.dismiss()
                         handleMessage(this@MapsActivity, "setupTrackingHistory",
                             "Tidak dapat menemukan riwayat pengiriman"
                         )
@@ -2252,7 +2063,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     else -> {
 
 
-                        progressDialog.dismiss()
+                        progressBar.dismiss()
                         handleMessage(this@MapsActivity, "setupTrackingHistory",
                             "Tidak dapat menemukan riwayat pengiriman. Error " + response.message
                         )
@@ -2266,7 +2077,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     return@launch
                 }
                 FirebaseUtils.logErr(this@MapsActivity, "Failed MapsActivity on setupTrackingHistory(). Catch: ${e.message}")
-                progressDialog.dismiss()
+                progressBar.dismiss()
                 handleMessage(this@MapsActivity, "setupTrackingHistory",
                     "Failed run service. Exception " + e.message
                 )
@@ -2277,7 +2088,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     }
 
     private fun resizedBitmap(drawable: Int, targetWidth: Int = convertDpToPx(60, this@MapsActivity), targetHeight: Int = convertDpToPx(60, this@MapsActivity)): Bitmap {
-        // Check if the bitmap is already cached
         bitmapCache[drawable]?.let { return it }
 
         val options = BitmapFactory.Options().apply {
@@ -2291,10 +2101,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         val originalBitmap = BitmapFactory.decodeResource(resources, drawable, options)
         val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, targetWidth, targetHeight, false)
 
-        // Recycle the original bitmap
         originalBitmap.recycle()
 
-        // Cache the scaled bitmap
         bitmapCache[drawable] = scaledBitmap
         return scaledBitmap
     }
@@ -2304,7 +2112,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         reqWidth: Int,
         reqHeight: Int
     ): Int {
-        // Raw height and width of image
         val (height: Int, width: Int) = options.run { outHeight to outWidth }
         var inSampleSize = 1
 
@@ -2313,8 +2120,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             val halfHeight: Int = height / 2
             val halfWidth: Int = width / 2
 
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
             while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
                 inSampleSize *= 2
             }
@@ -2339,34 +2144,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             if (currentYear == dateYear.toInt()) DateFormat.format(dateString, dateStringFormat, "dd MMM, HH:mm")
             else DateFormat.format(dateString, dateStringFormat, "dd MMM yyyy, HH:mm")
         } else DateFormat.format(dateString, dateStringFormat, "dd MMM, HH:mm")
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == DETAIL_ACTIVITY_REQUEST_CODE) {
-
-            val resultData = data?.getStringExtra("$DETAIL_ACTIVITY_REQUEST_CODE")
-            val isClosingAction = data?.getBooleanExtra(IS_CLOSING, false) ?: false
-
-            if (resultData == SYNC_NOW) {
-                val resultIntent = Intent()
-                resultIntent.putExtra("$DETAIL_ACTIVITY_REQUEST_CODE", SYNC_NOW)
-                resultIntent.putExtra(IS_CLOSING, isClosingAction)
-                setResult(RESULT_OK, resultIntent)
-
-                finish()
-            }
-
-        } else if (requestCode == ALL_USER_TRACKING_REQUEST) {
-            val resultData = data?.getStringExtra(SYNC_NOW)
-            if (resultData == SYNC_NOW) {
-                setupTrackingCourier()
-//                println("Refreshed")
-            }
-        }
-
     }
 
     @Subscribe
@@ -2398,9 +2175,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         if (courierTrackingListener != null) childCourier?.removeEventListener(courierTrackingListener!!)
     }
 
-
     override fun onDestroy() {
         super.onDestroy()
+
+        if (::progressBar.isInitialized && progressBar.isShowing()) {
+            progressBar.dismiss()
+        }
 
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) EventBus.getDefault().unregister(this)
         if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN){

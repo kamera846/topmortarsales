@@ -1,6 +1,5 @@
 package com.topmortar.topmortarsales.view.rencanaVisits
 
-import android.app.ProgressDialog
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
@@ -28,6 +27,7 @@ import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE_WITH_DEFAULT_RAN
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
@@ -57,7 +57,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
     private lateinit var tabLayout: TabLayout
     private lateinit var viewPager: ViewPager
     private lateinit var pagerAdapter: RencanaVisitPenagihanVPA
-    private lateinit var progressDialog: ProgressDialog
+    private lateinit var progressBar: CustomProgressBar
     private var pagerAdapterItemCount = mutableListOf(0,0,0,0)
     private var activeTab = 0
     private var selectedItemCount = 0
@@ -87,8 +87,8 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
         setContentView(binding.root)
 
         apiService = HttpClient.create()
-        progressDialog = ProgressDialog(this)
-        progressDialog.setMessage(getString(R.string.txt_loading))
+        progressBar = CustomProgressBar(this)
+        progressBar.setMessage(getString(R.string.txt_loading))
         binding.selectTitleBarDark.componentSelectTitleBarDark.visibility = View.GONE
 
         binding.titleBarDark.icBack.visibility = View.VISIBLE
@@ -187,7 +187,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
             else 0.5f
         binding.selectTitleBarDark.icConfirmSelect.setOnClickListener {
             if (selectedItemCount > 0) {
-                progressDialog.show()
+                progressBar.show()
                 pagerAdapter.onConfirmSelected(activeTab)
             }
         }
@@ -238,7 +238,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
     }
 
     private fun navigateCheckLocationStore(items: ArrayList<RencanaVisitModel>) {
-        progressDialog.show()
+        progressBar.show()
 
         listCoordinate = arrayListOf()
         listCoordinateName = arrayListOf()
@@ -251,7 +251,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
     }
 
     private fun getAllRenvi() {
-        progressDialog.show()
+        progressBar.show()
 
         listCoordinate = arrayListOf()
         listCoordinateName = arrayListOf()
@@ -267,7 +267,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
     }
     private fun getListRenviPerCategory(category: String) {
         processed ++
-        progressDialog.setMessage(getString(R.string.txt_loading) + "($processed/$totalProcess)")
+        progressBar.setMessage(getString(R.string.txt_loading) + "($processed/$totalProcess)")
 
         lifecycleScope.launch {
             try {
@@ -304,7 +304,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
                                 totalProcess = listAllRenvi.size
                                 processed = 0
                                 LoopingTask(listAllRenvi).execute()
-//                                progressDialog.dismiss()
+//                                progressBar.dismiss()
                             }
                         }
                     }
@@ -319,7 +319,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
                                 totalProcess = listAllRenvi.size
                                 processed = 0
                                 LoopingTask(listAllRenvi).execute()
-//                                progressDialog.dismiss()
+//                                progressBar.dismiss()
                             }
                         }
 
@@ -335,7 +335,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
                                 totalProcess = listAllRenvi.size
                                 processed = 0
                                 LoopingTask(listAllRenvi).execute()
-//                                progressDialog.dismiss()
+//                                progressBar.dismiss()
                             }
                         }
 
@@ -357,7 +357,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
                         totalProcess = listAllRenvi.size
                         processed = 0
                         LoopingTask(listAllRenvi).execute()
-//                        progressDialog.dismiss()
+//                        progressBar.dismiss()
                     }
                 }
 
@@ -411,7 +411,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
 
 //        toggleSelectBar()
 //        Handler(Looper.getMainLooper()).postDelayed({
-//            progressDialog.dismiss()
+//            progressBar.dismiss()
 //            startActivity(intent)
 //        }, 1000)
     }
@@ -440,7 +440,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
             intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
 
-            progressDialog.dismiss()
+            progressBar.dismiss()
             startActivity(intent)
         }
     }
@@ -474,6 +474,10 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
     }
 
     override fun onDestroy() {
+        super.onDestroy()
+        if (::progressBar.isInitialized && progressBar.isShowing()) {
+            progressBar.dismiss()
+        }
         if (sessionManager.isLoggedIn()) {
             if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(
@@ -483,7 +487,6 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
                 )
             }
         }
-        super.onDestroy()
     }
 
     @Subscribe

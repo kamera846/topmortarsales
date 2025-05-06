@@ -495,6 +495,9 @@ class AddBaseCampActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        if (::progressBar.isInitialized && progressBar.isShowing()) {
+            progressBar.dismiss()
+        }
         if (CustomUtility(this).isUserWithOnlineStatus()) {
             CustomUtility(this).setUserStatusOnline(
                 false,

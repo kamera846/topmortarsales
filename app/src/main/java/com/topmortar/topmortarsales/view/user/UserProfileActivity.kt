@@ -1,9 +1,6 @@
-@file:Suppress("DEPRECATION")
-
 package com.topmortar.topmortarsales.view.user
 
 import android.annotation.SuppressLint
-import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
@@ -55,6 +52,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_MARKETING
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
+import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
@@ -75,7 +73,6 @@ import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.Subscribe
 import java.util.Calendar
 
-@SuppressLint("SetTextI18n")
 class UserProfileActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
@@ -105,6 +102,20 @@ class UserProfileActivity : AppCompatActivity() {
 
     private var isAbsentMorningNow = false
     private var isAbsentEveningNow = false
+
+    private val userResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                val resultData = it.data?.getStringExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE")
+
+                if (resultData == SYNC_NOW) {
+
+                    isRequestSync = true
+                    getUserDetail(true)
+
+                }
+            }
+        }
 
     private val requestNotificationPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
@@ -222,7 +233,7 @@ class UserProfileActivity : AppCompatActivity() {
         intent.putExtra(CONST_FULL_NAME, iFullName)
         intent.putExtra(CONST_IS_NOTIFY, iIsNotify)
 
-        startActivityForResult(intent, MANAGE_USER_ACTIVITY_REQUEST_CODE)
+        userResultLauncher.launch(intent)
 
     }
 
@@ -407,25 +418,6 @@ class UserProfileActivity : AppCompatActivity() {
 //        navigateDetailContact(event.data)
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == MANAGE_USER_ACTIVITY_REQUEST_CODE) {
-
-            val resultData = data?.getStringExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE")
-
-            if (resultData == SYNC_NOW) {
-
-                isRequestSync = true
-                getUserDetail(true)
-
-            }
-
-        }
-
-    }
-
     private fun backHandler() {
         if (isRequestSync) {
             val resultIntent = Intent()
@@ -530,10 +522,10 @@ class UserProfileActivity : AppCompatActivity() {
 
     @SuppressLint("HardwareIds")
     private fun logoutHandler() {
-        val progressDialog = ProgressDialog(this)
-        progressDialog.setCancelable(false)
-        progressDialog.setMessage(getString(R.string.txt_loading))
-        progressDialog.show()
+        val progressBar = CustomProgressBar(this)
+        progressBar.setCancelable(false)
+        progressBar.setMessage(getString(R.string.txt_loading))
+        progressBar.show()
 
         // Firebase Auth Session
         try {
@@ -576,7 +568,7 @@ class UserProfileActivity : AppCompatActivity() {
             sessionManager.setLoggedIn(LOGGED_OUT)
             sessionManager.setUserLoggedIn(null)
 
-            progressDialog.dismiss()
+            progressBar.dismiss()
             val intent = Intent(this, SplashScreenActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)

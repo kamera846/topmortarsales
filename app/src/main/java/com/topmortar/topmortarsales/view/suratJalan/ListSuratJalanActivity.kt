@@ -17,6 +17,7 @@ import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.lifecycleScope
@@ -35,7 +36,6 @@ import com.topmortar.topmortarsales.commons.CONST_STATUS_INVOICE
 import com.topmortar.topmortarsales.commons.CONST_TOTAL_INVOICE
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.IS_CLOSING
-import com.topmortar.topmortarsales.commons.MANAGE_USER_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.SYNC_NOW
@@ -56,7 +56,6 @@ import com.topmortar.topmortarsales.view.invoice.DetailInvoiceActivity
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 
-@Suppress("DEPRECATION")
 @SuppressLint("SetTextI18n")
 class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapter.ItemClickListener,
     InvoiceRecyclerViewAdapter.ItemClickListener {
@@ -94,6 +93,15 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
     private var isClosingAction = false
     private var contactId: String? = null
     private var iName: String? = null
+
+    private var activityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == RESULT_OK) {
+            val resultData = it.data?.getStringExtra("$DETAIL_ACTIVITY_REQUEST_CODE")
+            isClosingAction = it.data?.getBooleanExtra(IS_CLOSING, false) ?: false
+
+            if (resultData == SYNC_NOW) isRequestSync = true
+        }
+    }
 
     companion object {
         const val LIST_SURAT_JALAN = "list_surat_jalan"
@@ -450,7 +458,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
         val intent = Intent(this@ListSuratJalanActivity, DetailSuratJalanActivity::class.java)
         intent.putExtra(CONST_INVOICE_ID, data?.id_surat_jalan)
         intent.putExtra(CONST_CONTACT_ID, contactId)
-        startActivityForResult(intent, DETAIL_ACTIVITY_REQUEST_CODE)
+        activityLauncher.launch(intent)
 
     }
 
@@ -465,29 +473,6 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
         intent.putExtra(CONST_DATE_INVOICE, data?.date_invoice)
         intent.putExtra(CONST_NO_SURAT_JALAN, data?.no_surat_jalan)
         startActivity(intent)
-
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == MANAGE_USER_ACTIVITY_REQUEST_CODE) {
-
-            val resultData = data?.getStringExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE")
-
-            if (resultData == SYNC_NOW) {
-
-                toggleList()
-
-            }
-
-        } else if (requestCode == DETAIL_ACTIVITY_REQUEST_CODE) {
-            val resultData = data?.getStringExtra("$DETAIL_ACTIVITY_REQUEST_CODE")
-            isClosingAction = data?.getBooleanExtra(IS_CLOSING, false) ?: false
-
-            if (resultData == SYNC_NOW) isRequestSync = true
-        }
 
     }
 

@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.DatePickerDialog
-import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -59,14 +58,12 @@ import com.topmortar.topmortarsales.commons.CONST_PHONE
 import com.topmortar.topmortarsales.commons.CONST_POSTED_NAME
 import com.topmortar.topmortarsales.commons.CONST_SKILL
 import com.topmortar.topmortarsales.commons.CONST_STATUS
-import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.PING_HOST
 import com.topmortar.topmortarsales.commons.PING_MEDIUM
 import com.topmortar.topmortarsales.commons.PING_NORMAL
-import com.topmortar.topmortarsales.commons.REQUEST_EDIT_CONTACT_COORDINATE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
@@ -82,6 +79,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_BA
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
+import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
@@ -112,8 +110,6 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-
-@Suppress("DEPRECATION")
 @SuppressLint("SetTextI18n")
 class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListener,
     PingUtility.PingResultInterface {
@@ -221,7 +217,16 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
     private lateinit var searchModalUsers: SearchModal
     private lateinit var searchModalSkill: SearchModal
     private lateinit var sendMessageModal: SendMessageTukangModal
-    private lateinit var progressDialog: ProgressDialog
+    private lateinit var progressBar: CustomProgressBar
+
+    private val editResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == RESULT_OK) {
+            val latitude = it.data?.getDoubleExtra("latitude", 0.0)
+            val longitude = it.data?.getDoubleExtra("longitude", 0.0)
+            if (latitude != null && longitude != null) etMaps.setText("$latitude,$longitude")
+            etMaps.clearFocus()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -232,7 +237,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
         sessionManager = SessionManager(this)
         binding = ActivityDetailContactBinding.inflate(layoutInflater)
-        progressDialog = ProgressDialog(this)
+        progressBar = CustomProgressBar(this)
         setContentView(binding.root)
 
         initVariable()
@@ -622,7 +627,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         val intent = Intent(this, MapsActivity::class.java)
         intent.putExtra(CONST_MAPS, data)
         intent.putExtra(GET_COORDINATE, true)
-        startActivityForResult(intent, REQUEST_EDIT_CONTACT_COORDINATE)
+        editResultLauncher.launch(intent)
     }
 
     private fun showEditOptions() {
@@ -1314,9 +1319,9 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                 dialog.dismiss()
             }
             .setPositiveButton("Iya") { dialog, _ ->
-                progressDialog.setMessage(getString(R.string.txt_loading))
-                progressDialog.setCancelable(false)
-                progressDialog.show()
+                progressBar.setMessage(getString(R.string.txt_loading))
+                progressBar.setCancelable(false)
+                progressBar.show()
 
                 lifecycleScope.launch {
                     try {
@@ -1374,7 +1379,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
                     } finally {
                         selectedUser = null
-                        progressDialog.dismiss()
+                        progressBar.dismiss()
                         dialog.dismiss()
                     }
 
@@ -1679,25 +1684,6 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
     }
 
     @Deprecated("Deprecated in Java")
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == DETAIL_ACTIVITY_REQUEST_CODE) {
-
-            val resultData = data?.getStringExtra("$DETAIL_ACTIVITY_REQUEST_CODE")
-
-            if (resultData == SYNC_NOW) hasEdited = true
-
-        } else if (requestCode == REQUEST_EDIT_CONTACT_COORDINATE) {
-            val latitude = data?.getDoubleExtra("latitude", 0.0)
-            val longitude = data?.getDoubleExtra("longitude", 0.0)
-            if (latitude != null && longitude != null) etMaps.setText("$latitude,$longitude")
-            etMaps.clearFocus()
-        }
-
-    }
-
-    @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
         if (isEdit) toggleEdit(false)
         else {
@@ -1734,6 +1720,9 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
     override fun onDestroy() {
         super.onDestroy()
+        if (::progressBar.isInitialized && progressBar.isShowing()) {
+            progressBar.dismiss()
+        }
         if (pingUtility != null) pingUtility!!.stopPingMonitoring()
     }
 

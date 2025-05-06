@@ -1,7 +1,6 @@
 package com.topmortar.topmortarsales.view
 
 import android.annotation.SuppressLint
-import android.app.ProgressDialog
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowInsets
@@ -19,6 +18,7 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.data.HttpClient
@@ -31,6 +31,7 @@ class ScannerActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private lateinit var binding: ActivityScannerBinding
     private lateinit var codeScanner: CodeScanner
+    private lateinit var progressBar: CustomProgressBar
 
     private val userId get() = sessionManager.userID()
 
@@ -42,6 +43,10 @@ class ScannerActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
         binding = ActivityScannerBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        progressBar = CustomProgressBar(this)
+        progressBar.setMessage(getString(R.string.txt_loading))
+        progressBar.setCancelable(false)
 
         if (Build.VERSION.SDK_INT >= 30) {
             binding.scannerView.windowInsetsController?.hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
@@ -77,10 +82,7 @@ class ScannerActivity : AppCompatActivity() {
 
     private fun executeAssignTukang(scannResult: Result) {
         codeScanner.releaseResources()
-        val progressDialog = ProgressDialog(this)
-        progressDialog.setMessage(getString(R.string.txt_loading))
-        progressDialog.setCancelable(false)
-        progressDialog.show()
+        progressBar.show()
 
         var responseMessage = ""
         var isSuccess = false
@@ -131,7 +133,7 @@ class ScannerActivity : AppCompatActivity() {
 
             } finally {
 
-                progressDialog.dismiss()
+                progressBar.dismiss()
                 val alertDialog = AlertDialog.Builder(this@ScannerActivity)
                 alertDialog.setCancelable(false)
                 alertDialog.setTitle("Pemindaian Selesai")
@@ -169,5 +171,12 @@ class ScannerActivity : AppCompatActivity() {
     override fun onPause() {
         codeScanner.releaseResources()
         super.onPause()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (::progressBar.isInitialized && progressBar.isShowing()) {
+            progressBar.dismiss()
+        }
     }
 }

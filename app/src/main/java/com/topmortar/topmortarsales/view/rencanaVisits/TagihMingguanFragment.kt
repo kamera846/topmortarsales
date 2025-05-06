@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package com.topmortar.topmortarsales.view.rencanaVisits
 
 import android.content.Context
@@ -86,7 +84,6 @@ class TagihMingguanFragment : Fragment() {
     private var totalProcess = 0
     private var processed = 0
     private var percentage = 0
-//    private lateinit var progressDialog: ProgressDialog
 
     private var reportSource = SALES_REPORT_RENVI
     private var listener: CounterItem? = null
@@ -144,9 +141,6 @@ class TagihMingguanFragment : Fragment() {
         userID = sessionManager.userID().toString()
 
         apiService = HttpClient.create()
-//        progressDialog = ProgressDialog(requireContext())
-//        progressDialog.setMessage(getString(R.string.txt_loading))
-//        progressDialog.setCancelable(false)
 
         if (userKind == USER_KIND_ADMIN) getCities()
         else getList()
@@ -181,16 +175,7 @@ class TagihMingguanFragment : Fragment() {
                         processed = 0
                         percentage = 0
                         totalProcess = response.results.size
-//                        progressDialog.show()
                         LoopingTask(response.results).execute()
-
-//                        listItem = response.results
-//                        listItem.sortBy { it.created_at }
-//
-//                        setRecyclerView(listItem)
-//                        loadingState(false)
-//                        showBadgeRefresh(false)
-//                        listener?.counterItem(listItem.size)
 
                     }
                     RESPONSE_STATUS_EMPTY -> {
@@ -234,7 +219,6 @@ class TagihMingguanFragment : Fragment() {
 
         override fun doInBackground(vararg params: Void?): Void? {
             for (item in items.listIterator()) {
-//                Handler(Looper.getMainLooper()).postDelayed({
                     if (item.is_new == "1") item.date_counter = item.date_invoice
                     else item.date_counter = item.created_at ?: "0000-00-00"
 
@@ -242,11 +226,9 @@ class TagihMingguanFragment : Fragment() {
 
                     processed ++
                     percentage = (processed * 100) / totalProcess
-//                    println(getString(R.string.txt_loading) + "($percentage%)")
                     requireActivity().runOnUiThread {
                         binding.txtLoading.text = getString(R.string.txt_loading) + "($percentage%)"
                     }
-//                }, 100)
             }
             return null
         }
