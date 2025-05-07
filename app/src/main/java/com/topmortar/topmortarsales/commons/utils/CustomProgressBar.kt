@@ -1,5 +1,6 @@
 package com.topmortar.topmortarsales.commons.utils
 
+import android.app.Activity
 import android.app.Dialog
 import android.content.Context
 import android.view.LayoutInflater
@@ -10,6 +11,7 @@ import com.topmortar.topmortarsales.R
 
 class CustomProgressBar(context: Context) {
 
+    private val mContext: Context = context
     private val dialog: Dialog = Dialog(context)
     private val messageView: TextView
 
@@ -45,8 +47,11 @@ class CustomProgressBar(context: Context) {
     }
 
     fun dismiss() {
-        if (dialog.isShowing) {
-            dialog.dismiss()
+        val activity = mContext as Activity
+        if (!activity.isFinishing && !activity.isDestroyed) {
+            if (dialog.isShowing) {
+                dialog.dismiss()
+            }
         }
     }
 

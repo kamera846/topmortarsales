@@ -924,15 +924,28 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         val printersConnections = BluetoothPrintersConnections.selectFirstPaired()
 
         if (printersConnections == null) {
-            Toast.makeText(this, "Tidak ada perangkat bluetooth yang terhubung.", Toast.LENGTH_SHORT).show()
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                printingState(false)
+                handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Tidak ada perangkat bluetooth yang terhubung")
+
+                return@postDelayed
+            }, 1000)
             return
         }
 
         try {
             printersConnections.connect()
         } catch (e: IOException) {
-            e.printStackTrace()
-            Toast.makeText(this, "Gagal terhubung ke printer bluetooth", Toast.LENGTH_SHORT).show()
+            Handler(Looper.getMainLooper()).postDelayed({
+                printingState(false)
+                FirebaseUtils.logErr(this@DetailSuratJalanActivity, "Failed DetailSuratJalanActivity on executePrinter(). Catch message: ${e.message}")
+                FirebaseUtils.logErr(this@DetailSuratJalanActivity, "Failed DetailSuratJalanActivity on executePrinter(). Catch stacktrace: ${e.stackTrace}")
+                FirebaseUtils.logErr(this@DetailSuratJalanActivity, "Failed DetailSuratJalanActivity on executePrinter(). Catch printed stacktrace: ${e.printStackTrace()}")
+                handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal terhubung ke perangkat. " + e.message)
+
+                return@postDelayed
+            }, 1000)
             return
         }
 
