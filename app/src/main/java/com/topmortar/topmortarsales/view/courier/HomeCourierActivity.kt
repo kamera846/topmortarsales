@@ -497,10 +497,7 @@ class HomeCourierActivity : AppCompatActivity() {
                                     setupDialogSearch(listBasecamp)
                                     searchBaseCampAbsentModal.show()
                                 }
-                            } else {
-                                absentAction()
-                                absentAction()
-                            }
+                            } else absentAction()
 
                         } else {
                             val message = getString(R.string.bg_service_location_permission_message)
