@@ -1596,7 +1596,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                                 binding.btnSuratJalan.setOnClickListener {
                                                     val intent = Intent(this@MapsActivity, ListSuratJalanActivity::class.java)
                                                     intent.putExtra(CONST_CONTACT_ID, store.id)
-                                                    intent.putExtra(CONST_NAME, "")
+                                                    intent.putExtra(CONST_NAME, store.name)
                                                     activityLauncher.launch(intent)
                                                 }
                                                 binding.courierContainer.setOnClickListener { changeFocusCamera(courierLatLng) }
@@ -2013,7 +2013,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                     binding.btnSuratJalan.setOnClickListener {
                                         val intent = Intent(this@MapsActivity, ListSuratJalanActivity::class.java)
                                         intent.putExtra(CONST_CONTACT_ID, item.id_contact)
-                                        intent.putExtra(CONST_NAME, "")
+                                        intent.putExtra(CONST_NAME, item.nama)
                                         activityLauncher.launch(intent)
                                     }
                                     binding.courierContainer.setOnClickListener { changeFocusCamera(courierLatLng) }
