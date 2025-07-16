@@ -912,7 +912,7 @@ class HomeCourierActivity : AppCompatActivity() {
                     val currentHour = checkTimeFromInternet()?.get(Calendar.HOUR_OF_DAY)
 
                     if (currentHour != null) {
-                        if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 14) {
+                        if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
                             binding.btnAbsent.visibility = View.GONE
                             binding.absenEveningInfoText.visibility = View.VISIBLE
                         } else {
@@ -1385,7 +1385,7 @@ class HomeCourierActivity : AppCompatActivity() {
                                 val currentHour = calendar?.get(Calendar.HOUR_OF_DAY)
 
                                 if (currentHour != null) {
-                                    if (currentHour >= 14) {
+                                    if (currentHour >= 16) {
                                         userChild.child("eveningDateTime").setValue(absentDateTime)
                                         userChild.child("lastSeen").setValue(absentDateTime)
 
