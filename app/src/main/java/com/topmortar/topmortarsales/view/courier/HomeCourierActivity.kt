@@ -67,6 +67,7 @@ import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.SntpClient
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -84,7 +85,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 import kotlin.coroutines.cancellation.CancellationException
 
 @SuppressLint("SetTextI18n")
@@ -485,7 +490,6 @@ class HomeCourierActivity : AppCompatActivity() {
                             ) == PackageManager.PERMISSION_GRANTED
                         ) {
 
-//                        absentAction()
                             if (!absentProgressBar!!.isShowing()) absentProgressBar?.show()
                             if (selectedBasecamp == null) {
                                 if (listBasecamp.isEmpty()) getListBasecamp()
@@ -493,7 +497,10 @@ class HomeCourierActivity : AppCompatActivity() {
                                     setupDialogSearch(listBasecamp)
                                     searchBaseCampAbsentModal.show()
                                 }
-                            } else absentAction()
+                            } else {
+                                absentAction()
+                                absentAction()
+                            }
 
                         } else {
                             val message = getString(R.string.bg_service_location_permission_message)
@@ -525,7 +532,6 @@ class HomeCourierActivity : AppCompatActivity() {
                             Manifest.permission.ACCESS_FINE_LOCATION
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
-//                    absentAction()
                         if (!absentProgressBar!!.isShowing()) absentProgressBar?.show()
                         if (selectedBasecamp == null) {
                             if (listBasecamp.isEmpty()) getListBasecamp()
@@ -902,16 +908,21 @@ class HomeCourierActivity : AppCompatActivity() {
                 binding.btnAbsent.text =
                     if (state) getString(R.string.absen_sekarang) else getString(R.string.pulang_sekarang)
 
-                val calendar = Calendar.getInstance()
-                val currentHour =
-                    calendar.get(Calendar.HOUR_OF_DAY) // Mengambil jam saat ini dalam format 24 jam
+                lifecycleScope.launch {
+                    val currentHour = checkTimeFromInternet()?.get(Calendar.HOUR_OF_DAY)
 
-                if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
-                    binding.btnAbsent.visibility = View.GONE
-                    binding.absenEveningInfoText.visibility = View.VISIBLE
-                } else {
-                    binding.btnAbsent.visibility = View.VISIBLE
-                    binding.absenEveningInfoText.visibility = View.GONE
+                    if (currentHour != null) {
+                        if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 14) {
+                            binding.btnAbsent.visibility = View.GONE
+                            binding.absenEveningInfoText.visibility = View.VISIBLE
+                        } else {
+                            binding.btnAbsent.visibility = View.VISIBLE
+                            binding.absenEveningInfoText.visibility = View.GONE
+                        }
+                    } else {
+                        binding.btnAbsent.visibility = View.GONE
+                        binding.absenEveningInfoText.visibility = View.VISIBLE
+                    }
                 }
             }
 
@@ -1355,22 +1366,40 @@ class HomeCourierActivity : AppCompatActivity() {
                             userChild.child("fullname").setValue(userFullName)
                             userChild.child("isOnline").setValue(true)
 
+                            val calendar = checkTimeFromInternet()
+                            val date = calendar?.let { Date(it.timeInMillis) }
+                            val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
+                            formatter.timeZone = TimeZone.getDefault()
+
+                            val absentDateTime = if (date != null) formatter.format(date) else "-"
+
                             if (!isAbsentMorningNow) {
 
-                                val absentDateTime = DateFormat.now()
                                 userChild.child("morningDateTime").setValue(absentDateTime)
                                 userChild.child("lastSeen").setValue(absentDateTime)
 
                                 sessionManager.absentDateTime(absentDateTime)
                                 checkAbsent()
+                            } else if (!isAbsentEveningNow) {
+
+                                val currentHour = calendar?.get(Calendar.HOUR_OF_DAY)
+
+                                if (currentHour != null) {
+                                    if (currentHour >= 14) {
+                                        userChild.child("eveningDateTime").setValue(absentDateTime)
+                                        userChild.child("lastSeen").setValue(absentDateTime)
+
+                                        sessionManager.absentDateTime(absentDateTime)
+                                        checkAbsent()
+                                    } else {
+                                        if (absentProgressBar!!.isShowing()) absentProgressBar?.dismiss()
+                                    }
+                                } else {
+                                    if (absentProgressBar!!.isShowing()) absentProgressBar?.dismiss()
+                                }
+
                             } else {
-
-                                val absentDateTime = DateFormat.now()
-                                userChild.child("eveningDateTime").setValue(absentDateTime)
-                                userChild.child("lastSeen").setValue(absentDateTime)
-
-                                sessionManager.absentDateTime(absentDateTime)
-                                checkAbsent()
+                                if (absentProgressBar!!.isShowing()) absentProgressBar?.dismiss()
                             }
 
                         }
@@ -1421,6 +1450,20 @@ class HomeCourierActivity : AppCompatActivity() {
 
             }
 
+        }
+    }
+
+    private suspend fun checkTimeFromInternet(): Calendar? {
+        return withContext(Dispatchers.IO) {
+            val networkTimeMillis = SntpClient.getNetworkTime()
+            if (networkTimeMillis != null) {
+                Calendar.getInstance().apply {
+                    timeInMillis = networkTimeMillis
+                }
+            } else {
+                handleMessage(this@HomeCourierActivity, "NetworkTime", "Gagal mengambil waktu dari internet, coba lagi setelah beberapa saat atau cek koneksi internet anda.")
+                null
+            }
         }
     }
 

@@ -138,5 +138,7 @@ dependencies {
     // Image Loader
     implementation 'com.github.bumptech.glide:glide:4.16.0'
 
+    // True Time from Internet
+    implementation 'commons-net:commons-net:3.6'
 
 }

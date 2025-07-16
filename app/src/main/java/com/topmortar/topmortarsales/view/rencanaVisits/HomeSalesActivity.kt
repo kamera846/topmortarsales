@@ -59,15 +59,12 @@ import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
-import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAX_REPORT_DISTANCE
 import com.topmortar.topmortarsales.commons.NOTIFICATION_LEVEL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
-import com.topmortar.topmortarsales.commons.SELECTED_ABSENT_MODE
-import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
@@ -82,6 +79,7 @@ import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.SntpClient
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -107,7 +105,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 import kotlin.coroutines.cancellation.CancellationException
 
 class HomeSalesActivity : AppCompatActivity() {
@@ -541,7 +543,6 @@ class HomeSalesActivity : AppCompatActivity() {
                             Manifest.permission.ACCESS_FINE_LOCATION
                         ) == PackageManager.PERMISSION_GRANTED
                     ) {
-//                    absentAction()
                         if (!absentProgressBar!!.isShowing()) absentProgressBar?.show()
                         if (selectedStore == null) getListAbsent()
                         else absentAction()
@@ -1230,24 +1231,57 @@ class HomeSalesActivity : AppCompatActivity() {
         userChild.child("fullname").setValue(userFullName)
         userChild.child("isOnline").setValue(true)
 
-        if (!isAbsentMorningNow) {
+        lifecycleScope.launch {
+            val calendar = checkTimeFromInternet()
+            val date = calendar?.let { Date(it.timeInMillis) }
+            val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
+            formatter.timeZone = TimeZone.getDefault()
 
-            val absentDateTime = DateFormat.now()
-            userChild.child("morningDateTime").setValue(absentDateTime)
-            userChild.child("lastSeen").setValue(absentDateTime)
+            val absentDateTime = if (date != null) formatter.format(date) else "-"
 
-            sessionManager.absentDateTime(absentDateTime)
+            if (!isAbsentMorningNow) {
 
-            checkAbsent()
-        } else {
+                userChild.child("morningDateTime").setValue(absentDateTime)
+                userChild.child("lastSeen").setValue(absentDateTime)
 
-            val absentDateTime = DateFormat.now()
-            userChild.child("eveningDateTime").setValue(absentDateTime)
-            userChild.child("lastSeen").setValue(absentDateTime)
+                sessionManager.absentDateTime(absentDateTime)
 
-            sessionManager.absentDateTime(absentDateTime)
+                checkAbsent()
+            } else if (!isAbsentEveningNow) {
 
-            checkAbsent()
+                val currentHour = calendar?.get(Calendar.HOUR_OF_DAY)
+
+                if (currentHour != null) {
+                    if (currentHour >= 16) {
+                        userChild.child("eveningDateTime").setValue(absentDateTime)
+                        userChild.child("lastSeen").setValue(absentDateTime)
+
+                        sessionManager.absentDateTime(absentDateTime)
+                        checkAbsent()
+                    } else {
+                        if (absentProgressBar!!.isShowing()) absentProgressBar?.dismiss()
+                    }
+                } else {
+                    if (absentProgressBar!!.isShowing()) absentProgressBar?.dismiss()
+                }
+
+            } else {
+                if (absentProgressBar!!.isShowing()) absentProgressBar?.dismiss()
+            }
+        }
+    }
+
+    private suspend fun checkTimeFromInternet(): Calendar? {
+        return withContext(Dispatchers.IO) {
+            val networkTimeMillis = SntpClient.getNetworkTime()
+            if (networkTimeMillis != null) {
+                Calendar.getInstance().apply {
+                    timeInMillis = networkTimeMillis
+                }
+            } else {
+                handleMessage(this@HomeSalesActivity, "NetworkTime", "Gagal mengambil waktu dari internet, coba lagi setelah beberapa saat atau cek koneksi internet anda.")
+                null
+            }
         }
     }
 
@@ -1427,16 +1461,21 @@ class HomeSalesActivity : AppCompatActivity() {
             binding.btnAbsent.text =
                 if (state) getString(R.string.absen_sekarang) else getString(R.string.pulang_sekarang)
 
-            val calendar = Calendar.getInstance()
-            val currentHour =
-                calendar.get(Calendar.HOUR_OF_DAY) // Mengambil jam saat ini dalam format 24 jam
+            lifecycleScope.launch {
+                val currentHour = checkTimeFromInternet()?.get(Calendar.HOUR_OF_DAY)
 
-            if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
-                binding.btnAbsent.visibility = View.GONE
-                binding.absenEveningInfoText.visibility = View.VISIBLE
-            } else {
-                binding.btnAbsent.visibility = View.VISIBLE
-                binding.absenEveningInfoText.visibility = View.GONE
+                if (currentHour != null) {
+                    if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
+                        binding.btnAbsent.visibility = View.GONE
+                        binding.absenEveningInfoText.visibility = View.VISIBLE
+                    } else {
+                        binding.btnAbsent.visibility = View.VISIBLE
+                        binding.absenEveningInfoText.visibility = View.GONE
+                    }
+                } else {
+                    binding.btnAbsent.visibility = View.GONE
+                    binding.absenEveningInfoText.visibility = View.VISIBLE
+                }
             }
         }
 
