@@ -3,7 +3,6 @@ package com.topmortar.topmortarsales.view.courier
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -63,6 +62,7 @@ import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
+import com.topmortar.topmortarsales.commons.utils.PermissionsHandler
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.SntpClient
 import com.topmortar.topmortarsales.commons.utils.URLUtility
@@ -76,6 +76,7 @@ import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.BaseCampModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MapsActivity
+import com.topmortar.topmortarsales.view.PermissionActivity
 import com.topmortar.topmortarsales.view.SplashScreenActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.Dispatchers
@@ -124,85 +125,10 @@ class HomeCourierActivity : AppCompatActivity() {
     private var listBasecamp: ArrayList<BaseCampModel> = arrayListOf()
     private var isSelectBasecampOnly = false
 
-    private var isDialogFineLocationShowed = false
-
     private val locationResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == RESULT_OK) {
             checkLocationPermission()
         }
-    }
-
-    private val locationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        val grantedFineLocation = permissions[Manifest.permission.ACCESS_FINE_LOCATION] ?: false
-        if (grantedFineLocation) {
-            checkLocationPermission()
-        } else {
-
-            val granted = ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-
-            if (!isDialogFineLocationShowed && !granted) {
-                isDialogFineLocationShowed = true
-                AlertDialog.Builder(this)
-                    .setTitle("Gagal Meminta Izin (Lokasi)")
-                    .setMessage("Mohon aktifkan secara manual sesuai langkah-langkah dibawah ini!\n\n" +
-                            "Pada halaman berikutnya:\n" +
-                            "1. Tekan 'Permissions' (Perizinan)\n" +
-                            "2. Pilih 'Location' (Lokasi)\n" +
-                            "3. Pilih 'Allow when the application is used' (Izinkan saat aplikasi digunakan)\n\n" +
-                            "Setelah selesai, kembali ke aplikasi.")
-                    .setPositiveButton(getString(R.string.open_settings)) { localDialog, _ ->
-                        isDialogFineLocationShowed = false
-                        localDialog.dismiss()
-                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                        intent.data = Uri.fromParts("package", packageName, null)
-                        locationResultLauncher.launch(intent)
-                    }
-                    .setOnCancelListener { isDialogFineLocationShowed = false }
-                    .show()
-            }
-        }
-    }
-
-    private fun requestLocationPermissions() {
-        locationPermissionLauncher.launch(
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION
-            )
-        )
-    }
-
-    private val backgroundLocationPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            checkLocationPermission()
-        } else {
-            AlertDialog.Builder(this)
-                .setCancelable(false)
-                .setTitle("Gagal Meminta Izin (Lokasi Latar Belakang)")
-                .setMessage(
-                    "Mohon aktifkan secara manual sesuai langkah-langkah dibawah ini!\n\n" +
-                            "Pada halaman berikutnya:\n" +
-                            "1. Tekan 'Permissions' (Perizinan)\n" +
-                            "2. Pilih 'Location' (Lokasi)\n" +
-                            "3. Pilih 'Allow all it' (Selalu izinkan)\n\n" +
-                            "Setelah selesai, kembali ke aplikasi."
-                )
-                .setPositiveButton(getString(R.string.open_settings)) { localDialog, _ ->
-                    localDialog.dismiss()
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                    intent.data = Uri.fromParts("package", packageName, null)
-                    locationResultLauncher.launch(intent)
-                }
-                .show()
-        }
-    }
-
-    private fun requestBackgroundLocationPermission() {
-        backgroundLocationPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -261,24 +187,28 @@ class HomeCourierActivity : AppCompatActivity() {
         )
     }
 
+    private fun checkPermissionsRequirement(): Boolean {
+        if (!PermissionsHandler.isAllLocationRequirementMet(this)) {
+            dismissProgressDialog()
+            val intent = Intent(this, PermissionActivity::class.java)
+            locationResultLauncher.launch(intent)
+            return false
+        } else {
+            return true
+        }
+    }
+
     private fun checkLocationPermission() {
         try {
-
             if (absentProgressBar == null) {
                 absentProgressBar = CustomProgressBar(this)
                 absentProgressBar!!.setCancelable(false)
             }
             absentProgressBar!!.setMessage(getString(R.string.txt_loading) + " 1 / 5")
             if (!absentProgressBar!!.isShowing()) absentProgressBar?.show()
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
+
+            if (checkPermissionsRequirement()) {
                 checkGpsStatus()
-            } else {
-                dismissProgressDialog()
-                requestLocationPermissions()
             }
         } catch (e: Exception) {
             if (e is CancellationException) {
@@ -300,7 +230,7 @@ class HomeCourierActivity : AppCompatActivity() {
         try {
 
             val locationManager =
-                getSystemService(Context.LOCATION_SERVICE) as LocationManager
+                getSystemService(LOCATION_SERVICE) as LocationManager
             val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
 
             if (!isGpsEnabled) {
@@ -308,6 +238,7 @@ class HomeCourierActivity : AppCompatActivity() {
             } else {
                 checkMockLocation()
             }
+
         } catch (e: Exception) {
             if (e is CancellationException) {
                 return
@@ -393,8 +324,6 @@ class HomeCourierActivity : AppCompatActivity() {
                         "Failed HomeCourierActivity on checkMockLocation(). Error: $e"
                     )
                 }
-            } else {
-                requestLocationPermissions()
             }
         } catch (e: Exception) {
             if (e is CancellationException) {
@@ -542,61 +471,17 @@ class HomeCourierActivity : AppCompatActivity() {
 
             binding.btnAbsent.setOnClickListener {
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    if (ContextCompat.checkSelfPermission(
-                            this,
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        ) == PackageManager.PERMISSION_GRANTED
-                    ) {
-                        if (ContextCompat.checkSelfPermission(
-                                this,
-                                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                            ) == PackageManager.PERMISSION_GRANTED
-                        ) {
-
-                            if (!absentProgressBar!!.isShowing()) absentProgressBar?.show()
-                            if (selectedBasecamp == null) {
-                                if (listBasecamp.isEmpty()) getListBasecamp()
-                                else {
-                                    setupDialogSearch(listBasecamp)
-                                    searchBaseCampAbsentModal.show()
-                                }
-                            } else absentAction()
-
-                        } else {
-                            val message = getString(R.string.bg_service_location_permission_message)
-                            val title = getString(R.string.bg_service_location_permission_title)
-                            AlertDialog.Builder(this)
-                                .setCancelable(false)
-                                .setTitle(title)
-                                .setMessage(message)
-                                .setPositiveButton(getString(R.string.open_settings)) { localDialog, _ ->
-                                    requestBackgroundLocationPermission()
-                                    localDialog.dismiss()
-                                }
-                                .show()
+                if (checkPermissionsRequirement()) {
+                    if (!absentProgressBar!!.isShowing()) absentProgressBar?.show()
+                    if (selectedBasecamp == null) {
+                        if (listBasecamp.isEmpty()) getListBasecamp()
+                        else {
+                            setupDialogSearch(listBasecamp)
+                            searchBaseCampAbsentModal.show()
                         }
-                    } else {
-                        requestLocationPermissions()
-                    }
-                } else {
-                    if (ContextCompat.checkSelfPermission(
-                            this,
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        ) == PackageManager.PERMISSION_GRANTED
-                    ) {
-                        if (!absentProgressBar!!.isShowing()) absentProgressBar?.show()
-                        if (selectedBasecamp == null) {
-                            if (listBasecamp.isEmpty()) getListBasecamp()
-                            else {
-                                setupDialogSearch(listBasecamp)
-                                searchBaseCampAbsentModal.show()
-                            }
-                        } else absentAction()
-                    } else {
-                        requestLocationPermissions()
-                    }
+                    } else absentAction()
                 }
+
             }
 
             lockMenuItem(true)
@@ -900,8 +785,7 @@ class HomeCourierActivity : AppCompatActivity() {
             }
 
         } else {
-            dismissProgressDialog()
-            requestLocationPermissions()
+            checkPermissionsRequirement()
         }
     }
 

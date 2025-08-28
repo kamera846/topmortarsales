@@ -4,11 +4,9 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
-import android.location.LocationManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -17,8 +15,10 @@ import android.os.Looper
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -27,15 +27,18 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
 import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.IS_PAY_STATUS_NOT_PAY
 import com.topmortar.topmortarsales.commons.IS_PAY_STATUS_PAY
 import com.topmortar.topmortarsales.commons.IS_PAY_STATUS_PAY_LATER
@@ -50,7 +53,6 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
-import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
@@ -60,6 +62,7 @@ import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
+import com.topmortar.topmortarsales.commons.utils.PermissionsHandler
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
@@ -69,6 +72,7 @@ import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityNewReportBinding
 import com.topmortar.topmortarsales.view.MapsActivity
+import com.topmortar.topmortarsales.view.PermissionActivity
 import kotlinx.coroutines.launch
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -109,6 +113,14 @@ class NewReportActivity : AppCompatActivity() {
     private lateinit var datePicker: DatePickerDialog
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
+    private var locationCallback: LocationCallback? = null
+
+    private val locationResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        if (it.resultCode == RESULT_OK) {
+            checkLocationPermission()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -136,70 +148,155 @@ class NewReportActivity : AppCompatActivity() {
         iReportSource = intent.getStringExtra(REPORT_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
         iRenviSource = intent.getStringExtra(RENVI_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
 
-        checkLocationPermission()
-    }
-
-    private fun checkLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            checkGpsStatus()
-        } else {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
-        }
-    }
-
-    private fun checkGpsStatus() {
-        val locationManager =
-            getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-
-        if (!isGpsEnabled) {
-            // GPS tidak aktif, munculkan dialog untuk mengaktifkannya
-            showGpsDisabledDialog()
-        } else {
-            val serviceIntent = Intent(this, TrackingService::class.java)
-            serviceIntent.putExtra("userId", userId)
-            serviceIntent.putExtra("userDistributorId", userDistributorId ?: "-start-001-$username")
-            if (userKind == USER_KIND_COURIER) serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(serviceIntent)
-            } else {
-                startService(serviceIntent)
-            }
-            initContent()
-        }
-    }
-
-    private fun showGpsDisabledDialog() {
-
-        val serviceIntent = Intent(this, TrackingService::class.java)
-        stopService(serviceIntent)
-
-        AlertDialog.Builder(this)
-            .setMessage("Aplikasi memerlukan lokasi untuk berfungsi. Aktifkan lokasi sekarang?")
-            .setCancelable(false)
-            .setPositiveButton("Ya") { _, _ ->
-                // Buka pengaturan untuk mengaktifkan GPS
-                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                startActivityForResult(intent, LOCATION_PERMISSION_REQUEST_CODE)
-            }
-            .show()
-    }
-
-    private fun initContent() {
-        isSalesOrPenagihan = userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN
-        binding.titleBarLight.tvTitleBar.text = "Buat Laporan"
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
-        loadingContent(true)
-
-        etMessageListener()
-
         id = intent.getStringExtra(CONST_CONTACT_ID).toString()
         name = intent.getStringExtra(CONST_NAME).toString()
         coordinate = intent.getStringExtra(CONST_MAPS).toString()
         isBaseCamp = intent.getBooleanExtra(CONST_IS_BASE_CAMP, false)
         iInvoiceId = intent.getStringExtra(CONST_INVOICE_ID)
         isReportPaymentStatus = intent.getBooleanExtra(REPORT_TYPE_IS_PAYMENT, false)
+
+        checkLocationPermission()
+    }
+
+    private fun checkPermissionsRequirement(): Boolean {
+        if (!PermissionsHandler.isAllLocationRequirementMet(this)) {
+            val intent = Intent(this, PermissionActivity::class.java)
+            locationResultLauncher.launch(intent)
+            return false
+        } else {
+            return true
+        }
+    }
+
+    private fun checkLocationPermission() {
+        if (checkPermissionsRequirement()) {
+            if (!progressBar.isShowing()) progressBar.show()
+            checkMockLocation()
+        }
+    }
+
+    private fun checkMockLocation() {
+        try {
+
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+
+                val status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
+                if (status != ConnectionResult.SUCCESS) {
+                    showDialogGooglePlayNotAvailable()
+                    return
+                }
+
+                fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+                fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+
+                    if (location == null) {
+
+                        if (locationCallback != null) {
+
+                            fusedLocationClient.removeLocationUpdates(locationCallback!!)
+                        }
+
+                        val locationRequest = LocationRequest.create().apply {
+                            interval = 3000
+                            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+                        }
+
+                        locationCallback = object : LocationCallback() {
+                            override fun onLocationResult(locationResult: LocationResult) {
+
+                                fusedLocationClient.removeLocationUpdates(this)
+                                Handler(Looper.getMainLooper()).postDelayed({
+                                    val intent = Intent(
+                                        this@NewReportActivity,
+                                        NewReportActivity::class.java
+                                    )
+
+                                    intent.putExtra(REPORT_SOURCE, iReportSource)
+                                    intent.putExtra(RENVI_SOURCE, iRenviSource)
+                                    intent.putExtra(CONST_CONTACT_ID, id)
+                                    intent.putExtra(CONST_INVOICE_ID, iInvoiceId)
+                                    intent.putExtra(REPORT_TYPE_IS_PAYMENT, isReportPaymentStatus)
+                                    if (name == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
+                                    else intent.putExtra(CONST_NAME, name)
+                                    if (coordinate == EMPTY_FIELD_VALUE) intent.putExtra(CONST_MAPS, "")
+                                    else intent.putExtra(CONST_MAPS, coordinate)
+
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    startActivity(intent)
+                                }, 3000)
+                            }
+                        }
+
+                        fusedLocationClient.requestLocationUpdates(
+                            locationRequest,
+                            locationCallback!!,
+                            Looper.getMainLooper()
+                        )
+                    } else {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && location.isMock) {
+
+                            showDialogIsMock()
+                        } else if (location.isFromMockProvider) {
+
+                            showDialogIsMock()
+                        } else initContent()
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
+            FirebaseUtils.logErr(this, "Failed NewReportActivity on checkMockLocation(). Catch: ${e.message}")
+            handleMessage(
+                this,
+                "Home Sales Failed",
+                "Failed NewReportActivity on checkMockLocation(). Error: ${e.message}"
+            )
+        }
+    }
+
+    private fun showDialogIsMock() {
+        try {
+
+            val serviceIntent = Intent(this, TrackingService::class.java)
+            stopService(serviceIntent)
+
+            val dialogView = layoutInflater.inflate(R.layout.modal_mock_location, null)
+            AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(false)
+                .setTitle("Lokasi Mock")
+                .setPositiveButton("Pengaturan") { _, _ ->
+                    // Buka pengaturan Developer Options
+                    val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+                    locationResultLauncher.launch(intent)
+                }
+                .show()
+        } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
+            FirebaseUtils.logErr(this, "Failed NewReportActivity on showDialogIsMock(). Catch: ${e.message}")
+            handleMessage(
+                this,
+                "Home Sales Failed",
+                "Failed NewReportActivity on showDialogIsMock(). Error: ${e.message}"
+            )
+        }
+    }
+
+    private fun initContent() {
+        isSalesOrPenagihan = userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN
+        binding.titleBarLight.tvTitleBar.text = "Buat Laporan"
+
+        loadingContent(true)
+
+        etMessageListener()
 
         when (isBaseCamp) {
             true -> {
@@ -260,7 +357,7 @@ class NewReportActivity : AppCompatActivity() {
             calculateDistance()
 
             loadingContent(false)
-        }, 500)
+        }, 1000)
     }
 
     private fun getCurrencyNormalValue(formattedString: String): Long {
@@ -391,7 +488,7 @@ class NewReportActivity : AppCompatActivity() {
 
     @SuppressLint("MissingPermission")
     fun calculateDistance() {
-        progressBar.show()
+        if (!progressBar.isShowing()) progressBar.show()
 
         Handler(Looper.getMainLooper()).postDelayed({
 
@@ -414,12 +511,13 @@ class NewReportActivity : AppCompatActivity() {
 
                         fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
 
-                            if (location != null) {
+                            if (location != null && mapsUrl != "null") {
                                 // Courier Location
                                 val currentLatitude = location.latitude
                                 val currentLongitude = location.longitude
 
                                 // Store Location
+                                Log.d("DEBUG", mapsUrl)
                                 val coordinate = mapsUrl.split(",")
                                 val latitude = coordinate[0].toDoubleOrNull()
                                 val longitude = coordinate[1].toDoubleOrNull()
@@ -560,11 +658,11 @@ class NewReportActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on showDialogGooglePlayNotAvailable(). Catch: ${e.message}")
+            FirebaseUtils.logErr(this, "Failed NewReportActivity on showDialogGooglePlayNotAvailable(). Catch: ${e.message}")
             handleMessage(
                 this,
                 "Home Courier Failed",
-                "Failed HomeSalesActivity on showDialogGooglePlayNotAvailable(). Error: ${e.message}"
+                "Failed NewReportActivity on showDialogGooglePlayNotAvailable(). Error: ${e.message}"
             )
         }
     }
@@ -651,6 +749,8 @@ class NewReportActivity : AppCompatActivity() {
     }
 
     private fun submitReport() {
+
+        if (!checkPermissionsRequirement()) return
 
         val submitDialog = CustomProgressBar(this)
         submitDialog.setCancelable(false)
@@ -872,6 +972,11 @@ class NewReportActivity : AppCompatActivity() {
                 )
             }
         }
+    }
+
+    override fun onResume() {
+        checkLocationPermission()
+        super.onResume()
     }
 
     override fun onDestroy() {
