@@ -31,6 +31,7 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -139,6 +140,7 @@ import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONArray
 import java.io.File
 import java.io.IOException
@@ -149,7 +151,7 @@ import java.util.Locale
 import kotlin.coroutines.cancellation.CancellationException
 
 class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListener,
-    PingUtility.PingResultInterface, SendMessageModal.SendMessageModalInterface {
+    PingUtility.PingResultInterface {
 
     private lateinit var progressBar: CustomProgressBar
     private lateinit var apiService: ApiService
@@ -324,21 +326,28 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     }
 
     private val cameraPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-        if (isGranted) {
-            chooseFile()
-        } else {
+        if (!isGranted) {
             handleMessage(this@DetailContactActivity, "CAMERA ACCESS DENIED", "Izin kamera ditolak")
         }
         etKtp.clearFocus()
     }
 
     private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
+        if (result.resultCode == RESULT_OK) {
             val data: Intent? = result.data
             selectedUri = if (data == null || data.data == null) currentPhotoUri else data.data
             tvSelectedKtp.text = "File terpilih: " + selectedUri?.let { getFileNameFromUri(it) }
         }
         etKtp.clearFocus()
+    }
+
+    private val imgMessagePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val data: Intent? = result.data
+            selectedUri = if (data == null || data.data == null) currentPhotoUri else data.data
+            sendMessageModal.setUri(selectedUri)
+            sendMessageModal.show()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -554,7 +563,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
         etKtp.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                chooseFile()
+                chooseFile(imagePickerLauncher)
                 etKtp.setSelection(etKtp.length())
             } else etKtp.clearFocus()
         }
@@ -642,7 +651,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
 
             override fun afterTextChanged(s: Editable?) {
-                if (isEdit) chooseFile()
+                if (isEdit) chooseFile(imagePickerLauncher)
             }
 
         })
@@ -921,7 +930,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         var pBirthday = "${ etBirthday.text }"
         val pMapsUrl = "${ etMaps.text }"
         val pAddress = "${ etAddress.text }"
-        val pStatus = if (selectedStatus.isEmpty()) "" else selectedStatus.substringBefore(" - ").toLowerCase(Locale.getDefault())
+        val pStatus = if (selectedStatus.isEmpty()) "" else selectedStatus.substringBefore(" - ").lowercase(Locale.getDefault())
         val pWeeklyVisitStatus = if (selectedWeeklyVisitStatus.isEmpty()) "0" else "1"
         val pPaymentMethod = when (selectedPaymentMethod) {
             paymentMethodItem[1] -> PAYMENT_TUNAI
@@ -970,7 +979,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             val byteArray = inputStream?.readBytes()
 
             if (byteArray != null) {
-                val requestFile: RequestBody = RequestBody.create("image/*".toMediaTypeOrNull(), byteArray)
+                val requestFile: RequestBody = byteArray.toRequestBody("image/*".toMediaTypeOrNull())
                 imagePart = MultipartBody.Part.createFormData("ktp", "image.jpg", requestFile)
             } else {
                 handleMessage(this, TAG_RESPONSE_CONTACT, "Gambar tidak ditemukan")
@@ -1612,7 +1621,18 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private fun setupDialogSendMessage(item: ContactModel? = null) {
 
         sendMessageModal = SendMessageModal(this, lifecycleScope)
-        sendMessageModal.initializeInterface(this)
+        sendMessageModal.initializeInterface(object: SendMessageModal.SendMessageModalInterface {
+            override fun onSubmitMessage(status: Boolean) {
+                getDetailContact(false)
+                setupDialogSendMessage(itemSendMessage)
+            }
+
+            override fun onPickImage() {
+                chooseFile(imgMessagePickerLauncher)
+            }
+
+        })
+
         if (item != null) sendMessageModal.setItem(item)
 
         // Setup Indicator
@@ -2234,7 +2254,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         setupHariBayar(iHariBayar)
     }
 
-    private fun chooseFile() {
+    private fun chooseFile(launcher: ActivityResultLauncher<Intent>) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
@@ -2251,9 +2271,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             val chooserIntent = Intent.createChooser(galleryIntent, "Pilih Gambar")
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(cameraIntent))
 
-            imagePickerLauncher!!.launch(chooserIntent)
+            launcher!!.launch(chooserIntent)
         } else {
-            cameraPermissionLauncher!!.launch(Manifest.permission.CAMERA)
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
     }
 
@@ -2327,11 +2347,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
         }
 
-    }
-
-    override fun onSubmitMessage(status: Boolean) {
-        getDetailContact(false)
-        setupDialogSendMessage(itemSendMessage)
     }
 
     private fun setupDelivery() {

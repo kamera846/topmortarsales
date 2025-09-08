@@ -2,6 +2,7 @@ package com.topmortar.topmortarsales.modal
 
 import android.app.Dialog
 import android.content.Context
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -16,6 +17,9 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.BID_VISITED
 import com.topmortar.topmortarsales.commons.PING_NORMAL
@@ -27,6 +31,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
+import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.updateTxtMaxLength
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
@@ -40,6 +45,10 @@ import com.topmortar.topmortarsales.databinding.ModalSendMessageBinding
 import com.topmortar.topmortarsales.model.ContactModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
 class SendMessageModal(private val context: Context, private val lifecycleScope: CoroutineScope) : Dialog(context) {
 
@@ -77,10 +86,51 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
     }
     interface SendMessageModalInterface {
         fun onSubmitMessage(status: Boolean)
+        fun onPickImage()
     }
 
     fun setPingStatus(pingStatus: Int? = null) {
         this.pingStatus = pingStatus
+    }
+
+    private var imagePart: MultipartBody.Part? = null
+    fun setUri(uri: Uri?) {
+        if (uri != null) {
+
+            val imgUri = CompressImageUtil.compressImageOptimized(context, uri)
+
+            Glide.with(context)
+                .load(uri)
+                .transform(CenterCrop(), RoundedCorners(convertDpToPx(8, context)))
+                .into(binding.imgMessage)
+
+            binding.txtBtnPickImg.text = "Klik untuk mengganti gambar"
+            binding.btnClearImg.visibility = View.VISIBLE
+            binding.imgMessage.visibility = View.VISIBLE
+
+            val contentResolver = context.contentResolver
+            val inputStream = contentResolver.openInputStream(imgUri)
+            val byteArray = inputStream?.readBytes()
+
+            if (byteArray != null) {
+                val requestFile: RequestBody =
+                    byteArray.toRequestBody("image/*".toMediaTypeOrNull())
+                imagePart = MultipartBody.Part.createFormData("img_message", "image.jpg", requestFile)
+            } else {
+                clearImg()
+                handleMessage(context, TAG_RESPONSE_CONTACT, "Gagal memproses gambar")
+            }
+
+        } else {
+            clearImg()
+        }
+    }
+
+    private fun clearImg() {
+        binding.txtBtnPickImg.text = "Klik untuk mimilih gambar"
+        binding.btnClearImg.visibility = View.GONE
+        binding.imgMessage.visibility = View.GONE
+        imagePart = null
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -127,6 +177,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
         // Set Title Bar
         icBack.visibility = View.GONE
         icClose.visibility = View.VISIBLE
+        binding.inputImgContainer.visibility = View.VISIBLE
         tvTitleBar.text = "Kirim Pesan ke Toko"
         tvTitleBar.setPadding(convertDpToPx(16, context), 0, 0, 0)
     }
@@ -134,6 +185,13 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
     private fun initClickHandler() {
         icClose.setOnClickListener { this.dismiss() }
         btnSend.setOnClickListener { submitHandler() }
+        binding.btnPickImg.setOnClickListener {
+            this.dismiss()
+            modalInterface?.onPickImage()
+        }
+        binding.btnClearImg.setOnClickListener {
+            clearImg()
+        }
     }
 
     private fun loadingState(state: Boolean) {
@@ -340,6 +398,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
                 val rbMapsUrl = createPartFromString(data.maps_url)
                 val rbMessage = createPartFromString("${ etMessage.text }")
                 val rbUserId = createPartFromString(userId)
+                val rbContactId = createPartFromString(data.id_contact)
                 val rbCurrentName = createPartFromString(currentName)
                 val rbTermin = createPartFromString(data.termin_payment)
 
@@ -352,20 +411,32 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 //                return@launch
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.sendMessage(
-                    name = rbName,
-                    phoneCategory = rbPhoneCategory,
-                    phone = rbPhone,
+                val response = imagePart.let {
+                    if (it != null) {
+                        apiService.sendImgMessage(
+                            contactId = rbContactId,
+                            userId = rbUserId,
+                            phone = rbPhone,
+                            message = rbMessage,
+                            imageMessage = it,
+                        )
+                    } else {
+                        apiService.sendMessage(
+                            name = rbName,
+                            phoneCategory = rbPhoneCategory,
+                            phone = rbPhone,
 //                    phone2 = rbPhone2,
-                    ownerName = rbOwner,
-                    birthday = rbBirthday,
-                    cityId = rbLocation,
-                    mapsUrl = rbMapsUrl,
-                    currentName = rbCurrentName,
-                    userId = rbUserId,
-                    termin = rbTermin,
-                    message = rbMessage
-                )
+                            ownerName = rbOwner,
+                            birthday = rbBirthday,
+                            cityId = rbLocation,
+                            mapsUrl = rbMapsUrl,
+                            currentName = rbCurrentName,
+                            userId = rbUserId,
+                            termin = rbTermin,
+                            message = rbMessage
+                        )
+                    }
+                }
 
                 if (response.isSuccessful) {
 
@@ -390,7 +461,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
                         }
                         RESPONSE_STATUS_ERROR-> {
 
-                            val errorMessages = responseBody.error?.messages.let { if (it?.size != 0) it?.get(0) else "" }
+                            val errorMessages = responseBody.error?.messages.let { if (!it.isNullOrEmpty()) it[0] else "" }
                             handleMessage(context, TAG_RESPONSE_MESSAGE, "Error Code ${ responseBody.error?.code } $errorMessages")
                             loadingState(false)
 
@@ -405,7 +476,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
                 } else {
 
-                    handleMessage(context, TAG_RESPONSE_CONTACT, "Gagal mengirim. Error: " + response.message())
+                    handleMessage(context, TAG_RESPONSE_CONTACT, "Gagal mengirim. Error: Code ${response.code()}, Message: ${response.message()}")
                     loadingState(false)
 
                 }

@@ -148,6 +148,16 @@ interface ApiService {
     ): Response<ResponseMessage>
 
     @Multipart
+    @POST("imgMessage.php")
+    suspend fun sendImgMessage(
+        @Part("id_contact") contactId: RequestBody,
+        @Part("id_user") userId: RequestBody,
+        @Part("nomorhp") phone: RequestBody,
+        @Part("message") message: RequestBody,
+        @Part imageMessage: MultipartBody.Part,
+    ): Response<ResponseMessage>
+
+    @Multipart
     @POST(SEARCH_CONTACT)
     suspend fun searchContact(
         @Part("key") key: RequestBody,
