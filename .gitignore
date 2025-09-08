@@ -16,4 +16,5 @@
 .externalNativeBuild
 .cxx
 local.properties
+secrets.properties
 /release
