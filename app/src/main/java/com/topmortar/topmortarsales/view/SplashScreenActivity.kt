@@ -72,6 +72,7 @@ import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.KeyboardHandler
 import com.topmortar.topmortarsales.commons.utils.KeyboardHandler.showKeyboard
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -140,20 +141,18 @@ class SplashScreenActivity : AppCompatActivity() {
                 insets
             }
         } else {
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
-                enableEdgeToEdge(SystemBarStyle.dark(getColor(R.color.primary)))
-                ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
-                    val systemBars = insets.getInsets(Type.systemBars())
-                    v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-                    insets
-                }
-            } else {
+//            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+//                enableEdgeToEdge(SystemBarStyle.dark(getColor(R.color.primary)))
+//                ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
+//                    val systemBars = insets.getInsets(Type.systemBars())
+//                    v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+//                    insets
+//                }
+//            } else {
                 window.statusBarColor = getColor(R.color.primary)
-            }
+//            }
         }
-
-
-
+//        applyMyEdgeToEdge(true)
         sessionManager = SessionManager(this)
         setContentView(R.layout.activity_splash_screen)
 

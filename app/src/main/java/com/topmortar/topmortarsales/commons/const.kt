@@ -13,8 +13,8 @@ import android.widget.Toast
 /*
     Dev Services
  */
-const val BASE_URL = "https://dev-saleswa.topmortarindonesia.com/" // Development
-const val PING_HOST = "dev-saleswa.topmortarindonesia.com" // Development
+const val BASE_URL = "https://devsaleswa.topmortarindonesia.com/" // Development
+const val PING_HOST = "devsaleswa.topmortarindonesia.com" // Development
 const val FIREBASE_REFERENCE = "db_dev" // Development
 const val NOTIFICATION_LEVEL = "dev"
 

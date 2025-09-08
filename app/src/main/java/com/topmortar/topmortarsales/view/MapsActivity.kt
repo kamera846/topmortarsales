@@ -67,6 +67,7 @@ import com.google.maps.DirectionsApi
 import com.google.maps.GeoApiContext
 import com.google.maps.errors.ApiException
 import com.google.maps.model.TravelMode
+import com.topmortar.topmortarsales.BuildConfig
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.PlaceAdapter
 import com.topmortar.topmortarsales.adapter.recyclerview.UserTrackingRecyclerViewAdapter
@@ -151,6 +152,7 @@ import kotlin.coroutines.cancellation.CancellationException
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private lateinit var sessionManager: SessionManager
+    private val mapsApiKey: String = BuildConfig.MAPS_API_KEY
     private val userKind get() = sessionManager.userKind().toString()
     private val userID get() = sessionManager.userID().toString()
     private val userDistributorId get() = sessionManager.userDistributor().toString()
@@ -315,7 +317,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         if (!Places.isInitialized()) {
-            Places.initialize(applicationContext, getString(R.string.maps_key))
+            Places.initialize(applicationContext, mapsApiKey)
         }
         placesClient = Places.createClient(this)
 
@@ -1016,7 +1018,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private fun getGeoContext(): GeoApiContext {
 
         return GeoApiContext.Builder()
-            .apiKey(getString(R.string.maps_key)) // Key API Google Maps
+            .apiKey(mapsApiKey) // Key API Google Maps
             .build()
 
     }
