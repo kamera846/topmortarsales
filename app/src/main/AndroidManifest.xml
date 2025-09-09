@@ -67,6 +67,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="35">
         <activity
+            android:name=".view.SendMessageActivity"
+            android:exported="false" />
+        <activity
             android:name=".view.PermissionActivity"
             android:exported="false" />
         <activity

@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:id="@+id/activity_send_message"
+    tools:context=".view.SendMessageActivity">
+
+    <include
+        android:id="@+id/title_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        layout="@layout/component_title_bar_light"/>
+
+    <ScrollView
+        android:id="@+id/scrollview"
+        android:layout_below="@+id/title_bar"
+        android:layout_above="@+id/bottom_action"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Message -->
+            <LinearLayout
+                android:visibility="visible"
+                android:id="@+id/input_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tv_message_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Isi Pesan"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                        android:textSize="16sp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="(wajib)"
+                        android:textColor="@color/primary"/>
+
+                </LinearLayout>
+
+                <EditText
+                    android:labelFor="@+id/tv_message_label"
+                    android:id="@+id/et_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    android:layout_marginBottom="4dp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                    android:textColorHint="@color/black_600"
+                    android:maxLines="3"
+                    android:inputType="textMultiLine"
+                    android:hint="@string/input_message_placeholder"
+                    android:autofillHints="@string/input_message_placeholder"
+                    android:textSize="14sp"
+                    android:maxLength="30"
+                    android:background="@drawable/et_background"
+                    android:padding="12dp"
+                    android:outlineProvider="none"/>
+
+                <!-- Max Text Length -->
+                <TextView
+                    android:id="@+id/tv_max_message"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:textColor="@color/primary"
+                    android:text="@string/message_length" />
+
+            </LinearLayout>
+
+            <!-- Img Message -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="16dp"
+                android:paddingBottom="8dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tv_img_message_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Gambar"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="(Opsional)"
+                        android:textColor="@color/black_500"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:id="@+id/btn_pick_img"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:padding="12dp"
+                        android:gravity="center"
+                        android:background="@drawable/et_background"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:background="@android:color/transparent"
+                            android:src="@drawable/img_picker"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="Klik untuk memilih file"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:visibility="gone"
+                        android:id="@+id/btn_clear_img"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="12dp"
+                        android:gravity="center"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/et_background"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:background="@android:color/transparent"
+                            android:src="@drawable/trash_black"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Max File Size -->
+                <TextView
+                    android:id="@+id/tv_max_file_size"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="4dp"/>
+
+                <ImageView
+                    android:visibility="gone"
+                    android:id="@+id/img_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:layout_marginTop="16dp"/>
+
+                <androidx.media3.ui.PlayerView
+                    android:visibility="gone"
+                    android:id="@+id/video_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:layout_marginTop="16dp"
+                    app:show_buffering="when_playing"
+                    app:use_controller="true"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <!-- Bottom Action -->
+    <LinearLayout
+        android:id="@+id/bottom_action"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/notice_bidding"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/contaierCountBidding"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sisa bidding anda "
+                    android:textSize="14sp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                <TextView
+                    android:id="@+id/textTotalBidding"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="3/5"
+                    android:textColor="@color/status_bid"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/text_notice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/text_bid_available"
+                android:textSize="14sp"
+                android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+        </LinearLayout>
+
+        <Button
+            android:visibility="visible"
+            android:id="@+id/btn_send"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/primary"
+            android:textColor="@color/white"
+            android:padding="12dp"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:text="@string/send_now" />
+
+    </LinearLayout>
+
+</RelativeLayout>

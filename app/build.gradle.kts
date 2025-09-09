@@ -112,6 +112,9 @@ dependencies {
     implementation(libs.glide)
     // True Time from Internet
     implementation(libs.commons.net)
+    // Media 3 Exo Player
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.ui)
 
     // Testing
     testImplementation(libs.junit)

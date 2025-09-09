@@ -154,7 +154,7 @@ interface ApiService {
         @Part("id_user") userId: RequestBody,
         @Part("nomorhp") phone: RequestBody,
         @Part("message") message: RequestBody,
-        @Part imageMessage: MultipartBody.Part,
+        @Part imageMessage: MultipartBody.Part?,
     ): Response<ResponseMessage>
 
     @Multipart

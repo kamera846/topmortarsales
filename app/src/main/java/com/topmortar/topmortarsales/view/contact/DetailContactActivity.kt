@@ -111,6 +111,7 @@ import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
 import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
+import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
@@ -131,6 +132,7 @@ import com.topmortar.topmortarsales.model.ContactSales
 import com.topmortar.topmortarsales.model.DeliveryModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MapsActivity
+import com.topmortar.topmortarsales.view.SendMessageActivity
 import com.topmortar.topmortarsales.view.reports.ChecklistReportActivity
 import com.topmortar.topmortarsales.view.reports.NewReportActivity
 import com.topmortar.topmortarsales.view.reports.ReportsActivity
@@ -141,6 +143,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.greenrobot.eventbus.EventBus
 import org.json.JSONArray
 import java.io.File
 import java.io.IOException
@@ -298,7 +301,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private val detailLauncher = registerForActivityResult(
     ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
+        if (result.resultCode == RESULT_OK) {
             val data = result.data
             val resultData = data?.getStringExtra("$DETAIL_ACTIVITY_REQUEST_CODE")
             isClosingAction = data?.getBooleanExtra(IS_CLOSING, false) ?: false
@@ -311,7 +314,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private val coordinateLauncher = registerForActivityResult(
     ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
+        if (result.resultCode == RESULT_OK) {
             val data = result.data
             val latitude = data?.getDoubleExtra("latitude", 0.0)
             val longitude = data?.getDoubleExtra("longitude", 0.0)
@@ -347,6 +350,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             selectedUri = if (data == null || data.data == null) currentPhotoUri else data.data
             sendMessageModal.setUri(selectedUri)
             sendMessageModal.show()
+        }
+    }
+
+    private val sendMessageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            getDetailContact(false)
         }
     }
 
@@ -514,7 +523,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         icEdit.setOnClickListener { toggleEdit(true) }
         icClose.setOnClickListener { toggleEdit(false) }
 //        btnSendMessage.setOnClickListener { navigateAddNewRoom() }
-        btnSendMessage.setOnClickListener { sendMessageModal.show() }
+//        btnSendMessage.setOnClickListener { sendMessageModal.show() }
+        btnSendMessage.setOnClickListener { navigateSendMessage() }
         btnSaveEdit.setOnClickListener { editConfirmation() }
         btnInvoice.setOnClickListener { navigateToDetailInvoice() }
         etBirthdayContainer.setOnClickListener { datePicker.show() }
@@ -2825,6 +2835,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         if (pingUtility != null) pingUtility!!.stopPingMonitoring()
         if (CustomUtility(this).isUserWithOnlineStatus()) {
             CustomUtility(this).setUserStatusOnline(false, userDistributorIds ?: "-custom-003", userID)
+        }
+    }
+
+    private fun navigateSendMessage() {
+        itemSendMessage?.let {
+            EventBus.getDefault().postSticky(EventBusUtils.ContactModelEvent(it))
+            val intent = Intent(this, SendMessageActivity::class.java)
+            sendMessageLauncher.launch(intent)
         }
     }
 
