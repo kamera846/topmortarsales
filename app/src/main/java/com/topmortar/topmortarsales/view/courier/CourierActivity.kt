@@ -13,6 +13,7 @@ import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -117,6 +118,13 @@ class CourierActivity : AppCompatActivity() {
         checkSwipeRefreshLayoutHint()
         initLayout()
 
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
+
     }
 
     @SuppressLint("HardwareIds")
@@ -207,10 +215,9 @@ class CourierActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
         if (activeTab != 0) tabLayout.getTabAt(0)?.select()
-        else super.onBackPressed()
+        else finish()
     }
 
     private fun checkUserAbsent() {

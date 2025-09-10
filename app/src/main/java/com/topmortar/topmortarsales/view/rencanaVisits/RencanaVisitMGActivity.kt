@@ -10,6 +10,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.PopupMenu
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
@@ -113,6 +114,14 @@ class RencanaVisitMGActivity : AppCompatActivity() {
             }
 
         })
+
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
+
     }
 
     private fun showMapsOption() {
@@ -239,8 +248,7 @@ class RencanaVisitMGActivity : AppCompatActivity() {
         }
     }
 
-    @SuppressLint("MissingSuperCall")
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
         if (isSelectBarActive) toggleSelectBar()
         else finish()
     }

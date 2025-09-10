@@ -24,7 +24,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
-import androidx.activity.SystemBarStyle
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -72,7 +72,6 @@ import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.KeyboardHandler
 import com.topmortar.topmortarsales.commons.utils.KeyboardHandler.showKeyboard
 import com.topmortar.topmortarsales.commons.utils.SessionManager
-import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -160,6 +159,14 @@ class SplashScreenActivity : AppCompatActivity() {
 //        AppUpdateHelper.checkForUpdate(this) {
 //            initView()
 //        }
+
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
+
     }
 
     private fun initView() {
@@ -941,13 +948,12 @@ class SplashScreenActivity : AppCompatActivity() {
 
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
         if (currentSubmitStep > 0) {
             if (currentSubmitStep > 2) showResetConfirmation()
             else submitHandler(previous = true)
         } else {
-            super.onBackPressed()
+            finish()
         }
     }
 

@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.topmortar.topmortarsales.R
@@ -97,6 +98,14 @@ class HistoryVisitedActivity : AppCompatActivity() {
         /*
         End Call Fragment
          */
+
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
+
     }
 
     override fun onDestroy() {
@@ -187,8 +196,7 @@ class HistoryVisitedActivity : AppCompatActivity() {
 
     }
 
-    @SuppressLint("MissingSuperCall")
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
         finish()
     }
 }

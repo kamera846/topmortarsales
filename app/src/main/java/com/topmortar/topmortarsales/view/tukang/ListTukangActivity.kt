@@ -12,6 +12,7 @@ import android.view.animation.AnimationUtils
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ELLIPSIS_TEXT
@@ -99,6 +100,14 @@ class ListTukangActivity : AppCompatActivity() {
         /*
         End Call Fragment
          */
+
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
+
     }
 
     private fun toggleSearchEvent(state: String) {
@@ -244,8 +253,7 @@ class ListTukangActivity : AppCompatActivity() {
         _binding = null
     }
 
-    @SuppressLint("MissingSuperCall")
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
         if (isSearchActive) toggleSearchEvent(SEARCH_CLOSE)
         else finish()
     }

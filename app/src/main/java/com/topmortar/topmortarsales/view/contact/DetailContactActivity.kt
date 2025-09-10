@@ -31,6 +31,7 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -404,6 +405,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 initView()
             }
+
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
 
     }
 
@@ -2308,8 +2316,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         return fileName
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
         if (isEdit) toggleEdit(false)
         else {
 
@@ -2319,9 +2326,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 resultIntent.putExtra("$activityRequestCode", SYNC_NOW)
                 setResult(RESULT_OK, resultIntent)
 
-                super.onBackPressed()
+                finish()
 
-            } else super.onBackPressed()
+            } else finish()
 
         }
     }

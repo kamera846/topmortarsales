@@ -10,6 +10,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -78,6 +79,13 @@ class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClic
         initClickHandler()
         getList()
         binding.swipeRefreshLayout.setOnRefreshListener { getList() }
+
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
 
     }
 
@@ -229,13 +237,13 @@ class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClic
         } else finish()
     }
 
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
         if (isRequestSync) {
             val resultIntent = Intent()
             resultIntent.putExtra("$MAIN_ACTIVITY_REQUEST_CODE", SYNC_NOW)
             setResult(RESULT_OK, resultIntent)
-            super.onBackPressed()
-        } else super.onBackPressed()
+            finish()
+        } else finish()
     }
 
 }

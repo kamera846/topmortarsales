@@ -15,6 +15,7 @@ import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -171,6 +172,13 @@ class HomeSalesActivity : AppCompatActivity() {
             sessionManager.userDistributor() ?: "-custom-010",
             sessionManager.userID() ?: ""
         )
+
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
 
     }
 
@@ -1768,10 +1776,9 @@ class HomeSalesActivity : AppCompatActivity() {
 
 // Override Class
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
         if (doubleBackToExitPressedOnce) {
-            super.onBackPressed()
+            finish()
             return
         }
 

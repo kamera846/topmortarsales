@@ -17,6 +17,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -101,6 +102,13 @@ class PreviewClosingActivity : AppCompatActivity() {
         initVariable()
         initClickHandler()
         dataActivityValidation()
+
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
 
     }
 
@@ -290,10 +298,9 @@ class PreviewClosingActivity : AppCompatActivity() {
 
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
         if (!isLoading) {
-            super.onBackPressed()
+            finish()
         } else {
             val builder = AlertDialog.Builder(this)
             builder.setMessage("Tunggu sebentar. Proses closing masih berjalan.")

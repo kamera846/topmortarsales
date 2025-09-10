@@ -24,6 +24,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -291,6 +292,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) EventBus.getDefault().register(this)
 
         checkLocationPermission()
+
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
 
     }
 
@@ -1348,21 +1356,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         } else Toast.makeText(this, "Koneksi ke Layanan Google Play gagal", TOAST_SHORT).show()
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
         if (!isGetCoordinate && !isTracking && !isTrackingCourier && !isTrackingHistory) {
             if (routeDirections != null) toggleBtnDrawRoute()
             else if (isCardNavigationShowing) {
                 selectedTargetRoute = null
                 toggleDrawRoute()
-            } else super.onBackPressed()
+            } else finish()
         } else {
             if (isTrackingCourier) {
                 val resultIntent = Intent()
                 resultIntent.putExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE", SYNC_NOW)
                 setResult(RESULT_OK, resultIntent)
                 finish()
-            } else super.onBackPressed()
+            } else finish()
         }
     }
 

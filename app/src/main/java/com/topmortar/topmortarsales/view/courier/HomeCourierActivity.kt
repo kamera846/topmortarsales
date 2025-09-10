@@ -16,6 +16,7 @@ import android.os.Looper
 import android.provider.Settings
 import android.view.View
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -185,6 +186,14 @@ class HomeCourierActivity : AppCompatActivity() {
             userDistributorId ?: "-custom-008",
             userId ?: ""
         )
+
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
+
     }
 
     private fun checkPermissionsRequirement(): Boolean {
@@ -1416,10 +1425,9 @@ class HomeCourierActivity : AppCompatActivity() {
     }
 
 // Override Class
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
         if (doubleBackToExitPressedOnce) {
-            super.onBackPressed()
+            finish()
             return
         }
 

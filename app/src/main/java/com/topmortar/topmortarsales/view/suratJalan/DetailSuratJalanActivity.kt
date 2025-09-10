@@ -39,6 +39,7 @@ import android.widget.RelativeLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -246,6 +247,13 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         val printState = sessionManager.printState()
         if (printState.isNullOrEmpty()) togglePrintButton(PRINT_METHOD_BLUETOOTH)
         else togglePrintButton(printState)
+
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
 
     }
 
@@ -1119,8 +1127,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
         if (isRequestSync) {
 
             val resultIntent = Intent()
@@ -1128,9 +1135,9 @@ class DetailSuratJalanActivity : AppCompatActivity() {
             resultIntent.putExtra(IS_CLOSING, isClosingAction)
             setResult(RESULT_OK, resultIntent)
 
-            super.onBackPressed()
+            finish()
 
-        } else super.onBackPressed()
+        } else finish()
     }
 
     /*
