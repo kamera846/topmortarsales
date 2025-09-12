@@ -3,7 +3,6 @@ package com.topmortar.topmortarsales.view
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.provider.OpenableColumns
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -11,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
@@ -18,6 +18,8 @@ import androidx.media3.common.Player
 import androidx.media3.common.VideoSize
 import androidx.media3.exoplayer.ExoPlayer
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_ERROR
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
@@ -30,27 +32,37 @@ import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.updateTxtMaxLe
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.UriHandler.uriToMultiPart
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
+import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivitySendMessageBinding
+import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.ContactModel
+import com.topmortar.topmortarsales.model.KontenModel
+import com.topmortar.topmortarsales.model.ModalSearchModel
 import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
-import java.io.File
-import java.io.FileOutputStream
 
 class SendMessageActivity() : AppCompatActivity() {
+
+    companion object {
+        private const val GENERAL_MESSAGE = "GeneralMessage"
+        private const val MEDIA_MESSAGE = "MediaMessage"
+        private const val LINK_MESSAGE = "LinkMessage"
+    }
+
     private lateinit var sessionManager: SessionManager
     private lateinit var binding: ActivitySendMessageBinding
 
-    private var item: ContactModel? = null
+    private var contact: ContactModel? = null
+
+    private var selectedMsgType = GENERAL_MESSAGE
 
     private val msgMaxLines = 5
     private val msgMaxLength = 200
@@ -65,6 +77,10 @@ class SendMessageActivity() : AppCompatActivity() {
         }
     }
 
+    private lateinit var searchModalKonten: SearchModal
+    private var listKonten: ArrayList<KontenModel>? = null
+    private var idKonten: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -76,9 +92,48 @@ class SendMessageActivity() : AppCompatActivity() {
 
         sessionManager = SessionManager(this)
 
+        /*
+        Set Dummy Item
+        */
+//        contact = ContactModel(
+//            id_contact = "2726",
+//            nama = "Trial Toko Bangunan Rafli",
+//            nomorhp = "62895636998639",
+//            tgl_lahir = "2024-12-18",
+//            store_owner = "M Rafli Ramadani",
+//            id_city = "1",
+//            maps_url = "-7.95244741393831,112.69275560975075,-7.9477740,112.6103210",
+//            address = "Jl Melati Blok 001 No 001 Kota Istimewa",
+//            store_status = "active",
+//            ktp_owner = "min-2025-09-08-18-15-16image.jpg",
+//            termin_payment = "30",
+//            id_promo = "1",
+//            reputation = "good",
+//            created_at = "2024-07-25 18:18:15",
+//            payment_method = "transfer",
+//            tagih_mingguan = "1",
+//            nomorhp_2 = "0",
+//            nomor_cat_1 = "Owner",
+//            nomor_cat_2 = "Konsultan",
+//            pass_contact = "ad52f32fb5c55f5ff52cc89cb8ab92f4",
+//            hari_bayar = "sabtu",
+//        )
+//        binding.titleBar.tvTitleBar.text = contact?.nama
+
+        // Initialize Message Type
+        toggleMessageType(selectedMsgType)
+
+        // Initialize Radio Button
+        binding.radioButtonGeneral.setOnClickListener { toggleMessageType(GENERAL_MESSAGE) }
+        binding.radioButtonMedia.setOnClickListener { toggleMessageType(MEDIA_MESSAGE) }
+        binding.radioButtonLink.setOnClickListener { toggleMessageType(LINK_MESSAGE) }
+
         // Initialize Click Handler
         binding.titleBar.icBack.setOnClickListener { finish() }
         binding.btnSend.setOnClickListener { submitHandler() }
+        binding.iconSelectableLink.setOnClickListener { showModalSelectKonten() }
+        binding.selectableLink.setOnClickListener { showModalSelectKonten() }
+        binding.tvSelectableLink.setOnClickListener { showModalSelectKonten() }
         binding.btnPickImg.setOnClickListener {
             chooseFileSendMessage()
         }
@@ -89,15 +144,18 @@ class SendMessageActivity() : AppCompatActivity() {
         // Initialize TextView
         binding.tvMaxFileSize.text = "Maksimal ukuran file $limitFileMB MB"
 
+        // Get List Konten
+        getListKonten()
+
         etMessageListener()
         EventBus.getDefault().register(this)
     }
 
     @Subscribe(sticky = true, threadMode = org.greenrobot.eventbus.ThreadMode.MAIN)
     fun onEvent(event: EventBusUtils.ContactModelEvent) {
-        item = event.data
+        contact = event.data
 
-        binding.titleBar.tvTitleBar.text = item?.nama
+        binding.titleBar.tvTitleBar.text = contact?.nama
 
         EventBus.getDefault().removeStickyEvent(event)
     }
@@ -111,6 +169,64 @@ class SendMessageActivity() : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         EventBus.getDefault().unregister(this)
+    }
+
+    private fun toggleMessageType(messageType: String) {
+        selectedMsgType = messageType
+        setSelectedKonten()
+        when (messageType) {
+            MEDIA_MESSAGE -> {
+                binding.radioButtonGeneral.isChecked = false
+                binding.radioButtonMedia.isChecked = true
+                binding.radioButtonLink.isChecked = false
+                binding.inputContainer.visibility = View.VISIBLE
+                binding.inputMediaContainer.visibility = View.VISIBLE
+                binding.inputLinkContainer.visibility = View.GONE
+            } LINK_MESSAGE -> {
+                binding.radioButtonGeneral.isChecked = false
+                binding.radioButtonMedia.isChecked = false
+                binding.radioButtonLink.isChecked = true
+                binding.inputContainer.visibility = View.GONE
+                binding.inputMediaContainer.visibility = View.GONE
+                binding.inputLinkContainer.visibility = View.VISIBLE
+            } else -> {
+                binding.radioButtonGeneral.isChecked = true
+                binding.radioButtonMedia.isChecked = false
+                binding.radioButtonLink.isChecked = false
+                binding.inputContainer.visibility = View.VISIBLE
+                binding.inputMediaContainer.visibility = View.GONE
+                binding.inputLinkContainer.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun setSelectedKonten(konten: KontenModel? = null) {
+        if (konten != null) {
+            binding.selectedLinkLayout.visibility = View.VISIBLE
+            binding.tvNameSelectedLink.text = konten.name_kontenmsg
+            binding.tvBodySelectedLink.text = konten.body_kontenmsg
+            binding.btnPreviewSelectedLink.isEnabled = true
+            binding.btnPreviewSelectedLink.setOnClickListener {
+                val intent = Intent(this, WebviewActivity::class.java)
+                intent.putExtra("URL", konten.link_kontenmsg)
+                startActivity(intent)
+            }
+            Glide.with(this)
+                .load(konten.link_thumbnail.toUri())
+                .transform(CenterCrop(), RoundedCorners(convertDpToPx(8, this)))
+                .into(binding.imgSelectedLink)
+            idKonten = konten.id_kontenmsg
+        } else {
+            binding.selectedLinkLayout.visibility = View.GONE
+            binding.tvNameSelectedLink.text = ""
+            binding.tvBodySelectedLink.text = ""
+            binding.btnPreviewSelectedLink.isEnabled = false
+            Glide.with(this)
+                .load(R.drawable.bg_light)
+                .transform(CenterCrop(), RoundedCorners(convertDpToPx(8, this)))
+                .into(binding.imgSelectedLink)
+            idKonten = null
+        }
     }
 
     private fun loadingState(state: Boolean) {
@@ -187,9 +303,10 @@ class SendMessageActivity() : AppCompatActivity() {
             }
 
             val mimeType = contentResolver.getType(uri)
+            val partName = "img_message"
 
             if (mimeType?.startsWith("image") == true) {
-                imagePart = uriToMultiPart(uri)
+                imagePart = uriToMultiPart(this, uri, partName)
 
                 binding.btnClearImg.visibility = View.VISIBLE
                 binding.imgMessage.visibility = View.VISIBLE
@@ -200,7 +317,7 @@ class SendMessageActivity() : AppCompatActivity() {
                     .into(binding.imgMessage)
 
             } else if (mimeType?.startsWith("video") == true) {
-                imagePart = uriToMultiPart(uri)
+                imagePart = uriToMultiPart(this, uri, partName)
 
                 binding.btnClearImg.visibility = View.VISIBLE
                 binding.imgMessage.visibility = View.GONE
@@ -244,49 +361,6 @@ class SendMessageActivity() : AppCompatActivity() {
         return fileSizeInMB <= limitFileMB
     }
 
-    private fun uriToMultiPart(uri: Uri?): MultipartBody.Part? {
-        if (uri == null) return null
-
-        val inputStream = contentResolver.openInputStream(uri)
-        val file = File(cacheDir, "upload_temp")
-        val outputStream = FileOutputStream(file)
-        inputStream?.copyTo(outputStream)
-        inputStream?.close()
-        outputStream.close()
-
-        val requestFile = file.asRequestBody(contentResolver.getType(uri)?.toMediaTypeOrNull())
-        val (name, ext) = getFileNameAndExtension(uri)
-        return MultipartBody.Part.createFormData("img_message", "$name.$ext", requestFile)
-    }
-
-    private fun getFileNameAndExtension(uri: Uri): Pair<String, String> {
-        var name = "image"
-        var extension = "jpg" // default
-
-        val cursor = contentResolver.query(uri, null, null, null, null)
-        cursor?.use {
-            val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-            if (it.moveToFirst() && nameIndex != -1) {
-                val fullName = it.getString(nameIndex)
-                val dotIndex = fullName.lastIndexOf('.')
-                if (dotIndex != -1) {
-                    name = fullName.substring(0, dotIndex)
-                    extension = fullName.substring(dotIndex + 1)
-                } else {
-                    name = fullName
-                }
-            }
-        }
-        val sanitizedName = sanitizeFileName(name)
-        return Pair(sanitizedName, extension)
-    }
-
-    private fun sanitizeFileName(filename: String): String {
-        // Karakter yang tidak diizinkan dalam nama file
-        val regex = Regex("[!&\$@=;/:+,?%\\[\\]<>\\\\~^*#|()\\s]")
-        return filename.replace(regex, "_")
-    }
-
     private fun clearImg() {
         binding.btnClearImg.visibility = View.GONE
         binding.imgMessage.visibility = View.GONE
@@ -297,14 +371,24 @@ class SendMessageActivity() : AppCompatActivity() {
     }
 
     private fun submitHandler() {
-
-        if (!formValidation( "${ binding.etMessage.text }")) return
+        if (!formValidation()) return
 
         loadingState(true)
 
+        when (selectedMsgType) {
+            LINK_MESSAGE -> {
+                submitMessageKonten()
+            } else -> {
+                submitMessageGeneralAndMedia()
+            }
+        }
+    }
+
+    private fun submitMessageGeneralAndMedia() {
+
         lifecycleScope.launch {
             try {
-                val data = item!!
+                val data = contact!!
                 val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
                 val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
 
@@ -322,16 +406,16 @@ class SendMessageActivity() : AppCompatActivity() {
                 val rbTermin = createPartFromString(data.termin_payment)
 
                 val apiService: ApiService = HttpClient.create()
-                val response = imagePart.let {
-                    if (it != null) {
+                val response = when (selectedMsgType) {
+                    MEDIA_MESSAGE -> {
                         apiService.sendImgMessage(
                             contactId = rbContactId,
                             userId = rbUserId,
                             phone = rbPhone,
                             message = rbMessage,
-                            imageMessage = it,
+                            imageMessage = imagePart,
                         )
-                    } else {
+                    } else -> {
                         apiService.sendMessage(
                             name = rbName,
                             phoneCategory = rbPhoneCategory,
@@ -347,7 +431,6 @@ class SendMessageActivity() : AppCompatActivity() {
                         )
                     }
                 }
-
 
                 if (response.isSuccessful) {
 
@@ -390,7 +473,7 @@ class SendMessageActivity() : AppCompatActivity() {
                                 loadingState(false)
 
                             }
-                            RESPONSE_STATUS_ERROR-> {
+                            RESPONSE_STATUS_ERROR -> {
 
                                 val errorMessages = responseBody.error?.messages.let { if (!it.isNullOrEmpty()) it[0] else "" }
                                 handleMessage(this@SendMessageActivity, TAG_RESPONSE_MESSAGE, "Error Code ${ responseBody.error?.code } $errorMessages")
@@ -415,7 +498,7 @@ class SendMessageActivity() : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                handleMessage(this@SendMessageActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@SendMessageActivity, TAG_RESPONSE_CONTACT, "Failed run service send message. Exception " + e.message)
                 loadingState(false)
 
             }
@@ -424,15 +507,171 @@ class SendMessageActivity() : AppCompatActivity() {
 
     }
 
-    private fun formValidation(message: String): Boolean {
-        return if (message.isEmpty()) {
-            binding.etMessage.error = "Pesan tidak boleh kosong!"
-            binding.etMessage.requestFocus()
-            false
-        } else {
-            binding.etMessage.error = null
-            binding.etMessage.clearFocus()
-            true
+    private fun submitMessageKonten() {
+
+        lifecycleScope.launch {
+            try {
+                val data = contact!!
+
+                val rbContactId = createPartFromString(data.id_contact)
+                val rbKontenId = createPartFromString(idKonten ?: "-1")
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.sendMessageKonten(
+                        idKonten = rbKontenId,
+                        idContact = rbContactId
+                    )
+
+                if (response.isSuccessful) {
+
+                    val responseBody = response.body()
+
+                    if (responseBody != null) {
+                        when (responseBody.status) {
+                            RESPONSE_STATUS_OK -> {
+
+                                loadingState(false)
+
+                                val responseQontak = responseBody.qontak
+
+                                if (responseQontak == null) {
+                                    handleMessage(this@SendMessageActivity, TAG_RESPONSE_MESSAGE, responseBody.message)
+
+                                    setResult(RESULT_OK)
+                                    finish()
+                                } else {
+                                    val qontakError = responseQontak.error
+                                    if (qontakError == null) {
+                                        handleMessage(
+                                            this@SendMessageActivity,
+                                            TAG_RESPONSE_MESSAGE,
+                                            "Status Qontak: ${responseQontak.status}"
+                                        )
+                                    } else {
+                                        handleMessage(
+                                            this@SendMessageActivity,
+                                            TAG_RESPONSE_MESSAGE,
+                                            "Code: ${ qontakError.code }, Message: ${qontakError.messages}"
+                                        )
+                                    }
+                                }
+
+                            }
+                            RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+
+                                handleMessage(this@SendMessageActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim: ${ responseBody.message }")
+                                loadingState(false)
+
+                            }
+                            RESPONSE_STATUS_ERROR -> {
+
+                                val errorMessages = responseBody.error?.messages.let { if (!it.isNullOrEmpty()) it[0] else "" }
+                                handleMessage(this@SendMessageActivity, TAG_RESPONSE_MESSAGE, "Error Code ${ responseBody.error?.code } $errorMessages")
+                                loadingState(false)
+
+                            }
+                            else -> {
+
+                                handleMessage(this@SendMessageActivity, TAG_RESPONSE_CONTACT, "Gagal mengirim!")
+                                loadingState(false)
+
+                            }
+                        }
+                    }
+
+                } else {
+
+                    handleMessage(this@SendMessageActivity, TAG_RESPONSE_CONTACT, "Gagal mengirim. Error: Code ${response?.code()}, Message: ${response?.message()}")
+                    loadingState(false)
+
+                }
+
+            } catch (e: Exception) {
+
+                handleMessage(this@SendMessageActivity, TAG_RESPONSE_CONTACT, "Failed run service send message. Exception " + e.message)
+                loadingState(false)
+
+            }
+
         }
+
+    }
+
+    private fun formValidation(): Boolean {
+        return when (selectedMsgType) {
+            GENERAL_MESSAGE -> {
+                val message = "${ binding.etMessage.text }"
+                if (message.isEmpty()) {
+                    handleMessage(this, message = "Text pesan tidak boleh kosong")
+                    false
+                } else true
+            } MEDIA_MESSAGE -> {
+                val message = "${ binding.etMessage.text }"
+                if (message.isEmpty()) {
+                    handleMessage(this, message = "Text pesan tidak boleh kosong")
+                    false
+                } else if (imagePart == null) {
+                    handleMessage(this, message = "Tidak ada media yang dipilih")
+                    false
+                } else true
+            } LINK_MESSAGE -> {
+                if (idKonten == null) {
+                    handleMessage(this, message = "Tidak ada konten yang dipilih")
+                    false
+                } else true
+            } else -> {
+                handleMessage(this, message = "Anda belum memilih opsi pesan")
+                false
+            }
+        }
+    }
+
+    private fun getListKonten() {
+        val apiService: ApiService = HttpClient.create()
+
+        try {
+            lifecycleScope.launch {
+                val response = apiService.getKonten()
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+                        listKonten = response.results
+                        val listItem = listKonten
+                        val items: ArrayList<ModalSearchModel> = ArrayList()
+
+                        if (listItem != null) {
+                            for (i in 0 until listItem.size) {
+                                val data = listItem[i]
+                                items.add(ModalSearchModel(data.id_kontenmsg, data.name_kontenmsg, data.body_kontenmsg))
+                            }
+                            setupModalSearchKonten(items)
+                        }
+                    } RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED, RESPONSE_STATUS_ERROR -> {
+                    handleMessage(this@SendMessageActivity, message = "Gagal memuat konten. Error: ${response.message}")
+                } else -> {
+                    handleMessage(this@SendMessageActivity, message = "Gagal memuat konten")
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            handleMessage(this, message = "Failed run service konten. Exception " + e.message)
+        }
+    }
+
+    private fun setupModalSearchKonten(items: ArrayList<ModalSearchModel>) {
+
+        searchModalKonten = SearchModal(this, items)
+        searchModalKonten.setCustomDialogListener(object : SearchModal.SearchModalListener {
+            override fun onDataReceived(data: ModalSearchModel) {
+                val findItem = listKonten?.find { it.id_kontenmsg == data.id }
+                setSelectedKonten(findItem)
+            }
+
+        })
+        searchModalKonten.searchHint = "Masukkan judul konten…"
+    }
+
+    private fun showModalSelectKonten() {
+        if (listKonten != null)
+            searchModalKonten.show()
     }
 }

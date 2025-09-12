@@ -1,10 +1,11 @@
 package com.topmortar.topmortarsales.response
 
-data class ResponseMessage (
-    val response: Int = 0,
+import com.topmortar.topmortarsales.model.KontenModel
+
+data class ResponseKonten(
     val status: String = "",
     val message: String = "",
-    val user_id: String = "",
+    val results: ArrayList<KontenModel> = ArrayList(),
     val error: ResponseErrorObject? = null,
     val qontak: ResponseQontak? = null,
 )

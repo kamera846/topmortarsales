@@ -5,7 +5,7 @@ import android.content.Context
 import android.util.Log
 import com.topmortar.topmortarsales.commons.TOAST_LONG
 
-fun handleMessage(context: Context, tag: String, message: String, duration: Int = TOAST_LONG) {
+fun handleMessage(context: Context, tag: String? = "DEBUG", message: String, duration: Int = TOAST_LONG) {
 
     Log.d(tag, message)
 
