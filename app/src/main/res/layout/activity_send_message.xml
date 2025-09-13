@@ -72,7 +72,7 @@
                         app:buttonTint="@color/primary_200" />
 
                     <com.google.android.material.radiobutton.MaterialRadioButton
-                        android:id="@+id/radioButtonLink"
+                        android:id="@+id/radioButtonKonten"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Link Konten"
@@ -258,10 +258,10 @@
 
             </LinearLayout>
 
-            <!-- Link Message -->
+            <!-- Konten Message -->
             <LinearLayout
-                android:visibility="visible"
-                android:id="@+id/inputLinkContainer"
+                android:visibility="gone"
+                android:id="@+id/inputKontenContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="16dp"
@@ -292,7 +292,7 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/selectableLink"
+                    android:id="@+id/selectableKonten"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="48dp"
@@ -303,7 +303,7 @@
                     android:orientation="horizontal">
 
                     <TextView
-                        android:id="@+id/tvSelectableLink"
+                        android:id="@+id/tvSelectableKonten"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -314,7 +314,7 @@
                         android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
 
                     <ImageView
-                        android:id="@+id/iconSelectableLink"
+                        android:id="@+id/iconSelectableKonten"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
                         android:layout_marginStart="16dp"
@@ -325,21 +325,24 @@
 
             </LinearLayout>
 
-            <!-- Selected Link -->
+            <!-- Selected Konten -->
             <LinearLayout
                 android:visibility="gone"
-                android:id="@+id/selectedLinkLayout"
+                android:id="@+id/selectedKontenLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:orientation="vertical">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:id="@+id/tvNameSelectedKonten"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Konten yang dipilih"
-                    android:textSize="16sp"
+                    android:text="Lorem ipsum"
+                    android:maxLines="2"
+                    android:ellipsize="end"
                     android:textStyle="bold"
+                    android:textSize="16sp"
                     android:layout_marginHorizontal="8dp"
                     android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
 
@@ -348,57 +351,55 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
                     app:cardElevation="2dp"
-                    app:cardCornerRadius="8dp">
+                    app:cardCornerRadius="10dp">
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="8dp"
-                        android:orientation="horizontal">
+                        android:orientation="vertical">
 
                         <ImageView
-                            android:id="@+id/imgSelectedLink"
-                            android:layout_width="130dp"
-                            android:layout_height="130dp"
-                            android:background="@drawable/background_rounded_8"
-                            android:scaleType="centerCrop"
-                            android:layout_gravity="start"/>
-
-                        <LinearLayout
+                            android:id="@+id/imgSelectedKonten"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_marginStart="8dp"
-                            android:orientation="vertical">
+                            android:layout_height="wrap_content"
+                            android:scaleType="fitCenter"
+                            android:adjustViewBounds="true"
+                            android:layout_gravity="start"
+                            android:layout_marginVertical="4dp"
+                            android:layout_marginHorizontal="4dp"
+                            android:background="@drawable/background_rounded_8"/>
 
-                            <TextView
-                                android:id="@+id/tvNameSelectedLink"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="Lorem ipsum"
-                                android:maxLines="2"
-                                android:ellipsize="end"
-                                android:textStyle="bold"
-                                android:textSize="16sp"
-                                android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+                        <TextView
+                            android:id="@+id/tvBodySelectedKonten"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Lorem ipsum sit dolor amet"
+                            android:layout_marginHorizontal="8dp"
+                            android:theme="@style/Theme.TopMortarSales.TextBaseLine"/>
 
-                            <TextView
-                                android:id="@+id/tvBodySelectedLink"
-                                android:layout_width="match_parent"
-                                android:layout_height="0dp"
-                                android:layout_weight="1"
-                                android:text="Lorem ipsum sit dolor amet"
-                                android:maxLines="2"
-                                android:ellipsize="end"
-                                android:theme="@style/Theme.TopMortarSales.TextBaseLine"/>
+                        <TextView
+                            android:id="@+id/tvLinkSelectedKonten"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Lorem ipsum sit dolor amet ipsum sit dolor amet"
+                            android:layout_marginHorizontal="8dp"
+                            android:textColor="@color/blue_silver_lake"/>
 
-                            <Button
-                                android:id="@+id/btnPreviewSelectedLink"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:backgroundTint="@color/green_reseda"
-                                android:text="Preview Konten"/>
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:layout_marginTop="8dp"
+                            android:theme="@style/Theme.TopMortarSales.BaseLine"/>
 
-                        </LinearLayout>
+                        <TextView
+                            android:id="@+id/btnPreviewSelectedKonten"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Preview Konten"
+                            android:textAlignment="center"
+                            android:textColor="@color/green_reseda"
+                            android:padding="12dp"
+                            android:background="@drawable/bg_transparent_round_8_clickable"/>
 
                     </LinearLayout>
 

@@ -1,6 +1,7 @@
 package com.topmortar.topmortarsales.view
 
 import android.content.Intent
+import android.graphics.Paint
 import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
@@ -18,7 +19,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.VideoSize
 import androidx.media3.exoplayer.ExoPlayer
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.FitCenter
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_ERROR
@@ -121,19 +122,19 @@ class SendMessageActivity() : AppCompatActivity() {
 //        binding.titleBar.tvTitleBar.text = contact?.nama
 
         // Initialize Message Type
-        toggleMessageType(selectedMsgType)
+        toggleMessageType(GENERAL_MESSAGE)
 
         // Initialize Radio Button
         binding.radioButtonGeneral.setOnClickListener { toggleMessageType(GENERAL_MESSAGE) }
         binding.radioButtonMedia.setOnClickListener { toggleMessageType(MEDIA_MESSAGE) }
-        binding.radioButtonLink.setOnClickListener { toggleMessageType(LINK_MESSAGE) }
+        binding.radioButtonKonten.setOnClickListener { toggleMessageType(LINK_MESSAGE) }
 
         // Initialize Click Handler
         binding.titleBar.icBack.setOnClickListener { finish() }
         binding.btnSend.setOnClickListener { submitHandler() }
-        binding.iconSelectableLink.setOnClickListener { showModalSelectKonten() }
-        binding.selectableLink.setOnClickListener { showModalSelectKonten() }
-        binding.tvSelectableLink.setOnClickListener { showModalSelectKonten() }
+        binding.iconSelectableKonten.setOnClickListener { showModalSelectKonten() }
+        binding.selectableKonten.setOnClickListener { showModalSelectKonten() }
+        binding.tvSelectableKonten.setOnClickListener { showModalSelectKonten() }
         binding.btnPickImg.setOnClickListener {
             chooseFileSendMessage()
         }
@@ -173,60 +174,73 @@ class SendMessageActivity() : AppCompatActivity() {
 
     private fun toggleMessageType(messageType: String) {
         selectedMsgType = messageType
+        binding.etMessage.setText("")
+        binding.etMessage.error = null
+        binding.etMessage.clearFocus()
+        clearImg()
         setSelectedKonten()
         when (messageType) {
             MEDIA_MESSAGE -> {
                 binding.radioButtonGeneral.isChecked = false
                 binding.radioButtonMedia.isChecked = true
-                binding.radioButtonLink.isChecked = false
+                binding.radioButtonKonten.isChecked = false
                 binding.inputContainer.visibility = View.VISIBLE
                 binding.inputMediaContainer.visibility = View.VISIBLE
-                binding.inputLinkContainer.visibility = View.GONE
+                binding.inputKontenContainer.visibility = View.GONE
             } LINK_MESSAGE -> {
                 binding.radioButtonGeneral.isChecked = false
                 binding.radioButtonMedia.isChecked = false
-                binding.radioButtonLink.isChecked = true
+                binding.radioButtonKonten.isChecked = true
                 binding.inputContainer.visibility = View.GONE
                 binding.inputMediaContainer.visibility = View.GONE
-                binding.inputLinkContainer.visibility = View.VISIBLE
+                binding.inputKontenContainer.visibility = View.VISIBLE
             } else -> {
                 binding.radioButtonGeneral.isChecked = true
                 binding.radioButtonMedia.isChecked = false
-                binding.radioButtonLink.isChecked = false
+                binding.radioButtonKonten.isChecked = false
                 binding.inputContainer.visibility = View.VISIBLE
                 binding.inputMediaContainer.visibility = View.GONE
-                binding.inputLinkContainer.visibility = View.GONE
+                binding.inputKontenContainer.visibility = View.GONE
             }
         }
     }
 
     private fun setSelectedKonten(konten: KontenModel? = null) {
         if (konten != null) {
-            binding.selectedLinkLayout.visibility = View.VISIBLE
-            binding.tvNameSelectedLink.text = konten.name_kontenmsg
-            binding.tvBodySelectedLink.text = konten.body_kontenmsg
-            binding.btnPreviewSelectedLink.isEnabled = true
-            binding.btnPreviewSelectedLink.setOnClickListener {
-                val intent = Intent(this, WebviewActivity::class.java)
-                intent.putExtra("URL", konten.link_kontenmsg)
-                startActivity(intent)
+            binding.selectedKontenLayout.visibility = View.VISIBLE
+            binding.tvNameSelectedKonten.text = konten.name_kontenmsg
+            binding.tvBodySelectedKonten.text = konten.body_kontenmsg
+            binding.tvLinkSelectedKonten.text = konten.link_kontenmsg
+            binding.tvLinkSelectedKonten.paintFlags = binding.tvLinkSelectedKonten.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+            binding.tvLinkSelectedKonten.setOnClickListener {
+                navigateToWebview(konten.link_kontenmsg)
+            }
+            binding.btnPreviewSelectedKonten.isEnabled = true
+            binding.btnPreviewSelectedKonten.setOnClickListener {
+                navigateToWebview(konten.link_kontenmsg)
             }
             Glide.with(this)
                 .load(konten.link_thumbnail.toUri())
-                .transform(CenterCrop(), RoundedCorners(convertDpToPx(8, this)))
-                .into(binding.imgSelectedLink)
+                .transform(FitCenter(), RoundedCorners(convertDpToPx(8, this)))
+                .into(binding.imgSelectedKonten)
             idKonten = konten.id_kontenmsg
         } else {
-            binding.selectedLinkLayout.visibility = View.GONE
-            binding.tvNameSelectedLink.text = ""
-            binding.tvBodySelectedLink.text = ""
-            binding.btnPreviewSelectedLink.isEnabled = false
+            binding.selectedKontenLayout.visibility = View.GONE
+            binding.tvNameSelectedKonten.text = ""
+            binding.tvBodySelectedKonten.text = ""
+            binding.tvLinkSelectedKonten.text = ""
+            binding.btnPreviewSelectedKonten.isEnabled = false
             Glide.with(this)
-                .load(R.drawable.bg_light)
-                .transform(CenterCrop(), RoundedCorners(convertDpToPx(8, this)))
-                .into(binding.imgSelectedLink)
+                .load(R.drawable.background_rounded_8)
+                .into(binding.imgSelectedKonten)
             idKonten = null
         }
+    }
+
+    private fun navigateToWebview(url: String) {
+        val intent = Intent(this, WebviewActivity::class.java)
+        intent.putExtra("URL", url)
+        startActivity(intent)
     }
 
     private fun loadingState(state: Boolean) {
@@ -373,15 +387,24 @@ class SendMessageActivity() : AppCompatActivity() {
     private fun submitHandler() {
         if (!formValidation()) return
 
-        loadingState(true)
+        AlertDialog.Builder(this)
+            .setTitle("Konfirmasi")
+            .setMessage("Pastikan pesan yang ingin anda kirim sudah sesuai.\n\nApakah anda yakin akan mengirim pesan sekarang?")
+            .setPositiveButton("Ya") { dialog, _ ->
 
-        when (selectedMsgType) {
-            LINK_MESSAGE -> {
-                submitMessageKonten()
-            } else -> {
-                submitMessageGeneralAndMedia()
+                dialog.dismiss()
+                loadingState(true)
+
+                when (selectedMsgType) {
+                    LINK_MESSAGE -> {
+                        submitMessageKonten()
+                    } else -> {
+                        submitMessageGeneralAndMedia()
+                    }
+                }
             }
-        }
+            .setNegativeButton("Batal") { dialog, _ -> dialog.dismiss() }
+            .show()
     }
 
     private fun submitMessageGeneralAndMedia() {
@@ -446,23 +469,28 @@ class SendMessageActivity() : AppCompatActivity() {
 
                                 if (responseQontak == null) {
                                     handleMessage(this@SendMessageActivity, TAG_RESPONSE_MESSAGE, responseBody.message)
-
                                     setResult(RESULT_OK)
                                     finish()
                                 } else {
-                                    val qontakError = responseQontak.error
-                                    if (qontakError == null) {
-                                        handleMessage(
-                                            this@SendMessageActivity,
-                                            TAG_RESPONSE_MESSAGE,
-                                            "Status Qontak: ${responseQontak.status}"
-                                        )
+                                    if (responseQontak.status == "success") {
+                                        handleMessage(this@SendMessageActivity, TAG_RESPONSE_MESSAGE, responseBody.message)
+                                        setResult(RESULT_OK)
+                                        finish()
                                     } else {
-                                        handleMessage(
-                                            this@SendMessageActivity,
-                                            TAG_RESPONSE_MESSAGE,
-                                            "Code: ${ qontakError.code }, Message: ${qontakError.messages}"
-                                        )
+                                        val qontakError = responseQontak.error
+                                        if (qontakError == null) {
+                                            handleMessage(
+                                                this@SendMessageActivity,
+                                                TAG_RESPONSE_MESSAGE,
+                                                "Status Qontak: ${responseQontak.status}"
+                                            )
+                                        } else {
+                                            handleMessage(
+                                                this@SendMessageActivity,
+                                                TAG_RESPONSE_MESSAGE,
+                                                "Code: ${qontakError.code}, Message: ${qontakError.messages}"
+                                            )
+                                        }
                                     }
                                 }
 
@@ -536,23 +564,28 @@ class SendMessageActivity() : AppCompatActivity() {
 
                                 if (responseQontak == null) {
                                     handleMessage(this@SendMessageActivity, TAG_RESPONSE_MESSAGE, responseBody.message)
-
                                     setResult(RESULT_OK)
                                     finish()
                                 } else {
-                                    val qontakError = responseQontak.error
-                                    if (qontakError == null) {
-                                        handleMessage(
-                                            this@SendMessageActivity,
-                                            TAG_RESPONSE_MESSAGE,
-                                            "Status Qontak: ${responseQontak.status}"
-                                        )
+                                    if (responseQontak.status == "success") {
+                                        handleMessage(this@SendMessageActivity, TAG_RESPONSE_MESSAGE, responseBody.message)
+                                        setResult(RESULT_OK)
+                                        finish()
                                     } else {
-                                        handleMessage(
-                                            this@SendMessageActivity,
-                                            TAG_RESPONSE_MESSAGE,
-                                            "Code: ${ qontakError.code }, Message: ${qontakError.messages}"
-                                        )
+                                        val qontakError = responseQontak.error
+                                        if (qontakError == null) {
+                                            handleMessage(
+                                                this@SendMessageActivity,
+                                                TAG_RESPONSE_MESSAGE,
+                                                "Status Qontak: ${responseQontak.status}"
+                                            )
+                                        } else {
+                                            handleMessage(
+                                                this@SendMessageActivity,
+                                                TAG_RESPONSE_MESSAGE,
+                                                "Code: ${ qontakError.code }, Message: ${qontakError.messages}"
+                                            )
+                                        }
                                     }
                                 }
 
