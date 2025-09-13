@@ -7,6 +7,7 @@ import android.view.Gravity
 import android.view.MenuItem
 import android.view.View
 import android.widget.PopupMenu
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.lifecycleScope
@@ -64,6 +65,14 @@ class AllUserTrackingActivity : AppCompatActivity() {
 
         setContentView(binding.root)
         initView()
+
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
+
     }
 
     private fun initView() {
@@ -349,12 +358,12 @@ class AllUserTrackingActivity : AppCompatActivity() {
         getList()
     }
 
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
         if (onRefreshed) {
             val intent = Intent()
             intent.putExtra(SYNC_NOW, SYNC_NOW)
             setResult(RESULT_OK, intent)
             finish()
-        } else super.onBackPressed()
+        } else finish()
     }
 }

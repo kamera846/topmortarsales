@@ -3,7 +3,6 @@ package com.topmortar.topmortarsales.view.courier
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -17,11 +16,11 @@ import android.os.Looper
 import android.provider.Settings
 import android.view.View
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.common.ConnectionResult
@@ -36,7 +35,6 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
-import com.topmortar.topmortarsales.commons.BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_CITY_ID
@@ -47,7 +45,6 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
 import com.topmortar.topmortarsales.commons.CONST_NEAREST_STORE
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
-import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.MAX_REPORT_DISTANCE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
@@ -66,7 +63,9 @@ import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
+import com.topmortar.topmortarsales.commons.utils.PermissionsHandler
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.SntpClient
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -78,13 +77,18 @@ import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.BaseCampModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MapsActivity
+import com.topmortar.topmortarsales.view.PermissionActivity
 import com.topmortar.topmortarsales.view.SplashScreenActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 import kotlin.coroutines.cancellation.CancellationException
 
 @SuppressLint("SetTextI18n")
@@ -182,30 +186,38 @@ class HomeCourierActivity : AppCompatActivity() {
             userDistributorId ?: "-custom-008",
             userId ?: ""
         )
+
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
+
+    }
+
+    private fun checkPermissionsRequirement(): Boolean {
+        if (!PermissionsHandler.isAllLocationRequirementMet(this)) {
+            dismissProgressDialog()
+            val intent = Intent(this, PermissionActivity::class.java)
+            locationResultLauncher.launch(intent)
+            return false
+        } else {
+            return true
+        }
     }
 
     private fun checkLocationPermission() {
         try {
-
             if (absentProgressBar == null) {
                 absentProgressBar = CustomProgressBar(this)
                 absentProgressBar!!.setCancelable(false)
             }
             absentProgressBar!!.setMessage(getString(R.string.txt_loading) + " 1 / 5")
             if (!absentProgressBar!!.isShowing()) absentProgressBar?.show()
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
+
+            if (checkPermissionsRequirement()) {
                 checkGpsStatus()
-            } else {
-                dismissProgressDialog()
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                    LOCATION_PERMISSION_REQUEST_CODE
-                )
             }
         } catch (e: Exception) {
             if (e is CancellationException) {
@@ -227,7 +239,7 @@ class HomeCourierActivity : AppCompatActivity() {
         try {
 
             val locationManager =
-                getSystemService(Context.LOCATION_SERVICE) as LocationManager
+                getSystemService(LOCATION_SERVICE) as LocationManager
             val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
 
             if (!isGpsEnabled) {
@@ -235,6 +247,7 @@ class HomeCourierActivity : AppCompatActivity() {
             } else {
                 checkMockLocation()
             }
+
         } catch (e: Exception) {
             if (e is CancellationException) {
                 return
@@ -320,12 +333,6 @@ class HomeCourierActivity : AppCompatActivity() {
                         "Failed HomeCourierActivity on checkMockLocation(). Error: $e"
                     )
                 }
-            } else {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                    LOCATION_PERMISSION_REQUEST_CODE
-                )
             }
         } catch (e: Exception) {
             if (e is CancellationException) {
@@ -473,75 +480,17 @@ class HomeCourierActivity : AppCompatActivity() {
 
             binding.btnAbsent.setOnClickListener {
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    if (ContextCompat.checkSelfPermission(
-                            this,
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        ) == PackageManager.PERMISSION_GRANTED
-                    ) {
-                        if (ContextCompat.checkSelfPermission(
-                                this,
-                                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                            ) == PackageManager.PERMISSION_GRANTED
-                        ) {
-
-//                        absentAction()
-                            if (!absentProgressBar!!.isShowing()) absentProgressBar?.show()
-                            if (selectedBasecamp == null) {
-                                if (listBasecamp.isEmpty()) getListBasecamp()
-                                else {
-                                    setupDialogSearch(listBasecamp)
-                                    searchBaseCampAbsentModal.show()
-                                }
-                            } else absentAction()
-
-                        } else {
-                            val message = getString(R.string.bg_service_location_permission_message)
-                            val title = getString(R.string.bg_service_location_permission_title)
-                            AlertDialog.Builder(this)
-                                .setCancelable(false)
-                                .setTitle(title)
-                                .setMessage(message)
-                                .setPositiveButton(getString(R.string.open_settings)) { localDialog, _ ->
-                                    ActivityCompat.requestPermissions(
-                                        this,
-                                        arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
-                                        BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE
-                                    )
-                                    localDialog.dismiss()
-                                }
-                                .show()
+                if (checkPermissionsRequirement()) {
+                    if (!absentProgressBar!!.isShowing()) absentProgressBar?.show()
+                    if (selectedBasecamp == null) {
+                        if (listBasecamp.isEmpty()) getListBasecamp()
+                        else {
+                            setupDialogSearch(listBasecamp)
+                            searchBaseCampAbsentModal.show()
                         }
-                    } else {
-                        ActivityCompat.requestPermissions(
-                            this,
-                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                            LOCATION_PERMISSION_REQUEST_CODE
-                        )
-                    }
-                } else {
-                    if (ContextCompat.checkSelfPermission(
-                            this,
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        ) == PackageManager.PERMISSION_GRANTED
-                    ) {
-//                    absentAction()
-                        if (!absentProgressBar!!.isShowing()) absentProgressBar?.show()
-                        if (selectedBasecamp == null) {
-                            if (listBasecamp.isEmpty()) getListBasecamp()
-                            else {
-                                setupDialogSearch(listBasecamp)
-                                searchBaseCampAbsentModal.show()
-                            }
-                        } else absentAction()
-                    } else {
-                        ActivityCompat.requestPermissions(
-                            this,
-                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                            LOCATION_PERMISSION_REQUEST_CODE
-                        )
-                    }
+                    } else absentAction()
                 }
+
             }
 
             lockMenuItem(true)
@@ -845,12 +794,7 @@ class HomeCourierActivity : AppCompatActivity() {
             }
 
         } else {
-            dismissProgressDialog()
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                LOCATION_PERMISSION_REQUEST_CODE
-            )
+            checkPermissionsRequirement()
         }
     }
 
@@ -902,16 +846,21 @@ class HomeCourierActivity : AppCompatActivity() {
                 binding.btnAbsent.text =
                     if (state) getString(R.string.absen_sekarang) else getString(R.string.pulang_sekarang)
 
-                val calendar = Calendar.getInstance()
-                val currentHour =
-                    calendar.get(Calendar.HOUR_OF_DAY) // Mengambil jam saat ini dalam format 24 jam
+                lifecycleScope.launch {
+                    val currentHour = checkTimeFromInternet()?.get(Calendar.HOUR_OF_DAY)
 
-                if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
-                    binding.btnAbsent.visibility = View.GONE
-                    binding.absenEveningInfoText.visibility = View.VISIBLE
-                } else {
-                    binding.btnAbsent.visibility = View.VISIBLE
-                    binding.absenEveningInfoText.visibility = View.GONE
+                    if (currentHour != null) {
+                        if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
+                            binding.btnAbsent.visibility = View.GONE
+                            binding.absenEveningInfoText.visibility = View.VISIBLE
+                        } else {
+                            binding.btnAbsent.visibility = View.VISIBLE
+                            binding.absenEveningInfoText.visibility = View.GONE
+                        }
+                    } else {
+                        binding.btnAbsent.visibility = View.GONE
+                        binding.absenEveningInfoText.visibility = View.VISIBLE
+                    }
                 }
             }
 
@@ -1355,22 +1304,40 @@ class HomeCourierActivity : AppCompatActivity() {
                             userChild.child("fullname").setValue(userFullName)
                             userChild.child("isOnline").setValue(true)
 
+                            val calendar = checkTimeFromInternet()
+                            val date = calendar?.let { Date(it.timeInMillis) }
+                            val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
+                            formatter.timeZone = TimeZone.getDefault()
+
+                            val absentDateTime = if (date != null) formatter.format(date) else "-"
+
                             if (!isAbsentMorningNow) {
 
-                                val absentDateTime = DateFormat.now()
                                 userChild.child("morningDateTime").setValue(absentDateTime)
                                 userChild.child("lastSeen").setValue(absentDateTime)
 
                                 sessionManager.absentDateTime(absentDateTime)
                                 checkAbsent()
+                            } else if (!isAbsentEveningNow) {
+
+                                val currentHour = calendar?.get(Calendar.HOUR_OF_DAY)
+
+                                if (currentHour != null) {
+                                    if (currentHour >= 16) {
+                                        userChild.child("eveningDateTime").setValue(absentDateTime)
+                                        userChild.child("lastSeen").setValue(absentDateTime)
+
+                                        sessionManager.absentDateTime(absentDateTime)
+                                        checkAbsent()
+                                    } else {
+                                        if (absentProgressBar!!.isShowing()) absentProgressBar?.dismiss()
+                                    }
+                                } else {
+                                    if (absentProgressBar!!.isShowing()) absentProgressBar?.dismiss()
+                                }
+
                             } else {
-
-                                val absentDateTime = DateFormat.now()
-                                userChild.child("eveningDateTime").setValue(absentDateTime)
-                                userChild.child("lastSeen").setValue(absentDateTime)
-
-                                sessionManager.absentDateTime(absentDateTime)
-                                checkAbsent()
+                                if (absentProgressBar!!.isShowing()) absentProgressBar?.dismiss()
                             }
 
                         }
@@ -1424,6 +1391,20 @@ class HomeCourierActivity : AppCompatActivity() {
         }
     }
 
+    private suspend fun checkTimeFromInternet(): Calendar? {
+        return withContext(Dispatchers.IO) {
+            val networkTimeMillis = SntpClient.getNetworkTime()
+            if (networkTimeMillis != null) {
+                Calendar.getInstance().apply {
+                    timeInMillis = networkTimeMillis
+                }
+            } else {
+                handleMessage(this@HomeCourierActivity, "NetworkTime", "Gagal mengambil waktu dari internet, coba lagi setelah beberapa saat atau cek koneksi internet anda.")
+                null
+            }
+        }
+    }
+
     private fun navigateChatAdmin() {
         val distributorNumber = sessionManager.userDistributorNumber()!!
         val phoneNumber = distributorNumber.ifEmpty { getString(R.string.topmortar_wa_number) }
@@ -1444,55 +1425,9 @@ class HomeCourierActivity : AppCompatActivity() {
     }
 
 // Override Class
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) checkLocationPermission()
-            else {
-                AlertDialog.Builder(this)
-                    .setCancelable(false)
-                    .setTitle("Izin Diperlukan")
-                    .setMessage("Izin lokasi diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
-                    .setPositiveButton(getString(R.string.open_settings)) { localDialog, _ ->
-                        localDialog.dismiss()
-                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                        intent.data = Uri.fromParts("package", packageName, null)
-                        locationResultLauncher.launch(intent)
-                    }
-                    .show()
-            }
-        } else if (requestCode == BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) checkLocationPermission()
-            else {
-                val message = getString(R.string.bg_service_location_permission_message)
-                val title = getString(R.string.bg_service_location_permission_title)
-                AlertDialog.Builder(this)
-                    .setCancelable(false)
-                    .setTitle(title)
-                    .setMessage(message)
-                    .setPositiveButton(getString(R.string.open_settings)) { localDialog, _ ->
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                            ActivityCompat.requestPermissions(
-                                this,
-                                arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
-                                BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE
-                            )
-                        }
-                        localDialog.dismiss()
-                    }
-                    .show()
-            }
-        }
-    }
-
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
         if (doubleBackToExitPressedOnce) {
-            super.onBackPressed()
+            finish()
             return
         }
 

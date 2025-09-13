@@ -27,6 +27,7 @@ import android.widget.PopupMenu
 import android.widget.RelativeLayout
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -247,6 +248,13 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         getUsers()
         getCities()
         getSkills()
+
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
 
     }
 
@@ -1683,8 +1691,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         return fileName
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
         if (isEdit) toggleEdit(false)
         else {
 
@@ -1694,9 +1701,9 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                 resultIntent.putExtra("$activityRequestCode", SYNC_NOW)
                 setResult(RESULT_OK, resultIntent)
 
-                super.onBackPressed()
+                finish()
 
-            } else super.onBackPressed()
+            } else finish()
 
         }
     }

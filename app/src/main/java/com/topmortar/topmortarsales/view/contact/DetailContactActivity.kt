@@ -31,6 +31,8 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -110,6 +112,7 @@ import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
 import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
+import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
@@ -130,6 +133,7 @@ import com.topmortar.topmortarsales.model.ContactSales
 import com.topmortar.topmortarsales.model.DeliveryModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MapsActivity
+import com.topmortar.topmortarsales.view.SendMessageActivity
 import com.topmortar.topmortarsales.view.reports.ChecklistReportActivity
 import com.topmortar.topmortarsales.view.reports.NewReportActivity
 import com.topmortar.topmortarsales.view.reports.ReportsActivity
@@ -139,6 +143,8 @@ import kotlinx.coroutines.launch
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.greenrobot.eventbus.EventBus
 import org.json.JSONArray
 import java.io.File
 import java.io.IOException
@@ -149,7 +155,7 @@ import java.util.Locale
 import kotlin.coroutines.cancellation.CancellationException
 
 class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListener,
-    PingUtility.PingResultInterface, SendMessageModal.SendMessageModalInterface {
+    PingUtility.PingResultInterface {
 
     private lateinit var progressBar: CustomProgressBar
     private lateinit var apiService: ApiService
@@ -296,7 +302,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private val detailLauncher = registerForActivityResult(
     ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
+        if (result.resultCode == RESULT_OK) {
             val data = result.data
             val resultData = data?.getStringExtra("$DETAIL_ACTIVITY_REQUEST_CODE")
             isClosingAction = data?.getBooleanExtra(IS_CLOSING, false) ?: false
@@ -309,7 +315,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private val coordinateLauncher = registerForActivityResult(
     ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
+        if (result.resultCode == RESULT_OK) {
             val data = result.data
             val latitude = data?.getDoubleExtra("latitude", 0.0)
             val longitude = data?.getDoubleExtra("longitude", 0.0)
@@ -324,21 +330,34 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     }
 
     private val cameraPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-        if (isGranted) {
-            chooseFile()
-        } else {
+        if (!isGranted) {
             handleMessage(this@DetailContactActivity, "CAMERA ACCESS DENIED", "Izin kamera ditolak")
         }
         etKtp.clearFocus()
     }
 
     private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
+        if (result.resultCode == RESULT_OK) {
             val data: Intent? = result.data
             selectedUri = if (data == null || data.data == null) currentPhotoUri else data.data
             tvSelectedKtp.text = "File terpilih: " + selectedUri?.let { getFileNameFromUri(it) }
         }
         etKtp.clearFocus()
+    }
+
+    private val imgMessagePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val data: Intent? = result.data
+            selectedUri = if (data == null || data.data == null) currentPhotoUri else data.data
+            sendMessageModal.setUri(selectedUri)
+            sendMessageModal.show()
+        }
+    }
+
+    private val sendMessageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            getDetailContact(false)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -386,6 +405,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 initView()
             }
+
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
 
     }
 
@@ -505,7 +531,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         icEdit.setOnClickListener { toggleEdit(true) }
         icClose.setOnClickListener { toggleEdit(false) }
 //        btnSendMessage.setOnClickListener { navigateAddNewRoom() }
-        btnSendMessage.setOnClickListener { sendMessageModal.show() }
+//        btnSendMessage.setOnClickListener { sendMessageModal.show() }
+        btnSendMessage.setOnClickListener { navigateSendMessage() }
         btnSaveEdit.setOnClickListener { editConfirmation() }
         btnInvoice.setOnClickListener { navigateToDetailInvoice() }
         etBirthdayContainer.setOnClickListener { datePicker.show() }
@@ -554,7 +581,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
         etKtp.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                chooseFile()
+                chooseFile(imagePickerLauncher)
                 etKtp.setSelection(etKtp.length())
             } else etKtp.clearFocus()
         }
@@ -642,7 +669,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
 
             override fun afterTextChanged(s: Editable?) {
-                if (isEdit) chooseFile()
+                if (isEdit) chooseFile(imagePickerLauncher)
             }
 
         })
@@ -921,7 +948,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         var pBirthday = "${ etBirthday.text }"
         val pMapsUrl = "${ etMaps.text }"
         val pAddress = "${ etAddress.text }"
-        val pStatus = if (selectedStatus.isEmpty()) "" else selectedStatus.substringBefore(" - ").toLowerCase(Locale.getDefault())
+        val pStatus = if (selectedStatus.isEmpty()) "" else selectedStatus.substringBefore(" - ").lowercase(Locale.getDefault())
         val pWeeklyVisitStatus = if (selectedWeeklyVisitStatus.isEmpty()) "0" else "1"
         val pPaymentMethod = when (selectedPaymentMethod) {
             paymentMethodItem[1] -> PAYMENT_TUNAI
@@ -970,7 +997,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             val byteArray = inputStream?.readBytes()
 
             if (byteArray != null) {
-                val requestFile: RequestBody = RequestBody.create("image/*".toMediaTypeOrNull(), byteArray)
+                val requestFile: RequestBody = byteArray.toRequestBody("image/*".toMediaTypeOrNull())
                 imagePart = MultipartBody.Part.createFormData("ktp", "image.jpg", requestFile)
             } else {
                 handleMessage(this, TAG_RESPONSE_CONTACT, "Gambar tidak ditemukan")
@@ -1612,7 +1639,18 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private fun setupDialogSendMessage(item: ContactModel? = null) {
 
         sendMessageModal = SendMessageModal(this, lifecycleScope)
-        sendMessageModal.initializeInterface(this)
+        sendMessageModal.initializeInterface(object: SendMessageModal.SendMessageModalInterface {
+            override fun onSubmitMessage(status: Boolean) {
+                getDetailContact(false)
+                setupDialogSendMessage(itemSendMessage)
+            }
+
+            override fun onPickImage() {
+                chooseFile(imgMessagePickerLauncher)
+            }
+
+        })
+
         if (item != null) sendMessageModal.setItem(item)
 
         // Setup Indicator
@@ -2234,7 +2272,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         setupHariBayar(iHariBayar)
     }
 
-    private fun chooseFile() {
+    private fun chooseFile(launcher: ActivityResultLauncher<Intent>) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
             val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
@@ -2251,9 +2289,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             val chooserIntent = Intent.createChooser(galleryIntent, "Pilih Gambar")
             chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf(cameraIntent))
 
-            imagePickerLauncher!!.launch(chooserIntent)
+            launcher!!.launch(chooserIntent)
         } else {
-            cameraPermissionLauncher!!.launch(Manifest.permission.CAMERA)
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
         }
     }
 
@@ -2278,8 +2316,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         return fileName
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
         if (isEdit) toggleEdit(false)
         else {
 
@@ -2289,9 +2326,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 resultIntent.putExtra("$activityRequestCode", SYNC_NOW)
                 setResult(RESULT_OK, resultIntent)
 
-                super.onBackPressed()
+                finish()
 
-            } else super.onBackPressed()
+            } else finish()
 
         }
     }
@@ -2327,11 +2364,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
         }
 
-    }
-
-    override fun onSubmitMessage(status: Boolean) {
-        getDetailContact(false)
-        setupDialogSendMessage(itemSendMessage)
     }
 
     private fun setupDelivery() {
@@ -2810,6 +2842,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         if (pingUtility != null) pingUtility!!.stopPingMonitoring()
         if (CustomUtility(this).isUserWithOnlineStatus()) {
             CustomUtility(this).setUserStatusOnline(false, userDistributorIds ?: "-custom-003", userID)
+        }
+    }
+
+    private fun navigateSendMessage() {
+        itemSendMessage?.let {
+            EventBus.getDefault().postSticky(EventBusUtils.ContactModelEvent(it))
+            val intent = Intent(this, SendMessageActivity::class.java)
+            sendMessageLauncher.launch(intent)
         }
     }
 

@@ -28,6 +28,7 @@ import android.widget.PopupMenu
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -286,6 +287,12 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         }
         if (userKind == USER_KIND_ADMIN) getCities()
         else getContacts()
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+        })
 
     }
 
@@ -1433,37 +1440,34 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         }
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
 
-        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) binding.drawerLayout.closeDrawer(GravityCompat.START)
-        else {
-
-            if (isSearchActive) toggleSearchEvent(SEARCH_CLOSE)
-
-            else if (isSelectItemActive) toggleSelectItem()
-
-            else {
-
-                if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_MARKETING) super.onBackPressed()
-                else {
-
-                    if (doubleBackToExitPressedOnce) {
-                        super.onBackPressed()
-                        return
-                    }
-
-                    this@MainActivity.doubleBackToExitPressedOnce = true
-                    handleMessage(this@MainActivity, TAG_ACTION_MAIN_ACTIVITY, getString(R.string.tekan_sekali_lagi), TOAST_SHORT)
+        when {
+            binding.drawerLayout.isDrawerOpen(GravityCompat.START) -> {
+                binding.drawerLayout.closeDrawer(GravityCompat.START)
+            }
+            isSearchActive -> {
+                toggleSearchEvent(SEARCH_CLOSE)
+            }
+            isSelectItemActive -> {
+                toggleSelectItem()
+            }
+            userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_MARKETING -> {
+                // Allow system back
+                finish()
+            }
+            else -> {
+                if (doubleBackToExitPressedOnce) {
+                    finish()
+                } else {
+                    doubleBackToExitPressedOnce = true
+                    handleMessage(this, TAG_ACTION_MAIN_ACTIVITY, getString(R.string.tekan_sekali_lagi), TOAST_SHORT)
 
                     Handler(Looper.getMainLooper()).postDelayed({
                         doubleBackToExitPressedOnce = false
                     }, 2000)
-
                 }
-
             }
-
         }
 
     }

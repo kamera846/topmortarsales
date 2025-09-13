@@ -9,6 +9,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupMenu
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
@@ -149,6 +150,13 @@ class ReportsActivity : AppCompatActivity() {
 
         setDatePickerDialog()
         initClickHandler()
+
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
 
     }
 
@@ -454,13 +462,13 @@ class ReportsActivity : AppCompatActivity() {
         }
     }
 
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
 
         if (isTaskRoot) {
             val intent = Intent(this, HomeSalesActivity::class.java)
             startActivity(intent)
             finish()
-        } else super.onBackPressed()
+        } else finish()
 
     }
 }

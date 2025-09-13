@@ -6,12 +6,14 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -21,6 +23,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.recyclerview.QnAFormReportRVA
@@ -30,6 +35,7 @@ import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
 import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAX_REPORT_DISTANCE
 import com.topmortar.topmortarsales.commons.NORMAL_REPORT
@@ -45,6 +51,7 @@ import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
+import com.topmortar.topmortarsales.commons.utils.PermissionsHandler
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
@@ -55,6 +62,7 @@ import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityChecklistReportBinding
 import com.topmortar.topmortarsales.model.QnAFormReportModel
 import com.topmortar.topmortarsales.view.MapsActivity
+import com.topmortar.topmortarsales.view.PermissionActivity
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -81,6 +89,14 @@ class ChecklistReportActivity : AppCompatActivity() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
+    private var locationCallback: LocationCallback? = null
+
+    private val locationResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+//        if (it.resultCode == RESULT_OK) {
+//            checkLocationPermission()
+//        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide()
@@ -94,8 +110,6 @@ class ChecklistReportActivity : AppCompatActivity() {
         progressBar.setMessage(getString(R.string.txt_loading))
         progressBar.setCancelable(false)
 
-        binding.titleBar.icBack.visibility = View.VISIBLE
-        binding.titleBar.tvTitleBar.text = "Form Visit Checklist"
 
         isAnswerChecklist = intent.getBooleanExtra("is_answer_checklist", false)
         iName = intent.getStringExtra(CONST_NAME)
@@ -108,8 +122,6 @@ class ChecklistReportActivity : AppCompatActivity() {
         iVisitId = intent.getStringExtra("visitId")
         iReportSource = intent.getStringExtra(REPORT_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
         iRenviSource = intent.getStringExtra(RENVI_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
-
-        loadContent()
 
         binding.titleBar.icBack.setOnClickListener { finish() }
         if (isAnswerChecklist != null && isAnswerChecklist == true) {
@@ -124,8 +136,142 @@ class ChecklistReportActivity : AppCompatActivity() {
                 getDistance(isSubmit = true)
             }
         }
-        binding.swipeRefreshLayout.setOnRefreshListener { loadContent() }
 
+        binding.titleBar.icBack.visibility = View.VISIBLE
+        binding.titleBar.tvTitleBar.text = "Form Visit Checklist"
+        binding.swipeRefreshLayout.setOnRefreshListener { loadContent() }
+//        checkLocationPermission()
+    }
+
+    private fun checkPermissionsRequirement(): Boolean {
+        if (!PermissionsHandler.isAllLocationRequirementMet(this)) {
+            val intent = Intent(this, PermissionActivity::class.java)
+            locationResultLauncher.launch(intent)
+            return false
+        } else {
+            return true
+        }
+    }
+
+    private fun checkLocationPermission() {
+        if (checkPermissionsRequirement()) {
+            if (!progressBar.isShowing()) progressBar.show()
+            checkMockLocation()
+        }
+    }
+
+    private fun checkMockLocation() {
+        try {
+
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+
+                val status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
+                if (status != ConnectionResult.SUCCESS) {
+                    showDialogGooglePlayNotAvailable()
+                    return
+                }
+
+                fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+                fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+
+                    if (location == null) {
+
+                        if (locationCallback != null) {
+
+                            fusedLocationClient.removeLocationUpdates(locationCallback!!)
+                        }
+
+                        val locationRequest = LocationRequest.create().apply {
+                            interval = 3000
+                            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+                        }
+
+                        locationCallback = object : LocationCallback() {
+                            override fun onLocationResult(locationResult: LocationResult) {
+
+                                fusedLocationClient.removeLocationUpdates(this)
+                                Handler(Looper.getMainLooper()).postDelayed({
+                                    val intent = Intent(
+                                        this@ChecklistReportActivity,
+                                        ChecklistReportActivity::class.java
+                                    )
+
+                                    intent.putExtra(REPORT_SOURCE, iReportSource)
+                                    intent.putExtra(RENVI_SOURCE, iRenviSource)
+                                    intent.putExtra(CONST_CONTACT_ID, iContactId)
+                                    intent.putExtra(CONST_INVOICE_ID, iInvoiceId)
+                                    if (iName == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
+                                    else intent.putExtra(CONST_NAME, iName)
+                                    if (iCoordinate == EMPTY_FIELD_VALUE) intent.putExtra(CONST_MAPS, "")
+                                    else intent.putExtra(CONST_MAPS, iCoordinate)
+
+                                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    startActivity(intent)
+                                }, 3000)
+                            }
+                        }
+
+                        fusedLocationClient.requestLocationUpdates(
+                            locationRequest,
+                            locationCallback!!,
+                            Looper.getMainLooper()
+                        )
+                    } else {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && location.isMock) {
+
+                            showDialogIsMock()
+                        } else if (location.isFromMockProvider) {
+
+                            showDialogIsMock()
+                        } else loadContent()
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
+            FirebaseUtils.logErr(this, "Failed ChecklistReportActivity on checkMockLocation(). Catch: ${e.message}")
+            handleMessage(
+                this,
+                "Home Sales Failed",
+                "Failed ChecklistReportActivity on checkMockLocation(). Error: ${e.message}"
+            )
+        }
+    }
+
+    private fun showDialogIsMock() {
+        try {
+
+            val serviceIntent = Intent(this, TrackingService::class.java)
+            stopService(serviceIntent)
+
+            val dialogView = layoutInflater.inflate(R.layout.modal_mock_location, null)
+            AlertDialog.Builder(this)
+                .setView(dialogView)
+                .setCancelable(false)
+                .setTitle("Lokasi Mock")
+                .setPositiveButton("Pengaturan") { _, _ ->
+                    // Buka pengaturan Developer Options
+                    val intent = Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS)
+                    locationResultLauncher.launch(intent)
+                }
+                .show()
+        } catch (e: Exception) {
+            if (e is CancellationException) {
+                return
+            }
+            FirebaseUtils.logErr(this, "Failed ChecklistReportActivity on showDialogIsMock(). Catch: ${e.message}")
+            handleMessage(
+                this,
+                "Home Sales Failed",
+                "Failed ChecklistReportActivity on showDialogIsMock(). Error: ${e.message}"
+            )
+        }
     }
 
     private data class QuestionSubmission(
@@ -171,13 +317,13 @@ class ChecklistReportActivity : AppCompatActivity() {
 
     private fun getDistance(isSubmit: Boolean = false) {
 
+        if (!progressBar.isShowing()) progressBar.show()
+
         if (iCoordinate == null) {
-            handleMessage(this, "SUBMIT FORM VISIT", "Tidak dapa menemukan lokasi toko")
+            progressBar.dismiss()
+            handleMessage(this, "SUBMIT FORM VISIT", "Tidak dapat menemukan lokasi toko")
             return
         }
-
-        progressBar.show()
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         Handler(Looper.getMainLooper()).postDelayed({
 
@@ -635,6 +781,11 @@ class ChecklistReportActivity : AppCompatActivity() {
             }
         }
         super.onStop()
+    }
+
+    override fun onResume() {
+        checkLocationPermission()
+        super.onResume()
     }
 
     override fun onDestroy() {

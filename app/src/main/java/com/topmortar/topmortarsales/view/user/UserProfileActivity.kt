@@ -10,6 +10,7 @@ import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -175,6 +176,13 @@ class UserProfileActivity : AppCompatActivity() {
 //
 //        initClickHandler()
         dataActivityValidation()
+
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
 
     }
 
@@ -837,14 +845,13 @@ class UserProfileActivity : AppCompatActivity() {
 
 // Override Class
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
         if (isRequestSync) {
             val resultIntent = Intent()
             resultIntent.putExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE", SYNC_NOW)
             setResult(RESULT_OK, resultIntent)
-            super.onBackPressed()
-        } else super.onBackPressed()
+            finish()
+        } else finish()
     }
 
     override fun onStart() {

@@ -10,7 +10,6 @@ import android.view.animation.AnimationUtils
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
@@ -65,16 +64,16 @@ class DetailInvoiceActivity : AppCompatActivity() {
                 insets
             }
         } else {
-            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
-                enableEdgeToEdge(SystemBarStyle.dark(getColor(R.color.primary)))
-                ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
-                    val systemBars = insets.getInsets(Type.systemBars())
-                    v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-                    insets
-                }
-            } else {
+//            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
+//                enableEdgeToEdge(SystemBarStyle.dark(getColor(R.color.primary)))
+//                ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
+//                    val systemBars = insets.getInsets(Type.systemBars())
+//                    v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+//                    insets
+//                }
+//            } else {
                 window.statusBarColor = getColor(R.color.primary)
-            }
+//            }
         }
 
         sessionManager = SessionManager(this)

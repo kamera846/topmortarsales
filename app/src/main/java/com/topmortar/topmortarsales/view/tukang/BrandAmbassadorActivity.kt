@@ -13,6 +13,7 @@ import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.PopupMenu
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -133,6 +134,13 @@ class BrandAmbassadorActivity : AppCompatActivity() {
             tabLayout.setTabTextColors(getColor(R.color.primary_600), getColor(R.color.white))
             tabLayout.setSelectedTabIndicatorColor(getColor(R.color.white))
         }
+
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
 
     }
 
@@ -447,13 +455,12 @@ class BrandAmbassadorActivity : AppCompatActivity() {
         _binding = null
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
         if (activeTab != 0) tabLayout.getTabAt(0)?.select()
         else {
 
             if (doubleBackToExitPressedOnce) {
-                super.onBackPressed()
+                finish()
                 return
             }
 

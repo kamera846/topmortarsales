@@ -24,6 +24,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -67,6 +68,7 @@ import com.google.maps.DirectionsApi
 import com.google.maps.GeoApiContext
 import com.google.maps.errors.ApiException
 import com.google.maps.model.TravelMode
+import com.topmortar.topmortarsales.BuildConfig
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.PlaceAdapter
 import com.topmortar.topmortarsales.adapter.recyclerview.UserTrackingRecyclerViewAdapter
@@ -151,6 +153,7 @@ import kotlin.coroutines.cancellation.CancellationException
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private lateinit var sessionManager: SessionManager
+    private val mapsApiKey: String = BuildConfig.MAPS_API_KEY
     private val userKind get() = sessionManager.userKind().toString()
     private val userID get() = sessionManager.userID().toString()
     private val userDistributorId get() = sessionManager.userDistributor().toString()
@@ -290,6 +293,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         checkLocationPermission()
 
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
+
     }
 
     private fun checkLocationPermission() {
@@ -315,7 +325,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         if (!Places.isInitialized()) {
-            Places.initialize(applicationContext, getString(R.string.maps_key))
+            Places.initialize(applicationContext, mapsApiKey)
         }
         placesClient = Places.createClient(this)
 
@@ -1016,7 +1026,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private fun getGeoContext(): GeoApiContext {
 
         return GeoApiContext.Builder()
-            .apiKey(getString(R.string.maps_key)) // Key API Google Maps
+            .apiKey(mapsApiKey) // Key API Google Maps
             .build()
 
     }
@@ -1346,21 +1356,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         } else Toast.makeText(this, "Koneksi ke Layanan Google Play gagal", TOAST_SHORT).show()
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
         if (!isGetCoordinate && !isTracking && !isTrackingCourier && !isTrackingHistory) {
             if (routeDirections != null) toggleBtnDrawRoute()
             else if (isCardNavigationShowing) {
                 selectedTargetRoute = null
                 toggleDrawRoute()
-            } else super.onBackPressed()
+            } else finish()
         } else {
             if (isTrackingCourier) {
                 val resultIntent = Intent()
                 resultIntent.putExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE", SYNC_NOW)
                 setResult(RESULT_OK, resultIntent)
                 finish()
-            } else super.onBackPressed()
+            } else finish()
         }
     }
 
@@ -1596,7 +1605,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                                 binding.btnSuratJalan.setOnClickListener {
                                                     val intent = Intent(this@MapsActivity, ListSuratJalanActivity::class.java)
                                                     intent.putExtra(CONST_CONTACT_ID, store.id)
-                                                    intent.putExtra(CONST_NAME, "")
+                                                    intent.putExtra(CONST_NAME, store.name)
                                                     activityLauncher.launch(intent)
                                                 }
                                                 binding.courierContainer.setOnClickListener { changeFocusCamera(courierLatLng) }
@@ -2013,7 +2022,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                     binding.btnSuratJalan.setOnClickListener {
                                         val intent = Intent(this@MapsActivity, ListSuratJalanActivity::class.java)
                                         intent.putExtra(CONST_CONTACT_ID, item.id_contact)
-                                        intent.putExtra(CONST_NAME, "")
+                                        intent.putExtra(CONST_NAME, item.nama)
                                         activityLauncher.launch(intent)
                                     }
                                     binding.courierContainer.setOnClickListener { changeFocusCamera(courierLatLng) }

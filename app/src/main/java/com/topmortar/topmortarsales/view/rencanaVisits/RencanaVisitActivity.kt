@@ -11,6 +11,7 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
@@ -108,13 +109,20 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
 
         initLayout()
 
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
+
     }
 
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
         if (isSelectBarActive) toggleSelectBar()
         else {
             if (activeTab != 0) tabLayout.getTabAt(0)?.select()
-            else super.onBackPressed()
+            else finish()
         }
     }
 

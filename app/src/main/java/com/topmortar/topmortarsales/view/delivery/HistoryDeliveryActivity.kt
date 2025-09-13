@@ -3,6 +3,7 @@ package com.topmortar.topmortarsales.view.delivery
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
@@ -53,6 +54,14 @@ class HistoryDeliveryActivity : AppCompatActivity() {
         /*
         End Call Fragment
          */
+
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
+
     }
 
     override fun onDestroy() {
@@ -60,8 +69,7 @@ class HistoryDeliveryActivity : AppCompatActivity() {
         super.onDestroy()
     }
 
-    @SuppressLint("MissingSuperCall")
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
         finish()
     }
 

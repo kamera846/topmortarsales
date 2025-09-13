@@ -47,6 +47,7 @@ import com.topmortar.topmortarsales.response.ResponseDelivery
 import com.topmortar.topmortarsales.response.ResponseDistributor
 import com.topmortar.topmortarsales.response.ResponseGudang
 import com.topmortar.topmortarsales.response.ResponseInvoice
+import com.topmortar.topmortarsales.response.ResponseKonten
 import com.topmortar.topmortarsales.response.ResponseList
 import com.topmortar.topmortarsales.response.ResponseMessage
 import com.topmortar.topmortarsales.response.ResponsePayment
@@ -145,6 +146,16 @@ interface ApiService {
         @Part("full_name") currentName: RequestBody,
         @Part("termin_payment") termin: RequestBody,
         @Part("message_body") message: RequestBody,
+    ): Response<ResponseMessage>
+
+    @Multipart
+    @POST("imgMessage.php")
+    suspend fun sendImgMessage(
+        @Part("id_contact") contactId: RequestBody,
+        @Part("id_user") userId: RequestBody,
+        @Part("nomorhp") phone: RequestBody,
+        @Part("message") message: RequestBody,
+        @Part imageMessage: MultipartBody.Part?,
     ): Response<ResponseMessage>
 
     @Multipart
@@ -803,4 +814,14 @@ interface ApiService {
         @Query("city") idCity: String,
         @Query("dst") idDistributor: String,
     ): ResponseActiveStore
+
+    @GET("kontenmsg.php")
+    suspend fun getKonten(): ResponseKonten
+
+    @Multipart
+    @POST("kontenmsg.php")
+    suspend fun sendMessageKonten(
+        @Part("id_kontenmsg") idKonten: RequestBody,
+        @Part("id_contact") idContact: RequestBody,
+    ): Response<ResponseKonten>
 }

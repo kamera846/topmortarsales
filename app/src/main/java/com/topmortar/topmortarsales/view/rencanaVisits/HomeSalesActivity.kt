@@ -2,13 +2,11 @@ package com.topmortar.topmortarsales.view.rencanaVisits
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.location.Location
 import android.location.LocationManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -17,11 +15,11 @@ import android.provider.Settings
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -43,7 +41,6 @@ import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_MARKETING
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
-import com.topmortar.topmortarsales.commons.BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
@@ -57,17 +54,13 @@ import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.CONST_USER_LEVEL
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_AUTH
-import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
-import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAX_REPORT_DISTANCE
 import com.topmortar.topmortarsales.commons.NOTIFICATION_LEVEL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
-import com.topmortar.topmortarsales.commons.SELECTED_ABSENT_MODE
-import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_ACTION_MAIN_ACTIVITY
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
@@ -81,7 +74,9 @@ import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
+import com.topmortar.topmortarsales.commons.utils.PermissionsHandler
 import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.SntpClient
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -96,6 +91,7 @@ import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.ChartActivity
 import com.topmortar.topmortarsales.view.MainActivity
 import com.topmortar.topmortarsales.view.MapsActivity
+import com.topmortar.topmortarsales.view.PermissionActivity
 import com.topmortar.topmortarsales.view.SplashScreenActivity
 import com.topmortar.topmortarsales.view.contact.NewRoomChatFormActivity
 import com.topmortar.topmortarsales.view.courier.AddBaseCampActivity
@@ -107,7 +103,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 import kotlin.coroutines.cancellation.CancellationException
 
 class HomeSalesActivity : AppCompatActivity() {
@@ -173,30 +173,37 @@ class HomeSalesActivity : AppCompatActivity() {
             sessionManager.userID() ?: ""
         )
 
+        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                myOnBackPressed()
+            }
+
+        })
+
+    }
+
+    private fun checkPermissionsRequirement(): Boolean {
+        if (!PermissionsHandler.isAllLocationRequirementMet(this)) {
+            dismissProgressDialog()
+            val intent = Intent(this, PermissionActivity::class.java)
+            locationResultLauncher.launch(intent)
+            return false
+        } else {
+            return true
+        }
     }
 
     private fun checkLocationPermission() {
         try {
-
             if (absentProgressBar == null) {
                 absentProgressBar = CustomProgressBar(this)
                 absentProgressBar!!.setCancelable(false)
             }
             absentProgressBar!!.setMessage(getString(R.string.txt_loading) + " 1 / 5")
             if (!absentProgressBar!!.isShowing()) absentProgressBar?.show()
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
+
+            if (checkPermissionsRequirement()) {
                 checkGpsStatus()
-            } else {
-                dismissProgressDialog()
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                    LOCATION_PERMISSION_REQUEST_CODE
-                )
             }
         } catch (e: Exception) {
             if (e is CancellationException) {
@@ -218,11 +225,12 @@ class HomeSalesActivity : AppCompatActivity() {
         try {
 
             val locationManager =
-                getSystemService(Context.LOCATION_SERVICE) as LocationManager
+                getSystemService(LOCATION_SERVICE) as LocationManager
             val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
 
             if (!isGpsEnabled) showGpsDisabledDialog()
             else checkMockLocation()
+
         } catch (e: Exception) {
             if (e is CancellationException) {
                 return
@@ -300,12 +308,6 @@ class HomeSalesActivity : AppCompatActivity() {
                         } else initView()
                     }
                 }
-            } else {
-                ActivityCompat.requestPermissions(
-                    this,
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                    LOCATION_PERMISSION_REQUEST_CODE
-                )
             }
         } catch (e: Exception) {
             if (e is CancellationException) {
@@ -495,64 +497,12 @@ class HomeSalesActivity : AppCompatActivity() {
 
             binding.btnAbsent.setOnClickListener {
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    if (ContextCompat.checkSelfPermission(
-                            this,
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        ) == PackageManager.PERMISSION_GRANTED
-                    ) {
-                        if (ContextCompat.checkSelfPermission(
-                                this,
-                                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                            ) == PackageManager.PERMISSION_GRANTED
-                        ) {
-
-                            if (!absentProgressBar!!.isShowing()) absentProgressBar?.show()
-                            if (selectedStore == null) getListAbsent()
-                            else absentAction()
-
-                        } else {
-                            val message = getString(R.string.bg_service_location_permission_message)
-                            val title = getString(R.string.bg_service_location_permission_title)
-                            AlertDialog.Builder(this)
-                                .setCancelable(false)
-                                .setTitle(title)
-                                .setMessage(message)
-                                .setPositiveButton(getString(R.string.open_settings)) { localDialog, _ ->
-                                    ActivityCompat.requestPermissions(
-                                        this,
-                                        arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
-                                        BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE
-                                    )
-                                    localDialog.dismiss()
-                                }
-                                .show()
-                        }
-                    } else {
-                        ActivityCompat.requestPermissions(
-                            this,
-                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                            LOCATION_PERMISSION_REQUEST_CODE
-                        )
-                    }
-                } else {
-                    if (ContextCompat.checkSelfPermission(
-                            this,
-                            Manifest.permission.ACCESS_FINE_LOCATION
-                        ) == PackageManager.PERMISSION_GRANTED
-                    ) {
-//                    absentAction()
-                        if (!absentProgressBar!!.isShowing()) absentProgressBar?.show()
-                        if (selectedStore == null) getListAbsent()
-                        else absentAction()
-                    } else {
-                        ActivityCompat.requestPermissions(
-                            this,
-                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                            LOCATION_PERMISSION_REQUEST_CODE
-                        )
-                    }
+                if (checkPermissionsRequirement()) {
+                    if (!absentProgressBar!!.isShowing()) absentProgressBar?.show()
+                    if (selectedStore == null) getListAbsent()
+                    else absentAction()
                 }
+
             }
 
             lockMenuItem(true)
@@ -1201,11 +1151,7 @@ class HomeSalesActivity : AppCompatActivity() {
 
         } else {
             dismissProgressDialog()
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                LOCATION_PERMISSION_REQUEST_CODE
-            )
+            checkPermissionsRequirement()
         }
     }
 
@@ -1230,24 +1176,57 @@ class HomeSalesActivity : AppCompatActivity() {
         userChild.child("fullname").setValue(userFullName)
         userChild.child("isOnline").setValue(true)
 
-        if (!isAbsentMorningNow) {
+        lifecycleScope.launch {
+            val calendar = checkTimeFromInternet()
+            val date = calendar?.let { Date(it.timeInMillis) }
+            val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
+            formatter.timeZone = TimeZone.getDefault()
 
-            val absentDateTime = DateFormat.now()
-            userChild.child("morningDateTime").setValue(absentDateTime)
-            userChild.child("lastSeen").setValue(absentDateTime)
+            val absentDateTime = if (date != null) formatter.format(date) else "-"
 
-            sessionManager.absentDateTime(absentDateTime)
+            if (!isAbsentMorningNow) {
 
-            checkAbsent()
-        } else {
+                userChild.child("morningDateTime").setValue(absentDateTime)
+                userChild.child("lastSeen").setValue(absentDateTime)
 
-            val absentDateTime = DateFormat.now()
-            userChild.child("eveningDateTime").setValue(absentDateTime)
-            userChild.child("lastSeen").setValue(absentDateTime)
+                sessionManager.absentDateTime(absentDateTime)
 
-            sessionManager.absentDateTime(absentDateTime)
+                checkAbsent()
+            } else if (!isAbsentEveningNow) {
 
-            checkAbsent()
+                val currentHour = calendar?.get(Calendar.HOUR_OF_DAY)
+
+                if (currentHour != null) {
+                    if (currentHour >= 16) {
+                        userChild.child("eveningDateTime").setValue(absentDateTime)
+                        userChild.child("lastSeen").setValue(absentDateTime)
+
+                        sessionManager.absentDateTime(absentDateTime)
+                        checkAbsent()
+                    } else {
+                        if (absentProgressBar!!.isShowing()) absentProgressBar?.dismiss()
+                    }
+                } else {
+                    if (absentProgressBar!!.isShowing()) absentProgressBar?.dismiss()
+                }
+
+            } else {
+                if (absentProgressBar!!.isShowing()) absentProgressBar?.dismiss()
+            }
+        }
+    }
+
+    private suspend fun checkTimeFromInternet(): Calendar? {
+        return withContext(Dispatchers.IO) {
+            val networkTimeMillis = SntpClient.getNetworkTime()
+            if (networkTimeMillis != null) {
+                Calendar.getInstance().apply {
+                    timeInMillis = networkTimeMillis
+                }
+            } else {
+                handleMessage(this@HomeSalesActivity, "NetworkTime", "Gagal mengambil waktu dari internet, coba lagi setelah beberapa saat atau cek koneksi internet anda.")
+                null
+            }
         }
     }
 
@@ -1427,16 +1406,21 @@ class HomeSalesActivity : AppCompatActivity() {
             binding.btnAbsent.text =
                 if (state) getString(R.string.absen_sekarang) else getString(R.string.pulang_sekarang)
 
-            val calendar = Calendar.getInstance()
-            val currentHour =
-                calendar.get(Calendar.HOUR_OF_DAY) // Mengambil jam saat ini dalam format 24 jam
+            lifecycleScope.launch {
+                val currentHour = checkTimeFromInternet()?.get(Calendar.HOUR_OF_DAY)
 
-            if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
-                binding.btnAbsent.visibility = View.GONE
-                binding.absenEveningInfoText.visibility = View.VISIBLE
-            } else {
-                binding.btnAbsent.visibility = View.VISIBLE
-                binding.absenEveningInfoText.visibility = View.GONE
+                if (currentHour != null) {
+                    if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
+                        binding.btnAbsent.visibility = View.GONE
+                        binding.absenEveningInfoText.visibility = View.VISIBLE
+                    } else {
+                        binding.btnAbsent.visibility = View.VISIBLE
+                        binding.absenEveningInfoText.visibility = View.GONE
+                    }
+                } else {
+                    binding.btnAbsent.visibility = View.GONE
+                    binding.absenEveningInfoText.visibility = View.VISIBLE
+                }
             }
         }
 
@@ -1792,10 +1776,9 @@ class HomeSalesActivity : AppCompatActivity() {
 
 // Override Class
 
-    @Deprecated("Deprecated in Java")
-    override fun onBackPressed() {
+    private fun myOnBackPressed() {
         if (doubleBackToExitPressedOnce) {
-            super.onBackPressed()
+            finish()
             return
         }
 
@@ -1862,52 +1845,6 @@ class HomeSalesActivity : AppCompatActivity() {
                     sessionManager.userDistributor() ?: "-custom-010",
                     sessionManager.userID() ?: ""
                 )
-            }
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                checkLocationPermission()
-            } else {
-                AlertDialog.Builder(this)
-                    .setCancelable(false)
-                    .setTitle("Izin Diperlukan")
-                    .setMessage("Izin lokasi diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
-                    .setPositiveButton(getString(R.string.open_settings)) { localDialog, _ ->
-                        localDialog.dismiss()
-                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                        intent.data = Uri.fromParts("package", packageName, null)
-                        locationResultLauncher.launch(intent)
-                    }
-                    .show()
-            }
-        } else if (requestCode == BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) checkLocationPermission()
-            else {
-                val message = getString(R.string.bg_service_location_permission_message)
-                val title = getString(R.string.bg_service_location_permission_title)
-                AlertDialog.Builder(this)
-                    .setCancelable(false)
-                    .setTitle(title)
-                    .setMessage(message)
-                    .setPositiveButton(getString(R.string.open_settings)) { localDialog, _ ->
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                            ActivityCompat.requestPermissions(
-                                this,
-                                arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
-                                BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE
-                            )
-                        }
-                        localDialog.dismiss()
-                    }
-                    .show()
             }
         }
     }
