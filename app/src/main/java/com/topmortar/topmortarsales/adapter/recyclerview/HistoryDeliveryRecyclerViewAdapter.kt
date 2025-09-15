@@ -2,6 +2,7 @@ package com.topmortar.topmortarsales.adapter.recyclerview
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Typeface
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
@@ -15,9 +16,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.DeliveryModel
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 
 @SuppressLint("SetTextI18n")
 class HistoryDeliveryRecyclerViewAdapter(private val listItem: ArrayList<DeliveryModel.History>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<HistoryDeliveryRecyclerViewAdapter.ChatViewHolder>() {
@@ -36,25 +34,34 @@ class HistoryDeliveryRecyclerViewAdapter(private val listItem: ArrayList<Deliver
 
         private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
+        private val tvNotes: TextView = itemView.findViewById(R.id.tv_notes)
         val tooltipStatus: ImageView = itemView.findViewById(R.id.tooltip_status)
 
         fun bind(item: DeliveryModel.History) {
+            var itemDescription = "Diselesaikan pada " + DateFormat.format(item.endDatetime, "yyyy-MM-dd HH:mm:ss", "dd MMM, HH:mm")
+
+            if (!isHistoryCourier) {
+                itemDescription = if (item.sj != null) {
+                    "${item.sj?.no_surat_jalan ?: ""} - ${item.full_name}"
+                } else {
+                    item.full_name
+                }
+
+                val itemClosingDate = if (item.sj != null) {
+                    item.sj?.date_closing ?: ""
+                } else {
+                    item.endDatetime
+                }
+
+                tvNotes.text = "* Diclosing pada ${DateFormat.format(itemClosingDate, "yyyy-MM-dd HH:mm:ss", "dd MMM, HH:mm")}"
+                tvNotes.setTypeface(null, Typeface.NORMAL)
+
+                tvNotes.visibility = View.VISIBLE
+            }
 
             tvContactName.text = item.nama
-            tvPhoneNumber.text = "Diselesaikan " + if (isHistoryCourier) "pada " + formatDateYear(item.endDatetime) else "oleh " + item.full_name
+            tvPhoneNumber.text = itemDescription
 
-        }
-
-        private fun formatDateYear(dateString: String, dateStringFormat: String = "yyyy-MM-dd HH:mm:ss"): String {
-            val date = SimpleDateFormat(dateStringFormat, Locale.getDefault()).parse(dateString)
-            return if (date != null) {
-                val calendar = Calendar.getInstance()
-                val currentYear = calendar.get(Calendar.YEAR)
-                val dateYear = SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
-
-                if (currentYear == dateYear.toInt()) DateFormat.format(dateString, dateStringFormat, "dd MMM, HH:mm")
-                else DateFormat.format(dateString, dateStringFormat, "dd MMM yyyy, HH:mm")
-            } else DateFormat.format(dateString, dateStringFormat, "dd MMM, HH:mm")
         }
 
     }
