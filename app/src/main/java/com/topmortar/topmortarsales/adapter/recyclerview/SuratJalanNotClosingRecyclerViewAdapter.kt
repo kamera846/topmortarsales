@@ -2,6 +2,7 @@ package com.topmortar.topmortarsales.adapter.recyclerview
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Typeface
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
@@ -29,8 +30,8 @@ class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<S
 
         private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
+        private val tvNotes: TextView = itemView.findViewById(R.id.tv_notes)
         val checkListImage: ImageView = itemView.findViewById(R.id.checklist)
-        private val icPhone: ImageView = itemView.findViewById(R.id.icPhoneNumber)
         private val deliveryStatus: LinearLayout = itemView.findViewById(R.id.deliveryStatus)
         private val deliveryStatusText: TextView = itemView.findViewById(R.id.deliveryStatusText)
         private val deliveryStatusIcon: ImageView = itemView.findViewById(R.id.deliveryStatusIcon)
@@ -64,9 +65,11 @@ class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<S
             }
 
             tvContactName.text = item.nama
-            tvPhoneNumber.text = "${item.full_name} - ${item.kode_city}"
+            tvPhoneNumber.text = "${item.no_surat_jalan} - ${item.full_name}"
+            tvNotes.text = "* Dibuat pada ${DateFormat.format(item.dalivery_date, "yyyy-MM-dd HH:mm:ss", "dd MMM yyyy, HH:mm")}"
+            tvNotes.setTypeface(null, Typeface.NORMAL)
 
-            icPhone.visibility = View.VISIBLE
+            tvNotes.visibility = View.VISIBLE
 
             setupStatus(dateProcessed)
 
