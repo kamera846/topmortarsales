@@ -77,27 +77,33 @@ object FirebaseUtils {
         val errLogId = "$dateNow-$randomString"
         val dbDistributor = FIREBASE_CHILD_DISTRIBUTOR + distributorId
         val firebaseReference = FirebaseDatabase.getInstance().getReference("$FIREBASE_REFERENCE/$dbDistributor")
-        val errLogTagChild = firebaseReference.child("error")
-        val idErrLogChild = errLogTagChild.child(errLogId)
-        val detailErrLogChild = idErrLogChild.child("detail")
+        val isLogActiveChild = FirebaseDatabase.getInstance().getReference("$FIREBASE_REFERENCE/isLogActive")
 
-        idErrLogChild.child("id").setValue(errLogId)
-        idErrLogChild.child("messages").setValue(logMessage)
-        detailErrLogChild.child("userId").setValue(userId)
-        detailErrLogChild.child("username").setValue(username)
-        detailErrLogChild.child("d-serial").setValue(MODEL)
-        detailErrLogChild.child("d-id").setValue(ID)
-        detailErrLogChild.child("d-manufacturer").setValue(MANUFACTURER)
-        detailErrLogChild.child("d-brand").setValue(BRAND)
-        detailErrLogChild.child("d-type").setValue(TYPE)
-        detailErrLogChild.child("d-user").setValue(USER)
-        detailErrLogChild.child("d-version-base").setValue("${VERSION_CODES.BASE}")
-        detailErrLogChild.child("d-version-incremental").setValue(VERSION.INCREMENTAL)
-        detailErrLogChild.child("d-version-sdk").setValue("${VERSION.SDK_INT}")
-        detailErrLogChild.child("d-version-release").setValue(VERSION.RELEASE)
-        detailErrLogChild.child("d-board").setValue(BOARD)
-        detailErrLogChild.child("d-host").setValue(HOST)
-        detailErrLogChild.child("d-fingerprint").setValue(FINGERPRINT)
-//        println("$tag $randomString.$dateNow: $logMessage")
+        isLogActiveChild.get().addOnSuccessListener {
+            if (it.exists() && it.value == true) {
+                val errLogTagChild = firebaseReference.child("error")
+                val idErrLogChild = errLogTagChild.child(errLogId)
+                val detailErrLogChild = idErrLogChild.child("detail")
+
+                idErrLogChild.child("id").setValue(errLogId)
+                idErrLogChild.child("messages").setValue(logMessage)
+                detailErrLogChild.child("userId").setValue(userId)
+                detailErrLogChild.child("username").setValue(username)
+                detailErrLogChild.child("d-serial").setValue(MODEL)
+                detailErrLogChild.child("d-id").setValue(ID)
+                detailErrLogChild.child("d-manufacturer").setValue(MANUFACTURER)
+                detailErrLogChild.child("d-brand").setValue(BRAND)
+                detailErrLogChild.child("d-type").setValue(TYPE)
+                detailErrLogChild.child("d-user").setValue(USER)
+                detailErrLogChild.child("d-version-base").setValue("${VERSION_CODES.BASE}")
+                detailErrLogChild.child("d-version-incremental").setValue(VERSION.INCREMENTAL)
+                detailErrLogChild.child("d-version-sdk").setValue("${VERSION.SDK_INT}")
+                detailErrLogChild.child("d-version-release").setValue(VERSION.RELEASE)
+                detailErrLogChild.child("d-board").setValue(BOARD)
+                detailErrLogChild.child("d-host").setValue(HOST)
+                detailErrLogChild.child("d-fingerprint").setValue(FINGERPRINT)
+//                println("$tag $randomString.$dateNow: $logMessage")
+            }
+        }
     }
 }
