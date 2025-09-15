@@ -22,6 +22,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.FitCenter
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_ERROR
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
@@ -145,9 +146,6 @@ class SendMessageActivity() : AppCompatActivity() {
         // Initialize TextView
         binding.tvMaxFileSize.text = "Maksimal ukuran file $limitFileMB MB"
 
-        // Get List Konten
-        getListKonten()
-
         etMessageListener()
         EventBus.getDefault().register(this)
     }
@@ -188,6 +186,8 @@ class SendMessageActivity() : AppCompatActivity() {
                 binding.inputMediaContainer.visibility = View.VISIBLE
                 binding.inputKontenContainer.visibility = View.GONE
             } LINK_MESSAGE -> {
+                // Get List Konten
+                getListKonten()
                 binding.radioButtonGeneral.isChecked = false
                 binding.radioButtonMedia.isChecked = false
                 binding.radioButtonKonten.isChecked = true
@@ -678,10 +678,15 @@ class SendMessageActivity() : AppCompatActivity() {
                             }
                             setupModalSearchKonten(items)
                         }
+                    } RESPONSE_STATUS_EMPTY -> {
+                        listKonten = arrayListOf()
+                        val items: ArrayList<ModalSearchModel> = ArrayList()
+                        setupModalSearchKonten(items)
+                        handleMessage(this@SendMessageActivity, message = "List konten kosong.")
                     } RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED, RESPONSE_STATUS_ERROR -> {
-                    handleMessage(this@SendMessageActivity, message = "Gagal memuat konten. Error: ${response.message}")
-                } else -> {
-                    handleMessage(this@SendMessageActivity, message = "Gagal memuat konten")
+                        handleMessage(this@SendMessageActivity, message = "Gagal memuat konten. Error: ${response.message}")
+                    } else -> {
+                        handleMessage(this@SendMessageActivity, message = "Gagal memuat konten. Status: ${response.status}")
                     }
                 }
             }
