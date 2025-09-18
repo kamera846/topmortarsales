@@ -74,9 +74,10 @@ import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
+import com.topmortar.topmortarsales.commons.utils.MySntpClient
+import com.topmortar.topmortarsales.commons.utils.MySntpClient.checkTimeFromInternet
 import com.topmortar.topmortarsales.commons.utils.PermissionsHandler
 import com.topmortar.topmortarsales.commons.utils.SessionManager
-import com.topmortar.topmortarsales.commons.utils.SntpClient
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -100,6 +101,7 @@ import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import com.topmortar.topmortarsales.view.tukang.ListTukangActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -1177,12 +1179,17 @@ class HomeSalesActivity : AppCompatActivity() {
         userChild.child("isOnline").setValue(true)
 
         lifecycleScope.launch {
-            val calendar = checkTimeFromInternet()
-            val date = calendar?.let { Date(it.timeInMillis) }
+
+            val calendar = checkTimeFromInternet(this@HomeSalesActivity)
+            var date = calendar?.let { Date(it.timeInMillis) }
+            val dateLocal = Date(Calendar.getInstance().timeInMillis)
+
+            if (date == null) date = dateLocal
+
             val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
             formatter.timeZone = TimeZone.getDefault()
 
-            val absentDateTime = if (date != null) formatter.format(date) else "-"
+            val absentDateTime = formatter.format(date)
 
             if (!isAbsentMorningNow) {
 
@@ -1212,20 +1219,6 @@ class HomeSalesActivity : AppCompatActivity() {
 
             } else {
                 if (absentProgressBar!!.isShowing()) absentProgressBar?.dismiss()
-            }
-        }
-    }
-
-    private suspend fun checkTimeFromInternet(): Calendar? {
-        return withContext(Dispatchers.IO) {
-            val networkTimeMillis = SntpClient.getNetworkTime()
-            if (networkTimeMillis != null) {
-                Calendar.getInstance().apply {
-                    timeInMillis = networkTimeMillis
-                }
-            } else {
-                handleMessage(this@HomeSalesActivity, "NetworkTime", "Gagal mengambil waktu dari internet, coba lagi setelah beberapa saat atau cek koneksi internet anda.")
-                null
             }
         }
     }
@@ -1376,9 +1369,6 @@ class HomeSalesActivity : AppCompatActivity() {
         FirebaseUtils.firebaseLogging(this, "Absent", "Lock menu")
         dismissProgressDialog()
         FirebaseUtils.firebaseLogging(this, "Absent", "Loading dismissed")
-        isLocked = state
-
-        setListMenu()
 
         if (isAbsentMorningNow && isAbsentEveningNow) {
 
@@ -1407,20 +1397,31 @@ class HomeSalesActivity : AppCompatActivity() {
                 if (state) getString(R.string.absen_sekarang) else getString(R.string.pulang_sekarang)
 
             lifecycleScope.launch {
-                val currentHour = checkTimeFromInternet()?.get(Calendar.HOUR_OF_DAY)
+                isLocked = true
+                setListMenu()
 
-                if (currentHour != null) {
-                    if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
-                        binding.btnAbsent.visibility = View.GONE
-                        binding.absenEveningInfoText.visibility = View.VISIBLE
-                    } else {
-                        binding.btnAbsent.visibility = View.VISIBLE
-                        binding.absenEveningInfoText.visibility = View.GONE
-                    }
-                } else {
+                binding.btnAbsent.visibility = View.GONE
+                binding.absenEveningInfoText.visibility = View.GONE
+
+                if (absentProgressBar?.isShowing() == false) absentProgressBar?.show()
+
+                var currentHour = checkTimeFromInternet(this@HomeSalesActivity)?.get(Calendar.HOUR_OF_DAY)
+                val currentHourLocal = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+
+                if (currentHour == null) currentHour = currentHourLocal
+
+                if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
                     binding.btnAbsent.visibility = View.GONE
                     binding.absenEveningInfoText.visibility = View.VISIBLE
+                } else {
+                    binding.btnAbsent.visibility = View.VISIBLE
+                    binding.absenEveningInfoText.visibility = View.GONE
                 }
+
+                isLocked = state
+                setListMenu()
+
+                if (absentProgressBar?.isShowing() == true) absentProgressBar?.dismiss()
             }
         }
 
