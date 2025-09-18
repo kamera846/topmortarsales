@@ -63,9 +63,9 @@ import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
+import com.topmortar.topmortarsales.commons.utils.MySntpClient.checkTimeFromInternet
 import com.topmortar.topmortarsales.commons.utils.PermissionsHandler
 import com.topmortar.topmortarsales.commons.utils.SessionManager
-import com.topmortar.topmortarsales.commons.utils.SntpClient
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -847,20 +847,25 @@ class HomeCourierActivity : AppCompatActivity() {
                     if (state) getString(R.string.absen_sekarang) else getString(R.string.pulang_sekarang)
 
                 lifecycleScope.launch {
-                    val currentHour = checkTimeFromInternet()?.get(Calendar.HOUR_OF_DAY)
+                    binding.btnAbsent.visibility = View.GONE
+                    binding.absenEveningInfoText.visibility = View.GONE
 
-                    if (currentHour != null) {
-                        if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
-                            binding.btnAbsent.visibility = View.GONE
-                            binding.absenEveningInfoText.visibility = View.VISIBLE
-                        } else {
-                            binding.btnAbsent.visibility = View.VISIBLE
-                            binding.absenEveningInfoText.visibility = View.GONE
-                        }
-                    } else {
+                    if (absentProgressBar?.isShowing() == false) absentProgressBar?.show()
+
+                    var currentHour = checkTimeFromInternet(this@HomeCourierActivity)?.get(Calendar.HOUR_OF_DAY)
+                    val currentHourLocal = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+
+                    if (currentHour == null) currentHour = currentHourLocal
+
+                    if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
                         binding.btnAbsent.visibility = View.GONE
                         binding.absenEveningInfoText.visibility = View.VISIBLE
+                    } else {
+                        binding.btnAbsent.visibility = View.VISIBLE
+                        binding.absenEveningInfoText.visibility = View.GONE
                     }
+
+                    if (absentProgressBar?.isShowing() == true) absentProgressBar?.dismiss()
                 }
             }
 
@@ -1304,12 +1309,16 @@ class HomeCourierActivity : AppCompatActivity() {
                             userChild.child("fullname").setValue(userFullName)
                             userChild.child("isOnline").setValue(true)
 
-                            val calendar = checkTimeFromInternet()
-                            val date = calendar?.let { Date(it.timeInMillis) }
+                            val calendar = checkTimeFromInternet(this@HomeCourierActivity)
+                            var date = calendar?.let { Date(it.timeInMillis) }
+                            val dateLocal = Date(Calendar.getInstance().timeInMillis)
+
+                            if (date == null) date = dateLocal
+
                             val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
                             formatter.timeZone = TimeZone.getDefault()
 
-                            val absentDateTime = if (date != null) formatter.format(date) else "-"
+                            val absentDateTime = formatter.format(date)
 
                             if (!isAbsentMorningNow) {
 
@@ -1388,20 +1397,6 @@ class HomeCourierActivity : AppCompatActivity() {
 
             }
 
-        }
-    }
-
-    private suspend fun checkTimeFromInternet(): Calendar? {
-        return withContext(Dispatchers.IO) {
-            val networkTimeMillis = SntpClient.getNetworkTime()
-            if (networkTimeMillis != null) {
-                Calendar.getInstance().apply {
-                    timeInMillis = networkTimeMillis
-                }
-            } else {
-                handleMessage(this@HomeCourierActivity, "NetworkTime", "Gagal mengambil waktu dari internet, coba lagi setelah beberapa saat atau cek koneksi internet anda.")
-                null
-            }
         }
     }
 
