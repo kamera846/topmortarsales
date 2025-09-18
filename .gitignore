@@ -17,4 +17,4 @@
 .cxx
 local.properties
 secrets.properties
-/release
+/app/release
