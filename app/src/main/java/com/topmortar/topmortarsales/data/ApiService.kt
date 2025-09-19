@@ -672,6 +672,7 @@ interface ApiService {
         @Part("startLng") startLng: RequestBody,
         @Part("id_courier") idCourier: RequestBody,
         @Part("id_contact") idContact: RequestBody,
+        @Part("id_surat_jalan") invoiceId: RequestBody,
     ): ResponseMessage
 
     @GET(DELIVERY)

@@ -329,9 +329,6 @@ class PreviewClosingActivity : AppCompatActivity() {
                         val courier = snapshot.child("courier").getValue(DeliveryModel.Courier::class.java)
                         val store = stores.getValue(DeliveryModel.Store::class.java)
 
-
-
-
                         val endDateTime = DateFormat.now()
 
                         var endLat = "0.0"
@@ -354,92 +351,10 @@ class PreviewClosingActivity : AppCompatActivity() {
                                         endLng = location.longitude.toString()
                                     }
 
-                                    lifecycleScope.launch {
-                                        try {
-
-                                            val apiService: ApiService = HttpClient.create()
-
-                                            val response = apiService.saveDelivery(
-                                                lat = createPartFromString(store?.lat.toString()),
-                                                lng = createPartFromString(store?.lng.toString()),
-                                                endDateTime = createPartFromString(endDateTime),
-                                                endLat = createPartFromString(endLat),
-                                                endLng = createPartFromString(endLng),
-                                                startDateTime = createPartFromString(store?.startDatetime.toString()),
-                                                startLat = createPartFromString(store?.startLat.toString()),
-                                                startLng = createPartFromString(store?.startLng.toString()),
-                                                idCourier = createPartFromString(courier?.id.toString()),
-                                                idContact = createPartFromString(store?.id.toString()),
-                                            )
-
-                                            when (response.status) {
-                                                RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
-
-                                                    finishClosing(message)
-
-
-                                                }
-
-                                                else -> {
-
-                                                    finishClosing(message)
-
-
-                                                }
-                                            }
-
-                                        } catch (e: Exception) {
-
-                                            finishClosing(message)
-                                            FirebaseUtils.logErr(this@PreviewClosingActivity, "Failed PreviewClosingActivity on onClosingFinished(). Catch: ${e.message}")
-                                            Log.d("Item to closing", "Failed to save item: Error request. " + e.message)
-
-                                        }
-
-                                    }
-                                }.addOnFailureListener {
-                                    lifecycleScope.launch {
-                                        try {
-
-                                            val apiService: ApiService = HttpClient.create()
-
-                                            val response = apiService.saveDelivery(
-                                                lat = createPartFromString(store?.lat.toString()),
-                                                lng = createPartFromString(store?.lng.toString()),
-                                                endDateTime = createPartFromString(endDateTime),
-                                                endLat = createPartFromString(endLat),
-                                                endLng = createPartFromString(endLng),
-                                                startDateTime = createPartFromString(store?.startDatetime.toString()),
-                                                startLat = createPartFromString(store?.startLat.toString()),
-                                                startLng = createPartFromString(store?.startLng.toString()),
-                                                idCourier = createPartFromString(courier?.id.toString()),
-                                                idContact = createPartFromString(store?.id.toString()),
-                                            )
-
-                                            when (response.status) {
-                                                RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
-
-                                                    finishClosing(message)
-
-
-                                                }
-
-                                                else -> {
-
-                                                    finishClosing(message)
-
-
-                                                }
-                                            }
-
-                                        } catch (e: Exception) {
-
-                                            finishClosing(message)
-                                            Log.d("Item to closing", "Failed to save item: Error request. " + e.message)
-
-                                        }
-
-                                    }
+                                    saveDelivery(store, endDateTime, endLat, endLng, courier, message)
+                                }
+                                .addOnFailureListener {
+                                    saveDelivery(store, endDateTime, endLat, endLng, courier, message)
                                 }
                         }
 
@@ -477,6 +392,56 @@ class PreviewClosingActivity : AppCompatActivity() {
 
         })
 
+    }
+
+    private fun saveDelivery(
+        store: DeliveryModel.Store?,
+        endDateTime: String,
+        endLat: String,
+        endLng: String,
+        courier: DeliveryModel.Courier?,
+        message: String
+    ) {
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.create()
+
+                val response = apiService.saveDelivery(
+                    lat = createPartFromString(store?.lat.toString()),
+                    lng = createPartFromString(store?.lng.toString()),
+                    endDateTime = createPartFromString(endDateTime),
+                    endLat = createPartFromString(endLat),
+                    endLng = createPartFromString(endLng),
+                    startDateTime = createPartFromString(store?.startDatetime.toString()),
+                    startLat = createPartFromString(store?.startLat.toString()),
+                    startLng = createPartFromString(store?.startLng.toString()),
+                    idCourier = createPartFromString(courier?.id.toString()),
+                    idContact = createPartFromString(store?.id.toString()),
+                    invoiceId = createPartFromString(invoiceId!!),
+                )
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
+                        finishClosing(message)
+                    }
+                    else -> {
+                        finishClosing(message)
+                    }
+                }
+
+            } catch (e: Exception) {
+
+                finishClosing(message)
+                FirebaseUtils.logErr(
+                    this@PreviewClosingActivity,
+                    "Failed PreviewClosingActivity on onClosingFinished(). Catch: ${e.message}"
+                )
+                Log.d("Item to closing", "Failed to save item: Error request. " + e.message)
+
+            }
+
+        }
     }
 
     private fun finishClosing(message: String) {
