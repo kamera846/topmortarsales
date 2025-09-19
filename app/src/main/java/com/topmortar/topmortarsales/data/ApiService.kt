@@ -324,6 +324,12 @@ interface ApiService {
         @Part("id_surat_jalan") invoiceId: RequestBody
      ): ResponseInvoice
 
+    @Multipart
+    @POST("invoiceTopSeller.php")
+    suspend fun addInvoiceSeller(
+        @Part("id_surat_jalan") invoiceId: RequestBody
+     ): ResponseInvoice
+
     @GET(SKILL)
     suspend fun getSkills(@Query("dst") distributorID: String): ResponseSkills
 

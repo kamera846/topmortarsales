@@ -2,6 +2,7 @@ package com.topmortar.topmortarsales.model
 
 data class SuratJalanModel(
     var id_surat_jalan : String = "",
+    var id_apporder : String = "0",
     var no_surat_jalan : String = "",
     var id_contact : String = "",
     var dalivery_date : String = "",

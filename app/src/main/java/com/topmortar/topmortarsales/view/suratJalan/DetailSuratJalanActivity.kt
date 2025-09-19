@@ -165,6 +165,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     private lateinit var txtLoading: TextView
 
     private var invoiceId: String? = null
+
+    private var idAppOrder: String = "0"
     private var contactId: String? = null
     private var isClosing: Boolean = false
     private var isClosingAction: Boolean = false
@@ -341,6 +343,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         val intent = Intent(this, PreviewClosingActivity::class.java)
         intent.putExtra(CONST_INVOICE_ID, invoiceId)
         intent.putExtra(CONST_CONTACT_ID, contactId)
+        intent.putExtra("const_id_apporder", idAppOrder)
         intent.putExtra(CONST_INVOICE_IS_COD, isCod)
         intent.putParcelableArrayListExtra(CONST_URI, uriList)
         intent.putExtra(CONST_DISTANCE, shortDistance)
@@ -445,6 +448,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                     RESPONSE_STATUS_OK -> {
 
                         val data = response.results[0]
+                        idAppOrder = data.id_apporder
                         isClosing = data.is_closing == "1"
                         isCod = data.is_cod == "1"
 
