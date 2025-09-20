@@ -171,6 +171,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     private var isClosing: Boolean = false
     private var isClosingAction: Boolean = false
     private var isCod: Boolean = false
+    private var isCanClosing: Boolean = false
     private var isRequestSync: Boolean = false
 
     private var detailContact: ContactModel? = null
@@ -451,6 +452,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                         idAppOrder = data.id_apporder
                         isClosing = data.is_closing == "1"
                         isCod = data.is_cod == "1"
+                        isCanClosing = data.can_closing == "yes"
 
                         companyLogoRetina = R.drawable.logo_retina_11zon
                         companyLogoBlack = R.drawable.logo_top_mortar
@@ -588,6 +590,15 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
     @SuppressLint("MissingPermission")
     private fun getMapsUrl() {
+
+        if (!isCanClosing) {
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Peringatan!")
+                .setMessage("Stok tidak mencukupi atau habis, tidak bisa closing surat jalan untuk saat ini.")
+                .setPositiveButton("Oke") { dialog, _ -> dialog.dismiss() }
+            builder.show()
+            return
+        }
 
         val mapsUrl = detailContact!!.maps_url
         val urlUtility = URLUtility(this)
