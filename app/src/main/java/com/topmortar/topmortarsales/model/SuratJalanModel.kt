@@ -18,8 +18,9 @@ data class SuratJalanModel(
     var is_cod: String = "",
     var date_closing: String = "",
     var distance: String = "",
-    var courier_name : String = "",
-    var nama_kendaraan : String = "",
-    var nopol_kendaraan : String = "",
-    var details : ArrayList<DetailSuratJalanModel> = ArrayList(),
+    var courier_name: String = "",
+    var nama_kendaraan: String = "",
+    var nopol_kendaraan: String = "",
+    var can_closing: String = "yes",
+    var details: ArrayList<DetailSuratJalanModel> = ArrayList(),
 )
