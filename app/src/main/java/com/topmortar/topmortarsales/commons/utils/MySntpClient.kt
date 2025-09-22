@@ -34,7 +34,7 @@ object MySntpClient {
                     }
                 }
                 attempt++
-                delay(2000)
+                delay(500)
             }
             return@withContext null
         }

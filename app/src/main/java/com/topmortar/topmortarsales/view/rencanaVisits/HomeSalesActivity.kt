@@ -74,7 +74,6 @@ import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
-import com.topmortar.topmortarsales.commons.utils.MySntpClient
 import com.topmortar.topmortarsales.commons.utils.MySntpClient.checkTimeFromInternet
 import com.topmortar.topmortarsales.commons.utils.PermissionsHandler
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -101,7 +100,6 @@ import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import com.topmortar.topmortarsales.view.tukang.ListTukangActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -1180,17 +1178,13 @@ class HomeSalesActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
 
-            val calendar = checkTimeFromInternet(this@HomeSalesActivity)
-            var date = calendar?.let { Date(it.timeInMillis) }
-            val dateLocal = Date(Calendar.getInstance().timeInMillis)
-
-            if (date == null) date = dateLocal
+            val calendar = checkTimeFromInternet(this@HomeSalesActivity) ?: Calendar.getInstance()
+            val date = Date(calendar.timeInMillis)
 
             val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
             formatter.timeZone = TimeZone.getDefault()
 
             val absentDateTime = formatter.format(date)
-
             if (!isAbsentMorningNow) {
 
                 userChild.child("morningDateTime").setValue(absentDateTime)
@@ -1248,106 +1242,15 @@ class HomeSalesActivity : AppCompatActivity() {
                 val snapshot = userChild.get().await()
 
                 withContext(Dispatchers.Main) {
-                    FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Firebase server reached")
-                    if (snapshot.exists()) {
-                        FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Snapshot exist")
-                        // Do something
-                        if (snapshot.child("morningDateTime").exists()) {
-                            FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Morning date time exist")
-                            val morningDateTime =
-                                snapshot.child("morningDateTime").getValue(String::class.java)
-                                    .toString()
-                            if (morningDateTime.isNotEmpty()) {
-                                FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Morning date time not empty")
-                                sessionManager.absentDateTime(morningDateTime)
-
-                                val absentMorningDate = DateFormat.format(
-                                    morningDateTime,
-                                    "yyyy-MM-dd HH:mm:ss",
-                                    "yyyy-MM-dd"
-                                )
-
-                                if (DateFormat.dateAfterNow(absentMorningDate)) {
-                                    FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Morning date time expired")
-                                    isAbsentMorningNow = false
-                                    lockMenuItem(true)
-
-                                } else {
-                                    val serviceIntentDD =
-                                        Intent(this@HomeSalesActivity, TrackingService::class.java)
-                                    serviceIntentDD.putExtra("userId", userId)
-                                    serviceIntentDD.putExtra(
-                                        "userDistributorId",
-                                        userDistributorId ?: "-start-005-$userName"
-                                    )
-                                    FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Morning date time start service")
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                        startForegroundService(serviceIntentDD)
-                                    } else {
-                                        startService(serviceIntentDD)
-                                    }
-
-                                    isAbsentMorningNow = true
-                                    FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Morning date time available")
-                                    if (snapshot.child("eveningDateTime").exists()) {
-                                        FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Evening date time exist")
-                                        val eveningDateTime = snapshot.child("eveningDateTime")
-                                            .getValue(String::class.java).toString()
-
-                                        if (eveningDateTime.isNotEmpty()) {
-                                            FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Evening date time not empty")
-                                            val absentEveningDate = DateFormat.format(
-                                                eveningDateTime,
-                                                "yyyy-MM-dd HH:mm:ss",
-                                                "yyyy-MM-dd"
-                                            )
-
-                                            if (DateFormat.dateAfterNow(absentEveningDate)) {
-                                                FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Evening date time expired")
-                                                isAbsentEveningNow = false
-                                                lockMenuItem(false)
-                                            } else {
-                                                FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Evening date time exist")
-                                                val serviceIntent = Intent(
-                                                    this@HomeSalesActivity,
-                                                    TrackingService::class.java
-                                                )
-                                                this@HomeSalesActivity.stopService(serviceIntent)
-                                                FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Evening date time stop service")
-                                                isAbsentEveningNow = true
-                                                lockMenuItem(true)
-                                            }
-
-                                        } else {
-                                            FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Evening date time is empty")
-                                            isAbsentEveningNow = false
-                                            lockMenuItem(false)
-                                        }
-                                    } else {
-                                        FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Evening date time not exist")
-                                        isAbsentEveningNow = false
-                                        lockMenuItem(false)
-                                    }
-
-                                }
-
-                            } else {
-                                FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Morning date time is empty")
-                                isAbsentMorningNow = false
-                                lockMenuItem(true)
-                            }
-                        } else {
-                            FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "Morning date time not exist")
-                            isAbsentMorningNow = false
-                            lockMenuItem(true)
-                        }
-                    } else {
-
-                        FirebaseUtils.firebaseLogging(this@HomeSalesActivity, "Absent", "snapshot not exist")
-                        isAbsentMorningNow = false
-                        lockMenuItem(true)
+                    if (!snapshot.exists()) {
+                        handleAbsenceStatus(morningDateTime = null, eveningDateTime = null)
+                        return@withContext
                     }
 
+                    val morningDateTime = snapshot.child("morningDateTime").getValue(String::class.java)
+                    val eveningDateTime = snapshot.child("eveningDateTime").getValue(String::class.java)
+
+                    handleAbsenceStatus(morningDateTime = morningDateTime, eveningDateTime = eveningDateTime)
                 }
 
             }
@@ -1365,10 +1268,40 @@ class HomeSalesActivity : AppCompatActivity() {
         }
     }
 
+    private fun handleAbsenceStatus(morningDateTime: String?, eveningDateTime: String?) {
+        isAbsentMorningNow = morningDateTime?.let { DateFormat.isCurrentDate(it) } ?: false
+        isAbsentEveningNow = eveningDateTime?.let { DateFormat.isCurrentDate(it) } ?: false
+
+        when {
+            isAbsentMorningNow && !isAbsentEveningNow -> {
+                val serviceIntentDD = Intent(this, TrackingService::class.java)
+                serviceIntentDD.putExtra("userId", userId)
+                serviceIntentDD.putExtra("userDistributorId",userDistributorId ?: "-start-005-$userName")
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(serviceIntentDD)
+                } else {
+                    startService(serviceIntentDD)
+                }
+
+                sessionManager.absentDateTime(morningDateTime!!)
+                lockMenuItem(false)
+            } else -> {
+                val serviceIntent = Intent(this,TrackingService::class.java)
+                stopService(serviceIntent)
+
+                lockMenuItem(true)
+            }
+        }
+    }
+
     private fun lockMenuItem(state: Boolean) {
         FirebaseUtils.firebaseLogging(this, "Absent", "Lock menu")
         dismissProgressDialog()
         FirebaseUtils.firebaseLogging(this, "Absent", "Loading dismissed")
+        isLocked = state
+
+        setListMenu()
 
         if (isAbsentMorningNow && isAbsentEveningNow) {
 
@@ -1397,18 +1330,8 @@ class HomeSalesActivity : AppCompatActivity() {
                 if (state) getString(R.string.absen_sekarang) else getString(R.string.pulang_sekarang)
 
             lifecycleScope.launch {
-                isLocked = true
-                setListMenu()
-
-                binding.btnAbsent.visibility = View.GONE
-                binding.absenEveningInfoText.visibility = View.GONE
-
-                if (absentProgressBar?.isShowing() == false) absentProgressBar?.show()
-
-                var currentHour = checkTimeFromInternet(this@HomeSalesActivity)?.get(Calendar.HOUR_OF_DAY)
-                val currentHourLocal = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-
-                if (currentHour == null) currentHour = currentHourLocal
+                val calendar = checkTimeFromInternet(this@HomeSalesActivity) ?: Calendar.getInstance()
+                val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
 
                 if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
                     binding.btnAbsent.visibility = View.GONE
@@ -1417,11 +1340,6 @@ class HomeSalesActivity : AppCompatActivity() {
                     binding.btnAbsent.visibility = View.VISIBLE
                     binding.absenEveningInfoText.visibility = View.GONE
                 }
-
-                isLocked = state
-                setListMenu()
-
-                if (absentProgressBar?.isShowing() == true) absentProgressBar?.dismiss()
             }
         }
 
