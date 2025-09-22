@@ -108,4 +108,24 @@ object DateFormat {
         }
     }
 
+    fun isCurrentDate(dateStr: String): Boolean {
+        try {
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val parsedDate = dateFormat.parse(dateStr)
+            if (parsedDate != null) {
+                val currentDate = Calendar.getInstance().apply {
+                    set(Calendar.HOUR_OF_DAY, 0)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }.time
+                return parsedDate.time == currentDate.time
+            }
+            return false
+        } catch (e: Exception) {
+            println("DEBUG FAILED FORMAT DATE: $e")
+            return  false
+        }
+    }
+
 }
