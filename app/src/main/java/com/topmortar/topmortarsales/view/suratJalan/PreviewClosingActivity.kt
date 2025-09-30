@@ -47,6 +47,7 @@ import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.GlideUtil
+import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -153,7 +154,7 @@ class PreviewClosingActivity : AppCompatActivity() {
                 handleMessage(
                     this@PreviewClosingActivity,
                     TAG_RESPONSE_CONTACT,
-                    "Failed run service. Exception " + e.message
+                    generateFailedRunServiceMessage(e.message.toString())
                 )
                 loadingState(false)
 
@@ -204,7 +205,7 @@ class PreviewClosingActivity : AppCompatActivity() {
                 handleMessage(
                     this@PreviewClosingActivity,
                     TAG_RESPONSE_CONTACT,
-                    "Failed run service. Exception " + e.message
+                    generateFailedRunServiceMessage(e.message.toString())
                 )
                 loadingState(false)
 

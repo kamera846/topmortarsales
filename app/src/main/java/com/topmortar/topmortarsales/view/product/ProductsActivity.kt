@@ -20,6 +20,7 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
+import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -137,7 +138,7 @@ class ProductsActivity : AppCompatActivity() {
                 } catch (e: Exception) {
 
                     FirebaseUtils.logErr(this@ProductsActivity, "Failed ProductsActivity on getCities(). Catch: ${e.message}")
-                    handleMessage(this@ProductsActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                    handleMessage(this@ProductsActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
                     getList()
 
                 }
@@ -217,7 +218,7 @@ class ProductsActivity : AppCompatActivity() {
             } catch (e: Exception) {
 
                 FirebaseUtils.logErr(this@ProductsActivity, "Failed ProductsActivity on getList(). Catch: ${e.message}")
-                handleMessage(this@ProductsActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@ProductsActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
                 loadingState(true, getString(R.string.failed_request))
 
             }

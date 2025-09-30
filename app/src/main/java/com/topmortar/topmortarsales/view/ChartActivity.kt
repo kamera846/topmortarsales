@@ -16,6 +16,7 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
+import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -133,7 +134,7 @@ class ChartActivity : AppCompatActivity() {
                     return@launch
                 }
                 FirebaseUtils.logErr(this@ChartActivity, "Failed ChartActivity on loadBarChartData(). Catch: ${e.message}")
-                handleMessage(this@ChartActivity, "TAG_CHART_ACTIVE", "Failed run service. Exception " + e.message)
+                handleMessage(this@ChartActivity, "TAG_CHART_ACTIVE", generateFailedRunServiceMessage(e.message.toString()))
 
             } finally {
 
@@ -293,7 +294,7 @@ class ChartActivity : AppCompatActivity() {
                     return@launch
                 }
                 FirebaseUtils.logErr(this@ChartActivity, "Failed ChartActivity on getCities(). Catch: ${e.message}")
-                handleMessage(this@ChartActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@ChartActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
 
             }
 

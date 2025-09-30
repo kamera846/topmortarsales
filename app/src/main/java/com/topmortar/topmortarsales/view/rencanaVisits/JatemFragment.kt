@@ -48,6 +48,7 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
+import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
@@ -197,7 +198,7 @@ class JatemFragment : Fragment() {
                 FirebaseUtils.logErr(requireContext(), "Failed JatemFragment on getList(). Catch: ${e.message}")
                 listItem = arrayListOf()
                 setRecyclerView(listItem)
-                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
 
@@ -358,7 +359,7 @@ class JatemFragment : Fragment() {
                     return@launch
                 }
                 FirebaseUtils.logErr(requireContext(), "Failed JatemFragment on getCities(). Catch: ${e.message}")
-                handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
 
             } finally {
                 getList()

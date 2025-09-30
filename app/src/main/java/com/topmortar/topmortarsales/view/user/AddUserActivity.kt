@@ -46,6 +46,7 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.phoneValidation
+import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -229,7 +230,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                 if (e is CancellationException) {
                     return@launch
                 }
-                handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
                 loadingState(false)
                 onSubmit = false
 
@@ -583,7 +584,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
             } catch (e: Exception) {
 
-                handleMessage(this@AddUserActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@AddUserActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
                 isCitiesLoaded = false
 
             }

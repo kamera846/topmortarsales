@@ -92,6 +92,7 @@ import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
+import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
@@ -620,7 +621,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                         return@launch
                     }
                     FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on navigateCheckLocation(). Catch: ${e.message}")
-                    handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                    handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
                     progressBar.dismiss()
 
                 }
@@ -958,7 +959,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                     return@launch
                 }
                 FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on getContacts(). Catch: ${e.message}")
-                handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
                 loadingState(true, getString(R.string.failed_request))
 
             }
@@ -1003,7 +1004,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                     return@launch
                 }
                 FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on getContactsForMaps(). Catch: ${e.message}")
-                handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
             } finally {
                 progressBar.dismiss()
             }
@@ -1055,7 +1056,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                     return@launch
                 }
                 FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on getCities(). Catch: ${e.message}")
-                handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
 
             }
 
@@ -1142,7 +1143,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                     return@launch
                 }
                 FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on getUserLoggedIn(). Catch: ${e.message}")
-                Log.d("TAG USER LOGGED IN", "Failed run service. Exception " + e.message)
+                Log.d("TAG USER LOGGED IN", generateFailedRunServiceMessage(e.message.toString()))
             }
 
         }
@@ -1220,7 +1221,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                     return@launch
                 }
                 FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on searchContact(). Catch: ${e.message}")
-                handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
                 loadingState(true, getString(R.string.failed_request))
 
             }

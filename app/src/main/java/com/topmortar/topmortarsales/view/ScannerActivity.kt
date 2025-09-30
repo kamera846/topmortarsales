@@ -19,6 +19,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
+import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.data.HttpClient
@@ -129,7 +130,7 @@ class ScannerActivity : AppCompatActivity() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                responseMessage = "Failed run service. Exception " + e.message
+                responseMessage = generateFailedRunServiceMessage(e.message.toString())
 
             } finally {
 

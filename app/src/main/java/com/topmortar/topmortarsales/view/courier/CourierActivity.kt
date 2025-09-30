@@ -41,6 +41,7 @@ import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
+import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.data.ApiService
@@ -193,7 +194,7 @@ class CourierActivity : AppCompatActivity() {
                     return@launch
                 }
                 FirebaseUtils.logErr(this@CourierActivity, "Failed CourierActivity on getUserLoggedIn(). Catch: ${e.message}")
-                Log.d("TAG USER LOGGED IN", "Failed run service. Exception " + e.message)
+                Log.d("TAG USER LOGGED IN", generateFailedRunServiceMessage(e.message.toString()))
             }
 
         }

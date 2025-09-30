@@ -86,6 +86,7 @@ import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.PingUtility
+import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -942,7 +943,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
             } catch (e: Exception) {
 
                 FirebaseUtils.logErr(this@DetailTukangActivity, "Failed DetailTukangActivity on saveEdit(). Catch: ${e.message}")
-                handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
                 loadingState(false)
                 toggleEdit(false)
 
@@ -1011,7 +1012,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
             } catch (e: Exception) {
 
-                handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
                 loadingState(false)
                 toggleEdit(false)
 
@@ -1277,7 +1278,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
             } catch (e: Exception) {
 
-                handleMessage(this@DetailTukangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@DetailTukangActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
 
             }
 
@@ -1381,7 +1382,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
                     } catch (e: Exception) {
 
-                        handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                        handleMessage(this@DetailTukangActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
                         loadingState(false)
                         toggleEdit(false)
 
@@ -1475,7 +1476,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
             } catch (e: Exception) {
 
-                handleMessage(this@DetailTukangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@DetailTukangActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
 //                searchModal.isLoading(true)
 
             }
@@ -1543,7 +1544,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
 
             } catch (e: Exception) {
 
-                handleMessage(this@DetailTukangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@DetailTukangActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
 //                searchModal.isLoading(true)
 
             }

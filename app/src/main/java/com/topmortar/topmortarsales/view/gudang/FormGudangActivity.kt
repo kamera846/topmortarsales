@@ -36,6 +36,7 @@ import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
+import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
@@ -286,7 +287,7 @@ class FormGudangActivity : AppCompatActivity() {
                     return@launch
                 }
                 FirebaseUtils.logErr(this@FormGudangActivity, "Failed FormGudangActivity on submitForm(). Catch: ${e.message}")
-                handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
 
             } finally {
                 progressBar.dismiss()
@@ -366,7 +367,7 @@ class FormGudangActivity : AppCompatActivity() {
                     return@launch
                 }
                 FirebaseUtils.logErr(this@FormGudangActivity, "Failed FormGudangActivity on getCities(). Catch: ${e.message}")
-                handleMessage(this@FormGudangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@FormGudangActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
 
             }
 
