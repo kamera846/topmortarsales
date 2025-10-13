@@ -14,7 +14,7 @@ class HttpClient {
     companion object {
 
         fun create(): ApiService {
-            val timeOutValue = 10L
+            val timeOutValue = 30L
 
             val trustManager = object : X509TrustManager {
                 override fun checkClientTrusted(chain: Array<out java.security.cert.X509Certificate>?, authType: String?) {}

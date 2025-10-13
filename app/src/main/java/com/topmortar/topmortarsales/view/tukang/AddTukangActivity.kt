@@ -41,6 +41,7 @@ import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.phoneValidation
+import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
@@ -243,7 +244,7 @@ class AddTukangActivity : AppCompatActivity() {
             } catch (e: Exception) {
 
                 FirebaseUtils.logErr(this@AddTukangActivity, "Failed AddTukangActivity on sendMessage(). Catch: ${e.message}")
-                handleMessage(this@AddTukangActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                handleMessage(this@AddTukangActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
                 loadingState(false)
 
             }
@@ -564,7 +565,7 @@ class AddTukangActivity : AppCompatActivity() {
             } catch (e: Exception) {
 
                 FirebaseUtils.logErr(this@AddTukangActivity, "Failed AddTukangActivity on getCities(). Catch: ${e.message}")
-                handleMessage(this@AddTukangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@AddTukangActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
                 getSkills()
 
             }
@@ -628,7 +629,7 @@ class AddTukangActivity : AppCompatActivity() {
             } catch (e: Exception) {
 
                 FirebaseUtils.logErr(this@AddTukangActivity, "Failed AddTukangActivity on getSkill(). Catch: ${e.message}")
-                handleMessage(this@AddTukangActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@AddTukangActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
                 etSkill.isEnabled = true
                 progressBar.dismiss()
 

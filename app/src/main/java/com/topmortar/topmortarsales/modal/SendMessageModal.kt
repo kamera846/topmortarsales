@@ -35,6 +35,7 @@ import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.updateTxtMaxLength
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
+import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
@@ -312,7 +313,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
             } catch (e: Exception) {
 
-                handleMessage(context, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(context, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
                 loadingState(true)
 
             }
@@ -360,7 +361,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
             } catch (e: Exception) {
 
-                handleMessage(context, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(context, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
                 loadingState(true)
 
             }
@@ -484,7 +485,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
             } catch (e: Exception) {
 
-                handleMessage(context, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(context, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
                 loadingState(false)
 
             }

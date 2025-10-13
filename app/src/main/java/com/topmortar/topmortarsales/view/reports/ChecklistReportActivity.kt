@@ -52,6 +52,7 @@ import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.PermissionsHandler
+import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
@@ -545,7 +546,7 @@ class ChecklistReportActivity : AppCompatActivity() {
             } catch (e: Exception) {
 
                 FirebaseUtils.logErr(this@ChecklistReportActivity, "Failed ChecklistReportActivity on getAnswer(). Catch: ${e.message}")
-                loadingState(true, "Failed run service. Exception " + e.message)
+                loadingState(true, generateFailedRunServiceMessage(e.message.toString()))
 
             }
         }
@@ -593,7 +594,7 @@ class ChecklistReportActivity : AppCompatActivity() {
             } catch (e: Exception) {
 
                 FirebaseUtils.logErr(this@ChecklistReportActivity, "Failed ChecklistReportActivity on getQuestions(). Catch: ${e.message}")
-                loadingState(true, "Failed run service. Exception " + e.message)
+                loadingState(true, generateFailedRunServiceMessage(e.message.toString()))
 
             }
         }
@@ -655,7 +656,7 @@ class ChecklistReportActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 progressBar.dismiss()
                 FirebaseUtils.logErr(this@ChecklistReportActivity, "Failed ChecklistReportActivity on submitReport(). Catch: ${e.message}")
-                handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
             }
         }
     }
@@ -751,7 +752,7 @@ class ChecklistReportActivity : AppCompatActivity() {
 
                 progressBar.dismiss()
                 FirebaseUtils.logErr(this@ChecklistReportActivity, "Failed ChecklistReportActivity on postSubmitReport(). Catch: ${e.message}")
-                handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
 
             }
         }

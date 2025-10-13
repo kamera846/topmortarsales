@@ -42,6 +42,7 @@ import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
+import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
@@ -335,7 +336,7 @@ class AddBaseCampActivity : AppCompatActivity() {
                 handleMessage(
                     this@AddBaseCampActivity,
                     TAG_RESPONSE_MESSAGE,
-                    "Failed run service. Exception " + e.message
+                    generateFailedRunServiceMessage(e.message.toString())
                 )
 
             } finally {
@@ -436,7 +437,7 @@ class AddBaseCampActivity : AppCompatActivity() {
                 handleMessage(
                     this@AddBaseCampActivity,
                     TAG_RESPONSE_CONTACT,
-                    "Failed run service. Exception " + e.message
+                    generateFailedRunServiceMessage(e.message.toString())
                 )
 
             } finally {

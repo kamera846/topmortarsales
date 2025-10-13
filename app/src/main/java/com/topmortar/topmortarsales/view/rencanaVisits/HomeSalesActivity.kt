@@ -76,6 +76,7 @@ import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.MySntpClient.checkTimeFromInternet
 import com.topmortar.topmortarsales.commons.utils.PermissionsHandler
+import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
@@ -683,7 +684,7 @@ class HomeSalesActivity : AppCompatActivity() {
                     handleMessage(
                         this@HomeSalesActivity,
                         TAG_RESPONSE_CONTACT,
-                        "Failed run service. Exception " + e.message
+                        generateFailedRunServiceMessage(e.message.toString())
                     )
                     progressBar!!.dismiss()
 
@@ -799,7 +800,7 @@ class HomeSalesActivity : AppCompatActivity() {
                     handleMessage(
                         this@HomeSalesActivity,
                         TAG_RESPONSE_CONTACT,
-                        "Failed run service. Exception " + e.message
+                        generateFailedRunServiceMessage(e.message.toString())
                     )
                     progressBar!!.dismiss()
 
@@ -913,7 +914,7 @@ class HomeSalesActivity : AppCompatActivity() {
                     return@launch
                 }
                 FirebaseUtils.logErr(this@HomeSalesActivity, "Failed HomeSalesActivity on getUserLoggedIn(). Catch: ${e.message}")
-                Log.d("TAG USER LOGGED IN", "Failed run service. Exception " + e.message)
+                Log.d("TAG USER LOGGED IN", generateFailedRunServiceMessage(e.message.toString()))
             }
 
         }
@@ -1431,7 +1432,7 @@ class HomeSalesActivity : AppCompatActivity() {
                 handleMessage(
                     this@HomeSalesActivity,
                     TAG_RESPONSE_CONTACT,
-                    "Failed run service. Exception " + e.message
+                    generateFailedRunServiceMessage(e.message.toString())
                 )
                 dismissProgressDialog()
 
@@ -1502,7 +1503,7 @@ class HomeSalesActivity : AppCompatActivity() {
                 handleMessage(
                     this@HomeSalesActivity,
                     TAG_RESPONSE_CONTACT,
-                    "Failed run service. Exception " + e.message
+                    generateFailedRunServiceMessage(e.message.toString())
                 )
                 dismissProgressDialog()
 

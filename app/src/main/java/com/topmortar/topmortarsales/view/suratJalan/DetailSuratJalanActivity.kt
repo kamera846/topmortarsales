@@ -103,6 +103,7 @@ import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.BluetoothPrinterManager
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
+import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
@@ -426,7 +427,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                     return@launch
                 }
                 FirebaseUtils.logErr(this@DetailSuratJalanActivity, "Failed DetailSuratJalanActivity on getDetail(). Catch: ${e.message}")
-                handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
                 loadingState(true, getString(R.string.failed_request))
 
             }
@@ -511,7 +512,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                     return@launch
                 }
                 FirebaseUtils.logErr(this@DetailSuratJalanActivity, "Failed DetailSuratJalanActivity on getDetailInvoice(). Catch: ${e.message}")
-                handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
                 loadingState(true, getString(R.string.failed_request))
 
             }
@@ -882,7 +883,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                     return@launch
                 }
                 FirebaseUtils.logErr(this@DetailSuratJalanActivity, "Failed DetailSuratJalanActivity on executePrinter(). Catch: ${e.message}")
-                handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
                 printingState(false)
 
             }
@@ -932,7 +933,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                         return@launch
                     }
                     FirebaseUtils.logErr(this@DetailSuratJalanActivity, "Failed DetailSuratJalanActivity on executeInkPrinter(). Catch: ${e.message}")
-                    handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                    handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
                     printingState(false)
 
                 }

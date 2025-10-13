@@ -71,6 +71,7 @@ import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.KeyboardHandler
 import com.topmortar.topmortarsales.commons.utils.KeyboardHandler.showKeyboard
+import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
@@ -567,7 +568,7 @@ class SplashScreenActivity : AppCompatActivity() {
             } catch (e: Exception) {
 
                 FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on loginHandler(). Catch: ${e.message}")
-                handleMessage(this@SplashScreenActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@SplashScreenActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
                 loadingState(false)
 
             }
@@ -641,7 +642,7 @@ class SplashScreenActivity : AppCompatActivity() {
                     return@launch
                 }
                 FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on requestOtpHandler(). Catch: ${e.message}")
-                handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
                 loadingState(false)
 
             }
@@ -720,7 +721,7 @@ class SplashScreenActivity : AppCompatActivity() {
                     return@launch
                 }
                 FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on verifyOtpHandler(). Catch: ${e.message}")
-                handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
                 loadingState(false)
             }
         }
@@ -799,7 +800,7 @@ class SplashScreenActivity : AppCompatActivity() {
                     return@launch
                 }
                 FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on resetPasswordHandler(). Catch: ${e.message}")
-                handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
                 loadingState(false)
             }
         }

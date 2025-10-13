@@ -329,7 +329,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
 //
 //            } catch (e: Exception) {
 //
-//                handleMessage(this@RencanaVisitActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+//                handleMessage(this@RencanaVisitActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
 //                progressBar.dismiss()
 //
 //            }

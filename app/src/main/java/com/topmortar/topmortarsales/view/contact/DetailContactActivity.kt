@@ -3,7 +3,6 @@ package com.topmortar.topmortarsales.view.contact
 import android.Manifest
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -117,6 +116,7 @@ import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler
 import com.topmortar.topmortarsales.commons.utils.PhoneHandler.formatPhoneNumber
 import com.topmortar.topmortarsales.commons.utils.PingUtility
+import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
@@ -1186,7 +1186,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     return@launch
                 }
                 FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on saveEdit(). Catch: ${e.message}")
-                handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
                 loadingState(false)
                 progressBar.dismiss()
                 toggleEdit(false)
@@ -1256,7 +1256,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     return@launch
                 }
                 FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getContact(). Catch: ${e.message}")
-                handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
                 loadingState(false)
                 progressBar.dismiss()
                 toggleEdit(false)
@@ -1366,7 +1366,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     return@launch
                 }
                 FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getDetailContact(). Catch: ${e.message}")
-                handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
                 loadingState(false)
                 progressBar.dismiss()
                 toggleEdit(false)
@@ -1519,7 +1519,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 btnNewReport.visibility = View.GONE
             } else if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN || sessionManager.userKind() == USER_KIND_MARKETING) {
                 if (iReportSource == NORMAL_REPORT) {
-                    btnNewReport.visibility = View.GONE
+                    btnNewReport.visibility = View.VISIBLE
 //                    checklistReportOption.visibility = View.GONE
                 }
 //                if (userDistributorId == "1" && iReportSource == NORMAL_REPORT) btnNewReport.visibility = View.GONE
@@ -1767,7 +1767,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     return@launch
                 }
                 FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getContactSales(). Catch: ${e.message}")
-                handleMessage(this@DetailContactActivity, "CONTACT SALES", "Failed run service. Exception " + e.message)
+                handleMessage(this@DetailContactActivity, "CONTACT SALES", generateFailedRunServiceMessage(e.message.toString()))
                 getCities()
 
             }
@@ -1836,7 +1836,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     return@launch
                 }
                 FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getCities(). Catch: ${e.message}")
-                handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
                 getPromo()
 
             }
@@ -1913,7 +1913,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     return@launch
                 }
                 FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getPromo(). Catch: ${e.message}")
-                handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
 
                 loadingState(false)
                 progressBar.dismiss()

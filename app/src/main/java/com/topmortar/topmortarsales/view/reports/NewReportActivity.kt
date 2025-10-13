@@ -15,7 +15,6 @@ import android.os.Looper
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -63,6 +62,7 @@ import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.PermissionsHandler
+import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
@@ -517,7 +517,7 @@ class NewReportActivity : AppCompatActivity() {
                                 val currentLongitude = location.longitude
 
                                 // Store Location
-                                Log.d("DEBUG", mapsUrl)
+//                                Log.d("DEBUG", mapsUrl)
                                 val coordinate = mapsUrl.split(",")
                                 val latitude = coordinate[0].toDoubleOrNull()
                                 val longitude = coordinate[1].toDoubleOrNull()
@@ -919,7 +919,7 @@ class NewReportActivity : AppCompatActivity() {
             } catch (e: Exception) {
 
                 FirebaseUtils.logErr(this@NewReportActivity, "Failed NewReportActivity on submitReport(). Catch: ${e.message}")
-                handleMessage(this@NewReportActivity, TAG_RESPONSE_MESSAGE, "Failed run service. Exception " + e.message)
+                handleMessage(this@NewReportActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
                 submitDialog.dismiss()
                 loadingSubmit(false)
 

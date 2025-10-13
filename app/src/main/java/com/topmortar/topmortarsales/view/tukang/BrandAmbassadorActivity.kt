@@ -40,6 +40,7 @@ import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
+import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
@@ -269,7 +270,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
                 } catch (e: Exception) {
 
                     FirebaseUtils.logErr(this@BrandAmbassadorActivity, "Failed BrandAmbassadorActivity on navigateCheckLocationStore(). Catch: ${e.message}")
-                    handleMessage(this@BrandAmbassadorActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                    handleMessage(this@BrandAmbassadorActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
                     progressBar.dismiss()
 
                 }
@@ -348,7 +349,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
                 } catch (e: Exception) {
 
                     FirebaseUtils.logErr(this@BrandAmbassadorActivity, "Failed BrandAmbassadorActivity on navigateChecklocationBasecamp(). Catch: ${e.message}")
-                    handleMessage(this@BrandAmbassadorActivity, TAG_RESPONSE_CONTACT, "Failed run service. Exception " + e.message)
+                    handleMessage(this@BrandAmbassadorActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
                     progressBar.dismiss()
 
                 }
@@ -428,7 +429,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
                 FirebaseUtils.logErr(this@BrandAmbassadorActivity, "Failed BrandAmbassadorActivity on getUserLoggedIn(). Catch: ${e.message}")
-                Log.d("TAG USER LOGGED IN", "Failed run service. Exception " + e.message)
+                Log.d("TAG USER LOGGED IN", generateFailedRunServiceMessage(e.message.toString()))
             }
 
         }
