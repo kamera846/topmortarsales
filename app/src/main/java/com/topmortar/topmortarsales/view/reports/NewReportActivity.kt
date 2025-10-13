@@ -15,7 +15,6 @@ import android.os.Looper
 import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -518,7 +517,7 @@ class NewReportActivity : AppCompatActivity() {
                                 val currentLongitude = location.longitude
 
                                 // Store Location
-                                Log.d("DEBUG", mapsUrl)
+//                                Log.d("DEBUG", mapsUrl)
                                 val coordinate = mapsUrl.split(",")
                                 val latitude = coordinate[0].toDoubleOrNull()
                                 val longitude = coordinate[1].toDoubleOrNull()

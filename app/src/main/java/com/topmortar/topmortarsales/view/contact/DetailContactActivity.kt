@@ -3,7 +3,6 @@ package com.topmortar.topmortarsales.view.contact
 import android.Manifest
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.app.DatePickerDialog
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -1520,7 +1519,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 btnNewReport.visibility = View.GONE
             } else if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN || sessionManager.userKind() == USER_KIND_MARKETING) {
                 if (iReportSource == NORMAL_REPORT) {
-                    btnNewReport.visibility = View.GONE
+                    btnNewReport.visibility = View.VISIBLE
 //                    checklistReportOption.visibility = View.GONE
                 }
 //                if (userDistributorId == "1" && iReportSource == NORMAL_REPORT) btnNewReport.visibility = View.GONE
