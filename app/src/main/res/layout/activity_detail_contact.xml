@@ -11,10 +11,15 @@
         android:id="@+id/title_bar"
         layout="@layout/component_title_bar_light"/>
 
-    <ScrollView
-        android:id="@+id/contentScrollView"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_below="@+id/title_bar"
         android:layout_above="@+id/bottom_action"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <ScrollView
+        android:id="@+id/contentScrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true">
@@ -1461,6 +1466,7 @@
 
     </ScrollView>
 
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     <!-- Bottom Action -->
     <LinearLayout
         android:id="@+id/bottom_action"

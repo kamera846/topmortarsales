@@ -526,6 +526,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun initClickHandler() {
 
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            binding.swipeRefreshLayout.isRefreshing = true
+            getContact()
+        }
         icBack.setOnClickListener { backHandler() }
 //        icEdit.setOnClickListener { if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_SALES) showMoreOption() else toggleEdit(true) }
         icEdit.setOnClickListener { toggleEdit(true) }
@@ -738,6 +742,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         if (isEdit) {
 
+            binding.swipeRefreshLayout.isEnabled = false
+
             if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) {
                 // Hide Case
                 icEdit.visibility = View.GONE
@@ -824,6 +830,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
 
         } else {
+
+            binding.swipeRefreshLayout.isEnabled = true
 
             if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) {
                 // Show Case
@@ -1262,6 +1270,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 toggleEdit(false)
                 setToGetCities()
 
+            } finally {
+                binding.swipeRefreshLayout.isRefreshing = false
             }
 
         }
