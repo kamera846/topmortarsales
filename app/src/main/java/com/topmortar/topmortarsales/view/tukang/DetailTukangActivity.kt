@@ -339,6 +339,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         btnInvoice.visibility = View.GONE
         skillContainer.visibility = View.VISIBLE
         binding.paymentMethodContainer.visibility = View.GONE
+        binding.clusterContainer.visibility = View.GONE
         binding.bottomAction.visibility = View.GONE
         binding.textLoading.visibility = View.GONE
         binding.btnDeliveryContainer.visibility = View.GONE

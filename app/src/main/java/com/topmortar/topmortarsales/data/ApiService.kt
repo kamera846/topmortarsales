@@ -111,6 +111,7 @@ interface ApiService {
         @Part("reputation") reputation: RequestBody,
         @Part("id_promo") promoId: RequestBody,
         @Part("hari_bayar") hariBayar: RequestBody,
+        @Part("cluster") cluster: RequestBody,
         @Part ktp: MultipartBody.Part? = null,
     ): Response<ResponseMessage>
 
