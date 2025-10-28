@@ -11,10 +11,15 @@
         android:id="@+id/title_bar"
         layout="@layout/component_title_bar_light"/>
 
-    <ScrollView
-        android:id="@+id/contentScrollView"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_below="@+id/title_bar"
         android:layout_above="@+id/bottom_action"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <ScrollView
+        android:id="@+id/contentScrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true">
@@ -1143,6 +1148,59 @@
 
                 </LinearLayout>
 
+                <!-- Text Cluster -->
+                <LinearLayout
+                    android:visibility="visible"
+                    android:id="@+id/cluster_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/background_rounded_16"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:text="Cluster"
+                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginTop="16dp"
+                            android:layout_marginBottom="4dp"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
+
+                        <TextView
+                            android:visibility="visible"
+                            android:id="@+id/tv_cluster"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:text="@string/txt_loading"
+                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginBottom="16dp"
+                            android:textSize="14sp"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                        <Spinner
+                            android:visibility="gone"
+                            android:id="@+id/spin_cluster"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginBottom="16dp"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
                 <!-- Hari Bayar -->
                 <LinearLayout
                     android:visibility="gone"
@@ -1461,6 +1519,7 @@
 
     </ScrollView>
 
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     <!-- Bottom Action -->
     <LinearLayout
         android:id="@+id/bottom_action"

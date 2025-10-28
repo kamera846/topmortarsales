@@ -25,4 +25,5 @@ data class ContactModel(
     var deliveryStatus: String = "",
     var pass_contact: String = "",
     var id_surat_jalan: String = "",
+    var cluster: String = "",
 )

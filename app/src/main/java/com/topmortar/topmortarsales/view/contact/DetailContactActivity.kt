@@ -18,6 +18,7 @@ import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
@@ -27,6 +28,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.PopupMenu
 import android.widget.RelativeLayout
 import android.widget.Spinner
 import android.widget.TextView
@@ -244,16 +246,18 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var selectedPromo: ModalSearchModel? = null
     private var itemSendMessage: ContactModel? = null
 
-    private var statusItem: List<String> = listOf("Pilih Status", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
-    private var statusWeeklyVisitItem: List<String> = listOf("Pilih Status", "Active")
-    private var terminItem: List<String> = listOf("Pilih Termin Payment", "COD", "COD + Transfer", "COD + Tunai", "30 Hari", "45 Hari", "60 Hari")
-    private var paymentMethodItem: List<String> = listOf("Pilih Metode Pembayaran", "Tunai", "Transfer")
-    private var reputationItem: List<String> = listOf("Pilih Reputasi Toko", "Good", "Bad")
-    private var hariBayarItem: List<String> = listOf("Pilih Hari Bayar", "Bebas", "Senin", "Selasa", "Rabu", "Kamis", "Jum'at", "Sabtu")
+    private var statusItem: List<String> = listOf("Reset Pilihan", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
+    private var statusWeeklyVisitItem: List<String> = listOf("Reset Pilihan", "Active")
+    private var terminItem: List<String> = listOf("Reset Pilihan", "COD", "COD + Transfer", "COD + Tunai", "30 Hari", "45 Hari", "60 Hari")
+    private var paymentMethodItem: List<String> = listOf("Reset Pilihan", "Tunai", "Transfer")
+    private var clusterItem: List<String> = listOf("Reset Pilihan", "Data Cluster 1", "Data Cluster 2", "Data Cluster 3")
+    private var reputationItem: List<String> = listOf("Reset Pilihan", "Good", "Bad")
+    private var hariBayarItem: List<String> = listOf("Reset Pilihan", "Bebas", "Senin", "Selasa", "Rabu", "Kamis", "Jum'at", "Sabtu")
     private var spinPhoneCatItems: List<String> = listOf()
     private var selectedStatus: String = ""
     private var selectedWeeklyVisitStatus: String = ""
     private var selectedPaymentMethod: String = ""
+    private var selectedCluster: String = ""
     private var selectedTermin: String = ""
     private var selectedReputation: String = ""
     private var selectedHariBayar: String = ""
@@ -266,6 +270,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var iStatus: String? = null
     private var iWeeklyVisitStatus: String? = null
     private var iPaymentMethod: String? = null
+    private var iCluster: String? = null
     private var iTermin: String? = null
     private var iReputation: String? = null
     private var iHariBayar: String? = null
@@ -286,6 +291,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var datePicker: DatePickerDialog
     private lateinit var searchModal: SearchModal
     private lateinit var searchPromoModal: SearchModal
+    private lateinit var searchClusterModal: SearchModal
     private lateinit var sendMessageModal: SendMessageModal
     private lateinit var bottomSheetDialog: BottomSheetDialog
 
@@ -513,6 +519,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         // Setup Dialog Search
         setupDialogSearch()
         setupDialogSearchPromo()
+        setupDialogSearchCluster()
 
         // Setup Dialog Send Message
         setupDialogSendMessage()
@@ -526,9 +533,16 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun initClickHandler() {
 
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            binding.swipeRefreshLayout.isRefreshing = true
+            getContact()
+        }
         icBack.setOnClickListener { backHandler() }
 //        icEdit.setOnClickListener { if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_SALES) showMoreOption() else toggleEdit(true) }
-        icEdit.setOnClickListener { toggleEdit(true) }
+        icEdit.setOnClickListener {
+            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) showEditOptions()
+            toggleEdit(true)
+        }
         icClose.setOnClickListener { toggleEdit(false) }
 //        btnSendMessage.setOnClickListener { navigateAddNewRoom() }
 //        btnSendMessage.setOnClickListener { sendMessageModal.show() }
@@ -732,11 +746,29 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         } else checkLocationPermission()
     }
 
+    private fun showEditOptions() {
+        val popupMenu = PopupMenu(this, icEdit)
+        popupMenu.inflate(R.menu.option_sales_edit_contact)
+
+        popupMenu.setOnMenuItemClickListener { item: MenuItem ->
+            when (item.itemId) {
+                R.id.option_edit_cluster -> {
+                    searchClusterModal.show()
+                    true
+                }
+                else -> false
+            }
+        }
+        popupMenu.show()
+    }
+
     private fun toggleEdit(value: Boolean? = null) {
 
         isEdit = if (value!!) value else !isEdit
 
         if (isEdit) {
+
+            binding.swipeRefreshLayout.isEnabled = false
 
             if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) {
                 // Hide Case
@@ -797,6 +829,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 binding.tvPaymentMethod.visibility = View.GONE
                 binding.spinPaymentMethod.visibility = View.VISIBLE
 
+                // Cluster
+                binding.clusterContainer.setBackgroundResource(R.drawable.et_background)
+                binding.tvCluster.visibility = View.GONE
+                binding.spinCluster.visibility = View.VISIBLE
+
                 // Termin
                 terminContainer.setBackgroundResource(R.drawable.et_background)
                 tvTermin.visibility = View.GONE
@@ -824,6 +861,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
 
         } else {
+
+            binding.swipeRefreshLayout.isEnabled = true
 
             if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) {
                 // Show Case
@@ -887,6 +926,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 binding.paymentMethodContainer.setBackgroundResource(R.drawable.background_rounded_16)
                 binding.tvPaymentMethod.visibility = View.VISIBLE
                 binding.spinPaymentMethod.visibility = View.GONE
+
+                // Cluster
+                binding.clusterContainer.setBackgroundResource(R.drawable.background_rounded_16)
+                binding.tvCluster.visibility = View.VISIBLE
+                binding.spinCluster.visibility = View.GONE
 
                 // Termin
                 terminContainer.setBackgroundResource(R.drawable.background_rounded_16)
@@ -955,6 +999,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             paymentMethodItem[2] -> PAYMENT_TRANSFER
             else -> PAYMENT_NOT_SET
         }
+        val pCluster = when (selectedCluster) {
+            clusterItem[1] -> "1"
+            clusterItem[2] -> "2"
+            clusterItem[3] -> "3"
+            else -> "0"
+        }
         val pTermin = if (selectedTermin.isEmpty()) "-1" else {
             when (selectedTermin) {
                 terminItem[1] -> STATUS_TERMIN_COD
@@ -1014,7 +1064,28 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         progressBar.show()
 
 //        Handler(Looper.getMainLooper()).postDelayed({
-//            handleMessage(this, "TAG SAVE", "${contactId!!}, ${formatPhoneNumber(pPhone)}, $pName, $pOwner, $pBirthday, $pMapsUrl, ${pCityID!!}, $pAddress, $pStatus, $imagePart, $pTermin, $pReputation, $pPromoID, $pWeeklyVisitStatus, $pHariBayar")
+//            handleMessage(this,
+//                message = "ID: ${contactId!!},\n" +
+//                        "NOMOR CAT 1: $pPhoneCategory1,\n" +
+//                        "NOMOR HP: $pPhone,\n" +
+//                        "NOMOR CAT 2: $pPhoneCategory2,\n" +
+//                        "NOMOR HP 2: $pPhone2,\n" +
+//                        "NAMA: $pName,\n" +
+//                        "OWNER NAME: $pOwner,\n" +
+//                        "TGL LAHIR: $pBirthday,\n" +
+//                        "ID CITY: $pCityID,\n" +
+//                        "MAPS URL: $pMapsUrl,\n" +
+//                        "ADDRESS: $pAddress,\n" +
+//                        "STATUS: $pStatus,\n" +
+//                        "TAGIH MINGGUAN: $pWeeklyVisitStatus,\n" +
+//                        "PAYMENT METHOD: $pPaymentMethod,\n" +
+//                        "TERMIN PAYMENT: $pTermin,\n" +
+//                        "REPUTATION: $pReputation,\n" +
+//                        "ID PPROMO: $pPromoID,\n" +
+//                        "HARI BAYAR: $pHariBayar,\n" +
+//                        "CLUSTER: $pCluster,\n" +
+//                        "KTP: $imagePart,\n"
+//            )
 //            loadingState(false)
 //            progressBar.dismiss()
 //        }, 1000)
@@ -1038,6 +1109,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbStatus = createPartFromString(pStatus)
                 val rbWeeklyVisitStatus = createPartFromString(pWeeklyVisitStatus)
                 val rbPaymentMethod = createPartFromString(pPaymentMethod)
+                val rbCluster = createPartFromString(pCluster)
                 val rbTermin = createPartFromString(pTermin)
                 val rbReputation = createPartFromString(pReputation)
                 val rbHariBayar = createPartFromString(pHariBayar)
@@ -1062,7 +1134,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     reputation = rbReputation,
                     promoId = rbPromoId,
                     ktp = imagePart?.let { imagePart },
-                    hariBayar = rbHariBayar
+                    hariBayar = rbHariBayar,
+                    cluster = rbCluster
                 )
 
                 if (response.isSuccessful) {
@@ -1141,6 +1214,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             iHariBayar = pHariBayar.ifEmpty { null }
 
                             iPaymentMethod = pPaymentMethod.ifEmpty { null }
+                            iCluster = pCluster.ifEmpty { null }
                             iTermin = pTermin.ifEmpty { null }
 
                             // Remove image temp
@@ -1262,6 +1336,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 toggleEdit(false)
                 setToGetCities()
 
+            } finally {
+                binding.swipeRefreshLayout.isRefreshing = false
             }
 
         }
@@ -1310,6 +1386,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 setupStatus(iStatus)
                                 setupWeeklyVisitStatus(iWeeklyVisitStatus)
                                 setupPaymentMethod(iPaymentMethod)
+                                setupCluster(iCluster)
                                 setupTermin(iTermin)
                                 setupReputation(iReputation)
                                 setupHariBayar(iHariBayar)
@@ -1324,6 +1401,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 setupStatus(data.store_status)
                                 setupWeeklyVisitStatus(data.tagih_mingguan)
 //                                setupPaymentMethod(data.payment_method)
+//                                setupCluster(data.cluster)
 //                                setupTermin(data.termin_payment)
 //                                setupReputation(data.reputation)
                             }
@@ -1636,6 +1714,26 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     }
 
+    private fun setupDialogSearchCluster() {
+        val items: ArrayList<ModalSearchModel> = ArrayList()
+
+        for (i in 0 until clusterItem.size) {
+            val data = clusterItem[i]
+            items.add(ModalSearchModel(data, data))
+        }
+        searchClusterModal = SearchModal(this, items)
+        searchClusterModal.label = "Pilih Cluster"
+        searchClusterModal.searchHint = "Ketik untuk mencari…"
+        searchClusterModal.setCustomDialogListener(object: SearchModal.SearchModalListener{
+            override fun onDataReceived(data: ModalSearchModel) {
+                selectedCluster = data.id ?: ""
+                saveEdit()
+            }
+
+        })
+
+    }
+
     private fun setupDialogSendMessage(item: ContactModel? = null) {
 
         sendMessageModal = SendMessageModal(this, lifecycleScope)
@@ -1857,7 +1955,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                         val results = response.results
                         val items: ArrayList<ModalSearchModel> = ArrayList()
-                        items.add(ModalSearchModel("0", EMPTY_FIELD_VALUE))
+                        items.add(ModalSearchModel("0", "Reset Pilihan"))
 
                         for (i in 0 until results.size) {
                             val data = results[i]
@@ -1877,8 +1975,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         }
 
                         // Admin Access
-//                        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY || sessionManager.userKind() == USER_KIND_SALES) {
-                        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) {
+                        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+//                        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) {
                             icEdit.visibility = View.VISIBLE
                             val indicatorImageView = findViewById<View>(R.id.indicatorView)
                             indicatorImageView.visibility = View.VISIBLE
@@ -2047,6 +2145,20 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
     }
 
+    private fun setupCluster(cluster: String? = null) {
+        val clusterNumber = cluster?.toInt() ?: 0
+        when (clusterNumber) {
+            1,2,3 -> {
+                binding.tvCluster.text = clusterItem[clusterNumber]
+                binding.spinCluster.setSelection(clusterNumber)
+            }
+            else -> {
+                binding.tvCluster.text = EMPTY_FIELD_VALUE
+                binding.spinCluster.setSelection(0)
+            }
+        }
+    }
+
     private fun setupTermin(termin: String? = null) {
         when (termin) {
             STATUS_TERMIN_COD -> {
@@ -2189,6 +2301,29 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             else -> paymentMethodItem[0]
         }
         setupPaymentMethod(iPaymentMethod)
+    }
+
+    private fun setupClusterSpinner() {
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, clusterItem)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        binding.spinCluster.adapter = adapter
+        binding.spinCluster.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedCluster = clusterItem[position]
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+        }
+
+        val clusterNumber = iCluster?.toInt() ?: 0
+        selectedCluster = when (clusterNumber) {
+            1,2,3 -> clusterItem[clusterNumber]
+            else -> clusterItem[0]
+        }
+        setupCluster(iCluster)
     }
 
     private fun setupTerminSpinner() {
@@ -2679,6 +2814,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         iStatus = data.store_status
         iWeeklyVisitStatus = data.tagih_mingguan
         iPaymentMethod = data.payment_method
+        iCluster = data.cluster
         iTermin = data.termin_payment
         iReputation = data.reputation
         iHariBayar = data.hari_bayar
@@ -2812,6 +2948,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         setupStatusSpinner()
         setupWeekliVisitStatusSpinner()
         setupPaymentMethodSpinner()
+        setupClusterSpinner()
         setupTerminSpinner()
         setupReputationSpinner()
         setupHariBayarSpinner()
