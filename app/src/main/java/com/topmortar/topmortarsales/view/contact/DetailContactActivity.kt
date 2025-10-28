@@ -18,6 +18,7 @@ import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
@@ -27,6 +28,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.PopupMenu
 import android.widget.RelativeLayout
 import android.widget.Spinner
 import android.widget.TextView
@@ -244,13 +246,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var selectedPromo: ModalSearchModel? = null
     private var itemSendMessage: ContactModel? = null
 
-    private var statusItem: List<String> = listOf("Pilih Status", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
-    private var statusWeeklyVisitItem: List<String> = listOf("Pilih Status", "Active")
-    private var terminItem: List<String> = listOf("Pilih Termin Payment", "COD", "COD + Transfer", "COD + Tunai", "30 Hari", "45 Hari", "60 Hari")
-    private var paymentMethodItem: List<String> = listOf("Pilih Metode Pembayaran", "Tunai", "Transfer")
-    private var clusterItem: List<String> = listOf("Pilih Cluster", "Data Cluster 1", "Data Cluster 2", "Data Cluster 3")
-    private var reputationItem: List<String> = listOf("Pilih Reputasi Toko", "Good", "Bad")
-    private var hariBayarItem: List<String> = listOf("Pilih Hari Bayar", "Bebas", "Senin", "Selasa", "Rabu", "Kamis", "Jum'at", "Sabtu")
+    private var statusItem: List<String> = listOf("Reset Pilihan", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
+    private var statusWeeklyVisitItem: List<String> = listOf("Reset Pilihan", "Active")
+    private var terminItem: List<String> = listOf("Reset Pilihan", "COD", "COD + Transfer", "COD + Tunai", "30 Hari", "45 Hari", "60 Hari")
+    private var paymentMethodItem: List<String> = listOf("Reset Pilihan", "Tunai", "Transfer")
+    private var clusterItem: List<String> = listOf("Reset Pilihan", "Data Cluster 1", "Data Cluster 2", "Data Cluster 3")
+    private var reputationItem: List<String> = listOf("Reset Pilihan", "Good", "Bad")
+    private var hariBayarItem: List<String> = listOf("Reset Pilihan", "Bebas", "Senin", "Selasa", "Rabu", "Kamis", "Jum'at", "Sabtu")
     private var spinPhoneCatItems: List<String> = listOf()
     private var selectedStatus: String = ""
     private var selectedWeeklyVisitStatus: String = ""
@@ -289,6 +291,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var datePicker: DatePickerDialog
     private lateinit var searchModal: SearchModal
     private lateinit var searchPromoModal: SearchModal
+    private lateinit var searchClusterModal: SearchModal
     private lateinit var sendMessageModal: SendMessageModal
     private lateinit var bottomSheetDialog: BottomSheetDialog
 
@@ -516,6 +519,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         // Setup Dialog Search
         setupDialogSearch()
         setupDialogSearchPromo()
+        setupDialogSearchCluster()
 
         // Setup Dialog Send Message
         setupDialogSendMessage()
@@ -535,7 +539,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
         icBack.setOnClickListener { backHandler() }
 //        icEdit.setOnClickListener { if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_SALES) showMoreOption() else toggleEdit(true) }
-        icEdit.setOnClickListener { toggleEdit(true) }
+        icEdit.setOnClickListener {
+            if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) showEditOptions()
+            toggleEdit(true)
+        }
         icClose.setOnClickListener { toggleEdit(false) }
 //        btnSendMessage.setOnClickListener { navigateAddNewRoom() }
 //        btnSendMessage.setOnClickListener { sendMessageModal.show() }
@@ -737,6 +744,22 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             intent.putExtra(GET_COORDINATE, true)
             coordinateLauncher.launch(intent)
         } else checkLocationPermission()
+    }
+
+    private fun showEditOptions() {
+        val popupMenu = PopupMenu(this, icEdit)
+        popupMenu.inflate(R.menu.option_sales_edit_contact)
+
+        popupMenu.setOnMenuItemClickListener { item: MenuItem ->
+            when (item.itemId) {
+                R.id.option_edit_cluster -> {
+                    searchClusterModal.show()
+                    true
+                }
+                else -> false
+            }
+        }
+        popupMenu.show()
     }
 
     private fun toggleEdit(value: Boolean? = null) {
@@ -1066,7 +1089,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 //            loadingState(false)
 //            progressBar.dismiss()
 //        }, 1000)
-
+//
 //        return
 
         lifecycleScope.launch {
@@ -1691,6 +1714,26 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     }
 
+    private fun setupDialogSearchCluster() {
+        val items: ArrayList<ModalSearchModel> = ArrayList()
+
+        for (i in 0 until clusterItem.size) {
+            val data = clusterItem[i]
+            items.add(ModalSearchModel(data, data))
+        }
+        searchClusterModal = SearchModal(this, items)
+        searchClusterModal.label = "Pilih Cluster"
+        searchClusterModal.searchHint = "Ketik untuk mencari…"
+        searchClusterModal.setCustomDialogListener(object: SearchModal.SearchModalListener{
+            override fun onDataReceived(data: ModalSearchModel) {
+                selectedCluster = data.id ?: ""
+                saveEdit()
+            }
+
+        })
+
+    }
+
     private fun setupDialogSendMessage(item: ContactModel? = null) {
 
         sendMessageModal = SendMessageModal(this, lifecycleScope)
@@ -1912,7 +1955,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                         val results = response.results
                         val items: ArrayList<ModalSearchModel> = ArrayList()
-                        items.add(ModalSearchModel("0", EMPTY_FIELD_VALUE))
+                        items.add(ModalSearchModel("0", "Reset Pilihan"))
 
                         for (i in 0 until results.size) {
                             val data = results[i]
@@ -1932,8 +1975,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         }
 
                         // Admin Access
-//                        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY || sessionManager.userKind() == USER_KIND_SALES) {
-                        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) {
+                        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
+//                        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) {
                             icEdit.visibility = View.VISIBLE
                             val indicatorImageView = findViewById<View>(R.id.indicatorView)
                             indicatorImageView.visibility = View.VISIBLE
