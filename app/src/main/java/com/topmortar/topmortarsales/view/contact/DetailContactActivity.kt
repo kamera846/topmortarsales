@@ -268,7 +268,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var iName: String? = null
     private var iLocation: String? = null
     private var iStatus: String? = null
-    private var iWeeklyVisitStatus: String? = null
+    private var iWeeklyVisitStatus: String = ""
     private var iPaymentMethod: String? = null
     private var iCluster: String? = null
     private var iTermin: String? = null
@@ -1209,7 +1209,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             } else tvPromo.text = EMPTY_FIELD_VALUE
 
                             iStatus = pStatus.ifEmpty { null }
-                            iWeeklyVisitStatus = pWeeklyVisitStatus.ifEmpty { null }
+                            iWeeklyVisitStatus = pWeeklyVisitStatus.let { if (it === "1") it else "" }
                             iReputation = pReputation.ifEmpty { null }
                             iHariBayar = pHariBayar.ifEmpty { null }
 
@@ -2115,13 +2115,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         when (status) {
             "1" -> {
                 binding.tooltipWeeklyVisit.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_active))
-                tooltipHandler(binding.tooltipWeeklyVisit, "Customer Status is active")
+                tooltipHandler(binding.tooltipWeeklyVisit, "Weekly Status is active")
                 binding.tvWeeklyVisit.text = statusWeeklyVisitItem[1]
                 binding.spinWeeklyVisit.setSelection(1)
             }
             else -> {
                 binding.tooltipWeeklyVisit.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_passive))
-                tooltipHandler(binding.tooltipWeeklyVisit, "Customer Status is not set")
+                tooltipHandler(binding.tooltipWeeklyVisit, "Weekly Status is not set")
                 binding.tvWeeklyVisit.text = EMPTY_FIELD_VALUE
                 binding.spinWeeklyVisit.setSelection(0)
             }
@@ -2276,7 +2276,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
         }
 
-        selectedWeeklyVisitStatus = iStatus!!
+        selectedWeeklyVisitStatus = iWeeklyVisitStatus
         setupWeeklyVisitStatus(iWeeklyVisitStatus)
     }
 
@@ -2812,7 +2812,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         iKtp = data.ktp_owner
         iMapsUrl = data.maps_url
         iStatus = data.store_status
-        iWeeklyVisitStatus = data.tagih_mingguan
+        iWeeklyVisitStatus = data.tagih_mingguan.let { if (it == "1") it else ""}
         iPaymentMethod = data.payment_method
         iCluster = data.cluster
         iTermin = data.termin_payment
