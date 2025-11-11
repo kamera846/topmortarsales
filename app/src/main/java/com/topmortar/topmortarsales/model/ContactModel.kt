@@ -12,6 +12,7 @@ data class ContactModel(
     var id_city: String = "0",
     var maps_url: String = "",
     var address: String = "",
+    var kredit_limit: String = "",
     var store_status: String = "",
     var tagih_mingguan: String? = null,
     var ktp_owner: String = "",

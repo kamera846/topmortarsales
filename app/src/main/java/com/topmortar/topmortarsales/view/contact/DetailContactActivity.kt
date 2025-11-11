@@ -22,6 +22,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.view.inputmethod.InputMethodManager
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -110,6 +111,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
+import com.topmortar.topmortarsales.commons.utils.CurrencyFormat
 import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
@@ -239,6 +241,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var activityRequestCode = MAIN_ACTIVITY_REQUEST_CODE
     private var contactId: String? = null
     private var isEdit: Boolean = false
+    private var isEditingCreditText: Boolean = false
     private var hasEdited: Boolean = false
     private var isClosingAction: Boolean = false
     private var selectedDate: Calendar = Calendar.getInstance()
@@ -275,6 +278,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var iReputation: String? = null
     private var iHariBayar: String? = null
     private var iAddress: String? = null
+    private var iCredit: String? = null
     private var iMapsUrl: String? = null
     private var iKtp: String? = null
     private var iPromo: String? = null
@@ -557,7 +561,23 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         etLocation.setOnClickListener { showSearchModal() }
         etPromo.setOnClickListener { showSearchPromoModal() }
         addressContainer.setOnClickListener {
-            if (isEdit) etAddress.requestFocus()
+            if (isEdit) {
+                etAddress.postDelayed({
+                    etAddress.requestFocus()
+                    val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.showSoftInput(etAddress, InputMethodManager.SHOW_IMPLICIT)
+                }, 200)
+            }
+        }
+        binding.creditContainer.setOnClickListener {
+            if (isEdit) {
+                binding.etCredit.postDelayed({
+                    binding.etCredit.requestFocus()
+                    val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.showSoftInput(binding.etCredit, InputMethodManager.SHOW_IMPLICIT)
+                }, 200)
+
+            }
         }
         tvMapsContainer.setOnClickListener { mapsActionHandler() }
         tvKtpContainer.setOnClickListener { previewKtp() }
@@ -598,6 +618,16 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 chooseFile(imagePickerLauncher)
                 etKtp.setSelection(etKtp.length())
             } else etKtp.clearFocus()
+        }
+        etAddress.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                etAddress.setSelection(etAddress.length())
+            } else etAddress.clearFocus()
+        }
+        binding.etCredit.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                binding.etCredit.setSelection(binding.etCredit.length())
+            } else binding.etCredit.clearFocus()
         }
 
         binding.togglePhoneSize.setOnClickListener {
@@ -684,6 +714,41 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             override fun afterTextChanged(s: Editable?) {
                 if (isEdit) chooseFile(imagePickerLauncher)
+            }
+
+        })
+        binding.etCredit.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            }
+
+            override fun afterTextChanged(s: Editable?) {
+                if (isEdit && !isEditingCreditText) {
+
+                    isEditingCreditText = true
+                    val text = s.toString()
+                        .replace("Rp", "")
+                        .replace(".", "")
+                        .trim()
+
+                    try {
+                        if (text.isNotEmpty()) {
+                            val price = text.toDouble()
+                            val formatedPrice = CurrencyFormat.format(price)
+                            binding.etCredit.setText(formatedPrice)
+                            binding.etCredit.setSelection(binding.etCredit.length())
+                        } else {
+                            binding.etCredit.setText(text)
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        binding.etCredit.setText("$s")
+                    } finally {
+                        isEditingCreditText = false
+                    }
+                }
             }
 
         })
@@ -810,6 +875,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 etAddress.isEnabled = true
                 if (iAddress.isNullOrEmpty()) etAddress.setText("")
 
+                binding.creditContainer.setBackgroundResource(R.drawable.et_background)
+                binding.etCredit.isEnabled = true
+                if (iCredit.isNullOrEmpty()) binding.etCredit.setText("")
+
                 // Status
                 statusContainer.visibility = if (userKind == USER_KIND_ADMIN) View.VISIBLE else View.GONE
                 statusContainer.setBackgroundResource(R.drawable.et_background)
@@ -901,6 +970,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 addressContainer.setBackgroundResource(R.drawable.background_rounded_16)
                 etAddress.isEnabled = false
                 if (iAddress.isNullOrEmpty()) etAddress.setText(EMPTY_FIELD_VALUE)
+                else etAddress.setText(iAddress)
+
+                binding.creditContainer.setBackgroundResource(R.drawable.background_rounded_16)
+                binding.etCredit.isEnabled = false
+                if (iCredit.isNullOrEmpty()) binding.etCredit.setText(EMPTY_FIELD_VALUE)
+                else binding.etCredit.setText(iCredit)
 
                 statusContainer.visibility = View.VISIBLE
                 statusContainer.setBackgroundResource(R.drawable.background_rounded_16)
@@ -992,6 +1067,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         var pBirthday = "${ etBirthday.text }"
         val pMapsUrl = "${ etMaps.text }"
         val pAddress = "${ etAddress.text }"
+        val textCredit = binding.etCredit.text.toString()
+            .replace("Rp", "")
+            .replace(".", "")
+            .trim()
+        val priceCredit = if (textCredit.isNotEmpty()) textCredit.toDouble() else 0.0
+        val pCredit = "${priceCredit.toInt()}"
+        val formatedCredit = CurrencyFormat.format(priceCredit)
         val pStatus = if (selectedStatus.isEmpty()) "" else selectedStatus.substringBefore(" - ").lowercase(Locale.getDefault())
         val pWeeklyVisitStatus = if (selectedWeeklyVisitStatus.isEmpty()) "0" else "1"
         val pPaymentMethod = when (selectedPaymentMethod) {
@@ -1076,6 +1158,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 //                        "ID CITY: $pCityID,\n" +
 //                        "MAPS URL: $pMapsUrl,\n" +
 //                        "ADDRESS: $pAddress,\n" +
+//                        "KREDIT: $pCredit,\n" +
+//                        "KREDIT FORMATTED: $formatedCredit,\n" +
 //                        "STATUS: $pStatus,\n" +
 //                        "TAGIH MINGGUAN: $pWeeklyVisitStatus,\n" +
 //                        "PAYMENT METHOD: $pPaymentMethod,\n" +
@@ -1106,6 +1190,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbMapsUrl = createPartFromString(pMapsUrl)
                 val rbLocation = createPartFromString(pCityID!!)
                 val rbAddress = createPartFromString(pAddress)
+                val rbCredit = createPartFromString(pCredit)
                 val rbStatus = createPartFromString(pStatus)
                 val rbWeeklyVisitStatus = createPartFromString(pWeeklyVisitStatus)
                 val rbPaymentMethod = createPartFromString(pPaymentMethod)
@@ -1127,6 +1212,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     cityId = rbLocation,
                     mapsUrl = rbMapsUrl,
                     address = rbAddress,
+                    credit = rbCredit,
                     status = rbStatus,
                     tagihanMingguan = rbWeeklyVisitStatus,
                     paymentMethod = rbPaymentMethod,
@@ -1183,6 +1269,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             }
 
                             iAddress = "${ etAddress.text }"
+                            iCredit = formatedCredit
 
 //                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
 //                            loadingState(false)
@@ -1537,6 +1624,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             etBirthday.clearFocus()
             etAddress.error = null
             etAddress.clearFocus()
+            binding.etCredit.error = null
+            binding.etCredit.clearFocus()
             true
         }
     }
@@ -2828,6 +2917,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         btnInvoice.visibility = View.VISIBLE
 
         iAddress = data.address
+        iCredit = data.kredit_limit.let {
+            if (it.isNotEmpty()) CurrencyFormat.format(it.toDouble())
+            else it
+        }
         iLocation = data.id_city
         iPromo = data.id_promo
         iReportSource = intent.getStringExtra(REPORT_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
@@ -2940,6 +3033,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         // Other columns handle
         if (!iAddress.isNullOrEmpty()) etAddress.setText(iAddress)
         else etAddress.setText(EMPTY_FIELD_VALUE)
+        if (!iCredit.isNullOrEmpty()) binding.etCredit.setText(iCredit)
+        else binding.etCredit.setText(EMPTY_FIELD_VALUE)
 
 //                            loadingState(false)
 //                            progressBar.dismiss()
