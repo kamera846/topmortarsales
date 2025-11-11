@@ -104,6 +104,7 @@ interface ApiService {
         @Part("id_city") cityId: RequestBody,
         @Part("mapsUrl") mapsUrl: RequestBody,
         @Part("address") address: RequestBody,
+        @Part("kredit_limit") credit: RequestBody,
         @Part("status") status: RequestBody,
         @Part("tagih_mingguan") tagihanMingguan: RequestBody,
         @Part("payment_method") paymentMethod: RequestBody,
