@@ -50,6 +50,7 @@ import com.topmortar.topmortarsales.response.ResponseInvoice
 import com.topmortar.topmortarsales.response.ResponseKonten
 import com.topmortar.topmortarsales.response.ResponseList
 import com.topmortar.topmortarsales.response.ResponseMessage
+import com.topmortar.topmortarsales.response.ResponseObject
 import com.topmortar.topmortarsales.response.ResponsePayment
 import com.topmortar.topmortarsales.response.ResponseProduct
 import com.topmortar.topmortarsales.response.ResponsePromo
@@ -833,4 +834,9 @@ interface ApiService {
         @Part("id_kontenmsg") idKonten: RequestBody,
         @Part("id_contact") idContact: RequestBody,
     ): Response<ResponseKonten>
+
+    @GET("totalVisitSales.php")
+    suspend fun getTotalVisitSales(
+        @Query("id_user") idUser: String
+    ): ResponseObject.TotalVisitSales
 }

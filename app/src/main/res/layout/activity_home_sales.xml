@@ -165,6 +165,63 @@
 
             </RelativeLayout>
 
+            <!-- Repost Box -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/background_rounded_8_clickable"
+                android:padding="12dp"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="16dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/reportTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Laporan Total Visit"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginEnd="48dp"
+                        android:ellipsize="marquee"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:focusable="true"
+                        android:singleLine="true"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentTop="true"/>
+
+                    <TextView
+                        android:id="@+id/reportSubtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="..."
+                        android:textSize="12sp"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginEnd="48dp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"
+                        android:layout_alignParentStart="true"
+                        android:layout_below="@+id/absent_title"/>
+
+                </LinearLayout>
+
+                <com.topmortar.topmortarsales.commons.utils.MyCircularProgressView
+                    android:id="@+id/reportProgress"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    app:progressValue="10"
+                    app:centerText="..."/>
+
+            </LinearLayout>
+
             <!-- Menu Box -->
             <LinearLayout
                 android:id="@+id/menu_container"
