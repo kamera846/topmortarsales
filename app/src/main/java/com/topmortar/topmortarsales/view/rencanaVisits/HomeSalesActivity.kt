@@ -483,6 +483,7 @@ class HomeSalesActivity : AppCompatActivity() {
             initGlobalVariable()
             binding.fullName.text = userFullName
 
+            setTotalVisitSalesReport()
             setListMenu()
 
             val currentNightMode =
@@ -1691,6 +1692,42 @@ class HomeSalesActivity : AppCompatActivity() {
         recyclerView.apply {
             adapter = menuItemAdapter
             layoutManager = LinearLayoutManager(this@HomeSalesActivity)
+        }
+    }
+
+    private fun setTotalVisitSalesReport() {
+        lifecycleScope.launch {
+            try {
+                val response = apiService.getTotalVisitSales(idUser = userId ?: "-1")
+                when(response.status) {
+                    RESPONSE_STATUS_OK -> {
+                        val result = response.results
+                        if (result != null) {
+                            val totalVisit = result.total_visit.toInt()
+                            val targetAmount = result.target_visit.toInt()
+
+                            binding.reportProgress.progress = (totalVisit.toFloat() / targetAmount) * 100
+                            binding.reportProgress.text = "$totalVisit"
+
+                            if (totalVisit >= targetAmount) {
+                                if (totalVisit == targetAmount) {
+                                    binding.reportSubtitle.text = "Anda telah menyelesaikan target visit bulan ini. Terima kasih atas kerja keras Anda!"
+                                } else {
+                                    binding.reportTitle.text = "Berhasil melampaui target!"
+                                    binding.reportSubtitle.text = "Hebat! Anda akan mendapatkan ${totalVisit - targetAmount} insentif tambahan untuk bulan ini."
+                                }
+                                binding.reportProgress.progressColor = getColor(R.color.green_reseda)
+                            } else {
+                                binding.reportSubtitle.text = "Selesaikan ${targetAmount - totalVisit} visit lagi untuk mencapai target bulan ini."
+                            }
+                        }
+                    } else -> {
+                        binding.reportSubtitle.text = "Gagal memuat laporan. Message: ${response.message}"
+                    }
+                }
+            } catch (e: Exception) {
+                binding.reportSubtitle.text = "Gagal memuat laporan. Error $e"
+            }
         }
     }
 
