@@ -1537,6 +1537,15 @@ class HomeSalesActivity : AppCompatActivity() {
             listItem.add(
                 HomeMenuSalesModel(
                     icon = R.drawable.store_white,
+                    bgColor = R.drawable.bg_blue_silver_lake_round_8,
+                    title = "Rencana Visit Terjadwal",
+                    target = ScheduledRenviActivity::class.java,
+                    isLocked = isLocked
+                )
+            )
+            listItem.add(
+                HomeMenuSalesModel(
+                    icon = R.drawable.store_white,
                     bgColor = R.drawable.bg_green_reseda_round_8,
                     title = "Rencana Visit Sales",
                     target = RencanaVisitActivity::class.java,

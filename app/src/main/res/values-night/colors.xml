@@ -48,4 +48,6 @@
     <color name="navMainMenuTint">@color/white</color>
     <color name="detailContactLine">@color/black_400</color>
     <color name="bgNavHeader">@color/black_300</color>
+    <color name="cardColor">@color/black_300</color>
+    <color name="cardStrokeColor">@color/black_400</color>
 </resources>
