@@ -3,4 +3,7 @@
     <item
         android:id="@+id/option_edit_cluster"
         android:title="Edit Data Cluster" />
+    <item
+        android:id="@+id/option_edit_hobi"
+        android:title="Edit Hobi" />
 </menu>

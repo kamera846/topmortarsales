@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:id="@+id/detail_contact_activity"
     tools:context=".view.contact.DetailContactActivity">
@@ -1506,6 +1507,76 @@
                         android:hint="Masukan Nominal"
                         android:text="@string/txt_loading"
                         android:inputType="number"
+                        android:background="@android:color/transparent"
+                        android:textColor="@color/et_color_with_disabled_state"
+                        android:enabled="false"
+                        android:outlineProvider="none"/>
+
+                </LinearLayout>
+
+                <!-- Text Hobi -->
+                <LinearLayout
+                    android:id="@+id/hobi_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:padding="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/background_rounded_16"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_weight="1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:text="Hobi"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
+
+                        <TextView
+                            android:id="@+id/status_hobi"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/black_600"
+                            android:text="(Aktif)"/>
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:visibility="gone"
+                            android:id="@+id/is_send_content"
+                            android:layout_width="wrap_content"
+                            android:layout_height="0dp"/>
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:visibility="gone"
+                        android:id="@+id/text_info_hobi"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/black_600"
+                        android:text="Toko akan mendapatkan notifikasi konten sesuai dengan hobi yang tertera."/>
+
+                    <EditText
+                        android:visibility="visible"
+                        android:id="@+id/et_hobi_contact"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="16dp"
+                        android:textSize="14sp"
+                        android:maxLines="5"
+                        android:gravity="start"
+                        android:textColorHint="@color/black_600"
+                        android:hint="Ketik hobi pemilik disini .."
+                        android:text="@string/txt_loading"
+                        android:inputType="textMultiLine"
+                        android:autofillHints="Enter Owner Name"
                         android:background="@android:color/transparent"
                         android:textColor="@color/et_color_with_disabled_state"
                         android:enabled="false"

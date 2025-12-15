@@ -18,6 +18,7 @@ import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -130,6 +131,7 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityDetailContactBinding
+import com.topmortar.topmortarsales.databinding.ModalEditHobiBinding
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.modal.SendMessageModal
 import com.topmortar.topmortarsales.model.ContactModel
@@ -286,6 +288,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var iRenviSource: String? = NORMAL_REPORT
     private var iInvoiceId: String? = null
     private var iReportPaymentStatus: Boolean? = false
+    private var iHobiContact: String? = null
+    private var iSendContent: Boolean? = false
 
     private var isSearchCity = false
     private var isSearchPromo = false
@@ -821,6 +825,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     searchClusterModal.show()
                     true
                 }
+                R.id.option_edit_hobi -> {
+                    showModalEditHobi()
+                    true
+                }
                 else -> false
             }
         }
@@ -874,6 +882,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 addressContainer.setBackgroundResource(R.drawable.et_background)
                 etAddress.isEnabled = true
                 if (iAddress.isNullOrEmpty()) etAddress.setText("")
+
+                binding.hobiContainer.setBackgroundResource(R.drawable.et_background)
+                binding.statusHobi.visibility = View.GONE
+                binding.isSendContent.visibility = View.VISIBLE
+                binding.etHobiContact.isEnabled = true
+                if (iHobiContact.isNullOrEmpty()) binding.etHobiContact.setText("")
+                binding.isSendContent.isChecked = iSendContent ?: false
 
                 binding.creditContainer.setBackgroundResource(R.drawable.et_background)
                 binding.etCredit.isEnabled = true
@@ -972,6 +987,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 if (iAddress.isNullOrEmpty()) etAddress.setText(EMPTY_FIELD_VALUE)
                 else etAddress.setText(iAddress)
 
+                binding.hobiContainer.setBackgroundResource(R.drawable.background_rounded_16)
+                binding.statusHobi.visibility = View.VISIBLE
+                binding.isSendContent.visibility = View.GONE
+                binding.etHobiContact.isEnabled = false
+                if (iHobiContact.isNullOrEmpty()) binding.etHobiContact.setText(EMPTY_FIELD_VALUE)
+                else binding.etHobiContact.setText(iHobiContact)
+                val statusHobi = iSendContent ?: false
+                binding.statusHobi.text = if (statusHobi) "(Aktif)" else "Nonaktif"
+
                 binding.creditContainer.setBackgroundResource(R.drawable.background_rounded_16)
                 binding.etCredit.isEnabled = false
                 if (iCredit.isNullOrEmpty()) binding.etCredit.setText(EMPTY_FIELD_VALUE)
@@ -1067,6 +1091,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         var pBirthday = "${ etBirthday.text }"
         val pMapsUrl = "${ etMaps.text }"
         val pAddress = "${ etAddress.text }"
+        val pHobiContact = "${ binding.etHobiContact.text }"
+        val pIsSendContent = if (binding.isSendContent.isChecked) "1" else "0"
         val textCredit = binding.etCredit.text.toString()
             .replace("Rp", "")
             .replace(".", "")
@@ -1168,7 +1194,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 //                        "ID PPROMO: $pPromoID,\n" +
 //                        "HARI BAYAR: $pHariBayar,\n" +
 //                        "CLUSTER: $pCluster,\n" +
-//                        "KTP: $imagePart,\n"
+//                        "KTP: $imagePart,\n" +
+//                        "HOBI: $pHobiContact,\n" +
+//                        "SEND CONTENT: $pIsSendContent,\n"
 //            )
 //            loadingState(false)
 //            progressBar.dismiss()
@@ -1190,6 +1218,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbMapsUrl = createPartFromString(pMapsUrl)
                 val rbLocation = createPartFromString(pCityID!!)
                 val rbAddress = createPartFromString(pAddress)
+                val rbHobiContact = createPartFromString(pHobiContact)
+                val rbIsSendContent = createPartFromString(pIsSendContent)
                 val rbCredit = createPartFromString(pCredit)
                 val rbStatus = createPartFromString(pStatus)
                 val rbWeeklyVisitStatus = createPartFromString(pWeeklyVisitStatus)
@@ -1212,6 +1242,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     cityId = rbLocation,
                     mapsUrl = rbMapsUrl,
                     address = rbAddress,
+                    hobiContact = rbHobiContact,
+                    isSendContent = rbIsSendContent,
                     credit = rbCredit,
                     status = rbStatus,
                     tagihanMingguan = rbWeeklyVisitStatus,
@@ -1269,6 +1301,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             }
 
                             iAddress = "${ etAddress.text }"
+                            iHobiContact = "${ binding.etHobiContact.text }"
+                            iSendContent = binding.isSendContent.isChecked
+
                             iCredit = formatedCredit
 
 //                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
@@ -1905,6 +1940,33 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val searchKey = etPromo.text.toString()
         if (searchKey.isNotEmpty()) searchPromoModal.setSearchKey(searchKey)
         searchPromoModal.show()
+    }
+
+    private fun showModalEditHobi() {
+        val modalBinding = ModalEditHobiBinding.inflate(LayoutInflater.from(this))
+        val dialogView = modalBinding.root
+
+        modalBinding.etModalHobi.setText(iHobiContact ?: "")
+
+        AlertDialog.Builder(this)
+            .setTitle("Form Edit Hobi")
+            .setView(dialogView)
+            .setPositiveButton("Simpan") { dialog, _ ->
+
+                val hobi = modalBinding.etModalHobi.text.toString()
+                if (hobi.isNotEmpty()) {
+                    binding.etHobiContact.setText(hobi)
+                    dialog.dismiss()
+                    saveEdit()
+                } else {
+                    modalBinding.etModalHobi.error = "Hobi wajib diisi!"
+                    modalBinding.etModalHobi.requestFocus()
+                }
+            }
+            .setNegativeButton("Batal") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
     private fun getContactSales() {
@@ -2917,6 +2979,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         btnInvoice.visibility = View.VISIBLE
 
         iAddress = data.address
+        iHobiContact = data.hobi_contact
+        iSendContent = data.is_send_content == "1"
         iCredit = data.kredit_limit.let {
             if (it.isNotEmpty()) CurrencyFormat.format(it.toDouble())
             else it
@@ -3033,6 +3097,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         // Other columns handle
         if (!iAddress.isNullOrEmpty()) etAddress.setText(iAddress)
         else etAddress.setText(EMPTY_FIELD_VALUE)
+        if (!iHobiContact.isNullOrEmpty()) binding.etHobiContact.setText(iHobiContact)
+        else binding.etHobiContact.setText(EMPTY_FIELD_VALUE)
+        val sendContent = iSendContent ?: false
+        binding.isSendContent.isChecked = sendContent
+        binding.statusHobi.text = if (sendContent) "(Aktif)" else "(Nonaktif)"
         if (!iCredit.isNullOrEmpty()) binding.etCredit.setText(iCredit)
         else binding.etCredit.setText(EMPTY_FIELD_VALUE)
 

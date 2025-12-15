@@ -114,6 +114,8 @@ interface ApiService {
         @Part("id_promo") promoId: RequestBody,
         @Part("hari_bayar") hariBayar: RequestBody,
         @Part("cluster") cluster: RequestBody,
+        @Part("hobi_contact") hobiContact: RequestBody,
+        @Part("is_send_content") isSendContent: RequestBody,
         @Part ktp: MultipartBody.Part? = null,
     ): Response<ResponseMessage>
 
