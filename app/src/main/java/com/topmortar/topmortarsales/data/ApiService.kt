@@ -113,6 +113,7 @@ interface ApiService {
         @Part("reputation") reputation: RequestBody,
         @Part("id_promo") promoId: RequestBody,
         @Part("hari_bayar") hariBayar: RequestBody,
+        @Part("jam_bayar") jamBayar: RequestBody,
         @Part("cluster") cluster: RequestBody,
         @Part("hobi_contact") hobiContact: RequestBody,
         @Part("is_send_content") isSendContent: RequestBody,

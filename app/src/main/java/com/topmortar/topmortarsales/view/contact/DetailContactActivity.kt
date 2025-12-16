@@ -49,6 +49,9 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.MaterialTimePicker.INPUT_MODE_KEYBOARD
+import com.google.android.material.timepicker.TimeFormat
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -266,6 +269,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var selectedTermin: String = ""
     private var selectedReputation: String = ""
     private var selectedHariBayar: String = ""
+    private var selectedJamBayar: String = ""
     private var selectedUri: Uri? = null
     private var currentPhotoUri: Uri? = null
 
@@ -279,6 +283,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var iTermin: String? = null
     private var iReputation: String? = null
     private var iHariBayar: String? = null
+    private var iJamBayar: String? = null
     private var iAddress: String? = null
     private var iCredit: String? = null
     private var iMapsUrl: String? = null
@@ -585,6 +590,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
         tvMapsContainer.setOnClickListener { mapsActionHandler() }
         tvKtpContainer.setOnClickListener { previewKtp() }
+        binding.jamBayarContainer.setOnClickListener { showTimePicker() }
 
         // Focus Listener
         etName.setOnFocusChangeListener { _, hasFocus ->
@@ -933,6 +939,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 binding.tvHariBayar.visibility = View.GONE
                 binding.spinHariBayar.visibility = View.VISIBLE
 
+                // Jam Bayar
+                binding.jamBayarContainer.setBackgroundResource(R.drawable.et_background)
+
                 // Promo
                 tvPromo.visibility = View.GONE
                 etPromo.visibility = View.VISIBLE
@@ -1046,6 +1055,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 binding.tvHariBayar.visibility = View.VISIBLE
                 binding.spinHariBayar.visibility = View.GONE
 
+                // Jam Bayar
+                binding.jamBayarContainer.setBackgroundResource(R.drawable.background_rounded_16)
+
                 // Promo
                 tvPromo.visibility = View.VISIBLE
                 etPromo.visibility = View.GONE
@@ -1144,6 +1156,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
         }
 
+        val pJamBayar = selectedJamBayar
+
         var imagePart: MultipartBody.Part? = null
 
         if (iKtp.isNullOrEmpty() && selectedUri != null || !iKtp.isNullOrEmpty() && selectedUri != null) {
@@ -1193,6 +1207,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 //                        "REPUTATION: $pReputation,\n" +
 //                        "ID PPROMO: $pPromoID,\n" +
 //                        "HARI BAYAR: $pHariBayar,\n" +
+//                        "JAM BAYAR: $pJamBayar,\n" +
 //                        "CLUSTER: $pCluster,\n" +
 //                        "KTP: $imagePart,\n" +
 //                        "HOBI: $pHobiContact,\n" +
@@ -1228,6 +1243,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbTermin = createPartFromString(pTermin)
                 val rbReputation = createPartFromString(pReputation)
                 val rbHariBayar = createPartFromString(pHariBayar)
+                val rbJamBayar = createPartFromString(pJamBayar)
                 val rbPromoId = createPartFromString(pPromoID!!)
 
                 val response = apiService.editContact(
@@ -1253,6 +1269,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     promoId = rbPromoId,
                     ktp = imagePart?.let { imagePart },
                     hariBayar = rbHariBayar,
+                    jamBayar = rbJamBayar,
                     cluster = rbCluster
                 )
 
@@ -1334,6 +1351,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             iWeeklyVisitStatus = pWeeklyVisitStatus.let { if (it === "1") it else "" }
                             iReputation = pReputation.ifEmpty { null }
                             iHariBayar = pHariBayar.ifEmpty { null }
+                            iJamBayar = pJamBayar.ifEmpty { null }
 
                             iPaymentMethod = pPaymentMethod.ifEmpty { null }
                             iCluster = pCluster.ifEmpty { null }
@@ -1597,6 +1615,29 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         datePicker.setOnDismissListener { etBirthday.clearFocus() }
 
+    }
+
+    private fun showTimePicker() {
+        val picker = MaterialTimePicker.Builder()
+            .setTitleText("Input Waktu")
+            .setTimeFormat(TimeFormat.CLOCK_24H)
+            .setInputMode(INPUT_MODE_KEYBOARD)
+            .setHour(selectedJamBayar.substring(0,2).toInt())
+            .setMinute(selectedJamBayar.substring(3,5).toInt())
+
+            .build()
+
+        // Atur listener saat pengguna menekan OK
+        picker.addOnPositiveButtonClickListener {
+            val selectedHour = picker.hour
+            val selectedMinute = picker.minute
+            val selectedTime = String.format("%02d:%02d:%02d", selectedHour, selectedMinute, 0)
+            selectedJamBayar = selectedTime
+            binding.tvJamBayar.text = if (selectedJamBayar == "00:00:00") "bebas" else "pukul ${selectedJamBayar.substring(0,5)} lebih"
+        }
+
+        // Tampilkan Dialog
+        picker.show(supportFragmentManager, "timePicker")
     }
 
     private fun loadingState(state: Boolean) {
@@ -2969,6 +3010,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         iTermin = data.termin_payment
         iReputation = data.reputation
         iHariBayar = data.hari_bayar
+        iJamBayar = data.jam_bayar
 
         tooltipStatus.visibility = View.VISIBLE
         binding.weeklyVisitContainer.visibility = View.VISIBLE
@@ -3092,6 +3134,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             iKtp = EMPTY_FIELD_VALUE
             tvKtp.text = EMPTY_FIELD_VALUE
             etKtp.setText("")
+        }
+        if (!iJamBayar.isNullOrEmpty()) {
+            selectedJamBayar = iJamBayar.toString()
+            binding.tvJamBayar.text = if (iJamBayar == "00:00:00") "bebas" else "pukul ${selectedJamBayar.substring(0,5)} lebih"
+        } else {
+            binding.tvJamBayar.text = EMPTY_FIELD_VALUE
         }
 
         // Other columns handle

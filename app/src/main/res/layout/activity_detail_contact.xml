@@ -1202,28 +1202,84 @@
 
                 </LinearLayout>
 
-                <!-- Hari Bayar -->
                 <LinearLayout
-                    android:visibility="gone"
-                    android:id="@+id/hari_bayar_container"
+                    android:id="@+id/waktuPembayaranContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp"
-                    android:background="@drawable/background_rounded_16"
                     android:orientation="horizontal">
 
+                    <!-- Hari Bayar -->
                     <LinearLayout
+                        android:visibility="visible"
+                        android:id="@+id/hari_bayar_container"
+                        android:layout_weight="1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="16dp"
+                        android:background="@drawable/background_rounded_16"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:text="Hari Bayar"
+                                android:layout_marginHorizontal="16dp"
+                                android:layout_marginTop="16dp"
+                                android:layout_marginBottom="4dp"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
+
+                            <TextView
+                                android:visibility="visible"
+                                android:id="@+id/tv_hari_bayar"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:text="@string/txt_loading"
+                                android:layout_marginHorizontal="16dp"
+                                android:layout_marginBottom="16dp"
+                                android:textSize="14sp"
+                                android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                            <Spinner
+                                android:visibility="gone"
+                                android:id="@+id/spin_hari_bayar"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="12dp"
+                                android:layout_marginBottom="16dp"/>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <!-- Jam Bayar -->
+                    <LinearLayout
+                        android:visibility="visible"
+                        android:id="@+id/jam_bayar_container"
                         android:layout_weight="1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="16dp"
+                        android:layout_marginStart="16dp"
+                        android:background="@drawable/background_rounded_16"
                         android:orientation="vertical">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
-                            android:text="Hari Bayar"
+                            android:text="Jam Bayar"
                             android:layout_marginHorizontal="16dp"
                             android:layout_marginTop="16dp"
                             android:layout_marginBottom="4dp"
@@ -1233,7 +1289,7 @@
 
                         <TextView
                             android:visibility="visible"
-                            android:id="@+id/tv_hari_bayar"
+                            android:id="@+id/tv_jam_bayar"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
@@ -1243,13 +1299,6 @@
                             android:textSize="14sp"
                             android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
 
-                        <Spinner
-                            android:visibility="gone"
-                            android:id="@+id/spin_hari_bayar"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
-                            android:layout_marginBottom="16dp"/>
 
                     </LinearLayout>
 

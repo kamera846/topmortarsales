@@ -29,4 +29,6 @@ data class ContactModel(
     var cluster: String = "",
     var hobi_contact: String = "",
     var is_send_content: String = "",
+    var jam_bayar: String = "",
+
 )
