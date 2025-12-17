@@ -132,6 +132,7 @@ interface ApiService {
         @Part("tgl_lahir") birthday: RequestBody,
         @Part("id_city") cityId: RequestBody,
         @Part("mapsUrl") mapsUrl: RequestBody,
+        @Part("address") address: RequestBody,
         @Part("id_user") userId: RequestBody,
         @Part("full_name") currentName: RequestBody,
         @Part("termin_payment") termin: RequestBody

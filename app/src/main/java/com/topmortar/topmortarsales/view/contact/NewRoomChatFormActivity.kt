@@ -194,6 +194,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         val cityId = sessionManager.userCityID().let { if (!it.isNullOrEmpty()) it else "0" }
         val mapsUrl = "${ etMapsUrl.text }"
         val message = "${ etMessage.text }"
+        val address = "${ binding.etAddress.text }"
         val termin = if (selectedTermin.isEmpty()) "-1" else {
             when (selectedTermin) {
                 terminItem[1] -> STATUS_TERMIN_COD
@@ -208,7 +209,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
         val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
 
-        if (!formValidation(phone = phone, name = name, owner = owner, mapsUrl = mapsUrl, message = message, termin = termin)) return
+        if (!formValidation(phone = phone, name = name, owner = owner, mapsUrl = mapsUrl, message = message, address = address, termin = termin)) return
 
         birthday = if (birthday.isEmpty()) "0000-00-00"
         else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
@@ -218,11 +219,22 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         loadingState(true)
 
 //        Handler(Looper.getMainLooper()).postDelayed({
-//            handleMessage(this, "SEND MESSAGE", "$phoneCategory : $phone : $name : $owner : $birthday : $cityId : $mapsUrl : $userId : $currentName : $termin : $message")
+//            handleMessage(this, message =
+//                "Category: $phoneCategory \n" +
+//                "Phone: $phone \n" +
+//                "Name : $name \n" +
+//                "Owner: $owner \n" +
+//                "Birthady: $birthday \n" +
+//                "City ID: $cityId \n" +
+//                "Coordinate: $mapsUrl \n" +
+//                "User ID: $userId \n" +
+//                "User Name: $currentName \n" +
+//                "Termin: $termin \n" +
+//                "Message: $message \n" +
+//                "Address: $address"
+//            )
 //            loadingState(false)
 //        }, 1000)
-//
-//        return
 
         lifecycleScope.launch {
             try {
@@ -237,6 +249,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                 val rbOwner = createPartFromString(owner)
                 val rbMapsUrl = createPartFromString(mapsUrl)
                 val rbMessage = createPartFromString(message)
+                val rbAddress = createPartFromString(address)
                 val rbUserId = createPartFromString(userId)
                 val rbCurrentName = createPartFromString(currentName)
                 val rbTermin = createPartFromString(termin)
@@ -253,6 +266,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                             birthday = rbBirthday,
                             cityId = rbLocation,
                             mapsUrl = rbMapsUrl,
+                            address = rbAddress,
                             userId = rbUserId,
                             currentName = rbCurrentName,
                             termin = rbTermin
@@ -505,7 +519,8 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
     }
 
-    private fun formValidation(phone: String, name: String, owner: String = "", mapsUrl: String = "", message: String = "", termin: String = "-1"): Boolean {
+
+    private fun formValidation(phone: String, name: String, owner: String = "", mapsUrl: String = "", message: String = "", address: String, termin: String = "-1"): Boolean {
         return if (phone.isEmpty()) {
             etPhone.error = "Nomor telpon wajib diisi!"
             etPhone.requestFocus()
@@ -536,6 +551,11 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 //            etMapsUrl.clearFocus()
 //            etMessage.error = "Tambahkan pesan untuk toko!"
 //            false
+        } else if (address.isEmpty()) {
+            etMapsUrl.error = null
+            etMapsUrl.clearFocus()
+            binding.etAddress.error = "Alamat wajib diisi!"
+            false
 //        } else if (termin == "-1") {
 //            etMapsUrl.error = null
 //            etMapsUrl.clearFocus()
@@ -548,6 +568,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             etBirthday.error = null
             etMapsUrl.error = null
             etMessage.error = null
+            binding.etAddress.error = null
             etStoreLocated.error = null
             etPhone.clearFocus()
             etName.clearFocus()
@@ -556,6 +577,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             etOwner.clearFocus()
             etMapsUrl.clearFocus()
             etMessage.clearFocus()
+            binding.etAddress.clearFocus()
             true
         }
     }
