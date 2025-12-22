@@ -113,7 +113,10 @@ interface ApiService {
         @Part("reputation") reputation: RequestBody,
         @Part("id_promo") promoId: RequestBody,
         @Part("hari_bayar") hariBayar: RequestBody,
+        @Part("jam_bayar") jamBayar: RequestBody,
         @Part("cluster") cluster: RequestBody,
+        @Part("hobi_contact") hobiContact: RequestBody,
+        @Part("is_send_content") isSendContent: RequestBody,
         @Part ktp: MultipartBody.Part? = null,
     ): Response<ResponseMessage>
 
@@ -129,6 +132,7 @@ interface ApiService {
         @Part("tgl_lahir") birthday: RequestBody,
         @Part("id_city") cityId: RequestBody,
         @Part("mapsUrl") mapsUrl: RequestBody,
+        @Part("address") address: RequestBody,
         @Part("id_user") userId: RequestBody,
         @Part("full_name") currentName: RequestBody,
         @Part("termin_payment") termin: RequestBody

@@ -67,6 +67,12 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="35">
         <activity
+            android:name=".view.ScheduledRenviMapsRoute"
+            android:exported="false" />
+        <activity
+            android:name=".view.rencanaVisits.ScheduledRenviActivity"
+            android:exported="false" />
+        <activity
             android:name=".view.WebviewActivity"
             android:exported="false" />
         <activity

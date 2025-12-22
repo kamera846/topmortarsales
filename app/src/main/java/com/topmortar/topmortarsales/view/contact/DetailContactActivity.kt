@@ -18,6 +18,7 @@ import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -48,6 +49,9 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.timepicker.MaterialTimePicker
+import com.google.android.material.timepicker.MaterialTimePicker.INPUT_MODE_KEYBOARD
+import com.google.android.material.timepicker.TimeFormat
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -130,6 +134,7 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityDetailContactBinding
+import com.topmortar.topmortarsales.databinding.ModalEditHobiBinding
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.modal.SendMessageModal
 import com.topmortar.topmortarsales.model.ContactModel
@@ -264,6 +269,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var selectedTermin: String = ""
     private var selectedReputation: String = ""
     private var selectedHariBayar: String = ""
+    private var selectedJamBayar: String = ""
     private var selectedUri: Uri? = null
     private var currentPhotoUri: Uri? = null
 
@@ -277,6 +283,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var iTermin: String? = null
     private var iReputation: String? = null
     private var iHariBayar: String? = null
+    private var iJamBayar: String? = null
     private var iAddress: String? = null
     private var iCredit: String? = null
     private var iMapsUrl: String? = null
@@ -286,6 +293,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var iRenviSource: String? = NORMAL_REPORT
     private var iInvoiceId: String? = null
     private var iReportPaymentStatus: Boolean? = false
+    private var iHobiContact: String? = null
+    private var iSendContent: Boolean? = false
 
     private var isSearchCity = false
     private var isSearchPromo = false
@@ -581,6 +590,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
         tvMapsContainer.setOnClickListener { mapsActionHandler() }
         tvKtpContainer.setOnClickListener { previewKtp() }
+        binding.jamBayarContainer.setOnClickListener { showTimePicker() }
 
         // Focus Listener
         etName.setOnFocusChangeListener { _, hasFocus ->
@@ -821,6 +831,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     searchClusterModal.show()
                     true
                 }
+                R.id.option_edit_hobi -> {
+                    showModalEditHobi()
+                    true
+                }
                 else -> false
             }
         }
@@ -875,6 +889,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 etAddress.isEnabled = true
                 if (iAddress.isNullOrEmpty()) etAddress.setText("")
 
+                binding.hobiContainer.setBackgroundResource(R.drawable.et_background)
+                binding.statusHobi.visibility = View.GONE
+                binding.isSendContent.visibility = View.VISIBLE
+                binding.etHobiContact.isEnabled = true
+                if (iHobiContact.isNullOrEmpty()) binding.etHobiContact.setText("")
+                binding.isSendContent.isChecked = iSendContent ?: false
+
                 binding.creditContainer.setBackgroundResource(R.drawable.et_background)
                 binding.etCredit.isEnabled = true
                 if (iCredit.isNullOrEmpty()) binding.etCredit.setText("")
@@ -917,6 +938,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 binding.hariBayarContainer.setBackgroundResource(R.drawable.et_background)
                 binding.tvHariBayar.visibility = View.GONE
                 binding.spinHariBayar.visibility = View.VISIBLE
+
+                // Jam Bayar
+                binding.jamBayarContainer.setBackgroundResource(R.drawable.et_background)
 
                 // Promo
                 tvPromo.visibility = View.GONE
@@ -972,6 +996,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 if (iAddress.isNullOrEmpty()) etAddress.setText(EMPTY_FIELD_VALUE)
                 else etAddress.setText(iAddress)
 
+                binding.hobiContainer.setBackgroundResource(R.drawable.background_rounded_16)
+                binding.statusHobi.visibility = View.VISIBLE
+                binding.isSendContent.visibility = View.GONE
+                binding.etHobiContact.isEnabled = false
+                if (iHobiContact.isNullOrEmpty()) binding.etHobiContact.setText(EMPTY_FIELD_VALUE)
+                else binding.etHobiContact.setText(iHobiContact)
+                val statusHobi = iSendContent ?: false
+                binding.statusHobi.text = if (statusHobi) "(Aktif)" else "Nonaktif"
+
                 binding.creditContainer.setBackgroundResource(R.drawable.background_rounded_16)
                 binding.etCredit.isEnabled = false
                 if (iCredit.isNullOrEmpty()) binding.etCredit.setText(EMPTY_FIELD_VALUE)
@@ -1022,6 +1055,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 binding.tvHariBayar.visibility = View.VISIBLE
                 binding.spinHariBayar.visibility = View.GONE
 
+                // Jam Bayar
+                binding.jamBayarContainer.setBackgroundResource(R.drawable.background_rounded_16)
+
                 // Promo
                 tvPromo.visibility = View.VISIBLE
                 etPromo.visibility = View.GONE
@@ -1067,6 +1103,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         var pBirthday = "${ etBirthday.text }"
         val pMapsUrl = "${ etMaps.text }"
         val pAddress = "${ etAddress.text }"
+        val pHobiContact = "${ binding.etHobiContact.text }"
+        val pIsSendContent = if (binding.isSendContent.isChecked) "1" else "0"
         val textCredit = binding.etCredit.text.toString()
             .replace("Rp", "")
             .replace(".", "")
@@ -1118,6 +1156,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             }
         }
 
+        val pJamBayar = selectedJamBayar
+
         var imagePart: MultipartBody.Part? = null
 
         if (iKtp.isNullOrEmpty() && selectedUri != null || !iKtp.isNullOrEmpty() && selectedUri != null) {
@@ -1167,8 +1207,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 //                        "REPUTATION: $pReputation,\n" +
 //                        "ID PPROMO: $pPromoID,\n" +
 //                        "HARI BAYAR: $pHariBayar,\n" +
+//                        "JAM BAYAR: $pJamBayar,\n" +
 //                        "CLUSTER: $pCluster,\n" +
-//                        "KTP: $imagePart,\n"
+//                        "KTP: $imagePart,\n" +
+//                        "HOBI: $pHobiContact,\n" +
+//                        "SEND CONTENT: $pIsSendContent,\n"
 //            )
 //            loadingState(false)
 //            progressBar.dismiss()
@@ -1190,6 +1233,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbMapsUrl = createPartFromString(pMapsUrl)
                 val rbLocation = createPartFromString(pCityID!!)
                 val rbAddress = createPartFromString(pAddress)
+                val rbHobiContact = createPartFromString(pHobiContact)
+                val rbIsSendContent = createPartFromString(pIsSendContent)
                 val rbCredit = createPartFromString(pCredit)
                 val rbStatus = createPartFromString(pStatus)
                 val rbWeeklyVisitStatus = createPartFromString(pWeeklyVisitStatus)
@@ -1198,6 +1243,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbTermin = createPartFromString(pTermin)
                 val rbReputation = createPartFromString(pReputation)
                 val rbHariBayar = createPartFromString(pHariBayar)
+                val rbJamBayar = createPartFromString(pJamBayar)
                 val rbPromoId = createPartFromString(pPromoID!!)
 
                 val response = apiService.editContact(
@@ -1212,6 +1258,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     cityId = rbLocation,
                     mapsUrl = rbMapsUrl,
                     address = rbAddress,
+                    hobiContact = rbHobiContact,
+                    isSendContent = rbIsSendContent,
                     credit = rbCredit,
                     status = rbStatus,
                     tagihanMingguan = rbWeeklyVisitStatus,
@@ -1221,6 +1269,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     promoId = rbPromoId,
                     ktp = imagePart?.let { imagePart },
                     hariBayar = rbHariBayar,
+                    jamBayar = rbJamBayar,
                     cluster = rbCluster
                 )
 
@@ -1269,6 +1318,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             }
 
                             iAddress = "${ etAddress.text }"
+                            iHobiContact = "${ binding.etHobiContact.text }"
+                            iSendContent = binding.isSendContent.isChecked
+
                             iCredit = formatedCredit
 
 //                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
@@ -1299,6 +1351,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             iWeeklyVisitStatus = pWeeklyVisitStatus.let { if (it === "1") it else "" }
                             iReputation = pReputation.ifEmpty { null }
                             iHariBayar = pHariBayar.ifEmpty { null }
+                            iJamBayar = pJamBayar.ifEmpty { null }
 
                             iPaymentMethod = pPaymentMethod.ifEmpty { null }
                             iCluster = pCluster.ifEmpty { null }
@@ -1562,6 +1615,29 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         datePicker.setOnDismissListener { etBirthday.clearFocus() }
 
+    }
+
+    private fun showTimePicker() {
+        val picker = MaterialTimePicker.Builder()
+            .setTitleText("Input Waktu")
+            .setTimeFormat(TimeFormat.CLOCK_24H)
+            .setInputMode(INPUT_MODE_KEYBOARD)
+            .setHour(selectedJamBayar.substring(0,2).toInt())
+            .setMinute(selectedJamBayar.substring(3,5).toInt())
+
+            .build()
+
+        // Atur listener saat pengguna menekan OK
+        picker.addOnPositiveButtonClickListener {
+            val selectedHour = picker.hour
+            val selectedMinute = picker.minute
+            val selectedTime = String.format("%02d:%02d:%02d", selectedHour, selectedMinute, 0)
+            selectedJamBayar = selectedTime
+            binding.tvJamBayar.text = if (selectedJamBayar == "00:00:00") "bebas" else "pukul ${selectedJamBayar.substring(0,5)} lebih"
+        }
+
+        // Tampilkan Dialog
+        picker.show(supportFragmentManager, "timePicker")
     }
 
     private fun loadingState(state: Boolean) {
@@ -1905,6 +1981,33 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val searchKey = etPromo.text.toString()
         if (searchKey.isNotEmpty()) searchPromoModal.setSearchKey(searchKey)
         searchPromoModal.show()
+    }
+
+    private fun showModalEditHobi() {
+        val modalBinding = ModalEditHobiBinding.inflate(LayoutInflater.from(this))
+        val dialogView = modalBinding.root
+
+        modalBinding.etModalHobi.setText(iHobiContact ?: "")
+
+        AlertDialog.Builder(this)
+            .setTitle("Form Edit Hobi")
+            .setView(dialogView)
+            .setPositiveButton("Simpan") { dialog, _ ->
+
+                val hobi = modalBinding.etModalHobi.text.toString()
+                if (hobi.isNotEmpty()) {
+                    binding.etHobiContact.setText(hobi)
+                    dialog.dismiss()
+                    saveEdit()
+                } else {
+                    modalBinding.etModalHobi.error = "Hobi wajib diisi!"
+                    modalBinding.etModalHobi.requestFocus()
+                }
+            }
+            .setNegativeButton("Batal") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
     private fun getContactSales() {
@@ -2907,6 +3010,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         iTermin = data.termin_payment
         iReputation = data.reputation
         iHariBayar = data.hari_bayar
+        iJamBayar = data.jam_bayar
 
         tooltipStatus.visibility = View.VISIBLE
         binding.weeklyVisitContainer.visibility = View.VISIBLE
@@ -2917,6 +3021,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         btnInvoice.visibility = View.VISIBLE
 
         iAddress = data.address
+        iHobiContact = data.hobi_contact
+        iSendContent = data.is_send_content == "1"
         iCredit = data.kredit_limit.let {
             if (it.isNotEmpty()) CurrencyFormat.format(it.toDouble())
             else it
@@ -3029,10 +3135,21 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             tvKtp.text = EMPTY_FIELD_VALUE
             etKtp.setText("")
         }
+        if (!iJamBayar.isNullOrEmpty()) {
+            selectedJamBayar = iJamBayar.toString()
+            binding.tvJamBayar.text = if (iJamBayar == "00:00:00") "bebas" else "pukul ${selectedJamBayar.substring(0,5)} lebih"
+        } else {
+            binding.tvJamBayar.text = EMPTY_FIELD_VALUE
+        }
 
         // Other columns handle
         if (!iAddress.isNullOrEmpty()) etAddress.setText(iAddress)
         else etAddress.setText(EMPTY_FIELD_VALUE)
+        if (!iHobiContact.isNullOrEmpty()) binding.etHobiContact.setText(iHobiContact)
+        else binding.etHobiContact.setText(EMPTY_FIELD_VALUE)
+        val sendContent = iSendContent ?: false
+        binding.isSendContent.isChecked = sendContent
+        binding.statusHobi.text = if (sendContent) "(Aktif)" else "(Nonaktif)"
         if (!iCredit.isNullOrEmpty()) binding.etCredit.setText(iCredit)
         else binding.etCredit.setText(EMPTY_FIELD_VALUE)
 

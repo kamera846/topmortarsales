@@ -27,4 +27,8 @@ data class ContactModel(
     var pass_contact: String = "",
     var id_surat_jalan: String = "",
     var cluster: String = "",
+    var hobi_contact: String = "",
+    var is_send_content: String = "",
+    var jam_bayar: String = "",
+
 )
