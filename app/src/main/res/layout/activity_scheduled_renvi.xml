@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".view.rencanaVisits.ScheduledRenviActivity">
+
+    <include
+        android:id="@+id/titleBar"
+        layout="@layout/component_title_bar_light"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/bottomBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_bottom_sheet"
+        android:orientation="vertical"
+        android:layout_marginHorizontal="-2dp"
+        android:layout_marginBottom="-2dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" >
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonPilihTargetLain"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dp"
+            android:backgroundTint="@color/quantum_bluegrey400"
+            android:paddingVertical="12dp"
+            android:text="Pilih Target Lain"
+            app:icon="@mipmap/ic_sync_white"
+            app:iconGravity="textEnd"
+            app:iconSize="16dp"
+            app:cornerRadius="100dp"/>
+    </LinearLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@+id/titleBar"
+        app:layout_constraintBottom_toTopOf="@+id/bottomBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:id="@+id/targetVisitContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="12dp"
+                android:padding="12dp"
+                android:background="@drawable/background_rounded_8_stroke"
+                android:orientation="vertical"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Target Visit Harian Diselesaikan"
+                        android:textStyle="bold"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="(0/15)"
+                        android:layout_marginStart="8dp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                </LinearLayout>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:visibility="gone"
+                    android:id="@+id/cardTargetVisit"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/baseBackground"
+                    android:outlineSpotShadowColor="@android:color/transparent"
+                    android:padding="12dp"
+                    app:cardCornerRadius="8dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="12dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="TK MUSTIKA JAYA"
+                                android:textStyle="bold"
+                                android:ellipsize="end"
+                                android:maxLines="1"
+                                android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Sedang dalam proses visit"
+                                android:ellipsize="end"
+                                android:maxLines="1"
+                                android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                        </LinearLayout>
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/time_line_dark_light_only" />
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardTargetVisitEmpty"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/baseBackground"
+                    android:outlineSpotShadowColor="@android:color/transparent"
+                    android:padding="12dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/cardStrokeColor"
+                    app:cardCornerRadius="8dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="12dp"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="Belum memilih target visit"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/buttonPilihTargetSekarang"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:text="Pilih Sekarang"
+                            android:backgroundTint="@color/quantum_bluegrey400"
+                            app:cornerRadius="100dp"/>
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/detailTokoContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="12dp"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/targetVisitContainer">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="12dp"
+                    android:text="INFORMASI RENCANA VISIT"
+                    android:textStyle="bold"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/cardStrokeColor"
+                    app:cardCornerRadius="8dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:padding="12dp">
+
+                            <com.google.android.material.card.MaterialCardView
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:layout_marginEnd="8dp"
+                                app:strokeColor="@color/primary"
+                                app:strokeWidth="1dp"
+                                app:cardCornerRadius="100dp"
+                                app:cardBackgroundColor="@color/primary_200">
+
+                                <ImageView
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/person_white" />
+
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="Rizal Fani"
+                                    android:textStyle="bold"
+                                    android:ellipsize="end"
+                                    android:maxLines="1"
+                                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Jatuh tempo 26 November 2025"
+                                    android:ellipsize="end"
+                                    android:maxLines="2"
+                                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                            </LinearLayout>
+
+                            <com.google.android.material.card.MaterialCardView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                app:cardCornerRadius="100dp"
+                                app:cardBackgroundColor="@color/black_600">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="1 hari"
+                                    android:textColor="@color/white"
+                                    android:textSize="12sp"
+                                    android:paddingHorizontal="12dp"
+                                    android:paddingVertical="4dp"
+                                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                            </com.google.android.material.card.MaterialCardView>
+
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="@color/cardStrokeColor" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="6dp">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/buttonDetailToko"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:backgroundTint="@color/quantum_bluegrey400"
+                                android:text="Detail Toko"
+                                app:cornerRadius="8dp"
+                                app:icon="@drawable/store_white"
+                                app:iconGravity="textEnd"
+                                app:iconSize="16dp" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/buttonChat"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:backgroundTint="@color/quantum_bluegrey400"
+                                android:text="Chat"
+                                app:cornerRadius="8dp"
+                                app:icon="@drawable/comment_light"
+                                app:iconGravity="textEnd"
+                                app:iconSize="16dp" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/detailLaporanContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="12dp"
+                android:orientation="vertical"
+                android:paddingBottom="12dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/detailTokoContainer">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="12dp"
+                    android:text="INFORMASI LAPORAN"
+                    android:textStyle="bold"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="@color/cardStrokeColor"
+                    app:cardCornerRadius="8dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:padding="12dp">
+
+                            <com.google.android.material.card.MaterialCardView
+                                android:layout_width="50dp"
+                                android:layout_height="50dp"
+                                android:layout_marginEnd="8dp"
+                                app:strokeColor="@color/black_500"
+                                app:strokeWidth="1dp"
+                                app:cardCornerRadius="100dp"
+                                app:cardBackgroundColor="@color/black_600">
+
+                                <ImageView
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/file_list_white_only" />
+
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="Belum Ada Laporan"
+                                    android:textStyle="bold"
+                                    android:ellipsize="end"
+                                    android:maxLines="1"
+                                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Datang ke toko untuk membuat laporan"
+                                    android:ellipsize="end"
+                                    android:maxLines="2"
+                                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                            </LinearLayout>
+
+                            <com.google.android.material.card.MaterialCardView
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                app:strokeColor="@color/black_500"
+                                app:strokeWidth="1dp"
+                                app:cardCornerRadius="100dp"
+                                app:cardBackgroundColor="@color/black_600">
+
+                                <ImageView
+                                    android:layout_width="26dp"
+                                    android:layout_height="26dp"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/time_line_dark_white_only" />
+
+                            </com.google.android.material.card.MaterialCardView>
+
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="@color/cardStrokeColor" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="6dp">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/buttonRute"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:backgroundTint="@color/quantum_bluegrey400"
+                                android:text="Rute"
+                                app:cornerRadius="8dp"
+                                app:icon="@drawable/location_white"
+                                app:iconGravity="textEnd"
+                                app:iconSize="16dp" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/buttonBuatLaporan"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:layout_weight="1"
+                                android:backgroundTint="@color/primary_200"
+                                android:text="Buat Laporan"
+                                app:cornerRadius="8dp"
+                                app:icon="@drawable/arrow_right_black"
+                                app:iconGravity="textEnd"
+                                app:iconSize="16dp"
+                                app:iconTint="@color/white" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
