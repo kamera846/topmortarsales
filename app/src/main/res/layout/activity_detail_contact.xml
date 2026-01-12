@@ -1202,6 +1202,73 @@
 
                 </LinearLayout>
 
+                <!-- Text Interval Visit -->
+                <LinearLayout
+                    android:visibility="visible"
+                    android:id="@+id/interval_visit_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/background_rounded_16"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginTop="16dp"
+                            android:layout_marginBottom="4dp"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:text="Interval Visit"
+                                android:layout_marginEnd="8dp"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:theme="@style/Theme.TopMortarSales.BaseTextTitle" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:text="(dalam 1 bulan)"
+                                android:textSize="14sp"
+                                android:theme="@style/Theme.TopMortarSales.BaseTextDescription" />
+
+                        </LinearLayout>
+
+                        <EditText
+                            android:id="@+id/et_interval_visit"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="16dp"
+                            android:layout_marginBottom="16dp"
+                            android:textSize="14sp"
+                            android:maxLines="5"
+                            android:gravity="center_vertical"
+                            android:textColorHint="@color/black_600"
+                            android:hint="Masukan Nominal"
+                            android:text="@string/txt_loading"
+                            android:inputType="number"
+                            android:background="@android:color/transparent"
+                            android:textColor="@color/et_color_with_disabled_state"
+                            android:enabled="false"
+                            android:outlineProvider="none"/>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
                 <LinearLayout
                     android:id="@+id/waktuPembayaranContainer"
                     android:layout_width="match_parent"

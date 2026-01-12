@@ -285,6 +285,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var iHariBayar: String? = null
     private var iJamBayar: String? = null
     private var iAddress: String? = null
+    private var iIntervalVisit: String? = null
     private var iCredit: String? = null
     private var iMapsUrl: String? = null
     private var iKtp: String? = null
@@ -588,6 +589,16 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             }
         }
+        binding.intervalVisitContainer.setOnClickListener {
+            if (isEdit) {
+                binding.etIntervalVisit.postDelayed({
+                    binding.etIntervalVisit.requestFocus()
+                    val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+                    imm.showSoftInput(binding.etIntervalVisit, InputMethodManager.SHOW_IMPLICIT)
+                }, 200)
+
+            }
+        }
         tvMapsContainer.setOnClickListener { mapsActionHandler() }
         tvKtpContainer.setOnClickListener { previewKtp() }
         binding.jamBayarContainer.setOnClickListener { showTimePicker() }
@@ -638,6 +649,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             if (hasFocus) {
                 binding.etCredit.setSelection(binding.etCredit.length())
             } else binding.etCredit.clearFocus()
+        }
+        binding.etIntervalVisit.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                binding.etIntervalVisit.setSelection(binding.etIntervalVisit.length())
+            } else binding.etIntervalVisit.clearFocus()
         }
 
         binding.togglePhoneSize.setOnClickListener {
@@ -896,6 +912,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 if (iHobiContact.isNullOrEmpty()) binding.etHobiContact.setText("")
                 binding.isSendContent.isChecked = iSendContent ?: false
 
+                // Interval Visit
+                binding.intervalVisitContainer.setBackgroundResource(R.drawable.et_background)
+                binding.etIntervalVisit.isEnabled = true
+                if (iIntervalVisit.isNullOrEmpty()) binding.etIntervalVisit.setText("")
+
+                // Credit
                 binding.creditContainer.setBackgroundResource(R.drawable.et_background)
                 binding.etCredit.isEnabled = true
                 if (iCredit.isNullOrEmpty()) binding.etCredit.setText("")
@@ -1005,6 +1027,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val statusHobi = iSendContent ?: false
                 binding.statusHobi.text = if (statusHobi) "(Aktif)" else "Nonaktif"
 
+                // Interval Visit
+                binding.intervalVisitContainer.setBackgroundResource(R.drawable.background_rounded_16)
+                binding.etIntervalVisit.isEnabled = false
+                if (iIntervalVisit.isNullOrEmpty()) binding.etIntervalVisit.setText(EMPTY_FIELD_VALUE)
+                else binding.etIntervalVisit.setText(iIntervalVisit)
+
+                // Credit
                 binding.creditContainer.setBackgroundResource(R.drawable.background_rounded_16)
                 binding.etCredit.isEnabled = false
                 if (iCredit.isNullOrEmpty()) binding.etCredit.setText(EMPTY_FIELD_VALUE)
@@ -1105,6 +1134,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val pAddress = "${ etAddress.text }"
         val pHobiContact = "${ binding.etHobiContact.text }"
         val pIsSendContent = if (binding.isSendContent.isChecked) "1" else "0"
+        val pIntervalVisit = binding.etIntervalVisit.text.toString()
         val textCredit = binding.etCredit.text.toString()
             .replace("Rp", "")
             .replace(".", "")
@@ -1209,6 +1239,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 //                        "HARI BAYAR: $pHariBayar,\n" +
 //                        "JAM BAYAR: $pJamBayar,\n" +
 //                        "CLUSTER: $pCluster,\n" +
+//                        "INTERVAL VISIT: $pIntervalVisit,\n" +
 //                        "KTP: $imagePart,\n" +
 //                        "HOBI: $pHobiContact,\n" +
 //                        "SEND CONTENT: $pIsSendContent,\n"
@@ -1235,6 +1266,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbAddress = createPartFromString(pAddress)
                 val rbHobiContact = createPartFromString(pHobiContact)
                 val rbIsSendContent = createPartFromString(pIsSendContent)
+                val rbIntervalVisit = createPartFromString(pIntervalVisit)
                 val rbCredit = createPartFromString(pCredit)
                 val rbStatus = createPartFromString(pStatus)
                 val rbWeeklyVisitStatus = createPartFromString(pWeeklyVisitStatus)
@@ -1270,7 +1302,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     ktp = imagePart?.let { imagePart },
                     hariBayar = rbHariBayar,
                     jamBayar = rbJamBayar,
-                    cluster = rbCluster
+                    cluster = rbCluster,
+                    intervalVisit = rbIntervalVisit
                 )
 
                 if (response.isSuccessful) {
@@ -1321,6 +1354,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             iHobiContact = "${ binding.etHobiContact.text }"
                             iSendContent = binding.isSendContent.isChecked
 
+                            iIntervalVisit = pIntervalVisit
                             iCredit = formatedCredit
 
 //                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Successfully edit data!")
@@ -1702,6 +1736,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             etAddress.clearFocus()
             binding.etCredit.error = null
             binding.etCredit.clearFocus()
+            binding.etIntervalVisit.error = null
+            binding.etIntervalVisit.clearFocus()
             true
         }
     }
@@ -3023,6 +3059,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         iAddress = data.address
         iHobiContact = data.hobi_contact
         iSendContent = data.is_send_content == "1"
+        iIntervalVisit = data.interval_visit
         iCredit = data.kredit_limit.let {
             if (it.isNotEmpty()) CurrencyFormat.format(it.toDouble())
             else it
@@ -3150,6 +3187,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val sendContent = iSendContent ?: false
         binding.isSendContent.isChecked = sendContent
         binding.statusHobi.text = if (sendContent) "(Aktif)" else "(Nonaktif)"
+        if (!iIntervalVisit.isNullOrEmpty()) binding.etIntervalVisit.setText(iIntervalVisit)
+        else binding.etIntervalVisit.setText(EMPTY_FIELD_VALUE)
         if (!iCredit.isNullOrEmpty()) binding.etCredit.setText(iCredit)
         else binding.etCredit.setText(EMPTY_FIELD_VALUE)
 

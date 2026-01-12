@@ -80,6 +80,7 @@ import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailed
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
+import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
@@ -1099,7 +1100,7 @@ class HomeSalesActivity : AppCompatActivity() {
                                         }
                                     builder.show()
                                 } else {
-                                    executeAbsentReport()
+                                    executeAbsentReport(shortDistance)
                                 }
 
                             } else {
@@ -1157,64 +1158,156 @@ class HomeSalesActivity : AppCompatActivity() {
         }
     }
 
-    private fun executeAbsentReport() {
+    private fun executeAbsentReport(shortDistance: String = "") {
 
         if (!absentProgressBar!!.isShowing()) absentProgressBar?.show()
 
-        val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
-        val userChild = absentChild.child(userId ?: "0")
-        val userLevel = when (userKind) {
-            USER_KIND_PENAGIHAN -> AUTH_LEVEL_PENAGIHAN
-            USER_KIND_SALES -> AUTH_LEVEL_SALES
-            USER_KIND_COURIER -> AUTH_LEVEL_COURIER
-            USER_KIND_MARKETING -> AUTH_LEVEL_MARKETING
-            else -> ""
-        }
-
-        userChild.child("userLevel").setValue(userLevel)
-        userChild.child("id").setValue(userId)
-        userChild.child("idCity").setValue(userCity)
-        userChild.child("username").setValue(userName)
-        userChild.child("fullname").setValue(userFullName)
-        userChild.child("isOnline").setValue(true)
-
         lifecycleScope.launch {
-
-            val calendar = checkTimeFromInternet(this@HomeSalesActivity) ?: Calendar.getInstance()
-            val date = Date(calendar.timeInMillis)
-
-            val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
-            formatter.timeZone = TimeZone.getDefault()
-
-            val absentDateTime = formatter.format(date)
-            if (!isAbsentMorningNow) {
-
-                userChild.child("morningDateTime").setValue(absentDateTime)
-                userChild.child("lastSeen").setValue(absentDateTime)
-
-                sessionManager.absentDateTime(absentDateTime)
-
-                checkAbsent()
-            } else if (!isAbsentEveningNow) {
-
-                val currentHour = calendar?.get(Calendar.HOUR_OF_DAY)
-
-                if (currentHour != null) {
-                    if (currentHour >= 16) {
-                        userChild.child("eveningDateTime").setValue(absentDateTime)
-                        userChild.child("lastSeen").setValue(absentDateTime)
-
-                        sessionManager.absentDateTime(absentDateTime)
-                        checkAbsent()
-                    } else {
-                        if (absentProgressBar!!.isShowing()) absentProgressBar?.dismiss()
-                    }
-                } else {
-                    if (absentProgressBar!!.isShowing()) absentProgressBar?.dismiss()
+            try {
+                var visitReport = "Absen masuk\n•by system•"
+                var absentType = "absen_in"
+                if (isAbsentMorningNow) {
+                    visitReport = "Absen pulang\n•by system•"
+                    absentType = "absen_out"
                 }
 
-            } else {
-                if (absentProgressBar!!.isShowing()) absentProgressBar?.dismiss()
+                val response = if (absentMode == ABSENT_MODE_STORE) {
+                    Log.d(
+                        "DEBUG REQUEST BODY",
+                        "ID CONTACT: ${selectedStore?.id} \n" +
+                                "ID USER: $userId \n" +
+                                "DISTANCE: $shortDistance \n" +
+                                "LAPORAN: $visitReport \n" +
+                                "SOURCE: $absentType \n")
+                    apiService.absenSalesInStore(
+                        idContact = createPartFromString(selectedStore?.id.toString()),
+                        idUser = createPartFromString(userId!!),
+                        distanceVisit = createPartFromString(shortDistance),
+                        laporanVisit = createPartFromString(visitReport),
+                        source = createPartFromString(absentType),
+                    )
+                } else {
+                    Log.d(
+                        "DEBUG REQUEST BODY",
+                        "ID GUDANG: ${selectedStore?.id} \n" +
+                                "ID USER: $userId \n" +
+                                "DISTANCE: $shortDistance \n" +
+                                "LAPORAN: $visitReport \n" +
+                                "SOURCE: $absentType \n")
+                    apiService.absenSalesInBasecamp(
+                        idGudang = createPartFromString(selectedStore?.id.toString()),
+                        idUser = createPartFromString(userId!!),
+                        distanceVisit = createPartFromString(shortDistance),
+                        laporanVisit = createPartFromString(visitReport),
+                        source = createPartFromString(absentType),
+                    )
+                }
+
+                if (response.isSuccessful) {
+                    val responseBody = response.body()!!
+                    when (responseBody.status) {
+                        RESPONSE_STATUS_OK -> {
+                            val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
+                            val userChild = absentChild.child(userId ?: "0")
+                            val userLevel = when (userKind) {
+                                USER_KIND_PENAGIHAN -> AUTH_LEVEL_PENAGIHAN
+                                USER_KIND_SALES -> AUTH_LEVEL_SALES
+                                USER_KIND_COURIER -> AUTH_LEVEL_COURIER
+                                USER_KIND_MARKETING -> AUTH_LEVEL_MARKETING
+                                else -> ""
+                            }
+
+                            userChild.child("userLevel").setValue(userLevel)
+                            userChild.child("id").setValue(userId)
+                            userChild.child("idCity").setValue(userCity)
+                            userChild.child("username").setValue(userName)
+                            userChild.child("fullname").setValue(userFullName)
+                            userChild.child("isOnline").setValue(true)
+
+                            lifecycleScope.launch {
+
+                                val calendar = checkTimeFromInternet(this@HomeSalesActivity) ?: Calendar.getInstance()
+                                val date = Date(calendar.timeInMillis)
+
+                                val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
+                                formatter.timeZone = TimeZone.getDefault()
+
+                                val absentDateTime = formatter.format(date)
+                                if (!isAbsentMorningNow) {
+
+                                    userChild.child("morningDateTime").setValue(absentDateTime)
+                                    userChild.child("lastSeen").setValue(absentDateTime)
+
+                                    sessionManager.absentDateTime(absentDateTime)
+
+                                    checkAbsent()
+                                } else if (!isAbsentEveningNow) {
+
+                                    val currentHour = calendar?.get(Calendar.HOUR_OF_DAY)
+
+                                    if (currentHour != null) {
+                                        if (currentHour >= 16) {
+                                            userChild.child("eveningDateTime").setValue(absentDateTime)
+                                            userChild.child("lastSeen").setValue(absentDateTime)
+
+                                            sessionManager.absentDateTime(absentDateTime)
+                                            checkAbsent()
+                                        } else {
+                                            if (absentProgressBar!!.isShowing()) absentProgressBar?.dismiss()
+                                        }
+                                    } else {
+                                        if (absentProgressBar!!.isShowing()) absentProgressBar?.dismiss()
+                                    }
+
+                                } else {
+                                    if (absentProgressBar!!.isShowing()) absentProgressBar?.dismiss()
+                                }
+                            }
+                        }
+                        RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+
+                            dismissProgressDialog()
+                            handleMessage(
+                                this@HomeSalesActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "Gagal mengirim laporan absen! Message: ${responseBody.message}"
+                            )
+
+                        }
+
+                        else -> {
+
+                            handleMessage(
+                                this@HomeSalesActivity,
+                                TAG_RESPONSE_CONTACT,
+                                getString(R.string.failed_get_data) + responseBody.message
+                            )
+                            dismissProgressDialog()
+
+                        }
+                    }
+                } else {
+
+                    dismissProgressDialog()
+                    handleMessage(
+                        this@HomeSalesActivity,
+                        TAG_RESPONSE_MESSAGE,
+                        "Gagal mengirim laporan absen! Error: " + response.message()
+                    )
+
+                }
+
+            } catch (e: Exception) {
+                if (e is CancellationException) {
+                    return@launch
+                }
+                FirebaseUtils.logErr(this@HomeSalesActivity, "Fathis@HomeSalesActivity on executeAbsentReport(). Catch: ${e.message}")
+                handleMessage(
+                    this@HomeSalesActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
+
             }
         }
     }
