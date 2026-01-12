@@ -30,5 +30,6 @@ data class ContactModel(
     var hobi_contact: String = "",
     var is_send_content: String = "",
     var jam_bayar: String = "",
+    var interval_visit: String = "",
 
 )
