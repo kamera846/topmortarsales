@@ -844,4 +844,26 @@ interface ApiService {
     suspend fun getTotalVisitSales(
         @Query("id_user") idUser: String
     ): ResponseObject.TotalVisitSales
+
+    @Multipart
+    @POST("absenSales.php")
+    suspend fun absenSalesInBasecamp(
+        @Part("id_gudang") idGudang: RequestBody,
+        @Part("id_user") idUser: RequestBody,
+        @Part("distance_visit") distanceVisit: RequestBody,
+        @Part("laporan_visit") laporanVisit: RequestBody,
+        @Part("source") source: RequestBody? = createPartFromString(NORMAL_REPORT),
+        @Part("type_renvi") renviSource: RequestBody? = createPartFromString(NORMAL_REPORT)
+    ): Response<ResponseReportVisit>
+
+    @Multipart
+    @POST("absenSales.php")
+    suspend fun absenSalesInStore(
+        @Part("id_contact") idContact: RequestBody,
+        @Part("id_user") idUser: RequestBody,
+        @Part("distance_visit") distanceVisit: RequestBody,
+        @Part("laporan_visit") laporanVisit: RequestBody,
+        @Part("source") source: RequestBody? = createPartFromString(NORMAL_REPORT),
+        @Part("type_renvi") renviSource: RequestBody? = createPartFromString(NORMAL_REPORT)
+    ): Response<ResponseReportVisit>
 }
