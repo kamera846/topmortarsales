@@ -117,6 +117,7 @@ interface ApiService {
         @Part("cluster") cluster: RequestBody,
         @Part("hobi_contact") hobiContact: RequestBody,
         @Part("is_send_content") isSendContent: RequestBody,
+        @Part("interval_visit") intervalVisit: RequestBody,
         @Part ktp: MultipartBody.Part? = null,
     ): Response<ResponseMessage>
 
