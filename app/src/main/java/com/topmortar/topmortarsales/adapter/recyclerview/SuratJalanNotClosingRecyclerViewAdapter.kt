@@ -37,6 +37,7 @@ class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<S
         private val deliveryStatusIcon: ImageView = itemView.findViewById(R.id.deliveryStatusIcon)
 
         fun bind(item: SuratJalanNotClosingModel) {
+            var notesText = "* Dibuat ${DateFormat.format(item.dalivery_date, "yyyy-MM-dd HH:mm:ss", "dd MMM yyyy, HH:mm")}"
             val dateProcessed = item.dateProcessed
             var dateCounter = item.dalivery_date.let {
                 if (it.isNotEmpty()) {
@@ -44,12 +45,16 @@ class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<S
                 } else -1
             }
 
-            if (dateProcessed.isNotEmpty()) {
+            if (item.is_printed == "1" && item.date_printed != null) {
+                notesText += ". Diproses "
                 deliveryStatusIcon.setImageResource(R.drawable.truck_fast_white_only)
-                dateCounter = dateProcessed.let {
-                    if (it.isNotEmpty()) {
-                        DateFormat.differenceDateNowDescCustom(it)
-                    } else -1
+                item.date_printed.let {
+                    if (it != null && it.isNotEmpty()) {
+                        notesText += DateFormat.format(it, "yyyy-MM-dd HH:mm:ss", "dd MMM yyyy, HH:mm")
+                        dateCounter = DateFormat.differenceDateNowDescCustom(it)
+                    } else {
+                        dateCounter = -1
+                    }
                 }
             } else {
                 deliveryStatusIcon.setImageResource(R.drawable.time_line_dark_white_only)
@@ -66,7 +71,7 @@ class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<S
 
             tvContactName.text = item.nama
             tvPhoneNumber.text = "${item.no_surat_jalan} - ${item.full_name}"
-            tvNotes.text = "* Dibuat pada ${DateFormat.format(item.dalivery_date, "yyyy-MM-dd HH:mm:ss", "dd MMM yyyy, HH:mm")}"
+            tvNotes.text = notesText
             tvNotes.setTypeface(null, Typeface.NORMAL)
 
             tvNotes.visibility = View.VISIBLE

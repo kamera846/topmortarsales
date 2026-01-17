@@ -1602,7 +1602,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                                 binding.cardDelivery.visibility = View.VISIBLE
                                                 binding.deliveryCourier.text = deliveryData!!.courier?.name
                                                 binding.deliveryStore.text = store.name
-                                                binding.deliveryDate.text = "Diproses pada " + formatDateYear(store.startDatetime)
+                                                val processedDate = formatDateYear(store.startDatetime)
+                                                if (processedDate.isEmpty() || processedDate == "null" || processedDate == "-") binding.deliveryDate.text = "Belum diproses"
+                                                else binding.deliveryDate.text = "Diproses pada $processedDate"
                                                 binding.btnSuratJalan.setOnClickListener {
                                                     val intent = Intent(this@MapsActivity, ListSuratJalanActivity::class.java)
                                                     intent.putExtra(CONST_CONTACT_ID, store.id)
@@ -2017,7 +2019,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                     binding.cardDelivery.visibility = View.VISIBLE
                                     binding.deliveryCourier.text = courierName
                                     binding.deliveryStore.text = item.nama
-                                    binding.deliveryDate.text = "Diproses pada " + formatDateYear(item.startDatetime)
+                                    val processedDate = formatDateYear(item.startDatetime)
+                                    if (processedDate.isEmpty() || processedDate == "null" || processedDate == "-") binding.deliveryDate.text = "Belum diproses"
+                                    else binding.deliveryDate.text = "Diproses pada $processedDate"
                                     binding.deliveryEndDateContainer.visibility = View.VISIBLE
                                     binding.deliveryEndDate.text = "Diselesaikan pada " + formatDateYear(item.endDatetime)
                                     binding.btnSuratJalan.setOnClickListener {
@@ -2145,15 +2149,19 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     }
 
     private fun formatDateYear(dateString: String, dateStringFormat: String = "yyyy-MM-dd HH:mm:ss"): String {
-        val date = SimpleDateFormat(dateStringFormat, Locale.getDefault()).parse(dateString)
-        return if (date != null) {
-            val calendar = Calendar.getInstance()
-            val currentYear = calendar.get(Calendar.YEAR)
-            val dateYear = SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
+        try {
+            val date = SimpleDateFormat(dateStringFormat, Locale.getDefault()).parse(dateString)
+            return if (date != null) {
+                val calendar = Calendar.getInstance()
+                val currentYear = calendar.get(Calendar.YEAR)
+                val dateYear = SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
 
-            if (currentYear == dateYear.toInt()) DateFormat.format(dateString, dateStringFormat, "dd MMM, HH:mm")
-            else DateFormat.format(dateString, dateStringFormat, "dd MMM yyyy, HH:mm")
-        } else DateFormat.format(dateString, dateStringFormat, "dd MMM, HH:mm")
+                if (currentYear == dateYear.toInt()) DateFormat.format(dateString, dateStringFormat, "dd MMM, HH:mm")
+                else DateFormat.format(dateString, dateStringFormat, "dd MMM yyyy, HH:mm")
+            } else DateFormat.format(dateString, dateStringFormat, "dd MMM, HH:mm")
+        } catch (e: Exception) {
+            return dateString
+        }
     }
 
     @Subscribe

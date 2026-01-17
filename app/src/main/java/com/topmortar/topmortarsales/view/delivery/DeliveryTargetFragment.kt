@@ -229,7 +229,8 @@ class DeliveryTargetFragment : Fragment() {
 
         val rvAdapter = SuratJalanNotClosingRecyclerViewAdapter(listItem, object: SuratJalanNotClosingRecyclerViewAdapter.ItemClickListener {
             override fun onItemClick(data: SuratJalanNotClosingModel?) {
-                if (data != null && data.dateProcessed.isNotEmpty()) {
+//                if (data != null && data.dateProcessed.isNotEmpty()) {
+                if (data != null && data.is_printed == "1") {
                     context?.let {
                         val intent = Intent(it, MapsActivity::class.java)
                         intent.putExtra(CONST_IS_TRACKING, true)

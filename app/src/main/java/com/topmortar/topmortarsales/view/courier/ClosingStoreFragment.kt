@@ -56,7 +56,6 @@ import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
-import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.EventBusUtils
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
@@ -439,7 +438,7 @@ class ClosingStoreFragment : Fragment() {
                         name = contact.nama,
                         lat = targetLatLng.latitude,
                         lng = targetLatLng.longitude,
-                        startDatetime = DateFormat.now(),
+                        startDatetime = if (contact.date_printed != null) "${contact.date_printed}" else "-" ,
                         startLat = currentLatLng.latitude,
                         startLng = currentLatLng.longitude,
                     )
