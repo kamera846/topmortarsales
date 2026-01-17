@@ -2827,7 +2827,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             name = "${tvName.text}",
                             lat = targetLatLng.latitude,
                             lng = targetLatLng.longitude,
-                            startDatetime = DateFormat.now(),
+                            startDatetime = "-",
                             startLat = currentLatLng.latitude,
                             startLng = currentLatLng.longitude,
                         )

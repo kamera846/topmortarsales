@@ -73,6 +73,7 @@ import com.itextpdf.layout.property.TextAlignment
 import com.itextpdf.layout.property.UnitValue
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.InvoiceOrderRecyclerViewAdapter
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_DISTANCE
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
@@ -81,6 +82,7 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
 import com.topmortar.topmortarsales.commons.CONST_URI
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
 import com.topmortar.topmortarsales.commons.IS_CLOSING
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
@@ -860,6 +862,11 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                     RESPONSE_STATUS_OK -> {
 
                         val data = response.results[0]
+                        val deliveryId = "$AUTH_LEVEL_COURIER$userID"
+                        val firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorId ?: "-firebase-008")
+                        val childDelivery = firebaseReference.child(FIREBASE_CHILD_DELIVERY)
+                        val childDriver = childDelivery.child(deliveryId)
+                        childDriver.child("stores/${data.id_contact}/startDatetime").setValue(data.date_printed)
                         printEscPos(data)
 
                     }

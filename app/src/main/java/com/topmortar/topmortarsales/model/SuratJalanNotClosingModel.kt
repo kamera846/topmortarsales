@@ -13,7 +13,7 @@ data class SuratJalanNotClosingModel (
     var id_kendaraan: String ="",
     var is_finished: String ="",
     var is_printed: String ="",
-    var date_printed: String ="",
+    var date_printed: String? =null,
     var is_closing: String ="",
     var date_closing: String ="",
     var proof_closing: String ="",
