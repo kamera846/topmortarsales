@@ -31,5 +31,7 @@ data class ContactModel(
     var is_send_content: String = "",
     var jam_bayar: String = "",
     var interval_visit: String = "",
+    var is_printed: String = "",
+    var date_printed: String? = null,
 
 )
