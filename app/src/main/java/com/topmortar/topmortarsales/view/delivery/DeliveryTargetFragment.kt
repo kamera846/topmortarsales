@@ -24,6 +24,7 @@ import com.topmortar.topmortarsales.adapter.recyclerview.SuratJalanNotClosingRec
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_DELIVERY_ID
 import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING
+import com.topmortar.topmortarsales.commons.CONST_NAME
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
@@ -42,6 +43,7 @@ import com.topmortar.topmortarsales.model.DeliveryModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.model.SuratJalanNotClosingModel
 import com.topmortar.topmortarsales.view.MapsActivity
+import com.topmortar.topmortarsales.view.suratJalan.ListSuratJalanActivity
 import kotlinx.coroutines.launch
 
 /**
@@ -230,13 +232,22 @@ class DeliveryTargetFragment : Fragment() {
         val rvAdapter = SuratJalanNotClosingRecyclerViewAdapter(listItem, object: SuratJalanNotClosingRecyclerViewAdapter.ItemClickListener {
             override fun onItemClick(data: SuratJalanNotClosingModel?) {
 //                if (data != null && data.dateProcessed.isNotEmpty()) {
-                if (data != null && data.is_printed == "1") {
-                    context?.let {
-                        val intent = Intent(it, MapsActivity::class.java)
-                        intent.putExtra(CONST_IS_TRACKING, true)
-                        intent.putExtra(CONST_DELIVERY_ID, data.deliveryId)
-                        intent.putExtra(CONST_CONTACT_ID, data.id_contact)
-                        startActivity(intent)
+                if (data != null) {
+                    if (data.is_printed == "1") {
+                        context?.let {
+                            val intent = Intent(it, MapsActivity::class.java)
+                            intent.putExtra(CONST_IS_TRACKING, true)
+                            intent.putExtra(CONST_DELIVERY_ID, data.deliveryId)
+                            intent.putExtra(CONST_CONTACT_ID, data.id_contact)
+                            startActivity(intent)
+                        }
+                    } else {
+                        context?.let {
+                            val intent = Intent(it, ListSuratJalanActivity::class.java)
+                            intent.putExtra(CONST_CONTACT_ID, data.id_contact)
+                            intent.putExtra(CONST_NAME, data.nama)
+                            startActivity(intent)
+                        }
                     }
                 }
             }
