@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".view.DeliveryMapsRoute">
+
+    <!-- Title Bar -->
+    <include
+        android:id="@+id/title_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        layout="@layout/component_title_bar"/>
+
+    <fragment
+        android:id="@+id/map_delivery"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/title_bar"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/optimal_route_toggle_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Hidupkan Rute Optimal"
+        android:layout_margin="8dp"
+        android:paddingVertical="12dp"
+        app:cornerRadius="8dp"
+        app:icon="@mipmap/ic_sync_white"
+        app:iconSize="20dp"
+        app:iconGravity="textEnd"
+        android:layout_alignParentBottom="true"/>
+
+</RelativeLayout>
