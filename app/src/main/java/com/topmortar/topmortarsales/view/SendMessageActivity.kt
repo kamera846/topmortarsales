@@ -7,6 +7,8 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -83,6 +85,9 @@ class SendMessageActivity() : AppCompatActivity() {
     private var listKonten: ArrayList<KontenModel>? = null
     private var idKonten: String? = null
 
+    private var listPhone: List<String> = mutableListOf("== Pilih Nomor Telpon")
+    private var selectedPhone = ""
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -155,6 +160,7 @@ class SendMessageActivity() : AppCompatActivity() {
         contact = event.data
 
         binding.titleBar.tvTitleBar.text = contact?.nama
+        setupPhoneSpinner()
 
         EventBus.getDefault().removeStickyEvent(event)
     }
@@ -168,6 +174,42 @@ class SendMessageActivity() : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         EventBus.getDefault().unregister(this)
+    }
+
+    private fun setupPhoneSpinner() {
+        val phone1 = contact?.nomorhp
+        val phone2 = contact?.nomorhp_2
+        val phones = mutableListOf<String>()
+
+        if (!phone1.isNullOrEmpty() && phone1 != "0") {
+            phones.add(phone1)
+            selectedPhone = phone1
+        }
+
+        if (!phone2.isNullOrEmpty() && phone2 != "0") {
+            phones.add(phone2)
+            if (phone1.isNullOrEmpty() || phone1 == "0") {
+                selectedPhone = phone2
+            }
+        }
+
+        if (phones.isNotEmpty()) {
+            listPhone = phones
+        }
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, listPhone)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        binding.spinPhone.adapter = adapter
+        binding.spinPhone.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedPhone = listPhone[position]
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // Do something
+            }
+        }
     }
 
     private fun toggleMessageType(messageType: String) {
@@ -415,8 +457,14 @@ class SendMessageActivity() : AppCompatActivity() {
                 val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
                 val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
 
-                val rbPhone = createPartFromString(formatPhoneNumber(data.nomorhp))
-                val rbPhoneCategory = createPartFromString(formatPhoneNumber(data.nomor_cat_1))
+                var phoneCat = data.nomor_cat_1
+
+                if (selectedPhone == data.nomorhp_2) {
+                    phoneCat = data.nomor_cat_2
+                }
+
+                val rbPhone = createPartFromString(formatPhoneNumber(selectedPhone))
+                val rbPhoneCategory = createPartFromString(formatPhoneNumber(phoneCat))
                 val rbName = createPartFromString(data.nama)
                 val rbLocation = createPartFromString(data.id_city)
                 val rbBirthday = createPartFromString(data.tgl_lahir)
@@ -631,6 +679,11 @@ class SendMessageActivity() : AppCompatActivity() {
     }
 
     private fun formValidation(): Boolean {
+        if (selectedPhone.isEmpty()) {
+            handleMessage(this, message = "Anda belum memilih nomor")
+            return false
+        }
+
         return when (selectedMsgType) {
             GENERAL_MESSAGE -> {
                 val message = "${ binding.etMessage.text }"
