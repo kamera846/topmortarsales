@@ -21,12 +21,13 @@ import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BID
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_BLACKLIST
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_DATA
 import com.topmortar.topmortarsales.commons.STATUS_CONTACT_PASSIVE
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.model.ContactModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<ContactsRecyclerViewAdapter.ChatViewHolder>() {
+class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>, private val itemClickListener: ItemClickListener, private val userKind: String = "") : RecyclerView.Adapter<ContactsRecyclerViewAdapter.ChatViewHolder>() {
 
     var callback: ((ArrayList<ContactModel>) -> Unit)? = null
 
@@ -62,8 +63,36 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
         private val imgProfile: ImageView = itemView.findViewById(R.id.iv_contact_profile)
         private val badgeSeller: TextView = itemView.findViewById(R.id.textSeller)
         val checkBoxItem: CheckBox = itemView.findViewById(R.id.checkbox)
+        private val textVerified: TextView = itemView.findViewById(R.id.textVerified)
 
         fun bind(chatItem: ContactModel) {
+            if (userKind == USER_KIND_COURIER) {
+                val paymentScore = chatItem.payment_score.toDouble()
+                val isBadReputation = chatItem.reputation == "bad"
+                var itemColor = R.color.baseBackground
+
+                if (paymentScore < 90 || isBadReputation) {
+                    itemColor = R.color.primary15
+                    val reputation = mutableListOf<String>()
+
+                    chatItem.reputation.let {
+                        if (it.isNotBlank()) reputation.add("$it -") else reputation.add(
+                            "score"
+                        )
+                    }
+                    reputation.add("${paymentScore.toInt()}")
+
+                    textVerified.text = reputation.joinToString(separator = " ")
+                    textVerified.setBackgroundResource(R.drawable.bg_primary_round)
+                    textVerified.visibility = View.VISIBLE
+                }
+
+                itemView.setBackgroundColor(
+                    ContextCompat.getColor(itemView.context, itemColor)
+                )
+            } else {
+                setupStatus(chatItem.store_status)
+            }
 
             if (chatItem.is_birthday == "1") icCake.visibility = View.VISIBLE
             else icCake.visibility = View.GONE
@@ -71,22 +100,20 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
             tvPhoneNumber.text = chatItem.deliveryStatus.ifEmpty {
                 if (chatItem.nomorhp.isNotEmpty()) "+${chatItem.nomorhp}" else chatItem.created_at
             }
-            setupStatus(chatItem.store_status)
 
             if (isSelectedItemActive) {
                 imgProfile.visibility = View.GONE
                 checkBoxItem.visibility = View.VISIBLE
+                checkBoxItem.isChecked = selectedItemsId.contains(chatItem.id_contact)
+
+                itemView.setBackgroundColor(
+                    if (selectedItemsId.contains(chatItem.id_contact)) ContextCompat.getColor(itemView.context, R.color.primary15)
+                    else ContextCompat.getColor(itemView.context, R.color.baseBackground)
+                )
             } else {
                 imgProfile.visibility = View.VISIBLE
                 checkBoxItem.visibility = View.GONE
             }
-
-            checkBoxItem.isChecked = selectedItemsId.contains(chatItem.id_contact)
-
-            itemView.setBackgroundColor(
-                if (selectedItemsId.contains(chatItem.id_contact)) ContextCompat.getColor(itemView.context, R.color.primary15)
-                else ContextCompat.getColor(itemView.context, R.color.baseBackground)
-            )
 
             if (chatItem.pass_contact.isNotEmpty() && chatItem.pass_contact != "0") badgeSeller.visibility = View.VISIBLE
             else badgeSeller.visibility = View.GONE
