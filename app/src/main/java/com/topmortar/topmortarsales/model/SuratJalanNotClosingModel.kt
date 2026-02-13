@@ -38,4 +38,5 @@ data class SuratJalanNotClosingModel (
     var full_name: String = "",
     var nama_city: String = "",
     var kode_city: String = "",
+    var payment_score: String = "0.0",
 )

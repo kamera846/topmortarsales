@@ -207,86 +207,97 @@
 
             </LinearLayout>
 
-            <ImageView
-                android:visibility="gone"
-                android:id="@+id/iv_printer"
-                android:layout_width="46dp"
-                android:layout_height="46dp"
-                android:padding="12dp"
-                android:src="@drawable/file_upload_black"
-                android:contentDescription="@string/icon_upload"/>
-
-            <ImageView
-                android:visibility="gone"
-                android:id="@+id/iv_upload"
-                android:layout_width="46dp"
-                android:layout_height="46dp"
-                android:padding="12dp"
-                android:src="@drawable/printer_black"
-                android:contentDescription="@string/icon_printer"/>
-
-            <ImageView
-                android:visibility="gone"
-                android:id="@+id/tooltip_status"
-                android:layout_width="46dp"
-                android:layout_height="46dp"
-                android:padding="16dp"
-                android:src="@drawable/status_active"
-                android:contentDescription="@string/icon_tooltip_information"/>
-
-            <ImageView
-                android:visibility="gone"
-                android:id="@+id/checklist"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:padding="16dp"
-                android:src="@drawable/active_circle_check"
-                android:contentDescription="Icon Checklist"/>
-
             <LinearLayout
-                android:visibility="gone"
-                android:id="@+id/deliveryStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="4dp"
-                android:layout_marginHorizontal="16dp"
-                android:orientation="horizontal"
-                android:background="@drawable/bg_passive_round">
-
-                <TextView
-                    android:id="@+id/deliveryStatusText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="1 hari"
-                    android:textColor="@color/white"
-                    android:textSize="12sp"
-                    android:layout_marginEnd="8dp"
-                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+                android:gravity="end"
+                android:orientation="vertical">
 
                 <ImageView
-                    android:id="@+id/deliveryStatusIcon"
+                    android:visibility="gone"
+                    android:id="@+id/iv_printer"
+                    android:layout_width="46dp"
+                    android:layout_height="46dp"
+                    android:padding="12dp"
+                    android:src="@drawable/file_upload_black"
+                    android:contentDescription="@string/icon_upload"/>
+
+                <ImageView
+                    android:visibility="gone"
+                    android:id="@+id/iv_upload"
+                    android:layout_width="46dp"
+                    android:layout_height="46dp"
+                    android:padding="12dp"
+                    android:src="@drawable/printer_black"
+                    android:contentDescription="@string/icon_printer"/>
+
+                <ImageView
+                    android:visibility="gone"
+                    android:id="@+id/tooltip_status"
                     android:layout_width="14dp"
                     android:layout_height="14dp"
-                    android:src="@drawable/truck_fast_white_only"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginVertical="2dp"
+                    android:src="@drawable/status_active"
+                    android:contentDescription="@string/icon_tooltip_information"/>
+
+                <ImageView
+                    android:visibility="gone"
+                    android:id="@+id/checklist"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:padding="16dp"
+                    android:src="@drawable/active_circle_check"
                     android:contentDescription="Icon Checklist"/>
 
-            </LinearLayout>
+                <LinearLayout
+                    android:visibility="gone"
+                    android:id="@+id/deliveryStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginVertical="2dp"
+                    android:orientation="horizontal"
+                    android:background="@drawable/bg_passive_round">
 
-            <TextView
-                android:visibility="gone"
-                android:id="@+id/textVerified"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Verified"
-                android:textColor="@color/white"
-                android:textSize="12sp"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="4dp"
-                android:layout_marginHorizontal="16dp"
-                android:background="@drawable/bg_active_round"
-                android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+                    <TextView
+                        android:id="@+id/deliveryStatusText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="1 hari"
+                        android:textColor="@color/white"
+                        android:textSize="12sp"
+                        android:layout_marginEnd="8dp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+                    <ImageView
+                        android:id="@+id/deliveryStatusIcon"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:src="@drawable/truck_fast_white_only"
+                        android:contentDescription="Icon Checklist"/>
+
+                </LinearLayout>
+
+                <TextView
+                    android:visibility="gone"
+                    android:id="@+id/textVerified"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Verified"
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginVertical="2dp"
+                    android:background="@drawable/bg_active_round"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
+
+            </LinearLayout>
 
         </LinearLayout>
 

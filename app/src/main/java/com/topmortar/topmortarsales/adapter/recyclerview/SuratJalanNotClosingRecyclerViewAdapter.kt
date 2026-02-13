@@ -13,6 +13,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.TooltipCompat
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.utils.DateFormat
@@ -35,9 +36,30 @@ class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<S
         private val deliveryStatus: LinearLayout = itemView.findViewById(R.id.deliveryStatus)
         private val deliveryStatusText: TextView = itemView.findViewById(R.id.deliveryStatusText)
         private val deliveryStatusIcon: ImageView = itemView.findViewById(R.id.deliveryStatusIcon)
+        private val textVerified: TextView = itemView.findViewById(R.id.textVerified)
 
         fun bind(item: SuratJalanNotClosingModel) {
-            var notesText = "* Dibuat ${DateFormat.format(item.dalivery_date, "yyyy-MM-dd HH:mm:ss", "dd MMM yyyy, HH:mm")}"
+            val paymentScore = item.payment_score.toDouble()
+            val isBadReputation = item.reputation == "bad"
+            var itemColor = R.color.baseBackground
+
+            if (paymentScore < 90 || isBadReputation) {
+                itemColor = R.color.primary15
+                val reputation = mutableListOf<String>()
+
+                item.reputation.let { if (it.isNotBlank()) reputation.add("$it -") else reputation.add("score") }
+                reputation.add("${paymentScore.toInt()}")
+
+                textVerified.text = reputation.joinToString(separator = " ")
+                textVerified.setBackgroundResource(R.drawable.bg_primary_round)
+                textVerified.visibility = View.VISIBLE
+            }
+
+            itemView.setBackgroundColor(
+                ContextCompat.getColor(itemView.context, itemColor)
+            )
+
+            var notesText = "* Dibuat ${DateFormat.format(item.dalivery_date, "yyyy-MM-dd HH:mm:ss", "dd MMM, HH:mm")}"
             val dateProcessed = item.dateProcessed
             var dateCounter = item.dalivery_date.let {
                 if (it.isNotEmpty()) {
@@ -49,8 +71,8 @@ class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<S
                 notesText += ". Diproses "
                 deliveryStatusIcon.setImageResource(R.drawable.truck_fast_white_only)
                 item.date_printed.let {
-                    if (it != null && it.isNotEmpty()) {
-                        notesText += DateFormat.format(it, "yyyy-MM-dd HH:mm:ss", "dd MMM yyyy, HH:mm")
+                    if (!it.isNullOrEmpty()) {
+                        notesText += DateFormat.format(it, "yyyy-MM-dd HH:mm:ss", "dd MMM, HH:mm")
                         dateCounter = DateFormat.differenceDateNowDescCustom(it)
                     } else {
                         dateCounter = -1
