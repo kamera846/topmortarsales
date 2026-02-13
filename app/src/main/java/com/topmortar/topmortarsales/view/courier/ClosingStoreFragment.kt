@@ -82,6 +82,7 @@ class ClosingStoreFragment : Fragment() {
     private lateinit var sessionManager: SessionManager
     private val userFullName get() = sessionManager.fullName().toString()
     private val userID get() = sessionManager.userID().toString()
+    private val userKind get() = sessionManager.userKind().toString()
 
     // Delivery
     private lateinit var fusedLocationClient: FusedLocationProviderClient
@@ -287,7 +288,7 @@ class ClosingStoreFragment : Fragment() {
                 }
             }
 
-        })
+        }, userKind)
 
         context?.let { ctx ->
             binding.rvChatList.layoutManager = LinearLayoutManager(ctx)
