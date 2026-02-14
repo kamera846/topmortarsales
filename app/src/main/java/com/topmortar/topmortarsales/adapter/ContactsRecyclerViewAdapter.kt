@@ -70,6 +70,7 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
                 val paymentScore = chatItem.payment_score.toDouble()
                 val isBadReputation = chatItem.reputation == "bad"
                 var itemColor = R.color.baseBackground
+                textVerified.visibility = View.GONE
 
                 if (paymentScore < 90 || isBadReputation) {
                     itemColor = R.color.primary15
