@@ -42,6 +42,7 @@ class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<S
             val paymentScore = item.payment_score.toDouble()
             val isBadReputation = item.reputation == "bad"
             var itemColor = R.color.baseBackground
+            textVerified.visibility = View.GONE
 
             if (paymentScore < 90 || isBadReputation) {
                 itemColor = R.color.primary15
