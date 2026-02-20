@@ -39,7 +39,7 @@ class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<S
         private val textVerified: TextView = itemView.findViewById(R.id.textVerified)
 
         fun bind(item: SuratJalanNotClosingModel) {
-            val paymentScore = item.payment_score.toDouble()
+            val paymentScore = item.payment_score?.toDouble() ?: 0.0
             val isBadReputation = item.reputation == "bad"
             var itemColor = R.color.baseBackground
             textVerified.visibility = View.GONE

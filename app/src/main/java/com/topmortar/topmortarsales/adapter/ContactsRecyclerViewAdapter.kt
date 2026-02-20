@@ -67,7 +67,7 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
 
         fun bind(chatItem: ContactModel) {
             if (userKind == USER_KIND_COURIER) {
-                val paymentScore = chatItem.payment_score.toDouble()
+                val paymentScore = chatItem.payment_score?.toDouble() ?: 0.0
                 val isBadReputation = chatItem.reputation == "bad"
                 var itemColor = R.color.baseBackground
                 textVerified.visibility = View.GONE
