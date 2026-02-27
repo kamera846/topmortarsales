@@ -33,6 +33,6 @@ data class ContactModel(
     var interval_visit: String = "",
     var is_printed: String = "",
     var date_printed: String? = null,
-    var payment_score: String = "0.0",
+    var payment_score: String? = "0.0",
 
 )

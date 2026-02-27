@@ -39,19 +39,21 @@ class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<S
         private val textVerified: TextView = itemView.findViewById(R.id.textVerified)
 
         fun bind(item: SuratJalanNotClosingModel) {
-            val paymentScore = item.payment_score.toDouble()
-            val isBadReputation = item.reputation == "bad"
+            val paymentScore = item.payment_score?.toDouble() ?: 0.0
+//            val isBadReputation = item.reputation == "bad"
             var itemColor = R.color.baseBackground
             textVerified.visibility = View.GONE
 
-            if (paymentScore < 90 || isBadReputation) {
+//            if (paymentScore < 90 || isBadReputation) {
+            if (paymentScore < 90) {
                 itemColor = R.color.primary15
-                val reputation = mutableListOf<String>()
+//                val reputation = mutableListOf<String>()
 
-                item.reputation.let { if (it.isNotBlank()) reputation.add("$it -") else reputation.add("score") }
-                reputation.add("${paymentScore.toInt()}")
+//                item.reputation.let { if (it.isNotBlank()) reputation.add("$it -") else reputation.add("score") }
+//                reputation.add("${paymentScore.toInt()}")
 
-                textVerified.text = reputation.joinToString(separator = " ")
+//                textVerified.text = reputation.joinToString(separator = " ")
+                textVerified.text = "skor $paymentScore"
                 textVerified.setBackgroundResource(R.drawable.bg_primary_round)
                 textVerified.visibility = View.VISIBLE
             }

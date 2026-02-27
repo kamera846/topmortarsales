@@ -67,23 +67,25 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
 
         fun bind(chatItem: ContactModel) {
             if (userKind == USER_KIND_COURIER) {
-                val paymentScore = chatItem.payment_score.toDouble()
-                val isBadReputation = chatItem.reputation == "bad"
+                val paymentScore = chatItem.payment_score?.toDouble() ?: 0.0
+//                val isBadReputation = chatItem.reputation == "bad"
                 var itemColor = R.color.baseBackground
                 textVerified.visibility = View.GONE
 
-                if (paymentScore < 90 || isBadReputation) {
+//                if (paymentScore < 90 || isBadReputation) {
+                if (paymentScore < 90) {
                     itemColor = R.color.primary15
-                    val reputation = mutableListOf<String>()
+//                    val reputation = mutableListOf<String>()
+//
+//                    chatItem.reputation.let {
+//                        if (it.isNotBlank()) reputation.add("$it -") else reputation.add(
+//                            "score"
+//                        )
+//                    }
+//                    reputation.add("${paymentScore.toInt()}")
 
-                    chatItem.reputation.let {
-                        if (it.isNotBlank()) reputation.add("$it -") else reputation.add(
-                            "score"
-                        )
-                    }
-                    reputation.add("${paymentScore.toInt()}")
-
-                    textVerified.text = reputation.joinToString(separator = " ")
+//                    textVerified.text = reputation.joinToString(separator = " ")
+                    textVerified.text = "skor $paymentScore"
                     textVerified.setBackgroundResource(R.drawable.bg_primary_round)
                     textVerified.visibility = View.VISIBLE
                 }

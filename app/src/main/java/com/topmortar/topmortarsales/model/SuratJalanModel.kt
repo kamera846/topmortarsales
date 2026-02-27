@@ -22,5 +22,6 @@ data class SuratJalanModel(
     var nama_kendaraan: String = "",
     var nopol_kendaraan: String = "",
     var can_closing: String = "yes",
+    var msg_can_closing: String = "",
     var details: ArrayList<DetailSuratJalanModel> = ArrayList(),
 )
