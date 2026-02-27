@@ -175,6 +175,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     private var isClosingAction: Boolean = false
     private var isCod: Boolean = false
     private var isCanClosing: Boolean = false
+    private var MsgCanClosing: String = ""
     private var isRequestSync: Boolean = false
 
     private var detailContact: ContactModel? = null
@@ -456,6 +457,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                         isClosing = data.is_closing == "1"
                         isCod = data.is_cod == "1"
                         isCanClosing = data.can_closing == "yes"
+                        MsgCanClosing = data.msg_can_closing
 
                         companyLogoRetina = R.drawable.logo_retina_11zon
                         companyLogoBlack = R.drawable.logo_top_mortar
@@ -489,7 +491,21 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                             btnBottomAction.visibility = View.GONE
                         }
 
-                        setRecyclerView(response.results[0].details.let { if (it.isEmpty()) arrayListOf() else it })
+                        var details = data.details.let { if (it.isEmpty()) arrayListOf() else it }
+
+                        if (!isCanClosing && !isClosing) {
+                            if (userKind == USER_KIND_COURIER) {
+                                btnBottomAction.visibility = View.GONE
+                                details = arrayListOf()
+                            }
+                            val builder = AlertDialog.Builder(this@DetailSuratJalanActivity)
+                            builder.setTitle("Peringatan!")
+                                .setMessage(MsgCanClosing)
+                                .setPositiveButton("Tutup") { dialog, _ -> dialog.dismiss() }
+                            builder.show()
+                        }
+
+                        setRecyclerView(details)
 
 //                        Toast.makeText(this@DetailSuratJalanActivity, "${detailContact!!.maps_url}", TOAST_SHORT).show()
                         loadingState(false)
@@ -597,7 +613,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         if (!isCanClosing) {
             val builder = AlertDialog.Builder(this)
             builder.setTitle("Peringatan!")
-                .setMessage("Stok tidak mencukupi atau habis, tidak bisa closing surat jalan untuk saat ini.")
+                .setMessage(MsgCanClosing)
                 .setPositiveButton("Oke") { dialog, _ -> dialog.dismiss() }
             builder.show()
             return
