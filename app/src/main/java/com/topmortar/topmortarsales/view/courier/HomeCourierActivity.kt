@@ -58,7 +58,8 @@ import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
-import com.topmortar.topmortarsales.commons.services.TrackingService
+import com.topmortar.topmortarsales.commons.services.startTrackingService
+import com.topmortar.topmortarsales.commons.services.stopTrackingService
 import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
@@ -353,8 +354,7 @@ class HomeCourierActivity : AppCompatActivity() {
 
             absentProgressBar?.dismiss()
 
-            val serviceIntent = Intent(this, TrackingService::class.java)
-            stopService(serviceIntent)
+            stopTrackingService()
 
             val dialogView = layoutInflater.inflate(R.layout.modal_mock_location, null)
             AlertDialog.Builder(this)
@@ -385,8 +385,7 @@ class HomeCourierActivity : AppCompatActivity() {
 
             absentProgressBar?.dismiss()
 
-            val serviceIntent = Intent(this, TrackingService::class.java)
-            stopService(serviceIntent)
+            stopTrackingService()
 
             AlertDialog.Builder(this)
                 .setCancelable(false)
@@ -573,21 +572,13 @@ class HomeCourierActivity : AppCompatActivity() {
 
         when {
             isAbsentMorningNow && !isAbsentEveningNow -> {
-                val serviceIntentDD = Intent(this, TrackingService::class.java)
-                serviceIntentDD.putExtra("userId", userId)
-                serviceIntentDD.putExtra("userDistributorId",userDistributorId ?: "-start-005-$userName")
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    startForegroundService(serviceIntentDD)
-                } else {
-                    startService(serviceIntentDD)
-                }
+                startTrackingService(userId, userDistributorId)
 
                 sessionManager.absentDateTime(morningDateTime!!)
                 lockMenuItem(false)
             } else -> {
-                val serviceIntent = Intent(this,TrackingService::class.java)
-                stopService(serviceIntent)
+                stopTrackingService()
 
                 lockMenuItem(true)
             }

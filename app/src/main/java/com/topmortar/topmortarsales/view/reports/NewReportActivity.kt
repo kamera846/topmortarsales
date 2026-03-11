@@ -54,7 +54,8 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
-import com.topmortar.topmortarsales.commons.services.TrackingService
+import com.topmortar.topmortarsales.commons.services.stopTrackingService
+import com.topmortar.topmortarsales.commons.services.updateTrackingServiceNow
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
@@ -263,8 +264,7 @@ class NewReportActivity : AppCompatActivity() {
     private fun showDialogIsMock() {
         try {
 
-            val serviceIntent = Intent(this, TrackingService::class.java)
-            stopService(serviceIntent)
+            stopTrackingService()
 
             val dialogView = layoutInflater.inflate(R.layout.modal_mock_location, null)
             AlertDialog.Builder(this)
@@ -642,8 +642,7 @@ class NewReportActivity : AppCompatActivity() {
 
             progressBar.dismiss()
 
-            val serviceIntent = Intent(this, TrackingService::class.java)
-            stopService(serviceIntent)
+            stopTrackingService()
 
             AlertDialog.Builder(this)
                 .setCancelable(false)
@@ -923,6 +922,8 @@ class NewReportActivity : AppCompatActivity() {
                 submitDialog.dismiss()
                 loadingSubmit(false)
 
+            } finally {
+                updateTrackingServiceNow()
             }
 
         }

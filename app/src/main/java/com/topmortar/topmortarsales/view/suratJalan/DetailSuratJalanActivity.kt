@@ -101,7 +101,8 @@ import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.printUtils.Comman
 import com.topmortar.topmortarsales.commons.printUtils.PdfDocumentAdapter
-import com.topmortar.topmortarsales.commons.services.TrackingService
+import com.topmortar.topmortarsales.commons.services.stopTrackingService
+import com.topmortar.topmortarsales.commons.services.updateTrackingServiceNow
 import com.topmortar.topmortarsales.commons.utils.BluetoothPrinterManager
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
@@ -696,8 +697,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     private fun showDialogGooglePlayNotAvailable() {
         try {
 
-            val serviceIntent = Intent(this, TrackingService::class.java)
-            stopService(serviceIntent)
+            stopTrackingService()
 
             AlertDialog.Builder(this)
                 .setCancelable(false)
@@ -934,6 +934,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                                 ?.let { File(it).mkdirs() }
                             createPDFFile(Comman.getAppPath(this@DetailSuratJalanActivity) + fileName, data)
                             printingState(false)
+                            updateTrackingServiceNow()
 
                         }
                         RESPONSE_STATUS_EMPTY -> {
@@ -1069,6 +1070,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
         Handler(Looper.getMainLooper()).postDelayed({
             printingState(false)
+            updateTrackingServiceNow()
         }, 1000)
     }
 

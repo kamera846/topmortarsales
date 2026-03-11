@@ -42,7 +42,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
-import com.topmortar.topmortarsales.commons.services.TrackingService
+import com.topmortar.topmortarsales.commons.services.stopTrackingService
 import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
@@ -357,8 +357,7 @@ class VoucherActivity : AppCompatActivity() {
 
             progressBar.dismiss()
 
-            val serviceIntent = Intent(this, TrackingService::class.java)
-            stopService(serviceIntent)
+            stopTrackingService()
 
             AlertDialog.Builder(this)
                 .setCancelable(false)

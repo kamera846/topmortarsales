@@ -47,7 +47,8 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
-import com.topmortar.topmortarsales.commons.services.TrackingService
+import com.topmortar.topmortarsales.commons.services.stopTrackingService
+import com.topmortar.topmortarsales.commons.services.updateTrackingServiceNow
 import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
@@ -248,8 +249,7 @@ class ChecklistReportActivity : AppCompatActivity() {
     private fun showDialogIsMock() {
         try {
 
-            val serviceIntent = Intent(this, TrackingService::class.java)
-            stopService(serviceIntent)
+            stopTrackingService()
 
             val dialogView = layoutInflater.inflate(R.layout.modal_mock_location, null)
             AlertDialog.Builder(this)
@@ -475,8 +475,7 @@ class ChecklistReportActivity : AppCompatActivity() {
 
             progressBar.dismiss()
 
-            val serviceIntent = Intent(this, TrackingService::class.java)
-            stopService(serviceIntent)
+            stopTrackingService()
 
             AlertDialog.Builder(this)
                 .setCancelable(false)
@@ -657,6 +656,8 @@ class ChecklistReportActivity : AppCompatActivity() {
                 progressBar.dismiss()
                 FirebaseUtils.logErr(this@ChecklistReportActivity, "Failed ChecklistReportActivity on submitReport(). Catch: ${e.message}")
                 handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
+            } finally {
+                updateTrackingServiceNow()
             }
         }
     }

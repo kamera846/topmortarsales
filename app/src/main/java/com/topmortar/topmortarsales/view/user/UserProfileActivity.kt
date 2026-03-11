@@ -52,7 +52,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_MARKETING
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
-import com.topmortar.topmortarsales.commons.services.TrackingService
+import com.topmortar.topmortarsales.commons.services.stopTrackingService
 import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
@@ -566,11 +566,7 @@ class UserProfileActivity : AppCompatActivity() {
             Log.d("Firebase Auth", "$e")
         }
 
-//        val isTracking = CustomUtility(this).isServiceRunning(TrackingService::class.java)
-//        if (isTracking) {
-            val serviceIntent = Intent(this, TrackingService::class.java)
-            stopService(serviceIntent)
-//        }
+        stopTrackingService()
 
         Handler(Looper.getMainLooper()).postDelayed({
             sessionManager.setLoggedIn(LOGGED_OUT)

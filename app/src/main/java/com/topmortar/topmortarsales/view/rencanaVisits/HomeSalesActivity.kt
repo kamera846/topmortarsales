@@ -69,7 +69,8 @@ import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_MARKETING
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
-import com.topmortar.topmortarsales.commons.services.TrackingService
+import com.topmortar.topmortarsales.commons.services.startTrackingService
+import com.topmortar.topmortarsales.commons.services.stopTrackingService
 import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
@@ -158,6 +159,10 @@ class HomeSalesActivity : AppCompatActivity() {
         }
     }
 
+    private val requestNotificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        // Do something
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -182,6 +187,15 @@ class HomeSalesActivity : AppCompatActivity() {
 
         })
 
+    }
+
+    fun requestNotificationPermission() {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestNotificationPermission.launch(
+                Manifest.permission.POST_NOTIFICATIONS
+            )
+        }
     }
 
     private fun checkPermissionsRequirement(): Boolean {
@@ -333,8 +347,7 @@ class HomeSalesActivity : AppCompatActivity() {
 
             dismissProgressDialog()
 
-            val serviceIntent = Intent(this, TrackingService::class.java)
-            stopService(serviceIntent)
+            stopTrackingService()
 
             val dialogView = layoutInflater.inflate(R.layout.modal_mock_location, null)
             AlertDialog.Builder(this)
@@ -365,8 +378,7 @@ class HomeSalesActivity : AppCompatActivity() {
 
             absentProgressBar?.dismiss()
 
-            val serviceIntent = Intent(this, TrackingService::class.java)
-            stopService(serviceIntent)
+            stopTrackingService()
 
             AlertDialog.Builder(this)
                 .setCancelable(false)
@@ -407,8 +419,7 @@ class HomeSalesActivity : AppCompatActivity() {
 
             dismissProgressDialog()
 
-            val serviceIntent = Intent(this, TrackingService::class.java)
-            stopService(serviceIntent)
+            stopTrackingService()
 
             AlertDialog.Builder(this)
                 .setMessage("Aplikasi memerlukan lokasi untuk berfungsi. Aktifkan lokasi sekarang?")
@@ -1369,21 +1380,11 @@ class HomeSalesActivity : AppCompatActivity() {
 
         when {
             isAbsentMorningNow && !isAbsentEveningNow -> {
-                val serviceIntentDD = Intent(this, TrackingService::class.java)
-                serviceIntentDD.putExtra("userId", userId)
-                serviceIntentDD.putExtra("userDistributorId",userDistributorId ?: "-start-005-$userName")
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    startForegroundService(serviceIntentDD)
-                } else {
-                    startService(serviceIntentDD)
-                }
-
+                startTrackingService(userId, userDistributorId)
                 sessionManager.absentDateTime(morningDateTime!!)
                 lockMenuItem(false)
             } else -> {
-                val serviceIntent = Intent(this,TrackingService::class.java)
-                stopService(serviceIntent)
+                stopTrackingService()
 
                 lockMenuItem(true)
             }
@@ -1885,6 +1886,7 @@ class HomeSalesActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
+        requestNotificationPermission()
         checkLocationPermission()
         super.onResume()
     }
