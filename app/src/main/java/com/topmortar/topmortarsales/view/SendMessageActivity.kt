@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Paint
 import android.net.Uri
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -12,7 +13,6 @@ import android.widget.ArrayAdapter
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
@@ -87,6 +87,8 @@ class SendMessageActivity() : AppCompatActivity() {
 
     private var listPhone: List<String> = mutableListOf("== Pilih Nomor Telpon")
     private var selectedPhone = ""
+
+    private var submitCountDown: CountDownTimer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -174,6 +176,7 @@ class SendMessageActivity() : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         EventBus.getDefault().unregister(this)
+        submitCountDown?.cancel()
     }
 
     private fun setupPhoneSpinner() {
@@ -287,9 +290,6 @@ class SendMessageActivity() : AppCompatActivity() {
 
     private fun loadingState(state: Boolean) {
 
-        binding.btnSend.setTextColor(ContextCompat.getColor(this, R.color.white))
-        binding.btnSend.setBackgroundColor(ContextCompat.getColor(this, R.color.primary_200))
-
         if (state) {
 
             binding.btnSend.isEnabled = false
@@ -298,8 +298,7 @@ class SendMessageActivity() : AppCompatActivity() {
         } else {
 
             binding.btnSend.isEnabled = true
-            binding.btnSend.text = this.getString(R.string.submit)
-            binding.btnSend.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
+            binding.btnSend.text = "Kirim Sekarang"
 
         }
 
@@ -577,6 +576,22 @@ class SendMessageActivity() : AppCompatActivity() {
                 handleMessage(this@SendMessageActivity, TAG_RESPONSE_CONTACT, "Failed run service send message. Exception " + e.message)
                 loadingState(false)
 
+            } finally {
+                if (submitCountDown != null) submitCountDown?.cancel()
+                submitCountDown = object : CountDownTimer(10000, 1000) {
+
+                    override fun onTick(millisUntilFinished: Long) {
+                        val second = millisUntilFinished / 1000
+                        binding.btnSend.text = "Tunggu $second detik"
+                        binding.btnSend.isEnabled = false
+                    }
+
+                    override fun onFinish() {
+                        binding.btnSend.text = "Kirim Sekarang"
+                        binding.btnSend.isEnabled = true
+                    }
+
+                }.start()
             }
 
         }
@@ -672,6 +687,22 @@ class SendMessageActivity() : AppCompatActivity() {
                 handleMessage(this@SendMessageActivity, TAG_RESPONSE_CONTACT, "Failed run service send message. Exception " + e.message)
                 loadingState(false)
 
+            } finally {
+                if (submitCountDown != null) submitCountDown?.cancel()
+                submitCountDown = object : CountDownTimer(10000, 1000) {
+
+                    override fun onTick(millisUntilFinished: Long) {
+                        val second = millisUntilFinished / 1000
+                        binding.btnSend.text = "Tunggu $second detik"
+                        binding.btnSend.isEnabled = false
+                    }
+
+                    override fun onFinish() {
+                        binding.btnSend.text = "Kirim Sekarang"
+                        binding.btnSend.isEnabled = true
+                    }
+
+                }.start()
             }
 
         }

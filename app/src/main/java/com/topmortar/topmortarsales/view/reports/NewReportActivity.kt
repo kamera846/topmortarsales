@@ -10,6 +10,7 @@ import android.location.Location
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -116,6 +117,8 @@ class NewReportActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private var locationCallback: LocationCallback? = null
+
+    private var submitCountDown: CountDownTimer? = null
 
     private val locationResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == RESULT_OK) {
@@ -925,6 +928,19 @@ class NewReportActivity : AppCompatActivity() {
 
             } finally {
                 saveTrackingServiceLocation(userId = idUser, contactId = id, actionType = TrackingService.ACTION_TYPE_VISIT)
+                submitCountDown = object : CountDownTimer(10000, 1000) {
+
+                    override fun onTick(millisUntilFinished: Long) {
+                        val second = millisUntilFinished / 1000
+                        binding.btnReport.text = "Tunggu $second detik"
+                        binding.btnReport.isEnabled = false
+                    }
+
+                    override fun onFinish() {
+                        loadingSubmit(false)
+                    }
+
+                }.start()
             }
 
         }
@@ -995,6 +1011,7 @@ class NewReportActivity : AppCompatActivity() {
                 )
             }
         }
+        submitCountDown?.cancel()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
