@@ -113,7 +113,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_MARKETING
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
-import com.topmortar.topmortarsales.commons.services.TrackingService
+import com.topmortar.topmortarsales.commons.services.startTrackingService
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
 import com.topmortar.topmortarsales.commons.utils.CurrencyFormat
 import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
@@ -2777,7 +2777,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                         intent.putExtra(CONST_CONTACT_ID, contactId)
                                         detailLauncher.launch(intent)
                                     }
-                                    checkServiceStatus()
+//                                    checkServiceStatus()
                                 } else setupBtnDelivery()
                             } else setupBtnDelivery()
                         }
@@ -2956,18 +2956,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     }
 
     private fun checkServiceStatus() {
-//        val isTracking = CustomUtility(this@DetailContactActivity).isServiceRunning(TrackingService::class.java)
-//        if (!isTracking) {
-            val serviceIntent = Intent(this@DetailContactActivity, TrackingService::class.java)
-            serviceIntent.putExtra("userId", userID)
-            serviceIntent.putExtra("userDistributorId", userDistributorIds ?: "-start-002-$username")
-            if (userKind == USER_KIND_COURIER) serviceIntent.putExtra("deliveryId", deliveryId)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(serviceIntent)
-            } else {
-                startService(serviceIntent)
-            }
-//        }
+        val courierDeliveryId = if (userKind == USER_KIND_COURIER) deliveryId else null
+        startTrackingService(userID, userDistributorIds, courierDeliveryId)
     }
 
     private fun scrollViewListener() {

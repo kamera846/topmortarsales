@@ -42,6 +42,8 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_SUCCESS
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.services.TrackingService
+import com.topmortar.topmortarsales.commons.services.saveTrackingServiceLocation
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
@@ -158,6 +160,8 @@ class PreviewClosingActivity : AppCompatActivity() {
                 )
                 loadingState(false)
 
+            } finally {
+                saveTrackingServiceLocation(userId = userID ?: "0", contactId = contactId ?: "0", actionType = TrackingService.ACTION_TYPE_CLOSING)
             }
 
         }
@@ -367,23 +371,6 @@ class PreviewClosingActivity : AppCompatActivity() {
                                 }
                         }
 
-//                        childDelivery?.child("$deliveryId/stores/$contactId")?.removeValue()
-
-//                        childDriver?.child("stores")?.addListenerForSingleValueEvent(object : ValueEventListener {
-//                            override fun onDataChange(dataSnapshot: DataSnapshot) {
-////                                val isTracking = CustomUtility(this@PreviewClosingActivity).isServiceRunning(TrackingService::class.java)
-////                                if (!dataSnapshot.exists() && isTracking) {
-////                                    val serviceIntent = Intent(this@PreviewClosingActivity, TrackingService::class.java)
-////                                    this@PreviewClosingActivity.stopService(serviceIntent)
-////                                }
-//                                finishClosing(message)
-//                            }
-//
-//                            override fun onCancelled(error: DatabaseError) {
-//                                finishClosing(message)
-//                            }
-//
-//                        })
 
                     } else {
                         finishClosing(message)

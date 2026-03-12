@@ -1,0 +1,8 @@
+<TextView android:id="@+id/tvContent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="#CC000000"
+    android:textColor="#FFFFFF"
+    android:padding="8dp"
+    android:text="Terakhir diperbarui pada:\nyyyy-MM-dd HH:mm:ss"
+    xmlns:android="http://schemas.android.com/apk/res/android" />

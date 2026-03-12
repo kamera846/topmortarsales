@@ -8,6 +8,7 @@ import android.location.Location
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -48,6 +49,8 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.services.TrackingService
+import com.topmortar.topmortarsales.commons.services.saveTrackingServiceLocation
+import com.topmortar.topmortarsales.commons.services.stopTrackingService
 import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
@@ -91,6 +94,8 @@ class ChecklistReportActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private var locationCallback: LocationCallback? = null
+
+    private var submitCountDown: CountDownTimer? = null
 
     private val locationResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
 //        if (it.resultCode == RESULT_OK) {
@@ -248,8 +253,7 @@ class ChecklistReportActivity : AppCompatActivity() {
     private fun showDialogIsMock() {
         try {
 
-            val serviceIntent = Intent(this, TrackingService::class.java)
-            stopService(serviceIntent)
+            stopTrackingService()
 
             val dialogView = layoutInflater.inflate(R.layout.modal_mock_location, null)
             AlertDialog.Builder(this)
@@ -475,8 +479,7 @@ class ChecklistReportActivity : AppCompatActivity() {
 
             progressBar.dismiss()
 
-            val serviceIntent = Intent(this, TrackingService::class.java)
-            stopService(serviceIntent)
+            stopTrackingService()
 
             AlertDialog.Builder(this)
                 .setCancelable(false)
@@ -657,6 +660,22 @@ class ChecklistReportActivity : AppCompatActivity() {
                 progressBar.dismiss()
                 FirebaseUtils.logErr(this@ChecklistReportActivity, "Failed ChecklistReportActivity on submitReport(). Catch: ${e.message}")
                 handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
+            } finally {
+                saveTrackingServiceLocation(userId = idUser, contactId = iContactId ?: "0", actionType = TrackingService.ACTION_TYPE_VISIT)
+                submitCountDown = object : CountDownTimer(10000, 1000) {
+
+                    override fun onTick(millisUntilFinished: Long) {
+                        val second = millisUntilFinished / 1000
+                        binding.submitReport.text = "Tunggu $second detik"
+                        binding.submitReport.isEnabled = false
+                    }
+
+                    override fun onFinish() {
+                        binding.submitReport.text = "Kirim Laporan"
+                        binding.submitReport.isEnabled = true
+                    }
+
+                }.start()
             }
         }
     }
@@ -803,6 +822,7 @@ class ChecklistReportActivity : AppCompatActivity() {
                 )
             }
         }
+        submitCountDown?.cancel()
     }
 
 }

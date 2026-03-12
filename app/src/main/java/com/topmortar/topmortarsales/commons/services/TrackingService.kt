@@ -1,4 +1,4 @@
-@file:Suppress("DEPRECATION")
+@file:Suppress("MissingPermission")
 
 package com.topmortar.topmortarsales.commons.services
 
@@ -7,138 +7,354 @@ import android.app.Notification
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
-import android.os.Handler
-import android.os.IBinder
-import android.os.Looper
+import android.location.Location
+import android.os.*
+import android.util.Log
+import com.google.android.gms.location.*
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
 import com.google.firebase.database.DatabaseReference
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.utils.CustomNotificationBuilder
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
+import com.topmortar.topmortarsales.commons.utils.createPartFromString
+import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.view.SplashScreenActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
 import java.util.Calendar
 
 class TrackingService : Service() {
 
-    private var fusedLocationClient: FusedLocationProviderClient? = null
+    companion object {
+        var isRunning = false
+        const val NOTIFICATION_ID = 1010
+        private const val LOCATION_INTERVAL = 2 * 60 * 1000L // 2 menit
+        private const val LOCATION_MIN_DISTANCE = 30f // 30 meter
+
+        const val ACTION_STOP = "STOP_SERVICE"
+        const val ACTION_UPDATE_LOCATION_NOW = "UPDATE_LOCATION_NOW"
+        const val ACTION_TYPE_DEFAULT = "Default"
+        const val ACTION_TYPE_VISIT = "Visit"
+        const val ACTION_TYPE_CLOSING = "Closing"
+    }
+
+    private var userId : String? = null
+    private var distributorId : String? = null
+    private var deliveryId : String? = null
+
+    private var lastApiUpdate = 0L
+
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationRequest: LocationRequest
     private var locationCallback: LocationCallback? = null
+
     private lateinit var firebaseReference: DatabaseReference
     private lateinit var childDelivery: DatabaseReference
     private lateinit var childAbsent: DatabaseReference
-    private lateinit var childDriver: DatabaseReference
-    private var isLocationUpdating = false
+    private var childDriver: DatabaseReference? = null
 
-    companion object {
-        const val NOTIFICATION_ID = 1010
-    }
+    private val handler = Handler(Looper.getMainLooper())
+
+    private var wakeLock: PowerManager.WakeLock? = null
+
+    private val serviceScope = CoroutineScope(
+        SupervisorJob() + Dispatchers.IO
+    )
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val action = intent?.action
 
-        if (action == "STOP_SERVICE") {
-            stopSelf()
-            return START_NOT_STICKY
+        when (intent?.action) {
+
+            ACTION_STOP -> {
+                stopSelf()
+                return START_NOT_STICKY
+            }
+
+            ACTION_UPDATE_LOCATION_NOW -> {
+                requestSingleLocationUpdate(intent)
+                return START_STICKY
+            }
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForeground(NOTIFICATION_ID, createNotification())
-        } else {
-            startService(intent)
+        intent?.let {
+            userId = it.getStringExtra("userId")
+            distributorId = it.getStringExtra("userDistributorId")
+            deliveryId = it.getStringExtra("deliveryId")
         }
 
+        acquireWakeLock()
+//        startForegroundService()
+        startForeground(NOTIFICATION_ID, createNotification())
         startLocationUpdates(intent)
         scheduleServiceStop()
+
         return START_STICKY
     }
 
+    override fun onCreate() {
+        super.onCreate()
+        isRunning = true
+    }
+
     override fun onDestroy() {
+        wakeLock?.release()
+        serviceScope.cancel()
         stopLocationUpdates()
+        handler.removeCallbacksAndMessages(null)
+        isRunning = false
         super.onDestroy()
     }
 
-    private fun createNotification() : Notification {
-        val notificationIntent = Intent(this, SplashScreenActivity::class.java)
+    override fun onBind(intent: Intent?): IBinder? = null
+
+
+    // -------------------------
+    // Wakelock Service
+    // -------------------------
+
+    private fun acquireWakeLock() {
+
+        if (wakeLock?.isHeld == true) return
+
+        val pm = getSystemService(POWER_SERVICE) as PowerManager
+
+        wakeLock = pm.newWakeLock(
+            PowerManager.PARTIAL_WAKE_LOCK,
+            "TopMortar:TrackingWakeLock"
+        )
+
+        wakeLock?.acquire(15 * 60 * 1000L) // 15 menit
+    }
+
+    // -------------------------
+    // Foreground Notification
+    // -------------------------
+
+//    private fun startForegroundService() {
+//
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            startForeground(NOTIFICATION_ID, createNotification())
+//        }
+//    }
+
+    private fun createNotification(): Notification {
+
+        val intent = Intent(this, SplashScreenActivity::class.java)
+
         return CustomNotificationBuilder.with(this)
-            .setIntent(notificationIntent)
+            .setIntent(intent)
             .setChannelId("topmortar_delivery_notification")
             .setChannelName("Topmortar Absent Notification")
             .setContentTitle("Kehadiran Sudah Tercatat")
             .setContentText("Pastikan untuk menyelesaikan target anda sebelum pulang...")
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setOnGoing(true)
             .build()
     }
 
+
+    // -------------------------
+    // Location Setup
+    // -------------------------
+
     private fun startLocationUpdates(intent: Intent?) {
 
-        val userId = intent?.getStringExtra("userId")
-        val userDistributorId = intent?.getStringExtra("userDistributorId")
-        val deliveryId = intent?.getStringExtra("deliveryId")
 
-        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorId ?: "-firebase-001")
+        val uid = userId ?: return
+        val distributor = distributorId ?: "-firebase-001"
+
+        firebaseReference = FirebaseUtils.getReference(distributorId = distributor)
         childDelivery = firebaseReference.child(FIREBASE_CHILD_DELIVERY)
-        childAbsent = firebaseReference.child(FIREBASE_CHILD_ABSENT).child(userId.toString())
-        if (!deliveryId.isNullOrEmpty()) childDriver = childDelivery.child(deliveryId)
+        childAbsent = firebaseReference.child(FIREBASE_CHILD_ABSENT).child(uid)
 
-        if (isLocationUpdating) {
-
-            stopLocationUpdates()
-            startListeningLocation(deliveryId)
-            return
+        if (!deliveryId.isNullOrEmpty()) {
+            childDriver = childDelivery.child(deliveryId!!)
         }
 
-        startListeningLocation(deliveryId)
-    }
-
-    private fun startListeningLocation(deliveryId: String?) {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        locationRequest = LocationRequest.create()
-            .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-            .setInterval(3000)
+
+        locationRequest = LocationRequest.Builder(
+            Priority.PRIORITY_HIGH_ACCURACY,
+            LOCATION_INTERVAL
+        )
+            .setMinUpdateIntervalMillis(LOCATION_INTERVAL / 2)
+            .setMinUpdateDistanceMeters(LOCATION_MIN_DISTANCE)
+            .build()
+
         locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
 
-                val userLocation = locationResult.lastLocation!!
+            override fun onLocationResult(result: LocationResult) {
 
-                childAbsent.child("lat").setValue(userLocation.latitude)
-                childAbsent.child("lng").setValue(userLocation.longitude)
-                childAbsent.child("lastTracking").setValue(DateFormat.now())
-
-                if (!deliveryId.isNullOrEmpty()) {
-                    childDriver.child("lat").setValue(userLocation.latitude)
-                    childDriver.child("lng").setValue(userLocation.longitude)
+                result.lastLocation?.let {
+                        updateAbsentLocation(it)
+                        updateDriverLocation(it)
+                        if (intent != null && shouldSendUpdate()) {
+                            sendPositionToServer(it, intent)
+                        }
                 }
 
             }
         }
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-            &&
-            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
-        ) return
-        if (fusedLocationClient != null) {
-            fusedLocationClient?.requestLocationUpdates(locationRequest, locationCallback!!, Looper.getMainLooper())
-        }
-        isLocationUpdating = true
+        if (!hasLocationPermission()) return
+
+        fusedLocationClient.requestLocationUpdates(
+            locationRequest,
+            locationCallback!!,
+            Looper.getMainLooper()
+        )
     }
 
-    private fun scheduleServiceStop() {
+
+    // -------------------------
+    // Firebase Update
+    // -------------------------
+
+    private fun requestSingleLocationUpdate(intent: Intent) {
+
+        if (!hasLocationPermission()) return
+
+        fusedLocationClient.getCurrentLocation(
+            Priority.PRIORITY_HIGH_ACCURACY,
+            null
+        ).addOnSuccessListener { location ->
+
+            location?.let {
+
+                updateAbsentLocation(it)
+                updateDriverLocation(it)
+                sendPositionToServer(it, intent)
+            }
+        }
+    }
+
+    private fun updateAbsentLocation(location: Location) {
+
+        childAbsent.updateChildren(
+            mapOf(
+                "lat" to location.latitude,
+                "lng" to location.longitude,
+                "lastTracking" to DateFormat.now()
+            )
+        )
+    }
+
+    private fun updateDriverLocation(location: Location) {
+
+        if (childDriver == null) return;
+        childDriver?.updateChildren(
+            mapOf(
+                "lat" to location.latitude,
+                "lng" to location.longitude
+            )
+        )
+    }
+
+    // -------------------------
+    // Api Service
+    // -------------------------
+
+    private fun shouldSendUpdate(): Boolean {
+
         val now = System.currentTimeMillis()
+
+        if (now - lastApiUpdate > (LOCATION_INTERVAL / 2)) { // 5 menit
+            lastApiUpdate = now
+            return true
+        }
+
+        return false
+    }
+
+    private fun sendPositionToServer(location: Location, intent: Intent) {
+
+        val uid = intent.getStringExtra("userId") ?: userId ?: "0"
+        val contactId = intent.getStringExtra("contactId") ?: "0"
+        val actionType = intent.getStringExtra("actionType") ?: ACTION_TYPE_DEFAULT
+
+        serviceScope.launch {
+
+            try {
+
+                val apiService = HttpClient.create()
+                val response = apiService.savePosition(
+                    idUser = createPartFromString(uid),
+                    idContact = createPartFromString(contactId),
+                    type = createPartFromString(actionType),
+                    lat = createPartFromString(location.latitude.toString()),
+                    lng = createPartFromString(location.longitude.toString())
+                )
+
+                if (!response.isSuccessful) {
+                    Log.e("Save Tracking Location", response.message())
+                    return@launch
+                }
+
+                val responseBody = response.body()
+
+                when (responseBody?.status) {
+                    RESPONSE_STATUS_OK -> {
+                        Log.i("Save Tracking Location", responseBody.message)
+                    } else -> {
+                        Log.e("Save Tracking Location", responseBody?.message ?: "")
+                    }
+                }
+
+            } catch (e: Exception) {
+                Log.e("Save Tracking Location", e.message.toString())
+                e.printStackTrace()
+            }
+
+        }
+    }
+
+    // -------------------------
+    // Stop Updates
+    // -------------------------
+
+    private fun stopLocationUpdates() {
+
+        locationCallback?.let {
+            fusedLocationClient.removeLocationUpdates(it)
+        }
+
+        locationCallback = null
+    }
+
+
+    // -------------------------
+    // Permission Check
+    // -------------------------
+
+    private fun hasLocationPermission(): Boolean {
+
+        return ActivityCompat.checkSelfPermission(
+            this,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+
+    // -------------------------
+    // Auto Stop Service 22:00
+    // -------------------------
+
+    private fun scheduleServiceStop() {
+
+        val now = System.currentTimeMillis()
+
         val calendar = Calendar.getInstance().apply {
             timeInMillis = now
-            set(Calendar.HOUR_OF_DAY, 22) // Set to 10 PM
+            set(Calendar.HOUR_OF_DAY, 22)
             set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0)
             set(Calendar.MILLISECOND, 0)
@@ -148,25 +364,10 @@ class TrackingService : Service() {
             calendar.add(Calendar.DAY_OF_MONTH, 1)
         }
 
-        val stopTimeMillis = calendar.timeInMillis
-        val delayMillis = stopTimeMillis - now
+        val delay = calendar.timeInMillis - now
 
-        Handler(Looper.getMainLooper()).postDelayed({
+        handler.postDelayed({
             stopSelf()
-        }, delayMillis)
-    }
-
-    private fun stopLocationUpdates() {
-
-        if (fusedLocationClient != null) {
-            fusedLocationClient?.removeLocationUpdates(locationCallback!!)
-        }
-
-        locationCallback = null
-        isLocationUpdating = false
-    }
-
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
+        }, delay)
     }
 }
