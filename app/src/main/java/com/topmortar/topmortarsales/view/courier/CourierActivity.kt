@@ -35,7 +35,8 @@ import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.LOGGED_OUT
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
-import com.topmortar.topmortarsales.commons.services.TrackingService
+import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
+import com.topmortar.topmortarsales.commons.services.startTrackingService
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
 import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
@@ -300,15 +301,8 @@ class CourierActivity : AppCompatActivity() {
         sessionManager.absentDateTime(absentDateTime)
         setTitleBarAbsent(absentDateTime)
 
-        val serviceIntent = Intent(this, TrackingService::class.java)
-        serviceIntent.putExtra("userId", userId)
-        serviceIntent.putExtra("userDistributorId", userDistributorIds ?: "-start-003-$username")
-        serviceIntent.putExtra("deliveryId", AUTH_LEVEL_COURIER + userId)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent)
-        } else {
-            startService(serviceIntent)
-        }
+        val courierDeliveryId = if (userKind == USER_KIND_COURIER) AUTH_LEVEL_COURIER + userId else null
+        startTrackingService(userId, userDistributorIds, courierDeliveryId)
 
         initLayout()
     }

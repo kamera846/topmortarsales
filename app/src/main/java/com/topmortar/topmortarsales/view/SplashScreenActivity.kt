@@ -65,7 +65,7 @@ import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_MARKETING
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
-import com.topmortar.topmortarsales.commons.services.TrackingService
+import com.topmortar.topmortarsales.commons.services.stopTrackingService
 import com.topmortar.topmortarsales.commons.utils.AppUpdateHelper
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
@@ -366,8 +366,7 @@ class SplashScreenActivity : AppCompatActivity() {
         sessionManager.setLoggedIn(LOGGED_OUT)
         sessionManager.setUserLoggedIn(null)
 
-        val serviceIntent = Intent(this, TrackingService::class.java)
-        stopService(serviceIntent)
+        stopTrackingService()
 
         rlModal.visibility = View.VISIBLE
     }

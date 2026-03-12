@@ -10,6 +10,7 @@ import android.location.Location
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
@@ -55,6 +56,8 @@ import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
+import com.topmortar.topmortarsales.commons.services.stopTrackingService
+import com.topmortar.topmortarsales.commons.services.saveTrackingServiceLocation
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
@@ -114,6 +117,8 @@ class NewReportActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private var locationCallback: LocationCallback? = null
+
+    private var submitCountDown: CountDownTimer? = null
 
     private val locationResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == RESULT_OK) {
@@ -263,8 +268,7 @@ class NewReportActivity : AppCompatActivity() {
     private fun showDialogIsMock() {
         try {
 
-            val serviceIntent = Intent(this, TrackingService::class.java)
-            stopService(serviceIntent)
+            stopTrackingService()
 
             val dialogView = layoutInflater.inflate(R.layout.modal_mock_location, null)
             AlertDialog.Builder(this)
@@ -642,8 +646,7 @@ class NewReportActivity : AppCompatActivity() {
 
             progressBar.dismiss()
 
-            val serviceIntent = Intent(this, TrackingService::class.java)
-            stopService(serviceIntent)
+            stopTrackingService()
 
             AlertDialog.Builder(this)
                 .setCancelable(false)
@@ -923,6 +926,21 @@ class NewReportActivity : AppCompatActivity() {
                 submitDialog.dismiss()
                 loadingSubmit(false)
 
+            } finally {
+                saveTrackingServiceLocation(userId = idUser, contactId = id, actionType = TrackingService.ACTION_TYPE_VISIT)
+                submitCountDown = object : CountDownTimer(10000, 1000) {
+
+                    override fun onTick(millisUntilFinished: Long) {
+                        val second = millisUntilFinished / 1000
+                        binding.btnReport.text = "Tunggu $second detik"
+                        binding.btnReport.isEnabled = false
+                    }
+
+                    override fun onFinish() {
+                        loadingSubmit(false)
+                    }
+
+                }.start()
             }
 
         }
@@ -993,6 +1011,7 @@ class NewReportActivity : AppCompatActivity() {
                 )
             }
         }
+        submitCountDown?.cancel()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
