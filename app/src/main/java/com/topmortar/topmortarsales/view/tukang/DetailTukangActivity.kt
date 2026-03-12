@@ -807,7 +807,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         var pBirthday = "${ etBirthday.text }"
         val pMapsUrl = "${ etMaps.text }"
         val pAddress = "${ etAddress.text }"
-        val pStatus = if (selectedStatus.isEmpty()) "" else selectedStatus.substringBefore(" - ").toLowerCase(
+        val pStatus = if (selectedStatus.isEmpty()) "" else selectedStatus.substringBefore(" - ").lowercase(
             Locale.getDefault())
 
         var imagePart: MultipartBody.Part? = null
