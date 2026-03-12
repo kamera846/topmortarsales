@@ -573,7 +573,20 @@ class HomeCourierActivity : AppCompatActivity() {
         when {
             isAbsentMorningNow && !isAbsentEveningNow -> {
 
-                startTrackingService(userId, userDistributorId)
+                val now = System.currentTimeMillis()
+
+                val calendar = Calendar.getInstance().apply {
+                    timeInMillis = now
+                    set(Calendar.HOUR_OF_DAY, 22)
+                    set(Calendar.MINUTE, 0)
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                }
+
+                if (calendar.timeInMillis > now) {
+                    // Jika sudah lebih dari jam 10 malam tracking otomatis dimatikan
+                    startTrackingService(userId, userDistributorId)
+                }
 
                 sessionManager.absentDateTime(morningDateTime!!)
                 lockMenuItem(false)

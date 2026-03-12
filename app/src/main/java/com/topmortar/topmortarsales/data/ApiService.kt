@@ -866,4 +866,14 @@ interface ApiService {
         @Part("source") source: RequestBody? = createPartFromString(NORMAL_REPORT),
         @Part("type_renvi") renviSource: RequestBody? = createPartFromString(NORMAL_REPORT)
     ): Response<ResponseReportVisit>
+
+    @Multipart
+    @POST("position.php")
+    suspend fun savePosition(
+        @Part("id_user") idUser: RequestBody,
+        @Part("id_contact") idContact: RequestBody,
+        @Part("type_position") type: RequestBody,
+        @Part("lat_position") lat: RequestBody,
+        @Part("long_position") lng: RequestBody,
+    ): Response<ResponseMessage>
 }

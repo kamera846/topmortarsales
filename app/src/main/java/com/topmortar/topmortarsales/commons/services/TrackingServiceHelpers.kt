@@ -10,8 +10,10 @@ fun Context.startTrackingService(
     deliveryId: String? = null
 ) {
 
+    if (TrackingService.isRunning) return
+
     val intent = Intent(this, TrackingService::class.java).apply {
-        putExtra("userId", userId ?: "anonymous")
+        putExtra("userId", userId ?: "0")
         putExtra("userDistributorId", distributorId ?: "-start-service-${userId}")
 
         if (!deliveryId.isNullOrEmpty()) {
@@ -39,11 +41,37 @@ fun Context.updateTrackingServiceNow() {
     }
 }
 
+fun Context.saveTrackingServiceLocation(
+    userId: String,
+    contactId: String,
+    actionType: String,
+) {
+
+    val intent = Intent(this, TrackingService::class.java).apply {
+        action = TrackingService.ACTION_UPDATE_LOCATION_NOW
+        putExtra("userId", userId)
+        putExtra("contactId", contactId)
+        putExtra("actionType", actionType)
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        startForegroundService(intent)
+    } else {
+        startService(intent)
+    }
+}
+
 fun Context.stopTrackingService() {
+
+    if (!TrackingService.isRunning) return
 
     val intent = Intent(this, TrackingService::class.java).apply {
         action = TrackingService.ACTION_STOP
     }
 
-    startService(intent)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        startForegroundService(intent)
+    } else {
+        startService(intent)
+    }
 }

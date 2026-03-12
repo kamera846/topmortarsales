@@ -54,8 +54,9 @@ import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
+import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.services.stopTrackingService
-import com.topmortar.topmortarsales.commons.services.updateTrackingServiceNow
+import com.topmortar.topmortarsales.commons.services.saveTrackingServiceLocation
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
@@ -923,7 +924,7 @@ class NewReportActivity : AppCompatActivity() {
                 loadingSubmit(false)
 
             } finally {
-                updateTrackingServiceNow()
+                saveTrackingServiceLocation(userId = idUser, contactId = id, actionType = TrackingService.ACTION_TYPE_VISIT)
             }
 
         }

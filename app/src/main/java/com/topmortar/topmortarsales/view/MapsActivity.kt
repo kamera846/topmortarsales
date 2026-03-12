@@ -1889,13 +1889,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         })
     }
 
-    private fun refreshUserTracked(item: UserAbsentModel) {
+    private fun refreshUserTracked(item: UserAbsentModel? = null) {
         if (courierTrackingListener != null) childCourier?.removeEventListener(courierTrackingListener!!)
         courierMarker = null
         mMap.clear()
 
         Handler(Looper.getMainLooper()).postDelayed({
-            courierID = item.id
+            if (item != null) {
+                courierID = item.id
+            }
             setupTrackingCourier()
         }, 100)
     }
@@ -2167,7 +2169,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     @Subscribe
     fun onEventBus(event: EventBusUtils.UserAbsentModelEvent) {
 
-        refreshUserTracked(event.data!!)
+        refreshUserTracked(event.data)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (courierID != null) {
+           refreshUserTracked()
+        }
     }
 
     override fun onStart() {

@@ -2777,7 +2777,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                         intent.putExtra(CONST_CONTACT_ID, contactId)
                                         detailLauncher.launch(intent)
                                     }
-                                    checkServiceStatus()
+//                                    checkServiceStatus()
                                 } else setupBtnDelivery()
                             } else setupBtnDelivery()
                         }

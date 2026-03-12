@@ -42,7 +42,8 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_SUCCESS
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
-import com.topmortar.topmortarsales.commons.services.updateTrackingServiceNow
+import com.topmortar.topmortarsales.commons.services.TrackingService
+import com.topmortar.topmortarsales.commons.services.saveTrackingServiceLocation
 import com.topmortar.topmortarsales.commons.utils.CompressImageUtil
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
@@ -160,7 +161,7 @@ class PreviewClosingActivity : AppCompatActivity() {
                 loadingState(false)
 
             } finally {
-                updateTrackingServiceNow()
+                saveTrackingServiceLocation(userId = userID ?: "0", contactId = contactId ?: "0", actionType = TrackingService.ACTION_TYPE_CLOSING)
             }
 
         }
