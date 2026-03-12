@@ -14,6 +14,7 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.utils.CustomMarkerView
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
@@ -24,6 +25,7 @@ import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityChartBinding
 import com.topmortar.topmortarsales.modal.SearchModal
+import com.topmortar.topmortarsales.model.ActiveStoreModel
 import com.topmortar.topmortarsales.model.CityModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import kotlinx.coroutines.launch
@@ -45,6 +47,7 @@ class ChartActivity : AppCompatActivity() {
     private lateinit var apiService: ApiService
     private lateinit var searchModal: SearchModal
     private var citiesResults: ArrayList<CityModel>? = null
+    private var listResponse: ArrayList<ActiveStoreModel>? = null
     private var selectedCity: ModalSearchModel? = null
 
     private var chartTextColor: Int = 0
@@ -73,6 +76,20 @@ class ChartActivity : AppCompatActivity() {
 
     private fun loadBarChartData() {
         binding.filterContainer.visibility = View.GONE
+        var salesDates = listOf(
+            1 to "-",
+            2 to "-",
+            3 to "-",
+            4 to "-",
+            5 to "-",
+            6 to "-",
+            7 to "-",
+            8 to "-",
+            9 to "-",
+            10 to "-",
+            11 to "-",
+            12 to "-",
+        )
         var salesData = listOf(
             1f to 0f,
             2f to 0f,
@@ -102,10 +119,22 @@ class ChartActivity : AppCompatActivity() {
                 when(response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        val listResponse = response.results
+                        listResponse = response.results
+
+                        salesDates.forEach { item ->
+                            val findMatch = listResponse?.firstOrNull { data -> data.month_active ==  item.first.toString() }
+                            if (findMatch != null) {
+                                salesDates = salesDates.map {
+                                    when (it.first) {
+                                        item.first -> it.copy(second = findMatch.updated_at)
+                                        else -> it
+                                    }
+                                }
+                            }
+                        }
 
                         salesData.forEach { item ->
-                            val findMatch = listResponse.firstOrNull { data -> data.month_active ==  item.first.toInt().toString() }
+                            val findMatch = listResponse?.firstOrNull { data -> data.month_active ==  item.first.toInt().toString() }
                             if (findMatch != null) {
                                 salesData = salesData.map {
                                     when (it.first) {
@@ -146,6 +175,9 @@ class ChartActivity : AppCompatActivity() {
                 val beforeYear = (yearFormat.format(Date()).toInt() - 1).toString()
                 val currentYear = yearFormat.format(Date())
 
+                val sortedSalesDates = salesDates.sortedBy {
+                    if (it.first > currentMonth) it.first else it.first + 12
+                }
                 val sortedSalesData = salesData.sortedBy {
                     if (it.first > currentMonth) it.first else it.first + 12
                 }
@@ -178,13 +210,13 @@ class ChartActivity : AppCompatActivity() {
                     binding.beforeYear.text = beforeYear
                 }
 
-                setupBarChart()
+                setupBarChart(sortedSalesDates)
 
             }
         }
     }
 
-    private fun setupBarChart() {
+    private fun setupBarChart(sortedSalesDates: List<Pair<Int, String>>) {
 
         binding.barChart.apply {
             setDrawBarShadow(false)
@@ -230,7 +262,14 @@ class ChartActivity : AppCompatActivity() {
 
             animateY(1000)
         }
-        binding.filterContainer.visibility = View.VISIBLE
+
+        val marker = CustomMarkerView(this@ChartActivity, R.layout.marker_view, sortedSalesDates)
+        marker.chartView = binding.barChart
+        binding.barChart.marker = marker
+        binding.barChart.setTouchEnabled(true)
+        binding.barChart.isHighlightPerTapEnabled = true
+
+        if (userKind == USER_KIND_ADMIN) binding.filterContainer.visibility = View.VISIBLE
     }
 
     private fun getDynamicMonths(startIndex: Int): Array<String> {
