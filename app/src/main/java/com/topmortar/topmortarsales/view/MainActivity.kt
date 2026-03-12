@@ -905,7 +905,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 val response = when (userKind) {
                     USER_KIND_COURIER -> apiService.getCourierStore(processNumber = "1", courierId = userId)
                     else -> {
-                        val statusFilter = selectedStatusID.toLowerCase(Locale.ROOT)
+                        val statusFilter = selectedStatusID.lowercase(Locale.ROOT)
                         val cityID = if (userKind == USER_KIND_ADMIN) selectedCitiesID?.id_city
                         else userCity
 
@@ -1159,7 +1159,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
                 val rbSearchKey = createPartFromString(PhoneHandler.formatPhoneNumber62(key))
 
-                val statusFilter = selectedStatusID.toLowerCase(Locale.ROOT)
+                val statusFilter = selectedStatusID.lowercase(Locale.ROOT)
                 val cityID = if (userKind == USER_KIND_ADMIN) selectedCitiesID?.id_city
                 else userCity
 
