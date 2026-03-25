@@ -35,8 +35,8 @@ class TrackingService : Service() {
     companion object {
         var isRunning = false
         const val NOTIFICATION_ID = 1010
-        private const val LOCATION_INTERVAL = 2 * 60 * 1000L // 2 menit
-        private const val LOCATION_MIN_DISTANCE = 30f // 30 meter
+        private const val LOCATION_INTERVAL = 30 * 60 * 1000L // 30 menit
+        private const val LOCATION_MIN_DISTANCE = 100f // 30 meter
 
         const val ACTION_STOP = "STOP_SERVICE"
         const val ACTION_UPDATE_LOCATION_NOW = "UPDATE_LOCATION_NOW"
@@ -267,7 +267,7 @@ class TrackingService : Service() {
 
         val now = System.currentTimeMillis()
 
-        if (now - lastApiUpdate > (LOCATION_INTERVAL / 2)) { // 5 menit
+        if (now - lastApiUpdate > (LOCATION_INTERVAL / 2)) { // 15 menit
             lastApiUpdate = now
             return true
         }
