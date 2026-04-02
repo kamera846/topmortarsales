@@ -37,7 +37,6 @@ import com.topmortar.topmortarsales.commons.CONST_URI
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
 import com.topmortar.topmortarsales.commons.IMG_PREVIEW_STATE
 import com.topmortar.topmortarsales.commons.IS_CLOSING
-import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_SUCCESS
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
@@ -57,7 +56,10 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.DeliveryModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -86,10 +88,13 @@ class PreviewClosingActivity : AppCompatActivity() {
     private var iDistance: Double = -1.0
 
     // Tracking
-    private var firebaseReference: DatabaseReference? = null
     private var childDelivery: DatabaseReference? = null
-    private var childDriver: DatabaseReference? = null
     private var deliveryId: String = ""
+
+    data class DeliveryData(
+        val store: DeliveryModel.Store,
+        val courier: DeliveryModel.Courier
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -184,24 +189,26 @@ class PreviewClosingActivity : AppCompatActivity() {
                     }
                 }
 
-                when (response.status) {
-                    RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
+                onClosingFinished(response.message)
 
-                        onClosingFinished(response.message)
-
-                    }
-
-                    else -> {
-
-                        handleMessage(
-                            this@PreviewClosingActivity,
-                            TAG_RESPONSE_CONTACT,
-                            "Gagal closing. Error: ${response.message}"
-                        )
-                        loadingState(false)
-
-                    }
-                }
+//                when (response.status) {
+//                    RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
+//
+//                        onClosingFinished(response.message)
+//
+//                    }
+//
+//                    else -> {
+//
+//                        handleMessage(
+//                            this@PreviewClosingActivity,
+//                            TAG_RESPONSE_CONTACT,
+//                            "Gagal closing. Error: ${response.message}"
+//                        )
+//                        loadingState(false)
+//
+//                    }
+//                }
 
             } catch (e: Exception) {
 
@@ -323,120 +330,318 @@ class PreviewClosingActivity : AppCompatActivity() {
         }
     }
 
+//    private fun onClosingFinished(message: String) {
+//
+//        deliveryId = "$AUTH_LEVEL_COURIER$userID"
+//        val userDistributorIds = sessionManager.userDistributor()
+//        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-015")
+//        childDelivery = firebaseReference?.child(FIREBASE_CHILD_DELIVERY)
+//        childDriver = childDelivery?.child(deliveryId)
+//
+//        childDriver?.addListenerForSingleValueEvent(object : ValueEventListener {
+//            override fun onDataChange(snapshot: DataSnapshot) {
+//
+//                if (snapshot.exists()) {
+//
+//                    val stores = snapshot.child("stores/$contactId")
+//                    if (stores.exists()) {
+//
+//                        val courier = snapshot.child("courier").getValue(DeliveryModel.Courier::class.java)
+//                        val store = stores.getValue(DeliveryModel.Store::class.java)
+//
+//                        val endDateTime = DateFormat.now()
+//
+//                        var endLat = "-1"
+//                        var endLng = "-1"
+//                        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this@PreviewClosingActivity)
+//                        if (ActivityCompat.checkSelfPermission(
+//                                this@PreviewClosingActivity,
+//                                Manifest.permission.ACCESS_FINE_LOCATION
+//                            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+//                                this@PreviewClosingActivity,
+//                                Manifest.permission.ACCESS_COARSE_LOCATION
+//                            ) != PackageManager.PERMISSION_GRANTED
+//                        ) {
+//                            ActivityCompat.requestPermissions(this@PreviewClosingActivity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+//                        } else {
+//                            fusedLocationClient.lastLocation
+//                                .addOnSuccessListener { location: Location? ->
+//                                    if (location != null) {
+//                                        endLat = location.latitude.toString()
+//                                        endLng = location.longitude.toString()
+//                                    }
+//
+//                                    saveDelivery(store, endDateTime, endLat, endLng, courier, message)
+//                                }
+//                                .addOnFailureListener {
+//                                    if (getLocationChance > 0) {
+//                                        Handler(Looper.getMainLooper()).postDelayed({
+//                                            onClosingFinished(message)
+//                                            getLocationChance -= 1
+//                                        }, 150)
+//                                    } else {
+//                                        saveDelivery(store, endDateTime, endLat, endLng, courier, message)
+//                                    }
+//                                }
+//                        }
+//
+//
+//                    } else {
+//                        finishClosing(message)
+//                    }
+//
+//                } else {
+//                    finishClosing(message)
+//                }
+//
+//            }
+//
+//            override fun onCancelled(error: DatabaseError) {
+//                finishClosing(message)
+//            }
+//
+//        })
+//
+//    }
+//
+//    private fun saveDelivery(
+//        store: DeliveryModel.Store?,
+//        endDateTime: String,
+//        endLat: String,
+//        endLng: String,
+//        courier: DeliveryModel.Courier?,
+//        message: String
+//    ) {
+//        lifecycleScope.launch {
+//            try {
+//
+//                val apiService: ApiService = HttpClient.create()
+//
+//                val response = apiService.saveDelivery(
+//                    lat = createPartFromString(store?.lat.toString()),
+//                    lng = createPartFromString(store?.lng.toString()),
+//                    endDateTime = createPartFromString(endDateTime),
+//                    endLat = createPartFromString(endLat),
+//                    endLng = createPartFromString(endLng),
+//                    startDateTime = createPartFromString(store?.startDatetime.toString()),
+//                    startLat = createPartFromString(store?.startLat.toString()),
+//                    startLng = createPartFromString(store?.startLng.toString()),
+//                    idCourier = createPartFromString(courier?.id.toString()),
+//                    idContact = createPartFromString(store?.id.toString()),
+//                    invoiceId = createPartFromString(invoiceId!!),
+//                )
+//
+//                when (response.status) {
+//                    RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
+//                        finishClosing(message)
+//                    }
+//                    else -> {
+//                        if (saveDeliveryChance > 0) {
+//                            Handler(Looper.getMainLooper()).postDelayed({
+//                                onClosingFinished(message)
+//                                saveDeliveryChance -= 1
+//                            }, 150)
+//                        } else {
+//                            finishClosing(message)
+//                        }
+//                    }
+//                }
+//
+//            } catch (e: Exception) {
+//
+//                finishClosing(message)
+//                FirebaseUtils.logErr(
+//                    this@PreviewClosingActivity,
+//                    "Failed PreviewClosingActivity on onClosingFinished(). Catch: ${e.message}"
+//                )
+//                Log.d("Item to closing", "Failed to save item: Error request. " + e.message)
+//
+//            }
+//
+//        }
+//    }
+
     private fun onClosingFinished(message: String) {
+        lifecycleScope.launch {
 
-        deliveryId = "$AUTH_LEVEL_COURIER$userID"
-        val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-015")
-        childDelivery = firebaseReference?.child(FIREBASE_CHILD_DELIVERY)
-        childDriver = childDelivery?.child(deliveryId)
-
-        childDriver?.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-
-                if (snapshot.exists()) {
-
-                    val stores = snapshot.child("stores/$contactId")
-                    if (stores.exists()) {
-
-                        val courier = snapshot.child("courier").getValue(DeliveryModel.Courier::class.java)
-                        val store = stores.getValue(DeliveryModel.Store::class.java)
-
-                        val endDateTime = DateFormat.now()
-
-                        var endLat = "0.0"
-                        var endLng = "0.0"
-                        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this@PreviewClosingActivity)
-                        if (ActivityCompat.checkSelfPermission(
-                                this@PreviewClosingActivity,
-                                Manifest.permission.ACCESS_FINE_LOCATION
-                            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                                this@PreviewClosingActivity,
-                                Manifest.permission.ACCESS_COARSE_LOCATION
-                            ) != PackageManager.PERMISSION_GRANTED
-                        ) {
-                            ActivityCompat.requestPermissions(this@PreviewClosingActivity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
-                        } else {
-                            fusedLocationClient.lastLocation
-                                .addOnSuccessListener { location: Location? ->
-                                    if (location != null) {
-                                        endLat = location.latitude.toString()
-                                        endLng = location.longitude.toString()
-                                    }
-
-                                    saveDelivery(store, endDateTime, endLat, endLng, courier, message)
-                                }
-                                .addOnFailureListener {
-                                    saveDelivery(store, endDateTime, endLat, endLng, courier, message)
-                                }
-                        }
-
-
-                    } else {
-                        finishClosing(message)
-                    }
-
-                } else {
-                    finishClosing(message)
-                }
-
-            }
-
-            override fun onCancelled(error: DatabaseError) {
+            val deliveryData = fetchDeliveryData() ?: run {
                 finishClosing(message)
+                return@launch
             }
 
-        })
+            val location = getLastLocationWithRetry()
 
+            val endLat = location?.latitude?.toString() ?: "-1"
+            val endLng = location?.longitude?.toString() ?: "-1"
+
+            saveDeliveryWithRetry(
+                store = deliveryData.store,
+                courier = deliveryData.courier,
+                endDateTime = DateFormat.now(),
+                endLat = endLat,
+                endLng = endLng
+            )
+
+            finishClosing(message)
+        }
     }
 
-    private fun saveDelivery(
-        store: DeliveryModel.Store?,
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private suspend fun fetchDeliveryData(): DeliveryData? =
+        suspendCancellableCoroutine { cont ->
+
+            val deliveryId = "$AUTH_LEVEL_COURIER$userID"
+            val userDistributorIds = sessionManager.userDistributor()
+
+            val ref = FirebaseUtils.getReference(
+                distributorId = userDistributorIds ?: "-firebase-015"
+            )
+
+            val childDriver = ref
+                .child(FIREBASE_CHILD_DELIVERY)
+                .child(deliveryId)
+
+            childDriver.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+
+                    if (!snapshot.exists()) {
+                        cont.resume(null, null)
+                        return
+                    }
+
+                    val stores = snapshot.child("stores/$contactId")
+                    if (!stores.exists()) {
+                        cont.resume(null, null)
+                        return
+                    }
+
+                    val courier = snapshot.child("courier")
+                        .getValue(DeliveryModel.Courier::class.java)
+
+                    val store = stores
+                        .getValue(DeliveryModel.Store::class.java)
+
+                    if (store == null || courier == null) {
+                        cont.resume(null, null)
+                    } else {
+                        cont.resume(DeliveryData(store, courier), null)
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    cont.resume(null, null)
+                }
+            })
+        }
+
+    private suspend fun getLastLocationWithRetry(
+        maxRetry: Int = 3
+    ): Location? {
+
+        repeat(maxRetry) {
+            val location = getLastLocation()
+            if (location != null) return location
+            FirebaseUtils.logErr(
+                this,
+                "Failed getLastLocationWithRetry: Location null, trying to getLastLocation"
+            )
+            delay(150)
+        }
+
+        return null
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private suspend fun getLastLocation(): Location? =
+        suspendCancellableCoroutine { cont ->
+
+            val fusedLocationClient =
+                LocationServices.getFusedLocationProviderClient(this)
+
+            if (ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                cont.resume(null, null)
+                return@suspendCancellableCoroutine
+            }
+
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { cont.resume(it, null) }
+                .addOnFailureListener { cont.resume(null, null) }
+        }
+
+    private suspend fun saveDeliveryWithRetry(
+        store: DeliveryModel.Store,
+        courier: DeliveryModel.Courier,
         endDateTime: String,
         endLat: String,
         endLng: String,
-        courier: DeliveryModel.Courier?,
-        message: String
-    ) {
-        lifecycleScope.launch {
-            try {
+        maxRetry: Int = 3
+    ): Boolean {
 
-                val apiService: ApiService = HttpClient.create()
+        repeat(maxRetry) {
+            val success = saveDelivery(
+                store,
+                courier,
+                endDateTime,
+                endLat,
+                endLng
+            )
+            if (success) return true
+            FirebaseUtils.logErr(
+                this,
+                "Failed saveDeliveryWithRetry: Request error, trying to saveDelivery"
+            )
+            delay(150)
+        }
 
-                val response = apiService.saveDelivery(
-                    lat = createPartFromString(store?.lat.toString()),
-                    lng = createPartFromString(store?.lng.toString()),
-                    endDateTime = createPartFromString(endDateTime),
-                    endLat = createPartFromString(endLat),
-                    endLng = createPartFromString(endLng),
-                    startDateTime = createPartFromString(store?.startDatetime.toString()),
-                    startLat = createPartFromString(store?.startLat.toString()),
-                    startLng = createPartFromString(store?.startLng.toString()),
-                    idCourier = createPartFromString(courier?.id.toString()),
-                    idContact = createPartFromString(store?.id.toString()),
-                    invoiceId = createPartFromString(invoiceId!!),
-                )
+        return false
+    }
 
-                when (response.status) {
-                    RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
-                        finishClosing(message)
-                    }
-                    else -> {
-                        finishClosing(message)
-                    }
-                }
+    private suspend fun saveDelivery(
+        store: DeliveryModel.Store,
+        courier: DeliveryModel.Courier,
+        endDateTime: String,
+        endLat: String,
+        endLng: String
+    ): Boolean {
 
-            } catch (e: Exception) {
+        return try {
 
-                finishClosing(message)
-                FirebaseUtils.logErr(
-                    this@PreviewClosingActivity,
-                    "Failed PreviewClosingActivity on onClosingFinished(). Catch: ${e.message}"
-                )
-                Log.d("Item to closing", "Failed to save item: Error request. " + e.message)
+            val apiService: ApiService = HttpClient.create()
 
-            }
+            val response = apiService.saveDelivery(
+                lat = createPartFromString("${store.lat}"),
+                lng = createPartFromString("${store.lng}"),
+                endDateTime = createPartFromString(endDateTime),
+                endLat = createPartFromString(endLat),
+                endLng = createPartFromString(endLng),
+                startDateTime = createPartFromString(store.startDatetime),
+                startLat = createPartFromString("${store.startLat}"),
+                startLng = createPartFromString("${store.startLng}"),
+                idCourier = createPartFromString(courier.id),
+                idContact = createPartFromString(store.id),
+                invoiceId = createPartFromString(invoiceId ?: "-1")
+            )
 
+            response.status == RESPONSE_STATUS_OK ||
+                    response.status == RESPONSE_STATUS_SUCCESS
+
+        } catch (e: Exception) {
+
+            FirebaseUtils.logErr(
+                this,
+                "Failed PreviewClosingActivity: ${e.message}"
+            )
+
+            Log.d("Closing", "Error: ${e.message}")
+            false
         }
     }
 
