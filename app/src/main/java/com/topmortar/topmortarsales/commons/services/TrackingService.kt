@@ -36,7 +36,7 @@ class TrackingService : Service() {
         var isRunning = false
         const val NOTIFICATION_ID = 1010
         private const val LOCATION_INTERVAL = 30 * 60 * 1000L // 30 menit
-        private const val LOCATION_MIN_DISTANCE = 100f // 100 meter
+        private const val LOCATION_MIN_DISTANCE = 0f // 100 meter
 
         const val ACTION_STOP = "STOP_SERVICE"
         const val ACTION_UPDATE_LOCATION_NOW = "UPDATE_LOCATION_NOW"
