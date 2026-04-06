@@ -876,4 +876,21 @@ interface ApiService {
         @Part("lat_position") lat: RequestBody,
         @Part("long_position") lng: RequestBody,
     ): Response<ResponseMessage>
+
+    @Multipart
+    @POST("closingDelivery.php")
+    suspend fun closingDelivery(
+        @Part("id_surat_jalan") id_surat_jalan: RequestBody,
+        @Part("command") command: RequestBody,
+        @Part("distance") distance: RequestBody,
+        @Part("endDateTime") endDateTime: RequestBody,
+        @Part("endLat") endLat: RequestBody,
+        @Part("endLng") endLng: RequestBody,
+        @Part("lat") lat: RequestBody,
+        @Part("lng") lng: RequestBody,
+        @Part("startDateTime") startDateTime: RequestBody,
+        @Part("startLat") startLat: RequestBody,
+        @Part("startLng") startLng: RequestBody,
+        @Part pic: MultipartBody.Part,
+    ): Response<ResponseMessage>
 }
