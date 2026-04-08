@@ -17,7 +17,7 @@ googleMapsServices = "2.2.0"
 gson = "2.10.1"
 io = "7.0.2"
 kotlin = "2.2.10"
-coreKtx = "1.17.0"
+coreKtx = "1.18.0"
 junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
@@ -40,6 +40,9 @@ googleGmsGoogleServices = "4.4.2"
 googleFirebaseCrashlytics = "3.0.3"
 media3Player = "1.8.0"
 media3Ui = "1.8.0"
+appUpdateKtx = "2.1.0"
+appUpdate = "2.1.0"
+workRuntimeKtx = "2.11.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -80,6 +83,9 @@ play-services-location = { module = "com.google.android.gms:play-services-locati
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 media3-exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3Player" }
 media3-ui = { module = "androidx.media3:media3-ui", version.ref = "media3Ui" }
+app-update-ktx = { group = "com.google.android.play", name = "app-update-ktx", version.ref = "appUpdateKtx" }
+app-update = { group = "com.google.android.play", name = "app-update", version.ref = "appUpdate" }
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -30,6 +30,8 @@ import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.firebase.database.DatabaseReference
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
@@ -72,6 +74,7 @@ import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
+import com.topmortar.topmortarsales.commons.utils.inAppUpdateHelper
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityHomeCourierBinding
@@ -128,6 +131,14 @@ class HomeCourierActivity : AppCompatActivity() {
     private var listBasecamp: ArrayList<BaseCampModel> = arrayListOf()
     private var isSelectBasecampOnly = false
 
+    lateinit var appUpdateManager: AppUpdateManager
+    private val appUpdateLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+        if (result.resultCode != RESULT_OK) {
+            FirebaseUtils.logErr(this@HomeCourierActivity, "Failed to update app. Result code ${result.resultCode}")
+//            showForceUpdateDialog()
+        }
+    }
+
     private val locationResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == RESULT_OK) {
             checkLocationPermission()
@@ -144,6 +155,8 @@ class HomeCourierActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
 
         setContentView(binding.root)
+
+        appUpdateManager = AppUpdateManagerFactory.create(this)
 
         if (absentProgressBar == null) {
             absentProgressBar = CustomProgressBar(this)
@@ -496,6 +509,8 @@ class HomeCourierActivity : AppCompatActivity() {
             lockMenuItem(true)
 
             checkAbsent()
+
+            inAppUpdateHelper(this@HomeCourierActivity, appUpdateManager, appUpdateLauncher)
 
         } catch (e: Exception) {
             if (e is CancellationException) {
