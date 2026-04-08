@@ -39,6 +39,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.firebase.database.DatabaseReference
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.ContactsRecyclerViewAdapter
@@ -98,6 +100,7 @@ import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
+import com.topmortar.topmortarsales.commons.utils.inAppUpdateHelper
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityMainBinding
@@ -184,6 +187,13 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
     private lateinit var listCoordinateStatus: ArrayList<String>
     private lateinit var listCoordinateCityID: ArrayList<String>
 
+    lateinit var appUpdateManager: AppUpdateManager
+    private val appUpdateLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+        if (result.resultCode != RESULT_OK) {
+            showForceUpdateDialog()
+        }
+    }
+
     private val activityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == RESULT_OK) {
             val resultData = it.data?.getStringExtra("$MAIN_ACTIVITY_REQUEST_CODE")
@@ -212,6 +222,8 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        appUpdateManager = AppUpdateManagerFactory.create(this)
 
         AppUpdateHelper.initialize()
         AppUpdateHelper.checkForUpdate(this)
@@ -288,6 +300,8 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         }
         if (userKind == USER_KIND_ADMIN) getCities()
         else getContacts()
+
+        inAppUpdateHelper(this@MainActivity, appUpdateManager, appUpdateLauncher)
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -1471,6 +1485,17 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             }
         }
 
+    }
+
+    private fun showForceUpdateDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Update Dibutuhkan")
+            .setMessage("Aplikasi harus diupdate untuk melanjutkan.")
+            .setCancelable(false)
+            .setPositiveButton("Update") { _, _ ->
+                inAppUpdateHelper(this@MainActivity, appUpdateManager, appUpdateLauncher)
+            }
+            .show()
     }
 
     override fun onStart() {
