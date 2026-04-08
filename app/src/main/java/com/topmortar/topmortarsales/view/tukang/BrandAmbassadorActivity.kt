@@ -14,11 +14,14 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.PopupMenu
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.firebase.database.DatabaseReference
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.viewpager.BAViewPagerAdapter
@@ -45,6 +48,7 @@ import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
+import com.topmortar.topmortarsales.commons.utils.inAppUpdateHelper
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityBrandAmbassadorBinding
@@ -73,6 +77,13 @@ class BrandAmbassadorActivity : AppCompatActivity() {
     private lateinit var pagerAdapter: BAViewPagerAdapter
     private var activeTab = 0
 
+    lateinit var appUpdateManager: AppUpdateManager
+    private val appUpdateLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+        if (result.resultCode != RESULT_OK) {
+            showForceUpdateDialog()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -86,6 +97,8 @@ class BrandAmbassadorActivity : AppCompatActivity() {
         if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()|| userDistributorId.isEmpty()) return missingDataHandler()
 
         setContentView(binding.root)
+
+        appUpdateManager = AppUpdateManagerFactory.create(this)
 
         AppUpdateHelper.initialize()
         AppUpdateHelper.checkForUpdate(this)
@@ -135,6 +148,8 @@ class BrandAmbassadorActivity : AppCompatActivity() {
             tabLayout.setTabTextColors(getColor(R.color.primary_600), getColor(R.color.white))
             tabLayout.setSelectedTabIndicatorColor(getColor(R.color.white))
         }
+
+        inAppUpdateHelper(this@BrandAmbassadorActivity, appUpdateManager, appUpdateLauncher)
 
         onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -473,6 +488,17 @@ class BrandAmbassadorActivity : AppCompatActivity() {
             }, 2000)
 
         }
+    }
+
+    private fun showForceUpdateDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("Update Dibutuhkan")
+            .setMessage("Aplikasi harus diupdate untuk melanjutkan.")
+            .setCancelable(false)
+            .setPositiveButton("Update") { _, _ ->
+                inAppUpdateHelper(this@BrandAmbassadorActivity, appUpdateManager, appUpdateLauncher)
+            }
+            .show()
     }
 
     override fun onResume() {

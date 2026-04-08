@@ -26,12 +26,15 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat.Type
 import androidx.lifecycle.lifecycleScope
+import com.google.android.play.core.appupdate.AppUpdateManager
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -75,6 +78,7 @@ import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailed
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
+import com.topmortar.topmortarsales.commons.utils.inAppUpdateHelper
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.DeviceModel
@@ -128,6 +132,14 @@ class SplashScreenActivity : AppCompatActivity() {
     private var currentSubmitStep = 0
     private var idUserResetPassword: String? = null
 
+    lateinit var appUpdateManager: AppUpdateManager
+    private val appUpdateLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+        if (result.resultCode != RESULT_OK) {
+            FirebaseUtils.logErr(this@SplashScreenActivity, "Failed to update app. Result code ${result.resultCode}")
+//            showForceUpdateDialog()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
@@ -155,6 +167,8 @@ class SplashScreenActivity : AppCompatActivity() {
 //        applyMyEdgeToEdge(true)
         sessionManager = SessionManager(this)
         setContentView(R.layout.activity_splash_screen)
+
+        appUpdateManager = AppUpdateManagerFactory.create(this)
 
 //        AppUpdateHelper.initialize()
 //        AppUpdateHelper.checkForUpdate(this) {
@@ -369,6 +383,7 @@ class SplashScreenActivity : AppCompatActivity() {
         stopTrackingService()
 
         rlModal.visibility = View.VISIBLE
+        inAppUpdateHelper(this@SplashScreenActivity, appUpdateManager, appUpdateLauncher)
     }
 
     private fun showAlert(message: String) {

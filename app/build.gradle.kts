@@ -29,8 +29,8 @@ android {
         applicationId = "com.topmortar.topmortarsales"
         minSdk = 24
         targetSdk = 36
-        versionCode = 170
-        versionName = "3.4.260406170"
+        versionCode = 179
+        versionName = "3.4.260408179"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
@@ -115,6 +115,10 @@ dependencies {
     // Media 3 Exo Player
     implementation(libs.media3.exoplayer)
     implementation(libs.media3.ui)
+    // Google In-App Update
+    implementation(libs.app.update.ktx)
+    implementation(libs.app.update)
+    implementation(libs.androidx.work.runtime.ktx)
 
     // Testing
     testImplementation(libs.junit)
