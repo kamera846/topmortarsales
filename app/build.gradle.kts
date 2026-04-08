@@ -29,8 +29,8 @@ android {
         applicationId = "com.topmortar.topmortarsales"
         minSdk = 24
         targetSdk = 36
-        versionCode = 177
-        versionName = "3.4.260408177"
+        versionCode = 178
+        versionName = "3.4.260408178"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
@@ -118,6 +118,7 @@ dependencies {
     // Google In-App Update
     implementation(libs.app.update.ktx)
     implementation(libs.app.update)
+    implementation(libs.androidx.work.runtime.ktx)
 
     // Testing
     testImplementation(libs.junit)

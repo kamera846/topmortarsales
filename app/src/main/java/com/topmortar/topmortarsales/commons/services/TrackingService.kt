@@ -8,19 +8,33 @@ import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
-import android.os.*
-import android.util.Log
-import com.google.android.gms.location.*
+import android.os.Handler
+import android.os.IBinder
+import android.os.Looper
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.firebase.database.DatabaseReference
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
-import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.utils.CustomNotificationBuilder
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
+import com.topmortar.topmortarsales.commons.workers.BackupLocationUpdateWorker
+import com.topmortar.topmortarsales.commons.workers.StopLocationUpdateWorker
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.view.SplashScreenActivity
 import kotlinx.coroutines.CoroutineScope
@@ -29,25 +43,30 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import java.util.concurrent.TimeUnit
 
 class TrackingService : Service() {
 
     companion object {
         var isRunning = false
         const val NOTIFICATION_ID = 1010
-        private const val LOCATION_INTERVAL = 30 * 60 * 1000L // 30 menit
-        private const val LOCATION_MIN_DISTANCE = 0f // 100 meter
+
+        private const val LOCATION_UPDATE_INTERVAL = 10 * 60 * 1000L // 10 Menit
+        private const val SERVER_UPDATE_INTERVAL = 30 * 60 * 1000L // 30 Menit
+
+        private const val LOCATION_MIN_DISTANCE = 0f // 100 Meter
 
         const val ACTION_STOP = "STOP_SERVICE"
         const val ACTION_UPDATE_LOCATION_NOW = "UPDATE_LOCATION_NOW"
+
         const val ACTION_TYPE_DEFAULT = "Default"
         const val ACTION_TYPE_VISIT = "Visit"
         const val ACTION_TYPE_CLOSING = "Closing"
     }
 
-    private var userId : String? = null
-    private var distributorId : String? = null
-    private var deliveryId : String? = null
+    private var userId: String? = null
+    private var distributorId: String? = null
+    private var deliveryId: String? = null
 
     private var lastApiUpdate = 0L
 
@@ -62,11 +81,14 @@ class TrackingService : Service() {
 
     private val handler = Handler(Looper.getMainLooper())
 
-    private var wakeLock: PowerManager.WakeLock? = null
-
     private val serviceScope = CoroutineScope(
         SupervisorJob() + Dispatchers.IO
     )
+
+    override fun onCreate() {
+        super.onCreate()
+        isRunning = true
+    }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
@@ -79,7 +101,7 @@ class TrackingService : Service() {
 
             ACTION_UPDATE_LOCATION_NOW -> {
                 requestSingleLocationUpdate(intent)
-                return START_STICKY
+                return START_REDELIVER_INTENT
             }
         }
 
@@ -89,22 +111,25 @@ class TrackingService : Service() {
             deliveryId = it.getStringExtra("deliveryId")
         }
 
-        acquireWakeLock()
-//        startForegroundService()
+        val sharedPref = getSharedPreferences("tracking_prefs", MODE_PRIVATE)
+
+        sharedPref.edit().apply {
+            putString("userId", userId)
+            putString("distributorId", distributorId)
+            putString("deliveryId", deliveryId)
+            apply()
+        }
+
         startForeground(NOTIFICATION_ID, createNotification())
+
         startLocationUpdates(intent)
         scheduleServiceStop()
+        scheduleBackupWorker()
 
-        return START_STICKY
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-        isRunning = true
+        return START_REDELIVER_INTENT
     }
 
     override fun onDestroy() {
-        wakeLock?.release()
         serviceScope.cancel()
         stopLocationUpdates()
         handler.removeCallbacksAndMessages(null)
@@ -114,35 +139,9 @@ class TrackingService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-
     // -------------------------
-    // Wakelock Service
+    // Notification
     // -------------------------
-
-    private fun acquireWakeLock() {
-
-        if (wakeLock?.isHeld == true) return
-
-        val pm = getSystemService(POWER_SERVICE) as PowerManager
-
-        wakeLock = pm.newWakeLock(
-            PowerManager.PARTIAL_WAKE_LOCK,
-            "TopMortar:TrackingWakeLock"
-        )
-
-        wakeLock?.acquire(15 * 60 * 1000L) // 15 menit
-    }
-
-    // -------------------------
-    // Foreground Notification
-    // -------------------------
-
-//    private fun startForegroundService() {
-//
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            startForeground(NOTIFICATION_ID, createNotification())
-//        }
-//    }
 
     private fun createNotification(): Notification {
 
@@ -160,13 +159,11 @@ class TrackingService : Service() {
             .build()
     }
 
-
     // -------------------------
     // Location Setup
     // -------------------------
 
     private fun startLocationUpdates(intent: Intent?) {
-
 
         val uid = userId ?: return
         val distributor = distributorId ?: "-firebase-001"
@@ -179,29 +176,34 @@ class TrackingService : Service() {
             childDriver = childDelivery.child(deliveryId!!)
         }
 
-
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         locationRequest = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
-            LOCATION_INTERVAL
+            LOCATION_UPDATE_INTERVAL
         )
-            .setMinUpdateIntervalMillis(LOCATION_INTERVAL / 2)
+            .setMinUpdateIntervalMillis(LOCATION_UPDATE_INTERVAL / 2)
             .setMinUpdateDistanceMeters(LOCATION_MIN_DISTANCE)
             .build()
 
         locationCallback = object : LocationCallback() {
 
             override fun onLocationResult(result: LocationResult) {
-
-                result.lastLocation?.let {
-                        updateAbsentLocation(it)
-                        updateDriverLocation(it)
-                        if (intent != null && shouldSendUpdate()) {
-                            sendPositionToServer(it, intent)
-                        }
+                val pref = getSharedPreferences("tracking_prefs", MODE_PRIVATE)
+                pref.edit().apply {
+                    putLong("lastHeartbeat", System.currentTimeMillis())
+                    apply()
                 }
 
+                result.lastLocation?.let {
+
+                    updateAbsentLocation(it)
+                    updateDriverLocation(it)
+
+                    if (shouldSendUpdate()) {
+                        sendPositionToServer(it, intent ?: Intent())
+                    }
+                }
             }
         }
 
@@ -214,11 +216,6 @@ class TrackingService : Service() {
         )
     }
 
-
-    // -------------------------
-    // Firebase Update
-    // -------------------------
-
     private fun requestSingleLocationUpdate(intent: Intent) {
 
         if (!hasLocationPermission()) return
@@ -229,7 +226,6 @@ class TrackingService : Service() {
         ).addOnSuccessListener { location ->
 
             location?.let {
-
                 updateAbsentLocation(it)
                 updateDriverLocation(it)
                 sendPositionToServer(it, intent)
@@ -237,8 +233,11 @@ class TrackingService : Service() {
         }
     }
 
-    private fun updateAbsentLocation(location: Location) {
+    // -------------------------
+    // Firebase
+    // -------------------------
 
+    private fun updateAbsentLocation(location: Location) {
         childAbsent.updateChildren(
             mapOf(
                 "lat" to location.latitude,
@@ -249,8 +248,6 @@ class TrackingService : Service() {
     }
 
     private fun updateDriverLocation(location: Location) {
-
-        if (childDriver == null) return;
         childDriver?.updateChildren(
             mapOf(
                 "lat" to location.latitude,
@@ -264,15 +261,11 @@ class TrackingService : Service() {
     // -------------------------
 
     private fun shouldSendUpdate(): Boolean {
-
         val now = System.currentTimeMillis()
-
-        if (now - lastApiUpdate > (LOCATION_INTERVAL / 2)) { // 15 menit
+        return if (now - lastApiUpdate > SERVER_UPDATE_INTERVAL) {
             lastApiUpdate = now
-            return true
-        }
-
-        return false
+            true
+        } else false
     }
 
     private fun sendPositionToServer(location: Location, intent: Intent) {
@@ -282,7 +275,6 @@ class TrackingService : Service() {
         val actionType = intent.getStringExtra("actionType") ?: ACTION_TYPE_DEFAULT
 
         serviceScope.launch {
-
             try {
 
                 val apiService = HttpClient.create()
@@ -294,39 +286,44 @@ class TrackingService : Service() {
                     lng = createPartFromString(location.longitude.toString())
                 )
 
-                if (!response.isSuccessful) {
-                    Log.e("Save Tracking Location", response.message())
-                    return@launch
-                }
-
-                val responseBody = response.body()
-
-                when (responseBody?.status) {
-                    RESPONSE_STATUS_OK -> {
-                        Log.i("Save Tracking Location", responseBody.message)
-                    } else -> {
-                        Log.e("Save Tracking Location", responseBody?.message ?: "")
-                    }
-                }
+                if (!response.isSuccessful) return@launch
 
             } catch (e: Exception) {
-                Log.e("Save Tracking Location", e.message.toString())
                 e.printStackTrace()
             }
-
         }
     }
 
     // -------------------------
-    // Stop Updates
+    // WorkManager Backup
+    // -------------------------
+
+    private fun scheduleBackupWorker() {
+
+        val workRequest =
+            PeriodicWorkRequestBuilder<BackupLocationUpdateWorker>(SERVER_UPDATE_INTERVAL, TimeUnit.MILLISECONDS)
+                .setConstraints(
+                    Constraints.Builder()
+                        .setRequiredNetworkType(NetworkType.CONNECTED)
+                        .build()
+                )
+                .build()
+
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "backup_location_update",
+            ExistingPeriodicWorkPolicy.UPDATE,
+            workRequest
+        )
+    }
+
+    // -------------------------
+    // Utils
     // -------------------------
 
     private fun stopLocationUpdates() {
-
         locationCallback?.let {
             fusedLocationClient.removeLocationUpdates(it)
         }
-
         locationCallback = null
     }
 
@@ -336,7 +333,6 @@ class TrackingService : Service() {
     // -------------------------
 
     private fun hasLocationPermission(): Boolean {
-
         return ActivityCompat.checkSelfPermission(
             this,
             Manifest.permission.ACCESS_FINE_LOCATION
@@ -357,7 +353,6 @@ class TrackingService : Service() {
             set(Calendar.HOUR_OF_DAY, 22)
             set(Calendar.MINUTE, 0)
             set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
         }
 
         if (calendar.timeInMillis < now) {
@@ -366,8 +361,14 @@ class TrackingService : Service() {
 
         val delay = calendar.timeInMillis - now
 
-        handler.postDelayed({
-            stopSelf()
-        }, delay)
+        val workRequest = OneTimeWorkRequestBuilder<StopLocationUpdateWorker>()
+            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+            .build()
+
+        WorkManager.getInstance(this).enqueueUniqueWork(
+            "stop_location_update",
+            ExistingWorkPolicy.REPLACE,
+            workRequest
+        )
     }
 }

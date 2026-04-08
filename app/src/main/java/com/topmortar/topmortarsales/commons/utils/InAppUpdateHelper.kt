@@ -31,7 +31,12 @@ fun inAppUpdateHelper(
             }
         }
     }.addOnFailureListener { e ->
-        FirebaseUtils.logErr(mContext, "Failed to update app. Err ${e.message}")
-        handleMessage(mContext, message = "Failed to update app. Err ${e.message}")
+        if (e.message?.contains("ERROR_APP_NOT_OWNED") == true) {
+            FirebaseUtils.logErr(mContext, "Aplikasi tidak diinstall melalui Google Play")
+            handleMessage(mContext, message = "Aplikasi tidak diinstall melalui Google Play")
+        } else {
+            FirebaseUtils.logErr(mContext, "Failed to update app. Err ${e.message}")
+            handleMessage(mContext, message = "Failed to update app. Err ${e.message}")
+        }
     }
 }
