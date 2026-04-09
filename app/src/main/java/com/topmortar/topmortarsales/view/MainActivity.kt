@@ -48,6 +48,7 @@ import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.CONST_ADDRESS
 import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_CONTACT_X
 import com.topmortar.topmortarsales.commons.CONST_DATE
 import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
@@ -163,6 +164,8 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
     private lateinit var progressBar: CustomProgressBar
     private lateinit var searchCityForMaps: SearchModal
 
+    private var isContactXSource = false
+
     // Initialize Search Engine
     private val searchDelayMillis = 500L
     private val searchHandler = Handler(Looper.getMainLooper())
@@ -222,6 +225,8 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        isContactXSource = intent.getBooleanExtra(CONST_CONTACT_X, false)
 
         appUpdateManager = AppUpdateManagerFactory.create(this)
 
@@ -392,10 +397,12 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
         // Set Title Bar
         if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_MARKETING) {
-            icMore.visibility = View.VISIBLE
+            if (!isContactXSource) {
+                icMore.visibility = View.VISIBLE
+            }
             binding.titleBar.icMenu.visibility = View.GONE
             tvTitleBarDescription.visibility = View.GONE
-            binding.titleBar.tvTitleBar.text = "Semua Toko"
+            binding.titleBar.tvTitleBar.text = if (isContactXSource) "Toko X" else "Semua Toko"
             binding.titleBar.icBack.visibility = View.VISIBLE
             binding.titleBar.icBack.setOnClickListener { if (isSelectItemActive) toggleSelectItem() else finish() }
         } else {
@@ -448,7 +455,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         }
 
         // Set Floating Action Button
-        if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) btnFab.visibility = View.VISIBLE
+        if ((sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) && !isContactXSource) btnFab.visibility = View.VISIBLE
         if (sessionManager.userKind() != USER_KIND_COURIER) icSearch.visibility = View.VISIBLE
         if (sessionManager.userKind() == USER_KIND_COURIER) btnFabAdmin.visibility = View.VISIBLE
 
@@ -555,6 +562,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             intent.putExtra(CONST_REPUTATION, data.reputation)
             intent.putExtra(CONST_DATE, data.created_at)
             intent.putExtra(CONST_WEEKLY_VISIT_STATUS, data.tagih_mingguan)
+            intent.putExtra(CONST_CONTACT_X, isContactXSource)
         }
 
         activityLauncher.launch(intent)
@@ -923,7 +931,9 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                         val cityID = if (userKind == USER_KIND_ADMIN) selectedCitiesID?.id_city
                         else userCity
 
-                        if (cityID != null && statusFilter != "-1") {
+                        if (isContactXSource) {
+                            apiService.getContactXs(cityId = userCity, userId = userId)
+                        } else if (cityID != null && statusFilter != "-1") {
                             apiService.getContacts(cityId = cityID, status = statusFilter, distributorID = userDistributorId)
                         } else if (cityID != null) {
                             apiService.getContacts(cityId = cityID, distributorID = userDistributorId)
@@ -1086,7 +1096,9 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.background = AppCompatResources.getDrawable(this, R.color.black_400)
             else binding.llFilter.background = AppCompatResources.getDrawable(this, R.color.light)
 
-            binding.llFilter.visibility = View.VISIBLE
+            if (!isContactXSource) {
+                binding.llFilter.visibility = View.VISIBLE
+            }
 
             filterModal = FilterTokoModal(this)
             if (userKind == USER_KIND_ADMIN) {
@@ -1178,7 +1190,9 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 else userCity
 
                 val apiService: ApiService = HttpClient.create()
-                val response = if (cityID != null && statusFilter != "-1") {
+                val response = if (isContactXSource) {
+                    apiService.searchContactXs(cityId = userCity, userId = userId, searchKey = key)
+                } else if (cityID != null && statusFilter != "-1") {
                     apiService.searchContact(cityId = createPartFromString(cityID), status = createPartFromString(statusFilter), key = rbSearchKey, distributorID = createPartFromString(userDistributorId))
                 } else if (cityID != null) {
                     apiService.searchContact(cityId = createPartFromString(cityID), key = rbSearchKey, distributorID = createPartFromString(userDistributorId))
@@ -1398,7 +1412,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             icMore.visibility = View.VISIBLE
             if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) binding.btnFab.visibility = View.VISIBLE
             binding.titleBar.icConfirmSelect.visibility = View.GONE
-            binding.titleBar.tvTitleBar.text = "Semua Toko"
+            binding.titleBar.tvTitleBar.text = if (isContactXSource) "Toko X" else "Semua Toko"
         }
 
     }
