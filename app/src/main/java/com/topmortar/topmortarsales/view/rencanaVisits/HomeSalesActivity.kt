@@ -43,6 +43,7 @@ import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_MARKETING
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_SALES
+import com.topmortar.topmortarsales.commons.CONST_CONTACT_X
 import com.topmortar.topmortarsales.commons.CONST_FULL_NAME
 import com.topmortar.topmortarsales.commons.CONST_IS_BASE_CAMP
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
@@ -603,6 +604,12 @@ class HomeSalesActivity : AppCompatActivity() {
         intent.putExtra(CONST_USER_ID, userId)
         intent.putExtra(CONST_FULL_NAME, userFullName)
         intent.putExtra(CONST_USER_LEVEL, AUTH_LEVEL_SALES)
+        startActivity(intent)
+    }
+
+    private fun navigateToContactX() {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.putExtra(CONST_CONTACT_X, true)
         startActivity(intent)
     }
 
@@ -1657,15 +1664,15 @@ class HomeSalesActivity : AppCompatActivity() {
                 )
             )
         } else {
-            listItem.add(
-                HomeMenuSalesModel(
-                    icon = R.drawable.store_white,
-                    bgColor = R.drawable.bg_blue_silver_lake_round_8,
-                    title = "Rencana Visit Terjadwal",
-                    target = ScheduledRenviActivity::class.java,
-                    isLocked = isLocked
-                )
-            )
+//            listItem.add(
+//                HomeMenuSalesModel(
+//                    icon = R.drawable.store_white,
+//                    bgColor = R.drawable.bg_blue_silver_lake_round_8,
+//                    title = "Rencana Visit Terjadwal",
+//                    target = ScheduledRenviActivity::class.java,
+//                    isLocked = isLocked
+//                )
+//            )
             listItem.add(
                 HomeMenuSalesModel(
                     icon = R.drawable.store_white,
@@ -1692,6 +1699,16 @@ class HomeSalesActivity : AppCompatActivity() {
                 bgColor = R.drawable.bg_blue_silver_lake_round_8,
                 title = "Semua Toko",
                 target = MainActivity::class.java,
+                isLocked = isLocked
+            )
+        )
+
+        listItem.add(
+            HomeMenuSalesModel(
+                icon = R.drawable.gudang_white,
+                bgColor = R.drawable.bg_charcoal_round_8,
+                title = "Toko X",
+                action = { navigateToContactX() },
                 isLocked = isLocked
             )
         )
