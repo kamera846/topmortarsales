@@ -169,6 +169,7 @@ const val CONST_IS_TRACKING_COURIER = "const_is_tracking_courier"
 const val CONST_IS_TRACKING_HISTORY = "const_is_tracking_history"
 const val CONST_POSTED_BY = "const_posted_by"
 const val CONST_POSTED_NAME = "const_posted_name"
+const val CONST_CONTACT_X = "const_contact_x"
 
 /*
     Status

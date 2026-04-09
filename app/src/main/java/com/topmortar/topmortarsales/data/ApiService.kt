@@ -893,4 +893,18 @@ interface ApiService {
         @Part("startLng") startLng: RequestBody,
         @Part pic: MultipartBody.Part,
     ): Response<ResponseMessage>
+
+    @GET("contactX.php")
+    suspend fun getContactXs(
+        @Query("id_city") cityId: String,
+        @Query("id_user") userId: String,
+        @Query("key") searchKey: String? = ""
+    ): ResponseContactList
+
+    @GET("contactX.php")
+    suspend fun searchContactXs(
+        @Query("id_city") cityId: String,
+        @Query("id_user") userId: String,
+        @Query("key") searchKey: String
+    ): Response<ResponseContactList>
 }

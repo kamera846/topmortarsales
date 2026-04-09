@@ -63,6 +63,7 @@ import com.topmortar.topmortarsales.commons.ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.BASE_URL
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
+import com.topmortar.topmortarsales.commons.CONST_CONTACT_X
 import com.topmortar.topmortarsales.commons.CONST_DELIVERY_ID
 import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_IS_TRACKING
@@ -253,6 +254,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var selectedCity: ModalSearchModel? = null
     private var selectedPromo: ModalSearchModel? = null
     private var itemSendMessage: ContactModel? = null
+    private var isContactXSource = false
 
     private var statusItem: List<String> = listOf("Reset Pilihan", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
     private var statusWeeklyVisitItem: List<String> = listOf("Reset Pilihan", "Active")
@@ -444,6 +446,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         if (userKind == USER_KIND_COURIER) {
             setupDelivery()
         } else {
+            if (isContactXSource) {
+                binding.bottomAction.visibility = View.GONE
+            }
             binding.textLoading.visibility = View.GONE
             binding.btnDeliveryContainer.visibility = View.GONE
             binding.contactAction.visibility = View.VISIBLE
@@ -1447,6 +1452,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun getContact() {
 
+        isContactXSource = intent.getBooleanExtra(CONST_CONTACT_X, false)
         contactId = intent.getStringExtra(CONST_CONTACT_ID) ?: "0"
         loadingState(true)
         progressBar.show()
@@ -2205,7 +2211,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         // Admin Access
                         if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) {
 //                        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) {
-                            icEdit.visibility = View.VISIBLE
+                            if (!isContactXSource) {
+                                icEdit.visibility = View.VISIBLE
+                            }
                             val indicatorImageView = findViewById<View>(R.id.indicatorView)
                             indicatorImageView.visibility = View.VISIBLE
                             if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) tvKtpContainer.visibility = View.VISIBLE
