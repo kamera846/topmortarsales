@@ -480,7 +480,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                         tvShipToAddress.text = data.ship_to_address
                         tvShipToPhone.text = data.ship_to_phone
                         tvDeliveryOrderDate.text = "Delivery Date: ${ data.dalivery_date }"
-                        tvDeliveryOrderNumber.text = "Printed Date: " + isClosing.let { if (it) data.date_printed else "-" }
+                        tvDeliveryOrderNumber.text = "Printed Date: " + data.date_printed.ifEmpty { "-" }
                         tvCourier.text = "Kurir: ${ data.courier_name }"
                         tvVehicle.text = "Kendaraan: ${ data.nama_kendaraan }"
                         tvVehicleNumber.text = "No. Polisi: ${ data.nopol_kendaraan }"
