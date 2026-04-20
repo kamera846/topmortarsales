@@ -247,6 +247,8 @@ class ChecklistReportActivity : AppCompatActivity() {
                 "Home Sales Failed",
                 "Failed ChecklistReportActivity on checkMockLocation(). Error: ${e.message}"
             )
+        } finally {
+            if (progressBar.isShowing()) progressBar.dismiss()
         }
     }
 

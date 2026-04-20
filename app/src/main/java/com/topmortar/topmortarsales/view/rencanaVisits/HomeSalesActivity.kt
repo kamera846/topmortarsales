@@ -215,12 +215,45 @@ class HomeSalesActivity : AppCompatActivity() {
     private fun checkPermissionsRequirement(): Boolean {
         if (!PermissionsHandler.isAllLocationRequirementMet(this)) {
             dismissProgressDialog()
-            val intent = Intent(this, PermissionActivity::class.java)
-            locationResultLauncher.launch(intent)
+//            val intent = Intent(this, PermissionActivity::class.java)
+//            locationResultLauncher.launch(intent)
+            showLocationDisclosure()
             return false
         } else {
             return true
         }
+    }
+
+    private fun showLocationDisclosure() {
+        AlertDialog.Builder(this)
+            .setTitle("Aktifkan Layanan Lokasi")
+            .setMessage(
+                "Aplikasi ini mengakses lokasi Anda untuk:\n" +
+                        "- Mencatat kehadiran (absensi)\n" +
+                        "- Memvalidasi lokasi kerja\n" +
+                        "- Mendukung aktivitas operasional sales\n\n" +
+                        "Lokasi akan tetap dikumpulkan meskipun aplikasi tidak digunakan (di latar belakang) selama Anda sedang dalam jam kerja.\n\n" +
+                        "Pelacakan akan berhenti saat Anda melakukan Absen Pulang."
+            )
+            .setPositiveButton("Setuju") { dialog, _ ->
+                dialog.dismiss()
+                val intent = Intent(this, PermissionActivity::class.java)
+                locationResultLauncher.launch(intent)
+            }
+            .setNegativeButton("Tolak") { dialog, _ ->
+                dialog.dismiss()
+                checkAbsent {
+                    if (isAbsentMorningNow && !isAbsentEveningNow) {
+                        lockMenuItem(true)
+                    }
+                }
+                Toast.makeText(
+                    this,
+                    "Aplikasi membutuhkan izin lokasi",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            .show()
     }
 
     private fun checkLocationPermission() {
@@ -500,7 +533,7 @@ class HomeSalesActivity : AppCompatActivity() {
         setupDialogSearch()
     }
 
-    private fun initView() {
+    private fun initView(onFinished: (() -> Unit)? = null) {
         if (absentProgressBar != null) {
             absentProgressBar!!.setMessage(getString(R.string.txt_loading) + " 4 / 5")
         }
@@ -535,7 +568,9 @@ class HomeSalesActivity : AppCompatActivity() {
 
             lockMenuItem(true)
 
-            checkAbsent()
+            checkAbsent {
+                onFinished?.invoke()
+            }
 
             inAppUpdateHelper(this@HomeSalesActivity, appUpdateManager, appUpdateLauncher)
 //        getFcmToken()
@@ -1345,7 +1380,7 @@ class HomeSalesActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkAbsent() {
+    private fun checkAbsent(onFinished: (() -> Unit)? = null) {
         FirebaseUtils.firebaseLogging(this, "Absent", "Start checking")
         try {
 
@@ -1372,6 +1407,7 @@ class HomeSalesActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     if (!snapshot.exists()) {
                         handleAbsenceStatus(morningDateTime = null, eveningDateTime = null)
+                        onFinished?.invoke()
                         return@withContext
                     }
 
@@ -1379,6 +1415,7 @@ class HomeSalesActivity : AppCompatActivity() {
                     val eveningDateTime = snapshot.child("eveningDateTime").getValue(String::class.java)
 
                     handleAbsenceStatus(morningDateTime = morningDateTime, eveningDateTime = eveningDateTime)
+                    onFinished?.invoke()
                 }
 
             }
@@ -1478,22 +1515,28 @@ class HomeSalesActivity : AppCompatActivity() {
     }
 
     private fun showDialogLockedFeature() {
-        var title = getString(R.string.fitur_terkunci)
-        var message = getString(R.string.absen_terlebih_dahulu_untuk_membuka)
+        checkAbsent {
+            if (isAbsentMorningNow && !isAbsentEveningNow) {
+                showLocationDisclosure()
+            } else {
+                var title = getString(R.string.fitur_terkunci)
+                var message = getString(R.string.absen_terlebih_dahulu_untuk_membuka)
 
-        if (isAbsentMorningNow && isAbsentEveningNow) {
+                if (isAbsentMorningNow && isAbsentEveningNow) {
 
-            title = getString(R.string.absen_pulang_sudah_tercatat)
-            message = getString(R.string.terima_kasih_atas_kinerja_hari_ini)
-        }
+                    title = getString(R.string.absen_pulang_sudah_tercatat)
+                    message = getString(R.string.terima_kasih_atas_kinerja_hari_ini)
+                }
 
-        AlertDialog.Builder(this)
-            .setTitle(title)
-            .setMessage(message)
-            .setPositiveButton(getString(R.string.oke)) { dialog, _ ->
-                dialog.dismiss()
+                AlertDialog.Builder(this)
+                    .setTitle(title)
+                    .setMessage(message)
+                    .setPositiveButton(getString(R.string.oke)) { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .show()
             }
-            .show()
+        }
     }
 
     private fun getListStore(showModal: Boolean = true) {
@@ -1932,8 +1975,12 @@ class HomeSalesActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
-        requestNotificationPermission()
-        checkLocationPermission()
+        initView {
+            if (isAbsentMorningNow && !isAbsentEveningNow) {
+                requestNotificationPermission()
+                checkLocationPermission()
+            }
+        }
         super.onResume()
     }
 

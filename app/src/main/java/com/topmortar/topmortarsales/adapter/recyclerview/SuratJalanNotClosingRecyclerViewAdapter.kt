@@ -76,9 +76,9 @@ class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<S
                 item.date_printed.let {
                     if (!it.isNullOrEmpty()) {
                         notesText += DateFormat.format(it, "yyyy-MM-dd HH:mm:ss", "dd MMM, HH:mm")
-                        dateCounter = DateFormat.differenceDateNowDescCustom(it)
-                    } else {
-                        dateCounter = -1
+//                        dateCounter = DateFormat.differenceDateNowDescCustom(it)
+//                    } else {
+//                        dateCounter = -1
                     }
                 }
             } else {
