@@ -13,7 +13,7 @@ data class SuratJalanModel(
     var id_courier : String = "",
     var is_finished: String = "",
     var is_printed: String = "",
-    var date_printed: String = "",
+    var date_printed: String? = "",
     var is_closing: String = "",
     var is_cod: String = "",
     var date_closing: String = "",
