@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package com.topmortar.topmortarsales.view
 
 import android.annotation.SuppressLint
@@ -14,10 +12,8 @@ import android.text.InputType
 import android.text.TextUtils
 import android.text.TextWatcher
 import android.text.method.PasswordTransformationMethod
-import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
-import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -86,12 +82,13 @@ import com.topmortar.topmortarsales.view.courier.HomeCourierActivity
 import com.topmortar.topmortarsales.view.rencanaVisits.HomeSalesActivity
 import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import com.topmortar.topmortarsales.view.tukang.BrandAmbassadorActivity
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
 import java.util.UUID
 import kotlin.coroutines.cancellation.CancellationException
 
-@SuppressLint("CustomSplashScreen", "SetTextI18n")
+@SuppressLint("SetTextI18n", "CustomSplashScreen")
 class SplashScreenActivity : AppCompatActivity() {
 
     private lateinit var rlModal: LinearLayout
@@ -144,6 +141,8 @@ class SplashScreenActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
+        setContentView(R.layout.activity_splash_screen)
+
         supportActionBar?.hide()
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             enableEdgeToEdge()
@@ -161,13 +160,12 @@ class SplashScreenActivity : AppCompatActivity() {
 //                    insets
 //                }
 //            } else {
-                window.statusBarColor = getColor(R.color.primary)
+            @Suppress("DEPRECATION")
+            window.statusBarColor = getColor(R.color.primary)
 //            }
         }
 //        applyMyEdgeToEdge(true)
         sessionManager = SessionManager(this)
-        setContentView(R.layout.activity_splash_screen)
-
         appUpdateManager = AppUpdateManagerFactory.create(this)
 
 //        AppUpdateHelper.initialize()
@@ -189,11 +187,15 @@ class SplashScreenActivity : AppCompatActivity() {
         initClickHandler()
         initOtpListener()
 
-        Handler(Looper.getMainLooper()).postDelayed({
-
-            checkSession()
-
-        }, splashScreenDuration)
+        lifecycleScope.launch {
+            delay(splashScreenDuration)
+            if (!isFinishing) checkSession()
+        }
+//        Handler(Looper.getMainLooper()).postDelayed({
+//
+//            checkSession()
+//
+//        }, splashScreenDuration)
     }
 
     private fun initVariable() {
@@ -275,12 +277,16 @@ class SplashScreenActivity : AppCompatActivity() {
                     if (!etObject.text.isNullOrEmpty()) {
                         if (i < (listOtpInput.size - 1)) {
                             listOtpInput[i+1].requestFocus()
-                            listOtpInput[i+1].setSelection(listOtpInput[i+1].text.length)
+                            listOtpInput[i+1].text?.let{
+                                listOtpInput[i+1].setSelection(it.length)
+                            }
                         } else KeyboardHandler.hideKeyboard(etObject, this@SplashScreenActivity)
                     } else {
                         if ( i > 0) {
                             listOtpInput[i-1].requestFocus()
-                            listOtpInput[i-1].setSelection(listOtpInput[i-1].text.length)
+                            listOtpInput[i-1].text?.let{
+                                listOtpInput[i-1].setSelection(it.length)
+                            }
                         }
                     }
 
@@ -329,8 +335,12 @@ class SplashScreenActivity : AppCompatActivity() {
         }
 
         // Set kursor ke posisi terakhir
-        etPassword.setSelection(etPassword.text.length)
-        etNewPassword.setSelection(etNewPassword.text.length)
+        etPassword.text?.let{
+            etPassword.setSelection(it.length)
+        }
+        etNewPassword.text?.let{
+            etNewPassword.setSelection(it.length)
+        }
     }
 
     private fun navigateToMain() {
@@ -365,13 +375,13 @@ class SplashScreenActivity : AppCompatActivity() {
     private fun checkSession() {
 
         val isLoggedIn = sessionManager.isLoggedIn()
-        val userId = sessionManager.userID()!!
-        val userCity = sessionManager.userCityID()!!
-        val userKind = sessionManager.userKind()!!
-        val userDistributor = sessionManager.userDistributor()!!
+        val userId = sessionManager.userID()
+        val userCity = sessionManager.userCityID()
+        val userKind = sessionManager.userKind()
+        val userDistributor = sessionManager.userDistributor()
         val availableLevel = checkAvailableAccount(sessionManager.userAuthLevel() ?: "0")
 
-        if (!isLoggedIn || !availableLevel || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty() || userDistributor.isEmpty()) showCardLogin()
+        if (!isLoggedIn || !availableLevel || userId.isNullOrEmpty() || userCity.isNullOrEmpty() || userKind.isNullOrEmpty() || userDistributor.isNullOrEmpty()) showCardLogin()
         else getUserLoggedIn()
 
     }
@@ -383,7 +393,7 @@ class SplashScreenActivity : AppCompatActivity() {
         stopTrackingService()
 
         rlModal.visibility = View.VISIBLE
-        inAppUpdateHelper(this@SplashScreenActivity, appUpdateManager, appUpdateLauncher)
+        inAppUpdateHelper(appUpdateManager, appUpdateLauncher)
     }
 
     private fun showAlert(message: String) {
@@ -472,7 +482,10 @@ class SplashScreenActivity : AppCompatActivity() {
 
                         // Firebase Auth Session
                         try {
-                            firebaseReference = FirebaseUtils.getReference(distributorId = data.id_distributor.ifEmpty { "-firebase-005" })
+                            if (!::firebaseReference.isInitialized) {
+                                firebaseReference =
+                                    FirebaseUtils.getReference(distributorId = data.id_distributor.ifEmpty { "-firebase-005" })
+                            }
                             val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
                             val userChild = authChild.child(data.username + data.id_user)
                             val userDevicesChild = userChild.child("devices")
@@ -753,8 +766,8 @@ class SplashScreenActivity : AppCompatActivity() {
             return
         } else if (password.length < 8) {
             etUsername.clearFocus()
-            etPassword.requestFocus()
-            etPassword.error = "Kata sandi minimum adalah 8 karakter!"
+            etNewPassword.requestFocus()
+            etNewPassword.error = "Kata sandi minimum adalah 8 karakter!"
             return
         } else {
             etNewPassword.error = null
@@ -825,7 +838,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
         if (isPasswordShow) togglePassword()
 
-        if (previous != null && previous == true) {
+        if (previous != null && previous) {
             currentSubmitStep -= 1
             if (currentSubmitStep == 0) currentSubmitStep = -1
         }
@@ -834,10 +847,10 @@ class SplashScreenActivity : AppCompatActivity() {
         cardAlert.visibility = View.GONE
 
         when (currentSubmitStep) {
-            0 -> if (submit != null && submit == true) loginHandler()
+            0 -> if (submit != null && submit) loginHandler()
             1 -> {
 
-                if (submit != null && submit == true) requestOtpHandler()
+                if (submit != null && submit) requestOtpHandler()
                 else {
                     clearInput()
 
@@ -856,7 +869,7 @@ class SplashScreenActivity : AppCompatActivity() {
             }
             2 -> {
 
-                if (submit != null && submit == true) verifyOtpHandler()
+                if (submit != null && submit) verifyOtpHandler()
                 else {
                     clearInput()
 
@@ -876,7 +889,7 @@ class SplashScreenActivity : AppCompatActivity() {
             }
             3 -> {
 
-                if (submit != null && submit == true) resetPasswordHandler()
+                if (submit != null && submit) resetPasswordHandler()
                 else {
                     clearInput()
 
@@ -986,13 +999,14 @@ class SplashScreenActivity : AppCompatActivity() {
         val version = Build.VERSION.SDK_INT
         val versionRelease = Build.VERSION.RELEASE
 
-        val displayMetrics = DisplayMetrics()
-        val windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
-        windowManager.defaultDisplay.getMetrics(displayMetrics)
+//        val displayMetrics = DisplayMetrics()
+//        val windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+//        windowManager.defaultDisplay.getMetrics(displayMetrics)
 
-        val screenWidth = displayMetrics.widthPixels
-        val screenHeight = displayMetrics.heightPixels
-        val density = displayMetrics.density
+        val metrics = resources.displayMetrics
+        val screenWidth = metrics.widthPixels
+        val screenHeight = metrics.heightPixels
+        val density = metrics.density
 
         // User Device Detail
         val userDevices = userChild.child("devices")
@@ -1029,6 +1043,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
     }
 
+    @SuppressLint("HardwareIds")
     private fun getUserLoggedIn() {
 
         val userId = sessionManager.userID()!!
@@ -1092,7 +1107,11 @@ class SplashScreenActivity : AppCompatActivity() {
                             // Firebase Auth Session
                             try {
                                 val userDistributorIds = sessionManager.userDistributor()
-                                firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-006")
+                                if (!::firebaseReference.isInitialized) {
+                                    firebaseReference = FirebaseUtils.getReference(
+                                        distributorId = userDistributorIds ?: "-firebase-006"
+                                    )
+                                }
                                 val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
                                 val userChild = authChild.child(username + userId)
                                 val userDevicesChild = userChild.child("devices")

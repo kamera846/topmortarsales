@@ -306,7 +306,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         if (userKind == USER_KIND_ADMIN) getCities()
         else getContacts()
 
-        inAppUpdateHelper(this@MainActivity, appUpdateManager, appUpdateLauncher)
+        inAppUpdateHelper(appUpdateManager, appUpdateLauncher)
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -1507,7 +1507,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             .setMessage("Aplikasi harus diupdate untuk melanjutkan.")
             .setCancelable(false)
             .setPositiveButton("Update") { _, _ ->
-                inAppUpdateHelper(this@MainActivity, appUpdateManager, appUpdateLauncher)
+                inAppUpdateHelper(appUpdateManager, appUpdateLauncher)
             }
             .show()
     }
