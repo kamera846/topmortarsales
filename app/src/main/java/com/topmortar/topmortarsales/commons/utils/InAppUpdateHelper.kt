@@ -8,35 +8,39 @@ import com.google.android.play.core.appupdate.AppUpdateOptions
 import com.google.android.play.core.install.model.AppUpdateType
 import com.google.android.play.core.install.model.UpdateAvailability
 
-fun inAppUpdateHelper(
-    mContext: Context,
+fun Context.inAppUpdateHelper(
     appUpdateManager: AppUpdateManager,
     launcher: ActivityResultLauncher<IntentSenderRequest>,
 ) {
-    val options = AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build()
-    appUpdateManager.appUpdateInfo.addOnSuccessListener { info ->
+    try {
+        val options = AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build()
+        appUpdateManager.appUpdateInfo.addOnSuccessListener { info ->
 
-        if (info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
-            info.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
-        ) {
-            try {
-                appUpdateManager.startUpdateFlowForResult(
-                    info,
-                    launcher,
-                    options,
-                )
-            } catch (e: Exception) {
-                FirebaseUtils.logErr(mContext, "Failed to update app. Catch ${e.message}")
-                handleMessage(mContext, message = "Failed to update app. Catch ${e.message}")
+            if (info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
+                info.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)
+            ) {
+                try {
+                    appUpdateManager.startUpdateFlowForResult(
+                        info,
+                        launcher,
+                        options,
+                    )
+                } catch (e: Exception) {
+                    FirebaseUtils.logErr(this, "Failed to update app. Catch ${e.message}")
+                    handleMessage(this, message = "Failed to update app. Catch ${e.message}")
+                }
+            }
+        }.addOnFailureListener { e ->
+            if (e.message?.contains("ERROR_APP_NOT_OWNED") == true) {
+                FirebaseUtils.logErr(this, "Aplikasi tidak diinstall melalui Google Play")
+                handleMessage(this, message = "Aplikasi tidak diinstall melalui Google Play")
+            } else {
+                FirebaseUtils.logErr(this, "Failed to update app. Err ${e.message}")
+                handleMessage(this, message = "Failed to update app. Err ${e.message}")
             }
         }
-    }.addOnFailureListener { e ->
-        if (e.message?.contains("ERROR_APP_NOT_OWNED") == true) {
-            FirebaseUtils.logErr(mContext, "Aplikasi tidak diinstall melalui Google Play")
-            handleMessage(mContext, message = "Aplikasi tidak diinstall melalui Google Play")
-        } else {
-            FirebaseUtils.logErr(mContext, "Failed to update app. Err ${e.message}")
-            handleMessage(mContext, message = "Failed to update app. Err ${e.message}")
-        }
+    } catch (e: Exception) {
+        FirebaseUtils.logErr(this, "Failed to update app. Main Catch ${e.message}")
+        handleMessage(this, message = "Failed to update app. Main Catch ${e.message}")
     }
 }

@@ -140,6 +140,8 @@ class HomeSalesActivity : AppCompatActivity() {
     private var isAbsentMorningNow = false
     private var isAbsentEveningNow = false
     private var isLocked = false
+    private var isPermissionGranted = false
+    private var isShowingLocationDisclosure = false
 
     private lateinit var firebaseReference: DatabaseReference
     private var absentProgressBar: CustomProgressBar? = null
@@ -158,22 +160,28 @@ class HomeSalesActivity : AppCompatActivity() {
     private var absentMode: String? = null
 
     lateinit var appUpdateManager: AppUpdateManager
-    private val appUpdateLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-        if (result.resultCode != RESULT_OK) {
-            FirebaseUtils.logErr(this@HomeSalesActivity, "Failed to update app. Result code ${result.resultCode}")
+    private val appUpdateLauncher =
+        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            if (result.resultCode != RESULT_OK) {
+                FirebaseUtils.logErr(
+                    this@HomeSalesActivity,
+                    "Failed to update app. Result code ${result.resultCode}"
+                )
 //            showForceUpdateDialog()
+            }
         }
-    }
 
-    private val locationResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            checkLocationPermission()
+    private val locationResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                checkLocationPermission()
+            }
         }
-    }
 
-    private val requestNotificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        // Do something
-    }
+    private val requestNotificationPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            // Do something
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -194,7 +202,7 @@ class HomeSalesActivity : AppCompatActivity() {
             sessionManager.userID() ?: ""
         )
 
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 myOnBackPressed()
             }
@@ -217,15 +225,22 @@ class HomeSalesActivity : AppCompatActivity() {
             dismissProgressDialog()
 //            val intent = Intent(this, PermissionActivity::class.java)
 //            locationResultLauncher.launch(intent)
+            isPermissionGranted = false
             showLocationDisclosure()
             return false
         } else {
+            isPermissionGranted = true
             return true
         }
     }
 
     private fun showLocationDisclosure() {
+        if (isShowingLocationDisclosure) {
+            return
+        }
+        isShowingLocationDisclosure = true
         AlertDialog.Builder(this)
+            .setCancelable(false)
             .setTitle("Aktifkan Layanan Lokasi")
             .setMessage(
                 "Aplikasi ini mengakses lokasi Anda untuk:\n" +
@@ -236,17 +251,20 @@ class HomeSalesActivity : AppCompatActivity() {
                         "Pelacakan akan berhenti saat Anda melakukan Absen Pulang."
             )
             .setPositiveButton("Setuju") { dialog, _ ->
+                isShowingLocationDisclosure = false
                 dialog.dismiss()
                 val intent = Intent(this, PermissionActivity::class.java)
                 locationResultLauncher.launch(intent)
             }
             .setNegativeButton("Tolak") { dialog, _ ->
+                isShowingLocationDisclosure = false
                 dialog.dismiss()
-                checkAbsent {
-                    if (isAbsentMorningNow && !isAbsentEveningNow) {
-                        lockMenuItem(true)
-                    }
-                }
+//                checkAbsent {
+//                    if (isAbsentMorningNow && !isAbsentEveningNow) {
+//                        lockMenuItem(true)
+//                    }
+//                }
+                initView()
                 Toast.makeText(
                     this,
                     "Aplikasi membutuhkan izin lokasi",
@@ -272,7 +290,10 @@ class HomeSalesActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on checkLocationPermission(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed HomeSalesActivity on checkLocationPermission(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Sales Failed",
@@ -298,7 +319,10 @@ class HomeSalesActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on checkGpsStatus(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed HomeSalesActivity on checkGpsStatus(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Sales Failed",
@@ -376,7 +400,10 @@ class HomeSalesActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on checkMockLocation(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed HomeSalesActivity on checkMockLocation(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Sales Failed",
@@ -411,7 +438,10 @@ class HomeSalesActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on showDialogIsMock(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed HomeSalesActivity on showDialogIsMock(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Sales Failed",
@@ -438,7 +468,10 @@ class HomeSalesActivity : AppCompatActivity() {
                 .setPositiveButton("Oke") { dialog, _ ->
                     dialog.dismiss()
 
-                    FirebaseUtils.logErr(this, "Failed HomeSalesActivity on showDialogGooglePlayNotAvailable(). Catch: Google Play Services not available")
+                    FirebaseUtils.logErr(
+                        this,
+                        "Failed HomeSalesActivity on showDialogGooglePlayNotAvailable(). Catch: Google Play Services not available"
+                    )
                     handleMessage(
                         this,
                         "Home Courier Failed",
@@ -452,7 +485,10 @@ class HomeSalesActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on showDialogGooglePlayNotAvailable(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed HomeSalesActivity on showDialogGooglePlayNotAvailable(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Courier Failed",
@@ -481,7 +517,10 @@ class HomeSalesActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on showGpsDisabledDialog(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed HomeSalesActivity on showGpsDisabledDialog(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Sales Failed",
@@ -533,7 +572,7 @@ class HomeSalesActivity : AppCompatActivity() {
         setupDialogSearch()
     }
 
-    private fun initView(onFinished: (() -> Unit)? = null) {
+    private fun initView() {
         if (absentProgressBar != null) {
             absentProgressBar!!.setMessage(getString(R.string.txt_loading) + " 4 / 5")
         }
@@ -568,11 +607,9 @@ class HomeSalesActivity : AppCompatActivity() {
 
             lockMenuItem(true)
 
-            checkAbsent {
-                onFinished?.invoke()
-            }
+            checkAbsent()
 
-            inAppUpdateHelper(this@HomeSalesActivity, appUpdateManager, appUpdateLauncher)
+            inAppUpdateHelper(appUpdateManager, appUpdateLauncher)
 //        getFcmToken()
 //        Disabled FCM
 //        subscribeFcmTopic()
@@ -580,7 +617,10 @@ class HomeSalesActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on initView(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed HomeSalesActivity on initView(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Sales Failed",
@@ -610,7 +650,10 @@ class HomeSalesActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on getFcmToken(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed HomeSalesActivity on getFcmToken(). Catch: ${e.message}"
+            )
             Log.e("FCM", "Error get fcm token exception: $e")
         }
 
@@ -750,7 +793,10 @@ class HomeSalesActivity : AppCompatActivity() {
                     if (e is CancellationException) {
                         return@launch
                     }
-                    FirebaseUtils.logErr(this@HomeSalesActivity, "Failed HomeSalesActivity on navigateToNearestStore(). Catch: ${e.message}")
+                    FirebaseUtils.logErr(
+                        this@HomeSalesActivity,
+                        "Failed HomeSalesActivity on navigateToNearestStore(). Catch: ${e.message}"
+                    )
                     handleMessage(
                         this@HomeSalesActivity,
                         TAG_RESPONSE_CONTACT,
@@ -866,7 +912,10 @@ class HomeSalesActivity : AppCompatActivity() {
                     if (e is CancellationException) {
                         return@launch
                     }
-                    FirebaseUtils.logErr(this@HomeSalesActivity, "Failed HomeSalesActivity on navigateToNearestBasecamp(). Catch: ${e.message}")
+                    FirebaseUtils.logErr(
+                        this@HomeSalesActivity,
+                        "Failed HomeSalesActivity on navigateToNearestBasecamp(). Catch: ${e.message}"
+                    )
                     handleMessage(
                         this@HomeSalesActivity,
                         TAG_RESPONSE_CONTACT,
@@ -918,7 +967,10 @@ class HomeSalesActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on logoutHandler(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed HomeSalesActivity on logoutHandler(). Catch: ${e.message}"
+            )
             Log.d("Firebase Auth", "$e")
         }
 
@@ -983,7 +1035,10 @@ class HomeSalesActivity : AppCompatActivity() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@HomeSalesActivity, "Failed HomeSalesActivity on getUserLoggedIn(). Catch: ${e.message}")
+                FirebaseUtils.logErr(
+                    this@HomeSalesActivity,
+                    "Failed HomeSalesActivity on getUserLoggedIn(). Catch: ${e.message}"
+                )
                 Log.d("TAG USER LOGGED IN", generateFailedRunServiceMessage(e.message.toString()))
             }
 
@@ -1108,7 +1163,8 @@ class HomeSalesActivity : AppCompatActivity() {
 
                 if (!urlUtility.isUrl(mapsUrl) && mapsUrl.isNotEmpty()) {
 
-                    val status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
+                    val status =
+                        GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
                     if (status != ConnectionResult.SUCCESS) {
                         showDialogGooglePlayNotAvailable()
                         return
@@ -1246,7 +1302,8 @@ class HomeSalesActivity : AppCompatActivity() {
                                 "ID USER: $userId \n" +
                                 "DISTANCE: $shortDistance \n" +
                                 "LAPORAN: $visitReport \n" +
-                                "SOURCE: $absentType \n")
+                                "SOURCE: $absentType \n"
+                    )
                     apiService.absenSalesInStore(
                         idContact = createPartFromString(selectedStore?.id.toString()),
                         idUser = createPartFromString(userId!!),
@@ -1261,7 +1318,8 @@ class HomeSalesActivity : AppCompatActivity() {
                                 "ID USER: $userId \n" +
                                 "DISTANCE: $shortDistance \n" +
                                 "LAPORAN: $visitReport \n" +
-                                "SOURCE: $absentType \n")
+                                "SOURCE: $absentType \n"
+                    )
                     apiService.absenSalesInBasecamp(
                         idGudang = createPartFromString(selectedStore?.id.toString()),
                         idUser = createPartFromString(userId!!),
@@ -1294,10 +1352,12 @@ class HomeSalesActivity : AppCompatActivity() {
 
                             lifecycleScope.launch {
 
-                                val calendar = checkTimeFromInternet(this@HomeSalesActivity) ?: Calendar.getInstance()
+                                val calendar = checkTimeFromInternet(this@HomeSalesActivity)
+                                    ?: Calendar.getInstance()
                                 val date = Date(calendar.timeInMillis)
 
-                                val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
+                                val formatter =
+                                    SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
                                 formatter.timeZone = TimeZone.getDefault()
 
                                 val absentDateTime = formatter.format(date)
@@ -1315,7 +1375,8 @@ class HomeSalesActivity : AppCompatActivity() {
 
                                     if (currentHour != null) {
                                         if (currentHour >= 16) {
-                                            userChild.child("eveningDateTime").setValue(absentDateTime)
+                                            userChild.child("eveningDateTime")
+                                                .setValue(absentDateTime)
                                             userChild.child("lastSeen").setValue(absentDateTime)
 
                                             sessionManager.absentDateTime(absentDateTime)
@@ -1332,6 +1393,7 @@ class HomeSalesActivity : AppCompatActivity() {
                                 }
                             }
                         }
+
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
                             dismissProgressDialog()
@@ -1369,7 +1431,10 @@ class HomeSalesActivity : AppCompatActivity() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@HomeSalesActivity, "Fathis@HomeSalesActivity on executeAbsentReport(). Catch: ${e.message}")
+                FirebaseUtils.logErr(
+                    this@HomeSalesActivity,
+                    "Fathis@HomeSalesActivity on executeAbsentReport(). Catch: ${e.message}"
+                )
                 handleMessage(
                     this@HomeSalesActivity,
                     TAG_RESPONSE_CONTACT,
@@ -1380,7 +1445,7 @@ class HomeSalesActivity : AppCompatActivity() {
         }
     }
 
-    private fun checkAbsent(onFinished: (() -> Unit)? = null) {
+    private fun checkAbsent() {
         FirebaseUtils.firebaseLogging(this, "Absent", "Start checking")
         try {
 
@@ -1407,15 +1472,18 @@ class HomeSalesActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     if (!snapshot.exists()) {
                         handleAbsenceStatus(morningDateTime = null, eveningDateTime = null)
-                        onFinished?.invoke()
                         return@withContext
                     }
 
-                    val morningDateTime = snapshot.child("morningDateTime").getValue(String::class.java)
-                    val eveningDateTime = snapshot.child("eveningDateTime").getValue(String::class.java)
+                    val morningDateTime =
+                        snapshot.child("morningDateTime").getValue(String::class.java)
+                    val eveningDateTime =
+                        snapshot.child("eveningDateTime").getValue(String::class.java)
 
-                    handleAbsenceStatus(morningDateTime = morningDateTime, eveningDateTime = eveningDateTime)
-                    onFinished?.invoke()
+                    handleAbsenceStatus(
+                        morningDateTime = morningDateTime,
+                        eveningDateTime = eveningDateTime
+                    )
                 }
 
             }
@@ -1423,7 +1491,10 @@ class HomeSalesActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this@HomeSalesActivity, "Failed HomeSalesActivity on checkAbsent(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this@HomeSalesActivity,
+                "Failed HomeSalesActivity on checkAbsent(). Catch: ${e.message}"
+            )
             lockMenuItem(false)
             handleMessage(
                 this,
@@ -1449,14 +1520,16 @@ class HomeSalesActivity : AppCompatActivity() {
                     set(Calendar.MILLISECOND, 0)
                 }
 
-                if (calendar.timeInMillis > now) {
+                if (calendar.timeInMillis > now && isPermissionGranted) {
                     // Jika sudah lebih dari jam 10 malam tracking otomatis dimatikan
                     startTrackingService(userId, userDistributorId)
                 }
 
                 sessionManager.absentDateTime(morningDateTime!!)
                 lockMenuItem(false)
-            } else -> {
+            }
+
+            else -> {
                 stopTrackingService()
 
                 lockMenuItem(true)
@@ -1468,7 +1541,7 @@ class HomeSalesActivity : AppCompatActivity() {
         FirebaseUtils.firebaseLogging(this, "Absent", "Lock menu")
         dismissProgressDialog()
         FirebaseUtils.firebaseLogging(this, "Absent", "Loading dismissed")
-        isLocked = state
+        isLocked = state || !isPermissionGranted
 
         setListMenu()
 
@@ -1480,12 +1553,12 @@ class HomeSalesActivity : AppCompatActivity() {
             binding.btnAbsent.visibility = View.GONE
         } else {
 
-            binding.absentTitle.text = if (state) {
+            binding.absentTitle.text = if (isLocked) {
                 getString(R.string.yuk_catat_kehadiranmu_hari_ini)
             } else {
                 getString(R.string.kehadiranmu_telah_tercatat)
             }
-            binding.absentDescription.text = if (state) {
+            binding.absentDescription.text = if (isLocked) {
                 getString(R.string.absenmu_penting)
             } else {
                 getString(R.string.terimakasih_sudah_mencatat_kehadiran_hari_ini_without_clock)
@@ -1493,13 +1566,14 @@ class HomeSalesActivity : AppCompatActivity() {
 
             binding.btnAbsent.backgroundTintList = ContextCompat.getColorStateList(
                 this,
-                if (state) R.color.status_bid else R.color.red_claret
+                if (isLocked) R.color.status_bid else R.color.red_claret
             )
             binding.btnAbsent.text =
-                if (state) getString(R.string.absen_sekarang) else getString(R.string.pulang_sekarang)
+                if (isLocked) getString(R.string.absen_sekarang) else getString(R.string.pulang_sekarang)
 
             lifecycleScope.launch {
-                val calendar = checkTimeFromInternet(this@HomeSalesActivity) ?: Calendar.getInstance()
+                val calendar =
+                    checkTimeFromInternet(this@HomeSalesActivity) ?: Calendar.getInstance()
                 val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
 
                 if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
@@ -1515,28 +1589,22 @@ class HomeSalesActivity : AppCompatActivity() {
     }
 
     private fun showDialogLockedFeature() {
-        checkAbsent {
-            if (isAbsentMorningNow && !isAbsentEveningNow) {
-                showLocationDisclosure()
-            } else {
-                var title = getString(R.string.fitur_terkunci)
-                var message = getString(R.string.absen_terlebih_dahulu_untuk_membuka)
+        var title = getString(R.string.fitur_terkunci)
+        var message = getString(R.string.absen_terlebih_dahulu_untuk_membuka)
 
-                if (isAbsentMorningNow && isAbsentEveningNow) {
+        if (isAbsentMorningNow && isAbsentEveningNow) {
 
-                    title = getString(R.string.absen_pulang_sudah_tercatat)
-                    message = getString(R.string.terima_kasih_atas_kinerja_hari_ini)
-                }
-
-                AlertDialog.Builder(this)
-                    .setTitle(title)
-                    .setMessage(message)
-                    .setPositiveButton(getString(R.string.oke)) { dialog, _ ->
-                        dialog.dismiss()
-                    }
-                    .show()
-            }
+            title = getString(R.string.absen_pulang_sudah_tercatat)
+            message = getString(R.string.terima_kasih_atas_kinerja_hari_ini)
         }
+
+        AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton(getString(R.string.oke)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
     private fun getListStore(showModal: Boolean = true) {
@@ -1602,7 +1670,10 @@ class HomeSalesActivity : AppCompatActivity() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@HomeSalesActivity, "Failed HomeSalesActivity on getListStore(). Catch: ${e.message}")
+                FirebaseUtils.logErr(
+                    this@HomeSalesActivity,
+                    "Failed HomeSalesActivity on getListStore(). Catch: ${e.message}"
+                )
                 handleMessage(
                     this@HomeSalesActivity,
                     TAG_RESPONSE_CONTACT,
@@ -1673,7 +1744,10 @@ class HomeSalesActivity : AppCompatActivity() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@HomeSalesActivity, "Failed HomeSalesActivity on getListBasecamp(). Catch: ${e.message}")
+                FirebaseUtils.logErr(
+                    this@HomeSalesActivity,
+                    "Failed HomeSalesActivity on getListBasecamp(). Catch: ${e.message}"
+                )
                 handleMessage(
                     this@HomeSalesActivity,
                     TAG_RESPONSE_CONTACT,
@@ -1867,7 +1941,8 @@ class HomeSalesActivity : AppCompatActivity() {
         menuItemAdapter.setList(listItem)
         menuItemAdapter.setOnItemClickListener(object : HomeSalesMenuRV.OnItemClickListener {
             override fun onItemClick(item: HomeMenuSalesModel) {
-                if (item.isLocked) showDialogLockedFeature()
+                if (!isPermissionGranted) showLocationDisclosure()
+                else if (item.isLocked) showDialogLockedFeature()
                 else {
                     if (item.target != null) startActivity(
                         Intent(
@@ -1891,30 +1966,38 @@ class HomeSalesActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val response = apiService.getTotalVisitSales(idUser = userId ?: "-1")
-                when(response.status) {
+                when (response.status) {
                     RESPONSE_STATUS_OK -> {
                         val result = response.results
                         if (result != null) {
                             val totalVisit = result.total_visit.toInt()
                             val targetAmount = result.target_visit.toInt()
 
-                            binding.reportProgress.progress = (totalVisit.toFloat() / targetAmount) * 100
+                            binding.reportProgress.progress =
+                                (totalVisit.toFloat() / targetAmount) * 100
                             binding.reportProgress.text = "$totalVisit"
 
                             if (totalVisit >= targetAmount) {
                                 if (totalVisit == targetAmount) {
-                                    binding.reportSubtitle.text = "Anda telah menyelesaikan target visit bulan ini. Terima kasih atas kerja keras Anda!"
+                                    binding.reportSubtitle.text =
+                                        "Anda telah menyelesaikan target visit bulan ini. Terima kasih atas kerja keras Anda!"
                                 } else {
                                     binding.reportTitle.text = "Berhasil melampaui target!"
-                                    binding.reportSubtitle.text = "Hebat! Anda akan mendapatkan ${totalVisit - targetAmount} insentif tambahan untuk bulan ini."
+                                    binding.reportSubtitle.text =
+                                        "Hebat! Anda akan mendapatkan ${totalVisit - targetAmount} insentif tambahan untuk bulan ini."
                                 }
-                                binding.reportProgress.progressColor = getColor(R.color.green_reseda)
+                                binding.reportProgress.progressColor =
+                                    getColor(R.color.green_reseda)
                             } else {
-                                binding.reportSubtitle.text = "Selesaikan ${targetAmount - totalVisit} visit lagi untuk mencapai target bulan ini."
+                                binding.reportSubtitle.text =
+                                    "Selesaikan ${targetAmount - totalVisit} visit lagi untuk mencapai target bulan ini."
                             }
                         }
-                    } else -> {
-                        binding.reportSubtitle.text = "Gagal memuat laporan. Message: ${response.message}"
+                    }
+
+                    else -> {
+                        binding.reportSubtitle.text =
+                            "Gagal memuat laporan. Message: ${response.message}"
                     }
                 }
             } catch (e: Exception) {
@@ -1975,12 +2058,8 @@ class HomeSalesActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
-        initView {
-            if (isAbsentMorningNow && !isAbsentEveningNow) {
-                requestNotificationPermission()
-                checkLocationPermission()
-            }
-        }
+        requestNotificationPermission()
+        checkLocationPermission()
         super.onResume()
     }
 
@@ -2002,7 +2081,7 @@ class HomeSalesActivity : AppCompatActivity() {
             }
         }
     }
-    
+
     private fun dismissProgressDialog() {
         if (!isFinishing && !isDestroyed) {
             absentProgressBar?.dismiss()

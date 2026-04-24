@@ -149,7 +149,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
             tabLayout.setSelectedTabIndicatorColor(getColor(R.color.white))
         }
 
-        inAppUpdateHelper(this@BrandAmbassadorActivity, appUpdateManager, appUpdateLauncher)
+        inAppUpdateHelper(appUpdateManager, appUpdateLauncher)
 
         onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
@@ -496,7 +496,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
             .setMessage("Aplikasi harus diupdate untuk melanjutkan.")
             .setCancelable(false)
             .setPositiveButton("Update") { _, _ ->
-                inAppUpdateHelper(this@BrandAmbassadorActivity, appUpdateManager, appUpdateLauncher)
+                inAppUpdateHelper(appUpdateManager, appUpdateLauncher)
             }
             .show()
     }
