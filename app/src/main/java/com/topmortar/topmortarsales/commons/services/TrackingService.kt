@@ -11,8 +11,8 @@ import android.location.Location
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
@@ -91,15 +91,22 @@ class TrackingService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (!hasLocationPermission()) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+            stopSelf()
+            return START_NOT_STICKY
+        }
 
         when (intent?.action) {
 
             ACTION_STOP -> {
+                stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
                 return START_NOT_STICKY
             }
 
             ACTION_UPDATE_LOCATION_NOW -> {
+                if (!hasLocationPermission()) return START_NOT_STICKY
                 requestSingleLocationUpdate(intent)
                 return START_REDELIVER_INTENT
             }
@@ -301,7 +308,10 @@ class TrackingService : Service() {
     private fun scheduleBackupWorker() {
 
         val workRequest =
-            PeriodicWorkRequestBuilder<BackupLocationUpdateWorker>(SERVER_UPDATE_INTERVAL, TimeUnit.MILLISECONDS)
+            PeriodicWorkRequestBuilder<BackupLocationUpdateWorker>(
+                SERVER_UPDATE_INTERVAL,
+                TimeUnit.MILLISECONDS
+            )
                 .setConstraints(
                     Constraints.Builder()
                         .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -333,7 +343,7 @@ class TrackingService : Service() {
     // -------------------------
 
     private fun hasLocationPermission(): Boolean {
-        return ActivityCompat.checkSelfPermission(
+        return ContextCompat.checkSelfPermission(
             this,
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED

@@ -118,6 +118,8 @@ class HomeCourierActivity : AppCompatActivity() {
     private var isAbsentMorningNow = false
     private var isAbsentEveningNow = false
     private var isLocked = false
+    private var isPermissionGranted = false
+    private var isShowingLocationDisclosure = false
 
     private lateinit var firebaseReference: DatabaseReference
     private var absentProgressBar: CustomProgressBar? = null
@@ -132,22 +134,28 @@ class HomeCourierActivity : AppCompatActivity() {
     private var isSelectBasecampOnly = false
 
     lateinit var appUpdateManager: AppUpdateManager
-    private val appUpdateLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-        if (result.resultCode != RESULT_OK) {
-            FirebaseUtils.logErr(this@HomeCourierActivity, "Failed to update app. Result code ${result.resultCode}")
+    private val appUpdateLauncher =
+        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            if (result.resultCode != RESULT_OK) {
+                FirebaseUtils.logErr(
+                    this@HomeCourierActivity,
+                    "Failed to update app. Result code ${result.resultCode}"
+                )
 //            showForceUpdateDialog()
+            }
         }
-    }
 
-    private val locationResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            checkLocationPermission()
+    private val locationResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                checkLocationPermission()
+            }
         }
-    }
 
-    private val requestNotificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        // Do something
-    }
+    private val requestNotificationPermission =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            // Do something
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -206,7 +214,7 @@ class HomeCourierActivity : AppCompatActivity() {
             userId ?: ""
         )
 
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 myOnBackPressed()
             }
@@ -229,15 +237,22 @@ class HomeCourierActivity : AppCompatActivity() {
             dismissProgressDialog()
 //            val intent = Intent(this, PermissionActivity::class.java)
 //            locationResultLauncher.launch(intent)
+            isPermissionGranted = false
             showLocationDisclosure()
             return false
         } else {
+            isPermissionGranted = true
             return true
         }
     }
 
     private fun showLocationDisclosure() {
+        if (isShowingLocationDisclosure) {
+            return
+        }
+        isShowingLocationDisclosure = true
         AlertDialog.Builder(this)
+            .setCancelable(false)
             .setTitle("Aktifkan Layanan Lokasi")
             .setMessage(
                 "Aplikasi ini mengakses lokasi Anda untuk:\n" +
@@ -248,17 +263,20 @@ class HomeCourierActivity : AppCompatActivity() {
                         "Pelacakan akan berhenti saat Anda melakukan Absen Pulang."
             )
             .setPositiveButton("Setuju") { dialog, _ ->
+                isShowingLocationDisclosure = false
                 dialog.dismiss()
                 val intent = Intent(this, PermissionActivity::class.java)
                 locationResultLauncher.launch(intent)
             }
             .setNegativeButton("Tolak") { dialog, _ ->
+                isShowingLocationDisclosure = false
                 dialog.dismiss()
-                checkAbsent {
-                    if (isAbsentMorningNow && !isAbsentEveningNow) {
-                        lockMenuItem(true)
-                    }
-                }
+//                checkAbsent {
+//                    if (isAbsentMorningNow && !isAbsentEveningNow) {
+//                        lockMenuItem(true)
+//                    }
+//                }
+                initView()
                 Toast.makeText(
                     this,
                     "Aplikasi membutuhkan izin lokasi",
@@ -284,7 +302,10 @@ class HomeCourierActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed HomeCourierActivity on checkLocationPermission(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed HomeCourierActivity on checkLocationPermission(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Courier Failed",
@@ -313,7 +334,10 @@ class HomeCourierActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed HomeCourierActivity on checkGpsStatus(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed HomeCourierActivity on checkGpsStatus(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Courier Failed",
@@ -387,7 +411,10 @@ class HomeCourierActivity : AppCompatActivity() {
                     }
                 }.addOnFailureListener { e ->
                     initView()
-                    FirebaseUtils.logErr(this, "Failed HomeCourierActivity on checkMockLocation(). Catch: $e")
+                    FirebaseUtils.logErr(
+                        this,
+                        "Failed HomeCourierActivity on checkMockLocation(). Catch: $e"
+                    )
                     handleMessage(
                         this,
                         "Home Courier Failed",
@@ -399,7 +426,10 @@ class HomeCourierActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed HomeCourierActivity on checkMockLocation(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed HomeCourierActivity on checkMockLocation(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Courier Failed",
@@ -430,7 +460,10 @@ class HomeCourierActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed HomeCourierActivity on showDialogIsMock(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed HomeCourierActivity on showDialogIsMock(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Courier Failed",
@@ -457,7 +490,10 @@ class HomeCourierActivity : AppCompatActivity() {
                 .setPositiveButton("Oke") { dialog, _ ->
                     dialog.dismiss()
 
-                    FirebaseUtils.logErr(this, "Failed HomeCourierActivity on checkMockLocation(). Catch: Google Play Services not available")
+                    FirebaseUtils.logErr(
+                        this,
+                        "Failed HomeCourierActivity on checkMockLocation(). Catch: Google Play Services not available"
+                    )
                     handleMessage(
                         this,
                         "Home Courier Failed",
@@ -471,7 +507,10 @@ class HomeCourierActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed HomeCourierActivity on showDialogGooglePlayNotAvailable(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed HomeCourierActivity on showDialogGooglePlayNotAvailable(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Courier Failed",
@@ -497,7 +536,10 @@ class HomeCourierActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed HomeCourierActivity on showGpsDisabledDialog(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed HomeCourierActivity on showGpsDisabledDialog(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Courier Failed",
@@ -506,7 +548,7 @@ class HomeCourierActivity : AppCompatActivity() {
         }
     }
 
-    private fun initView(onFinished: (() -> Unit)? = null) {
+    private fun initView() {
         if (absentProgressBar != null) {
             absentProgressBar!!.setMessage(getString(R.string.txt_loading) + " 4 / 5")
         }
@@ -515,10 +557,42 @@ class HomeCourierActivity : AppCompatActivity() {
 
             binding.fullName.text = userFullName
 
-            binding.deliveryItem.setOnClickListener { if (!isLocked) navigateToDelivery() else showDialogLockedFeature() }
-            binding.nearestStoreItem.setOnClickListener { if (!isLocked) navigateToNearestStore() else showDialogLockedFeature() }
-            binding.basecampItem.setOnClickListener { if (!isLocked) navigateToBasecamp() else showDialogLockedFeature() }
-            binding.nearestBasecampItem.setOnClickListener { if (!isLocked) navigateToNearestBasecamp() else showDialogLockedFeature() }
+            binding.deliveryItem.setOnClickListener {
+                if (!isLocked) {
+                    navigateToDelivery()
+                } else if (!isPermissionGranted) {
+                    showLocationDisclosure()
+                } else {
+                    showDialogLockedFeature()
+                }
+            }
+            binding.nearestStoreItem.setOnClickListener {
+                if (!isLocked) {
+                    navigateToNearestStore()
+                } else if (!isPermissionGranted) {
+                    showLocationDisclosure()
+                } else {
+                    showDialogLockedFeature()
+                }
+            }
+            binding.basecampItem.setOnClickListener {
+                if (!isLocked) {
+                    navigateToBasecamp()
+                } else if (!isPermissionGranted) {
+                    showLocationDisclosure()
+                } else {
+                    showDialogLockedFeature()
+                }
+            }
+            binding.nearestBasecampItem.setOnClickListener {
+                if (!isLocked) {
+                    navigateToNearestBasecamp()
+                } else if (!isPermissionGranted) {
+                    showLocationDisclosure()
+                } else {
+                    showDialogLockedFeature()
+                }
+            }
             binding.myProfileItem.setOnClickListener { navigateToMyProfile() }
             binding.contactAdminItem.setOnClickListener { navigateToContactAdmin() }
 
@@ -554,17 +628,18 @@ class HomeCourierActivity : AppCompatActivity() {
 
             lockMenuItem(true)
 
-            checkAbsent {
-                onFinished?.invoke()
-            }
+            checkAbsent()
 
-            inAppUpdateHelper(this@HomeCourierActivity, appUpdateManager, appUpdateLauncher)
+            inAppUpdateHelper(appUpdateManager, appUpdateLauncher)
 
         } catch (e: Exception) {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed HomeCourierActivity on initView(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed HomeCourierActivity on initView(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Courier Failed",
@@ -578,7 +653,7 @@ class HomeCourierActivity : AppCompatActivity() {
 
     }
 
-    private fun checkAbsent(onFinished: (() -> Unit)? = null) {
+    private fun checkAbsent() {
         FirebaseUtils.firebaseLogging(this, "Absent", "Start checking")
         try {
 
@@ -605,15 +680,18 @@ class HomeCourierActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     if (!snapshot.exists()) {
                         handleAbsenceStatus(morningDateTime = null, eveningDateTime = null)
-                        onFinished?.invoke()
                         return@withContext
                     }
 
-                    val morningDateTime = snapshot.child("morningDateTime").getValue(String::class.java)
-                    val eveningDateTime = snapshot.child("eveningDateTime").getValue(String::class.java)
+                    val morningDateTime =
+                        snapshot.child("morningDateTime").getValue(String::class.java)
+                    val eveningDateTime =
+                        snapshot.child("eveningDateTime").getValue(String::class.java)
 
-                    handleAbsenceStatus(morningDateTime = morningDateTime, eveningDateTime = eveningDateTime)
-                    onFinished?.invoke()
+                    handleAbsenceStatus(
+                        morningDateTime = morningDateTime,
+                        eveningDateTime = eveningDateTime
+                    )
                 }
 
             }
@@ -621,7 +699,10 @@ class HomeCourierActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed HomeCourierActivity on checkAbsent(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed HomeCourierActivity on checkAbsent(). Catch: ${e.message}"
+            )
             lockMenuItem(false)
             handleMessage(
                 this,
@@ -648,14 +729,16 @@ class HomeCourierActivity : AppCompatActivity() {
                     set(Calendar.MILLISECOND, 0)
                 }
 
-                if (calendar.timeInMillis > now) {
+                if (calendar.timeInMillis > now && isPermissionGranted) {
                     // Jika sudah lebih dari jam 10 malam tracking otomatis dimatikan
                     startTrackingService(userId, userDistributorId)
                 }
 
                 sessionManager.absentDateTime(morningDateTime!!)
                 lockMenuItem(false)
-            } else -> {
+            }
+
+            else -> {
                 stopTrackingService()
 
                 lockMenuItem(true)
@@ -704,7 +787,8 @@ class HomeCourierActivity : AppCompatActivity() {
 
                 if (!urlUtility.isUrl(mapsUrl) && mapsUrl.isNotEmpty()) {
 
-                    val status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
+                    val status =
+                        GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
                     if (status != ConnectionResult.SUCCESS) {
                         showDialogGooglePlayNotAvailable()
                         return
@@ -807,22 +891,22 @@ class HomeCourierActivity : AppCompatActivity() {
         try {
 
             dismissProgressDialog()
-            isLocked = state
-//        isAbsentMorningNow = !state
+            isLocked = state || !isPermissionGranted
+//        isAbsentMorningNow = !isLocked
 
-            binding.deliveryItem.alpha = if (state) 0.5f else 1f
-            binding.nearestStoreItem.alpha = if (state) 0.5f else 1f
-            binding.basecampItem.alpha = if (state) 0.5f else 1f
-            binding.nearestBasecampItem.alpha = if (state) 0.5f else 1f
-//        binding.myProfileItem.alpha = if (state) 0.5f else 1f
-//        binding.contactAdminItem.alpha = if (state) 0.5f else 1f
+            binding.deliveryItem.alpha = if (isLocked) 0.5f else 1f
+            binding.nearestStoreItem.alpha = if (isLocked) 0.5f else 1f
+            binding.basecampItem.alpha = if (isLocked) 0.5f else 1f
+            binding.nearestBasecampItem.alpha = if (isLocked) 0.5f else 1f
+//        binding.myProfileItem.alpha = if (isLocked) 0.5f else 1f
+//        binding.contactAdminItem.alpha = if (isLocked) 0.5f else 1f
 
-            binding.deliveryItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
-            binding.nearestStoreItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
-            binding.basecampItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
-            binding.nearestBasecampItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
-//        binding.myProfileItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
-//        binding.contactAdminItemChevron.setImageResource(if (state) R.drawable.lock_dark else R.drawable.chevron_right_dark)
+            binding.deliveryItemChevron.setImageResource(if (isLocked) R.drawable.lock_dark else R.drawable.chevron_right_dark)
+            binding.nearestStoreItemChevron.setImageResource(if (isLocked) R.drawable.lock_dark else R.drawable.chevron_right_dark)
+            binding.basecampItemChevron.setImageResource(if (isLocked) R.drawable.lock_dark else R.drawable.chevron_right_dark)
+            binding.nearestBasecampItemChevron.setImageResource(if (isLocked) R.drawable.lock_dark else R.drawable.chevron_right_dark)
+//        binding.myProfileItemChevron.setImageResource(if (isLocked) R.drawable.lock_dark else R.drawable.chevron_right_dark)
+//        binding.contactAdminItemChevron.setImageResource(if (isLocked) R.drawable.lock_dark else R.drawable.chevron_right_dark)
 
             if (isAbsentMorningNow && isAbsentEveningNow) {
 
@@ -833,12 +917,12 @@ class HomeCourierActivity : AppCompatActivity() {
                 binding.btnAbsent.visibility = View.GONE
             } else {
 
-                binding.absentTitle.text = if (state) {
+                binding.absentTitle.text = if (isLocked) {
                     getString(R.string.yuk_catat_kehadiranmu_hari_ini)
                 } else {
                     getString(R.string.kehadiranmu_telah_tercatat)
                 }
-                binding.absentDescription.text = if (state) {
+                binding.absentDescription.text = if (isLocked) {
                     getString(R.string.absenmu_penting)
                 } else {
                     getString(R.string.terimakasih_sudah_mencatat_kehadiran_hari_ini)
@@ -846,13 +930,14 @@ class HomeCourierActivity : AppCompatActivity() {
 
                 binding.btnAbsent.backgroundTintList = ContextCompat.getColorStateList(
                     this,
-                    if (state) R.color.status_bid else R.color.red_claret
+                    if (isLocked) R.color.status_bid else R.color.red_claret
                 )
                 binding.btnAbsent.text =
-                    if (state) getString(R.string.absen_sekarang) else getString(R.string.pulang_sekarang)
+                    if (isLocked) getString(R.string.absen_sekarang) else getString(R.string.pulang_sekarang)
 
                 lifecycleScope.launch {
-                    val calendar = checkTimeFromInternet(this@HomeCourierActivity) ?: Calendar.getInstance()
+                    val calendar =
+                        checkTimeFromInternet(this@HomeCourierActivity) ?: Calendar.getInstance()
                     val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
 
                     if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
@@ -869,7 +954,10 @@ class HomeCourierActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed HomeCourierActivity on lockMenuItem(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed HomeCourierActivity on lockMenuItem(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Courier Failed",
@@ -980,7 +1068,10 @@ class HomeCourierActivity : AppCompatActivity() {
                     if (e is CancellationException) {
                         return@launch
                     }
-                    FirebaseUtils.logErr(this@HomeCourierActivity, "Failed HomeCourierActivity on navigateToNearestStore(). Catch: ${e.message}")
+                    FirebaseUtils.logErr(
+                        this@HomeCourierActivity,
+                        "Failed HomeCourierActivity on navigateToNearestStore(). Catch: ${e.message}"
+                    )
                     handleMessage(
                         this@HomeCourierActivity,
                         TAG_RESPONSE_CONTACT,
@@ -1101,7 +1192,10 @@ class HomeCourierActivity : AppCompatActivity() {
                     if (e is CancellationException) {
                         return@launch
                     }
-                    FirebaseUtils.logErr(this@HomeCourierActivity, "Failed HomeCourierActivity on navigateToNearestBasecamp(). Catch: ${e.message}")
+                    FirebaseUtils.logErr(
+                        this@HomeCourierActivity,
+                        "Failed HomeCourierActivity on navigateToNearestBasecamp(). Catch: ${e.message}"
+                    )
                     handleMessage(
                         this@HomeCourierActivity,
                         TAG_RESPONSE_CONTACT,
@@ -1138,28 +1232,22 @@ class HomeCourierActivity : AppCompatActivity() {
     }
 
     private fun showDialogLockedFeature() {
-        checkAbsent {
-            if (isAbsentMorningNow && !isAbsentEveningNow) {
-                showLocationDisclosure()
-            } else {
-                var title = getString(R.string.fitur_terkunci)
-                var message = getString(R.string.absen_terlebih_dahulu_untuk_membuka)
+        var title = getString(R.string.fitur_terkunci)
+        var message = getString(R.string.absen_terlebih_dahulu_untuk_membuka)
 
-                if (isAbsentMorningNow && isAbsentEveningNow) {
+        if (isAbsentMorningNow && isAbsentEveningNow) {
 
-                    title = getString(R.string.absen_pulang_sudah_tercatat)
-                    message = getString(R.string.terima_kasih_atas_kinerja_hari_ini)
-                }
-
-                AlertDialog.Builder(this)
-                    .setTitle(title)
-                    .setMessage(message)
-                    .setPositiveButton(getString(R.string.oke)) { dialog, _ ->
-                        dialog.dismiss()
-                    }
-                    .show()
-            }
+            title = getString(R.string.absen_pulang_sudah_tercatat)
+            message = getString(R.string.terima_kasih_atas_kinerja_hari_ini)
         }
+
+        AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton(getString(R.string.oke)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
     private fun setupDialogSearch(items: ArrayList<BaseCampModel> = ArrayList()) {
@@ -1252,7 +1340,10 @@ class HomeCourierActivity : AppCompatActivity() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@HomeCourierActivity, "Failed HomeCourierActivity on getListBasecamp(). Catch: ${e.message}")
+                FirebaseUtils.logErr(
+                    this@HomeCourierActivity,
+                    "Failed HomeCourierActivity on getListBasecamp(). Catch: ${e.message}"
+                )
                 handleMessage(
                     this@HomeCourierActivity,
                     TAG_RESPONSE_CONTACT,
@@ -1311,10 +1402,12 @@ class HomeCourierActivity : AppCompatActivity() {
                             userChild.child("fullname").setValue(userFullName)
                             userChild.child("isOnline").setValue(true)
 
-                            val calendar = checkTimeFromInternet(this@HomeCourierActivity) ?: Calendar.getInstance()
+                            val calendar = checkTimeFromInternet(this@HomeCourierActivity)
+                                ?: Calendar.getInstance()
                             val date = Date(calendar.timeInMillis)
 
-                            val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
+                            val formatter =
+                                SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
                             formatter.timeZone = TimeZone.getDefault()
 
                             val absentDateTime = formatter.format(date)
@@ -1387,7 +1480,10 @@ class HomeCourierActivity : AppCompatActivity() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@HomeCourierActivity, "Failed HomeCourierActivity on executeAbsentReport(). Catch: ${e.message}")
+                FirebaseUtils.logErr(
+                    this@HomeCourierActivity,
+                    "Failed HomeCourierActivity on executeAbsentReport(). Catch: ${e.message}"
+                )
                 handleMessage(
                     this@HomeCourierActivity,
                     TAG_RESPONSE_CONTACT,
@@ -1418,7 +1514,7 @@ class HomeCourierActivity : AppCompatActivity() {
 
     }
 
-// Override Class
+    // Override Class
     private fun myOnBackPressed() {
         if (doubleBackToExitPressedOnce) {
             finish()
@@ -1466,12 +1562,8 @@ class HomeCourierActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
-        initView {
-            if (isAbsentMorningNow && !isAbsentEveningNow) {
-                requestNotificationPermission()
-                checkLocationPermission()
-            }
-        }
+        requestNotificationPermission()
+        checkLocationPermission()
         super.onResume()
     }
 
@@ -1544,7 +1636,10 @@ class HomeCourierActivity : AppCompatActivity() {
                     return@launch
                 }
                 dismissProgressDialog()
-                FirebaseUtils.logErr(this@HomeCourierActivity, "Failed HomeCourierActivity on getUserLoggedIn(). Catch: ${e.message}")
+                FirebaseUtils.logErr(
+                    this@HomeCourierActivity,
+                    "Failed HomeCourierActivity on getUserLoggedIn(). Catch: ${e.message}"
+                )
                 handleMessage(
                     this@HomeCourierActivity,
                     "Home Courier Failed",
@@ -1578,7 +1673,10 @@ class HomeCourierActivity : AppCompatActivity() {
                 return
             }
             dismissProgressDialog()
-            FirebaseUtils.logErr(this@HomeCourierActivity, "Failed HomeCourierActivity on logoutHandler(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this@HomeCourierActivity,
+                "Failed HomeCourierActivity on logoutHandler(). Catch: ${e.message}"
+            )
             handleMessage(
                 this@HomeCourierActivity,
                 "Home Courier Failed",
@@ -1593,11 +1691,11 @@ class HomeCourierActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
-    
+
     private fun dismissProgressDialog() {
         if (!isFinishing && !isDestroyed) {
             absentProgressBar?.dismiss()
         }
     }
-    
+
 }
