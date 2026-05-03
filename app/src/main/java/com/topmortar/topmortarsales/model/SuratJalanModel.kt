@@ -1,20 +1,22 @@
 package com.topmortar.topmortarsales.model
 
 data class SuratJalanModel(
-    var id_surat_jalan : String = "",
-    var id_apporder : String = "0",
-    var no_surat_jalan : String = "",
-    var id_contact : String = "",
-    var dalivery_date : String = "",
-    var order_number : String = "",
-    var ship_to_name : String = "",
-    var ship_to_address : String = "",
-    var ship_to_phone : String = "",
-    var id_courier : String = "",
+    var id_surat_jalan: String = "",
+    var id_apporder: String = "0",
+    var no_surat_jalan: String = "",
+    var id_contact: String = "",
+    var dalivery_date: String = "",
+    var order_number: String = "",
+    var ship_to_name: String = "",
+    var ship_to_address: String = "",
+    var ship_to_phone: String = "",
+    var id_courier: String = "",
     var is_finished: String = "",
     var is_printed: String = "",
     var date_printed: String? = "",
     var is_closing: String = "",
+    var is_print_inv: String = "",
+    var date_printed_inv: String? = "",
     var is_cod: String = "",
     var date_closing: String = "",
     var distance: String = "",
@@ -24,4 +26,5 @@ data class SuratJalanModel(
     var can_closing: String = "yes",
     var msg_can_closing: String = "",
     var details: ArrayList<DetailSuratJalanModel> = ArrayList(),
+    var invoice: InvoiceModel
 )

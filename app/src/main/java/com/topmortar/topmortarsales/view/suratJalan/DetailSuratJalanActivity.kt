@@ -4,17 +4,14 @@ package com.topmortar.topmortarsales.view.suratJalan
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.ActivityNotFoundException
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.location.Location
 import android.net.Uri
@@ -38,7 +35,6 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.ScrollView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -47,11 +43,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.drawable.toDrawable
+import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.dantsu.escposprinter.EscPosPrinter
-import com.dantsu.escposprinter.connection.bluetooth.BluetoothPrintersConnections
+import com.dantsu.escposprinter.connection.bluetooth.BluetoothConnection
 import com.dantsu.escposprinter.textparser.PrinterTextParserImg
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
@@ -92,10 +91,12 @@ import com.topmortar.topmortarsales.commons.PRINT_METHOD_WIFI
 import com.topmortar.topmortarsales.commons.REQUEST_BLUETOOTH_PERMISSIONS
 import com.topmortar.topmortarsales.commons.REQUEST_STORAGE_PERMISSION
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_SUCCESS
 import com.topmortar.topmortarsales.commons.SYNC_NOW
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
-import com.topmortar.topmortarsales.commons.TOAST_SHORT
 import com.topmortar.topmortarsales.commons.USER_KIND_COURIER
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
@@ -103,7 +104,7 @@ import com.topmortar.topmortarsales.commons.printUtils.Comman
 import com.topmortar.topmortarsales.commons.printUtils.PdfDocumentAdapter
 import com.topmortar.topmortarsales.commons.services.stopTrackingService
 import com.topmortar.topmortarsales.commons.services.updateTrackingServiceNow
-import com.topmortar.topmortarsales.commons.utils.BluetoothPrinterManager
+import com.topmortar.topmortarsales.commons.utils.CurrencyFormat
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
@@ -119,6 +120,7 @@ import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.DetailSuratJalanModel
 import com.topmortar.topmortarsales.model.SuratJalanModel
 import com.topmortar.topmortarsales.view.MapsActivity
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileNotFoundException
@@ -164,19 +166,21 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
     private lateinit var btnPrint: Button
     private lateinit var btnClosing: Button
-    private lateinit var btnBottomAction: LinearLayout
+    private lateinit var bottomActionSj: LinearLayout
     private lateinit var lnrClosing: LinearLayout
     private lateinit var txtLoading: TextView
+    private lateinit var dataSj: SuratJalanModel
 
-    private var invoiceId: String? = null
+    private var idSj: String? = null
 
     private var idAppOrder: String = "0"
     private var contactId: String? = null
     private var isClosing: Boolean = false
+    private var isPrintInvoice: Boolean = false
     private var isClosingAction: Boolean = false
     private var isCod: Boolean = false
     private var isCanClosing: Boolean = false
-    private var MsgCanClosing: String = ""
+    private var msgCanClosing: String = ""
     private var isRequestSync: Boolean = false
 
     private var detailContact: ContactModel? = null
@@ -187,45 +191,49 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     private var selectedUri: Uri? = null
     private var currentPhotoUri: Uri? = null
     private var bluetoothAdapter: BluetoothAdapter? = null
-    private var printerManager = BluetoothPrinterManager()
+
+    //    private var printerManager = BluetoothPrinterManager()
     private lateinit var bottomSheetDialog: BottomSheetDialog
 
     private var companyLogoRetina: Int = 0
     private var companyLogoBlack: Int = 0
     private var companyName: String = ""
 
-    private val bluetoothResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            printNow()
-        } else {
-            Toast.makeText(this, "Bluetooth belum diaktifkan", TOAST_SHORT).show()
-        }
-    }
-
-    private val imageResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            val resultData = it.data?.getIntExtra("$IMG_PREVIEW_STATE", 0)
-            isClosingAction = it.data?.getBooleanExtra(IS_CLOSING, false) ?: false
-
-            if (resultData == RESULT_OK ) {
-                getDetail()
-                isRequestSync = true
-            }
-
-            // Remove image temp
-            currentPhotoUri?.let { uri ->
-                val contentResolver = contentResolver
-                contentResolver.delete(uri, null, null)
+    private val bluetoothResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                printNow()
+            } else {
+                handleMessage(this, message = "Bluetooth belum diaktifkan")
             }
         }
-    }
+
+    private val imageResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                val resultData = it.data?.getIntExtra("$IMG_PREVIEW_STATE", 0)
+                isClosingAction = it.data?.getBooleanExtra(IS_CLOSING, false) ?: false
+
+                if (resultData == RESULT_OK) {
+                    getDetail()
+                    isRequestSync = true
+                }
+
+                // Remove image temp
+                currentPhotoUri?.let { uri ->
+                    val contentResolver = contentResolver
+                    contentResolver.delete(uri, null, null)
+                }
+            }
+        }
 
     companion object {
         private const val PRINT_METHOD_BLUETOOTH_TITLE = "Print Bluetooth"
         private const val PRINT_METHOD_WIFI_TITLE = "Print Wifi"
+        private const val PRINT_INVOICE_TITLE = "Print Invoice"
     }
 
-    private var fileName : String = "Surat Jalan.pdf"
+    private var fileName: String = "Surat Jalan.pdf"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -243,7 +251,11 @@ class DetailSuratJalanActivity : AppCompatActivity() {
             userKind == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_SALES ||
             userKind == USER_KIND_PENAGIHAN || sessionManager.userKind() == USER_KIND_PENAGIHAN
         ) {
-            CustomUtility(this).setUserStatusOnline(true, userDistributorId ?: "-custom-015", "$userID")
+            CustomUtility(this).setUserStatusOnline(
+                true,
+                userDistributorId ?: "-custom-015",
+                "$userID"
+            )
         }
 
         customUtility = CustomUtility(this@DetailSuratJalanActivity)
@@ -256,7 +268,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         if (printState.isNullOrEmpty()) togglePrintButton(PRINT_METHOD_BLUETOOTH)
         else togglePrintButton(printState)
 
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 myOnBackPressed()
             }
@@ -267,7 +279,11 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
     private fun createPDF() {
         if (VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
                 executeInkPrinter()
             } else {
                 ActivityCompat.requestPermissions(
@@ -304,9 +320,9 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         tvReceivedBy = previewInvoiceLayout.findViewById(R.id.tv_received_by)
         tvReceivedDate = previewInvoiceLayout.findViewById(R.id.tv_received_date)
 
-        btnPrint = findViewById(R.id.btn_print_invoice)
+        btnPrint = findViewById(R.id.btn_print_sj)
         btnClosing = findViewById(R.id.btn_closing)
-        btnBottomAction = findViewById(R.id.bottom_action)
+        bottomActionSj = findViewById(R.id.bottom_action_sj)
         lnrClosing = findViewById(R.id.lnr_closing)
         txtLoading = findViewById(R.id.txt_loading)
 
@@ -316,29 +332,37 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
         // Setup Printer
         if (sessionManager.userKind() == USER_KIND_COURIER) {
-            btnBottomAction.visibility = View.VISIBLE
+            bottomActionSj.visibility = View.VISIBLE
             bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-            printerManager.setContext(this)
+//            printerManager.setContext(this)
         }
 
         // Setup Image Picker
-        cameraPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) {
-                chooseFile()
-            } else {
-                if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
-                    val message = "Izin kamera diperlukan untuk fitur ini. Izinkan aplikasi mengakses kamera pada perangkat!"
-                    customUtility.showPermissionDeniedSnackbar(message) { cameraPermissionLauncher!!.launch(Manifest.permission.CAMERA) }
-                } else customUtility.showPermissionDeniedDialog("Izin kamera diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
+        cameraPermissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+                if (isGranted) {
+                    chooseFile()
+                } else {
+                    if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
+                        val message =
+                            "Izin kamera diperlukan untuk fitur ini. Izinkan aplikasi mengakses kamera pada perangkat!"
+                        customUtility.showPermissionDeniedSnackbar(message) {
+                            cameraPermissionLauncher!!.launch(
+                                Manifest.permission.CAMERA
+                            )
+                        }
+                    } else customUtility.showPermissionDeniedDialog("Izin kamera diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
+                }
             }
-        }
-        imagePicker = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val data: Intent? = result.data
-                selectedUri = if (data == null || data.data == null) currentPhotoUri else data.data
-                navigateToPreviewClosing()
+        imagePicker =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == RESULT_OK) {
+                    val data: Intent? = result.data
+                    selectedUri =
+                        if (data == null || data.data == null) currentPhotoUri else data.data
+                    navigateToPreviewClosing()
+                }
             }
-        }
 
     }
 
@@ -347,7 +371,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         selectedUri?.let { uriList.add(it) }
 
         val intent = Intent(this, PreviewClosingActivity::class.java)
-        intent.putExtra(CONST_INVOICE_ID, invoiceId)
+        intent.putExtra(CONST_INVOICE_ID, idSj)
         intent.putExtra(CONST_CONTACT_ID, contactId)
         intent.putExtra("const_id_apporder", idAppOrder)
         intent.putExtra(CONST_INVOICE_IS_COD, isCod)
@@ -373,14 +397,14 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
     private fun dataActivityValidation() {
 
-        val iInvoiceId = intent.getStringExtra(CONST_INVOICE_ID)
+        val iidSj = intent.getStringExtra(CONST_INVOICE_ID)
         val iContactId = intent.getStringExtra(CONST_CONTACT_ID)
 
-        if (!iInvoiceId.isNullOrEmpty() ) {
-            invoiceId = iInvoiceId.toString()
+        if (!iidSj.isNullOrEmpty()) {
+            idSj = iidSj
         }
-        if (!iContactId.isNullOrEmpty() ) {
-            contactId = iContactId.toString()
+        if (!iContactId.isNullOrEmpty()) {
+            contactId = iContactId
         }
 
         getDetail()
@@ -403,24 +427,34 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                         RESPONSE_STATUS_OK -> {
 
                             detailContact = responseBody.results[0]
-                            getDetailInvoice()
+                            getDetailSj()
 
                         }
+
                         RESPONSE_STATUS_EMPTY -> {
 
                             loadingState(true, "Detail surat jalan kosong!")
 
                         }
+
                         else -> {
 
-                            handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal memuat data.")
+                            handleMessage(
+                                this@DetailSuratJalanActivity,
+                                TAG_RESPONSE_CONTACT,
+                                "Gagal memuat data."
+                            )
                             loadingState(true, getString(R.string.failed_request))
 
                         }
                     }
                 } else {
 
-                    handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal memuat data. Error : " + response.message())
+                    handleMessage(
+                        this@DetailSuratJalanActivity,
+                        TAG_RESPONSE_CONTACT,
+                        "Gagal memuat data. Error : " + response.message()
+                    )
                     loadingState(false)
 
                 }
@@ -430,8 +464,15 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@DetailSuratJalanActivity, "Failed DetailSuratJalanActivity on getDetail(). Catch: ${e.message}")
-                handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@DetailSuratJalanActivity,
+                    "Failed DetailSuratJalanActivity on getDetail(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@DetailSuratJalanActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
 
             }
@@ -440,7 +481,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
     }
 
-    private fun getDetailInvoice() {
+    private fun getDetailSj() {
 
         loadingState(true)
 
@@ -448,17 +489,21 @@ class DetailSuratJalanActivity : AppCompatActivity() {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.getSuratJalanDetail(processNumber = "3", invoiceId = invoiceId!!)
+                val response =
+                    apiService.getSuratJalanDetail(processNumber = "3", idSj = idSj!!)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        val data = response.results[0]
-                        idAppOrder = data.id_apporder
-                        isClosing = data.is_closing == "1"
-                        isCod = data.is_cod == "1"
-                        isCanClosing = data.can_closing == "yes"
-                        MsgCanClosing = data.msg_can_closing
+                        dataSj = response.results[0]
+
+                        idAppOrder = dataSj.id_apporder
+                        isClosing = dataSj.is_closing == "1"
+                        isPrintInvoice =
+                            dataSj.is_print_inv == "1" && dataSj.date_printed_inv == null
+                        isCod = dataSj.is_cod == "1"
+                        isCanClosing = dataSj.can_closing == "yes"
+                        msgCanClosing = dataSj.msg_can_closing
 
                         companyLogoRetina = R.drawable.logo_retina_11zon
                         companyLogoBlack = R.drawable.logo_top_mortar
@@ -474,52 +519,72 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                         imgCompany.setImageResource(companyLogoRetina)
                         tvCompany.text = companyName
 
-                        tvReferenceNumber.text = data.no_surat_jalan
-//                        tvDeliveryDate.text = "${ data.dalivery_date }"
-                        tvShipToName.text = data.ship_to_name
-                        tvShipToAddress.text = data.ship_to_address
-                        tvShipToPhone.text = data.ship_to_phone
-                        tvDeliveryOrderDate.text = "Delivery Date: ${ data.dalivery_date }"
-                        tvDeliveryOrderNumber.text = "Printed Date: " + data.date_printed.let{ if (!it.isNullOrEmpty()) it else "-"}
-                        tvCourier.text = "Kurir: ${ data.courier_name }"
-                        tvVehicle.text = "Kendaraan: ${ data.nama_kendaraan }"
-                        tvVehicleNumber.text = "No. Polisi: ${ data.nopol_kendaraan }"
+                        tvReferenceNumber.text = dataSj.no_surat_jalan
+//                        tvDeliveryDate.text = "${ dataSj.dalivery_date }"
+                        tvShipToName.text = dataSj.ship_to_name
+                        tvShipToAddress.text = dataSj.ship_to_address
+                        tvShipToPhone.text = dataSj.ship_to_phone
+                        tvDeliveryOrderDate.text = "Delivery Date: ${dataSj.dalivery_date}"
+                        tvDeliveryOrderNumber.text =
+                            "Printed Date: " + dataSj.date_printed.let { if (!it.isNullOrEmpty()) it else "-" }
+                        tvCourier.text = "Kurir: ${dataSj.courier_name}"
+                        tvVehicle.text = "Kendaraan: ${dataSj.nama_kendaraan}"
+                        tvVehicleNumber.text = "No. Polisi: ${dataSj.nopol_kendaraan}"
                         if (isClosing) {
                             tvReceivedBy.visibility = View.VISIBLE
                             tvReceivedDate.visibility = View.VISIBLE
-                            tvReceivedBy.text = data.ship_to_name
-                            tvReceivedDate.text = "Sudah di closing pada ${ data.date_closing }" + data.distance.let { if (it.isNotEmpty()) "\ndengan jarak $it km dari titik toko" else "" }
-                            btnBottomAction.visibility = View.GONE
+                            tvReceivedBy.text = dataSj.ship_to_name
+                            tvReceivedDate.text =
+                                "Sudah di closing pada ${dataSj.date_closing}" + dataSj.distance.let { if (it.isNotEmpty()) "\ndengan jarak $it km dari titik toko" else "" }
+                            bottomActionSj.visibility = View.GONE
+                            if (isPrintInvoice) {
+                                binding.lnrPrintInvoice.visibility = View.VISIBLE
+                                binding.btnPrintInvoice.setOnClickListener {
+                                    printNow()
+//                                    printingState(true)
+//                                    printInvoiceEscPos()
+                                }
+                            }
+                        } else {
+                            tvReceivedBy.visibility = View.GONE
+                            tvReceivedDate.visibility = View.GONE
+                            bottomActionSj.visibility = View.VISIBLE
+                            binding.lnrPrintInvoice.visibility = View.GONE
                         }
 
-                        var details = data.details.let { if (it.isEmpty()) arrayListOf() else it }
+                        var details = dataSj.details.let { if (it.isEmpty()) arrayListOf() else it }
 
                         if (!isCanClosing && !isClosing) {
                             if (userKind == USER_KIND_COURIER) {
-                                btnBottomAction.visibility = View.GONE
+                                bottomActionSj.visibility = View.GONE
                                 details = arrayListOf()
                             }
                             val builder = AlertDialog.Builder(this@DetailSuratJalanActivity)
                             builder.setTitle("Peringatan!")
-                                .setMessage(MsgCanClosing)
+                                .setMessage(msgCanClosing)
                                 .setPositiveButton("Tutup") { dialog, _ -> dialog.dismiss() }
                             builder.show()
                         }
 
                         setRecyclerView(details)
 
-//                        Toast.makeText(this@DetailSuratJalanActivity, "${detailContact!!.maps_url}", TOAST_SHORT).show()
                         loadingState(false)
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(true, "Detail surat jalan kosong!")
 
                     }
+
                     else -> {
 
-                        handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal memuat data.")
+                        handleMessage(
+                            this@DetailSuratJalanActivity,
+                            TAG_RESPONSE_CONTACT,
+                            "Gagal memuat data."
+                        )
                         loadingState(true, getString(R.string.failed_request))
 
                     }
@@ -530,8 +595,15 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@DetailSuratJalanActivity, "Failed DetailSuratJalanActivity on getDetailInvoice(). Catch: ${e.message}")
-                handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@DetailSuratJalanActivity,
+                    "Failed DetailSuratJalanActivity on getDetailSj(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@DetailSuratJalanActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
 
             }
@@ -595,6 +667,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
             btnPrint.text = "Printing…"
             btnPrint.isEnabled = false
+            binding.btnPrintInvoice.text = "Printing…"
+            binding.btnPrintInvoice.isEnabled = false
 
         } else {
 
@@ -603,6 +677,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                 else -> PRINT_METHOD_WIFI_TITLE
             }
             btnPrint.isEnabled = true
+            binding.btnPrintInvoice.text = PRINT_INVOICE_TITLE
+            binding.btnPrintInvoice.isEnabled = true
 
         }
 
@@ -614,7 +690,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         if (!isCanClosing) {
             val builder = AlertDialog.Builder(this)
             builder.setTitle("Peringatan!")
-                .setMessage(MsgCanClosing)
+                .setMessage(msgCanClosing)
                 .setPositiveButton("Oke") { dialog, _ -> dialog.dismiss() }
             builder.show()
             return
@@ -623,7 +699,11 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         val mapsUrl = detailContact!!.maps_url
         val urlUtility = URLUtility(this)
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
 
             if (urlUtility.isLocationEnabled(this)) {
 
@@ -631,7 +711,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
                 if (!urlUtility.isUrl(mapsUrl)) {
 
-                    val status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
+                    val status =
+                        GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
                     if (status != ConnectionResult.SUCCESS) {
                         showDialogGooglePlayNotAvailable()
                         return
@@ -653,10 +734,16 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                             if (latitude != null && longitude != null) {
 
                                 // Calculate Distance
-                                val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
+                                val distance = urlUtility.calculateDistance(
+                                    currentLatitude,
+                                    currentLongitude,
+                                    latitude,
+                                    longitude
+                                )
                                 var stringDistance = "%.3f".format(distance)
 
-                                if (stringDistance.contains(",")) stringDistance = stringDistance.replace(",", ".")
+                                if (stringDistance.contains(",")) stringDistance =
+                                    stringDistance.replace(",", ".")
                                 shortDistance = stringDistance.toDouble()
 
                                 if (distance > MAX_DISTANCE) {
@@ -665,7 +752,10 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                                         .setMessage("Titik anda saat ini $shortDistance km dari titik toko. Cobalah untuk lebih dekat dengan toko!")
                                         .setPositiveButton("Oke") { dialog, _ -> dialog.dismiss() }
                                         .setNegativeButton("Buka Maps") { dialog, _ ->
-                                            val intent = Intent(this@DetailSuratJalanActivity, MapsActivity::class.java)
+                                            val intent = Intent(
+                                                this@DetailSuratJalanActivity,
+                                                MapsActivity::class.java
+                                            )
                                             intent.putExtra(CONST_MAPS, mapsUrl)
                                             intent.putExtra(CONST_MAPS_NAME, detailContact?.nama)
                                             startActivity(intent)
@@ -674,15 +764,22 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                                     builder.show()
                                 } else chooseFile()
 
-                            } else Toast.makeText(this, "Gagal memproses koordinat.", TOAST_SHORT).show()
+                            } else handleMessage(this, message = "Gagal memproses koordinat.")
 
-                        } else Toast.makeText(this, "Tidak dapat mengakses lokasi, refresh dan coba lagi", TOAST_SHORT).show()
+                        } else handleMessage(
+                            this,
+                            message = "Tidak dapat mengakses lokasi, refresh dan coba lagi"
+                        )
                     }
 
                 } else {
-                    val message = "Untuk saat ini belum bisa closing, silahkan hubungi admin untuk update koordinatnya"
+                    val message =
+                        "Untuk saat ini belum bisa closing, silahkan hubungi admin untuk update koordinatnya"
                     val actionTitle = "Hubungi Sekarang"
-                    customUtility.showPermissionDeniedSnackbar(message, actionTitle) { navigateChatAdmin() }
+                    customUtility.showPermissionDeniedSnackbar(
+                        message,
+                        actionTitle
+                    ) { navigateChatAdmin() }
                 }
 
             } else {
@@ -690,7 +787,11 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                 startActivity(enableLocationIntent)
             }
 
-        } else ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+        } else ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+            LOCATION_PERMISSION_REQUEST_CODE
+        )
 
     }
 
@@ -712,7 +813,10 @@ class DetailSuratJalanActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on showDialogGooglePlayNotAvailable(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed HomeSalesActivity on showDialogGooglePlayNotAvailable(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Courier Failed",
@@ -724,30 +828,41 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     private fun navigateChatAdmin() {
         val distributorNumber = sessionManager.userDistributorNumber()!!
         val phoneNumber = distributorNumber.ifEmpty { getString(R.string.topmortar_wa_number) }
-        val message = "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada toko *${ detailContact!!.nama }*"
+        val message =
+            "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada toko *${detailContact!!.nama}*"
 
         val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")
+        intent.data =
+            "https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}".toUri()
 
         try {
             startActivity(intent)
             finishAffinity()
-        } catch (e: ActivityNotFoundException) {
-            Toast.makeText(this, "Gagal mengalihkan ke whatsapp.", TOAST_SHORT).show()
+        } catch (_: ActivityNotFoundException) {
+            handleMessage(this, message = "Gagal mengalihkan ke whatsapp.")
         }
 
     }
 
     private fun chooseFile() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            val galleryIntent =
+                Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
 
             // Create a file to store the captured image
             val photoFile: File? = createImageFile()
 
             if (photoFile != null) {
-                val photoUri: Uri = FileProvider.getUriForFile(this, "com.topmortar.topmortarsales.fileprovider", photoFile)
+                val photoUri: Uri = FileProvider.getUriForFile(
+                    this,
+                    "com.topmortar.topmortarsales.fileprovider",
+                    photoFile
+                )
                 cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
                 currentPhotoUri = photoUri
             }
@@ -764,7 +879,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     @Throws(IOException::class)
     private fun createImageFile(): File? {
         // Create an image file name
-        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val timeStamp: String =
+            SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val storageDir: File? = getExternalFilesDir("Invoices")
         return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
     }
@@ -789,7 +905,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                 if (hasBluetoothPermissions()) {
                     if (bluetoothAdapter!!.isEnabled) {
                         if (checkPermission()) {
-                            val pairedDevices: Set<BluetoothDevice>? = bluetoothAdapter!!.bondedDevices
+                            val pairedDevices: Set<BluetoothDevice>? =
+                                bluetoothAdapter!!.bondedDevices
                             showPrinterSelectionDialog(pairedDevices)
                         }
                     } else {
@@ -809,7 +926,10 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                 }
             }
         } else {
-            customUtility.showDialog(title = "Peringatan", message = "Perangkat anda tidak support menggunakan bluetooth!")
+            customUtility.showDialog(
+                title = "Peringatan",
+                message = "Perangkat anda tidak support menggunakan bluetooth!"
+            )
         }
 
     }
@@ -823,9 +943,9 @@ class DetailSuratJalanActivity : AppCompatActivity() {
             builder.setTitle("Pilih perangkat printer")
             builder.setItems(deviceNames) { _, which ->
                 val selectedDevice = deviceList[which]
-                executePrinter(selectedDevice)
 //                printEscPos()
-                Toast.makeText(this, "Menghubungkan ke: ${ selectedDevice.name }", TOAST_SHORT).show()
+                handleMessage(this, message = "Menghubungkan ke: ${selectedDevice.name}")
+                executePrinter(selectedDevice)
             }
             builder.show()
         }
@@ -839,62 +959,106 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     }
 
     private fun hasBluetoothPermissions(): Boolean {
-        return (ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED
-                && ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED)
+        return if (VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.BLUETOOTH
+            ) == PackageManager.PERMISSION_GRANTED
+                    && ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.BLUETOOTH_ADMIN
+            ) == PackageManager.PERMISSION_GRANTED
+                    && ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.BLUETOOTH_SCAN
+            ) == PackageManager.PERMISSION_GRANTED
+                    && ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) == PackageManager.PERMISSION_GRANTED)
+        } else {
+            (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.BLUETOOTH
+            ) == PackageManager.PERMISSION_GRANTED
+                    && ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.BLUETOOTH_ADMIN
+            ) == PackageManager.PERMISSION_GRANTED)
+        }
     }
 
     private fun requestBluetoothPermissions() {
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(
-                Manifest.permission.BLUETOOTH,
-                Manifest.permission.BLUETOOTH_ADMIN,
-                Manifest.permission.BLUETOOTH_SCAN,
-                Manifest.permission.BLUETOOTH_CONNECT,
-            ), REQUEST_BLUETOOTH_PERMISSIONS
-        )
+        if (VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(
+                    Manifest.permission.BLUETOOTH,
+                    Manifest.permission.BLUETOOTH_ADMIN,
+                    Manifest.permission.BLUETOOTH_SCAN,
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                ), REQUEST_BLUETOOTH_PERMISSIONS
+            )
+        } else {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(
+                    Manifest.permission.BLUETOOTH,
+                    Manifest.permission.BLUETOOTH_ADMIN,
+                ), REQUEST_BLUETOOTH_PERMISSIONS
+            )
+        }
     }
 
     private fun executePrinter(device: BluetoothDevice) {
 
-        // Enter new line in the beginning
-        val gap = 1
-        val starterBytes = ArrayList<ByteArray>()
-        starterBytes.add(printerManager.resetFormat())
-        starterBytes.add(printerManager.textEnter(gap))
-        printerManager.connectToDevice(device, starterBytes)
-
         printingState(true)
+
+        if (isClosing && isPrintInvoice) {
+            return printInvoiceEscPos(device)
+        }
 
         lifecycleScope.launch {
             try {
 
                 val apiService: ApiService = HttpClient.create()
-                val response = apiService.printInvoice(invoiceId = createPartFromString(invoiceId!!))
+                val response =
+                    apiService.printSj(idSj = createPartFromString(idSj!!))
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
                         val data = response.results[0]
                         val deliveryId = "$AUTH_LEVEL_COURIER$userID"
-                        val firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorId ?: "-firebase-008")
+                        val firebaseReference = FirebaseUtils.getReference(
+                            distributorId = userDistributorId ?: "-firebase-008"
+                        )
                         val childDelivery = firebaseReference.child(FIREBASE_CHILD_DELIVERY)
                         val childDriver = childDelivery.child(deliveryId)
-                        childDriver.child("stores/${data.id_contact}/startDatetime").setValue(data.date_printed)
-                        printEscPos(data)
+                        childDriver.child("stores/${data.id_contact}/startDatetime")
+                            .setValue(data.date_printed)
+                        printEscPos(data, device)
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
-                        handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal mencetak: Detail surat jalan kosong!")
+                        handleMessage(
+                            this@DetailSuratJalanActivity,
+                            TAG_RESPONSE_CONTACT,
+                            "Gagal mencetak: Detail surat jalan kosong!"
+                        )
                         printingState(false)
 
                     }
+
                     else -> {
 
-                        handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal mencetak")
+                        handleMessage(
+                            this@DetailSuratJalanActivity,
+                            TAG_RESPONSE_CONTACT,
+                            "Gagal mencetak"
+                        )
                         printingState(false)
 
                     }
@@ -905,8 +1069,15 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@DetailSuratJalanActivity, "Failed DetailSuratJalanActivity on executePrinter(). Catch: ${e.message}")
-                handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@DetailSuratJalanActivity,
+                    "Failed DetailSuratJalanActivity on executePrinter(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@DetailSuratJalanActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 printingState(false)
 
             }
@@ -922,7 +1093,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                 try {
 
                     val apiService: ApiService = HttpClient.create()
-                    val response = apiService.printInvoice(invoiceId = createPartFromString(invoiceId!!))
+                    val response =
+                        apiService.printSj(idSj = createPartFromString(idSj!!))
 
                     when (response.status) {
                         RESPONSE_STATUS_OK -> {
@@ -932,20 +1104,33 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                             fileName = "Surat Jalan ${data.no_surat_jalan}.pdf"
                             Comman.getAppPath(this@DetailSuratJalanActivity)
                                 ?.let { File(it).mkdirs() }
-                            createPDFFile(Comman.getAppPath(this@DetailSuratJalanActivity) + fileName, data)
+                            createPDFFile(
+                                Comman.getAppPath(this@DetailSuratJalanActivity) + fileName,
+                                data
+                            )
                             printingState(false)
                             updateTrackingServiceNow()
 
                         }
+
                         RESPONSE_STATUS_EMPTY -> {
 
-                            handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal mencetak: Detail surat jalan kosong!")
+                            handleMessage(
+                                this@DetailSuratJalanActivity,
+                                TAG_RESPONSE_CONTACT,
+                                "Gagal mencetak: Detail surat jalan kosong!"
+                            )
                             printingState(false)
 
                         }
+
                         else -> {
 
-                            handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal mencetak")
+                            handleMessage(
+                                this@DetailSuratJalanActivity,
+                                TAG_RESPONSE_CONTACT,
+                                "Gagal mencetak"
+                            )
                             printingState(false)
 
                         }
@@ -956,8 +1141,14 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                     if (e is CancellationException) {
                         return@launch
                     }
-                    FirebaseUtils.logErr(this@DetailSuratJalanActivity, "Failed DetailSuratJalanActivity on executeInkPrinter(). Catch: ${e.message}")
-                    handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                    FirebaseUtils.logErr(
+                        this@DetailSuratJalanActivity,
+                        "Failed DetailSuratJalanActivity on executeInkPrinter(). Catch: ${e.message}"
+                    )
+                    handleMessage(
+                        this@DetailSuratJalanActivity,
+                        message = generateFailedRunServiceMessage(e.message.toString())
+                    )
                     printingState(false)
 
                 }
@@ -967,124 +1158,302 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     }
 
     // Testing
-    private fun printEscPos(data: SuratJalanModel) {
+    private suspend fun printEscPos(data: SuratJalanModel, device: BluetoothDevice) {
 
-        val printersConnections = BluetoothPrintersConnections.selectFirstPaired()
+        val connection = BluetoothConnection(device)
 
-        if (printersConnections == null) {
+        try {
+            if (connection.isConnected) {
+                connection.disconnect()
+            }
+            delay(500)
+            if (!connection.isConnected) {
+                connection.connect()
+            }
+
+            val printer = EscPosPrinter(connection, 203, 70f, 48)
+
+            val drawable = this.applicationContext.resources.getDrawableForDensity(
+                companyLogoBlack,
+                DisplayMetrics.DENSITY_MEDIUM
+            )
+
+            val scaledDrawable = scaleDrawable(drawable!!)
+            val imageHexadecimal =
+                PrinterTextParserImg.bitmapToHexadecimalString(printer, scaledDrawable)
+
+            // Data to Printed
+            val txtReferenceNumber = data.no_surat_jalan
+            val txtShipToName = data.ship_to_name
+            val txtShipToAddress = data.ship_to_address
+            val txtShipToPhone = data.ship_to_phone
+            val txtDeliveryOrderDate = "Delivery Date: ${data.dalivery_date}"
+            val txtPrintedDate = "Printed Date: ${data.date_printed}"
+            val txtCourier = "Kurir: ${data.courier_name}"
+            val txtVehicle = "Kendaraan: ${data.nama_kendaraan}"
+            val txtVehicleNumber = "No. Polisi: ${data.nopol_kendaraan}"
+
+            val orders = data.details.let { if (it.isEmpty()) arrayListOf() else it }
+            var textOrders = ""
+
+            orders.forEach {
+                val originalProductName = it.nama_produk
+                val produkName = if (originalProductName.length > 44) {
+                    val firstLine = originalProductName.substring(0, 44)
+                    val remainingText = originalProductName.substring(44)
+                    "$firstLine\n$remainingText"
+                } else {
+                    originalProductName
+                }
+
+                textOrders += "[L]<b>$produkName</b>[R]<b>[${it.qty_produk}]</b>\n"
+
+                if (!it.no_voucher.isNullOrEmpty()) {
+                    textOrders += "[L]Nomor voucher ${it.no_voucher}\n"
+                }
+
+                if (it.is_bonus == "1") {
+                    textOrders += "[L]${getString(R.string.free)}\n"
+                } else if (it.is_bonus == "2") {
+                    textOrders += "[L]${getString(R.string.free)}\n"
+                }
+
+                textOrders += "[L]\n"
+            }
+
+            printer.printFormattedText(
+                "[C]<img>$imageHexadecimal</img>\n\n" +
+                        "[C]$txtReferenceNumber\n\n" +
+                        "[C]Distributor Indonesia\n" +
+                        "[C]$companyName\n\n" +
+                        "[L]Shipped to:\n" +
+                        "[L]$txtShipToName\n" +
+                        "[L]$txtShipToAddress\n" +
+                        "[L]$txtShipToPhone\n\n" +
+                        "[L]Delivery Order\n" +
+                        "[L]$txtDeliveryOrderDate\n" +
+                        "[L]$txtPrintedDate\n\n" +
+                        "[L]Daftar Pesanan[R]Qty\n" + textOrders +
+                        "[L]Description\n" +
+                        "[L]$txtCourier\n" +
+                        "[L]$txtVehicle\n" +
+                        "[L]$txtVehicleNumber\n\n" +
+                        "[L]Received By:\n\n\n\n\n\n\n\n" +
+                        "[C]<b><u>$txtShipToName</u></b>\n" +
+                        "[L]\n"
+            )
 
             Handler(Looper.getMainLooper()).postDelayed({
                 printingState(false)
-                handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Tidak ada perangkat bluetooth yang terhubung")
-
-                return@postDelayed
+                updateTrackingServiceNow()
             }, 1000)
-            return
-        }
-
-        try {
-            printersConnections.connect()
         } catch (e: IOException) {
             Handler(Looper.getMainLooper()).postDelayed({
                 printingState(false)
-                FirebaseUtils.logErr(this@DetailSuratJalanActivity, "Failed DetailSuratJalanActivity on executePrinter(). Catch message: ${e.message}")
-                FirebaseUtils.logErr(this@DetailSuratJalanActivity, "Failed DetailSuratJalanActivity on executePrinter(). Catch stacktrace: ${e.stackTrace}")
-                FirebaseUtils.logErr(this@DetailSuratJalanActivity, "Failed DetailSuratJalanActivity on executePrinter(). Catch printed stacktrace: ${e.printStackTrace()}")
-                handleMessage(this@DetailSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal terhubung ke perangkat. " + e.message)
+                FirebaseUtils.logErr(
+                    this@DetailSuratJalanActivity,
+                    "Failed DetailSuratJalanActivity on executePrinter(). Catch message: ${e.message}"
+                )
+                FirebaseUtils.logErr(
+                    this@DetailSuratJalanActivity,
+                    "Failed DetailSuratJalanActivity on executePrinter(). Catch stacktrace: ${e.stackTrace}"
+                )
+                FirebaseUtils.logErr(
+                    this@DetailSuratJalanActivity,
+                    "Failed DetailSuratJalanActivity on executePrinter(). Catch printed stacktrace: ${e.printStackTrace()}"
+                )
+                handleMessage(
+                    this@DetailSuratJalanActivity,
+                    TAG_RESPONSE_CONTACT,
+                    "Gagal terhubung ke perangkat. " + e.message
+                )
 
                 return@postDelayed
             }, 1000)
             return
         }
+    }
 
-        val printer = EscPosPrinter(printersConnections, 203, 70f, 48)
+    private fun printInvoiceEscPos(device: BluetoothDevice) {
 
-        val drawable = this.applicationContext.resources.getDrawableForDensity(
-            companyLogoBlack,
-            DisplayMetrics.DENSITY_MEDIUM
-        )
+        val connection = BluetoothConnection(device)
 
-        val scaledDrawable = scaleDrawable(drawable!!)
-        val imageHexadecimal = PrinterTextParserImg.bitmapToHexadecimalString(printer, scaledDrawable)
+        lifecycleScope.launch {
+            try {
 
-        // Data to Printed
-        val txtReferenceNumber = data.no_surat_jalan
-        val txtShipToName = data.ship_to_name
-        val txtShipToAddress = data.ship_to_address
-        val txtShipToPhone = data.ship_to_phone
-        val txtDeliveryOrderDate = "Delivery Date: ${ data.dalivery_date }"
-        val txtPrintedDate = "Printed Date: ${ data.date_printed }"
-        val txtCourier = "Kurir: ${ data.courier_name }"
-        val txtVehicle = "Kendaraan: ${ data.nama_kendaraan }"
-        val txtVehicleNumber = "No. Polisi: ${ data.nopol_kendaraan }"
+                if (connection.isConnected) {
+                    connection.disconnect()
+                }
+                delay(500)
+                if (!connection.isConnected) {
+                    connection.connect()
+                }
+                val printer = EscPosPrinter(connection, 203, 70f, 48)
 
-        val orders = data.details.let { if (it.isEmpty()) arrayListOf() else it }
-        var textOrders = ""
+                val drawable =
+                    this@DetailSuratJalanActivity.applicationContext.resources.getDrawableForDensity(
+                        companyLogoBlack,
+                        DisplayMetrics.DENSITY_MEDIUM
+                    )
 
-        orders.forEach {
-            val originalProductName = it.nama_produk
-            val produkName = if (originalProductName.length > 44) {
-                val firstLine = originalProductName.substring(0, 44)
-                val remainingText = originalProductName.substring(44)
-                "$firstLine\n$remainingText"
-            } else {
-                originalProductName
+                val scaledDrawable = scaleDrawable(drawable!!)
+                val imageHexadecimal =
+                    PrinterTextParserImg.bitmapToHexadecimalString(printer, scaledDrawable)
+
+                // Data to Printed
+                val invoice = dataSj.invoice
+                val txtDoNumber = dataSj.no_surat_jalan
+                val txtShipToName = dataSj.ship_to_name
+                val txtShipToAddress = dataSj.ship_to_address
+                val txtShipToPhone = dataSj.ship_to_phone
+                val txtBillToName = invoice.bill_to_name
+                val txtBillToAddress = invoice.bill_to_address
+                val txtBillToPhone = invoice.bill_to_phone
+                val txtInvoiceNumber = invoice.no_invoice
+                var txtTotalAmount = 0.0
+                var txtPotongan = 0.0
+                val txtTotal = invoice.total_invoice?.toDoubleOrNull() ?: 0.0
+                val txtPtAddress =
+                    "PT Top Mortar Indonesia Pergudangan Bizpoint Blok F No 50, Cikupa, Tangerang"
+                val orders = dataSj.details.let { if (it.isEmpty()) arrayListOf() else it }
+                var textOrders = ""
+
+                orders.forEach {
+                    var nameProduct = it.nama_produk
+                    if (it.is_bonus == "1" || it.is_bonus == "2") {
+                        nameProduct += " (Free)"
+                    }
+                    val qty = it.qty_produk.toIntOrNull() ?: 0
+                    val price = it.harga_produk.toIntOrNull() ?: 0
+                    var total = (qty * price).toDouble()
+                    if (it.is_bonus == "1" || it.is_bonus == "2") {
+                        total = 0.0
+                    }
+
+                    txtTotalAmount += total
+                    textOrders += "[L]$nameProduct\n[L]$qty x $price[R]${
+                        CurrencyFormat.format(
+                            total
+                        )
+                    }\n"
+                }
+
+                txtPotongan += txtTotalAmount - txtTotal
+
+                val apiService = HttpClient.create()
+                val response = apiService.printInvoice(idSj = createPartFromString(idSj ?: ""))
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
+                        val txtDateNow = response.data.date_printed_inv
+                        printer.printFormattedText(
+                            "[C]<img>$imageHexadecimal</img>\n\n" +
+                                    "[C]$txtDateNow\n" +
+                                    "[C]Distributor Indonesia\n" +
+                                    "[C]$companyName\n\n" +
+                                    "[L]Bill to:\n" +
+                                    "[L]$txtBillToName\n" +
+                                    "[L]$txtBillToAddress\n" +
+                                    "[L]$txtBillToPhone\n" +
+                                    "[C]------------------------------------------------\n" +
+                                    "[L]Shipped to:\n" +
+                                    "[L]$txtShipToName\n" +
+                                    "[L]$txtShipToAddress\n" +
+                                    "[L]$txtShipToPhone\n\n" +
+                                    "[C]<b>Daftar Pesanan</b>\n" +
+                                    "[C]------------------------------------------------\n" +
+                                    "[L]$txtDoNumber[R]$txtInvoiceNumber\n" +
+                                    "[C]------------------------------------------------\n" +
+                                    "$textOrders\n" +
+                                    "[C]------------------------------------------------\n" +
+                                    "[L]SUBTOTAL[R]${CurrencyFormat.format(txtTotalAmount)}\n" +
+                                    "[L]POTONGAN[R](${CurrencyFormat.format(txtPotongan)})\n" +
+                                    "[C]------------------------------------------------\n" +
+                                    "[L]<b>TOTAL</b>[R]<b>${CurrencyFormat.format(txtTotal)}</b>\n\n" +
+                                    "[C]Terima Kasih\n" +
+                                    "[C]$txtPtAddress\n"
+                        )
+
+                        delay(1000)
+//                          updateTrackingServiceNow()
+                        handleMessage(
+                            this@DetailSuratJalanActivity,
+                            message = "Berhasil print invoice"
+                        )
+                        binding.lnrPrintInvoice.visibility = View.GONE
+                    }
+
+                    RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
+                        handleMessage(
+                            this@DetailSuratJalanActivity,
+                            TAG_RESPONSE_CONTACT,
+                            response.message
+                        )
+                    }
+
+                    else -> {
+                        handleMessage(
+                            this@DetailSuratJalanActivity,
+                            TAG_RESPONSE_CONTACT,
+                            "Gagal mencetak"
+                        )
+                    }
+                }
+
+            } catch (e: IOException) {
+                Handler(Looper.getMainLooper()).postDelayed({
+                    FirebaseUtils.logErr(
+                        this@DetailSuratJalanActivity,
+                        "Failed DetailSuratJalanActivity on executePrinter(). Catch message: ${e.message}"
+                    )
+                    FirebaseUtils.logErr(
+                        this@DetailSuratJalanActivity,
+                        "Failed DetailSuratJalanActivity on executePrinter(). Catch stacktrace: ${e.stackTrace}"
+                    )
+                    FirebaseUtils.logErr(
+                        this@DetailSuratJalanActivity,
+                        "Failed DetailSuratJalanActivity on executePrinter(). Catch printed stacktrace: ${e.printStackTrace()}"
+                    )
+                    handleMessage(
+                        this@DetailSuratJalanActivity,
+                        message = "Gagal terhubung ke perangkat. " + e.message
+                    )
+
+                    return@postDelayed
+                }, 1000)
+            } catch (e: Exception) {
+
+                if (e is CancellationException) {
+                    return@launch
+                }
+                FirebaseUtils.logErr(
+                    this@DetailSuratJalanActivity,
+                    "Failed DetailSuratJalanActivity on printInvoiceEscPos(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@DetailSuratJalanActivity,
+                    message = generateFailedRunServiceMessage(e.message.toString())
+                )
+
+            } finally {
+                printingState(false)
             }
-
-            textOrders += "[L]<b>$produkName</b>[R]<b>[${ it.qty_produk }]</b>\n"
-
-            if (!it.no_voucher.isNullOrEmpty()) {
-                textOrders += "[L]Nomor voucher ${it.no_voucher}\n"
-            }
-
-            if (it.is_bonus == "1") {
-                textOrders += "[L]${getString(R.string.free)}\n"
-            } else if (it.is_bonus == "2") {
-                textOrders += "[L]${getString(R.string.free)}\n"
-            }
-
-            textOrders += "[L]\n"
         }
-
-        printer.printFormattedText(
-            "[C]<img>$imageHexadecimal</img>\n\n" +
-            "[C]$txtReferenceNumber\n\n" +
-            "[C]Distributor Indonesia\n" +
-            "[C]$companyName\n" +
-            "[L]Shipped to:\n" +
-            "[L]$txtShipToName\n" +
-            "[L]$txtShipToAddress\n" +
-            "[L]$txtShipToPhone\n\n" +
-            "[L]Delivery Order\n" +
-            "[L]$txtDeliveryOrderDate\n" +
-            "[L]$txtPrintedDate\n\n" +
-            "[L]Daftar Pesanan[R]Qty\n" + textOrders +
-            "[L]Description\n" +
-            "[L]$txtCourier\n" +
-            "[L]$txtVehicle\n" +
-            "[L]$txtVehicleNumber\n\n" +
-            "[L]Received By:\n\n\n\n\n\n\n\n" +
-            "[C]<b><u>$txtShipToName</u></b>\n" +
-            "[L]\n"
-        )
-
-        Handler(Looper.getMainLooper()).postDelayed({
-            printingState(false)
-            updateTrackingServiceNow()
-        }, 1000)
     }
 
     private fun scaleDrawable(drawable: Drawable): Drawable {
-        val bitmap = Bitmap.createBitmap(400, 206, Bitmap.Config.ARGB_8888)
+        val bitmap = createBitmap(400, 206)
         val canvas = Canvas(bitmap)
         drawable.setBounds(0, 0, 400, 206)
         drawable.draw(canvas)
-        return BitmapDrawable(this.applicationContext.resources, bitmap)
+        return bitmap.toDrawable(this.applicationContext.resources)
     }
 
     private fun showPrintOption() {
-        val parentLayout: ViewGroup = findViewById(R.id.detail_surat_jalan_activity) // Ganti dengan ID yang sesuai dari layout Anda
-        val bottomSheetLayout = layoutInflater.inflate(R.layout.fragment_bottom_sheet_print_option, parentLayout, false)
+        val parentLayout: ViewGroup =
+            findViewById(R.id.detail_surat_jalan_activity) // Ganti dengan ID yang sesuai dari layout Anda
+        val bottomSheetLayout =
+            layoutInflater.inflate(R.layout.fragment_bottom_sheet_print_option, parentLayout, false)
 
         bottomSheetDialog = BottomSheetDialog(this)
         bottomSheetDialog.setContentView(bottomSheetLayout)
@@ -1096,7 +1465,9 @@ class DetailSuratJalanActivity : AppCompatActivity() {
             R.id.printBluetoothOption -> {
                 showDialogChangePrintMethod(PRINT_METHOD_BLUETOOTH)
                 bottomSheetDialog.dismiss()
-            } else -> {
+            }
+
+            else -> {
                 showDialogChangePrintMethod(PRINT_METHOD_WIFI)
                 bottomSheetDialog.dismiss()
             }
@@ -1121,14 +1492,20 @@ class DetailSuratJalanActivity : AppCompatActivity() {
             PRINT_METHOD_BLUETOOTH -> {
                 btnPrint.text = PRINT_METHOD_BLUETOOTH_TITLE
                 sessionManager.printState(PRINT_METHOD_BLUETOOTH)
-            } else -> {
+            }
+
+            else -> {
                 btnPrint.text = PRINT_METHOD_WIFI_TITLE
                 sessionManager.printState(PRINT_METHOD_WIFI)
             }
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         if (requestCode == REQUEST_BLUETOOTH_PERMISSIONS) {
@@ -1141,7 +1518,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                     shouldShowRequestPermissionRationale(Manifest.permission.BLUETOOTH_SCAN) ||
                     shouldShowRequestPermissionRationale(Manifest.permission.BLUETOOTH_CONNECT)
                 ) {
-                    val message = "Izin Bluetooth diperlukan untuk fitur ini. Izinkan aplikasi mengakses bluetooth pada perangkat."
+                    val message =
+                        "Izin Bluetooth diperlukan untuk fitur ini. Izinkan aplikasi mengakses bluetooth pada perangkat."
                     customUtility.showPermissionDeniedSnackbar(message) { requestBluetoothPermissions() }
                 } else customUtility.showPermissionDeniedDialog("Izin Bluetooth diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
             }
@@ -1151,8 +1529,15 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                 getMapsUrl()
             } else {
                 if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    val message = "Izin lokasi diperlukan untuk fitur ini. Izinkan aplikasi mengakses lokasi perangkat."
-                    customUtility.showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE) }
+                    val message =
+                        "Izin lokasi diperlukan untuk fitur ini. Izinkan aplikasi mengakses lokasi perangkat."
+                    customUtility.showPermissionDeniedSnackbar(message) {
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                            LOCATION_PERMISSION_REQUEST_CODE
+                        )
+                    }
                 } else customUtility.showPermissionDeniedDialog("Izin lokasi diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
             }
         } else if (requestCode == REQUEST_STORAGE_PERMISSION) {
@@ -1160,8 +1545,15 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                 createPDF()
             } else {
                 if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    val message = "Izin penyimpanan diperlukan untuk fitur ini. Izinkan aplikasi mengakses penyimpanan perangkat."
-                    customUtility.showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), REQUEST_STORAGE_PERMISSION) }
+                    val message =
+                        "Izin penyimpanan diperlukan untuk fitur ini. Izinkan aplikasi mengakses penyimpanan perangkat."
+                    customUtility.showPermissionDeniedSnackbar(message) {
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                            REQUEST_STORAGE_PERMISSION
+                        )
+                    }
                 } else customUtility.showPermissionDeniedDialog("Izin penyimpanan diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
             }
         }
@@ -1193,7 +1585,15 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         return cell
     }
 
-    private fun getParagraph(text: String = "", alignment: TextAlignment = TextAlignment.LEFT, fontSize: Float = 9f, paddingLeft: Float = 0f, paddingTop: Float = 0f, paddingRight: Float = 0f, paddingBottom: Float = 0f): Paragraph {
+    private fun getParagraph(
+        text: String = "",
+        alignment: TextAlignment = TextAlignment.LEFT,
+        fontSize: Float = 9f,
+        paddingLeft: Float = 0f,
+        paddingTop: Float = 0f,
+        paddingRight: Float = 0f,
+        paddingBottom: Float = 0f
+    ): Paragraph {
         val paragraph = Paragraph(text).setTextAlignment(alignment)
         paragraph.setFontSize(fontSize)
         paragraph.paddingLeft = paddingLeft
@@ -1254,7 +1654,12 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         document.add(tableShipDel)
         val tableShipDelValue = Table(2)
         tableShipDelValue.addCell(getCell(" ${data.ship_to_address}", TextAlignment.LEFT))
-        tableShipDelValue.addCell(getCell(" Printed Date: ${data.date_printed}", TextAlignment.RIGHT))
+        tableShipDelValue.addCell(
+            getCell(
+                " Printed Date: ${data.date_printed}",
+                TextAlignment.RIGHT
+            )
+        )
         document.add(tableShipDelValue)
 
         val tablex = Table(1)
@@ -1295,20 +1700,53 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         for ((index, item) in items.iterator().withIndex()) {
             val i = index + 1
             table2.addCell(Cell().add(getParagraph("$i", TextAlignment.CENTER)))
-            table2.addCell(Cell().add(getParagraph(item.nama_produk + if (item.is_bonus == "1" || item.is_bonus == "2") " (Free)" else "", paddingLeft = 8f, paddingRight = 8f)))
-            table2.addCell(Cell().add(getParagraph(if (!item.no_voucher.isNullOrEmpty()) item.no_voucher!! else "-", paddingLeft = 8f, paddingRight = 8f)))
+            table2.addCell(
+                Cell().add(
+                    getParagraph(
+                        item.nama_produk + if (item.is_bonus == "1" || item.is_bonus == "2") " (Free)" else "",
+                        paddingLeft = 8f,
+                        paddingRight = 8f
+                    )
+                )
+            )
+            table2.addCell(
+                Cell().add(
+                    getParagraph(
+                        if (!item.no_voucher.isNullOrEmpty()) item.no_voucher!! else "-",
+                        paddingLeft = 8f,
+                        paddingRight = 8f
+                    )
+                )
+            )
             table2.addCell(Cell().add(getParagraph(item.qty_produk, TextAlignment.CENTER)))
         }
 
-        if (items.size == 0) table2.addCell(Cell(1,5).add(getParagraph("Tidak ada pesanan", TextAlignment.LEFT)))
+        if (items.isEmpty()) table2.addCell(
+            Cell(1, 5).add(
+                getParagraph(
+                    "Tidak ada pesanan",
+                    TextAlignment.LEFT
+                )
+            )
+        )
 
         //table2 ...5
         document.add(table2)
         document.add(getParagraph("\n", fontSize = 1f))
 
         val tableReceived = Table(2)
-        tableReceived.addCell(getCell(" Kurir: ${data.courier_name}\nKendaraan: ${data.nama_kendaraan}\nNo.Polisi: ${data.nopol_kendaraan}", TextAlignment.LEFT))
-        if (data.is_closing == "1") tableReceived.addCell(getCell(" Telah di closing pada ${data.date_closing}\ndengan jarak ${data.distance} km dari titik toko", TextAlignment.RIGHT))
+        tableReceived.addCell(
+            getCell(
+                " Kurir: ${data.courier_name}\nKendaraan: ${data.nama_kendaraan}\nNo.Polisi: ${data.nopol_kendaraan}",
+                TextAlignment.LEFT
+            )
+        )
+        if (data.is_closing == "1") tableReceived.addCell(
+            getCell(
+                " Telah di closing pada ${data.date_closing}\ndengan jarak ${data.distance} km dari titik toko",
+                TextAlignment.RIGHT
+            )
+        )
         document.add(tableReceived)
         document.add(getParagraph("\n", fontSize = 1f))
 
@@ -1319,7 +1757,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         document.add(tableTtd)
 
         val maxRow = items.size.let { if (it == 0) 7 else 8 - it }
-        for (i in 0 until maxRow) {
+        (0 until maxRow).forEach { _ ->
             document.add(getParagraph("\n", fontSize = 8f))
         }
 
@@ -1328,13 +1766,14 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
 
     private fun printPDF() {
-        val printManager = getSystemService(Context.PRINT_SERVICE) as PrintManager
+        val printManager = getSystemService(PRINT_SERVICE) as PrintManager
 
         try {
-            val printAdapter = PdfDocumentAdapter(this,Comman.getAppPath(this) + fileName, fileName)
-            printManager.print("Documents",printAdapter, PrintAttributes.Builder().build())
-        }catch (e:Exception){
-            Log.e("TOP Mortar - Print PDF",""+e.message)
+            val printAdapter =
+                PdfDocumentAdapter(this, Comman.getAppPath(this) + fileName, fileName)
+            printManager.print("Documents", printAdapter, PrintAttributes.Builder().build())
+        } catch (e: Exception) {
+            Log.e("TOP Mortar - Print PDF", "" + e.message)
         }
 
     }
@@ -1347,7 +1786,11 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
             if (CustomUtility(this).isUserWithOnlineStatus()) {
-                CustomUtility(this).setUserStatusOnline(true, userDistributorId ?: "-custom-015", "$userID")
+                CustomUtility(this).setUserStatusOnline(
+                    true,
+                    userDistributorId ?: "-custom-015",
+                    "$userID"
+                )
             }
         }, 1000)
     }
@@ -1355,14 +1798,22 @@ class DetailSuratJalanActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         if (CustomUtility(this).isUserWithOnlineStatus()) {
-            CustomUtility(this).setUserStatusOnline(false, userDistributorId ?: "-custom-015", "$userID")
+            CustomUtility(this).setUserStatusOnline(
+                false,
+                userDistributorId ?: "-custom-015",
+                "$userID"
+            )
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         if (CustomUtility(this).isUserWithOnlineStatus()) {
-            CustomUtility(this).setUserStatusOnline(false, userDistributorId ?: "-custom-015", "$userID")
+            CustomUtility(this).setUserStatusOnline(
+                false,
+                userDistributorId ?: "-custom-015",
+                "$userID"
+            )
         }
     }
 

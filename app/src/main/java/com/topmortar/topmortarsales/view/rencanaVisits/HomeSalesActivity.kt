@@ -265,11 +265,7 @@ class HomeSalesActivity : AppCompatActivity() {
 //                    }
 //                }
                 initView()
-                Toast.makeText(
-                    this,
-                    "Aplikasi membutuhkan izin lokasi",
-                    Toast.LENGTH_LONG
-                ).show()
+                handleMessage(this, message = "Aplikasi membutuhkan izin lokasi")
             }
             .show()
     }
@@ -607,7 +603,9 @@ class HomeSalesActivity : AppCompatActivity() {
 
             lockMenuItem(true)
 
-            checkAbsent()
+            lifecycleScope.launch {
+                checkAbsent()
+            }
 
             inAppUpdateHelper(appUpdateManager, appUpdateLauncher)
 //        getFcmToken()
@@ -1296,14 +1294,14 @@ class HomeSalesActivity : AppCompatActivity() {
                 }
 
                 val response = if (absentMode == ABSENT_MODE_STORE) {
-                    Log.d(
-                        "DEBUG REQUEST BODY",
-                        "ID CONTACT: ${selectedStore?.id} \n" +
-                                "ID USER: $userId \n" +
-                                "DISTANCE: $shortDistance \n" +
-                                "LAPORAN: $visitReport \n" +
-                                "SOURCE: $absentType \n"
-                    )
+//                    Log.d(
+//                        "DEBUG REQUEST BODY",
+//                        "ID CONTACT: ${selectedStore?.id} \n" +
+//                                "ID USER: $userId \n" +
+//                                "DISTANCE: $shortDistance \n" +
+//                                "LAPORAN: $visitReport \n" +
+//                                "SOURCE: $absentType \n"
+//                    )
                     apiService.absenSalesInStore(
                         idContact = createPartFromString(selectedStore?.id.toString()),
                         idUser = createPartFromString(userId!!),
@@ -1312,14 +1310,14 @@ class HomeSalesActivity : AppCompatActivity() {
                         source = createPartFromString(absentType),
                     )
                 } else {
-                    Log.d(
-                        "DEBUG REQUEST BODY",
-                        "ID GUDANG: ${selectedStore?.id} \n" +
-                                "ID USER: $userId \n" +
-                                "DISTANCE: $shortDistance \n" +
-                                "LAPORAN: $visitReport \n" +
-                                "SOURCE: $absentType \n"
-                    )
+//                    Log.d(
+//                        "DEBUG REQUEST BODY",
+//                        "ID GUDANG: ${selectedStore?.id} \n" +
+//                                "ID USER: $userId \n" +
+//                                "DISTANCE: $shortDistance \n" +
+//                                "LAPORAN: $visitReport \n" +
+//                                "SOURCE: $absentType \n"
+//                    )
                     apiService.absenSalesInBasecamp(
                         idGudang = createPartFromString(selectedStore?.id.toString()),
                         idUser = createPartFromString(userId!!),
@@ -1441,11 +1439,13 @@ class HomeSalesActivity : AppCompatActivity() {
                     generateFailedRunServiceMessage(e.message.toString())
                 )
 
+            } finally {
+                dismissProgressDialog()
             }
         }
     }
 
-    private fun checkAbsent() {
+    private suspend fun checkAbsent() {
         FirebaseUtils.firebaseLogging(this, "Absent", "Start checking")
         try {
 
@@ -1465,28 +1465,28 @@ class HomeSalesActivity : AppCompatActivity() {
             val userChild = absentChild.child(userId ?: "0")
 
             FirebaseUtils.firebaseLogging(this, "Absent", "Reaching firebase server")
-            lifecycleScope.launch(Dispatchers.IO) {
+//            lifecycleScope.launch(Dispatchers.IO) {
 
-                val snapshot = userChild.get().await()
+            val snapshot = userChild.get().await()
 
-                withContext(Dispatchers.Main) {
-                    if (!snapshot.exists()) {
-                        handleAbsenceStatus(morningDateTime = null, eveningDateTime = null)
-                        return@withContext
-                    }
-
-                    val morningDateTime =
-                        snapshot.child("morningDateTime").getValue(String::class.java)
-                    val eveningDateTime =
-                        snapshot.child("eveningDateTime").getValue(String::class.java)
-
-                    handleAbsenceStatus(
-                        morningDateTime = morningDateTime,
-                        eveningDateTime = eveningDateTime
-                    )
-                }
-
+//                withContext(Dispatchers.Main) {
+            if (!snapshot.exists()) {
+                handleAbsenceStatus(morningDateTime = null, eveningDateTime = null)
+                return
             }
+
+            val morningDateTime =
+                snapshot.child("morningDateTime").getValue(String::class.java)
+            val eveningDateTime =
+                snapshot.child("eveningDateTime").getValue(String::class.java)
+
+            handleAbsenceStatus(
+                morningDateTime = morningDateTime,
+                eveningDateTime = eveningDateTime
+            )
+//                }
+
+//            }
         } catch (e: Exception) {
             if (e is CancellationException) {
                 return

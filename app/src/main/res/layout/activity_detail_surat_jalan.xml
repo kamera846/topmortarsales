@@ -27,144 +27,177 @@
 
         <!-- Bottom Action -->
         <LinearLayout
-            android:visibility="gone"
             android:id="@+id/bottom_action"
             android:layout_alignParentBottom="true"
             android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:paddingVertical="16dp"
-            android:paddingHorizontal="8dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
+            <!-- Bottom Action Invoice -->
             <LinearLayout
-                android:visibility="visible"
-                android:id="@+id/lnr_print"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_marginHorizontal="8dp"
+                android:visibility="gone"
+                android:id="@+id/lnr_print_invoice"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginVertical="16dp"
+                android:layout_marginHorizontal="16dp"
                 android:gravity="center_vertical"
-                android:background="@drawable/bg_primary_round_8"
+                android:background="@drawable/bg_primary_outlined_round_8"
                 android:orientation="horizontal">
 
                 <Button
                     android:id="@+id/btn_print_invoice"
                     android:visibility="visible"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:textSize="12sp"
-                    android:textColor="@color/white"
+                    android:textColor="@color/primary"
+                    android:textStyle="bold"
                     android:background="@android:color/transparent"
-                    android:text="Print Bluetooth" />
-
-                <LinearLayout
-                    android:visibility="gone"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:padding="8dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:contentDescription="Invoice Image Button"
-                        android:src="@drawable/bluetooth_fill" />
-
-                    <TextView
-                        android:id="@+id/tvTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Print"
-                        android:textStyle="bold"
-                        android:textAllCaps="true"
-                        android:textSize="18sp"
-                        android:textColor="@color/white"
-                        android:layout_marginLeft="8dp"
-                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
-
-                </LinearLayout>
-
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
-                    android:background="@color/light"/>
-
-                <LinearLayout
-                    android:id="@+id/btn_print_option"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:paddingHorizontal="12dp"
-                    android:gravity="center"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:contentDescription="Invoice Image Button"
-                        android:src="@drawable/up_down_white" />
-
-                </LinearLayout>
+                    android:text="Print Invoice" />
 
             </LinearLayout>
 
-            <Button
-                android:visibility="gone"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginHorizontal="8dp"
-                android:padding="12dp"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:text="Print" />
-
+            <!-- Bottom Action SJ -->
             <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_marginHorizontal="8dp"
+                android:visibility="visible"
+                android:id="@+id/bottom_action_sj"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:paddingVertical="16dp"
+                android:paddingHorizontal="8dp"
                 android:gravity="center_vertical"
-                android:background="@drawable/bg_light_round_8"
                 android:orientation="horizontal">
 
+                <LinearLayout
+                    android:visibility="visible"
+                    android:id="@+id/lnr_print"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_marginHorizontal="8dp"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/bg_primary_round_8"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btn_print_sj"
+                        android:visibility="visible"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textSize="12sp"
+                        android:textColor="@color/white"
+                        android:background="@android:color/transparent"
+                        android:text="Print Bluetooth" />
+
+                    <LinearLayout
+                        android:visibility="gone"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:padding="8dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:contentDescription="Invoice Image Button"
+                            android:src="@drawable/bluetooth_fill" />
+
+                        <TextView
+                            android:id="@+id/tvTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Print"
+                            android:textStyle="bold"
+                            android:textAllCaps="true"
+                            android:textSize="18sp"
+                            android:textColor="@color/white"
+                            android:layout_marginStart="8dp"
+                            android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/light"/>
+
+                    <LinearLayout
+                        android:id="@+id/btn_print_option"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:paddingHorizontal="12dp"
+                        android:gravity="center"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="18dp"
+                            android:layout_height="18dp"
+                            android:contentDescription="Invoice Image Button"
+                            android:src="@drawable/up_down_white" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
                 <Button
-                    android:id="@+id/btn_closing"
+                    android:visibility="gone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginHorizontal="8dp"
+                    android:padding="12dp"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:text="Print" />
+
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_marginHorizontal="8dp"
-                    android:padding="8dp"
-                    android:textSize="12sp"
-                    android:textColor="@color/black_200"
-                    android:background="@android:color/transparent"
-                    android:drawableLeft="@drawable/button_img_camera_lens_black"
-                    android:text="Closing" />
+                    android:gravity="center_vertical"
+                    android:background="@drawable/bg_light_round_8"
+                    android:orientation="horizontal">
 
-            </LinearLayout>
+                    <Button
+                        android:id="@+id/btn_closing"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginHorizontal="8dp"
+                        android:padding="8dp"
+                        android:textSize="12sp"
+                        android:textColor="@color/black_200"
+                        android:background="@android:color/transparent"
+                        android:drawableStart="@drawable/button_img_camera_lens_black"
+                        android:text="Closing" />
 
-            <LinearLayout
-                android:visibility="gone"
-                android:id="@+id/lnr_closing"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="8dp"
-                android:padding="12dp"
-                android:gravity="center"
-                android:background="@drawable/circular_border_black"
-                android:orientation="horizontal">
+                </LinearLayout>
 
-                <ImageView
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:contentDescription="Invoice Image Button"
-                    android:src="@drawable/camera_lens_black" />
+                <LinearLayout
+                    android:visibility="gone"
+                    android:id="@+id/lnr_closing"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="8dp"
+                    android:padding="12dp"
+                    android:gravity="center"
+                    android:background="@drawable/circular_border_black"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:contentDescription="Invoice Image Button"
+                        android:src="@drawable/camera_lens_black" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
         </LinearLayout>
-
     </RelativeLayout>
 
     <TextView
