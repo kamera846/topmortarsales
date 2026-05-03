@@ -187,6 +187,13 @@ class PreviewClosingActivity : AppCompatActivity() {
         endLng: String
     ): Pair<Boolean, String> {
         val apiService: ApiService = HttpClient.create()
+        val startDatetime = store.startDatetime.let {
+            if (it.isEmpty() || it == "-") {
+                "0000-00-00"
+            } else {
+                it
+            }
+        }
 
         val response = apiService.closingDelivery(
             lat = createPartFromString("${store.lat}"),
@@ -194,7 +201,7 @@ class PreviewClosingActivity : AppCompatActivity() {
             endDateTime = createPartFromString(endDateTime),
             endLat = createPartFromString(endLat),
             endLng = createPartFromString(endLng),
-            startDateTime = createPartFromString(store.startDatetime),
+            startDateTime = createPartFromString(startDatetime),
             startLat = createPartFromString("${store.startLat}"),
             startLng = createPartFromString("${store.startLng}"),
             id_surat_jalan = createPartFromString(invoiceId ?: "-1"),

@@ -50,6 +50,7 @@ import com.topmortar.topmortarsales.response.ResponseInvoice
 import com.topmortar.topmortarsales.response.ResponseKonten
 import com.topmortar.topmortarsales.response.ResponseList
 import com.topmortar.topmortarsales.response.ResponseMessage
+import com.topmortar.topmortarsales.response.ResponseObject.PrintInvoice
 import com.topmortar.topmortarsales.response.ResponseObject
 import com.topmortar.topmortarsales.response.ResponsePayment
 import com.topmortar.topmortarsales.response.ResponseProduct
@@ -307,14 +308,14 @@ interface ApiService {
     @GET(SURAT_JALAN)
     suspend fun getSuratJalanDetail(
         @Query("p") processNumber: String,
-        @Query("sj") invoiceId: String
+        @Query("sj") idSj: String
     ): ResponseSuratJalan
 
     @Multipart
     @POST(SURAT_JALAN)
-    suspend fun printInvoice(
+    suspend fun printSj(
         @Part("command") command: RequestBody = createPartFromString("print"),
-        @Part("id_surat_jalan") invoiceId: RequestBody
+        @Part("id_surat_jalan") idSj: RequestBody
     ): ResponseSuratJalan
 
     @Multipart
@@ -907,4 +908,10 @@ interface ApiService {
         @Query("id_user") userId: String,
         @Query("key") searchKey: String
     ): Response<ResponseContactList>
+
+    @Multipart
+    @POST("printInvoice.php")
+    suspend fun printInvoice(
+        @Part("id_sj") idSj: RequestBody
+    ): PrintInvoice
 }

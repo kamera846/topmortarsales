@@ -277,11 +277,7 @@ class HomeCourierActivity : AppCompatActivity() {
 //                    }
 //                }
                 initView()
-                Toast.makeText(
-                    this,
-                    "Aplikasi membutuhkan izin lokasi",
-                    Toast.LENGTH_LONG
-                ).show()
+                handleMessage(this, message = "Aplikasi membutuhkan izin lokasi")
             }
             .show()
     }
@@ -628,7 +624,9 @@ class HomeCourierActivity : AppCompatActivity() {
 
             lockMenuItem(true)
 
-            checkAbsent()
+            lifecycleScope.launch {
+                checkAbsent()
+            }
 
             inAppUpdateHelper(appUpdateManager, appUpdateLauncher)
 
@@ -653,7 +651,7 @@ class HomeCourierActivity : AppCompatActivity() {
 
     }
 
-    private fun checkAbsent() {
+    private suspend fun checkAbsent() {
         FirebaseUtils.firebaseLogging(this, "Absent", "Start checking")
         try {
 
@@ -673,28 +671,28 @@ class HomeCourierActivity : AppCompatActivity() {
             val userChild = absentChild.child(userId ?: "0")
 
             FirebaseUtils.firebaseLogging(this, "Absent", "Reaching firebase server")
-            lifecycleScope.launch(Dispatchers.IO) {
+//            lifecycleScope.launch(Dispatchers.IO) {
 
-                val snapshot = userChild.get().await()
+            val snapshot = userChild.get().await()
 
-                withContext(Dispatchers.Main) {
-                    if (!snapshot.exists()) {
-                        handleAbsenceStatus(morningDateTime = null, eveningDateTime = null)
-                        return@withContext
-                    }
-
-                    val morningDateTime =
-                        snapshot.child("morningDateTime").getValue(String::class.java)
-                    val eveningDateTime =
-                        snapshot.child("eveningDateTime").getValue(String::class.java)
-
-                    handleAbsenceStatus(
-                        morningDateTime = morningDateTime,
-                        eveningDateTime = eveningDateTime
-                    )
-                }
-
+//                withContext(Dispatchers.Main) {
+            if (!snapshot.exists()) {
+                handleAbsenceStatus(morningDateTime = null, eveningDateTime = null)
+                return
             }
+
+            val morningDateTime =
+                snapshot.child("morningDateTime").getValue(String::class.java)
+            val eveningDateTime =
+                snapshot.child("eveningDateTime").getValue(String::class.java)
+
+            handleAbsenceStatus(
+                morningDateTime = morningDateTime,
+                eveningDateTime = eveningDateTime
+            )
+//                }
+//
+//            }
         } catch (e: Exception) {
             if (e is CancellationException) {
                 return
@@ -1490,6 +1488,8 @@ class HomeCourierActivity : AppCompatActivity() {
                     generateFailedRunServiceMessage(e.message.toString())
                 )
 
+            } finally {
+                dismissProgressDialog()
             }
 
         }
