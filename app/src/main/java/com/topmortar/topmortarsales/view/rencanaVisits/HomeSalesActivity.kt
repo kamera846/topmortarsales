@@ -93,6 +93,7 @@ import com.topmortar.topmortarsales.databinding.ActivityHomeSalesBinding
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.BaseCampModel
 import com.topmortar.topmortarsales.model.ContactModel
+import com.topmortar.topmortarsales.model.CounterVisitModel
 import com.topmortar.topmortarsales.model.HomeMenuSalesModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.ChartActivity
@@ -106,16 +107,15 @@ import com.topmortar.topmortarsales.view.product.ProductsActivity
 import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import com.topmortar.topmortarsales.view.tukang.ListTukangActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.math.roundToInt
 
 class HomeSalesActivity : AppCompatActivity() {
 
@@ -607,6 +607,8 @@ class HomeSalesActivity : AppCompatActivity() {
                 checkAbsent()
             }
 
+            fetchProgressiveVisitCounter()
+
             inAppUpdateHelper(appUpdateManager, appUpdateLauncher)
 //        getFcmToken()
 //        Disabled FCM
@@ -629,6 +631,98 @@ class HomeSalesActivity : AppCompatActivity() {
 //                absentProgressBar!!.setMessage(getString(R.string.txt_loading))
 //            }
         }
+    }
+
+    private fun fetchProgressiveVisitCounter() {
+
+        lifecycleScope.launch {
+
+            try {
+
+                toggleProgressiveVisitCounterLoading(true)
+
+                val response = apiService.getCounterVisit(userId ?: "-1")
+
+                if (!response.isSuccessful) {
+                    throw IllegalStateException(
+                        "HTTP Error: ${response.code()}"
+                    )
+                }
+
+                val body = response.body()
+                    ?: throw IllegalStateException("Response body kosong")
+
+                if (body.status != RESPONSE_STATUS_OK) {
+                    throw IllegalStateException(
+                        body.message
+                    )
+                }
+
+                setDataProgressiveVisitCounter(body.results)
+            } catch (e: Exception) {
+
+                handleMessage(
+                    this@HomeSalesActivity,
+                    message = e.message ?: "Terjadi kesalahan"
+                )
+
+            } finally {
+
+                toggleProgressiveVisitCounterLoading(false)
+            }
+        }
+    }
+
+    private fun setDataProgressiveVisitCounter(data: CounterVisitModel) {
+        val targetVisit = data.target_visit.toIntOrNull() ?: 0
+        val totalVisit = data.total_visit.toIntOrNull() ?: 0
+        val totalConfirmed = data.total_confirmed.toIntOrNull() ?: 0
+
+        val targetCounterText = DateFormat.format(DateFormat.now(), outputFormat = "dd/MM/yyyy")
+        binding.targetProgress.progress = 100f
+        binding.targetProgress.text = "$targetVisit"
+        binding.targetDate.text = targetCounterText
+
+        val visitedCounterProgress = calculateProgress(totalVisit, targetVisit)
+        val visitedCounterText = "${totalVisit}/${targetVisit} Target"
+        binding.visitProgress.progress = visitedCounterProgress
+        binding.visitProgress.text = "${visitedCounterProgress.roundToInt()}%"
+        binding.visitCounter.text = visitedCounterText
+
+        var confirmedCounterProgress = calculateProgress(totalConfirmed, totalVisit)
+        var confirmedCounterText = "${totalConfirmed}/${totalVisit} Visit"
+        if (totalVisit > targetVisit) {
+            confirmedCounterProgress = calculateProgress(totalConfirmed, targetVisit)
+            confirmedCounterText = "${totalConfirmed}/${targetVisit} Target"
+        }
+        binding.confirmedProgress.progress = confirmedCounterProgress
+        binding.confirmedProgress.text = "${confirmedCounterProgress.roundToInt()}%"
+        binding.confirmedCounter.text = confirmedCounterText
+    }
+
+    private fun calculateProgress(
+        current: Int,
+        target: Int
+    ): Float {
+        if (target <= 0) return 0f
+        val progress = (current.toFloat() / target.toFloat()) * 100f
+        return progress.coerceIn(0f, 100f)
+    }
+
+    private fun toggleProgressiveVisitCounterLoading(isLoading: Boolean) {
+        if (!isLoading) return
+
+        binding.targetProgress.progress = 0F
+        binding.targetProgress.text = "0"
+        binding.targetDate.text = "memuat..."
+
+        binding.visitProgress.progress = 0F
+        binding.visitProgress.text = "0%"
+        binding.visitCounter.text = "memuat..."
+
+        binding.confirmedProgress.progress = 0F
+        binding.confirmedProgress.text = "0%"
+        binding.confirmedCounter.text = "memuat..."
     }
 
     private fun getFcmToken() {
