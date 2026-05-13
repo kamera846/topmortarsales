@@ -165,8 +165,9 @@
 
             </RelativeLayout>
 
-            <!-- Repost Box -->
+            <!-- Report Box -->
             <LinearLayout
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/background_rounded_8_clickable"
@@ -219,6 +220,156 @@
                     android:layout_height="60dp"
                     app:progressValue="10"
                     app:centerText="..."/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:paddingHorizontal="16dp"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Progressive Visits"
+                    android:textStyle="bold"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+            </LinearLayout>
+
+            <!-- Counter Visit Box -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginHorizontal="16dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="16dp"
+                    android:gravity="center"
+                    android:background="@drawable/background_rounded_8_clickable"
+                    android:orientation="vertical">
+
+                    <com.topmortar.topmortarsales.commons.utils.MyCircularProgressView
+                        android:id="@+id/targetProgress"
+                        android:layout_width="70dp"
+                        android:layout_height="70dp"
+                        app:progressColor="@color/status_passive"
+                        app:progressValue="0"
+                        app:centerText="0"/>
+
+                    <TextView
+                        android:id="@+id/targetCounter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Target"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:textAlignment="center"
+                        android:textSize="12sp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                    <TextView
+                        android:id="@+id/targetDate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="---"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:textAlignment="center"
+                        android:textStyle="bold"
+                        android:textSize="12sp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:paddingVertical="16dp"
+                    android:layout_marginHorizontal="8dp"
+                    android:background="@drawable/background_rounded_8_clickable"
+                    android:orientation="vertical">
+
+                    <com.topmortar.topmortarsales.commons.utils.MyCircularProgressView
+                        android:id="@+id/visitProgress"
+                        android:layout_width="70dp"
+                        android:layout_height="70dp"
+                        app:progressColor="@color/blue_silver_lake"
+                        app:progressValue="0"
+                        app:centerText="0%"/>
+
+                    <TextView
+                        android:id="@+id/visitCounter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="---"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:textAlignment="center"
+                        android:textSize="12sp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Divisit"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:textAlignment="center"
+                        android:textStyle="bold"
+                        android:textSize="12sp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingVertical="16dp"
+                    android:gravity="center"
+                    android:background="@drawable/background_rounded_8_clickable"
+                    android:orientation="vertical">
+
+                    <com.topmortar.topmortarsales.commons.utils.MyCircularProgressView
+                        android:id="@+id/confirmedProgress"
+                        android:layout_width="70dp"
+                        android:layout_height="70dp"
+                        app:progressColor="@color/status_active"
+                        app:progressValue="0"
+                        app:centerText="0%"/>
+
+                    <TextView
+                        android:id="@+id/confirmedCounter"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="---"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:textAlignment="center"
+                        android:textSize="12sp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Dibalas"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        android:textAlignment="center"
+                        android:textStyle="bold"
+                        android:textSize="12sp"
+                        android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
+
+                </LinearLayout>
 
             </LinearLayout>
 
