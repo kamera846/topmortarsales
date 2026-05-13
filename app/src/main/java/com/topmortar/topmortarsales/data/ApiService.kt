@@ -914,4 +914,7 @@ interface ApiService {
     suspend fun printInvoice(
         @Part("id_sj") idSj: RequestBody
     ): PrintInvoice
+
+    @GET("counterVisit.php")
+    suspend fun getCounterVisit(@Query("id_user") idUser: String): Response<ResponseObject.ResponseCounterVisit>
 }

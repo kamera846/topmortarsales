@@ -23,6 +23,8 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.topmortar.topmortarsales.R
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN
+import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_COURIER
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_MARKETING
 import com.topmortar.topmortarsales.commons.AUTH_LEVEL_PENAGIHAN
@@ -66,6 +68,7 @@ import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityUserProfileBinding
 import com.topmortar.topmortarsales.modal.ChartSalesPricingModal
+import com.topmortar.topmortarsales.model.CounterVisitModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.SplashScreenActivity
 import com.topmortar.topmortarsales.view.delivery.HistoryDeliveryActivity
@@ -73,6 +76,7 @@ import com.topmortar.topmortarsales.view.reports.ReportsActivity
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.Subscribe
 import java.util.Calendar
+import kotlin.math.roundToInt
 
 class UserProfileActivity : AppCompatActivity() {
 
@@ -371,6 +375,15 @@ class UserProfileActivity : AppCompatActivity() {
         }
         if (iFullName!!.isNotEmpty()) binding.tvFullName.text = iFullName
         if (iUserLevel!!.isNotEmpty()) binding.tvLevel.text = iUserLevel
+
+        if ((userAuthLevel == AUTH_LEVEL_ADMIN || userAuthLevel == AUTH_LEVEL_ADMIN_CITY) && (iUserLevel == AUTH_LEVEL_SALES || iUserLevel == AUTH_LEVEL_PENAGIHAN || iUserLevel == AUTH_LEVEL_MARKETING)) {
+            binding.progressiveVisitsTitle.visibility = View.VISIBLE
+            binding.progressiveVisitsContainer.visibility = View.VISIBLE
+            fetchProgressiveVisitCounter()
+        } else {
+            binding.progressiveVisitsTitle.visibility = View.GONE
+            binding.progressiveVisitsContainer.visibility = View.GONE
+        }
 
 //        if (iUserLevel == AUTH_LEVEL_SALES) {
 //
@@ -837,6 +850,99 @@ class UserProfileActivity : AppCompatActivity() {
             }
 
         })
+    }
+
+    private fun fetchProgressiveVisitCounter() {
+
+        lifecycleScope.launch {
+
+            try {
+
+                toggleProgressiveVisitCounterLoading(true)
+
+                val apiService: ApiService = HttpClient.create()
+                val response = apiService.getCounterVisit(iUserID ?: "-1")
+
+                if (!response.isSuccessful) {
+                    throw IllegalStateException(
+                        "HTTP Error: ${response.code()}"
+                    )
+                }
+
+                val body = response.body()
+                    ?: throw IllegalStateException("Response body kosong")
+
+                if (body.status != RESPONSE_STATUS_OK) {
+                    throw IllegalStateException(
+                        body.message
+                    )
+                }
+
+                setDataProgressiveVisitCounter(body.results)
+            } catch (e: Exception) {
+
+                handleMessage(
+                    this@UserProfileActivity,
+                    message = e.message ?: "Terjadi kesalahan"
+                )
+
+            } finally {
+
+                toggleProgressiveVisitCounterLoading(false)
+            }
+        }
+    }
+
+    private fun setDataProgressiveVisitCounter(data: CounterVisitModel) {
+        val targetVisit = data.target_visit.toIntOrNull() ?: 0
+        val totalVisit = data.total_visit.toIntOrNull() ?: 0
+        val totalConfirmed = data.total_confirmed.toIntOrNull() ?: 0
+
+        val targetCounterText = DateFormat.format(DateFormat.now(), outputFormat = "dd/MM/yyyy")
+        binding.targetProgress.progress = 100f
+        binding.targetProgress.text = "$targetVisit"
+        binding.targetDate.text = targetCounterText
+
+        val visitedCounterProgress = calculateProgress(totalVisit, targetVisit)
+        val visitedCounterText = "${totalVisit}/${targetVisit} Target"
+        binding.visitProgress.progress = visitedCounterProgress
+        binding.visitProgress.text = "${visitedCounterProgress.roundToInt()}%"
+        binding.visitCounter.text = visitedCounterText
+
+        var confirmedCounterProgress = calculateProgress(totalConfirmed, totalVisit)
+        var confirmedCounterText = "${totalConfirmed}/${totalVisit} Visit"
+        if (totalVisit > targetVisit) {
+            confirmedCounterProgress = calculateProgress(totalConfirmed, targetVisit)
+            confirmedCounterText = "${totalConfirmed}/${targetVisit} Target"
+        }
+        binding.confirmedProgress.progress = confirmedCounterProgress
+        binding.confirmedProgress.text = "${confirmedCounterProgress.roundToInt()}%"
+        binding.confirmedCounter.text = confirmedCounterText
+    }
+
+    private fun calculateProgress(
+        current: Int,
+        target: Int
+    ): Float {
+        if (target <= 0) return 0f
+        val progress = (current.toFloat() / target.toFloat()) * 100f
+        return progress.coerceIn(0f, 100f)
+    }
+
+    private fun toggleProgressiveVisitCounterLoading(isLoading: Boolean) {
+        if (!isLoading) return
+
+        binding.targetProgress.progress = 0F
+        binding.targetProgress.text = "0"
+        binding.targetDate.text = "memuat..."
+
+        binding.visitProgress.progress = 0F
+        binding.visitProgress.text = "0%"
+        binding.visitCounter.text = "memuat..."
+
+        binding.confirmedProgress.progress = 0F
+        binding.confirmedProgress.text = "0%"
+        binding.confirmedCounter.text = "memuat..."
     }
 
 // Override Class

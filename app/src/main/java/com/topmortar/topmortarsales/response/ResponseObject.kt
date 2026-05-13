@@ -1,7 +1,7 @@
 package com.topmortar.topmortarsales.response
 
+import com.topmortar.topmortarsales.model.CounterVisitModel
 import com.topmortar.topmortarsales.model.TotalVisitSalesModel
-import java.util.Objects
 
 object ResponseObject {
     data class TotalVisitSales(
@@ -20,5 +20,12 @@ object ResponseObject {
 
     data class DataPrintInvoice(
         var date_printed_inv: String
+    )
+
+    data class ResponseCounterVisit(
+        var response: Int = -1,
+        var status: String = "",
+        var message: String = "",
+        var results: CounterVisitModel,
     )
 }
