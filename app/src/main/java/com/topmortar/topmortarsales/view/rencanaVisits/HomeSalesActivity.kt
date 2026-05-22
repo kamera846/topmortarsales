@@ -192,8 +192,8 @@ class HomeSalesActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private var currentInternetTime: LocalDateTime? = null
     private var currentTime: Int = 0
-    private var morningStart: Int = (7 * 3600) + (30 * 60)
-    private var morningEnd: Int = (8 * 3600) + (30 * 60)
+    private var morningStart: Int = (7 * 3600)
+    private var morningEnd: Int = (9 * 3600)
 
     private var eveningStart: Int = (16 * 3600)
 
@@ -373,7 +373,7 @@ class HomeSalesActivity : AppCompatActivity() {
         }
     }
 
-    private fun setAbsentText(title: String = "Sabar Dulu Ya", description: String = "Absen masuk hanya bisa dilakukan pada pukul 07.30-08.30 WIB.") {
+    private fun setAbsentText(title: String = "Sabar Dulu Ya", description: String = "Absen masuk hanya bisa dilakukan pada pukul 07.00-09.00 WIB.") {
         binding.absentTitle.text = title
         binding.absentDescription.text = description
     }
