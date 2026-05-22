@@ -128,9 +128,9 @@
                     android:text="Memuat waktu..."
                     android:textSize="13sp"
                     android:textStyle="bold"
-                    android:textColor="@color/black"
                     android:layout_marginTop="8dp"
-                    android:layout_below="@id/absent_description"/>
+                    android:layout_below="@id/absent_description"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextDescription"/>
 
                 <include
                     android:id="@+id/selectedStoreContainer"
