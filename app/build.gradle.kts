@@ -1,3 +1,4 @@
+import org.gradle.kotlin.dsl.coreLibraryDesugaring
 import java.util.Properties
 
 val secretsProperties = Properties()
@@ -29,8 +30,8 @@ android {
         applicationId = "com.topmortar.topmortarsales"
         minSdk = 24
         targetSdk = 36
-        versionCode = 186
-        versionName = "3.4.260513186"
+        versionCode = 187
+        versionName = "3.4.260523187"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
@@ -50,6 +51,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
         jvmTarget = "11"
@@ -119,6 +122,7 @@ dependencies {
     implementation(libs.app.update.ktx)
     implementation(libs.app.update)
     implementation(libs.androidx.work.runtime.ktx)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     // Testing
     testImplementation(libs.junit)
