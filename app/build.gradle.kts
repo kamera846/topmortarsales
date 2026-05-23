@@ -30,8 +30,8 @@ android {
         applicationId = "com.topmortar.topmortarsales"
         minSdk = 24
         targetSdk = 36
-        versionCode = 186
-        versionName = "3.4.260513186"
+        versionCode = 187
+        versionName = "3.4.260523187"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
