@@ -22,13 +22,21 @@ class FilterTokoModal(private val context: Context) : Dialog(context) {
     private lateinit var customUtility: CustomUtility
     private lateinit var binding: ModalFilterTokoBinding
 
+    private var validStatuses: ArrayList<String> = arrayListOf("Sudah Valid", "Tidak Valid")
     private var statuses: ArrayList<String> = arrayListOf("Data", "Passive", "Active", "Bid", "Blacklist")
+    private var selectedValidStatusID: String = "-1"
     private var selectedStatusID: String = "-1"
 
+    private var showFilterValidStatus = false
     private var showFilterStatus = false
     private var showFilterVisited = false
     private var showFilterCities = false
     private var showBtnHapus = false
+
+    fun setValidStatuses(selected: String = "-1") {
+        selectedValidStatusID = selected
+        showFilterValidStatus = true
+    }
 
     fun setStatuses(selected: String = "-1") {
         selectedStatusID = selected
@@ -51,7 +59,7 @@ class FilterTokoModal(private val context: Context) : Dialog(context) {
     }
 
     interface SendFilterListener {
-        fun onSendFilter(selectedStatusID: String, selectedVisitedID: String, selectedCitiesID: CityModel? = null)
+        fun onSendFilter(selectedValidStatusID: String, selectedStatusID: String, selectedVisitedID: String, selectedCitiesID: CityModel? = null)
     }
 
     private var listener: SendFilterListener? = null
@@ -68,6 +76,7 @@ class FilterTokoModal(private val context: Context) : Dialog(context) {
 
         setLayout()
         initClickHandler()
+        setupFilterValidStatuses()
         setupFilterStatuses()
         setupFilterVisited()
         setupFilterCities()
@@ -100,12 +109,55 @@ class FilterTokoModal(private val context: Context) : Dialog(context) {
         titleBar.icClose.visibility = View.VISIBLE
         titleBar.icClose.setOnClickListener { this@FilterTokoModal.dismiss() }
         binding.btnHapusFilter.setOnClickListener {
-            listener!!.onSendFilter("-1", "-1", null)
+            listener!!.onSendFilter("-1","-1", "-1", null)
             this@FilterTokoModal.dismiss()
         }
         binding.btnFilter.setOnClickListener {
-            listener!!.onSendFilter(selectedStatusID, selectedVisitedID, selectedCitiesID)
+            listener!!.onSendFilter(selectedValidStatusID, selectedStatusID, selectedVisitedID, selectedCitiesID)
             this@FilterTokoModal.dismiss()
+        }
+    }
+
+    private fun setupFilterValidStatuses() {
+        if (showFilterValidStatus) binding.filterValidStatusesContainer.visibility = View.VISIBLE
+        else binding.filterValidStatusesContainer.visibility = View.GONE
+
+        val flexBoxCities = binding.flexboxValidStatus
+        val margin = convertDpToPx(2, context)
+        val paddingVertical = convertDpToPx(6, context)
+        val paddingHorizontal = convertDpToPx(10, context)
+
+        for (item in validStatuses.listIterator()) {
+            val textView = TextView(context)
+            textView.text = item
+            val layoutParams = FlexboxLayout.LayoutParams(
+                FlexboxLayout.LayoutParams.WRAP_CONTENT,
+                FlexboxLayout.LayoutParams.WRAP_CONTENT
+            )
+            textView.gravity = Gravity.CENTER
+            textView.setTextColor(context.getColor(
+                if (item == selectedValidStatusID) R.color.white
+                else {
+                    if (customUtility.isDarkMode()) R.color.black_600
+                    else R.color.black_200
+                }
+            ))
+            textView.setBackgroundResource(
+                if (item == selectedValidStatusID) R.drawable.bg_primary_round
+                else R.drawable.bg_border_round
+            )
+            textView.setPadding(paddingHorizontal, paddingVertical, paddingHorizontal, paddingVertical)
+            layoutParams.setMargins(margin, margin, margin, margin)
+            textView.layoutParams = layoutParams
+
+            textView.setOnClickListener{
+                selectedValidStatusID = if (item == selectedValidStatusID) "-1"
+                else item
+                flexBoxCities.removeAllViews()
+                setupFilterValidStatuses()
+            }
+
+            flexBoxCities.addView(textView)
         }
     }
 
@@ -239,7 +291,7 @@ class FilterTokoModal(private val context: Context) : Dialog(context) {
     }
 
     private fun setBtnHapus() {
-        if (selectedStatusID != "-1" || selectedVisitedID != "-1" || selectedCitiesID != null) binding.btnHapusFilter.visibility = View.VISIBLE
+        if (selectedValidStatusID != "-1" || selectedStatusID != "-1" || selectedVisitedID != "-1" || selectedCitiesID != null) binding.btnHapusFilter.visibility = View.VISIBLE
         else binding.btnHapusFilter.visibility = View.GONE
     }
 }

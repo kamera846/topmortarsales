@@ -1243,6 +1243,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             } else if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_ADMIN_CITY) filterModal.setStatuses(selected = selectedStatusID)
             filterModal.setSendFilterListener(object: FilterTokoModal.SendFilterListener {
                 override fun onSendFilter(
+                    selectedValidStatusID: String,
                     selectedStatusID: String,
                     selectedVisitedID: String,
                     selectedCitiesID: CityModel?

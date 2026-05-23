@@ -181,6 +181,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
     private var percentage = 0
 
     // Setup Filter
+    private var selectedValidStatusID: String = "-1"
     private var selectedStatusID: String = "-1"
     private var selectedVisitedID: String = "-1"
     private var selectedCitiesID: CityModel? = null
@@ -927,29 +928,53 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 val response = when (userKind) {
                     USER_KIND_COURIER -> apiService.getCourierStore(processNumber = "1", courierId = userId)
                     else -> {
+                        val validStatusFilter = selectedValidStatusID.lowercase(Locale.ROOT).let {
+                            when (it) {
+                                "sudah valid" -> {
+                                    "valid"
+                                }
+                                "tidak valid" -> {
+                                    "invalid"
+                                }
+                                else -> {
+                                    "-1"
+                                }
+                            }
+                        }
                         val statusFilter = selectedStatusID.lowercase(Locale.ROOT)
                         val cityID = if (userKind == USER_KIND_ADMIN) selectedCitiesID?.id_city
                         else userCity
 
                         if (isContactXSource) {
                             apiService.getContactXs(cityId = userCity, userId = userId)
+                        } else if (cityID != null && statusFilter != "-1" && validStatusFilter != "-1") {
+                            apiService.getContacts(cityId = cityID, status = statusFilter, distributorID = userDistributorId, validationStatus = validStatusFilter)
+                        } else if (statusFilter != "-1" && validStatusFilter != "-1") {
+                            apiService.getContactsByStatusAndValidationStatus(status = statusFilter, validationStatus = validStatusFilter, distributorID = userDistributorId)
                         } else if (cityID != null && statusFilter != "-1") {
                             apiService.getContacts(cityId = cityID, status = statusFilter, distributorID = userDistributorId)
+                        } else if (cityID != null && validStatusFilter != "-1") {
+                            apiService.getContactsByCityAndValidationStatus(cityId = cityID, validationStatus = validStatusFilter, distributorID = userDistributorId)
                         } else if (cityID != null) {
                             apiService.getContacts(cityId = cityID, distributorID = userDistributorId)
                         } else if (statusFilter != "-1" ) {
                             apiService.getContactsByStatus(status = statusFilter, distributorID = userDistributorId)
+                        } else if (validStatusFilter != "-1" ) {
+                            apiService.getContactsByValidationStatus(validationStatus = validStatusFilter, distributorID = userDistributorId)
                         } else apiService.getContactsByDistributor(distributorID = userDistributorId)
                     }
                 }
 
                 var textFilter = ""
 
-                if (selectedStatusID != "-1" || selectedVisitedID != "-1" || selectedCitiesID != null) {
+                if (selectedValidStatusID != "-1" || selectedStatusID != "-1" || selectedVisitedID != "-1" || selectedCitiesID != null) {
                     textFilter += if (selectedCitiesID != null && selectedCitiesID?.id_city != "-1") selectedCitiesID?.nama_city else ""
                     textFilter += if (selectedStatusID != "-1") if (textFilter.isNotEmpty()) ", $selectedStatusID" else selectedStatusID else ""
+                    textFilter += if (selectedValidStatusID != "-1") if (textFilter.isNotEmpty()) ", $selectedValidStatusID" else selectedValidStatusID else ""
                     textFilter += if (selectedVisitedID != "-1") if (textFilter.isNotEmpty()) ", $selectedVisitedID" else selectedVisitedID else ""
                 } else textFilter = getString(R.string.tidak_ada_filter)
+
+                Log.w("[DEBUG]", "Filter logging")
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -1102,16 +1127,22 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
             filterModal = FilterTokoModal(this)
             if (userKind == USER_KIND_ADMIN) {
+                filterModal.setValidStatuses(selected = selectedValidStatusID)
                 filterModal.setStatuses(selected = selectedStatusID)
                 filterModal.setCities(items = cities, selected = selectedCitiesID)
-            } else if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_MARKETING || userKind == USER_KIND_ADMIN_CITY) filterModal.setStatuses(selected = selectedStatusID)
+            } else if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_MARKETING || userKind == USER_KIND_ADMIN_CITY) {
+                filterModal.setValidStatuses(selected = selectedValidStatusID)
+                filterModal.setStatuses(selected = selectedStatusID)
+            }
             filterModal.setSendFilterListener(object: FilterTokoModal.SendFilterListener {
                 override fun onSendFilter(
+                    selectedValidStatusID: String,
                     selectedStatusID: String,
                     selectedVisitedID: String,
                     selectedCitiesID: CityModel?
                 ) {
 
+                    this@MainActivity.selectedValidStatusID = selectedValidStatusID
                     this@MainActivity.selectedStatusID = selectedStatusID
                     this@MainActivity.selectedVisitedID = selectedVisitedID
                     this@MainActivity.selectedCitiesID = selectedCitiesID
@@ -1185,19 +1216,50 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
                 val rbSearchKey = createPartFromString(PhoneHandler.formatPhoneNumber62(key))
 
+                val validStatusFilter = selectedValidStatusID.lowercase(Locale.ROOT).let {
+                    when (it) {
+                        "sudah valid" -> {
+                            "valid"
+                        }
+                        "tidak valid" -> {
+                            "invalid"
+                        }
+                        else -> {
+                            "-1"
+                        }
+                    }
+                }
                 val statusFilter = selectedStatusID.lowercase(Locale.ROOT)
                 val cityID = if (userKind == USER_KIND_ADMIN) selectedCitiesID?.id_city
                 else userCity
 
                 val apiService: ApiService = HttpClient.create()
+//                val response = if (isContactXSource) {
+//                    apiService.searchContactXs(cityId = userCity, userId = userId, searchKey = key)
+//                } else if (cityID != null && statusFilter != "-1") {
+//                    apiService.searchContact(cityId = createPartFromString(cityID), status = createPartFromString(statusFilter), key = rbSearchKey, distributorID = createPartFromString(userDistributorId))
+//                } else if (cityID != null) {
+//                    apiService.searchContact(cityId = createPartFromString(cityID), key = rbSearchKey, distributorID = createPartFromString(userDistributorId))
+//                } else if (statusFilter != "-1" ) {
+//                    apiService.searchContactByStatus(status = createPartFromString(statusFilter), key = rbSearchKey, distributorID = createPartFromString(userDistributorId))
+//                } else apiService.searchContact(key = rbSearchKey, distributorID = createPartFromString(userDistributorId))
+
                 val response = if (isContactXSource) {
-                    apiService.searchContactXs(cityId = userCity, userId = userId, searchKey = key)
+                    apiService.searchContactXs(searchKey = key, cityId = userCity, userId = userId)
+                } else if (cityID != null && statusFilter != "-1" && validStatusFilter != "-1") {
+                    apiService.searchContact(key = rbSearchKey, cityId = createPartFromString(cityID), status = createPartFromString(statusFilter), distributorID = createPartFromString(userDistributorId), validationStatus = createPartFromString(validStatusFilter))
+                } else if (statusFilter != "-1" && validStatusFilter != "-1") {
+                    apiService.searchContactByStatusAndValidationStatus(key = rbSearchKey, status = createPartFromString(statusFilter), validationStatus = createPartFromString(validStatusFilter), distributorID = createPartFromString(userDistributorId))
                 } else if (cityID != null && statusFilter != "-1") {
-                    apiService.searchContact(cityId = createPartFromString(cityID), status = createPartFromString(statusFilter), key = rbSearchKey, distributorID = createPartFromString(userDistributorId))
+                    apiService.searchContact(key = rbSearchKey, cityId = createPartFromString(cityID), status = createPartFromString(statusFilter), distributorID = createPartFromString(userDistributorId))
+                } else if (cityID != null && validStatusFilter != "-1") {
+                    apiService.searchContactByCityAndValidationStatus(key = rbSearchKey, cityId = createPartFromString(cityID), validationStatus = createPartFromString(validStatusFilter), distributorID = createPartFromString(userDistributorId))
                 } else if (cityID != null) {
-                    apiService.searchContact(cityId = createPartFromString(cityID), key = rbSearchKey, distributorID = createPartFromString(userDistributorId))
+                    apiService.searchContact(key = rbSearchKey, cityId = createPartFromString(cityID), distributorID = createPartFromString(userDistributorId))
                 } else if (statusFilter != "-1" ) {
-                    apiService.searchContactByStatus(status = createPartFromString(statusFilter), key = rbSearchKey, distributorID = createPartFromString(userDistributorId))
+                    apiService.searchContactByStatus(key = rbSearchKey, status = createPartFromString(statusFilter), distributorID = createPartFromString(userDistributorId))
+                } else if (validStatusFilter != "-1" ) {
+                    apiService.searchContactByValidationStatus(key = rbSearchKey, validationStatus = createPartFromString(validStatusFilter), distributorID = createPartFromString(userDistributorId))
                 } else apiService.searchContact(key = rbSearchKey, distributorID = createPartFromString(userDistributorId))
 
                 if (response.isSuccessful) {
@@ -1206,9 +1268,10 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
                     var textFilter = ""
 
-                    if (selectedStatusID != "-1" || selectedVisitedID != "-1" || selectedCitiesID != null) {
+                    if (selectedValidStatusID != "-1" || selectedStatusID != "-1" || selectedVisitedID != "-1" || selectedCitiesID != null) {
                         textFilter += if (selectedCitiesID != null && selectedCitiesID?.id_city != "-1") selectedCitiesID?.nama_city else ""
                         textFilter += if (selectedStatusID != "-1") if (textFilter.isNotEmpty()) ", $selectedStatusID" else selectedStatusID else ""
+                        textFilter += if (selectedValidStatusID != "-1") if (textFilter.isNotEmpty()) ", $selectedValidStatusID" else selectedValidStatusID else ""
                         textFilter += if (selectedVisitedID != "-1") if (textFilter.isNotEmpty()) ", $selectedVisitedID" else selectedVisitedID else ""
                     } else textFilter = getString(R.string.tidak_ada_filter)
 

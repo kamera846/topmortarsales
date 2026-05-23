@@ -78,9 +78,23 @@ interface ApiService {
     val currenMonth: Int get() = Calendar.getInstance().get(Calendar.MONTH) + 1
 
     @GET(CONTACT)
-    suspend fun getContacts(@Query("c") cityId: String, @Query("dst") distributorID: String): ResponseContactList
+    suspend fun getContacts(
+        @Query("c") cityId: String,
+        @Query("dst") distributorID: String
+    ): ResponseContactList
     @GET(CONTACT)
-    suspend fun getContacts(@Query("c") cityId: String, @Query("status") status: String, @Query("dst") distributorID: String): ResponseContactList
+    suspend fun getContacts(
+        @Query("c") cityId: String,
+        @Query("status") status: String,
+        @Query("dst") distributorID: String
+    ): ResponseContactList
+    @GET(CONTACT)
+    suspend fun getContacts(
+        @Query("c") cityId: String,
+        @Query("status") status: String,
+        @Query("validation_status") validationStatus: String,
+        @Query("dst") distributorID: String
+    ): ResponseContactList
 
 //    @GET(CONTACT)
 //    suspend fun getContacts(): ResponseContactList
@@ -88,6 +102,12 @@ interface ApiService {
     suspend fun getContactsByDistributor(@Query("dst") distributorID: String): ResponseContactList
     @GET(CONTACT)
     suspend fun getContactsByStatus(@Query("status") status: String, @Query("dst") distributorID: String): ResponseContactList
+    @GET(CONTACT)
+    suspend fun getContactsByCityAndValidationStatus(@Query("c") cityId: String, @Query("validation_status") validationStatus: String, @Query("dst") distributorID: String): ResponseContactList
+    @GET(CONTACT)
+    suspend fun getContactsByStatusAndValidationStatus(@Query("status") status: String, @Query("validation_status") validationStatus: String, @Query("dst") distributorID: String): ResponseContactList
+    @GET(CONTACT)
+    suspend fun getContactsByValidationStatus(@Query("validation_status") validationStatus: String, @Query("dst") distributorID: String): ResponseContactList
 
     @GET(CONTACT)
     suspend fun getContactDetail(@Query("id") contactId: String): Response<ResponseContactList>
@@ -192,7 +212,43 @@ interface ApiService {
 
     @Multipart
     @POST(SEARCH_CONTACT)
+    suspend fun searchContactByValidationStatus(
+        @Part("validation_status") validationStatus: RequestBody,
+        @Part("key") key: RequestBody,
+        @Part("dst") distributorID: RequestBody
+    ): Response<ResponseContactList>
+
+    @Multipart
+    @POST(SEARCH_CONTACT)
+    suspend fun searchContactByStatusAndValidationStatus(
+        @Part("status") status: RequestBody,
+        @Part("validation_status") validationStatus: RequestBody,
+        @Part("key") key: RequestBody,
+        @Part("dst") distributorID: RequestBody
+    ): Response<ResponseContactList>
+
+    @Multipart
+    @POST(SEARCH_CONTACT)
+    suspend fun searchContactByCityAndValidationStatus(
+        @Part("id_city") cityId: RequestBody,
+        @Part("validation_status") validationStatus: RequestBody,
+        @Part("key") key: RequestBody,
+        @Part("dst") distributorID: RequestBody
+    ): Response<ResponseContactList>
+
+    @Multipart
+    @POST(SEARCH_CONTACT)
     suspend fun searchContact(
+        @Part("status") status: RequestBody,
+        @Part("id_city") cityId: RequestBody,
+        @Part("key") key: RequestBody,
+        @Part("dst") distributorID: RequestBody
+    ): Response<ResponseContactList>
+
+    @Multipart
+    @POST(SEARCH_CONTACT)
+    suspend fun searchContact(
+        @Part("validation_status") validationStatus: RequestBody,
         @Part("status") status: RequestBody,
         @Part("id_city") cityId: RequestBody,
         @Part("key") key: RequestBody,
