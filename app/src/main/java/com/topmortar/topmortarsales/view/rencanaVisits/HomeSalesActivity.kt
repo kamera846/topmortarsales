@@ -78,7 +78,6 @@ import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
-import com.topmortar.topmortarsales.commons.utils.MySntpClient.checkTimeFromInternet
 import com.topmortar.topmortarsales.commons.utils.PermissionsHandler
 import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -89,6 +88,7 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.commons.utils.inAppUpdateHelper
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
+import com.topmortar.topmortarsales.data.WorldTimeClient
 import com.topmortar.topmortarsales.databinding.ActivityHomeSalesBinding
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.BaseCampModel
@@ -96,6 +96,7 @@ import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.CounterVisitModel
 import com.topmortar.topmortarsales.model.HomeMenuSalesModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
+import com.topmortar.topmortarsales.response.WorldTimeResponse
 import com.topmortar.topmortarsales.view.ChartActivity
 import com.topmortar.topmortarsales.view.MainActivity
 import com.topmortar.topmortarsales.view.MapsActivity
@@ -109,7 +110,12 @@ import com.topmortar.topmortarsales.view.tukang.ListTukangActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -183,6 +189,29 @@ class HomeSalesActivity : AppCompatActivity() {
             // Do something
         }
 
+    private val handler = Handler(Looper.getMainLooper())
+    private var currentInternetTime: LocalDateTime? = null
+    private var currentTime: Int = 0
+    private var morningStart: Int = (7 * 3600)
+    private var morningEnd: Int = (9 * 3600)
+
+    private var eveningStart: Int = (16 * 3600)
+
+    private val runnable = object : Runnable {
+        override fun run() {
+
+            currentInternetTime?.let {
+
+                currentInternetTime = it.plusSeconds(1)
+
+                updateRealtimeClock()
+                validateAttendanceButton()
+            }
+
+            handler.postDelayed(this, 1000)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -209,6 +238,180 @@ class HomeSalesActivity : AppCompatActivity() {
 
         })
 
+    }
+
+    private fun getInternetTime() {
+        handler.removeCallbacks(runnable)
+
+        WorldTimeClient.api.getJakartaTime()
+            .enqueue(object : Callback<WorldTimeResponse> {
+
+                override fun onResponse(
+                    call: Call<WorldTimeResponse>,
+                    response: Response<WorldTimeResponse>
+                ) {
+
+                    if (response.isSuccessful) {
+
+                        response.body()?.let { result ->
+
+                            val dateTime = result.date_time.substring(0, 19)
+
+                            currentInternetTime = LocalDateTime.parse(dateTime)
+
+                            updateRealtimeClock()
+                            validateAttendanceButton()
+
+                            handler.post(runnable)
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<WorldTimeResponse>, t: Throwable) {
+
+                    binding.tvRealtimeClock.text = "Gagal mengambil waktu realtime"
+
+                    binding.btnAbsent.isEnabled = false
+                }
+            })
+    }
+
+    private fun updateRealtimeClock() {
+
+        currentInternetTime?.let {
+
+            val formatter = DateTimeFormatter.ofPattern("HH:mm:ss")
+
+            val formatted = it.format(formatter)
+
+            binding.tvRealtimeClock.text = "Waktu Sekarang: $formatted WIB"
+        }
+    }
+
+    private fun validateAttendanceButton() {
+
+        currentInternetTime?.let { time ->
+
+            val hour = time.hour
+            val minute = time.minute
+            val second = time.second
+
+            currentTime = (hour * 3600) + (minute * 60) + second
+
+            when {
+
+                // ABSEN PULANG AKTIF
+                currentTime >= eveningStart -> {
+
+                    var title = "Waktunya Pulang"
+                    var description = "Jangan lupa melakukan absen pulang untuk menyelesaikan pekerjaan."
+
+                    if (!isAbsentMorningNow) {
+                        description = "Jam kerja berakhir, dan Anda belum melakukan absen masuk hari ini."
+                        hideBtnAbsent()
+                    } else if (!isAbsentEveningNow) {
+                        showBtnAbsent("PULANG SEKARANG",R.color.red_claret)
+                    } else {
+                        title = getString(R.string.absen_pulang_sudah_tercatat)
+                        description = getString(R.string.terima_kasih_atas_kinerja_hari_ini)
+                        hideBtnAbsent()
+                    }
+
+                    setAbsentText(title, description)
+                    hideEveningText()
+
+                }
+
+                // JAM KERJA AKTIF
+                currentTime in morningEnd..eveningStart -> {
+
+                    var title = getString(R.string.kehadiranmu_telah_tercatat)
+                    val description = getString(R.string.terimakasih_sudah_mencatat_kehadiran_hari_ini_without_clock)
+
+                    if (!isAbsentMorningNow) {
+                        title = "Wah, Kamu Terlambat"
+                        setAbsentText(title)
+                        hideEveningText()
+                    } else {
+                        setAbsentText(title, description)
+                        showEveningText()
+                    }
+
+                    hideBtnAbsent()
+
+                }
+
+                // ABSEN MASUK AKTIF
+                currentTime in morningStart..morningEnd -> {
+
+                    var title = getString(R.string.kehadiranmu_telah_tercatat)
+                    val description = getString(R.string.terimakasih_sudah_mencatat_kehadiran_hari_ini_without_clock)
+
+                    if (!isAbsentMorningNow) {
+                        title = getString(R.string.yuk_catat_kehadiranmu_hari_ini)
+                        setAbsentText(title)
+                        showBtnAbsent("ABSEN SEKARANG")
+                        hideEveningText()
+                    } else {
+                        setAbsentText(title, description)
+                        hideBtnAbsent()
+                        showEveningText()
+                    }
+
+
+                }
+
+                // DI LUAR JAM ABSEN
+                else -> {
+
+                    setAbsentText()
+                    hideBtnAbsent()
+                    hideEveningText()
+
+                }
+            }
+        }
+    }
+
+    private fun setAbsentText(title: String = "Sabar Dulu Ya", description: String = "Absen masuk hanya bisa dilakukan pada pukul 07.00-09.00 WIB.") {
+        binding.absentTitle.text = title
+        binding.absentDescription.text = description
+    }
+
+    private fun hideBtnAbsent() {
+        binding.btnAbsent.visibility = View.GONE
+    }
+
+    private fun showBtnAbsent(label: String, bgColor: Int = R.color.status_bid) {
+        binding.btnAbsent.visibility = View.VISIBLE
+        binding.btnAbsent.text = label
+        binding.btnAbsent.backgroundTintList = ContextCompat.getColorStateList(
+            this,
+            bgColor
+        )
+    }
+
+    private fun hideEveningText() {
+        binding.absenEveningInfoText.visibility = View.GONE
+    }
+
+    private fun showEveningText() {
+        binding.absenEveningInfoText.visibility = View.VISIBLE
+    }
+
+    private fun dateNowFromWorldTime(): Date {
+        val calendar = Calendar.getInstance()
+
+        val hour = currentTime / 3600
+        val minute = (currentTime % 3600) / 60
+        val second = currentTime % 60
+
+        calendar.set(Calendar.HOUR_OF_DAY, hour)
+        calendar.set(Calendar.MINUTE, minute)
+        calendar.set(Calendar.SECOND, second)
+        calendar.set(Calendar.MILLISECOND, 0)
+
+        return Date(calendar.timeInMillis)
     }
 
     fun requestNotificationPermission() {
@@ -1444,9 +1647,7 @@ class HomeSalesActivity : AppCompatActivity() {
 
                             lifecycleScope.launch {
 
-                                val calendar = checkTimeFromInternet(this@HomeSalesActivity)
-                                    ?: Calendar.getInstance()
-                                val date = Date(calendar.timeInMillis)
+                                val date = dateNowFromWorldTime()
 
                                 val formatter =
                                     SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault())
@@ -1463,19 +1664,13 @@ class HomeSalesActivity : AppCompatActivity() {
                                     checkAbsent()
                                 } else if (!isAbsentEveningNow) {
 
-                                    val currentHour = calendar?.get(Calendar.HOUR_OF_DAY)
+                                    if (currentTime >= eveningStart) {
+                                        userChild.child("eveningDateTime")
+                                            .setValue(absentDateTime)
+                                        userChild.child("lastSeen").setValue(absentDateTime)
 
-                                    if (currentHour != null) {
-                                        if (currentHour >= 16) {
-                                            userChild.child("eveningDateTime")
-                                                .setValue(absentDateTime)
-                                            userChild.child("lastSeen").setValue(absentDateTime)
-
-                                            sessionManager.absentDateTime(absentDateTime)
-                                            checkAbsent()
-                                        } else {
-                                            if (absentProgressBar!!.isShowing()) absentProgressBar?.dismiss()
-                                        }
+                                        sessionManager.absentDateTime(absentDateTime)
+                                        checkAbsent()
                                     } else {
                                         if (absentProgressBar!!.isShowing()) absentProgressBar?.dismiss()
                                     }
@@ -1589,7 +1784,7 @@ class HomeSalesActivity : AppCompatActivity() {
                 this@HomeSalesActivity,
                 "Failed HomeSalesActivity on checkAbsent(). Catch: ${e.message}"
             )
-            lockMenuItem(false)
+            lockMenuItem(true)
             handleMessage(
                 this,
                 "Home Sales Failed",
@@ -1604,17 +1799,9 @@ class HomeSalesActivity : AppCompatActivity() {
 
         when {
             isAbsentMorningNow && !isAbsentEveningNow -> {
-                val now = System.currentTimeMillis()
 
-                val calendar = Calendar.getInstance().apply {
-                    timeInMillis = now
-                    set(Calendar.HOUR_OF_DAY, 22)
-                    set(Calendar.MINUTE, 0)
-                    set(Calendar.SECOND, 0)
-                    set(Calendar.MILLISECOND, 0)
-                }
-
-                if (calendar.timeInMillis > now && isPermissionGranted) {
+                val maxWorkingTime = (22 * 3600)
+                if (maxWorkingTime > currentTime && isPermissionGranted) {
                     // Jika sudah lebih dari jam 10 malam tracking otomatis dimatikan
                     startTrackingService(userId, userDistributorId)
                 }
@@ -1638,48 +1825,6 @@ class HomeSalesActivity : AppCompatActivity() {
         isLocked = state || !isPermissionGranted
 
         setListMenu()
-
-        if (isAbsentMorningNow && isAbsentEveningNow) {
-
-            binding.absentTitle.text = getString(R.string.absen_pulang_sudah_tercatat)
-            binding.absentDescription.text = getString(R.string.terima_kasih_atas_kinerja_hari_ini)
-
-            binding.btnAbsent.visibility = View.GONE
-        } else {
-
-            binding.absentTitle.text = if (isLocked) {
-                getString(R.string.yuk_catat_kehadiranmu_hari_ini)
-            } else {
-                getString(R.string.kehadiranmu_telah_tercatat)
-            }
-            binding.absentDescription.text = if (isLocked) {
-                getString(R.string.absenmu_penting)
-            } else {
-                getString(R.string.terimakasih_sudah_mencatat_kehadiran_hari_ini_without_clock)
-            }
-
-            binding.btnAbsent.backgroundTintList = ContextCompat.getColorStateList(
-                this,
-                if (isLocked) R.color.status_bid else R.color.red_claret
-            )
-            binding.btnAbsent.text =
-                if (isLocked) getString(R.string.absen_sekarang) else getString(R.string.pulang_sekarang)
-
-            lifecycleScope.launch {
-                val calendar =
-                    checkTimeFromInternet(this@HomeSalesActivity) ?: Calendar.getInstance()
-                val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
-
-                if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
-                    binding.btnAbsent.visibility = View.GONE
-                    binding.absenEveningInfoText.visibility = View.VISIBLE
-                } else {
-                    binding.btnAbsent.visibility = View.VISIBLE
-                    binding.absenEveningInfoText.visibility = View.GONE
-                }
-            }
-        }
-
     }
 
     private fun showDialogLockedFeature() {
@@ -2152,6 +2297,7 @@ class HomeSalesActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
+        getInternetTime()
         requestNotificationPermission()
         checkLocationPermission()
         super.onResume()
@@ -2159,6 +2305,7 @@ class HomeSalesActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        handler.removeCallbacks { runnable }
         if (progressBar != null && progressBar!!.isShowing()) {
             progressBar?.dismiss()
         }

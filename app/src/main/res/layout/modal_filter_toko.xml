@@ -20,6 +20,40 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <!-- Status Toko Valid -->
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/filterValidStatusesContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="16dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_valid_status_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Filter Status Validasi"
+                    android:theme="@style/Theme.TopMortarSales.BaseTextTitle"
+                    android:layout_marginBottom="8dp"
+                    android:textSize="16sp"
+                    android:textStyle="bold"/>
+
+                <com.google.android.flexbox.FlexboxLayout
+                    android:id="@+id/flexboxValidStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="-2dp"
+                    android:layout_marginBottom="-2dp"
+                    app:flexWrap="wrap"
+                    app:flexDirection="row"
+                    app:justifyContent="flex_start"
+                    app:alignItems="flex_start">
+
+                </com.google.android.flexbox.FlexboxLayout>
+
+            </LinearLayout>
 
             <!-- Status Toko -->
             <LinearLayout
