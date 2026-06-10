@@ -26,6 +26,7 @@ import android.provider.MediaStore
 import android.provider.Settings
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
@@ -560,10 +561,18 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                                 details = arrayListOf()
                             }
                             val builder = AlertDialog.Builder(this@DetailSuratJalanActivity)
-                            builder.setTitle("Peringatan!")
+                                .setTitle("Peringatan!")
                                 .setMessage(msgCanClosing)
                                 .setPositiveButton("Tutup") { dialog, _ -> dialog.dismiss() }
+                                .create()
                             builder.show()
+                            builder.window?.apply {
+                                setGravity(Gravity.BOTTOM)
+                                setLayout(
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                    ViewGroup.LayoutParams.WRAP_CONTENT
+                                )
+                            }
                         }
 
                         setRecyclerView(details)
