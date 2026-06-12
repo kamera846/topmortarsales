@@ -105,6 +105,11 @@
 
         <menu>
             <item
+                android:id="@+id/nav_manual_absent"
+                android:title="Absen Manual"
+                android:icon="@drawable/absent_manual_black"
+                android:visible="false"/>
+            <item
                 android:id="@+id/nav_logout"
                 android:icon="@drawable/logout_black"
                 android:title="Logout"/>

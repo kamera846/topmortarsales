@@ -122,6 +122,7 @@ import com.topmortar.topmortarsales.view.rencanaVisits.RencanaVisitPenagihanActi
 import com.topmortar.topmortarsales.view.skill.ManageSkillActivity
 import com.topmortar.topmortarsales.view.tukang.ListTukangActivity
 import com.topmortar.topmortarsales.view.user.ManageUserActivity
+import com.topmortar.topmortarsales.view.user.UserAbsentManualActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -265,6 +266,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         val rencanaVisit = popupMenu.menu.findItem(R.id.rencana_visit)
         val rencanaVisitPenagihan = popupMenu.menu.findItem(R.id.rencana_visit_penagihan)
         val cityStore = popupMenu.menu.findItem(R.id.nav_city_store)
+        val manualAbsent = popupMenu.menu.findItem(R.id.nav_manual_absent)
 
         searchItem.isVisible = false
         syncNowItem.isVisible = false
@@ -284,6 +286,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             rencanaVisitGroup.isVisible = true
             rencanaVisit.isVisible = true
             rencanaVisitPenagihan.isVisible = true
+            manualAbsent.isVisible = true
         }
 
         if (sessionManager.userKind() != USER_KIND_SALES) {
@@ -364,6 +367,9 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             }
             R.id.nav_delivery -> {
                 startActivity(Intent(this@MainActivity, DeliveryActivity::class.java))
+            }
+            R.id.nav_manual_absent -> {
+                startActivity(Intent(this@MainActivity, UserAbsentManualActivity::class.java))
             }
             R.id.nav_logout -> {
                 logoutConfirmation()

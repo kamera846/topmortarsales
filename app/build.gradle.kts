@@ -61,6 +61,7 @@ android {
 
 dependencies {
 
+    implementation(libs.androidx.activity.ktx)
     // Default
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

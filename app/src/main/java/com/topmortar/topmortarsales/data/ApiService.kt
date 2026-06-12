@@ -973,4 +973,16 @@ interface ApiService {
 
     @GET("counterVisit.php")
     suspend fun getCounterVisit(@Query("id_user") idUser: String): Response<ResponseObject.ResponseCounterVisit>
+
+    @Multipart
+    @POST("absenManual.php")
+    suspend fun absentManualInBasecamp(
+        @Part("id_gudang") idGudang: RequestBody,
+        @Part("id_user") idUser: RequestBody,
+        @Part("distance_visit") distanceVisit: RequestBody? = createPartFromString("0"),
+        @Part("laporan_visit") laporanVisit: RequestBody? = createPartFromString("Absen masuk\n•by system•"),
+        @Part("source") source: RequestBody = createPartFromString("absen_in"),
+        @Part("type_renvi") renviSource: RequestBody = createPartFromString(NORMAL_REPORT),
+        @Part("level_user") levelUser: RequestBody
+    ): Response<ResponseReportVisit>
 }
