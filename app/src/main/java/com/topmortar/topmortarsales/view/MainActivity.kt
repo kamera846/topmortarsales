@@ -102,7 +102,6 @@ import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.commons.utils.inAppUpdateHelper
-import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityMainBinding
 import com.topmortar.topmortarsales.modal.FilterTokoModal
@@ -584,11 +583,10 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             lifecycleScope.launch {
                 try {
 
-                    val apiService: ApiService = HttpClient.create()
                     val response = when (userKind) {
-                        USER_KIND_ADMIN, USER_KIND_PENAGIHAN, USER_KIND_MARKETING -> apiService.getContactsByDistributor(distributorID = userDistributorId)
-                        USER_KIND_COURIER -> apiService.getCourierStore(processNumber = "1", courierId = userId)
-                        else -> apiService.getContacts(cityId = userCity, distributorID = userDistributorId)
+                        USER_KIND_ADMIN, USER_KIND_PENAGIHAN, USER_KIND_MARKETING -> HttpClient.apiService.getContactsByDistributor(distributorID = userDistributorId)
+                        USER_KIND_COURIER -> HttpClient.apiService.getCourierStore(processNumber = "1", courierId = userId)
+                        else -> HttpClient.apiService.getContacts(cityId = userCity, distributorID = userDistributorId)
                     }
 
                     when (response.status) {
@@ -930,9 +928,8 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
                 val response = when (userKind) {
-                    USER_KIND_COURIER -> apiService.getCourierStore(processNumber = "1", courierId = userId)
+                    USER_KIND_COURIER -> HttpClient.apiService.getCourierStore(processNumber = "1", courierId = userId)
                     else -> {
                         val validStatusFilter = selectedValidStatusID.lowercase(Locale.ROOT).let {
                             when (it) {
@@ -952,22 +949,22 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                         else userCity
 
                         if (isContactXSource) {
-                            apiService.getContactXs(cityId = userCity, userId = userId)
+                            HttpClient.apiService.getContactXs(cityId = userCity, userId = userId)
                         } else if (cityID != null && statusFilter != "-1" && validStatusFilter != "-1") {
-                            apiService.getContacts(cityId = cityID, status = statusFilter, distributorID = userDistributorId, validationStatus = validStatusFilter)
+                            HttpClient.apiService.getContacts(cityId = cityID, status = statusFilter, distributorID = userDistributorId, validationStatus = validStatusFilter)
                         } else if (statusFilter != "-1" && validStatusFilter != "-1") {
-                            apiService.getContactsByStatusAndValidationStatus(status = statusFilter, validationStatus = validStatusFilter, distributorID = userDistributorId)
+                            HttpClient.apiService.getContactsByStatusAndValidationStatus(status = statusFilter, validationStatus = validStatusFilter, distributorID = userDistributorId)
                         } else if (cityID != null && statusFilter != "-1") {
-                            apiService.getContacts(cityId = cityID, status = statusFilter, distributorID = userDistributorId)
+                            HttpClient.apiService.getContacts(cityId = cityID, status = statusFilter, distributorID = userDistributorId)
                         } else if (cityID != null && validStatusFilter != "-1") {
-                            apiService.getContactsByCityAndValidationStatus(cityId = cityID, validationStatus = validStatusFilter, distributorID = userDistributorId)
+                            HttpClient.apiService.getContactsByCityAndValidationStatus(cityId = cityID, validationStatus = validStatusFilter, distributorID = userDistributorId)
                         } else if (cityID != null) {
-                            apiService.getContacts(cityId = cityID, distributorID = userDistributorId)
+                            HttpClient.apiService.getContacts(cityId = cityID, distributorID = userDistributorId)
                         } else if (statusFilter != "-1" ) {
-                            apiService.getContactsByStatus(status = statusFilter, distributorID = userDistributorId)
+                            HttpClient.apiService.getContactsByStatus(status = statusFilter, distributorID = userDistributorId)
                         } else if (validStatusFilter != "-1" ) {
-                            apiService.getContactsByValidationStatus(validationStatus = validStatusFilter, distributorID = userDistributorId)
-                        } else apiService.getContactsByDistributor(distributorID = userDistributorId)
+                            HttpClient.apiService.getContactsByValidationStatus(validationStatus = validStatusFilter, distributorID = userDistributorId)
+                        } else HttpClient.apiService.getContactsByDistributor(distributorID = userDistributorId)
                     }
                 }
 
@@ -1031,8 +1028,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
-                val response = apiService.getContacts(cityId = cityID, distributorID = userDistributorId)
+                val response = HttpClient.apiService.getContacts(cityId = cityID, distributorID = userDistributorId)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -1075,8 +1071,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
-                val response = apiService.getCities(distributorID = userDistributorId)
+                val response = HttpClient.apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -1170,8 +1165,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
-                val response = apiService.detailUser(userId = userId)
+                val response = HttpClient.apiService.detailUser(userId = userId)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -1239,7 +1233,6 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 val cityID = if (userKind == USER_KIND_ADMIN) selectedCitiesID?.id_city
                 else userCity
 
-                val apiService: ApiService = HttpClient.create()
 //                val response = if (isContactXSource) {
 //                    apiService.searchContactXs(cityId = userCity, userId = userId, searchKey = key)
 //                } else if (cityID != null && statusFilter != "-1") {
@@ -1251,22 +1244,22 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 //                } else apiService.searchContact(key = rbSearchKey, distributorID = createPartFromString(userDistributorId))
 
                 val response = if (isContactXSource) {
-                    apiService.searchContactXs(searchKey = key, cityId = userCity, userId = userId)
+                    HttpClient.apiService.searchContactXs(searchKey = key, cityId = userCity, userId = userId)
                 } else if (cityID != null && statusFilter != "-1" && validStatusFilter != "-1") {
-                    apiService.searchContact(key = rbSearchKey, cityId = createPartFromString(cityID), status = createPartFromString(statusFilter), distributorID = createPartFromString(userDistributorId), validationStatus = createPartFromString(validStatusFilter))
+                    HttpClient.apiService.searchContact(key = rbSearchKey, cityId = createPartFromString(cityID), status = createPartFromString(statusFilter), distributorID = createPartFromString(userDistributorId), validationStatus = createPartFromString(validStatusFilter))
                 } else if (statusFilter != "-1" && validStatusFilter != "-1") {
-                    apiService.searchContactByStatusAndValidationStatus(key = rbSearchKey, status = createPartFromString(statusFilter), validationStatus = createPartFromString(validStatusFilter), distributorID = createPartFromString(userDistributorId))
+                    HttpClient.apiService.searchContactByStatusAndValidationStatus(key = rbSearchKey, status = createPartFromString(statusFilter), validationStatus = createPartFromString(validStatusFilter), distributorID = createPartFromString(userDistributorId))
                 } else if (cityID != null && statusFilter != "-1") {
-                    apiService.searchContact(key = rbSearchKey, cityId = createPartFromString(cityID), status = createPartFromString(statusFilter), distributorID = createPartFromString(userDistributorId))
+                    HttpClient.apiService.searchContact(key = rbSearchKey, cityId = createPartFromString(cityID), status = createPartFromString(statusFilter), distributorID = createPartFromString(userDistributorId))
                 } else if (cityID != null && validStatusFilter != "-1") {
-                    apiService.searchContactByCityAndValidationStatus(key = rbSearchKey, cityId = createPartFromString(cityID), validationStatus = createPartFromString(validStatusFilter), distributorID = createPartFromString(userDistributorId))
+                    HttpClient.apiService.searchContactByCityAndValidationStatus(key = rbSearchKey, cityId = createPartFromString(cityID), validationStatus = createPartFromString(validStatusFilter), distributorID = createPartFromString(userDistributorId))
                 } else if (cityID != null) {
-                    apiService.searchContact(key = rbSearchKey, cityId = createPartFromString(cityID), distributorID = createPartFromString(userDistributorId))
+                    HttpClient.apiService.searchContact(key = rbSearchKey, cityId = createPartFromString(cityID), distributorID = createPartFromString(userDistributorId))
                 } else if (statusFilter != "-1" ) {
-                    apiService.searchContactByStatus(key = rbSearchKey, status = createPartFromString(statusFilter), distributorID = createPartFromString(userDistributorId))
+                    HttpClient.apiService.searchContactByStatus(key = rbSearchKey, status = createPartFromString(statusFilter), distributorID = createPartFromString(userDistributorId))
                 } else if (validStatusFilter != "-1" ) {
-                    apiService.searchContactByValidationStatus(key = rbSearchKey, validationStatus = createPartFromString(validStatusFilter), distributorID = createPartFromString(userDistributorId))
-                } else apiService.searchContact(key = rbSearchKey, distributorID = createPartFromString(userDistributorId))
+                    HttpClient.apiService.searchContactByValidationStatus(key = rbSearchKey, validationStatus = createPartFromString(validStatusFilter), distributorID = createPartFromString(userDistributorId))
+                } else HttpClient.apiService.searchContact(key = rbSearchKey, distributorID = createPartFromString(userDistributorId))
 
                 if (response.isSuccessful) {
 

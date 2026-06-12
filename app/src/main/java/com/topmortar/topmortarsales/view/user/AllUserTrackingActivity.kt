@@ -196,7 +196,7 @@ class AllUserTrackingActivity : AppCompatActivity() {
 
         try {
             lifecycleScope.launch {
-                val apiService = HttpClient.create()
+                val apiService = HttpClient.apiService
                 val response = apiService.getUsers(distributorID = userDistributorId.toString())
                 when (response.status) {
                     RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {

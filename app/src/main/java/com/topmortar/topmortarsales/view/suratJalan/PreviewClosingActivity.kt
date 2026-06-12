@@ -186,7 +186,7 @@ class PreviewClosingActivity : AppCompatActivity() {
         endLat: String,
         endLng: String
     ): Pair<Boolean, String> {
-        val apiService: ApiService = HttpClient.create()
+        val apiService: ApiService = HttpClient.apiService
         val startDatetime = store.startDatetime.let {
             if (it.isEmpty() || it == "-") {
                 "0000-00-00"
@@ -259,7 +259,7 @@ class PreviewClosingActivity : AppCompatActivity() {
 
     private suspend fun createInvoice(): Pair<Boolean, String> {
 
-        val apiService: ApiService = HttpClient.create()
+        val apiService: ApiService = HttpClient.apiService
         val response = idAppOrder.let {
             if (it != "0") {
                 apiService.addInvoiceSeller(invoiceId = createPartFromString(invoiceId!!))

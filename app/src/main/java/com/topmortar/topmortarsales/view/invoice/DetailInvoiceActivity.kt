@@ -82,7 +82,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
         binding = ActivityDetailInvoiceBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        apiService = HttpClient.create()
+        apiService = HttpClient.apiService
 
         if (CustomUtility(this).isUserWithOnlineStatus()) {
             CustomUtility(this).setUserStatusOnline(

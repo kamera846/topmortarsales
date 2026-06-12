@@ -254,7 +254,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                 val rbCurrentName = createPartFromString(currentName)
                 val rbTermin = createPartFromString(termin)
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = message.let {
                     if (it.isEmpty()) {
                         apiService.insertContact(

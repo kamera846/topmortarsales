@@ -113,7 +113,7 @@ class AddTukangActivity : AppCompatActivity() {
         applyMyEdgeToEdge(isPrimary = false)
 
         binding = ActivityAddTukangBinding.inflate(layoutInflater)
-        apiService = HttpClient.create()
+        apiService = HttpClient.apiService
         progressBar = CustomProgressBar(this)
         progressBar.setMessage(getString(R.string.txt_loading))
         progressBar.setCancelable(false)
@@ -178,7 +178,7 @@ class AddTukangActivity : AppCompatActivity() {
                 val rbUserId = createPartFromString(userId)
                 val rbCurrentName = createPartFromString(currentName)
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = message.let {
                     if (it.isEmpty()) {
                         apiService.insertTukang(

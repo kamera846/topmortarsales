@@ -127,7 +127,7 @@ class UsersReportActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCl
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.listUsersReport(idUser = userID, idContact = iContactID)
 
                 when (response.status) {

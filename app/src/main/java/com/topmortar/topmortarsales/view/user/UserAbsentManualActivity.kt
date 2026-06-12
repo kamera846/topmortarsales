@@ -4,10 +4,20 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.topmortar.topmortarsales.R
-import com.topmortar.topmortarsales.commons.*
-import com.topmortar.topmortarsales.commons.utils.*
+import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_ABSENT
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
+import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
 import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
-import com.topmortar.topmortarsales.data.ApiService
+import com.topmortar.topmortarsales.commons.utils.SessionManager
+import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
+import com.topmortar.topmortarsales.commons.utils.createPartFromString
+import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityUserAbsentManualBinding
 import com.topmortar.topmortarsales.modal.SearchModal
@@ -99,8 +109,7 @@ class UserAbsentManualActivity : AppCompatActivity() {
     }
 
     private suspend fun fetchUsers() {
-        val apiService: ApiService = HttpClient.create()
-        val response = apiService.getUsers(distributorID = distributorId)
+        val response = HttpClient.apiService.getUsers(distributorID = distributorId)
 
         when (response.status) {
 
@@ -151,8 +160,7 @@ class UserAbsentManualActivity : AppCompatActivity() {
     }
 
     private suspend fun fetchBasecamps() {
-        val apiService: ApiService = HttpClient.create()
-        val response = apiService.getListBaseCamp(distributorID = distributorId)
+        val response = HttpClient.apiService.getListBaseCamp(distributorID = distributorId)
 
         when (response.status) {
 
@@ -302,8 +310,7 @@ class UserAbsentManualActivity : AppCompatActivity() {
 
                 val selectedUser =
                     userList.find { it.id_user == selectedUserItem?.id }
-                val apiService: ApiService = HttpClient.create()
-                val response = apiService.absentManualInBasecamp(
+                val response = HttpClient.apiService.absentManualInBasecamp(
                         idGudang = createPartFromString(
                             selectedBasecampItem?.id ?: "-1"
                         ),

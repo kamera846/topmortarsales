@@ -109,7 +109,7 @@ class ManageGudangActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = when (userKind) {
                     USER_KIND_ADMIN -> {
                         if (selectedCity != null) apiService.getListGudang(cityId = selectedCity?.id!!, distributorID = userDistributorId)
@@ -257,7 +257,7 @@ class ManageGudangActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {

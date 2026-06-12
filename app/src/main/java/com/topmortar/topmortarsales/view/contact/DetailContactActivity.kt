@@ -132,7 +132,6 @@ import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
-import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityDetailContactBinding
 import com.topmortar.topmortarsales.databinding.ModalEditHobiBinding
@@ -168,7 +167,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     PingUtility.PingResultInterface {
 
     private lateinit var progressBar: CustomProgressBar
-    private lateinit var apiService: ApiService
     private lateinit var sessionManager: SessionManager
     private val userKind get() = sessionManager.userKind().toString()
     private val userID get() = sessionManager.userID().toString()
@@ -397,8 +395,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         progressBar = CustomProgressBar(this)
         progressBar.setCancelable(false)
         progressBar.setMessage(getString(R.string.txt_loading))
-
-        apiService = HttpClient.create()
 
         if (CustomUtility(this).isUserWithOnlineStatus()) {
             CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-003", userID)
@@ -1283,7 +1279,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbJamBayar = createPartFromString(pJamBayar)
                 val rbPromoId = createPartFromString(pPromoID!!)
 
-                val response = apiService.editContact(
+                val response = HttpClient.apiService.editContact(
                     id = rbId,
                     phoneCategory1 = rbPhoneCategory1,
                     phone = rbPhone,
@@ -1460,7 +1456,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         lifecycleScope.launch {
             try {
 
-                val response = contactId?.let { apiService.getContactDetail(contactId = it) }
+                val response = contactId?.let { HttpClient.apiService.getContactDetail(contactId = it) }
 
                 if (response!!.isSuccessful) {
 
@@ -1538,7 +1534,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         lifecycleScope.launch {
             try {
 
-                val response = contactId?.let { apiService.getContactDetail(contactId = it) }
+                val response = contactId?.let { HttpClient.apiService.getContactDetail(contactId = it) }
 
                 if (response!!.isSuccessful) {
 
@@ -2058,7 +2054,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         lifecycleScope.launch {
             try {
 
-                val response = apiService.getContactSales(idContact = contactId ?: "0")
+                val response = HttpClient.apiService.getContactSales(idContact = contactId ?: "0")
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -2112,7 +2108,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         lifecycleScope.launch {
             try {
 
-                val response = apiService.getCities(distributorID = userDistributorId)
+                val response = HttpClient.apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -2182,7 +2178,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         lifecycleScope.launch {
             try {
 
-                val response = apiService.getPromo()
+                val response = HttpClient.apiService.getPromo()
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {

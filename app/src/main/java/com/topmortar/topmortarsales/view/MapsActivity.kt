@@ -125,7 +125,6 @@ import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.handleMessage
-import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityMapsBinding
 import com.topmortar.topmortarsales.modal.FilterTokoModal
@@ -1269,8 +1268,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
-                val response = apiService.getCities(distributorID = userDistributorId)
+                val response = HttpClient.apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -1384,10 +1382,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
                 val response = when (userKind) {
-                    USER_KIND_ADMIN -> apiService.getListGudang(distributorID = userDistributorId)
-                    else -> apiService.getListGudang(cityId = userCity, distributorID = userDistributorId)
+                    USER_KIND_ADMIN -> HttpClient.apiService.getListGudang(distributorID = userDistributorId)
+                    else -> HttpClient.apiService.getListGudang(cityId = userCity, distributorID = userDistributorId)
                 }
 
                 when (response.status) {
@@ -1910,8 +1907,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
-                val response = apiService.getDetailDelivery(idDelivery = deliveryID.toString(), distributorID = userDistributorId)
+                val response = HttpClient.apiService.getDetailDelivery(idDelivery = deliveryID.toString(), distributorID = userDistributorId)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {

@@ -138,7 +138,7 @@ class ClosingStoreFragment : Fragment() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
 //                val response = apiService.getCourierStoreClosing(idCity = userCityID, distributorID = userDistributorID)
                 val response = apiService.getCourierStore(processNumber = "1", courierId = userID)
 

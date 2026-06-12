@@ -163,7 +163,7 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = when (userKind) {
                     USER_KIND_ADMIN -> apiService.getUsers(distributorID = userDistributorId)
                     else -> apiService.getUsers(cityId = userCityID, distributorID = userDistributorId)

@@ -167,7 +167,7 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getContactsUserBid(userId = userIDParam!!.ifEmpty { userID })
 //                val response = when (userKind) {
 //                    USER_KIND_ADMIN -> {
@@ -231,7 +231,7 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
                 val searchCity = createPartFromString(userCityParam!!.ifEmpty { userCity })
                 val distributorId = createPartFromString(userDistributorId)
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
                     if (selectedCity != null ) {
                         if (selectedCity!!.id != "-1") {
@@ -302,7 +302,7 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {

@@ -111,7 +111,7 @@ class BasecampFragment : Fragment() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 var response = apiService.getListBaseCamp(distributorID = userDistributorid)
                 if (selectedCity != null) response = apiService.getListBaseCamp(distributorID = userDistributorid, cityId = selectedCity!!.id!!)
 
@@ -288,7 +288,7 @@ class BasecampFragment : Fragment() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getCities(distributorID = userDistributorid)
 
                 when (response.status) {

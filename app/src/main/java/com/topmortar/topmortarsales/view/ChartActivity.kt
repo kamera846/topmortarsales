@@ -21,7 +21,6 @@ import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailed
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.handleMessage
-import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityChartBinding
 import com.topmortar.topmortarsales.modal.SearchModal
@@ -44,7 +43,6 @@ class ChartActivity : AppCompatActivity() {
     private var _binding: ActivityChartBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var apiService: ApiService
     private lateinit var searchModal: SearchModal
     private var citiesResults: ArrayList<CityModel>? = null
     private var listResponse: ArrayList<ActiveStoreModel>? = null
@@ -62,8 +60,6 @@ class ChartActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
         _binding = ActivityChartBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        apiService = HttpClient.create()
 
         binding.titleBarDark.tvTitleBar.text = "Grafik Status Toko"
         binding.titleBarDark.icBack.setOnClickListener { finish() }
@@ -109,12 +105,12 @@ class ChartActivity : AppCompatActivity() {
             try {
                 val response = when (selectedCity) {
                     null -> {
-                        if (userKind == USER_KIND_ADMIN) apiService.getActiveStore(idDistributor = userDistributorId ?: "")
+                        if (userKind == USER_KIND_ADMIN) HttpClient.apiService.getActiveStore(idDistributor = userDistributorId ?: "")
                         else {
                             binding.chartDesc.text = "Menampilkan data di kota $userCityName"
-                            apiService.getActiveStore(idCity = userCity ?: "", idDistributor = userDistributorId ?: "")
+                            HttpClient.apiService.getActiveStore(idCity = userCity ?: "", idDistributor = userDistributorId ?: "")
                         }
-                    } else -> apiService.getActiveStore(idCity = selectedCity?.id!!, idDistributor = userDistributorId ?: "")
+                    } else -> HttpClient.apiService.getActiveStore(idCity = selectedCity?.id!!, idDistributor = userDistributorId ?: "")
                 }
                 when(response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -296,7 +292,7 @@ class ChartActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val response = apiService.getCities(distributorID = userDistributorId ?: "")
+                val response = HttpClient.apiService.getCities(distributorID = userDistributorId ?: "")
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {

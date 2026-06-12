@@ -2,7 +2,6 @@ package com.topmortar.topmortarsales.modal
 
 import android.app.Dialog
 import android.content.Context
-import android.content.DialogInterface
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.View
@@ -161,7 +160,7 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
 //                handleMessage(context, "SUBMIT SKILL", "Name: $skillName, Code: $skillCode")
 //                return@launch
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = isEdit.let {
                     if (it) apiService.editSkill(id = createPartFromString("$skillID"), name = skillName, code = skillCode, distributorID = distributorId)
                     else apiService.addSkill(name = skillName, code = skillCode, distributorID = distributorId)

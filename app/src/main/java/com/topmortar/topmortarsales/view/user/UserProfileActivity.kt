@@ -198,7 +198,7 @@ class UserProfileActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val userId = when (isRequestSync) {
                     true -> iUserID.toString()
                     else -> sessionManager.userID().toString()
@@ -860,7 +860,7 @@ class UserProfileActivity : AppCompatActivity() {
 
                 toggleProgressiveVisitCounterLoading(true)
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getCounterVisit(iUserID ?: "-1")
 
                 if (!response.isSuccessful) {

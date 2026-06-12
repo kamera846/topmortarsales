@@ -213,7 +213,7 @@ class AddVoucherModal(private val context: Context, private val lifecycleScope: 
                 val noFisik = createPartFromString(voucher1.toString())
 
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.editNoFisikVoucher(
                     idVoucher = idVoucher,
                     idUser = idUser,

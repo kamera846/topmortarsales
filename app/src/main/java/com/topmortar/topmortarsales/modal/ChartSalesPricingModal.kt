@@ -2,20 +2,14 @@ package com.topmortar.topmortarsales.modal
 
 import android.app.Dialog
 import android.content.Context
-import android.graphics.Color
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.WindowManager
 import androidx.core.content.ContextCompat
-import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.BarData
-import com.github.mikephil.charting.data.BarDataSet
-import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
-import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.utils.CurrencyFormat
 import com.topmortar.topmortarsales.commons.utils.CustomUtility

@@ -132,7 +132,7 @@ class JatemPenagihan1Fragment : Fragment() {
         userCity = sessionManager.userCityID().toString()
         userID = sessionManager.userID().toString()
 
-        apiService = HttpClient.create()
+        apiService = HttpClient.apiService
 
         if (userKind == USER_KIND_ADMIN) getCities()
         else getList()
@@ -323,7 +323,7 @@ class JatemPenagihan1Fragment : Fragment() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {

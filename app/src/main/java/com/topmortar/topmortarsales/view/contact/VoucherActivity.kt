@@ -90,7 +90,7 @@ class VoucherActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
         setContentView(binding.root)
 
-        apiService = HttpClient.create()
+        apiService = HttpClient.apiService
 
         idContact = intent.getStringExtra(CONST_CONTACT_ID).toString()
         contactName = intent.getStringExtra(CONST_NAME).toString()

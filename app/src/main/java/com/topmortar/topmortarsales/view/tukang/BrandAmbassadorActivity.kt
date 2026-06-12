@@ -228,7 +228,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
 
-                    val apiService: ApiService = HttpClient.create()
+                    val apiService: ApiService = HttpClient.apiService
                     val response = apiService.getCourierStore(processNumber = "1", courierId = userId)
 
                     when (response.status) {
@@ -305,7 +305,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
 
-                    val apiService: ApiService = HttpClient.create()
+                    val apiService: ApiService = HttpClient.apiService
                     val response = apiService.getListBaseCamp(cityId = userCity, distributorID = userDistributorId)
 
                     when (response.status) {
@@ -424,7 +424,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.detailUser(userId = userId)
 
                 when (response.status) {

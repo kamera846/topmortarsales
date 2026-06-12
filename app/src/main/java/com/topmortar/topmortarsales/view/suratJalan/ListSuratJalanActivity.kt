@@ -164,7 +164,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
         etSearchBox = findViewById(R.id.et_search_box)
 
 
-        apiService = HttpClient.create()
+        apiService = HttpClient.apiService
 
         // Set Title Bar
         icBack.visibility = View.VISIBLE

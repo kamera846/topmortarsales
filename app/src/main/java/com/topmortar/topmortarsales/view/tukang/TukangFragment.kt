@@ -121,7 +121,7 @@ class TukangFragment : Fragment() {
         binding.eFabOptionAdd.setOnClickListener { navigateAddTukang() }
         binding.eFabOptionScan.setOnClickListener { checkPermissionCamera(requireActivity()) }
 
-        apiService = HttpClient.create()
+        apiService = HttpClient.apiService
 
         if (userKind == USER_KIND_ADMIN) getCities()
         else getList()

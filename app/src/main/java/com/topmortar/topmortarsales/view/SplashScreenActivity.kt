@@ -75,7 +75,6 @@ import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.commons.utils.inAppUpdateHelper
-import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.model.DeviceModel
 import com.topmortar.topmortarsales.view.courier.HomeCourierActivity
@@ -457,8 +456,7 @@ class SplashScreenActivity : AppCompatActivity() {
                 val rbUsername = createPartFromString("${ etUsername.text }")
                 val rbPassword = createPartFromString("${ etPassword.text }")
 
-                val apiService: ApiService = HttpClient.create()
-                val response = apiService.auth(rbUsername, rbPassword)
+                val response = HttpClient.apiService.auth(rbUsername, rbPassword)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -633,8 +631,7 @@ class SplashScreenActivity : AppCompatActivity() {
             try {
 
                 val rbUsername = createPartFromString(usernameForgot)
-                val apiService = HttpClient.create()
-                val response = apiService.requestOtp(rbUsername)
+                val response = HttpClient.apiService.requestOtp(rbUsername)
 
                 if (response.isSuccessful) {
 
@@ -712,8 +709,7 @@ class SplashScreenActivity : AppCompatActivity() {
             try {
 
                 val rbOtp = createPartFromString(otpCode)
-                val apiService = HttpClient.create()
-                val response = apiService.verifyOtp(rbOtp)
+                val response = HttpClient.apiService.verifyOtp(rbOtp)
 
                 if (response.isSuccessful) {
 
@@ -781,8 +777,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
                 val rbUserID = createPartFromString(userID)
                 val rbPassword = createPartFromString(password)
-                val apiService = HttpClient.create()
-                val response = apiService.updatePassword(rbUserID, rbPassword)
+                val response = HttpClient.apiService.updatePassword(rbUserID, rbPassword)
 
                 if (response.isSuccessful) {
 
@@ -1058,8 +1053,7 @@ class SplashScreenActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
-                val response = apiService.detailUser(userId = userId)
+                val response = HttpClient.apiService.detailUser(userId = userId)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {

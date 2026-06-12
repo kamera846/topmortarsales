@@ -222,7 +222,7 @@ class FormGudangActivity : AppCompatActivity() {
                 val rbMapsUrl = createPartFromString(mapsUrl)
                 val rbIdGudang = createPartFromString(idGudang)
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = if (isEdit) {
                     if (phone.isEmpty()) {
                         apiService.editGudang(
@@ -325,7 +325,7 @@ class FormGudangActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {

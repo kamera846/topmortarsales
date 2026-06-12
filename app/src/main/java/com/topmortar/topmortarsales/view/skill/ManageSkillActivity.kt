@@ -121,7 +121,7 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getSkills(distributorID = userDistributorId)
 
                 when (response.status) {

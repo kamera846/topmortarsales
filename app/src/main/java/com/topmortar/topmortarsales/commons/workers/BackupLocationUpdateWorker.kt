@@ -59,9 +59,7 @@ class BackupLocationUpdateWorker(
                 // Update Firebase
                 updateFirebase(it, sharedPref)
 
-                val apiService = HttpClient.create()
-
-                val response = apiService.savePosition(
+                val response = HttpClient.apiService.savePosition(
                     idUser = createPartFromString(userId),
                     idContact = createPartFromString(contactId),
                     type = createPartFromString("Default-Worker"),

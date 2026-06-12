@@ -147,7 +147,7 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
                 val cityCode = createPartFromString("${ etCityCode.text }")
                 val distributorID = createPartFromString(userDistributorId)
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.addCity(name = cityName, code = cityCode, distributorID = distributorID)
 
                 if (response.isSuccessful) {
@@ -248,7 +248,7 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getListDistributor()
 
                 when (response.status) {

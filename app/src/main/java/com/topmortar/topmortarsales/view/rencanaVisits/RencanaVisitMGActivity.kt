@@ -1,6 +1,5 @@
 package com.topmortar.topmortarsales.view.rencanaVisits
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle

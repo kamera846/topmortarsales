@@ -90,8 +90,7 @@ class ScannerActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                val apiService = HttpClient.create()
-                val response = apiService.assignTukang(
+                val response = HttpClient.apiService.assignTukang(
                     idUser = createPartFromString(userId ?: "-1"),
                     idMd5 = createPartFromString(scannResult.text)
                 )

@@ -525,7 +525,7 @@ class ChecklistReportActivity : AppCompatActivity() {
     private fun getAnswers() {
         loadingState(true)
 
-        val apiService = HttpClient.create()
+        val apiService = HttpClient.apiService
         lifecycleScope.launch {
             try {
                 val response = apiService.getVisitAnswers(idVisit = iVisitId ?: "")
@@ -560,7 +560,7 @@ class ChecklistReportActivity : AppCompatActivity() {
     private fun getQuestions() {
         loadingState(true)
 
-        val apiService = HttpClient.create()
+        val apiService = HttpClient.apiService
         lifecycleScope.launch {
             try {
                 val response = apiService.getVisitQuestion(idDistributor = userDistributorId)
@@ -626,7 +626,7 @@ class ChecklistReportActivity : AppCompatActivity() {
                 val rbRenviSource = createPartFromString(iRenviSource)
                 val rbInvoiceId = createPartFromString(iInvoiceId ?: "")
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.makeVisitReport(
                     idContact = rbidContact,
                     idUser = rbidUser,
@@ -741,7 +741,7 @@ class ChecklistReportActivity : AppCompatActivity() {
 
     private fun postSubmitAnswer(arrayAnswer: String) {
 
-        val apiService = HttpClient.create()
+        val apiService = HttpClient.apiService
         lifecycleScope.launch {
             try {
                 val response = apiService.postVisitQuestion(

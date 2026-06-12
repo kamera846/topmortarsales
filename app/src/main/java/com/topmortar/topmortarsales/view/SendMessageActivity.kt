@@ -41,7 +41,6 @@ import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
-import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivitySendMessageBinding
 import com.topmortar.topmortarsales.modal.SearchModal
@@ -475,10 +474,9 @@ class SendMessageActivity() : AppCompatActivity() {
                 val rbCurrentName = createPartFromString(currentName)
                 val rbTermin = createPartFromString(data.termin_payment)
 
-                val apiService: ApiService = HttpClient.create()
                 val response = when (selectedMsgType) {
                     MEDIA_MESSAGE -> {
-                        apiService.sendImgMessage(
+                        HttpClient.apiService.sendImgMessage(
                             contactId = rbContactId,
                             userId = rbUserId,
                             phone = rbPhone,
@@ -486,7 +484,7 @@ class SendMessageActivity() : AppCompatActivity() {
                             imageMessage = imagePart,
                         )
                     } else -> {
-                        apiService.sendMessage(
+                        HttpClient.apiService.sendMessage(
                             name = rbName,
                             phoneCategory = rbPhoneCategory,
                             phone = rbPhone,
@@ -607,8 +605,7 @@ class SendMessageActivity() : AppCompatActivity() {
                 val rbContactId = createPartFromString(data.id_contact)
                 val rbKontenId = createPartFromString(idKonten ?: "-1")
 
-                val apiService: ApiService = HttpClient.create()
-                val response = apiService.sendMessageKonten(
+                val response = HttpClient.apiService.sendMessageKonten(
                         idKonten = rbKontenId,
                         idContact = rbContactId
                     )
@@ -744,11 +741,10 @@ class SendMessageActivity() : AppCompatActivity() {
     }
 
     private fun getListKonten() {
-        val apiService: ApiService = HttpClient.create()
 
         try {
             lifecycleScope.launch {
-                val response = apiService.getKonten()
+                val response = HttpClient.apiService.getKonten()
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
                         listKonten = response.results

@@ -147,7 +147,7 @@ class UserHistoryAddTukangFragment : Fragment(), ContactsRecyclerViewAdapter.Ite
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getContactsUserBid(userId = userIDParam!!.ifEmpty { userID }, visit = BID_VISITED, month = selectedMonth.toString())
 //                val response = when (userKind) {
 //                    USER_KIND_ADMIN -> {
@@ -209,7 +209,7 @@ class UserHistoryAddTukangFragment : Fragment(), ContactsRecyclerViewAdapter.Ite
                 val searchCity = createPartFromString(userCityParam!!.ifEmpty { userCity })
                 val distributorId = createPartFromString(userDistributorId)
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
                     if (selectedCity != null ) {
                         if (selectedCity!!.id != "-1") {

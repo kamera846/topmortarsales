@@ -120,7 +120,7 @@ class DeliveryTargetFragment : Fragment() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
 
                 val response = when (userKind) {
                     USER_KIND_ADMIN -> {
@@ -320,7 +320,7 @@ class DeliveryTargetFragment : Fragment() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {

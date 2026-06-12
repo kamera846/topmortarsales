@@ -175,7 +175,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                 val rbDistributorId = createPartFromString(userDistributorId)
                 val rbIsNotify = createPartFromString(isNotify)
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = if (userID == null) {
                     apiService.addUser(level = rbLevel, cityId = rbCityId, phone = rbPhone, username = rbUsername, fullName = rbFullName, password = rbPassword, distributorID = rbDistributorId, isNotify = rbIsNotify)
                 } else {
@@ -541,7 +541,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {

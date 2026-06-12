@@ -856,7 +856,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                 val rbStatus = createPartFromString(pStatus)
                 val rbSkill = createPartFromString(pSkillID!!)
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.editTukang(
                     id = rbId,
                     phone = rbPhone,
@@ -963,7 +963,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = contactId?.let { apiService.getDetailTukang(tukangId = it) }
 
                 if (response!!.isSuccessful) {
@@ -1257,7 +1257,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getUsers(distributorID = userDistributorId)
 
                 when (response.status) {
@@ -1342,7 +1342,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
                         val rbId = createPartFromString(contactId!!)
                         val rbUserId = createPartFromString(selectedUser?.id!!)
 
-                        val apiService: ApiService = HttpClient.create()
+                        val apiService: ApiService = HttpClient.apiService
                         val response = apiService.editUserInputTukang(
                             id = rbId,
                             idUser = rbUserId,
@@ -1436,7 +1436,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {
@@ -1494,7 +1494,7 @@ class DetailTukangActivity : AppCompatActivity(), SearchModal.SearchModalListene
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getSkills(distributorID = userDistributorId)
 
                 when (response.status) {

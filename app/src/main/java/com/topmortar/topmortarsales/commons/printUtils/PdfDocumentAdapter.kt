@@ -9,7 +9,12 @@ import android.print.PrintAttributes
 import android.print.PrintDocumentAdapter
 import android.print.PrintDocumentInfo
 import android.util.Log
-import java.io.*
+import java.io.File
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.io.OutputStream
 
 
 class PdfDocumentAdapter(var context: Context, var path: String, var fileName: String) :

@@ -193,7 +193,7 @@ class SendMessageTukangModal(private val context: Context, private val lifecycle
 //                this@SendMessageTukangModal.dismiss()
 //                return@launch
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.sendMessageTukang(
                     name = rbName,
                     phone = rbPhone,

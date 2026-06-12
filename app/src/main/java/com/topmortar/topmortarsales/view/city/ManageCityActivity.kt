@@ -28,7 +28,6 @@ import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailed
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.handleMessage
-import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityManageCityBinding
 import com.topmortar.topmortarsales.modal.AddCityModal
@@ -128,8 +127,7 @@ class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClic
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
-                val response = apiService.getCities(distributorID = userDistributorId)
+                val response = HttpClient.apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {

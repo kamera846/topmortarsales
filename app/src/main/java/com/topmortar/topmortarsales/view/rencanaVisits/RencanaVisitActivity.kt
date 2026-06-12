@@ -87,7 +87,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
 
         setContentView(binding.root)
 
-        apiService = HttpClient.create()
+        apiService = HttpClient.apiService
         progressBar = CustomProgressBar(this)
         progressBar.setMessage(getString(R.string.txt_loading))
         binding.selectTitleBarDark.componentSelectTitleBarDark.visibility = View.GONE

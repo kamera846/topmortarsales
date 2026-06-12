@@ -196,7 +196,7 @@ class ReportsActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = when (isCourier || isBA) {
                     true -> {
                         if (contactID.isNullOrEmpty()) {

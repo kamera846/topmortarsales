@@ -275,7 +275,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getContactsUserBid(userId = userID)
 
                 when (response.status) {
@@ -327,7 +327,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getContactsUserBid(userId = userID, visit = BID_VISITED)
 
                 when (response.status) {
@@ -411,7 +411,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 //                this@SendMessageModal.dismiss()
 //                return@launch
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = imagePart.let {
                     if (it != null) {
                         apiService.sendImgMessage(

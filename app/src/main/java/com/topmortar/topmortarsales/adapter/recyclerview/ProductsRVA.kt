@@ -7,13 +7,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.utils.CurrencyFormat
-import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.ProductModel
 
 class ProductsRVA (private val listItem: ArrayList<ProductModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<ProductsRVA.ChatViewHolder>() {

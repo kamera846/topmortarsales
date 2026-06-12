@@ -255,7 +255,7 @@ class AddBaseCampActivity : AppCompatActivity() {
                 val rbIdBasecamp = createPartFromString(idBasecamp)
                 val rbDistributorId = createPartFromString(userDistributorId)
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = if (isEdit) {
                     apiService.editBaseCamp(
                         name = rbName,
@@ -377,7 +377,7 @@ class AddBaseCampActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {

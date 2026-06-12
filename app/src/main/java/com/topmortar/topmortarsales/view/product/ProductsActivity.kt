@@ -64,7 +64,7 @@ class ProductsActivity : AppCompatActivity() {
 
         setContentView(binding.root)
 
-        apiService = HttpClient.create()
+        apiService = HttpClient.apiService
         binding.titleBar.tvTitleBar.text = "Daftar Produk"
         binding.titleBar.icBack.setOnClickListener { finish() }
 
@@ -95,7 +95,7 @@ class ProductsActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
 
-                    val apiService: ApiService = HttpClient.create()
+                    val apiService: ApiService = HttpClient.apiService
                     val response = apiService.getCities(distributorID = "$userDistributorId")
 
                     when (response.status) {

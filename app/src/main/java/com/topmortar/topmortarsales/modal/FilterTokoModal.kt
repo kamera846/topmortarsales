@@ -2,8 +2,6 @@ package com.topmortar.topmortarsales.modal
 
 import android.app.Dialog
 import android.content.Context
-import android.content.DialogInterface
-import android.graphics.Color
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.Gravity

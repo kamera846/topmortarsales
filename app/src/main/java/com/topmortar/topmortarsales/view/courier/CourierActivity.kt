@@ -170,7 +170,7 @@ class CourierActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.detailUser(userId = userId)
 
                 when (response.status) {

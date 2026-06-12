@@ -739,7 +739,7 @@ class HomeSalesActivity : AppCompatActivity() {
         val userDistributorIds = sessionManager.userDistributor()
         firebaseReference =
             FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-014")
-        apiService = HttpClient.create()
+        apiService = HttpClient.apiService
         customUtility = CustomUtility(this)
         absentMode = selectedAbsentMode
 
@@ -1283,7 +1283,7 @@ class HomeSalesActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.detailUser(userId = userId!!)
 
                 when (response.status) {
