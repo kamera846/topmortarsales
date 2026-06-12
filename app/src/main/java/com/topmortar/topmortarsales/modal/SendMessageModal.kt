@@ -51,7 +51,8 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 
-class SendMessageModal(private val context: Context, private val lifecycleScope: CoroutineScope) : Dialog(context) {
+class SendMessageModal(private val context: Context, private val lifecycleScope: CoroutineScope) :
+    Dialog(context) {
 
     private lateinit var titleBar: LinearLayout
     private lateinit var icBack: ImageView
@@ -81,10 +82,11 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
         this.item = data
     }
 
-    private var modalInterface : SendMessageModalInterface? = null
-    fun initializeInterface(data : SendMessageModalInterface) {
+    private var modalInterface: SendMessageModalInterface? = null
+    fun initializeInterface(data: SendMessageModalInterface) {
         this.modalInterface = data
     }
+
     interface SendMessageModalInterface {
         fun onSubmitMessage(status: Boolean)
         fun onPickImage()
@@ -116,7 +118,8 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
             if (byteArray != null) {
                 val requestFile: RequestBody =
                     byteArray.toRequestBody("image/*".toMediaTypeOrNull())
-                imagePart = MultipartBody.Part.createFormData("img_message", "image.jpg", requestFile)
+                imagePart =
+                    MultipartBody.Part.createFormData("img_message", "image.jpg", requestFile)
             } else {
                 clearImg()
                 handleMessage(context, TAG_RESPONSE_CONTACT, "Gagal memproses gambar")
@@ -294,6 +297,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
                         getCurrentVisited()
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(false)
@@ -302,9 +306,14 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
                         getCurrentVisited()
 
                     }
+
                     else -> {
 
-                        handleMessage(context, TAG_RESPONSE_CONTACT, context.getString(R.string.failed_get_data))
+                        handleMessage(
+                            context,
+                            TAG_RESPONSE_CONTACT,
+                            context.getString(R.string.failed_get_data)
+                        )
                         loadingState(true)
 
                     }
@@ -313,7 +322,11 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
             } catch (e: Exception) {
 
-                handleMessage(context, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    context,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true)
 
             }
@@ -344,15 +357,21 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
                         setupBiddingNotice()
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(false)
                         setupBiddingNotice()
 
                     }
+
                     else -> {
 
-                        handleMessage(context, TAG_RESPONSE_CONTACT, context.getString(R.string.failed_get_data))
+                        handleMessage(
+                            context,
+                            TAG_RESPONSE_CONTACT,
+                            context.getString(R.string.failed_get_data)
+                        )
                         loadingState(true)
 
                     }
@@ -361,7 +380,11 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
             } catch (e: Exception) {
 
-                handleMessage(context, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    context,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true)
 
             }
@@ -371,7 +394,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
     private fun submitHandler() {
 
-        if (!formValidation( "${ etMessage.text }")) return
+        if (!formValidation("${etMessage.text}")) return
 
         val builder = AlertDialog.Builder(context)
         builder.setTitle("Koneksi Tidak Stabil!")
@@ -387,7 +410,10 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
             try {
                 val data = item!!
                 val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
-                val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
+                val currentName = sessionManager.fullName().let { fullName ->
+                    if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName()
+                        .let { username -> if (!username.isNullOrEmpty()) username else "" }
+                }
 
                 val rbPhone = createPartFromString(formatPhoneNumber(data.nomorhp))
                 val rbPhoneCategory = createPartFromString(formatPhoneNumber(data.nomor_cat_1))
@@ -397,7 +423,7 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
                 val rbBirthday = createPartFromString(data.tgl_lahir)
                 val rbOwner = createPartFromString(data.store_owner)
                 val rbMapsUrl = createPartFromString(data.maps_url)
-                val rbMessage = createPartFromString("${ etMessage.text }")
+                val rbMessage = createPartFromString("${etMessage.text}")
                 val rbUserId = createPartFromString(userId)
                 val rbContactId = createPartFromString(data.id_contact)
                 val rbCurrentName = createPartFromString(currentName)
@@ -454,19 +480,31 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
                             this@SendMessageModal.dismiss()
 
                         }
+
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(context, TAG_RESPONSE_MESSAGE, "Gagal mengirim: ${ responseBody.message }")
+                            handleMessage(
+                                context,
+                                TAG_RESPONSE_MESSAGE,
+                                "Gagal mengirim: ${responseBody.message}"
+                            )
                             loadingState(false)
 
                         }
-                        RESPONSE_STATUS_ERROR-> {
 
-                            val errorMessages = responseBody.error?.messages.let { if (!it.isNullOrEmpty()) it[0] else "" }
-                            handleMessage(context, TAG_RESPONSE_MESSAGE, "Error Code ${ responseBody.error?.code } $errorMessages")
+                        RESPONSE_STATUS_ERROR -> {
+
+                            val errorMessages =
+                                responseBody.error?.messages.let { if (!it.isNullOrEmpty()) it[0] else "" }
+                            handleMessage(
+                                context,
+                                TAG_RESPONSE_MESSAGE,
+                                "Error Code ${responseBody.error?.code} $errorMessages"
+                            )
                             loadingState(false)
 
                         }
+
                         else -> {
 
                             handleMessage(context, TAG_RESPONSE_CONTACT, "Gagal mengirim!")
@@ -477,7 +515,11 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
                 } else {
 
-                    handleMessage(context, TAG_RESPONSE_CONTACT, "Gagal mengirim. Error: Code ${response.code()}, Message: ${response.message()}")
+                    handleMessage(
+                        context,
+                        TAG_RESPONSE_CONTACT,
+                        "Gagal mengirim. Error: Code ${response.code()}, Message: ${response.message()}"
+                    )
                     loadingState(false)
 
                 }
@@ -485,7 +527,11 @@ class SendMessageModal(private val context: Context, private val lifecycleScope:
 
             } catch (e: Exception) {
 
-                handleMessage(context, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    context,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(false)
 
             }

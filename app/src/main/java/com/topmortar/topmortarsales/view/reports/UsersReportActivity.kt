@@ -138,14 +138,20 @@ class UsersReportActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCl
 //                        loadingState(true, "Success get data!")
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(true, "Belum ada laporan dari sales untuk toko ini!")
 
                     }
+
                     else -> {
 
-                        handleMessage(this@UsersReportActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@UsersReportActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         loadingState(true, getString(R.string.failed_request))
 
                     }
@@ -154,8 +160,15 @@ class UsersReportActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCl
 
             } catch (e: Exception) {
 
-                FirebaseUtils.logErr(this@UsersReportActivity, "Failed UsersReportActivity on getList(). Catch: ${e.message}")
-                handleMessage(this@UsersReportActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@UsersReportActivity,
+                    "Failed UsersReportActivity on getList(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@UsersReportActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
 
             }

@@ -66,7 +66,7 @@ val daftarLokasi = listOf(
     Lokasi("Sutiwijaya", "-7.959007700000001,112.6473347"),
     Lokasi("TB BOSS", "-7.900759499999998,112.6037699"),
 
-)
+    )
 
 const val API_KEY = "AIzaSyBNtWfOO3C9WWbyf_jBtqRCTgKc7HUW-40"
 const val TAG = "DirectionsClient"
@@ -135,7 +135,11 @@ class ScheduledRenviMapsRoute : AppCompatActivity(), OnMapReadyCallback {
                     if (directionsResult.routes.isNotEmpty()) {
                         drawRouteOnMap(directionsResult)
                     } else {
-                        Toast.makeText(this@ScheduledRenviMapsRoute, "Tidak ada rute ditemukan.", Toast.LENGTH_LONG).show()
+                        Toast.makeText(
+                            this@ScheduledRenviMapsRoute,
+                            "Tidak ada rute ditemukan.",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 }
             } catch (e: ApiException) {
@@ -204,7 +208,10 @@ class ScheduledRenviMapsRoute : AppCompatActivity(), OnMapReadyCallback {
         val boundsBuilder = LatLngBounds.Builder()
 
         for ((index, lokasi) in daftarLokasi.withIndex()) {
-            val point = LatLng(lokasi.mapsUrl.split(",")[0].toDouble(), lokasi.mapsUrl.split(",")[1].toDouble())
+            val point = LatLng(
+                lokasi.mapsUrl.split(",")[0].toDouble(),
+                lokasi.mapsUrl.split(",")[1].toDouble()
+            )
 
             val markerColor: Int
             val markerTitle: String
@@ -216,11 +223,13 @@ class ScheduledRenviMapsRoute : AppCompatActivity(), OnMapReadyCallback {
                     markerColor = getColor(R.color.status_active)
                     markerTitle = "START: ${lokasi.nama}"
                 }
+
                 daftarLokasi.lastIndex -> {
                     // Marker untuk Titik Akhir (Destination) - Merah
                     markerColor = getColor(R.color.blue_silver_lake)
                     markerTitle = "END: ${lokasi.nama}"
                 }
+
                 else -> {
                     // Marker untuk Waypoint - Biru Langit
                     markerColor = getColor(R.color.primary_300)
@@ -284,9 +293,19 @@ class ScheduledRenviMapsRoute : AppCompatActivity(), OnMapReadyCallback {
         fillPaint.isAntiAlias = true
 
         // --- 3. GAMBAR BORDER ---
-        canvas.drawCircle(center, center - textYOffset, circleRadius + 6f, backgroundPaint) // Tambahkan sedikit ukuran agar border terlihat
+        canvas.drawCircle(
+            center,
+            center - textYOffset,
+            circleRadius + 6f,
+            backgroundPaint
+        ) // Tambahkan sedikit ukuran agar border terlihat
 
-        canvas.drawCircle(center, center - textYOffset, circleRadius + 6f, borderPaint) // Tambahkan sedikit ukuran agar border terlihat
+        canvas.drawCircle(
+            center,
+            center - textYOffset,
+            circleRadius + 6f,
+            borderPaint
+        ) // Tambahkan sedikit ukuran agar border terlihat
 
         // --- 4. GAMBAR ISI ---
         canvas.drawCircle(center, center - textYOffset, circleRadius, fillPaint)
@@ -299,7 +318,8 @@ class ScheduledRenviMapsRoute : AppCompatActivity(), OnMapReadyCallback {
         textPaint.textAlign = Paint.Align.CENTER
         textPaint.isAntiAlias = true
 
-        val text = if (index == 0) "S" else if (index == daftarLokasi.lastIndex) "E" else index.toString()
+        val text =
+            if (index == 0) "S" else if (index == daftarLokasi.lastIndex) "E" else index.toString()
 
         val xPos = center
         val yPos = (center - textYOffset) - ((textPaint.descent() + textPaint.ascent()) / 2f)

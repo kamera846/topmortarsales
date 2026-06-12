@@ -120,11 +120,12 @@ class NewReportActivity : AppCompatActivity() {
 
     private var submitCountDown: CountDownTimer? = null
 
-    private val locationResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            checkLocationPermission()
+    private val locationResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                checkLocationPermission()
+            }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -150,8 +151,10 @@ class NewReportActivity : AppCompatActivity() {
             )
         }
 
-        iReportSource = intent.getStringExtra(REPORT_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
-        iRenviSource = intent.getStringExtra(RENVI_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
+        iReportSource = intent.getStringExtra(REPORT_SOURCE)
+            .let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
+        iRenviSource = intent.getStringExtra(RENVI_SOURCE)
+            .let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
 
         id = intent.getStringExtra(CONST_CONTACT_ID).toString()
         name = intent.getStringExtra(CONST_NAME).toString()
@@ -227,7 +230,10 @@ class NewReportActivity : AppCompatActivity() {
                                     intent.putExtra(REPORT_TYPE_IS_PAYMENT, isReportPaymentStatus)
                                     if (name == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
                                     else intent.putExtra(CONST_NAME, name)
-                                    if (coordinate == EMPTY_FIELD_VALUE) intent.putExtra(CONST_MAPS, "")
+                                    if (coordinate == EMPTY_FIELD_VALUE) intent.putExtra(
+                                        CONST_MAPS,
+                                        ""
+                                    )
                                     else intent.putExtra(CONST_MAPS, coordinate)
 
                                     intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -256,7 +262,10 @@ class NewReportActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed NewReportActivity on checkMockLocation(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed NewReportActivity on checkMockLocation(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Sales Failed",
@@ -285,7 +294,10 @@ class NewReportActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed NewReportActivity on showDialogIsMock(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed NewReportActivity on showDialogIsMock(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Sales Failed",
@@ -308,6 +320,7 @@ class NewReportActivity : AppCompatActivity() {
                 binding.tvNameLabel.text = getString(R.string.basecamp_name)
                 binding.etMessage.hint = getString(R.string.laporan_basecamp_hint)
             }
+
             else -> {
                 reportType = "toko"
                 binding.tvNameLabel.text = getString(R.string.store_name)
@@ -319,10 +332,16 @@ class NewReportActivity : AppCompatActivity() {
 //            binding.reportPaymentContainer.visibility = View.VISIBLE
             binding.reportPaymentTrueContainer.visibility = View.VISIBLE
 
-            binding.etPaymentYes.addTextChangedListener(object: TextWatcher {
+            binding.etPaymentYes.addTextChangedListener(object : TextWatcher {
                 private var current = ""
 
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
+                }
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
 
@@ -419,10 +438,14 @@ class NewReportActivity : AppCompatActivity() {
                 R.id.rbPayYes -> {
                     binding.etPaymentYesContainer.visibility = View.VISIBLE
                     binding.etPaymentLaterContainer.visibility = View.GONE
-                } R.id.rbNotPay -> {
+                }
+
+                R.id.rbNotPay -> {
                     binding.etPaymentYesContainer.visibility = View.GONE
                     binding.etPaymentLaterContainer.visibility = View.GONE
-                } R.id.rbPayLater -> {
+                }
+
+                R.id.rbPayLater -> {
                     binding.etPaymentYesContainer.visibility = View.GONE
                     binding.etPaymentLaterContainer.visibility = View.VISIBLE
                 }
@@ -448,7 +471,7 @@ class NewReportActivity : AppCompatActivity() {
 
                 // Do something with the selected date
                 val formattedDate = DateFormat.format(selectedDate)
-                realPaymentDateValue =  DateFormat.format(selectedDate, "yyyy-MM-dd")
+                realPaymentDateValue = DateFormat.format(selectedDate, "yyyy-MM-dd")
                 binding.etPaymentLater.setText(formattedDate)
                 binding.etPaymentLater.clearFocus()
             },
@@ -499,7 +522,11 @@ class NewReportActivity : AppCompatActivity() {
             val mapsUrl = coordinate
             val urlUtility = URLUtility(this)
 
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
 
                 if (urlUtility.isLocationEnabled(this)) {
 
@@ -507,7 +534,8 @@ class NewReportActivity : AppCompatActivity() {
 
                     if (!urlUtility.isUrl(mapsUrl) && mapsUrl.isNotEmpty()) {
 
-                        val status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
+                        val status =
+                            GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
                         if (status != ConnectionResult.SUCCESS) {
                             showDialogGooglePlayNotAvailable()
                             return@postDelayed
@@ -616,15 +644,23 @@ class NewReportActivity : AppCompatActivity() {
 
                         }.addOnFailureListener {
                             progressBar.dismiss()
-                            handleMessage(this, "LOG REPORT", "Gagal mendapatkan lokasi anda. Err: " + it.message)
+                            handleMessage(
+                                this,
+                                "LOG REPORT",
+                                "Gagal mendapatkan lokasi anda. Err: " + it.message
+                            )
 //                            Toast.makeText(this, "Gagal mendapatkan lokasi anda", TOAST_SHORT).show()
                         }
 
                     } else {
                         progressBar.dismiss()
-                        val message = "Anda tidak dapat membuat laporan untuk saat ini, silakan hubungi admin untuk memperbarui koordinat $reportType ini"
+                        val message =
+                            "Anda tidak dapat membuat laporan untuk saat ini, silakan hubungi admin untuk memperbarui koordinat $reportType ini"
                         val actionTitle = "Hubungi Sekarang"
-                        customUtility.showPermissionDeniedSnackbar(message, actionTitle) { navigateChatAdmin() }
+                        customUtility.showPermissionDeniedSnackbar(
+                            message,
+                            actionTitle
+                        ) { navigateChatAdmin() }
                     }
 
                 } else {
@@ -635,7 +671,11 @@ class NewReportActivity : AppCompatActivity() {
 
             } else {
                 progressBar.dismiss()
-                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    LOCATION_PERMISSION_REQUEST_CODE
+                )
             }
 
         }, 500)
@@ -661,7 +701,10 @@ class NewReportActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed NewReportActivity on showDialogGooglePlayNotAvailable(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed NewReportActivity on showDialogGooglePlayNotAvailable(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Courier Failed",
@@ -673,10 +716,12 @@ class NewReportActivity : AppCompatActivity() {
     private fun navigateChatAdmin() {
         val distributorNumber = sessionManager.userDistributorNumber()!!
         val phoneNumber = distributorNumber.ifEmpty { getString(R.string.topmortar_wa_number) }
-        val message = "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada $reportType *${ name }*"
+        val message =
+            "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada $reportType *${name}*"
 
         val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")
+        intent.data =
+            Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")
 
         try {
             startActivity(intent)
@@ -709,7 +754,8 @@ class NewReportActivity : AppCompatActivity() {
             return false
         }
         if (isDistanceToLong) {
-            val message = "Anda tidak dapat membuat laporan untuk saat ini, Cobalah untuk lebih dekat dengan titik $reportType dan refresh jaraknya!"
+            val message =
+                "Anda tidak dapat membuat laporan untuk saat ini, Cobalah untuk lebih dekat dengan titik $reportType dan refresh jaraknya!"
             val actionTitle = "Refresh Sekarang"
             customUtility.showPermissionDeniedSnackbar(message, actionTitle) { calculateDistance() }
             return false
@@ -812,7 +858,9 @@ class NewReportActivity : AppCompatActivity() {
                         laporanVisit = rblaporanVisit,
                         source = rbSource,
                         renviSource = rbRenviSource,
-                    ) else -> {
+                    )
+
+                    else -> {
                         if (!isReportPaymentStatus) {
                             apiService.makeVisitReport(
                                 idContact = rbidContact,
@@ -839,6 +887,7 @@ class NewReportActivity : AppCompatActivity() {
                                         payValue = createPartFromString(realPaymentValue)
                                     )
                                 }
+
                                 R.id.rbPayLater -> {
                                     apiService.makeVisitReportPaymentLater(
                                         idContact = rbidContact,
@@ -852,6 +901,7 @@ class NewReportActivity : AppCompatActivity() {
                                         payDate = createPartFromString(realPaymentDateValue)
                                     )
                                 }
+
                                 else -> {
                                     apiService.makeVisitReport(
                                         idContact = rbidContact,
@@ -889,22 +939,36 @@ class NewReportActivity : AppCompatActivity() {
                                 intent.putExtra(CONST_MAPS, coordinate)
                                 startActivity(intent)
                             } else {
-                                Toast.makeText(this@NewReportActivity, responseBody.message, TOAST_SHORT).show()
+                                Toast.makeText(
+                                    this@NewReportActivity,
+                                    responseBody.message,
+                                    TOAST_SHORT
+                                ).show()
                             }
 
                             finish()
 
                         }
+
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(this@NewReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan! Message: ${ responseBody.message }")
+                            handleMessage(
+                                this@NewReportActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "Gagal mengirim laporan! Message: ${responseBody.message}"
+                            )
                             submitDialog.dismiss()
                             loadingSubmit(false)
 
                         }
+
                         else -> {
 
-                            handleMessage(this@NewReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan!: ${ responseBody.message }")
+                            handleMessage(
+                                this@NewReportActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "Gagal mengirim laporan!: ${responseBody.message}"
+                            )
                             submitDialog.dismiss()
                             loadingSubmit(false)
 
@@ -913,7 +977,11 @@ class NewReportActivity : AppCompatActivity() {
 
                 } else {
 
-                    handleMessage(this@NewReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan! Error: " + response.message())
+                    handleMessage(
+                        this@NewReportActivity,
+                        TAG_RESPONSE_MESSAGE,
+                        "Gagal mengirim laporan! Error: " + response.message()
+                    )
                     submitDialog.dismiss()
                     loadingSubmit(false)
 
@@ -921,13 +989,24 @@ class NewReportActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                FirebaseUtils.logErr(this@NewReportActivity, "Failed NewReportActivity on submitReport(). Catch: ${e.message}")
-                handleMessage(this@NewReportActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@NewReportActivity,
+                    "Failed NewReportActivity on submitReport(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@NewReportActivity,
+                    TAG_RESPONSE_MESSAGE,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 submitDialog.dismiss()
                 loadingSubmit(false)
 
             } finally {
-                saveTrackingServiceLocation(userId = idUser, contactId = id, actionType = TrackingService.ACTION_TYPE_VISIT)
+                saveTrackingServiceLocation(
+                    userId = idUser,
+                    contactId = id,
+                    actionType = TrackingService.ACTION_TYPE_VISIT
+                )
                 submitCountDown = object : CountDownTimer(10000, 1000) {
 
                     override fun onTick(millisUntilFinished: Long) {
@@ -965,6 +1044,7 @@ class NewReportActivity : AppCompatActivity() {
             binding.container.visibility = View.VISIBLE
         }
     }
+
     override fun onStart() {
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
@@ -1014,7 +1094,11 @@ class NewReportActivity : AppCompatActivity() {
         submitCountDown?.cancel()
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {

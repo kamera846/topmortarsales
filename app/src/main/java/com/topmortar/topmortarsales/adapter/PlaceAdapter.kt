@@ -7,9 +7,13 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 
-class PlaceAdapter(private val places: List<String>, private val address: List<String>, private val onItemClick: (Int) -> Unit) : RecyclerView.Adapter<PlaceAdapter.ViewHolder>() {
+class PlaceAdapter(
+    private val places: List<String>,
+    private val address: List<String>,
+    private val onItemClick: (Int) -> Unit
+) : RecyclerView.Adapter<PlaceAdapter.ViewHolder>() {
 
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val placeNameTextView: TextView = itemView.findViewById(R.id.placeNameTextView)
         val placeAddressTextView: TextView = itemView.findViewById(R.id.placeAddressTextView)
 //        val placeDistanceTextView: TextView = itemView.findViewById(R.id.placeDistanceTextView)

@@ -100,7 +100,10 @@ class UserAbsentManualActivity : AppCompatActivity() {
                     this@UserAbsentManualActivity,
                     "User Absent Manual Activity. Failed on loadInitialData: ${e.message}"
                 )
-                handleMessage(this@UserAbsentManualActivity, message = "Failed loadInitialData: ${e.message}")
+                handleMessage(
+                    this@UserAbsentManualActivity,
+                    message = "Failed loadInitialData: ${e.message}"
+                )
 
             } finally {
                 progressBar.dismiss()
@@ -311,16 +314,16 @@ class UserAbsentManualActivity : AppCompatActivity() {
                 val selectedUser =
                     userList.find { it.id_user == selectedUserItem?.id }
                 val response = HttpClient.apiService.absentManualInBasecamp(
-                        idGudang = createPartFromString(
-                            selectedBasecampItem?.id ?: "-1"
-                        ),
-                        idUser = createPartFromString(
-                            selectedUser?.id_user ?: "-1"
-                        ),
-                        levelUser = createPartFromString(
-                            selectedUser?.level_user ?: "-"
-                        )
+                    idGudang = createPartFromString(
+                        selectedBasecampItem?.id ?: "-1"
+                    ),
+                    idUser = createPartFromString(
+                        selectedUser?.id_user ?: "-1"
+                    ),
+                    levelUser = createPartFromString(
+                        selectedUser?.level_user ?: "-"
                     )
+                )
 
                 if (!response.isSuccessful) {
                     handleMessage(

@@ -70,8 +70,10 @@ class ProductsActivity : AppCompatActivity() {
 
         // Get the current theme mode (light or dark)
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(this, R.color.black_400)
-        else binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(this, R.color.light)
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background =
+            AppCompatResources.getDrawable(this, R.color.black_400)
+        else binding.llFilter.componentFilter.background =
+            AppCompatResources.getDrawable(this, R.color.light)
 
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_PENAGIHAN) getCities()
         else {
@@ -106,7 +108,12 @@ class ProductsActivity : AppCompatActivity() {
 
                             for (i in 0 until citiesResults!!.size) {
                                 val data = citiesResults!![i]
-                                items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                                items.add(
+                                    ModalSearchModel(
+                                        data.id_city,
+                                        "${data.nama_city} - ${data.kode_city}"
+                                    )
+                                )
                             }
 
                             setupDialogSearch(items)
@@ -115,20 +122,27 @@ class ProductsActivity : AppCompatActivity() {
 
                             selectedCity = items[0]
                             binding.titleBar.tvTitleBarDescription.visibility = View.VISIBLE
-                            binding.titleBar.tvTitleBarDescription.text = "Di kota ${ items[0].title}"
+                            binding.titleBar.tvTitleBarDescription.text =
+                                "Di kota ${items[0].title}"
                             binding.llFilter.tvFilter.text = items[0].title
                             getList()
 
                         }
+
                         RESPONSE_STATUS_EMPTY -> {
 
                             handleMessage(this@ProductsActivity, "LIST CITY", "Daftar kota kosong!")
                             getList()
 
                         }
+
                         else -> {
 
-                            handleMessage(this@ProductsActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                            handleMessage(
+                                this@ProductsActivity,
+                                TAG_RESPONSE_CONTACT,
+                                getString(R.string.failed_get_data)
+                            )
                             getList()
 
                         }
@@ -137,8 +151,15 @@ class ProductsActivity : AppCompatActivity() {
 
                 } catch (e: Exception) {
 
-                    FirebaseUtils.logErr(this@ProductsActivity, "Failed ProductsActivity on getCities(). Catch: ${e.message}")
-                    handleMessage(this@ProductsActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                    FirebaseUtils.logErr(
+                        this@ProductsActivity,
+                        "Failed ProductsActivity on getCities(). Catch: ${e.message}"
+                    )
+                    handleMessage(
+                        this@ProductsActivity,
+                        TAG_RESPONSE_CONTACT,
+                        generateFailedRunServiceMessage(e.message.toString())
+                    )
                     getList()
 
                 }
@@ -151,7 +172,7 @@ class ProductsActivity : AppCompatActivity() {
     private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
 
         searchModal = SearchModal(this, items)
-        searchModal.setCustomDialogListener(object: SearchModal.SearchModalListener{
+        searchModal.setCustomDialogListener(object : SearchModal.SearchModalListener {
             override fun onDataReceived(data: ModalSearchModel) {
                 if (data.id == "-1") {
                     selectedCity = null
@@ -160,7 +181,7 @@ class ProductsActivity : AppCompatActivity() {
                 } else {
                     selectedCity = data
                     binding.titleBar.tvTitleBarDescription.visibility = View.VISIBLE
-                    binding.titleBar.tvTitleBarDescription.text = "Di kota ${ data.title}"
+                    binding.titleBar.tvTitleBarDescription.text = "Di kota ${data.title}"
                     binding.llFilter.tvFilter.text = data.title
                 }
                 getList()
@@ -170,8 +191,10 @@ class ProductsActivity : AppCompatActivity() {
         searchModal.searchHint = "Ketik untuk mencari…"
 
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(this, R.color.black_400)
-        else binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(this, R.color.light)
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background =
+            AppCompatResources.getDrawable(this, R.color.black_400)
+        else binding.llFilter.componentFilter.background =
+            AppCompatResources.getDrawable(this, R.color.light)
         binding.llFilter.componentFilter.visibility = View.GONE
         binding.llFilter.componentFilter.setOnClickListener {
             searchModal.show()
@@ -192,7 +215,9 @@ class ProductsActivity : AppCompatActivity() {
                     USER_KIND_ADMIN, USER_KIND_PENAGIHAN -> {
                         if (selectedCity != null) apiService.getProducts(idCity = selectedCity?.id!!)
                         else apiService.getProducts(idCity = "")
-                    } else -> apiService.getProducts(idCity = "$userCity")
+                    }
+
+                    else -> apiService.getProducts(idCity = "$userCity")
                 }
 
                 when (response.status) {
@@ -202,14 +227,20 @@ class ProductsActivity : AppCompatActivity() {
                         loadingState(false)
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(true, "Belum ada produk di kota ini")
 
                     }
+
                     else -> {
 
-                        handleMessage(this@ProductsActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@ProductsActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         loadingState(true, getString(R.string.failed_request))
 
                     }
@@ -217,8 +248,15 @@ class ProductsActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                FirebaseUtils.logErr(this@ProductsActivity, "Failed ProductsActivity on getList(). Catch: ${e.message}")
-                handleMessage(this@ProductsActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@ProductsActivity,
+                    "Failed ProductsActivity on getList(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@ProductsActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
 
             }
@@ -229,7 +267,7 @@ class ProductsActivity : AppCompatActivity() {
 
     private fun setRecyclerView(listItem: ArrayList<ProductModel>) {
 
-        val rvAdapter = ProductsRVA(listItem, object: ProductsRVA.ItemClickListener {
+        val rvAdapter = ProductsRVA(listItem, object : ProductsRVA.ItemClickListener {
             override fun onItemClick(data: ProductModel?) {
                 // Do Something
             }

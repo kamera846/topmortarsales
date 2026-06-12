@@ -34,7 +34,10 @@ object PhoneHandler {
         val pattern = Regex("^\\d{10,16}$")
         val trimmedInput = input.trim()
 
-        return if (!trimmedInput.startsWith("0") && !trimmedInput.startsWith("8") && !trimmedInput.startsWith("62")) {
+        return if (!trimmedInput.startsWith("0") && !trimmedInput.startsWith("8") && !trimmedInput.startsWith(
+                "62"
+            )
+        ) {
             etPhone.error = "Nomor telpon harus diawali dengan format: 08XXXX, 8XXXX, 628XXXX"
             false
         } else if (!pattern.matches(input)) {

@@ -71,7 +71,11 @@ class HistoryAddTukangActivity : AppCompatActivity() {
         val iUserCity = intent.getStringExtra(CONST_USER_CITY)
 
         if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
-            CustomUtility(this).setUserStatusOnline(true, userDistributorId ?: "-custom-018", userId ?: "")
+            CustomUtility(this).setUserStatusOnline(
+                true,
+                userDistributorId ?: "-custom-018",
+                userId ?: ""
+            )
         }
 
         /*
@@ -83,7 +87,7 @@ class HistoryAddTukangActivity : AppCompatActivity() {
         val myFragment = UserHistoryAddTukangFragment()
         myFragment.setUserCityParam(iUserCity)
         myFragment.setUserIdParam(iUserID)
-        myFragment.setCounterItem(object : UserHistoryAddTukangFragment.CounterItem{
+        myFragment.setCounterItem(object : UserHistoryAddTukangFragment.CounterItem {
             override fun counterItem(count: Int) {
                 // Do something..
             }
@@ -99,7 +103,7 @@ class HistoryAddTukangActivity : AppCompatActivity() {
         End Call Fragment
          */
 
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 myOnBackPressed()
             }

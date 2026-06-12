@@ -94,12 +94,15 @@ class ClosingStoreFragment : Fragment() {
     private lateinit var badgeRefresh: LinearLayout
 
     private var listener: CounterItem? = null
+
     interface CounterItem {
         fun counterItem(count: Int)
     }
+
     fun setCounterItem(listener: CounterItem) {
         this.listener = listener
     }
+
     fun syncNow() {
         getContacts()
     }
@@ -118,7 +121,8 @@ class ClosingStoreFragment : Fragment() {
 
         deliveryId = "$AUTH_LEVEL_COURIER$userID"
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-008")
+        firebaseReference =
+            FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-008")
         childDelivery = firebaseReference.child(FIREBASE_CHILD_DELIVERY)
         childDriver = childDelivery.child(deliveryId)
 
@@ -162,26 +166,34 @@ class ClosingStoreFragment : Fragment() {
                         // Get a reference to your database
                         val deliveryId = AUTH_LEVEL_COURIER + userID
                         val userDistributorIds = sessionManager.userDistributor()
-                        val firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-009")
-                        val myRef: DatabaseReference = firebaseReference.child("$FIREBASE_CHILD_DELIVERY/$deliveryId")
+                        val firebaseReference = FirebaseUtils.getReference(
+                            distributorId = userDistributorIds ?: "-firebase-009"
+                        )
+                        val myRef: DatabaseReference =
+                            firebaseReference.child("$FIREBASE_CHILD_DELIVERY/$deliveryId")
 
                         // Add a ValueEventListener to retrieve the data
                         myRef.addListenerForSingleValueEvent(object : ValueEventListener {
                             override fun onDataChange(dataSnapshot: DataSnapshot) {
                                 // The dataSnapshot contains the data from the database
                                 if (dataSnapshot.exists()) {
-                                    myRef.child("stores").addListenerForSingleValueEvent(object : ValueEventListener {
+                                    myRef.child("stores").addListenerForSingleValueEvent(object :
+                                        ValueEventListener {
                                         override fun onDataChange(snapshot: DataSnapshot) {
                                             if (snapshot.exists()) {
-                                                val deliveryStore = arrayListOf<DeliveryModel.Store>()
+                                                val deliveryStore =
+                                                    arrayListOf<DeliveryModel.Store>()
                                                 for (item in snapshot.children) {
-                                                    val data = item.getValue(DeliveryModel.Store::class.java)!!
+                                                    val data =
+                                                        item.getValue(DeliveryModel.Store::class.java)!!
                                                     deliveryStore.add(data)
                                                 }
 
                                                 for ((i, contact) in contacts.withIndex()) {
-                                                    val findItem = deliveryStore.find { it.id == contact.id_contact && it.idSuratJalan == contact.id_surat_jalan }
-                                                    contacts[i].deliveryStatus = "Pengiriman sedang berlangsung"
+                                                    val findItem =
+                                                        deliveryStore.find { it.id == contact.id_contact && it.idSuratJalan == contact.id_surat_jalan }
+                                                    contacts[i].deliveryStatus =
+                                                        "Pengiriman sedang berlangsung"
                                                     if (findItem == null) {
                                                         startDelivery(contact)
                                                     }
@@ -190,12 +202,15 @@ class ClosingStoreFragment : Fragment() {
                                                 // Remove expired item
                                                 for (store in deliveryStore.iterator()) {
 
-                                                    val findItem = contacts.find { it.id_contact == store.id }
+                                                    val findItem =
+                                                        contacts.find { it.id_contact == store.id }
 
                                                     if (findItem == null) {
 
                                                         val storeRef = myRef.child("stores")
-                                                        if (store.id.isNotEmpty()) storeRef.child(store.id).removeValue()
+                                                        if (store.id.isNotEmpty()) storeRef.child(
+                                                            store.id
+                                                        ).removeValue()
 
                                                     }
 
@@ -209,7 +224,8 @@ class ClosingStoreFragment : Fragment() {
 
                                                 for ((i, contact) in contacts.withIndex()) {
 
-                                                    contacts[i].deliveryStatus = "Pengiriman sedang berlangsung"
+                                                    contacts[i].deliveryStatus =
+                                                        "Pengiriman sedang berlangsung"
                                                     startDelivery(contact)
                                                 }
 
@@ -247,6 +263,7 @@ class ClosingStoreFragment : Fragment() {
                         })
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(true, "Belum ada pengiriman!")
@@ -254,9 +271,14 @@ class ClosingStoreFragment : Fragment() {
                         listener?.counterItem(0)
 
                     }
+
                     else -> {
 
-                        handleMessage(requireContext(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            requireContext(),
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         loadingState(true, getString(R.string.failed_request))
                         showBadgeRefresh(true)
 
@@ -269,7 +291,11 @@ class ClosingStoreFragment : Fragment() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    requireContext(),
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
 
@@ -281,14 +307,18 @@ class ClosingStoreFragment : Fragment() {
 
     private fun setRecyclerView(listItem: ArrayList<ContactModel>) {
 
-        val rvAdapter = ContactsRecyclerViewAdapter(listItem, object: ContactsRecyclerViewAdapter.ItemClickListener {
-            override fun onItemClick(data: ContactModel?) {
-                context?.let {
-                    navigateDetailContact(it, data)
+        val rvAdapter = ContactsRecyclerViewAdapter(
+            listItem,
+            object : ContactsRecyclerViewAdapter.ItemClickListener {
+                override fun onItemClick(data: ContactModel?) {
+                    context?.let {
+                        navigateDetailContact(it, data)
+                    }
                 }
-            }
 
-        }, userKind)
+            },
+            userKind
+        )
 
         context?.let { ctx ->
             binding.rvChatList.layoutManager = LinearLayoutManager(ctx)
@@ -375,7 +405,8 @@ class ClosingStoreFragment : Fragment() {
         val message = "*#Courier Service*\nHalo admin, tolong bantu saya [KETIK PESAN ANDA]"
 
         val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")
+        intent.data =
+            Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")
 
         try {
             startActivity(intent)
@@ -410,16 +441,17 @@ class ClosingStoreFragment : Fragment() {
         } else badgeRefresh.visibility = View.GONE
     }
 
-    private val someActivityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        // Handle the result
-        val resultCode = result.resultCode
-        val data = result.data
-        // Process the result
-        if (resultCode == RESULT_OK) {
-            val resultData = data?.getStringExtra("$MAIN_ACTIVITY_REQUEST_CODE")
-            if (!resultData.isNullOrEmpty() && resultData == SYNC_NOW) getContacts()
+    private val someActivityResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            // Handle the result
+            val resultCode = result.resultCode
+            val data = result.data
+            // Process the result
+            if (resultCode == RESULT_OK) {
+                val resultData = data?.getStringExtra("$MAIN_ACTIVITY_REQUEST_CODE")
+                if (!resultData.isNullOrEmpty() && resultData == SYNC_NOW) getContacts()
+            }
         }
-    }
 
     @SuppressLint("MissingPermission")
     private fun startDelivery(contact: ContactModel) {
@@ -439,7 +471,7 @@ class ClosingStoreFragment : Fragment() {
                         name = contact.nama,
                         lat = targetLatLng.latitude,
                         lng = targetLatLng.longitude,
-                        startDatetime = if (contact.date_printed != null) "${contact.date_printed}" else "-" ,
+                        startDatetime = if (contact.date_printed != null) "${contact.date_printed}" else "-",
                         startLat = currentLatLng.latitude,
                         startLng = currentLatLng.longitude,
                     )
@@ -452,7 +484,11 @@ class ClosingStoreFragment : Fragment() {
                     childDriver.child("stores/${store.id}").setValue(store)
 
                 }.addOnFailureListener { e ->
-                    handleMessage(requireContext(), "onStartDelivery", "Failed get user lastLocation")
+                    handleMessage(
+                        requireContext(),
+                        "onStartDelivery",
+                        "Failed get user lastLocation"
+                    )
                     Log.e("onStartDelivery", "Failed get user lastLocation: $e")
                     val context = requireContext()
                     if (isAdded) {

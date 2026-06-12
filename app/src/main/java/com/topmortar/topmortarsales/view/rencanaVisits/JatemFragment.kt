@@ -72,7 +72,7 @@ class JatemFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var sessionManager: SessionManager
-    private lateinit var userDistributorId : String
+    private lateinit var userDistributorId: String
     private lateinit var userKind: String
     private lateinit var userCity: String
     private lateinit var userID: String
@@ -86,16 +86,20 @@ class JatemFragment : Fragment() {
     private var listener: CounterItem? = null
     private lateinit var apiService: ApiService
     private lateinit var rvAdapter: RencanaVisitRVA
+
     interface CounterItem {
         fun counterItem(count: Int)
     }
+
     fun setCounterItem(listener: CounterItem) {
         this.listener = listener
     }
+
     fun syncNow() {
         if (userKind == USER_KIND_ADMIN) getCities()
         else getList()
     }
+
     fun isSelectBarActive(state: Boolean) {
         this.rvAdapter.clearSelections()
         this.rvAdapter.setSelectBarActive(state)
@@ -107,6 +111,7 @@ class JatemFragment : Fragment() {
         val eventBusInt = EventBusUtils.IntEvent(0)
         EventBus.getDefault().post(eventBusInt)
     }
+
     fun onConfirmSelected() {
         rvAdapter.getSelectedItems()
     }
@@ -155,7 +160,9 @@ class JatemFragment : Fragment() {
                     USER_KIND_ADMIN -> {
                         if (selectedCity != null) apiService.targetJatem(idCity = selectedCity?.id!!)
                         else apiService.targetJatemDst(idDistributor = userDistributorId)
-                    } else -> apiService.targetJatem(idCity = userCity)
+                    }
+
+                    else -> apiService.targetJatem(idCity = userCity)
                 }
 
                 when (response.status) {
@@ -170,6 +177,7 @@ class JatemFragment : Fragment() {
                         listener?.counterItem(listItem.size)
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         listItem = arrayListOf()
@@ -179,11 +187,16 @@ class JatemFragment : Fragment() {
                         listener?.counterItem(0)
 
                     }
+
                     else -> {
 
                         listItem = arrayListOf()
                         setRecyclerView(listItem)
-                        handleMessage(requireContext(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            requireContext(),
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         loadingState(true, getString(R.string.failed_request))
                         showBadgeRefresh(true)
 
@@ -195,10 +208,17 @@ class JatemFragment : Fragment() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(requireContext(), "Failed JatemFragment on getList(). Catch: ${e.message}")
+                FirebaseUtils.logErr(
+                    requireContext(),
+                    "Failed JatemFragment on getList(). Catch: ${e.message}"
+                )
                 listItem = arrayListOf()
                 setRecyclerView(listItem)
-                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    requireContext(),
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
 
@@ -211,7 +231,7 @@ class JatemFragment : Fragment() {
     private fun setRecyclerView(listItem: ArrayList<RencanaVisitModel>) {
 
         if (isAdded) {
-            rvAdapter = RencanaVisitRVA(listItem, object: RencanaVisitRVA.ItemClickListener {
+            rvAdapter = RencanaVisitRVA(listItem, object : RencanaVisitRVA.ItemClickListener {
                 override fun onItemClick(data: RencanaVisitModel?) {
                     context?.let { ctx ->
                         val intent = Intent(ctx, DetailContactActivity::class.java)
@@ -332,7 +352,12 @@ class JatemFragment : Fragment() {
 
                         for (i in 0 until citiesResults!!.size) {
                             val data = citiesResults!![i]
-                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                            items.add(
+                                ModalSearchModel(
+                                    data.id_city,
+                                    "${data.nama_city} - ${data.kode_city}"
+                                )
+                            )
                         }
                         items.add(0, ModalSearchModel("-1", "Hapus Filter"))
 
@@ -340,14 +365,20 @@ class JatemFragment : Fragment() {
                         binding.llFilter.componentFilter.visibility = View.VISIBLE
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         handleMessage(requireActivity(), "LIST CITY", "Daftar kota kosong!")
 
                     }
+
                     else -> {
 
-                        handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            requireActivity(),
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
 
                     }
                 }
@@ -358,8 +389,15 @@ class JatemFragment : Fragment() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(requireContext(), "Failed JatemFragment on getCities(). Catch: ${e.message}")
-                handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    requireContext(),
+                    "Failed JatemFragment on getCities(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    requireActivity(),
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
 
             } finally {
                 getList()
@@ -371,7 +409,7 @@ class JatemFragment : Fragment() {
     private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
 
         searchModal = SearchModal(requireActivity(), items)
-        searchModal.setCustomDialogListener(object: SearchModal.SearchModalListener{
+        searchModal.setCustomDialogListener(object : SearchModal.SearchModalListener {
             override fun onDataReceived(data: ModalSearchModel) {
                 if (data.id == "-1") {
                     selectedCity = null
@@ -387,8 +425,10 @@ class JatemFragment : Fragment() {
         searchModal.searchHint = "Ketik untuk mencari…"
 
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(requireContext(), R.color.black_400)
-        else binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(requireContext(), R.color.light)
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background =
+            AppCompatResources.getDrawable(requireContext(), R.color.black_400)
+        else binding.llFilter.componentFilter.background =
+            AppCompatResources.getDrawable(requireContext(), R.color.light)
         binding.llFilter.componentFilter.visibility = View.GONE
         binding.llFilter.componentFilter.setOnClickListener {
             searchModal.show()

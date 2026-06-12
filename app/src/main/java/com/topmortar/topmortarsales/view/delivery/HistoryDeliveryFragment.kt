@@ -50,15 +50,19 @@ class HistoryDeliveryFragment : Fragment() {
     private lateinit var badgeRefresh: LinearLayout
 
     private var listener: CounterItem? = null
+
     interface CounterItem {
         fun counterItem(count: Int)
     }
+
     fun setCounterItem(listener: CounterItem) {
         this.listener = listener
     }
+
     fun syncNow() {
         getList()
     }
+
     fun setUserID(id: String?) {
         this.iUserID = id
     }
@@ -99,7 +103,8 @@ class HistoryDeliveryFragment : Fragment() {
             try {
 
                 val apiService: ApiService = HttpClient.apiService
-                val response = apiService.getDelivery(idCourier = userID, distributorID = userDistributorid)
+                val response =
+                    apiService.getDelivery(idCourier = userID, distributorID = userDistributorid)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -110,6 +115,7 @@ class HistoryDeliveryFragment : Fragment() {
                         listener?.counterItem(response.results.size)
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(true, "Belum ada riwayat!")
@@ -117,9 +123,14 @@ class HistoryDeliveryFragment : Fragment() {
                         listener?.counterItem(0)
 
                     }
+
                     else -> {
 
-                        handleMessage(requireContext(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            requireContext(),
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         loadingState(true, getString(R.string.failed_request))
                         showBadgeRefresh(true)
 
@@ -132,8 +143,15 @@ class HistoryDeliveryFragment : Fragment() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(requireContext(), "Failed HistoryDeliveryFragment on getList(). Catch: ${e.message}")
-                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    requireContext(),
+                    "Failed HistoryDeliveryFragment on getList(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    requireContext(),
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
 
@@ -145,17 +163,19 @@ class HistoryDeliveryFragment : Fragment() {
 
     private fun setRecyclerView(listItem: ArrayList<DeliveryModel.History>) {
 
-        val rvAdapter = HistoryDeliveryRecyclerViewAdapter(listItem, object: HistoryDeliveryRecyclerViewAdapter.ItemClickListener {
-            override fun onItemClick(data: DeliveryModel.History?) {
-                context?.let {
-                    val intent = Intent(it, MapsActivity::class.java)
-                    intent.putExtra(CONST_IS_TRACKING_HISTORY, true)
-                    intent.putExtra(CONST_DELIVERY_ID, data?.id_delivery)
-                    startActivity(intent)
+        val rvAdapter = HistoryDeliveryRecyclerViewAdapter(
+            listItem,
+            object : HistoryDeliveryRecyclerViewAdapter.ItemClickListener {
+                override fun onItemClick(data: DeliveryModel.History?) {
+                    context?.let {
+                        val intent = Intent(it, MapsActivity::class.java)
+                        intent.putExtra(CONST_IS_TRACKING_HISTORY, true)
+                        intent.putExtra(CONST_DELIVERY_ID, data?.id_delivery)
+                        startActivity(intent)
+                    }
                 }
-            }
 
-        })
+            })
 
         rvAdapter.isHistoryCourier(true)
 

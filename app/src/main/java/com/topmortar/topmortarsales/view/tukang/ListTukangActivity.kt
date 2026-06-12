@@ -100,7 +100,7 @@ class ListTukangActivity : AppCompatActivity() {
         End Call Fragment
          */
 
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 myOnBackPressed()
             }
@@ -117,19 +117,23 @@ class ListTukangActivity : AppCompatActivity() {
         fadeIn.duration = animationDuration
         val fadeOut = AnimationUtils.loadAnimation(this, R.anim.fade_out)
         fadeOut.duration = animationDuration
-        val slideInFromLeft = AnimationUtils.loadAnimation(this,
+        val slideInFromLeft = AnimationUtils.loadAnimation(
+            this,
             R.anim.fade_slide_in_from_left
         )
         slideInFromLeft.duration = animationDuration
-        val slideOutToRight = AnimationUtils.loadAnimation(this,
+        val slideOutToRight = AnimationUtils.loadAnimation(
+            this,
             R.anim.fade_slide_out_to_right
         )
         slideOutToRight.duration = animationDuration
-        val slideInFromRight = AnimationUtils.loadAnimation(this,
+        val slideInFromRight = AnimationUtils.loadAnimation(
+            this,
             R.anim.fade_slide_in_from_right
         )
         slideInFromRight.duration = animationDuration
-        val slideOutToLeft = AnimationUtils.loadAnimation(this,
+        val slideOutToLeft = AnimationUtils.loadAnimation(
+            this,
             R.anim.fade_slide_out_to_left
         )
         slideOutToLeft.duration = animationDuration
@@ -147,13 +151,14 @@ class ListTukangActivity : AppCompatActivity() {
                 isSearchActive = true
             }, animationDuration)
 
-            etSearchBox.addTextChangedListener(object: TextWatcher {
+            etSearchBox.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(
                     s: CharSequence?,
                     start: Int,
                     count: Int,
                     after: Int
-                ) {}
+                ) {
+                }
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
 

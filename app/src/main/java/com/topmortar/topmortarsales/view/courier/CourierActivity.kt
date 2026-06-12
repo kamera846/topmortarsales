@@ -67,7 +67,7 @@ class CourierActivity : AppCompatActivity() {
     private val userDistributorIds get() = sessionManager.userDistributor()
     private val userAbsentDateTime get() = sessionManager.absentDateTime()!!
 
-    private lateinit var firebaseReference : DatabaseReference
+    private lateinit var firebaseReference: DatabaseReference
 
     private lateinit var tabLayout: TabLayout
     private lateinit var viewPager: ViewPager
@@ -76,11 +76,12 @@ class CourierActivity : AppCompatActivity() {
 
     private lateinit var absentProgressBar: CustomProgressBar
 
-    private val locationResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            checkUserAbsent()
+    private val locationResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                checkUserAbsent()
+            }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,7 +93,7 @@ class CourierActivity : AppCompatActivity() {
         sessionManager = SessionManager(this@CourierActivity)
         val isLoggedIn = sessionManager.isLoggedIn()
 
-        if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()|| userDistributorId.isEmpty()) return missingDataHandler()
+        if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty() || userDistributorId.isEmpty()) return missingDataHandler()
 
         setContentView(binding.root)
 
@@ -100,10 +101,13 @@ class CourierActivity : AppCompatActivity() {
         AppUpdateHelper.checkForUpdate(this)
 
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-010")
+        firebaseReference =
+            FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-010")
 
-        binding.titleBarDark.tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
-        binding.titleBarDark.tvTitleBarDescription.visibility = binding.titleBarDark.tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
+        binding.titleBarDark.tvTitleBarDescription.text =
+            sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "" }
+        binding.titleBarDark.tvTitleBarDescription.visibility =
+            binding.titleBarDark.tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
         binding.titleBarDark.icBack.visibility = View.VISIBLE
         binding.titleBarDark.icBack.setOnClickListener {
             if (activeTab != 0) tabLayout.getTabAt(0)?.select()
@@ -120,7 +124,7 @@ class CourierActivity : AppCompatActivity() {
         checkSwipeRefreshLayoutHint()
         initLayout()
 
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 myOnBackPressed()
             }
@@ -135,7 +139,8 @@ class CourierActivity : AppCompatActivity() {
         // Firebase Auth Session
         lifecycleScope.launch {
             try {
-                val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+                val androidId =
+                    Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
                 val model = Build.MODEL
                 val manufacturer = Build.MANUFACTURER
 
@@ -152,7 +157,10 @@ class CourierActivity : AppCompatActivity() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@CourierActivity, "Failed CourierActivity on logoutHandler(). Catch: ${e.message}")
+                FirebaseUtils.logErr(
+                    this@CourierActivity,
+                    "Failed CourierActivity on logoutHandler(). Catch: ${e.message}"
+                )
                 Log.d("Firebase Auth", "$e")
             }
         }
@@ -180,11 +188,14 @@ class CourierActivity : AppCompatActivity() {
                         sessionManager.setUserLoggedIn(data)
 
 //                        tvTitleBarDescription.text = sessionManager.fullName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "Halo, ${ sessionManager.userName() }"}
-                        binding.titleBarDark.tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
-                        binding.titleBarDark.tvTitleBarDescription.visibility = binding.titleBarDark.tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
+                        binding.titleBarDark.tvTitleBarDescription.text = sessionManager.userName()
+                            .let { if (!it.isNullOrEmpty()) "Halo, $it" else "" }
+                        binding.titleBarDark.tvTitleBarDescription.visibility =
+                            binding.titleBarDark.tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
                         setTitleBarAbsent(userAbsentDateTime)
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> missingDataHandler()
 
                 }
@@ -194,7 +205,10 @@ class CourierActivity : AppCompatActivity() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@CourierActivity, "Failed CourierActivity on getUserLoggedIn(). Catch: ${e.message}")
+                FirebaseUtils.logErr(
+                    this@CourierActivity,
+                    "Failed CourierActivity on getUserLoggedIn(). Catch: ${e.message}"
+                )
                 Log.d("TAG USER LOGGED IN", generateFailedRunServiceMessage(e.message.toString()))
             }
 
@@ -228,16 +242,18 @@ class CourierActivity : AppCompatActivity() {
         val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
         val userChild = absentChild.child(userId)
 
-        userChild.addListenerForSingleValueEvent(object: ValueEventListener {
+        userChild.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
                     // Do something
-                    val absentDateTime = snapshot.child("morningDateTime").getValue(String::class.java).toString()
+                    val absentDateTime =
+                        snapshot.child("morningDateTime").getValue(String::class.java).toString()
 
                     if (absentDateTime.isNotEmpty()) {
                         sessionManager.absentDateTime(absentDateTime)
 
-                        val absentDate = DateFormat.format(absentDateTime, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd")
+                        val absentDate =
+                            DateFormat.format(absentDateTime, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd")
 
                         if (DateFormat.dateAfterNow(absentDate)) {
                             showDialogAbsent(userChild)
@@ -301,7 +317,8 @@ class CourierActivity : AppCompatActivity() {
         sessionManager.absentDateTime(absentDateTime)
         setTitleBarAbsent(absentDateTime)
 
-        val courierDeliveryId = if (userKind == USER_KIND_COURIER) AUTH_LEVEL_COURIER + userId else null
+        val courierDeliveryId =
+            if (userKind == USER_KIND_COURIER) AUTH_LEVEL_COURIER + userId else null
         startTrackingService(userId, userDistributorIds, courierDeliveryId)
 
         initLayout()
@@ -330,14 +347,16 @@ class CourierActivity : AppCompatActivity() {
 
         // Connect TabLayout and ViewPager
         tabLayout.setupWithViewPager(viewPager)
-        pagerAdapter.setCounterPageItem(object : CourierViewPagerAdapter.CounterPageItem{
+        pagerAdapter.setCounterPageItem(object : CourierViewPagerAdapter.CounterPageItem {
             override fun counterItem(count: Int, tabIndex: Int) {
-                if (tabIndex == 0) tabLayout.getTabAt(tabIndex)?.text = "Toko${if (count != 0) " ($count)" else ""}"
-                else tabLayout.getTabAt(tabIndex)?.text = "Basecamp${if (count != 0) " ($count)" else ""}"
+                if (tabIndex == 0) tabLayout.getTabAt(tabIndex)?.text =
+                    "Toko${if (count != 0) " ($count)" else ""}"
+                else tabLayout.getTabAt(tabIndex)?.text =
+                    "Basecamp${if (count != 0) " ($count)" else ""}"
             }
 
         })
-        tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener{
+        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 activeTab = tab?.position!!
             }
@@ -352,8 +371,7 @@ class CourierActivity : AppCompatActivity() {
             tabLayout.setBackgroundColor(getColor(R.color.black_300))
             tabLayout.setTabTextColors(getColor(R.color.black_600), getColor(R.color.primary))
             tabLayout.setSelectedTabIndicatorColor(getColor(R.color.primary))
-        }
-        else {
+        } else {
             tabLayout.setBackgroundColor(getColor(R.color.primary))
             tabLayout.setTabTextColors(getColor(R.color.primary_600), getColor(R.color.white))
             tabLayout.setSelectedTabIndicatorColor(getColor(R.color.white))
@@ -373,11 +391,16 @@ class CourierActivity : AppCompatActivity() {
 
         val dateDesc = DateFormat.differenceDateNowDesc(dateString)
         val date = DateFormat.format(dateString, "yyyy-MM-dd HH:mm:ss", "HH.mm")
-        binding.titleBarDark.tvTitleBarDescription.text = "Halo $username, absenmu tercatat pukul $date $dateDesc"
+        binding.titleBarDark.tvTitleBarDescription.text =
+            "Halo $username, absenmu tercatat pukul $date $dateDesc"
 
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
@@ -404,9 +427,17 @@ class CourierActivity : AppCompatActivity() {
 
     }
 
-    private fun checkPermission(userChild: DatabaseReference? = null, dialog: DialogInterface? = null, validAction: (() -> Unit)? = null) {
+    private fun checkPermission(
+        userChild: DatabaseReference? = null,
+        dialog: DialogInterface? = null,
+        validAction: (() -> Unit)? = null
+    ) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
                 if (ContextCompat.checkSelfPermission(
                         this,
                         Manifest.permission.ACCESS_BACKGROUND_LOCATION
@@ -438,18 +469,30 @@ class CourierActivity : AppCompatActivity() {
                         .show()
                 }
             } else {
-                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    LOCATION_PERMISSION_REQUEST_CODE
+                )
                 dialog?.dismiss()
             }
         } else {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
                 if (validAction != null) validAction()
                 else {
                     if (userChild != null) initFirebase(userChild)
                     dialog?.dismiss()
                 }
             } else {
-                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    LOCATION_PERMISSION_REQUEST_CODE
+                )
                 dialog?.dismiss()
             }
         }
@@ -465,7 +508,11 @@ class CourierActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
-            CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-007", userId)
+            CustomUtility(this).setUserStatusOnline(
+                true,
+                userDistributorIds ?: "-custom-007",
+                userId
+            )
         }, 1000)
     }
 

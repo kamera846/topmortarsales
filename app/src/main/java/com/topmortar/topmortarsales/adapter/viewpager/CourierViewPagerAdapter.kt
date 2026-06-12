@@ -11,12 +11,15 @@ import com.topmortar.topmortarsales.view.courier.ClosingStoreFragment
 class CourierViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
 
     private var listener: CounterPageItem? = null
+
     interface CounterPageItem {
         fun counterItem(count: Int, tabIndex: Int)
     }
+
     fun setCounterPageItem(listener: CounterPageItem) {
         this.listener = listener
     }
+
     private lateinit var fragmentClosing: ClosingStoreFragment
     private lateinit var fragmentBasecamp: BasecampFragment
     fun setSyncAction(index: Int) {
@@ -29,7 +32,7 @@ class CourierViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
             0 -> {
 
                 fragmentClosing = ClosingStoreFragment()
-                fragmentClosing.setCounterItem(object : ClosingStoreFragment.CounterItem{
+                fragmentClosing.setCounterItem(object : ClosingStoreFragment.CounterItem {
                     override fun counterItem(count: Int) {
                         listener?.counterItem(count, 0)
                     }
@@ -37,10 +40,12 @@ class CourierViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
                 })
                 fragmentClosing
 
-            } else -> {
+            }
+
+            else -> {
 
                 fragmentBasecamp = BasecampFragment()
-                fragmentBasecamp.setCounterItem(object : BasecampFragment.CounterItem{
+                fragmentBasecamp.setCounterItem(object : BasecampFragment.CounterItem {
                     override fun counterItem(count: Int) {
                         listener?.counterItem(count, 1)
                     }

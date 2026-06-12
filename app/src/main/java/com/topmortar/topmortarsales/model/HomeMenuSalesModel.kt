@@ -1,6 +1,6 @@
 package com.topmortar.topmortarsales.model
 
-data class HomeMenuSalesModel (
+data class HomeMenuSalesModel(
     var title: String = "",
     var icon: Int? = null,
     var bgColor: Int? = null,

@@ -487,7 +487,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val response = HttpClient.apiService.getSuratJalanDetail(processNumber = "3", idSj = idSj!!)
+                val response =
+                    HttpClient.apiService.getSuratJalanDetail(processNumber = "3", idSj = idSj!!)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -1095,7 +1096,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
 
-                    val response = HttpClient.apiService.printSj(idSj = createPartFromString(idSj!!))
+                    val response =
+                        HttpClient.apiService.printSj(idSj = createPartFromString(idSj!!))
 
                     when (response.status) {
                         RESPONSE_STATUS_OK -> {
@@ -1341,7 +1343,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
                 txtPotongan += txtTotalAmount - txtTotal
 
-                val response = HttpClient.apiService.printInvoice(idSj = createPartFromString(idSj ?: ""))
+                val response =
+                    HttpClient.apiService.printInvoice(idSj = createPartFromString(idSj ?: ""))
 
                 when (response.status) {
                     RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {

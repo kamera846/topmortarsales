@@ -304,13 +304,15 @@ class HomeSalesActivity : AppCompatActivity() {
                 currentTime >= eveningStart -> {
 
                     var title = "Waktunya Pulang"
-                    var description = "Jangan lupa melakukan absen pulang untuk menyelesaikan pekerjaan."
+                    var description =
+                        "Jangan lupa melakukan absen pulang untuk menyelesaikan pekerjaan."
 
                     if (!isAbsentMorningNow) {
-                        description = "Jam kerja berakhir, dan Anda belum melakukan absen masuk hari ini."
+                        description =
+                            "Jam kerja berakhir, dan Anda belum melakukan absen masuk hari ini."
                         hideBtnAbsent()
                     } else if (!isAbsentEveningNow) {
-                        showBtnAbsent("PULANG SEKARANG",R.color.red_claret)
+                        showBtnAbsent("PULANG SEKARANG", R.color.red_claret)
                     } else {
                         title = getString(R.string.absen_pulang_sudah_tercatat)
                         description = getString(R.string.terima_kasih_atas_kinerja_hari_ini)
@@ -326,7 +328,8 @@ class HomeSalesActivity : AppCompatActivity() {
                 currentTime in morningEnd..eveningStart -> {
 
                     var title = getString(R.string.kehadiranmu_telah_tercatat)
-                    val description = getString(R.string.terimakasih_sudah_mencatat_kehadiran_hari_ini_without_clock)
+                    val description =
+                        getString(R.string.terimakasih_sudah_mencatat_kehadiran_hari_ini_without_clock)
 
                     if (!isAbsentMorningNow) {
                         title = "Wah, Kamu Terlambat"
@@ -345,7 +348,8 @@ class HomeSalesActivity : AppCompatActivity() {
                 currentTime in morningStart..morningEnd -> {
 
                     var title = getString(R.string.kehadiranmu_telah_tercatat)
-                    val description = getString(R.string.terimakasih_sudah_mencatat_kehadiran_hari_ini_without_clock)
+                    val description =
+                        getString(R.string.terimakasih_sudah_mencatat_kehadiran_hari_ini_without_clock)
 
                     if (!isAbsentMorningNow) {
                         title = getString(R.string.yuk_catat_kehadiranmu_hari_ini)
@@ -373,7 +377,10 @@ class HomeSalesActivity : AppCompatActivity() {
         }
     }
 
-    private fun setAbsentText(title: String = "Sabar Dulu Ya", description: String = "Absen masuk hanya bisa dilakukan pada pukul 07.00-09.00 WIB.") {
+    private fun setAbsentText(
+        title: String = "Sabar Dulu Ya",
+        description: String = "Absen masuk hanya bisa dilakukan pada pukul 07.00-09.00 WIB."
+    ) {
         binding.absentTitle.text = title
         binding.absentDescription.text = description
     }

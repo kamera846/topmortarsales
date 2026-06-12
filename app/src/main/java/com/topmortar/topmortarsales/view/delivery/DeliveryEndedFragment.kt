@@ -59,12 +59,15 @@ class DeliveryEndedFragment : Fragment() {
     private var selectedCity: ModalSearchModel? = null
 
     private var listener: CounterItem? = null
+
     interface CounterItem {
         fun counterItem(count: Int)
     }
+
     fun setCounterItem(listener: CounterItem) {
         this.listener = listener
     }
+
     fun syncNow() {
         getList()
     }
@@ -111,9 +114,17 @@ class DeliveryEndedFragment : Fragment() {
                 val apiService: ApiService = HttpClient.apiService
                 val response = when (userKind) {
                     USER_KIND_ADMIN -> {
-                        if (selectedCity != null) apiService.getDeliveryByCity(cityId = selectedCity?.id!!, distributorID = userDistributorid)
+                        if (selectedCity != null) apiService.getDeliveryByCity(
+                            cityId = selectedCity?.id!!,
+                            distributorID = userDistributorid
+                        )
                         else apiService.getDelivery(distributorID = userDistributorid)
-                    } else -> apiService.getDeliveryByCity(cityId = userCity, distributorID = userDistributorid)
+                    }
+
+                    else -> apiService.getDeliveryByCity(
+                        cityId = userCity,
+                        distributorID = userDistributorid
+                    )
                 }
 
                 when (response.status) {
@@ -125,6 +136,7 @@ class DeliveryEndedFragment : Fragment() {
                         listener?.counterItem(response.results.size)
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(true, "Belum ada kiriman yang diselesaikan hari ini!")
@@ -132,9 +144,14 @@ class DeliveryEndedFragment : Fragment() {
                         listener?.counterItem(0)
 
                     }
+
                     else -> {
 
-                        handleMessage(requireContext(), TAG_RESPONSE_CONTACT, getString(string.failed_get_data))
+                        handleMessage(
+                            requireContext(),
+                            TAG_RESPONSE_CONTACT,
+                            getString(string.failed_get_data)
+                        )
                         loadingState(true, getString(string.failed_request))
                         showBadgeRefresh(true)
 
@@ -143,7 +160,11 @@ class DeliveryEndedFragment : Fragment() {
 
             } catch (e: Exception) {
 
-                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    requireContext(),
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(string.failed_request))
                 showBadgeRefresh(true)
 
@@ -155,17 +176,19 @@ class DeliveryEndedFragment : Fragment() {
 
     private fun setRecyclerView(listItem: ArrayList<DeliveryModel.History>) {
 
-        val rvAdapter = HistoryDeliveryRecyclerViewAdapter(listItem, object: HistoryDeliveryRecyclerViewAdapter.ItemClickListener {
-            override fun onItemClick(data: DeliveryModel.History?) {
-                context?.let {
-                    val intent = Intent(it, MapsActivity::class.java)
-                    intent.putExtra(CONST_IS_TRACKING_HISTORY, true)
-                    intent.putExtra(CONST_DELIVERY_ID, data?.id_delivery)
-                    startActivity(intent)
+        val rvAdapter = HistoryDeliveryRecyclerViewAdapter(
+            listItem,
+            object : HistoryDeliveryRecyclerViewAdapter.ItemClickListener {
+                override fun onItemClick(data: DeliveryModel.History?) {
+                    context?.let {
+                        val intent = Intent(it, MapsActivity::class.java)
+                        intent.putExtra(CONST_IS_TRACKING_HISTORY, true)
+                        intent.putExtra(CONST_DELIVERY_ID, data?.id_delivery)
+                        startActivity(intent)
+                    }
                 }
-            }
 
-        })
+            })
 
         context?.let { ctx ->
             binding.rvChatList.layoutManager = LinearLayoutManager(ctx)
@@ -204,7 +227,7 @@ class DeliveryEndedFragment : Fragment() {
             binding.txtLoading.visibility = View.VISIBLE
             binding.rvChatList.visibility = View.GONE
 
-            binding.swipeRefreshLayout.isRefreshing = message === getString(R.string.txt_loading)
+            binding.swipeRefreshLayout.isRefreshing = message === getString(string.txt_loading)
 
         } else {
 
@@ -244,7 +267,12 @@ class DeliveryEndedFragment : Fragment() {
 
                         for (i in 0 until citiesResults!!.size) {
                             val data = citiesResults!![i]
-                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                            items.add(
+                                ModalSearchModel(
+                                    data.id_city,
+                                    "${data.nama_city} - ${data.kode_city}"
+                                )
+                            )
                         }
                         items.add(0, ModalSearchModel("-1", "Hapus Filter"))
 
@@ -253,14 +281,20 @@ class DeliveryEndedFragment : Fragment() {
 //                        binding.llFilter.componentFilter.visibility = View.GONE
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         handleMessage(requireActivity(), "LIST CITY", "Daftar kota kosong!")
 
                     }
+
                     else -> {
 
-                        handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, getString(string.failed_get_data))
+                        handleMessage(
+                            requireActivity(),
+                            TAG_RESPONSE_CONTACT,
+                            getString(string.failed_get_data)
+                        )
 
                     }
                 }
@@ -268,7 +302,11 @@ class DeliveryEndedFragment : Fragment() {
 
             } catch (e: Exception) {
 
-                handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    requireActivity(),
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
 
             }
 
@@ -278,7 +316,7 @@ class DeliveryEndedFragment : Fragment() {
     private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
 
         searchModal = SearchModal(requireActivity(), items)
-        searchModal.setCustomDialogListener(object: SearchModal.SearchModalListener{
+        searchModal.setCustomDialogListener(object : SearchModal.SearchModalListener {
             override fun onDataReceived(data: ModalSearchModel) {
                 if (data.id == "-1") {
                     selectedCity = null
@@ -294,8 +332,10 @@ class DeliveryEndedFragment : Fragment() {
         searchModal.searchHint = "Ketik untuk mencari…"
 
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(requireContext(), color.black_400)
-        else binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(requireContext(), color.light)
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background =
+            AppCompatResources.getDrawable(requireContext(), color.black_400)
+        else binding.llFilter.componentFilter.background =
+            AppCompatResources.getDrawable(requireContext(), color.light)
         binding.llFilter.componentFilter.visibility = View.GONE
         binding.llFilter.componentFilter.setOnClickListener {
             searchModal.show()

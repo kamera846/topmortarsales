@@ -103,13 +103,17 @@ class PreviewClosingActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_preview_closing)
 
-        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, userDistributorId ?: "-custom-017", "$userID")
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(
+            true,
+            userDistributorId ?: "-custom-017",
+            "$userID"
+        )
 
         initVariable()
         initClickHandler()
         dataActivityValidation()
 
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 myOnBackPressed()
             }
@@ -146,7 +150,10 @@ class PreviewClosingActivity : AppCompatActivity() {
                         endLng = endLng
                     )
                 } catch (e: Exception) {
-                    FirebaseUtils.logErr(this@PreviewClosingActivity, "Failed closingDelivery(), Exception: ${e.message}")
+                    FirebaseUtils.logErr(
+                        this@PreviewClosingActivity,
+                        "Failed closingDelivery(), Exception: ${e.message}"
+                    )
                     Pair(false, e.message.toString())
                 }
 
@@ -166,7 +173,10 @@ class PreviewClosingActivity : AppCompatActivity() {
                     "Failed closingDelivery(), Retry ${attempt + 1} failed. $closingDeliveryMessage"
                 )
 
-                Log.d("DEBUG", "Failed closingDelivery(), Retry ${attempt + 1} failed. $closingDeliveryMessage")
+                Log.d(
+                    "DEBUG",
+                    "Failed closingDelivery(), Retry ${attempt + 1} failed. $closingDeliveryMessage"
+                )
 
                 delay(500L * (attempt + 1))
             }
@@ -228,7 +238,10 @@ class PreviewClosingActivity : AppCompatActivity() {
             val (success, message) = try {
                 createInvoice()
             } catch (e: Exception) {
-                FirebaseUtils.logErr(this@PreviewClosingActivity, "Failed createInvoice(), Exception: ${e.message}")
+                FirebaseUtils.logErr(
+                    this@PreviewClosingActivity,
+                    "Failed createInvoice(), Exception: ${e.message}"
+                )
                 Pair(false, e.message.toString())
             }
 
@@ -312,7 +325,8 @@ class PreviewClosingActivity : AppCompatActivity() {
 
         if (!imgUris.isNullOrEmpty()) {
 
-            imgUri = CompressImageUtil.compressImageOptimized(this@PreviewClosingActivity, imgUris[0])
+            imgUri =
+                CompressImageUtil.compressImageOptimized(this@PreviewClosingActivity, imgUris[0])
             GlideUtil.loadImage(this@PreviewClosingActivity, imgUri, imgPreview)
 
             val contentResolver = contentResolver
@@ -488,18 +502,30 @@ class PreviewClosingActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
-            if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(true, userDistributorId ?: "-custom-017", "$userID")
+            if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(
+                true,
+                userDistributorId ?: "-custom-017",
+                "$userID"
+            )
         }, 1000)
     }
 
     override fun onStop() {
         super.onStop()
-        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, userDistributorId ?: "-custom-017", "$userID")
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(
+            false,
+            userDistributorId ?: "-custom-017",
+            "$userID"
+        )
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(false, userDistributorId ?: "-custom-017", "$userID")
+        if (sessionManager.userKind() == USER_KIND_COURIER) CustomUtility(this).setUserStatusOnline(
+            false,
+            userDistributorId ?: "-custom-017",
+            "$userID"
+        )
     }
 
 }

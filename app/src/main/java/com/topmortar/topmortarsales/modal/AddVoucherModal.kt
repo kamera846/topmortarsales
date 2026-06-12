@@ -37,7 +37,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @SuppressLint("SetTextI18n")
-class AddVoucherModal(private val context: Context, private val lifecycleScope: CoroutineScope) : Dialog(context) {
+class AddVoucherModal(private val context: Context, private val lifecycleScope: CoroutineScope) :
+    Dialog(context) {
 
     private var _binding: ModalAddVoucherBinding? = null
     private val binding get() = _binding!!
@@ -58,20 +59,23 @@ class AddVoucherModal(private val context: Context, private val lifecycleScope: 
         this.isEdit = isEdit
         this.data = data
     }
+
     private var contactId: String = "-1"
     fun setVoucherId(id: String) {
         this.contactId = id
     }
+
     private var contactCoordinate: String = ""
     fun setContactCoordinate(coordinate: String) {
         this.contactCoordinate = coordinate
     }
 
     // Interface
-    private var modalInterface : AddVoucherModalInterface? = null
-    fun initializeInterface(data : AddVoucherModalInterface) {
+    private var modalInterface: AddVoucherModalInterface? = null
+    fun initializeInterface(data: AddVoucherModalInterface) {
         this.modalInterface = data
     }
+
     interface AddVoucherModalInterface {
         fun onSubmit(status: Boolean)
     }
@@ -117,12 +121,12 @@ class AddVoucherModal(private val context: Context, private val lifecycleScope: 
         icClose.visibility = View.VISIBLE
         tvTitleBar.text = (if (isEdit) "Konfirmasi Penerima" else "Tambah Voucher")
 
-        tvTitleBar.setPadding(convertDpToPx(16, context),0, convertDpToPx(16, context), 0)
+        tvTitleBar.setPadding(convertDpToPx(16, context), 0, convertDpToPx(16, context), 0)
 
         if (isEdit && data != null) {
             tvTitleBarDesc.visibility = View.VISIBLE
             tvTitleBarDesc.text = "Nomor " + data?.no_voucher
-            tvTitleBarDesc.setPadding(convertDpToPx(16, context),0, convertDpToPx(16, context), 0)
+            tvTitleBarDesc.setPadding(convertDpToPx(16, context), 0, convertDpToPx(16, context), 0)
 
             binding.voucher2Container.visibility = View.VISIBLE
             binding.etVoucher2.setText(if (data!!.is_claimed == "1") "Sudah diklaim" else "Belum diklaim")
@@ -130,7 +134,8 @@ class AddVoucherModal(private val context: Context, private val lifecycleScope: 
             binding.etVoucher2.setBackgroundResource(R.drawable.et_background_disabled)
             binding.etVoucher2.setTextColor(context.getColor(R.color.black_200))
 
-            if (userKind != USER_KIND_ADMIN && userKind != USER_KIND_ADMIN_CITY) binding.tvDistance.visibility = View.VISIBLE
+            if (userKind != USER_KIND_ADMIN && userKind != USER_KIND_ADMIN_CITY) binding.tvDistance.visibility =
+                View.VISIBLE
             else binding.tvDistance.visibility = View.GONE
             binding.tvDistance.text = "*Jarak anda dengan toko saat ini $contactCoordinate km"
 
@@ -140,8 +145,7 @@ class AddVoucherModal(private val context: Context, private val lifecycleScope: 
                 if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
                     binding.tvDistance.visibility = View.GONE
                     binding.btnSubmit.visibility = View.VISIBLE
-                }
-                else {
+                } else {
                     binding.tvDistance.visibility = View.GONE
                     binding.btnSubmit.visibility = View.GONE
 
@@ -233,12 +237,18 @@ class AddVoucherModal(private val context: Context, private val lifecycleScope: 
                         this@AddVoucherModal.dismiss()
 
                     }
+
                     RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                        handleMessage(context, TAG_RESPONSE_MESSAGE, "Gagal menambahkan! Message: ${ response.message }")
+                        handleMessage(
+                            context,
+                            TAG_RESPONSE_MESSAGE,
+                            "Gagal menambahkan! Message: ${response.message}"
+                        )
                         loadingState(false)
 
                     }
+
                     else -> {
 
                         handleMessage(context, TAG_RESPONSE_CONTACT, "Gagal menambahkan data!")
@@ -250,7 +260,11 @@ class AddVoucherModal(private val context: Context, private val lifecycleScope: 
 
             } catch (e: Exception) {
 
-                handleMessage(context, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    context,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(false)
 
             }

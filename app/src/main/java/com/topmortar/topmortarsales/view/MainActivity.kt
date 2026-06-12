@@ -192,23 +192,25 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
     private lateinit var listCoordinateCityID: ArrayList<String>
 
     lateinit var appUpdateManager: AppUpdateManager
-    private val appUpdateLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-        if (result.resultCode != RESULT_OK) {
-            showForceUpdateDialog()
-        }
-    }
-
-    private val activityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            val resultData = it.data?.getStringExtra("$MAIN_ACTIVITY_REQUEST_CODE")
-
-            if (resultData == SYNC_NOW) {
-
-                getUserLoggedIn()
-
+    private val appUpdateLauncher =
+        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            if (result.resultCode != RESULT_OK) {
+                showForceUpdateDialog()
             }
         }
-    }
+
+    private val activityLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                val resultData = it.data?.getStringExtra("$MAIN_ACTIVITY_REQUEST_CODE")
+
+                if (resultData == SYNC_NOW) {
+
+                    getUserLoggedIn()
+
+                }
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -219,10 +221,11 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
         sessionManager = SessionManager(this@MainActivity)
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-002")
+        firebaseReference =
+            FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-002")
 
         val isLoggedIn = sessionManager.isLoggedIn()
-        if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()|| userDistributorId.isEmpty()) return missingDataHandler()
+        if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty() || userDistributorId.isEmpty()) return missingDataHandler()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -324,58 +327,75 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             R.id.nav_sync_now -> {
                 getUserLoggedIn()
             }
+
             R.id.nav_chart -> {
                 val intent = Intent(this@MainActivity, ChartActivity::class.java)
                 startActivity(intent)
             }
+
             R.id.nav_nearest_store -> {
                 navigateCheckLocation()
             }
+
             R.id.nav_city_store -> {
                 searchCityForMaps.show()
             }
+
             R.id.nav_my_profile -> {
                 val intent = Intent(this@MainActivity, UserProfileActivity::class.java)
                 startActivity(intent)
             }
+
             R.id.nav_search -> {
                 toggleSearchEvent(SEARCH_OPEN)
             }
+
             R.id.nav_products -> {
                 startActivity(Intent(this@MainActivity, ProductsActivity::class.java))
             }
+
             R.id.nav_user -> {
                 startActivity(Intent(this@MainActivity, ManageUserActivity::class.java))
             }
+
             R.id.nav_city -> {
                 val intent = Intent(this@MainActivity, ManageCityActivity::class.java)
                 intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
                 activityLauncher.launch(intent)
             }
+
             R.id.nav_tukang -> {
                 startActivity(Intent(this@MainActivity, ListTukangActivity::class.java))
             }
+
             R.id.nav_skill -> {
                 startActivity(Intent(this@MainActivity, ManageSkillActivity::class.java))
             }
+
             R.id.nav_basecamp -> {
                 startActivity(Intent(this@MainActivity, ManageBasecampActivity::class.java))
             }
+
             R.id.nav_gudang -> {
                 startActivity(Intent(this@MainActivity, ManageGudangActivity::class.java))
             }
+
             R.id.nav_delivery -> {
                 startActivity(Intent(this@MainActivity, DeliveryActivity::class.java))
             }
+
             R.id.nav_manual_absent -> {
                 startActivity(Intent(this@MainActivity, UserAbsentManualActivity::class.java))
             }
+
             R.id.nav_logout -> {
                 logoutConfirmation()
             }
+
             R.id.rencana_visit -> {
                 startActivity(Intent(this@MainActivity, RencanaVisitActivity::class.java))
             }
+
             R.id.rencana_visit_penagihan -> {
                 startActivity(Intent(this@MainActivity, RencanaVisitPenagihanActivity::class.java))
             }
@@ -420,11 +440,26 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 binding.titleBar.icMenu.visibility = View.VISIBLE
                 binding.titleBar.icMenu.layoutParams.width = contentWidht
                 binding.titleBar.icMenu.layoutParams.height = contentHeight
-                binding.titleBar.icMenu.setPadding(paddingHorizontal,paddingVertival,paddingHorizontal,paddingVertival)
-                (binding.titleBar.icMenu.layoutParams as ViewGroup.MarginLayoutParams).setMargins(0,0,paddingHorizontal,0)
+                binding.titleBar.icMenu.setPadding(
+                    paddingHorizontal,
+                    paddingVertival,
+                    paddingHorizontal,
+                    paddingVertival
+                )
+                (binding.titleBar.icMenu.layoutParams as ViewGroup.MarginLayoutParams).setMargins(
+                    0,
+                    0,
+                    paddingHorizontal,
+                    0
+                )
                 binding.titleBar.icSearch.layoutParams.width = contentWidht
                 binding.titleBar.icSearch.layoutParams.height = contentHeight
-                binding.titleBar.icSearch.setPadding(paddingHorizontal,paddingVertival,paddingHorizontal,paddingVertival)
+                binding.titleBar.icSearch.setPadding(
+                    paddingHorizontal,
+                    paddingVertival,
+                    paddingHorizontal,
+                    paddingVertival
+                )
                 icMore.visibility = View.GONE
 
                 val headerView = binding.navView.getHeaderView(0)
@@ -461,7 +496,8 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         }
 
         // Set Floating Action Button
-        if ((sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) && !isContactXSource) btnFab.visibility = View.VISIBLE
+        if ((sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) && !isContactXSource) btnFab.visibility =
+            View.VISIBLE
         if (sessionManager.userKind() != USER_KIND_COURIER) icSearch.visibility = View.VISIBLE
         if (sessionManager.userKind() == USER_KIND_COURIER) btnFabAdmin.visibility = View.VISIBLE
 
@@ -516,7 +552,8 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         val message = "*#Courier Service*\nHalo admin, tolong bantu saya [KETIK PESAN ANDA]"
 
         val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")
+        intent.data =
+            Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")
 
         try {
             startActivity(intent)
@@ -584,9 +621,19 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 try {
 
                     val response = when (userKind) {
-                        USER_KIND_ADMIN, USER_KIND_PENAGIHAN, USER_KIND_MARKETING -> HttpClient.apiService.getContactsByDistributor(distributorID = userDistributorId)
-                        USER_KIND_COURIER -> HttpClient.apiService.getCourierStore(processNumber = "1", courierId = userId)
-                        else -> HttpClient.apiService.getContacts(cityId = userCity, distributorID = userDistributorId)
+                        USER_KIND_ADMIN, USER_KIND_PENAGIHAN, USER_KIND_MARKETING -> HttpClient.apiService.getContactsByDistributor(
+                            distributorID = userDistributorId
+                        )
+
+                        USER_KIND_COURIER -> HttpClient.apiService.getCourierStore(
+                            processNumber = "1",
+                            courierId = userId
+                        )
+
+                        else -> HttpClient.apiService.getContacts(
+                            cityId = userCity,
+                            distributorID = userDistributorId
+                        )
                     }
 
                     when (response.status) {
@@ -619,6 +666,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 //                            startActivity(intent)
 
                         }
+
                         RESPONSE_STATUS_EMPTY -> {
 
                             val listCoordinate = arrayListOf<String>()
@@ -628,15 +676,23 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
                             intent.putExtra(CONST_NEAREST_STORE, true)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_NAME,
+                                listCoordinateName
+                            )
 
                             progressBar.dismiss()
                             startActivity(intent)
 
                         }
+
                         else -> {
 
-                            handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                            handleMessage(
+                                this@MainActivity,
+                                TAG_RESPONSE_CONTACT,
+                                getString(R.string.failed_get_data)
+                            )
                             progressBar.dismiss()
 
                         }
@@ -647,8 +703,15 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                     if (e is CancellationException) {
                         return@launch
                     }
-                    FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on navigateCheckLocation(). Catch: ${e.message}")
-                    handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                    FirebaseUtils.logErr(
+                        this@MainActivity,
+                        "Failed MainActivity on navigateCheckLocation(). Catch: ${e.message}"
+                    )
+                    handleMessage(
+                        this@MainActivity,
+                        TAG_RESPONSE_CONTACT,
+                        generateFailedRunServiceMessage(e.message.toString())
+                    )
                     progressBar.dismiss()
 
                 }
@@ -661,7 +724,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
     private fun setupDialogSearchForMaps(items: ArrayList<ModalSearchModel> = ArrayList()) {
 
         searchCityForMaps = SearchModal(this, items)
-        searchCityForMaps.setCustomDialogListener(object: SearchModal.SearchModalListener{
+        searchCityForMaps.setCustomDialogListener(object : SearchModal.SearchModalListener {
             override fun onDataReceived(data: ModalSearchModel) {
                 data.id?.let { getContactsForMaps(it) }
             }
@@ -727,61 +790,80 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                     getUserLoggedIn()
                     true
                 }
+
                 R.id.nearest_store -> {
                     navigateCheckLocation()
                     true
                 }
+
                 R.id.selected_store -> {
                     toggleSelectItem()
                     true
                 }
+
                 R.id.option_my_profile -> {
                     val intent = Intent(this@MainActivity, UserProfileActivity::class.java)
                     startActivity(intent)
                     true
                 }
+
                 R.id.option_search -> {
                     toggleSearchEvent(SEARCH_OPEN)
                     true
                 }
+
                 R.id.option_user -> {
                     startActivity(Intent(this@MainActivity, ManageUserActivity::class.java))
                     true
                 }
+
                 R.id.option_city -> {
                     val intent = Intent(this@MainActivity, ManageCityActivity::class.java)
                     intent.putExtra(ACTIVITY_REQUEST_CODE, MAIN_ACTIVITY_REQUEST_CODE)
                     activityLauncher.launch(intent)
                     true
                 }
+
                 R.id.option_skill -> {
                     startActivity(Intent(this@MainActivity, ManageSkillActivity::class.java))
                     true
                 }
+
                 R.id.option_basecamp -> {
                     startActivity(Intent(this@MainActivity, ManageBasecampActivity::class.java))
                     true
                 }
+
                 R.id.option_gudang -> {
                     startActivity(Intent(this@MainActivity, ManageGudangActivity::class.java))
                     true
                 }
+
                 R.id.option_delivery -> {
                     startActivity(Intent(this@MainActivity, DeliveryActivity::class.java))
                     true
                 }
+
                 R.id.option_logout -> {
                     logoutConfirmation()
                     true
                 }
+
                 R.id.rencana_visit -> {
                     startActivity(Intent(this@MainActivity, RencanaVisitActivity::class.java))
                     true
                 }
+
                 R.id.rencana_visit_penagihan -> {
-                    startActivity(Intent(this@MainActivity, RencanaVisitPenagihanActivity::class.java))
+                    startActivity(
+                        Intent(
+                            this@MainActivity,
+                            RencanaVisitPenagihanActivity::class.java
+                        )
+                    )
                     true
                 }
+
                 else -> false
             }
         }
@@ -807,19 +889,23 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         fadeIn.duration = animationDuration
         val fadeOut = AnimationUtils.loadAnimation(this@MainActivity, R.anim.fade_out)
         fadeOut.duration = animationDuration
-        val slideInFromLeft = AnimationUtils.loadAnimation(this@MainActivity,
+        val slideInFromLeft = AnimationUtils.loadAnimation(
+            this@MainActivity,
             R.anim.fade_slide_in_from_left
         )
         slideInFromLeft.duration = animationDuration
-        val slideOutToRight = AnimationUtils.loadAnimation(this@MainActivity,
+        val slideOutToRight = AnimationUtils.loadAnimation(
+            this@MainActivity,
             R.anim.fade_slide_out_to_right
         )
         slideOutToRight.duration = animationDuration
-        val slideInFromRight = AnimationUtils.loadAnimation(this@MainActivity,
+        val slideInFromRight = AnimationUtils.loadAnimation(
+            this@MainActivity,
             R.anim.fade_slide_in_from_right
         )
         slideInFromRight.duration = animationDuration
-        val slideOutToLeft = AnimationUtils.loadAnimation(this@MainActivity,
+        val slideOutToLeft = AnimationUtils.loadAnimation(
+            this@MainActivity,
             R.anim.fade_slide_out_to_left
         )
         slideOutToLeft.duration = animationDuration
@@ -837,13 +923,14 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 isSearchActive = true
             }, animationDuration)
 
-            etSearchBox.addTextChangedListener(object: TextWatcher {
+            etSearchBox.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(
                     s: CharSequence?,
                     start: Int,
                     count: Int,
                     after: Int
-                ) {}
+                ) {
+                }
 
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
 
@@ -929,16 +1016,22 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             try {
 
                 val response = when (userKind) {
-                    USER_KIND_COURIER -> HttpClient.apiService.getCourierStore(processNumber = "1", courierId = userId)
+                    USER_KIND_COURIER -> HttpClient.apiService.getCourierStore(
+                        processNumber = "1",
+                        courierId = userId
+                    )
+
                     else -> {
                         val validStatusFilter = selectedValidStatusID.lowercase(Locale.ROOT).let {
                             when (it) {
                                 "sudah valid" -> {
                                     "valid"
                                 }
+
                                 "tidak valid" -> {
                                     "invalid"
                                 }
+
                                 else -> {
                                     "-1"
                                 }
@@ -951,19 +1044,45 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                         if (isContactXSource) {
                             HttpClient.apiService.getContactXs(cityId = userCity, userId = userId)
                         } else if (cityID != null && statusFilter != "-1" && validStatusFilter != "-1") {
-                            HttpClient.apiService.getContacts(cityId = cityID, status = statusFilter, distributorID = userDistributorId, validationStatus = validStatusFilter)
+                            HttpClient.apiService.getContacts(
+                                cityId = cityID,
+                                status = statusFilter,
+                                distributorID = userDistributorId,
+                                validationStatus = validStatusFilter
+                            )
                         } else if (statusFilter != "-1" && validStatusFilter != "-1") {
-                            HttpClient.apiService.getContactsByStatusAndValidationStatus(status = statusFilter, validationStatus = validStatusFilter, distributorID = userDistributorId)
+                            HttpClient.apiService.getContactsByStatusAndValidationStatus(
+                                status = statusFilter,
+                                validationStatus = validStatusFilter,
+                                distributorID = userDistributorId
+                            )
                         } else if (cityID != null && statusFilter != "-1") {
-                            HttpClient.apiService.getContacts(cityId = cityID, status = statusFilter, distributorID = userDistributorId)
+                            HttpClient.apiService.getContacts(
+                                cityId = cityID,
+                                status = statusFilter,
+                                distributorID = userDistributorId
+                            )
                         } else if (cityID != null && validStatusFilter != "-1") {
-                            HttpClient.apiService.getContactsByCityAndValidationStatus(cityId = cityID, validationStatus = validStatusFilter, distributorID = userDistributorId)
+                            HttpClient.apiService.getContactsByCityAndValidationStatus(
+                                cityId = cityID,
+                                validationStatus = validStatusFilter,
+                                distributorID = userDistributorId
+                            )
                         } else if (cityID != null) {
-                            HttpClient.apiService.getContacts(cityId = cityID, distributorID = userDistributorId)
-                        } else if (statusFilter != "-1" ) {
-                            HttpClient.apiService.getContactsByStatus(status = statusFilter, distributorID = userDistributorId)
-                        } else if (validStatusFilter != "-1" ) {
-                            HttpClient.apiService.getContactsByValidationStatus(validationStatus = validStatusFilter, distributorID = userDistributorId)
+                            HttpClient.apiService.getContacts(
+                                cityId = cityID,
+                                distributorID = userDistributorId
+                            )
+                        } else if (statusFilter != "-1") {
+                            HttpClient.apiService.getContactsByStatus(
+                                status = statusFilter,
+                                distributorID = userDistributorId
+                            )
+                        } else if (validStatusFilter != "-1") {
+                            HttpClient.apiService.getContactsByValidationStatus(
+                                validationStatus = validStatusFilter,
+                                distributorID = userDistributorId
+                            )
                         } else HttpClient.apiService.getContactsByDistributor(distributorID = userDistributorId)
                     }
                 }
@@ -989,15 +1108,21 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                         setupFilterTokoModal()
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(true, "Daftar kontak kosong!")
                         binding.tvFilter.text = "$textFilter (${response.results.size})"
 
                     }
+
                     else -> {
 
-                        handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@MainActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         loadingState(true, getString(R.string.failed_request))
 
                     }
@@ -1010,8 +1135,15 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on getContacts(). Catch: ${e.message}")
-                handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@MainActivity,
+                    "Failed MainActivity on getContacts(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@MainActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
 
             }
@@ -1028,7 +1160,10 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         lifecycleScope.launch {
             try {
 
-                val response = HttpClient.apiService.getContacts(cityId = cityID, distributorID = userDistributorId)
+                val response = HttpClient.apiService.getContacts(
+                    cityId = cityID,
+                    distributorID = userDistributorId
+                )
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -1042,11 +1177,21 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                         LoopingTask(response.results).execute()
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
-                        handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Daftar kontak kosong!")
+                        handleMessage(
+                            this@MainActivity,
+                            TAG_RESPONSE_CONTACT,
+                            "Daftar kontak kosong!"
+                        )
                     }
+
                     else -> {
-                        handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@MainActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                     }
                 }
 
@@ -1054,8 +1199,15 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on getContactsForMaps(). Catch: ${e.message}")
-                handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@MainActivity,
+                    "Failed MainActivity on getContactsForMaps(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@MainActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
             } finally {
                 progressBar.dismiss()
             }
@@ -1082,19 +1234,30 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 //                        items.add(ModalSearchModel("-1", "Hapus filter"))
                         for (i in 0 until cities.size) {
                             val data = cities[i]
-                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                            items.add(
+                                ModalSearchModel(
+                                    data.id_city,
+                                    "${data.nama_city} - ${data.kode_city}"
+                                )
+                            )
                         }
                         setupDialogSearchForMaps(items)
                         setupFilterTokoModal()
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         handleMessage(this@MainActivity, "LIST CITY", "Daftar kota kosong!")
 
                     }
+
                     else -> {
 
-                        handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@MainActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
 
                     }
                 }
@@ -1105,8 +1268,15 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on getCities(). Catch: ${e.message}")
-                handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@MainActivity,
+                    "Failed MainActivity on getCities(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@MainActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
 
             }
 
@@ -1118,8 +1288,10 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
     private fun setupFilterTokoModal() {
 
         if (userKind != USER_KIND_COURIER && userKind != USER_KIND_BA) {
-            val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-            if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.background = AppCompatResources.getDrawable(this, R.color.black_400)
+            val currentNightMode =
+                resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+            if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.background =
+                AppCompatResources.getDrawable(this, R.color.black_400)
             else binding.llFilter.background = AppCompatResources.getDrawable(this, R.color.light)
 
             if (!isContactXSource) {
@@ -1135,7 +1307,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 filterModal.setValidStatuses(selected = selectedValidStatusID)
                 filterModal.setStatuses(selected = selectedStatusID)
             }
-            filterModal.setSendFilterListener(object: FilterTokoModal.SendFilterListener {
+            filterModal.setSendFilterListener(object : FilterTokoModal.SendFilterListener {
                 override fun onSendFilter(
                     selectedValidStatusID: String,
                     selectedStatusID: String,
@@ -1191,7 +1363,9 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                             }
                         }
 
-                    } RESPONSE_STATUS_EMPTY -> missingDataHandler()
+                    }
+
+                    RESPONSE_STATUS_EMPTY -> missingDataHandler()
 
                 }
 
@@ -1199,7 +1373,10 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on getUserLoggedIn(). Catch: ${e.message}")
+                FirebaseUtils.logErr(
+                    this@MainActivity,
+                    "Failed MainActivity on getUserLoggedIn(). Catch: ${e.message}"
+                )
                 Log.d("TAG USER LOGGED IN", generateFailedRunServiceMessage(e.message.toString()))
             }
 
@@ -1221,9 +1398,11 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                         "sudah valid" -> {
                             "valid"
                         }
+
                         "tidak valid" -> {
                             "invalid"
                         }
+
                         else -> {
                             "-1"
                         }
@@ -1244,22 +1423,62 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 //                } else apiService.searchContact(key = rbSearchKey, distributorID = createPartFromString(userDistributorId))
 
                 val response = if (isContactXSource) {
-                    HttpClient.apiService.searchContactXs(searchKey = key, cityId = userCity, userId = userId)
+                    HttpClient.apiService.searchContactXs(
+                        searchKey = key,
+                        cityId = userCity,
+                        userId = userId
+                    )
                 } else if (cityID != null && statusFilter != "-1" && validStatusFilter != "-1") {
-                    HttpClient.apiService.searchContact(key = rbSearchKey, cityId = createPartFromString(cityID), status = createPartFromString(statusFilter), distributorID = createPartFromString(userDistributorId), validationStatus = createPartFromString(validStatusFilter))
+                    HttpClient.apiService.searchContact(
+                        key = rbSearchKey,
+                        cityId = createPartFromString(cityID),
+                        status = createPartFromString(statusFilter),
+                        distributorID = createPartFromString(userDistributorId),
+                        validationStatus = createPartFromString(validStatusFilter)
+                    )
                 } else if (statusFilter != "-1" && validStatusFilter != "-1") {
-                    HttpClient.apiService.searchContactByStatusAndValidationStatus(key = rbSearchKey, status = createPartFromString(statusFilter), validationStatus = createPartFromString(validStatusFilter), distributorID = createPartFromString(userDistributorId))
+                    HttpClient.apiService.searchContactByStatusAndValidationStatus(
+                        key = rbSearchKey,
+                        status = createPartFromString(statusFilter),
+                        validationStatus = createPartFromString(validStatusFilter),
+                        distributorID = createPartFromString(userDistributorId)
+                    )
                 } else if (cityID != null && statusFilter != "-1") {
-                    HttpClient.apiService.searchContact(key = rbSearchKey, cityId = createPartFromString(cityID), status = createPartFromString(statusFilter), distributorID = createPartFromString(userDistributorId))
+                    HttpClient.apiService.searchContact(
+                        key = rbSearchKey,
+                        cityId = createPartFromString(cityID),
+                        status = createPartFromString(statusFilter),
+                        distributorID = createPartFromString(userDistributorId)
+                    )
                 } else if (cityID != null && validStatusFilter != "-1") {
-                    HttpClient.apiService.searchContactByCityAndValidationStatus(key = rbSearchKey, cityId = createPartFromString(cityID), validationStatus = createPartFromString(validStatusFilter), distributorID = createPartFromString(userDistributorId))
+                    HttpClient.apiService.searchContactByCityAndValidationStatus(
+                        key = rbSearchKey,
+                        cityId = createPartFromString(cityID),
+                        validationStatus = createPartFromString(validStatusFilter),
+                        distributorID = createPartFromString(userDistributorId)
+                    )
                 } else if (cityID != null) {
-                    HttpClient.apiService.searchContact(key = rbSearchKey, cityId = createPartFromString(cityID), distributorID = createPartFromString(userDistributorId))
-                } else if (statusFilter != "-1" ) {
-                    HttpClient.apiService.searchContactByStatus(key = rbSearchKey, status = createPartFromString(statusFilter), distributorID = createPartFromString(userDistributorId))
-                } else if (validStatusFilter != "-1" ) {
-                    HttpClient.apiService.searchContactByValidationStatus(key = rbSearchKey, validationStatus = createPartFromString(validStatusFilter), distributorID = createPartFromString(userDistributorId))
-                } else HttpClient.apiService.searchContact(key = rbSearchKey, distributorID = createPartFromString(userDistributorId))
+                    HttpClient.apiService.searchContact(
+                        key = rbSearchKey,
+                        cityId = createPartFromString(cityID),
+                        distributorID = createPartFromString(userDistributorId)
+                    )
+                } else if (statusFilter != "-1") {
+                    HttpClient.apiService.searchContactByStatus(
+                        key = rbSearchKey,
+                        status = createPartFromString(statusFilter),
+                        distributorID = createPartFromString(userDistributorId)
+                    )
+                } else if (validStatusFilter != "-1") {
+                    HttpClient.apiService.searchContactByValidationStatus(
+                        key = rbSearchKey,
+                        validationStatus = createPartFromString(validStatusFilter),
+                        distributorID = createPartFromString(userDistributorId)
+                    )
+                } else HttpClient.apiService.searchContact(
+                    key = rbSearchKey,
+                    distributorID = createPartFromString(userDistributorId)
+                )
 
                 if (response.isSuccessful) {
 
@@ -1283,15 +1502,21 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                             loadingState(false)
 
                         }
+
                         RESPONSE_STATUS_EMPTY -> {
 
                             loadingState(true, "Daftar kontak kosong!")
                             binding.tvFilter.text = "$textFilter (${responseBody.results.size})"
 
                         }
+
                         else -> {
 
-                            handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                            handleMessage(
+                                this@MainActivity,
+                                TAG_RESPONSE_CONTACT,
+                                getString(R.string.failed_get_data)
+                            )
                             loadingState(true, getString(R.string.failed_request))
 
                         }
@@ -1299,7 +1524,11 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
                 } else {
 
-                    handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, "Failed get data! Message: " + response.message())
+                    handleMessage(
+                        this@MainActivity,
+                        TAG_RESPONSE_CONTACT,
+                        "Failed get data! Message: " + response.message()
+                    )
                     loadingState(true, getString(R.string.failed_request))
 
                 }
@@ -1310,8 +1539,15 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on searchContact(). Catch: ${e.message}")
-                handleMessage(this@MainActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@MainActivity,
+                    "Failed MainActivity on searchContact(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@MainActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
 
             }
@@ -1322,26 +1558,28 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
     private fun setRecyclerView(listItem: ArrayList<ContactModel>) {
 
-        rvAdapter = ContactsRecyclerViewAdapter(listItem, object: ContactsRecyclerViewAdapter.ItemClickListener {
-            override fun onItemClick(data: ContactModel?) {
-                navigateDetailContact(data)
-            }
-
-            override fun updateSelectedItem(count: Int, selectedItemsId: MutableSet<String>) {
-                if (isSelectItemActive) {
-                    this@MainActivity.selectedItemsId = selectedItemsId
-                    selectedItemCount = count
-                    binding.titleBar.tvTitleBar.text = "$selectedItemCount Item terpilih"
-                    if (selectedItemCount > 0)
-                        binding.titleBar.icConfirmSelect.alpha = 1f
-                    else
-                        binding.titleBar.icConfirmSelect.alpha =
-                            if (CustomUtility(this@MainActivity).isDarkMode()) 0.2f
-                            else 0.5f
+        rvAdapter = ContactsRecyclerViewAdapter(
+            listItem,
+            object : ContactsRecyclerViewAdapter.ItemClickListener {
+                override fun onItemClick(data: ContactModel?) {
+                    navigateDetailContact(data)
                 }
-            }
 
-        })
+                override fun updateSelectedItem(count: Int, selectedItemsId: MutableSet<String>) {
+                    if (isSelectItemActive) {
+                        this@MainActivity.selectedItemsId = selectedItemsId
+                        selectedItemCount = count
+                        binding.titleBar.tvTitleBar.text = "$selectedItemCount Item terpilih"
+                        if (selectedItemCount > 0)
+                            binding.titleBar.icConfirmSelect.alpha = 1f
+                        else
+                            binding.titleBar.icConfirmSelect.alpha =
+                                if (CustomUtility(this@MainActivity).isDarkMode()) 0.2f
+                                else 0.5f
+                    }
+                }
+
+            })
 
         rvAdapter.setSelectItemState(isSelectItemActive)
         rvAdapter.setSelectedItemsId(selectedItemsId)
@@ -1409,7 +1647,8 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         // Firebase Auth Session
         lifecycleScope.launch {
             try {
-                val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+                val androidId =
+                    Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
                 val model = Build.MODEL
                 val manufacturer = Build.MANUFACTURER
 
@@ -1426,7 +1665,10 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@MainActivity, "Failed MainActivity on logoutHandler(). Catch: ${e.message}")
+                FirebaseUtils.logErr(
+                    this@MainActivity,
+                    "Failed MainActivity on logoutHandler(). Catch: ${e.message}"
+                )
                 Log.d("Firebase Auth", "$e")
             }
         }
@@ -1472,7 +1714,8 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
         } else {
             icMore.visibility = View.VISIBLE
-            if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) binding.btnFab.visibility = View.VISIBLE
+            if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) binding.btnFab.visibility =
+                View.VISIBLE
             binding.titleBar.icConfirmSelect.visibility = View.GONE
             binding.titleBar.tvTitleBar.text = if (isContactXSource) "Toko X" else "Semua Toko"
         }
@@ -1492,7 +1735,8 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         LoopingTask(items).execute()
     }
 
-    private inner class LoopingTask(private var items: ArrayList<ContactModel>) : AsyncTask<Void, Void, Void>() {
+    private inner class LoopingTask(private var items: ArrayList<ContactModel>) :
+        AsyncTask<Void, Void, Void>() {
 
         override fun doInBackground(vararg params: Void?): Void? {
             for (item in items.listIterator()) {
@@ -1501,7 +1745,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 listCoordinateStatus.add(item.store_status)
                 listCoordinateCityID.add(item.id_city)
 
-                processed ++
+                processed++
                 percentage = (processed * 100) / totalProcess
                 runOnUiThread {
                     progressBar.setMessage(getString(R.string.txt_loading) + "($percentage%)")
@@ -1537,22 +1781,31 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             binding.drawerLayout.isDrawerOpen(GravityCompat.START) -> {
                 binding.drawerLayout.closeDrawer(GravityCompat.START)
             }
+
             isSearchActive -> {
                 toggleSearchEvent(SEARCH_CLOSE)
             }
+
             isSelectItemActive -> {
                 toggleSelectItem()
             }
+
             userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_MARKETING -> {
                 // Allow system back
                 finish()
             }
+
             else -> {
                 if (doubleBackToExitPressedOnce) {
                     finish()
                 } else {
                     doubleBackToExitPressedOnce = true
-                    handleMessage(this, TAG_ACTION_MAIN_ACTIVITY, getString(R.string.tekan_sekali_lagi), TOAST_SHORT)
+                    handleMessage(
+                        this,
+                        TAG_ACTION_MAIN_ACTIVITY,
+                        getString(R.string.tekan_sekali_lagi),
+                        TOAST_SHORT
+                    )
 
                     Handler(Looper.getMainLooper()).postDelayed({
                         doubleBackToExitPressedOnce = false

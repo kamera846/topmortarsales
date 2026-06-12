@@ -15,12 +15,15 @@ import com.topmortar.topmortarsales.view.rencanaVisits.VoucherRenViFragment
 class RencanaVisitVPA(fm: FragmentManager, private var tabSize: Int) : FragmentPagerAdapter(fm) {
 
     private var listener: CounterPageItem? = null
+
     interface CounterPageItem {
         fun counterItem(count: Int, tabIndex: Int)
     }
+
     fun setCounterPageItem(listener: CounterPageItem) {
         this.listener = listener
     }
+
     private lateinit var frgamentJatem: JatemFragment
     private lateinit var fragmentVoucherRenVi: VoucherRenViFragment
     private lateinit var fragmentPasifRenViFragment: PasifRenViFragment
@@ -33,6 +36,7 @@ class RencanaVisitVPA(fm: FragmentManager, private var tabSize: Int) : FragmentP
             3 -> fragmentWeekly.syncNow()
         }
     }
+
     fun setSelectBarActive(index: Int, state: Boolean) {
         when (index) {
             0 -> frgamentJatem.isSelectBarActive(state)
@@ -41,6 +45,7 @@ class RencanaVisitVPA(fm: FragmentManager, private var tabSize: Int) : FragmentP
             3 -> fragmentWeekly.isSelectBarActive(state)
         }
     }
+
     fun onConfirmSelected(index: Int) {
         when (index) {
             0 -> frgamentJatem.onConfirmSelected()
@@ -49,6 +54,7 @@ class RencanaVisitVPA(fm: FragmentManager, private var tabSize: Int) : FragmentP
             3 -> fragmentWeekly.onConfirmSelected()
         }
     }
+
     fun getAllListItem(index: Int): ArrayList<RencanaVisitModel> {
         return when (index) {
             0 -> frgamentJatem.getAllListItem()
@@ -64,7 +70,7 @@ class RencanaVisitVPA(fm: FragmentManager, private var tabSize: Int) : FragmentP
             0 -> {
 
                 frgamentJatem = JatemFragment()
-                frgamentJatem.setCounterItem(object : JatemFragment.CounterItem{
+                frgamentJatem.setCounterItem(object : JatemFragment.CounterItem {
                     override fun counterItem(count: Int) {
                         listener?.counterItem(count, position)
                     }
@@ -73,10 +79,11 @@ class RencanaVisitVPA(fm: FragmentManager, private var tabSize: Int) : FragmentP
                 frgamentJatem
 
             }
+
             1 -> {
 
                 fragmentVoucherRenVi = VoucherRenViFragment()
-                fragmentVoucherRenVi.setCounterItem(object : VoucherRenViFragment.CounterItem{
+                fragmentVoucherRenVi.setCounterItem(object : VoucherRenViFragment.CounterItem {
                     override fun counterItem(count: Int) {
                         listener?.counterItem(count, position)
                     }
@@ -85,10 +92,11 @@ class RencanaVisitVPA(fm: FragmentManager, private var tabSize: Int) : FragmentP
                 fragmentVoucherRenVi
 
             }
+
             2 -> {
 
                 fragmentPasifRenViFragment = PasifRenViFragment()
-                fragmentPasifRenViFragment.setCounterItem(object : PasifRenViFragment.CounterItem{
+                fragmentPasifRenViFragment.setCounterItem(object : PasifRenViFragment.CounterItem {
                     override fun counterItem(count: Int) {
                         listener?.counterItem(count, position)
                     }
@@ -96,11 +104,13 @@ class RencanaVisitVPA(fm: FragmentManager, private var tabSize: Int) : FragmentP
                 })
                 fragmentPasifRenViFragment
 
-            } else -> {
+            }
+
+            else -> {
 
                 fragmentWeekly = TagihMingguanFragment()
                 fragmentWeekly.setReportSource(SALES_REPORT_RENVI)
-                fragmentWeekly.setCounterItem(object : TagihMingguanFragment.CounterItem{
+                fragmentWeekly.setCounterItem(object : TagihMingguanFragment.CounterItem {
                     override fun counterItem(count: Int) {
                         listener?.counterItem(count, position)
                     }

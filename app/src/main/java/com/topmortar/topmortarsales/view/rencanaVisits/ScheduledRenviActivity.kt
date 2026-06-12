@@ -61,12 +61,13 @@ class ScheduledRenviActivity : AppCompatActivity() {
     }
 
     private fun setupLauncher() {
-        resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == RESULT_OK) {
-                val data: Intent? = result.data
-                // Handle the result data here
+        resultLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (result.resultCode == RESULT_OK) {
+                    val data: Intent? = result.data
+                    // Handle the result data here
+                }
             }
-        }
     }
 
     private fun navigateToStoreDetail() {

@@ -61,7 +61,7 @@ class ChartSalesPricingModal(private val context: Context) : Dialog(context) {
 
         val titleBar = binding.titleBarLight
         titleBar.tvTitleBar.text = "Rincian Pendapatan"
-        titleBar.tvTitleBar.setPadding(convertDpToPx(16, context),0,0,0)
+        titleBar.tvTitleBar.setPadding(convertDpToPx(16, context), 0, 0, 0)
         titleBar.tvTitleBarDescription.text = "Ini adalah rincian anda pada bulan ini"
 
         setupPricing()
@@ -76,9 +76,12 @@ class ChartSalesPricingModal(private val context: Context) : Dialog(context) {
     }
 
     private fun setupPricing() {
-        binding.tvCountData.text = "($countData x ${CurrencyFormat.format(komisiData.toDouble(), false)} / Toko)"
-        binding.tvCountPassive.text = "($countPassive x ${CurrencyFormat.format(komisiPassive.toDouble(), false)} / Toko)"
-        binding.tvCountPenjualan.text = "($countPenjualan x ${CurrencyFormat.format(komisiPenjualan.toDouble(), false)} / Sak)"
+        binding.tvCountData.text =
+            "($countData x ${CurrencyFormat.format(komisiData.toDouble(), false)} / Toko)"
+        binding.tvCountPassive.text =
+            "($countPassive x ${CurrencyFormat.format(komisiPassive.toDouble(), false)} / Toko)"
+        binding.tvCountPenjualan.text =
+            "($countPenjualan x ${CurrencyFormat.format(komisiPenjualan.toDouble(), false)} / Sak)"
 
         priceData = countData * komisiData
         pricePassive = countPassive * komisiPassive
@@ -97,7 +100,8 @@ class ChartSalesPricingModal(private val context: Context) : Dialog(context) {
         binding.progressBarData.progress = countData
         binding.progressBarPassive.max = maxProgressToko
         binding.progressBarPassive.progress = countPassive
-        binding.progressBarPenjualan.max = if (maxProgressSak > countPenjualan) maxProgressSak else countPenjualan
+        binding.progressBarPenjualan.max =
+            if (maxProgressSak > countPenjualan) maxProgressSak else countPenjualan
         binding.progressBarPenjualan.progress = countPenjualan
     }
 

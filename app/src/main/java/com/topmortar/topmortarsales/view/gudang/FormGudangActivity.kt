@@ -68,15 +68,16 @@ class FormGudangActivity : AppCompatActivity() {
     private var name = ""
     private var idGudang = "-1"
 
-    private val coordinateLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            val latitude = it.data?.getDoubleExtra("latitude", 0.0)
-            val longitude = it.data?.getDoubleExtra("longitude", 0.0)
-            if (latitude != null && longitude != null) binding.etMapsUrl.setText("$latitude,$longitude")
-            binding.etMapsUrl.error = null
-            binding.etMapsUrl.clearFocus()
+    private val coordinateLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                val latitude = it.data?.getDoubleExtra("latitude", 0.0)
+                val longitude = it.data?.getDoubleExtra("longitude", 0.0)
+                if (latitude != null && longitude != null) binding.etMapsUrl.setText("$latitude,$longitude")
+                binding.etMapsUrl.error = null
+                binding.etMapsUrl.clearFocus()
+            }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -158,7 +159,11 @@ class FormGudangActivity : AppCompatActivity() {
     private fun getCoordinate() {
         val data = "${binding.etMapsUrl.text}"
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             val intent = Intent(this, MapsActivity::class.java)
             intent.putExtra(CONST_MAPS, data)
             intent.putExtra(GET_COORDINATE, true)
@@ -170,7 +175,11 @@ class FormGudangActivity : AppCompatActivity() {
 
     private fun checkLocationPermission() {
         val urlUtility = URLUtility(this)
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             if (urlUtility.isLocationEnabled(this)) {
 
                 urlUtility.requestLocationUpdate()
@@ -179,7 +188,11 @@ class FormGudangActivity : AppCompatActivity() {
                 val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                 startActivity(enableLocationIntent)
             }
-        } else ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+        } else ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+            LOCATION_PERMISSION_REQUEST_CODE
+        )
     }
 
     override fun onRequestPermissionsResult(
@@ -193,8 +206,15 @@ class FormGudangActivity : AppCompatActivity() {
             else {
                 val customUtility = CustomUtility(this)
                 if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    val message = "Izin lokasi diperlukan untuk fitur ini. Izinkan aplikasi mengakses lokasi perangkat."
-                    customUtility.showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE) }
+                    val message =
+                        "Izin lokasi diperlukan untuk fitur ini. Izinkan aplikasi mengakses lokasi perangkat."
+                    customUtility.showPermissionDeniedSnackbar(message) {
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                            LOCATION_PERMISSION_REQUEST_CODE
+                        )
+                    }
                 } else customUtility.showPermissionDeniedDialog("Izin lokasi diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
             }
         }
@@ -205,13 +225,13 @@ class FormGudangActivity : AppCompatActivity() {
 
         progressBar.show()
 
-        val phone = "${ binding.etPhone.text }"
-        val name = "${ binding.etName.text }"
+        val phone = "${binding.etPhone.text}"
+        val name = "${binding.etName.text}"
         val cityId = when (userKind) {
             USER_KIND_ADMIN -> selectedCity?.id!!
             else -> userCityID.let { if (!it.isNullOrEmpty()) it else "0" }
         }
-        val mapsUrl = "${ binding.etMapsUrl.text }"
+        val mapsUrl = "${binding.etMapsUrl.text}"
 
         lifecycleScope.launch {
             try {
@@ -260,7 +280,11 @@ class FormGudangActivity : AppCompatActivity() {
                 when (response.status) {
                     RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
 
-                        handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, response.message)
+                        handleMessage(
+                            this@FormGudangActivity,
+                            TAG_RESPONSE_MESSAGE,
+                            response.message
+                        )
 
                         val resultIntent = Intent()
                         resultIntent.putExtra(REQUEST_BASECAMP_FRAGMENT, SYNC_NOW)
@@ -268,14 +292,24 @@ class FormGudangActivity : AppCompatActivity() {
                         finish()
 
                     }
+
                     RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                        handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, response.message)
+                        handleMessage(
+                            this@FormGudangActivity,
+                            TAG_RESPONSE_MESSAGE,
+                            response.message
+                        )
 
                     }
+
                     else -> {
 
-                        handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, "Gagal menyimpan!")
+                        handleMessage(
+                            this@FormGudangActivity,
+                            TAG_RESPONSE_MESSAGE,
+                            "Gagal menyimpan!"
+                        )
 
                     }
                 }
@@ -286,8 +320,15 @@ class FormGudangActivity : AppCompatActivity() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@FormGudangActivity, "Failed FormGudangActivity on submitForm(). Catch: ${e.message}")
-                handleMessage(this@FormGudangActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@FormGudangActivity,
+                    "Failed FormGudangActivity on submitForm(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@FormGudangActivity,
+                    TAG_RESPONSE_MESSAGE,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
 
             } finally {
                 progressBar.dismiss()
@@ -336,7 +377,12 @@ class FormGudangActivity : AppCompatActivity() {
 
                         for (i in 0 until citiesResults.size) {
                             val data = citiesResults[i]
-                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                            items.add(
+                                ModalSearchModel(
+                                    data.id_city,
+                                    "${data.nama_city} - ${data.kode_city}"
+                                )
+                            )
                         }
 
                         setupDialogSearch(items)
@@ -348,14 +394,20 @@ class FormGudangActivity : AppCompatActivity() {
                         } else binding.etCityOption.setText("")
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         handleMessage(this@FormGudangActivity, "LIST CITY", "Daftar kota kosong!")
 
                     }
+
                     else -> {
 
-                        handleMessage(this@FormGudangActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@FormGudangActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
 
                     }
                 }
@@ -366,8 +418,15 @@ class FormGudangActivity : AppCompatActivity() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@FormGudangActivity, "Failed FormGudangActivity on getCities(). Catch: ${e.message}")
-                handleMessage(this@FormGudangActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@FormGudangActivity,
+                    "Failed FormGudangActivity on getCities(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@FormGudangActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
 
             }
 
@@ -377,7 +436,7 @@ class FormGudangActivity : AppCompatActivity() {
     private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
 
         searchModal = SearchModal(this, items)
-        searchModal.setCustomDialogListener(object: SearchModal.SearchModalListener{
+        searchModal.setCustomDialogListener(object : SearchModal.SearchModalListener {
             override fun onDataReceived(data: ModalSearchModel) {
                 binding.etCityOption.setText(data.title)
                 selectedCity = data

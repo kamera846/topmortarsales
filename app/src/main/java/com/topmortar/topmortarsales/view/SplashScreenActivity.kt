@@ -129,12 +129,16 @@ class SplashScreenActivity : AppCompatActivity() {
     private var idUserResetPassword: String? = null
 
     lateinit var appUpdateManager: AppUpdateManager
-    private val appUpdateLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-        if (result.resultCode != RESULT_OK) {
-            FirebaseUtils.logErr(this@SplashScreenActivity, "Failed to update app. Result code ${result.resultCode}")
+    private val appUpdateLauncher =
+        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            if (result.resultCode != RESULT_OK) {
+                FirebaseUtils.logErr(
+                    this@SplashScreenActivity,
+                    "Failed to update app. Result code ${result.resultCode}"
+                )
 //            showForceUpdateDialog()
+            }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -172,7 +176,7 @@ class SplashScreenActivity : AppCompatActivity() {
 //            initView()
 //        }
 
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 myOnBackPressed()
             }
@@ -266,8 +270,13 @@ class SplashScreenActivity : AppCompatActivity() {
         for (i in listOtpInput.indices) {
 
             val etObject = listOtpInput[i]
-            etObject.addTextChangedListener(object: TextWatcher {
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            etObject.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(
+                    s: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+                ) {
 
                 }
 
@@ -275,16 +284,16 @@ class SplashScreenActivity : AppCompatActivity() {
 
                     if (!etObject.text.isNullOrEmpty()) {
                         if (i < (listOtpInput.size - 1)) {
-                            listOtpInput[i+1].requestFocus()
-                            listOtpInput[i+1].text?.let{
-                                listOtpInput[i+1].setSelection(it.length)
+                            listOtpInput[i + 1].requestFocus()
+                            listOtpInput[i + 1].text?.let {
+                                listOtpInput[i + 1].setSelection(it.length)
                             }
                         } else KeyboardHandler.hideKeyboard(etObject, this@SplashScreenActivity)
                     } else {
-                        if ( i > 0) {
-                            listOtpInput[i-1].requestFocus()
-                            listOtpInput[i-1].text?.let{
-                                listOtpInput[i-1].setSelection(it.length)
+                        if (i > 0) {
+                            listOtpInput[i - 1].requestFocus()
+                            listOtpInput[i - 1].text?.let {
+                                listOtpInput[i - 1].setSelection(it.length)
                             }
                         }
                     }
@@ -334,10 +343,10 @@ class SplashScreenActivity : AppCompatActivity() {
         }
 
         // Set kursor ke posisi terakhir
-        etPassword.text?.let{
+        etPassword.text?.let {
             etPassword.setSelection(it.length)
         }
-        etNewPassword.text?.let{
+        etNewPassword.text?.let {
             etNewPassword.setSelection(it.length)
         }
     }
@@ -349,6 +358,7 @@ class SplashScreenActivity : AppCompatActivity() {
         finish()
 
     }
+
     private fun navigateToListTukang() {
 
         val intent = Intent(this, BrandAmbassadorActivity::class.java)
@@ -356,6 +366,7 @@ class SplashScreenActivity : AppCompatActivity() {
         finish()
 
     }
+
     private fun navigateToCourier() {
 
         val intent = Intent(this, HomeCourierActivity::class.java)
@@ -363,6 +374,7 @@ class SplashScreenActivity : AppCompatActivity() {
         finish()
 
     }
+
     private fun navigateToSales() {
 
         val intent = Intent(this, HomeSalesActivity::class.java)
@@ -426,8 +438,8 @@ class SplashScreenActivity : AppCompatActivity() {
 
     private fun loginHandler() {
 
-        val username = "${ etUsername.text }"
-        val password = "${ etPassword.text }"
+        val username = "${etUsername.text}"
+        val password = "${etPassword.text}"
 
         if (TextUtils.isEmpty(username)) {
             etUsername.requestFocus()
@@ -453,8 +465,8 @@ class SplashScreenActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val rbUsername = createPartFromString("${ etUsername.text }")
-                val rbPassword = createPartFromString("${ etPassword.text }")
+                val rbUsername = createPartFromString("${etUsername.text}")
+                val rbPassword = createPartFromString("${etPassword.text}")
 
                 val response = HttpClient.apiService.auth(rbUsername, rbPassword)
 
@@ -465,7 +477,7 @@ class SplashScreenActivity : AppCompatActivity() {
                         val data = results[0]
                         val availableAccount = checkAvailableAccount(data.level_user)
 
-                        if(!availableAccount) {
+                        if (!availableAccount) {
                             showAlert("Akun tidak ditemukan!")
                             loadingState(false)
                             return@launch
@@ -500,11 +512,13 @@ class SplashScreenActivity : AppCompatActivity() {
                             userChild.child("full_name").setValue(data.full_name)
                             userChild.child("id_distributor").setValue(data.id_distributor)
                             userChild.child("nama_distributor").setValue(data.nama_distributor)
-                            userChild.child("nomorhp_distributor").setValue(data.nomorhp_distributor)
+                            userChild.child("nomorhp_distributor")
+                                .setValue(data.nomorhp_distributor)
                             userChild.child("alamat_distributor").setValue(data.alamat_distributor)
                             userChild.child("jenis_distributor").setValue(data.jenis_distributor)
 
-                            userDevicesChild.addListenerForSingleValueEvent(object : ValueEventListener {
+                            userDevicesChild.addListenerForSingleValueEvent(object :
+                                ValueEventListener {
                                 override fun onDataChange(snapshot: DataSnapshot) {
                                     if (snapshot.exists()) {
                                         for (item in snapshot.children) {
@@ -514,23 +528,32 @@ class SplashScreenActivity : AppCompatActivity() {
                                                 return
                                             }
 
-                                            val device = item.getValue(DeviceModel::class.java) ?: return
+                                            val device =
+                                                item.getValue(DeviceModel::class.java) ?: return
 
-                                            var userDeviceText = "${device.manufacture}${device.model}${device.id}"
+                                            var userDeviceText =
+                                                "${device.manufacture}${device.model}${device.id}"
 
                                             if (userDeviceText.isEmpty()) return
 
-                                            userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
+                                            userDeviceText =
+                                                userDeviceText.replace(".", "_").replace(",", "_")
+                                                    .replace(" ", "")
                                             val userDevice = userDevicesChild.child(userDeviceText)
                                             userDevice.child("id").setValue(device.id)
                                             userDevice.child("model").setValue(device.model)
-                                            userDevice.child("manufacture").setValue(device.manufacture)
+                                            userDevice.child("manufacture")
+                                                .setValue(device.manufacture)
                                             userDevice.child("device").setValue(device.device)
                                             userDevice.child("product").setValue(device.product)
-                                            userDevice.child("sdk_version").setValue(device.sdk_version)
-                                            userDevice.child("version_release").setValue(device.version_release)
-                                            userDevice.child("screen_width").setValue(device.screen_width)
-                                            userDevice.child("screen_height").setValue(device.screen_height)
+                                            userDevice.child("sdk_version")
+                                                .setValue(device.sdk_version)
+                                            userDevice.child("version_release")
+                                                .setValue(device.version_release)
+                                            userDevice.child("screen_width")
+                                                .setValue(device.screen_width)
+                                            userDevice.child("screen_height")
+                                                .setValue(device.screen_height)
                                             userDevice.child("density").setValue(device.density)
                                             userDevice.child("login_at").setValue(device.login_at)
                                             userDevice.child("logout_at").setValue(device.logout_at)
@@ -550,13 +573,17 @@ class SplashScreenActivity : AppCompatActivity() {
 
                             // Reset isAllowedLogout value
                             val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
-                            absentChild.child(data.id_user).child(FIREBASE_CHILD_IS_ALLOWED_LOGOUT).setValue(false)
+                            absentChild.child(data.id_user).child(FIREBASE_CHILD_IS_ALLOWED_LOGOUT)
+                                .setValue(false)
 
                         } catch (e: Exception) {
                             if (e is CancellationException) {
                                 return@launch
                             }
-                            FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on loginHandler(). Catch: ${e.message}")
+                            FirebaseUtils.logErr(
+                                this@SplashScreenActivity,
+                                "Failed SplashScreenActivity on loginHandler(). Catch: ${e.message}"
+                            )
                             Log.e("Firebase Auth", "$e")
                         }
 
@@ -570,21 +597,27 @@ class SplashScreenActivity : AppCompatActivity() {
                         loadingState(false)
 
                     }
+
                     RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
                         showAlert(response.message)
                         loadingState(false)
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         showAlert("Username atau kata sandi anda sepertinya salah!")
                         loadingState(false)
 
                     }
+
                     else -> {
 
-                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_CONTACT, response.message.let { it.ifEmpty { "Proses autentikasi gagal" } })
+                        handleMessage(
+                            this@SplashScreenActivity,
+                            TAG_RESPONSE_CONTACT,
+                            response.message.let { it.ifEmpty { "Proses autentikasi gagal" } })
                         loadingState(false)
 
                     }
@@ -592,8 +625,15 @@ class SplashScreenActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on loginHandler(). Catch: ${e.message}")
-                handleMessage(this@SplashScreenActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@SplashScreenActivity,
+                    "Failed SplashScreenActivity on loginHandler(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@SplashScreenActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(false)
 
             }
@@ -613,7 +653,7 @@ class SplashScreenActivity : AppCompatActivity() {
 
     private fun requestOtpHandler() {
 
-        val usernameForgot = "${ etUsernameForgot.text }".trim().replace(" ", "")
+        val usernameForgot = "${etUsernameForgot.text}".trim().replace(" ", "")
             .lowercase(Locale.getDefault())
 
         if (usernameForgot.isEmpty()) {
@@ -641,21 +681,30 @@ class SplashScreenActivity : AppCompatActivity() {
 
                         currentSubmitStep += 1
                         submitHandler()
-                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE,
+                        handleMessage(
+                            this@SplashScreenActivity, TAG_RESPONSE_MESSAGE,
                             responseBody.message
                         )
                         loadingState(false)
 
                     } else {
 
-                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Gagal mendapatkan kode OTP!: ${ responseBody.message }")
+                        handleMessage(
+                            this@SplashScreenActivity,
+                            TAG_RESPONSE_MESSAGE,
+                            "Gagal mendapatkan kode OTP!: ${responseBody.message}"
+                        )
                         loadingState(false)
 
                     }
 
                 } else {
 
-                    handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Gagal mendapatkan kode OTP! Error: " + response.message())
+                    handleMessage(
+                        this@SplashScreenActivity,
+                        TAG_RESPONSE_MESSAGE,
+                        "Gagal mendapatkan kode OTP! Error: " + response.message()
+                    )
                     loadingState(false)
 
                 }
@@ -665,8 +714,15 @@ class SplashScreenActivity : AppCompatActivity() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on requestOtpHandler(). Catch: ${e.message}")
-                handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@SplashScreenActivity,
+                    "Failed SplashScreenActivity on requestOtpHandler(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@SplashScreenActivity,
+                    TAG_RESPONSE_MESSAGE,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(false)
 
             }
@@ -681,12 +737,12 @@ class SplashScreenActivity : AppCompatActivity() {
 
         for (i in listOtpInput.indices) {
             val otpObject = listOtpInput[i]
-            val otpInput = "${ otpObject.text }"
+            val otpInput = "${otpObject.text}"
 
             otpObject.error = null
 
             if (otpInput.isEmpty()) {
-                otpObject.error = "OTP ${ i + 1 } tidak boleh kosong"
+                otpObject.error = "OTP ${i + 1} tidak boleh kosong"
                 otpObject.requestFocus()
                 isReady = false
                 break
@@ -720,21 +776,30 @@ class SplashScreenActivity : AppCompatActivity() {
                         idUserResetPassword = responseBody.user_id
                         currentSubmitStep += 1
                         submitHandler()
-                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE,
+                        handleMessage(
+                            this@SplashScreenActivity, TAG_RESPONSE_MESSAGE,
                             responseBody.message
                         )
                         loadingState(false)
 
                     } else {
 
-                        handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Gagal verifikasi OTP!: ${ responseBody.message }")
+                        handleMessage(
+                            this@SplashScreenActivity,
+                            TAG_RESPONSE_MESSAGE,
+                            "Gagal verifikasi OTP!: ${responseBody.message}"
+                        )
                         loadingState(false)
 
                     }
 
                 } else {
 
-                    handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Gagal verifikasi OTP! Error: " + response.message())
+                    handleMessage(
+                        this@SplashScreenActivity,
+                        TAG_RESPONSE_MESSAGE,
+                        "Gagal verifikasi OTP! Error: " + response.message()
+                    )
                     loadingState(false)
 
                 }
@@ -743,19 +808,31 @@ class SplashScreenActivity : AppCompatActivity() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on verifyOtpHandler(). Catch: ${e.message}")
-                handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@SplashScreenActivity,
+                    "Failed SplashScreenActivity on verifyOtpHandler(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@SplashScreenActivity,
+                    TAG_RESPONSE_MESSAGE,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(false)
             }
         }
 
     }
+
     private fun resetPasswordHandler() {
         val userID = "$idUserResetPassword"
-        val password = "${ etNewPassword.text }"
+        val password = "${etNewPassword.text}"
 
         if (userID.isEmpty()) {
-            handleMessage(this, "USER RESET PASSWORD", "Tidak dapat menemukan pengguna untuk setel ulang kata sandi, silakan coba masukkan kata sandi Anda!")
+            handleMessage(
+                this,
+                "USER RESET PASSWORD",
+                "Tidak dapat menemukan pengguna untuk setel ulang kata sandi, silakan coba masukkan kata sandi Anda!"
+            )
         } else if (password.isEmpty()) {
             etNewPassword.error = "Kata sandi baru Anda tidak boleh kosong!"
             etNewPassword.requestFocus()
@@ -796,15 +873,25 @@ class SplashScreenActivity : AppCompatActivity() {
                             )
                             loadingState(false)
                         }
+
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Gagal setel ulang kata sandi! Message: ${ responseBody.message }")
+                            handleMessage(
+                                this@SplashScreenActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "Gagal setel ulang kata sandi! Message: ${responseBody.message}"
+                            )
                             loadingState(false)
 
                         }
+
                         else -> {
 
-                            handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Gagal setel ulang kata sandi!: ${ responseBody.message }")
+                            handleMessage(
+                                this@SplashScreenActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "Gagal setel ulang kata sandi!: ${responseBody.message}"
+                            )
                             loadingState(false)
 
                         }
@@ -812,7 +899,11 @@ class SplashScreenActivity : AppCompatActivity() {
 
                 } else {
 
-                    handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, "Gagal setel ulang kata sandi! Error: " + response.message())
+                    handleMessage(
+                        this@SplashScreenActivity,
+                        TAG_RESPONSE_MESSAGE,
+                        "Gagal setel ulang kata sandi! Error: " + response.message()
+                    )
                     loadingState(false)
 
                 }
@@ -821,8 +912,15 @@ class SplashScreenActivity : AppCompatActivity() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on resetPasswordHandler(). Catch: ${e.message}")
-                handleMessage(this@SplashScreenActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@SplashScreenActivity,
+                    "Failed SplashScreenActivity on resetPasswordHandler(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@SplashScreenActivity,
+                    TAG_RESPONSE_MESSAGE,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(false)
             }
         }
@@ -862,6 +960,7 @@ class SplashScreenActivity : AppCompatActivity() {
                 }
 
             }
+
             2 -> {
 
                 if (submit != null && submit) verifyOtpHandler()
@@ -882,6 +981,7 @@ class SplashScreenActivity : AppCompatActivity() {
                 }
 
             }
+
             3 -> {
 
                 if (submit != null && submit) resetPasswordHandler()
@@ -900,6 +1000,7 @@ class SplashScreenActivity : AppCompatActivity() {
                 }
 
             }
+
             else -> {
                 clearInput()
 
@@ -1026,7 +1127,8 @@ class SplashScreenActivity : AppCompatActivity() {
         userDevice.child("login_at").addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val loginTime = snapshot.getValue(String::class.java)
-                if (loginTime.isNullOrEmpty()) userDevice.child("login_at").setValue(DateFormat.now())
+                if (loginTime.isNullOrEmpty()) userDevice.child("login_at")
+                    .setValue(DateFormat.now())
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -1063,18 +1165,23 @@ class SplashScreenActivity : AppCompatActivity() {
 
                             // Firebase Auth Session
                             try {
-                                val androidId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+                                val androidId = Settings.Secure.getString(
+                                    contentResolver,
+                                    Settings.Secure.ANDROID_ID
+                                )
                                 val model = Build.MODEL
                                 val manufacturer = Build.MANUFACTURER
 
                                 val authChild = firebaseReference.child(FIREBASE_CHILD_AUTH)
-                                val userChild = authChild.child(sessionManager.userName() + sessionManager.userID())
+                                val userChild =
+                                    authChild.child(sessionManager.userName() + sessionManager.userID())
                                 val userDevices = userChild.child("devices")
                                 var userDeviceText = "$manufacturer$model$androidId"
 
                                 if (userDeviceText.isEmpty()) return@launch
 
-                                userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
+                                userDeviceText = userDeviceText.replace(".", "_").replace(",", "_")
+                                    .replace(" ", "")
                                 val userDevice = userDevices.child(userDeviceText)
 
                                 userDevice.child("logout_at").setValue(DateFormat.now())
@@ -1083,7 +1190,10 @@ class SplashScreenActivity : AppCompatActivity() {
                                 if (e is CancellationException) {
                                     return@launch
                                 }
-                                FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on getUserLoggedIn(). Catch: ${e.message}")
+                                FirebaseUtils.logErr(
+                                    this@SplashScreenActivity,
+                                    "Failed SplashScreenActivity on getUserLoggedIn(). Catch: ${e.message}"
+                                )
                                 Log.d("Firebase Auth", "$e")
                             }
 
@@ -1116,10 +1226,12 @@ class SplashScreenActivity : AppCompatActivity() {
                                 userChild.child("level_user").setValue(userLevel)
                                 userChild.child("id_distributor").setValue(userDistributor)
                                 userChild.child("full_name").setValue(userFullName)
-                                userChild.child("nomorhp_distributor").setValue(userDistributorNumber)
+                                userChild.child("nomorhp_distributor")
+                                    .setValue(userDistributorNumber)
                                 userChild.child("bid_limit").setValue(userBidLimit)
 
-                                userDevicesChild.addListenerForSingleValueEvent(object : ValueEventListener {
+                                userDevicesChild.addListenerForSingleValueEvent(object :
+                                    ValueEventListener {
                                     override fun onDataChange(snapshot: DataSnapshot) {
                                         if (snapshot.exists()) {
                                             for (item in snapshot.children) {
@@ -1129,26 +1241,37 @@ class SplashScreenActivity : AppCompatActivity() {
                                                     return
                                                 }
 
-                                                val device = item.getValue(DeviceModel::class.java) ?: return
+                                                val device =
+                                                    item.getValue(DeviceModel::class.java) ?: return
 
-                                                var userDeviceText = "${device.manufacture}${device.model}${device.id}"
+                                                var userDeviceText =
+                                                    "${device.manufacture}${device.model}${device.id}"
 
                                                 if (userDeviceText.isEmpty()) return
 
-                                                userDeviceText = userDeviceText.replace(".", "_").replace(",", "_").replace(" ", "")
-                                                val userDevice = userDevicesChild.child(userDeviceText)
+                                                userDeviceText = userDeviceText.replace(".", "_")
+                                                    .replace(",", "_").replace(" ", "")
+                                                val userDevice =
+                                                    userDevicesChild.child(userDeviceText)
                                                 userDevice.child("id").setValue(device.id)
                                                 userDevice.child("model").setValue(device.model)
-                                                userDevice.child("manufacture").setValue(device.manufacture)
+                                                userDevice.child("manufacture")
+                                                    .setValue(device.manufacture)
                                                 userDevice.child("device").setValue(device.device)
                                                 userDevice.child("product").setValue(device.product)
-                                                userDevice.child("sdk_version").setValue(device.sdk_version)
-                                                userDevice.child("version_release").setValue(device.version_release)
-                                                userDevice.child("screen_width").setValue(device.screen_width)
-                                                userDevice.child("screen_height").setValue(device.screen_height)
+                                                userDevice.child("sdk_version")
+                                                    .setValue(device.sdk_version)
+                                                userDevice.child("version_release")
+                                                    .setValue(device.version_release)
+                                                userDevice.child("screen_width")
+                                                    .setValue(device.screen_width)
+                                                userDevice.child("screen_height")
+                                                    .setValue(device.screen_height)
                                                 userDevice.child("density").setValue(device.density)
-                                                userDevice.child("login_at").setValue(device.login_at)
-                                                userDevice.child("logout_at").setValue(device.logout_at)
+                                                userDevice.child("login_at")
+                                                    .setValue(device.login_at)
+                                                userDevice.child("logout_at")
+                                                    .setValue(device.logout_at)
                                             }
 
                                             userDevice(userChild)
@@ -1166,18 +1289,24 @@ class SplashScreenActivity : AppCompatActivity() {
                                 if (e is CancellationException) {
                                     return@launch
                                 }
-                                FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on getUserLoggedIn(). Catch: ${e.message}")
+                                FirebaseUtils.logErr(
+                                    this@SplashScreenActivity,
+                                    "Failed SplashScreenActivity on getUserLoggedIn(). Catch: ${e.message}"
+                                )
                                 Log.e("Firebase Auth", "$e")
                             }
 
-                            val nUserId =  intent.getStringExtra(CONST_USER_ID)
-                            val nFullName =  intent.getStringExtra(CONST_FULL_NAME)
-                            val nUserLevel =  intent.getStringExtra(CONST_USER_LEVEL)
-                            val nIntent =  intent.getStringExtra("notification_intent")
-                            val nVisitId =  intent.getStringExtra("nVisitId")
+                            val nUserId = intent.getStringExtra(CONST_USER_ID)
+                            val nFullName = intent.getStringExtra(CONST_FULL_NAME)
+                            val nUserLevel = intent.getStringExtra(CONST_USER_LEVEL)
+                            val nIntent = intent.getStringExtra("notification_intent")
+                            val nVisitId = intent.getStringExtra("nVisitId")
 
                             if (!nIntent.isNullOrEmpty()) {
-                                val intent = Intent(this@SplashScreenActivity, ReportsActivity::class.java).apply {
+                                val intent = Intent(
+                                    this@SplashScreenActivity,
+                                    ReportsActivity::class.java
+                                ).apply {
                                     putExtra(CONST_USER_ID, nUserId)
                                     putExtra(CONST_FULL_NAME, nFullName)
                                     putExtra(CONST_USER_LEVEL, nUserLevel)
@@ -1196,9 +1325,12 @@ class SplashScreenActivity : AppCompatActivity() {
                             }
                         }
 
-                    } RESPONSE_STATUS_EMPTY -> {
+                    }
+
+                    RESPONSE_STATUS_EMPTY -> {
                         showCardLogin()
-                }
+                    }
+
                     else -> {
                         showCardLogin()
                     }
@@ -1208,7 +1340,10 @@ class SplashScreenActivity : AppCompatActivity() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@SplashScreenActivity, "Failed SplashScreenActivity on getUserLoggedIn(). Catch: ${e.message}")
+                FirebaseUtils.logErr(
+                    this@SplashScreenActivity,
+                    "Failed SplashScreenActivity on getUserLoggedIn(). Catch: ${e.message}"
+                )
                 showCardLogin()
             }
 

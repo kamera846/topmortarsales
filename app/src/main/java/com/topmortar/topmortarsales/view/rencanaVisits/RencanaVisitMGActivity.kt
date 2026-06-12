@@ -106,15 +106,16 @@ class RencanaVisitMGActivity : AppCompatActivity() {
             }
         }
 
-        myFragment.setCounterItem(object: MGFragment.CounterItem{
+        myFragment.setCounterItem(object : MGFragment.CounterItem {
             override fun counterItem(count: Int) {
                 itemCount = count
-                binding.titleBarDark.tvTitleBar.text = "Rencana Visit MG" + "${if (count != 0) " ($count)" else ""}"
+                binding.titleBarDark.tvTitleBar.text =
+                    "Rencana Visit MG" + "${if (count != 0) " ($count)" else ""}"
             }
 
         })
 
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 myOnBackPressed()
             }
@@ -133,6 +134,7 @@ class RencanaVisitMGActivity : AppCompatActivity() {
                     if (itemCount != 0) toggleSelectBar()
                     true
                 }
+
                 else -> false
             }
         }
@@ -166,7 +168,8 @@ class RencanaVisitMGActivity : AppCompatActivity() {
         LoopingTask(items).execute()
     }
 
-    private inner class LoopingTask(private var items: ArrayList<RencanaVisitModel>) : AsyncTask<Void, Void, Void>() {
+    private inner class LoopingTask(private var items: ArrayList<RencanaVisitModel>) :
+        AsyncTask<Void, Void, Void>() {
 
         override fun doInBackground(vararg params: Void?): Void? {
             for (item in items.listIterator()) {
@@ -175,7 +178,7 @@ class RencanaVisitMGActivity : AppCompatActivity() {
                 listCoordinateStatus.add(item.store_status)
                 listCoordinateCityID.add(item.id_city)
 
-                processed ++
+                processed++
                 percentage = (processed * 100) / totalProcess
                 runOnUiThread {
                     progressBar.setMessage(getString(R.string.txt_loading) + "($percentage%)")

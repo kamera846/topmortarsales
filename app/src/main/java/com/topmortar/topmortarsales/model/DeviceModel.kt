@@ -1,6 +1,6 @@
 package com.topmortar.topmortarsales.model
 
-data class DeviceModel (
+data class DeviceModel(
     var id: String = "",
     var model: String = "",
     var manufacture: String = "",

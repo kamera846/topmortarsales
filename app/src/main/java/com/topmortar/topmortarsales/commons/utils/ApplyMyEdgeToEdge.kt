@@ -30,7 +30,7 @@ fun AppCompatActivity.applyMyEdgeToEdge(
 //                        insets
 //                    }
 //                } else {
-                    window.statusBarColor = getColor(R.color.black_300)
+                window.statusBarColor = getColor(R.color.black_300)
 //                }
             } else {
 //                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
@@ -41,7 +41,7 @@ fun AppCompatActivity.applyMyEdgeToEdge(
 //                        insets
 //                    }
 //                } else {
-                    window.statusBarColor = getColor(R.color.primary)
+                window.statusBarColor = getColor(R.color.primary)
 //                }
             }
         } else {
@@ -54,12 +54,12 @@ fun AppCompatActivity.applyMyEdgeToEdge(
 //                    insets
 //                }
 //            } else {
-                if (CustomUtility(this).isDarkMode()) {
-                    window.statusBarColor = getColor(R.color.black_200)
-                } else {
-                    window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                    window.statusBarColor = getColor(R.color.white)
-                }
+            if (CustomUtility(this).isDarkMode()) {
+                window.statusBarColor = getColor(R.color.black_200)
+            } else {
+                window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                window.statusBarColor = getColor(R.color.white)
+            }
 //            }
         }
     }

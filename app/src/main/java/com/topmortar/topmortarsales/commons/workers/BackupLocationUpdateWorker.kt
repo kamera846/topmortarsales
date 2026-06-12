@@ -38,7 +38,8 @@ class BackupLocationUpdateWorker(
                 .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
                 .await()
 
-            val pref = applicationContext.getSharedPreferences("tracking_prefs", Context.MODE_PRIVATE)
+            val pref =
+                applicationContext.getSharedPreferences("tracking_prefs", Context.MODE_PRIVATE)
             val lastHeartbeat = pref.getLong("lastHeartbeat", 0L)
             val now = System.currentTimeMillis()
 
@@ -86,7 +87,8 @@ class BackupLocationUpdateWorker(
         val distributorId = pref.getString("distributorId", null)
         val deliveryId = pref.getString("deliveryId", null)
 
-        val firebaseReference = FirebaseUtils.getReference(distributorId = distributorId ?: "-firebase-001")
+        val firebaseReference =
+            FirebaseUtils.getReference(distributorId = distributorId ?: "-firebase-001")
 
         val childAbsent = firebaseReference
             .child(FIREBASE_CHILD_ABSENT)

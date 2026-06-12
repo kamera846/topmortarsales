@@ -2,7 +2,7 @@ package com.topmortar.topmortarsales.response
 
 import com.topmortar.topmortarsales.model.PromoModel
 
-data class ResponsePromo (
+data class ResponsePromo(
     var status: String = "",
     var message: String = "",
     var results: ArrayList<PromoModel> = arrayListOf()

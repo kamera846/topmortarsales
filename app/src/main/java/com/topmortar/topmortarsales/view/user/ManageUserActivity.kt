@@ -87,17 +87,18 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
     private var users: ArrayList<UserModel> = arrayListOf()
     private var activeFilter = EMPTY_FIELD_VALUE
 
-    private val userResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            val resultData = it.data?.getStringExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE")
+    private val userResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                val resultData = it.data?.getStringExtra("$MANAGE_USER_ACTIVITY_REQUEST_CODE")
 
-            if (resultData == SYNC_NOW) {
+                if (resultData == SYNC_NOW) {
 
-                getList()
+                    getList()
 
+                }
             }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -115,8 +116,10 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
 
         // Get the current theme mode (light or dark)
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(this, R.color.black_400)
-        else binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(this, R.color.light)
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background =
+            AppCompatResources.getDrawable(this, R.color.black_400)
+        else binding.llFilter.componentFilter.background =
+            AppCompatResources.getDrawable(this, R.color.light)
 
         initVariable()
         initClickHandler()
@@ -166,7 +169,10 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
                 val apiService: ApiService = HttpClient.apiService
                 val response = when (userKind) {
                     USER_KIND_ADMIN -> apiService.getUsers(distributorID = userDistributorId)
-                    else -> apiService.getUsers(cityId = userCityID, distributorID = userDistributorId)
+                    else -> apiService.getUsers(
+                        cityId = userCityID,
+                        distributorID = userDistributorId
+                    )
                 }
 
                 when (response.status) {
@@ -185,14 +191,20 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
 //                        loadingState(true, "Success get data!")
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(true, "Daftar pengguna kosong!")
 
                     }
+
                     else -> {
 
-                        handleMessage(this@ManageUserActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@ManageUserActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         loadingState(true, getString(R.string.failed_request))
 
                     }
@@ -204,7 +216,11 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
                 if (e is CancellationException) {
                     return@launch
                 }
-                handleMessage(this@ManageUserActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    this@ManageUserActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
 
             }
@@ -302,7 +318,9 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
     }
 
     override fun onItemClick(data: UserModel?) {
-        if (data?.level_user == AUTH_LEVEL_SALES || data?.level_user == AUTH_LEVEL_COURIER || data?.level_user == AUTH_LEVEL_BA || data?.level_user == AUTH_LEVEL_PENAGIHAN  || data?.level_user == AUTH_LEVEL_MARKETING) navigateDetailUser(data)
+        if (data?.level_user == AUTH_LEVEL_SALES || data?.level_user == AUTH_LEVEL_COURIER || data?.level_user == AUTH_LEVEL_BA || data?.level_user == AUTH_LEVEL_PENAGIHAN || data?.level_user == AUTH_LEVEL_MARKETING) navigateDetailUser(
+            data
+        )
         else navigateAddUser(data)
     }
 
@@ -316,32 +334,46 @@ class ManageUserActivity : AppCompatActivity(), UsersRecyclerViewAdapter.ItemCli
                 R.id.option_none -> {
                     activeFilter = EMPTY_FIELD_VALUE
                     synchFilter()
-                    return@setOnMenuItemClickListener  true
-                } R.id.option_admin -> {
+                    return@setOnMenuItemClickListener true
+                }
+
+                R.id.option_admin -> {
                     activeFilter = AUTH_LEVEL_ADMIN_CITY
                     synchFilter()
-                    return@setOnMenuItemClickListener  true
-                } R.id.option_sales -> {
+                    return@setOnMenuItemClickListener true
+                }
+
+                R.id.option_sales -> {
                     activeFilter = AUTH_LEVEL_SALES
                     synchFilter()
-                    return@setOnMenuItemClickListener  true
-                } R.id.option_courier -> {
+                    return@setOnMenuItemClickListener true
+                }
+
+                R.id.option_courier -> {
                     activeFilter = AUTH_LEVEL_COURIER
                     synchFilter()
-                    return@setOnMenuItemClickListener  true
-                } R.id.option_ba -> {
+                    return@setOnMenuItemClickListener true
+                }
+
+                R.id.option_ba -> {
                     activeFilter = AUTH_LEVEL_BA
                     synchFilter()
-                    return@setOnMenuItemClickListener  true
-                } R.id.option_marketing -> {
+                    return@setOnMenuItemClickListener true
+                }
+
+                R.id.option_marketing -> {
                     activeFilter = AUTH_LEVEL_MARKETING
                     synchFilter()
-                    return@setOnMenuItemClickListener  true
-                } R.id.option_penagihan -> {
+                    return@setOnMenuItemClickListener true
+                }
+
+                R.id.option_penagihan -> {
                     activeFilter = AUTH_LEVEL_PENAGIHAN
                     synchFilter()
-                    return@setOnMenuItemClickListener  true
-                } else -> return@setOnMenuItemClickListener false
+                    return@setOnMenuItemClickListener true
+                }
+
+                else -> return@setOnMenuItemClickListener false
             }
         }
 

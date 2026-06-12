@@ -45,7 +45,8 @@ class FirebaseCloudMessagingServices : FirebaseMessagingService() {
         super.onMessageReceived(remoteMessage)
         try {
             if (sessionManager == null) sessionManager = SessionManager(this)
-            if (soundUri == null) soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+            if (soundUri == null) soundUri =
+                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
             notificationId = System.currentTimeMillis().toInt()
 
             remoteMessage.data.let {
@@ -62,7 +63,8 @@ class FirebaseCloudMessagingServices : FirebaseMessagingService() {
                 nIntent = it["notification_intent"].toString()
             }
 
-            if (nChannelId == "report_feedback") soundUri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + packageName + "/" + R.raw.feedback_notification_sound)
+            if (nChannelId == "report_feedback") soundUri =
+                Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + packageName + "/" + R.raw.feedback_notification_sound)
 
             if (!userId.isNullOrEmpty() && userId == nUserId
             ) {

@@ -11,7 +11,7 @@ import java.io.FileOutputStream
 
 object UriHandler {
 
-    fun uriToMultiPart(context: Context, uri: Uri, partName: String): MultipartBody.Part? {
+    fun uriToMultiPart(context: Context, uri: Uri, partName: String): MultipartBody.Part {
         val inputStream = context.contentResolver.openInputStream(uri)
         val file = File(context.cacheDir, "upload_temp")
         val outputStream = FileOutputStream(file)
@@ -19,7 +19,8 @@ object UriHandler {
         inputStream?.close()
         outputStream.close()
 
-        val requestFile = file.asRequestBody(context.contentResolver.getType(uri)?.toMediaTypeOrNull())
+        val requestFile =
+            file.asRequestBody(context.contentResolver.getType(uri)?.toMediaTypeOrNull())
         val (name, ext) = getFileNameAndExtension(context, uri)
         return MultipartBody.Part.createFormData(partName, "$name.$ext", requestFile)
     }

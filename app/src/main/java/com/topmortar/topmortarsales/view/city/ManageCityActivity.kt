@@ -80,7 +80,7 @@ class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClic
         getList()
         binding.swipeRefreshLayout.setOnRefreshListener { getList() }
 
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 myOnBackPressed()
             }
@@ -136,14 +136,20 @@ class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClic
                         loadingState(false)
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(true, "Daftar kontak kosong!")
 
                     }
+
                     else -> {
 
-                        handleMessage(this@ManageCityActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@ManageCityActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         loadingState(true, getString(R.string.failed_request))
 
                     }
@@ -155,8 +161,15 @@ class ManageCityActivity : AppCompatActivity(), CityRecyclerViewAdapter.ItemClic
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@ManageCityActivity, "Failed ManageCityActivity on getList(). Catch: ${e.message}")
-                handleMessage(this@ManageCityActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@ManageCityActivity,
+                    "Failed ManageCityActivity on getList(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@ManageCityActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
 
             }

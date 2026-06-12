@@ -35,4 +35,4 @@ data class ContactModel(
     var date_printed: String? = null,
     var payment_score: String? = "0.0",
 
-)
+    )

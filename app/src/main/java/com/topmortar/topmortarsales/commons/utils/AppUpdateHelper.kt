@@ -66,7 +66,12 @@ object AppUpdateHelper {
             .setPositiveButton("Perbarui Sekarang") { _, _ ->
                 // Arahkan pengguna ke Google Play Store
                 val appPackageName = activity.packageName
-                activity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")))
+                activity.startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")
+                    )
+                )
             }
             .setNegativeButton("Nanti dulu") { _, _ ->
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

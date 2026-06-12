@@ -12,12 +12,15 @@ import com.topmortar.topmortarsales.view.delivery.DeliveryTargetFragment
 class DeliveryViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
 
     private var listener: CounterPageItem? = null
+
     interface CounterPageItem {
         fun counterItem(count: Int, tabIndex: Int)
     }
+
     fun setCounterPageItem(listener: CounterPageItem) {
         this.listener = listener
     }
+
     private lateinit var targetFragment: DeliveryTargetFragment
     private lateinit var progressFragment: DeliveryProgressFragment
     private lateinit var endedFragment: DeliveryEndedFragment
@@ -36,7 +39,7 @@ class DeliveryViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
             0 -> {
 
                 targetFragment = DeliveryTargetFragment()
-                targetFragment.setCounterItem(object : DeliveryTargetFragment.CounterItem{
+                targetFragment.setCounterItem(object : DeliveryTargetFragment.CounterItem {
                     override fun counterItem(count: Int) {
                         listener?.counterItem(count, 0)
                     }
@@ -44,10 +47,12 @@ class DeliveryViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
                 })
                 targetFragment
 
-            } 1 -> {
+            }
+
+            1 -> {
 
                 endedFragment = DeliveryEndedFragment()
-                endedFragment.setCounterItem(object : DeliveryEndedFragment.CounterItem{
+                endedFragment.setCounterItem(object : DeliveryEndedFragment.CounterItem {
                     override fun counterItem(count: Int) {
                         listener?.counterItem(count, 1)
                     }
@@ -55,10 +60,12 @@ class DeliveryViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
                 })
                 endedFragment
 
-            } else -> {
+            }
+
+            else -> {
 
                 targetFragment = DeliveryTargetFragment()
-                targetFragment.setCounterItem(object : DeliveryTargetFragment.CounterItem{
+                targetFragment.setCounterItem(object : DeliveryTargetFragment.CounterItem {
                     override fun counterItem(count: Int) {
                         listener?.counterItem(count, 0)
                     }

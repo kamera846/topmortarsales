@@ -52,7 +52,7 @@ import okhttp3.MultipartBody
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
-class SendMessageActivity() : AppCompatActivity() {
+class SendMessageActivity : AppCompatActivity() {
 
     companion object {
         private const val GENERAL_MESSAGE = "GeneralMessage"
@@ -74,11 +74,12 @@ class SendMessageActivity() : AppCompatActivity() {
     private var exoPlayer: ExoPlayer? = null
     private var imagePart: MultipartBody.Part? = null
 
-    private val imgMessagePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK && result.data != null) {
-            setUri(result.data?.data)
+    private val imgMessagePickerLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK && result.data != null) {
+                setUri(result.data?.data)
+            }
         }
-    }
 
     private lateinit var searchModalKonten: SearchModal
     private var listKonten: ArrayList<KontenModel>? = null
@@ -204,7 +205,12 @@ class SendMessageActivity() : AppCompatActivity() {
 
         binding.spinPhone.adapter = adapter
         binding.spinPhone.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 selectedPhone = listPhone[position]
             }
 
@@ -229,7 +235,9 @@ class SendMessageActivity() : AppCompatActivity() {
                 binding.inputContainer.visibility = View.VISIBLE
                 binding.inputMediaContainer.visibility = View.VISIBLE
                 binding.inputKontenContainer.visibility = View.GONE
-            } LINK_MESSAGE -> {
+            }
+
+            LINK_MESSAGE -> {
                 // Get List Konten
                 getListKonten()
                 binding.radioButtonGeneral.isChecked = false
@@ -238,7 +246,9 @@ class SendMessageActivity() : AppCompatActivity() {
                 binding.inputContainer.visibility = View.GONE
                 binding.inputMediaContainer.visibility = View.GONE
                 binding.inputKontenContainer.visibility = View.VISIBLE
-            } else -> {
+            }
+
+            else -> {
                 binding.radioButtonGeneral.isChecked = true
                 binding.radioButtonMedia.isChecked = false
                 binding.radioButtonKonten.isChecked = false
@@ -255,7 +265,8 @@ class SendMessageActivity() : AppCompatActivity() {
             binding.tvNameSelectedKonten.text = konten.name_kontenmsg
             binding.tvBodySelectedKonten.text = konten.body_kontenmsg
             binding.tvLinkSelectedKonten.text = konten.link_kontenmsg
-            binding.tvLinkSelectedKonten.paintFlags = binding.tvLinkSelectedKonten.paintFlags or Paint.UNDERLINE_TEXT_FLAG
+            binding.tvLinkSelectedKonten.paintFlags =
+                binding.tvLinkSelectedKonten.paintFlags or Paint.UNDERLINE_TEXT_FLAG
             binding.tvLinkSelectedKonten.setOnClickListener {
                 navigateToWebview(konten.link_kontenmsg)
             }
@@ -313,7 +324,11 @@ class SendMessageActivity() : AppCompatActivity() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                updateTxtMaxLength(binding.tvMaxMessage, msgMaxLength, binding.etMessage.text.length)
+                updateTxtMaxLength(
+                    binding.tvMaxMessage,
+                    msgMaxLength,
+                    binding.etMessage.text.length
+                )
             }
 
             override fun afterTextChanged(s: Editable?) {
@@ -333,8 +348,14 @@ class SendMessageActivity() : AppCompatActivity() {
                             type = "image/*"
                             addCategory(Intent.CATEGORY_OPENABLE)
                         }
-                        imgMessagePickerLauncher.launch(Intent.createChooser(intent, "Pilih Gambar"))
+                        imgMessagePickerLauncher.launch(
+                            Intent.createChooser(
+                                intent,
+                                "Pilih Gambar"
+                            )
+                        )
                     }
+
                     1 -> {
                         val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
                             type = "video/*"
@@ -352,7 +373,11 @@ class SendMessageActivity() : AppCompatActivity() {
 
             if (!isFileSizeAllowed(uri)) {
                 clearImg()
-                handleMessage(this, "TAG SEND MESSAGE ACTIVITY", "Ukuran file melebihi batas $limitFileMB MB")
+                handleMessage(
+                    this,
+                    "TAG SEND MESSAGE ACTIVITY",
+                    "Ukuran file melebihi batas $limitFileMB MB"
+                )
                 return
             }
 
@@ -401,7 +426,11 @@ class SendMessageActivity() : AppCompatActivity() {
 
             } else {
                 clearImg()
-                handleMessage(this@SendMessageActivity, TAG_RESPONSE_CONTACT, "Gagal memproses media")
+                handleMessage(
+                    this@SendMessageActivity,
+                    TAG_RESPONSE_CONTACT,
+                    "Gagal memproses media"
+                )
             }
 
         } else {
@@ -438,7 +467,9 @@ class SendMessageActivity() : AppCompatActivity() {
                 when (selectedMsgType) {
                     LINK_MESSAGE -> {
                         submitMessageKonten()
-                    } else -> {
+                    }
+
+                    else -> {
                         submitMessageGeneralAndMedia()
                     }
                 }
@@ -453,7 +484,10 @@ class SendMessageActivity() : AppCompatActivity() {
             try {
                 val data = contact!!
                 val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
-                val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
+                val currentName = sessionManager.fullName().let { fullName ->
+                    if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName()
+                        .let { username -> if (!username.isNullOrEmpty()) username else "" }
+                }
 
                 var phoneCat = data.nomor_cat_1
 
@@ -468,7 +502,7 @@ class SendMessageActivity() : AppCompatActivity() {
                 val rbBirthday = createPartFromString(data.tgl_lahir)
                 val rbOwner = createPartFromString(data.store_owner)
                 val rbMapsUrl = createPartFromString(data.maps_url)
-                val rbMessage = createPartFromString("${ binding.etMessage.text }")
+                val rbMessage = createPartFromString("${binding.etMessage.text}")
                 val rbUserId = createPartFromString(userId)
                 val rbContactId = createPartFromString(data.id_contact)
                 val rbCurrentName = createPartFromString(currentName)
@@ -483,7 +517,9 @@ class SendMessageActivity() : AppCompatActivity() {
                             message = rbMessage,
                             imageMessage = imagePart,
                         )
-                    } else -> {
+                    }
+
+                    else -> {
                         HttpClient.apiService.sendMessage(
                             name = rbName,
                             phoneCategory = rbPhoneCategory,
@@ -513,12 +549,20 @@ class SendMessageActivity() : AppCompatActivity() {
                                 val responseQontak = responseBody.qontak
 
                                 if (responseQontak == null) {
-                                    handleMessage(this@SendMessageActivity, TAG_RESPONSE_MESSAGE, responseBody.message)
+                                    handleMessage(
+                                        this@SendMessageActivity,
+                                        TAG_RESPONSE_MESSAGE,
+                                        responseBody.message
+                                    )
                                     setResult(RESULT_OK)
                                     finish()
                                 } else {
                                     if (responseQontak.status == "success") {
-                                        handleMessage(this@SendMessageActivity, TAG_RESPONSE_MESSAGE, responseBody.message)
+                                        handleMessage(
+                                            this@SendMessageActivity,
+                                            TAG_RESPONSE_MESSAGE,
+                                            responseBody.message
+                                        )
                                         setResult(RESULT_OK)
                                         finish()
                                     } else {
@@ -540,22 +584,38 @@ class SendMessageActivity() : AppCompatActivity() {
                                 }
 
                             }
+
                             RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                                handleMessage(this@SendMessageActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim: ${ responseBody.message }")
+                                handleMessage(
+                                    this@SendMessageActivity,
+                                    TAG_RESPONSE_MESSAGE,
+                                    "Gagal mengirim: ${responseBody.message}"
+                                )
                                 loadingState(false)
 
                             }
+
                             RESPONSE_STATUS_ERROR -> {
 
-                                val errorMessages = responseBody.error?.messages.let { if (!it.isNullOrEmpty()) it[0] else "" }
-                                handleMessage(this@SendMessageActivity, TAG_RESPONSE_MESSAGE, "Error Code ${ responseBody.error?.code } $errorMessages")
+                                val errorMessages =
+                                    responseBody.error?.messages.let { if (!it.isNullOrEmpty()) it[0] else "" }
+                                handleMessage(
+                                    this@SendMessageActivity,
+                                    TAG_RESPONSE_MESSAGE,
+                                    "Error Code ${responseBody.error?.code} $errorMessages"
+                                )
                                 loadingState(false)
 
                             }
+
                             else -> {
 
-                                handleMessage(this@SendMessageActivity, TAG_RESPONSE_CONTACT, "Gagal mengirim!")
+                                handleMessage(
+                                    this@SendMessageActivity,
+                                    TAG_RESPONSE_CONTACT,
+                                    "Gagal mengirim!"
+                                )
                                 loadingState(false)
 
                             }
@@ -564,14 +624,22 @@ class SendMessageActivity() : AppCompatActivity() {
 
                 } else {
 
-                    handleMessage(this@SendMessageActivity, TAG_RESPONSE_CONTACT, "Gagal mengirim. Error: Code ${response?.code()}, Message: ${response?.message()}")
+                    handleMessage(
+                        this@SendMessageActivity,
+                        TAG_RESPONSE_CONTACT,
+                        "Gagal mengirim. Error: Code ${response?.code()}, Message: ${response?.message()}"
+                    )
                     loadingState(false)
 
                 }
 
             } catch (e: Exception) {
 
-                handleMessage(this@SendMessageActivity, TAG_RESPONSE_CONTACT, "Failed run service send message. Exception " + e.message)
+                handleMessage(
+                    this@SendMessageActivity,
+                    TAG_RESPONSE_CONTACT,
+                    "Failed run service send message. Exception " + e.message
+                )
                 loadingState(false)
 
             } finally {
@@ -606,9 +674,9 @@ class SendMessageActivity() : AppCompatActivity() {
                 val rbKontenId = createPartFromString(idKonten ?: "-1")
 
                 val response = HttpClient.apiService.sendMessageKonten(
-                        idKonten = rbKontenId,
-                        idContact = rbContactId
-                    )
+                    idKonten = rbKontenId,
+                    idContact = rbContactId
+                )
 
                 if (response.isSuccessful) {
 
@@ -623,12 +691,20 @@ class SendMessageActivity() : AppCompatActivity() {
                                 val responseQontak = responseBody.qontak
 
                                 if (responseQontak == null) {
-                                    handleMessage(this@SendMessageActivity, TAG_RESPONSE_MESSAGE, responseBody.message)
+                                    handleMessage(
+                                        this@SendMessageActivity,
+                                        TAG_RESPONSE_MESSAGE,
+                                        responseBody.message
+                                    )
                                     setResult(RESULT_OK)
                                     finish()
                                 } else {
                                     if (responseQontak.status == "success") {
-                                        handleMessage(this@SendMessageActivity, TAG_RESPONSE_MESSAGE, responseBody.message)
+                                        handleMessage(
+                                            this@SendMessageActivity,
+                                            TAG_RESPONSE_MESSAGE,
+                                            responseBody.message
+                                        )
                                         setResult(RESULT_OK)
                                         finish()
                                     } else {
@@ -643,29 +719,45 @@ class SendMessageActivity() : AppCompatActivity() {
                                             handleMessage(
                                                 this@SendMessageActivity,
                                                 TAG_RESPONSE_MESSAGE,
-                                                "Code: ${ qontakError.code }, Message: ${qontakError.messages}"
+                                                "Code: ${qontakError.code}, Message: ${qontakError.messages}"
                                             )
                                         }
                                     }
                                 }
 
                             }
+
                             RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                                handleMessage(this@SendMessageActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim: ${ responseBody.message }")
+                                handleMessage(
+                                    this@SendMessageActivity,
+                                    TAG_RESPONSE_MESSAGE,
+                                    "Gagal mengirim: ${responseBody.message}"
+                                )
                                 loadingState(false)
 
                             }
+
                             RESPONSE_STATUS_ERROR -> {
 
-                                val errorMessages = responseBody.error?.messages.let { if (!it.isNullOrEmpty()) it[0] else "" }
-                                handleMessage(this@SendMessageActivity, TAG_RESPONSE_MESSAGE, "Error Code ${ responseBody.error?.code } $errorMessages")
+                                val errorMessages =
+                                    responseBody.error?.messages.let { if (!it.isNullOrEmpty()) it[0] else "" }
+                                handleMessage(
+                                    this@SendMessageActivity,
+                                    TAG_RESPONSE_MESSAGE,
+                                    "Error Code ${responseBody.error?.code} $errorMessages"
+                                )
                                 loadingState(false)
 
                             }
+
                             else -> {
 
-                                handleMessage(this@SendMessageActivity, TAG_RESPONSE_CONTACT, "Gagal mengirim!")
+                                handleMessage(
+                                    this@SendMessageActivity,
+                                    TAG_RESPONSE_CONTACT,
+                                    "Gagal mengirim!"
+                                )
                                 loadingState(false)
 
                             }
@@ -674,14 +766,22 @@ class SendMessageActivity() : AppCompatActivity() {
 
                 } else {
 
-                    handleMessage(this@SendMessageActivity, TAG_RESPONSE_CONTACT, "Gagal mengirim. Error: Code ${response?.code()}, Message: ${response?.message()}")
+                    handleMessage(
+                        this@SendMessageActivity,
+                        TAG_RESPONSE_CONTACT,
+                        "Gagal mengirim. Error: Code ${response?.code()}, Message: ${response?.message()}"
+                    )
                     loadingState(false)
 
                 }
 
             } catch (e: Exception) {
 
-                handleMessage(this@SendMessageActivity, TAG_RESPONSE_CONTACT, "Failed run service send message. Exception " + e.message)
+                handleMessage(
+                    this@SendMessageActivity,
+                    TAG_RESPONSE_CONTACT,
+                    "Failed run service send message. Exception " + e.message
+                )
                 loadingState(false)
 
             } finally {
@@ -714,13 +814,15 @@ class SendMessageActivity() : AppCompatActivity() {
 
         return when (selectedMsgType) {
             GENERAL_MESSAGE -> {
-                val message = "${ binding.etMessage.text }"
+                val message = "${binding.etMessage.text}"
                 if (message.isEmpty()) {
                     handleMessage(this, message = "Text pesan tidak boleh kosong")
                     false
                 } else true
-            } MEDIA_MESSAGE -> {
-                val message = "${ binding.etMessage.text }"
+            }
+
+            MEDIA_MESSAGE -> {
+                val message = "${binding.etMessage.text}"
                 if (message.isEmpty()) {
                     handleMessage(this, message = "Text pesan tidak boleh kosong")
                     false
@@ -728,12 +830,16 @@ class SendMessageActivity() : AppCompatActivity() {
                     handleMessage(this, message = "Tidak ada media yang dipilih")
                     false
                 } else true
-            } LINK_MESSAGE -> {
+            }
+
+            LINK_MESSAGE -> {
                 if (idKonten == null) {
                     handleMessage(this, message = "Tidak ada konten yang dipilih")
                     false
                 } else true
-            } else -> {
+            }
+
+            else -> {
                 handleMessage(this, message = "Anda belum memilih opsi pesan")
                 false
             }
@@ -754,19 +860,37 @@ class SendMessageActivity() : AppCompatActivity() {
                         if (listItem != null) {
                             for (i in 0 until listItem.size) {
                                 val data = listItem[i]
-                                items.add(ModalSearchModel(data.id_kontenmsg, data.name_kontenmsg, data.body_kontenmsg))
+                                items.add(
+                                    ModalSearchModel(
+                                        data.id_kontenmsg,
+                                        data.name_kontenmsg,
+                                        data.body_kontenmsg
+                                    )
+                                )
                             }
                             setupModalSearchKonten(items)
                         }
-                    } RESPONSE_STATUS_EMPTY -> {
+                    }
+
+                    RESPONSE_STATUS_EMPTY -> {
                         listKonten = arrayListOf()
                         val items: ArrayList<ModalSearchModel> = ArrayList()
                         setupModalSearchKonten(items)
                         handleMessage(this@SendMessageActivity, message = "List konten kosong.")
-                    } RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED, RESPONSE_STATUS_ERROR -> {
-                        handleMessage(this@SendMessageActivity, message = "Gagal memuat konten. Error: ${response.message}")
-                    } else -> {
-                        handleMessage(this@SendMessageActivity, message = "Gagal memuat konten. Status: ${response.status}")
+                    }
+
+                    RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED, RESPONSE_STATUS_ERROR -> {
+                        handleMessage(
+                            this@SendMessageActivity,
+                            message = "Gagal memuat konten. Error: ${response.message}"
+                        )
+                    }
+
+                    else -> {
+                        handleMessage(
+                            this@SendMessageActivity,
+                            message = "Gagal memuat konten. Status: ${response.status}"
+                        )
                     }
                 }
             }

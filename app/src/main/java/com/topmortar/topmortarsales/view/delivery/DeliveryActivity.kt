@@ -44,19 +44,23 @@ class DeliveryActivity : AppCompatActivity() {
 
         // Connect TabLayout and ViewPager
         tabLayout.setupWithViewPager(viewPager)
-        pagerAdapter.setCounterPageItem(object : DeliveryViewPagerAdapter.CounterPageItem{
+        pagerAdapter.setCounterPageItem(object : DeliveryViewPagerAdapter.CounterPageItem {
             override fun counterItem(count: Int, tabIndex: Int) {
                 when (tabIndex) {
-                    0 -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Target"
+                    0 -> tabLayout.getTabAt(tabIndex)?.text =
+                        "${if (count != 0) "($count)\n" else ""}Target"
 //                    1 -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Berlangsung"
 //                    2 -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Riwayat"
-                    1 -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Riwayat"
-                    else -> tabLayout.getTabAt(tabIndex)?.text = "${if (count != 0) "($count)\n" else ""}Target"
+                    1 -> tabLayout.getTabAt(tabIndex)?.text =
+                        "${if (count != 0) "($count)\n" else ""}Riwayat"
+
+                    else -> tabLayout.getTabAt(tabIndex)?.text =
+                        "${if (count != 0) "($count)\n" else ""}Target"
                 }
             }
 
         })
-        tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener{
+        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 activeTab = tab?.position!!
             }
@@ -71,8 +75,7 @@ class DeliveryActivity : AppCompatActivity() {
             tabLayout.setBackgroundColor(getColor(R.color.black_300))
             tabLayout.setTabTextColors(getColor(R.color.black_600), getColor(R.color.primary))
             tabLayout.setSelectedTabIndicatorColor(getColor(R.color.primary))
-        }
-        else {
+        } else {
             tabLayout.setBackgroundColor(getColor(R.color.primary))
             tabLayout.setTabTextColors(getColor(R.color.primary_600), getColor(R.color.white))
             tabLayout.setSelectedTabIndicatorColor(getColor(R.color.white))

@@ -96,14 +96,15 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
     private var contactId: String? = null
     private var iName: String? = null
 
-    private var activityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            val resultData = it.data?.getStringExtra("$DETAIL_ACTIVITY_REQUEST_CODE")
-            isClosingAction = it.data?.getBooleanExtra(IS_CLOSING, false) ?: false
+    private var activityLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                val resultData = it.data?.getStringExtra("$DETAIL_ACTIVITY_REQUEST_CODE")
+                isClosingAction = it.data?.getBooleanExtra(IS_CLOSING, false) ?: false
 
-            if (resultData == SYNC_NOW) isRequestSync = true
+                if (resultData == SYNC_NOW) isRequestSync = true
+            }
         }
-    }
 
     companion object {
         const val LIST_SURAT_JALAN = "list_surat_jalan"
@@ -126,7 +127,11 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
         setContentView(binding.root)
 
         if (CustomUtility(this).isUserWithOnlineStatus()) {
-            CustomUtility(this).setUserStatusOnline(true, userDistributorId ?: "-custom-016", "$userID")
+            CustomUtility(this).setUserStatusOnline(
+                true,
+                userDistributorId ?: "-custom-016",
+                "$userID"
+            )
         }
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale_anim)
 
@@ -134,7 +139,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
         initClickHandler()
         dataActivityValidation()
 
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 myOnBackPressed()
             }
@@ -175,7 +180,8 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
 
         // Get the current theme mode (light or dark)
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) llFilter.background = AppCompatResources.getDrawable(this, R.color.black_400)
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) llFilter.background =
+            AppCompatResources.getDrawable(this, R.color.black_400)
         else llFilter.background = AppCompatResources.getDrawable(this, R.color.light)
 
     }
@@ -207,7 +213,8 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
         lifecycleScope.launch {
             try {
 
-                val response = apiService.getSuratJalan(processNumber = "2", contactId = contactId!!)
+                val response =
+                    apiService.getSuratJalan(processNumber = "2", contactId = contactId!!)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -216,14 +223,20 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
                         loadingState(false)
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(true, "Data surat jalan kosong!")
 
                     }
+
                     else -> {
 
-                        handleMessage(this@ListSuratJalanActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@ListSuratJalanActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         loadingState(true, getString(R.string.failed_request))
 
                     }
@@ -234,8 +247,15 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@ListSuratJalanActivity, "Failed ListSuratJalanActivity on getList(). Catch: ${e.message}")
-                handleMessage(this@ListSuratJalanActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@ListSuratJalanActivity,
+                    "Failed ListSuratJalanActivity on getList(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@ListSuratJalanActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
 
             }
@@ -258,10 +278,13 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
                         tvFilter.text = "Paid"
                         response = apiService.getInvoices(contactId = contactId!!, "paid")
                     }
+
                     FILTER_UNPAID -> {
                         tvFilter.text = "Unpaid"
-                        response = apiService.getInvoices(contactId = contactId!!, status = "waiting")
+                        response =
+                            apiService.getInvoices(contactId = contactId!!, status = "waiting")
                     }
+
                     else -> {
                         tvFilter.text = "None"
                         response = apiService.getInvoices(contactId = contactId!!)
@@ -277,15 +300,21 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
                         llFilter.visibility = View.VISIBLE
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         llFilter.visibility = View.VISIBLE
                         loadingState(true, "Daftar invoice kosong!")
 
                     }
+
                     else -> {
 
-                        handleMessage(this@ListSuratJalanActivity, TAG_RESPONSE_CONTACT, "Gagal memuat data")
+                        handleMessage(
+                            this@ListSuratJalanActivity,
+                            TAG_RESPONSE_CONTACT,
+                            "Gagal memuat data"
+                        )
                         loadingState(true, getString(R.string.failed_request))
 
                     }
@@ -296,8 +325,15 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@ListSuratJalanActivity, "Failed ListSuratJalanActivity on getListInvoice(). Catch: ${e.message}")
-                handleMessage(this@ListSuratJalanActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@ListSuratJalanActivity,
+                    "Failed ListSuratJalanActivity on getListInvoice(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@ListSuratJalanActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
 
             }
@@ -377,10 +413,12 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
                     toggleList()
                     true
                 }
+
                 R.id.option_surat_jalan -> {
                     if (isListActive != LIST_SURAT_JALAN) toggleList(LIST_SURAT_JALAN)
                     true
                 }
+
                 R.id.option_invoices -> {
                     if (isListActive != LIST_INVOICE) {
                         isFilterInvoice = FILTER_NONE
@@ -388,6 +426,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
                     }
                     true
                 }
+
                 else -> false
             }
         }
@@ -402,14 +441,20 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
             when (item?.itemId) {
                 R.id.option_none -> {
                     toggleFilter(FILTER_NONE)
-                    return@setOnMenuItemClickListener  true
-                } R.id.option_paid -> {
+                    return@setOnMenuItemClickListener true
+                }
+
+                R.id.option_paid -> {
                     toggleFilter(FILTER_PAID)
-                    return@setOnMenuItemClickListener  true
-                } R.id.option_unpaid -> {
+                    return@setOnMenuItemClickListener true
+                }
+
+                R.id.option_unpaid -> {
                     toggleFilter(FILTER_UNPAID)
-                    return@setOnMenuItemClickListener  true
-                } else -> return@setOnMenuItemClickListener false
+                    return@setOnMenuItemClickListener true
+                }
+
+                else -> return@setOnMenuItemClickListener false
             }
         }
 
@@ -488,6 +533,7 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
     override fun onItemClick(data: SuratJalanModel?) {
         navigateDetailSuratJalan(data)
     }
+
     override fun onItemInvoiceClick(data: InvoiceModel?) {
         navigateDetailInvoice(data)
     }
@@ -523,7 +569,11 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
             if (CustomUtility(this).isUserWithOnlineStatus()) {
-                CustomUtility(this).setUserStatusOnline(true, userDistributorId ?: "-custom-016", "$userID")
+                CustomUtility(this).setUserStatusOnline(
+                    true,
+                    userDistributorId ?: "-custom-016",
+                    "$userID"
+                )
             }
         }, 1000)
     }
@@ -531,14 +581,22 @@ class ListSuratJalanActivity : AppCompatActivity(), SuratJalanRecyclerViewAdapte
     override fun onStop() {
         super.onStop()
         if (CustomUtility(this).isUserWithOnlineStatus()) {
-            CustomUtility(this).setUserStatusOnline(false, userDistributorId ?: "-custom-016", "$userID")
+            CustomUtility(this).setUserStatusOnline(
+                false,
+                userDistributorId ?: "-custom-016",
+                "$userID"
+            )
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         if (CustomUtility(this).isUserWithOnlineStatus()) {
-            CustomUtility(this).setUserStatusOnline(false, userDistributorId ?: "-custom-016", "$userID")
+            CustomUtility(this).setUserStatusOnline(
+                false,
+                userDistributorId ?: "-custom-016",
+                "$userID"
+            )
         }
     }
 

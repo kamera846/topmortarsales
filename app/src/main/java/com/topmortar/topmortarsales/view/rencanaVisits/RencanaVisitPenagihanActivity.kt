@@ -44,7 +44,8 @@ import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import kotlin.coroutines.cancellation.CancellationException
 
-class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment.OnSelectedItemListener {
+class RencanaVisitPenagihanActivity : AppCompatActivity(),
+    TagihMingguanFragment.OnSelectedItemListener {
 
     private var _binding: ActivityRencanaVisitPenagihanBinding? = null
     private val binding get() = _binding!!
@@ -59,7 +60,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
     private lateinit var viewPager: ViewPager
     private lateinit var pagerAdapter: RencanaVisitPenagihanVPA
     private lateinit var progressBar: CustomProgressBar
-    private var pagerAdapterItemCount = mutableListOf(0,0,0,0)
+    private var pagerAdapterItemCount = mutableListOf(0, 0, 0, 0)
     private var activeTab = 0
     private var selectedItemCount = 0
     private var isSelectBarActive = false
@@ -109,7 +110,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
 
         initLayout()
 
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 myOnBackPressed()
             }
@@ -133,8 +134,8 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
         viewPager = binding.viewPager
 
 //        if (userKind == USER_KIND_ADMIN) {
-            pagerAdapterItemCount.add(0)
-            tabTitles.add("MG")
+        pagerAdapterItemCount.add(0)
+        tabTitles.add("MG")
 //        }
 
         pagerAdapter = RencanaVisitPenagihanVPA(supportFragmentManager, tabTitles.size)
@@ -143,20 +144,22 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
         // Connect TabLayout and ViewPager
         tabLayout.setupWithViewPager(viewPager)
         for ((idx, item) in tabTitles.listIterator().withIndex()) {
-            val textView = LayoutInflater.from(this).inflate(R.layout.tab_renvi_title, null) as TextView
+            val textView =
+                LayoutInflater.from(this).inflate(R.layout.tab_renvi_title, null) as TextView
             textView.text = item
             tabTitleViews.add(textView)
             tabLayout.getTabAt(idx)?.customView = textView
         }
         tabTitleViews[0].setTypeface(null, android.graphics.Typeface.BOLD)
-        pagerAdapter.setCounterPageItem(object : RencanaVisitPenagihanVPA.CounterPageItem{
+        pagerAdapter.setCounterPageItem(object : RencanaVisitPenagihanVPA.CounterPageItem {
             override fun counterItem(count: Int, tabIndex: Int) {
                 pagerAdapterItemCount[tabIndex] = count
-                tabTitleViews[tabIndex].text = "${if (count != 0) "($count) " else ""}" + tabTitles[tabIndex]
+                tabTitleViews[tabIndex].text =
+                    "${if (count != 0) "($count) " else ""}" + tabTitles[tabIndex]
             }
 
         })
-        tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener{
+        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 activeTab = tab?.position!!
                 tabTitleViews[activeTab].setTypeface(null, android.graphics.Typeface.BOLD)
@@ -174,8 +177,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
             tabLayout.setBackgroundColor(getColor(R.color.black_300))
             tabLayout.setTabTextColors(getColor(R.color.black_600), getColor(R.color.primary))
             tabLayout.setSelectedTabIndicatorColor(getColor(R.color.primary))
-        }
-        else {
+        } else {
             tabLayout.setBackgroundColor(getColor(R.color.primary))
             tabLayout.setTabTextColors(getColor(R.color.primary_600), getColor(R.color.white))
             tabLayout.setSelectedTabIndicatorColor(getColor(R.color.white))
@@ -211,13 +213,21 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
         when (activeTab) {
             0 -> {
                 menuPerCategory.title = "Lihat lokasi renvi Jatem 0-7"
-            } 1 -> {
+            }
+
+            1 -> {
                 menuPerCategory.title = "Lihat lokasi renvi Jatem 8-15"
-            } 2 -> {
+            }
+
+            2 -> {
                 menuPerCategory.title = "Lihat lokasi renvi Jatem 16+"
-            } 3 -> {
+            }
+
+            3 -> {
                 menuPerCategory.title = "Lihat lokasi renvi Mingguan"
-            } 4 -> {
+            }
+
+            4 -> {
                 menuPerCategory.title = "Lihat lokasi renvi MG"
             }
         }
@@ -228,6 +238,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
                     getAllRenvi()
                     true
                 }
+
                 R.id.option_per_category -> {
                     if (pagerAdapterItemCount[activeTab] != 0) {
                         val listIem = pagerAdapter.getAllListItem(activeTab)
@@ -235,10 +246,12 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
                     }
                     true
                 }
+
                 R.id.option_choices -> {
                     if (pagerAdapterItemCount[activeTab] != 0) toggleSelectBar()
                     true
                 }
+
                 else -> false
             }
         }
@@ -273,8 +286,9 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
 
         getListRenviPerCategory("jatem1")
     }
+
     private fun getListRenviPerCategory(category: String) {
-        processed ++
+        processed++
         progressBar.setMessage(getString(R.string.txt_loading) + "($processed/$totalProcess)")
 
         lifecycleScope.launch {
@@ -283,17 +297,48 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
                 val response = when (userKind) {
                     USER_KIND_ADMIN -> {
                         when (category) {
-                            "jatem1" -> apiService.jatemPenagihan(dst = userDistributorId ?: "0", type = "jatem1")
-                            "jatem2" -> apiService.jatemPenagihan(dst = userDistributorId ?: "0", type = "jatem2")
-                            "jatem3" -> apiService.jatemPenagihan(dst = userDistributorId ?: "0", type = "jatem3")
+                            "jatem1" -> apiService.jatemPenagihan(
+                                dst = userDistributorId ?: "0",
+                                type = "jatem1"
+                            )
+
+                            "jatem2" -> apiService.jatemPenagihan(
+                                dst = userDistributorId ?: "0",
+                                type = "jatem2"
+                            )
+
+                            "jatem3" -> apiService.jatemPenagihan(
+                                dst = userDistributorId ?: "0",
+                                type = "jatem3"
+                            )
+
                             "mg" -> apiService.targetMgDst(idDistributor = userDistributorId ?: "0")
-                            else -> apiService.targetWeeklyDst(idDistributor = userDistributorId ?: "0")
+                            else -> apiService.targetWeeklyDst(
+                                idDistributor = userDistributorId ?: "0"
+                            )
                         }
-                    } else -> {
+                    }
+
+                    else -> {
                         when (category) {
-                            "jatem1" -> apiService.jatemPenagihanFilter(dst = userDistributorId ?: "0", idCity = userCityID ?: "0", type = "jatem1")
-                            "jatem2" -> apiService.jatemPenagihanFilter(dst = userDistributorId ?: "0", idCity = userCityID ?: "0", type = "jatem2")
-                            "jatem3" -> apiService.jatemPenagihanFilter(dst = userDistributorId ?: "0", idCity = userCityID ?: "0", type = "jatem3")
+                            "jatem1" -> apiService.jatemPenagihanFilter(
+                                dst = userDistributorId ?: "0",
+                                idCity = userCityID ?: "0",
+                                type = "jatem1"
+                            )
+
+                            "jatem2" -> apiService.jatemPenagihanFilter(
+                                dst = userDistributorId ?: "0",
+                                idCity = userCityID ?: "0",
+                                type = "jatem2"
+                            )
+
+                            "jatem3" -> apiService.jatemPenagihanFilter(
+                                dst = userDistributorId ?: "0",
+                                idCity = userCityID ?: "0",
+                                type = "jatem3"
+                            )
+
                             "mg" -> apiService.targetMg(idCity = userCityID ?: "0")
                             else -> apiService.targetWeekly(idCity = userCityID ?: "0")
                         }
@@ -316,6 +361,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
                             }
                         }
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         when (category) {
@@ -332,6 +378,7 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
                         }
 
                     }
+
                     else -> {
 
                         when (category) {
@@ -355,7 +402,10 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@RencanaVisitPenagihanActivity, "Failed RencanaVisitPenagihanActivity on getListRenviPerCategory(). Catch: ${e.message}")
+                FirebaseUtils.logErr(
+                    this@RencanaVisitPenagihanActivity,
+                    "Failed RencanaVisitPenagihanActivity on getListRenviPerCategory(). Catch: ${e.message}"
+                )
                 when (category) {
                     "jatem1" -> getListRenviPerCategory("jatem2")
                     "jatem2" -> getListRenviPerCategory("jatem3")
@@ -424,7 +474,8 @@ class RencanaVisitPenagihanActivity : AppCompatActivity(), TagihMingguanFragment
 //        }, 1000)
     }
 
-    private inner class LoopingTask(private var items: ArrayList<RencanaVisitModel>) : AsyncTask<Void, Void, Void>() {
+    private inner class LoopingTask(private var items: ArrayList<RencanaVisitModel>) :
+        AsyncTask<Void, Void, Void>() {
 
         override fun doInBackground(vararg params: Void?): Void? {
             for (item in items.listIterator()) {

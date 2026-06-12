@@ -150,7 +150,8 @@ import java.util.Locale
 import kotlin.coroutines.cancellation.CancellationException
 
 @OptIn(DelicateCoroutinesApi::class)
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener,
+    GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private lateinit var sessionManager: SessionManager
     private val mapsApiKey: String = BuildConfig.MAPS_API_KEY
@@ -187,7 +188,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private val mapsDuration = 2000
     private var selectedLocation: LatLng? = null
     private var currentLatLng: LatLng? = null
-    private var lineColor = listOf(R.color.primary_200, R.color.status_passive, R.color.status_passive)
+    private var lineColor =
+        listOf(R.color.primary_200, R.color.status_passive, R.color.status_passive)
 
     private lateinit var mLastLocation: Location
     private var mCurrLocationMarker: Marker? = null
@@ -241,30 +243,32 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     private val bitmapCache = mutableMapOf<Int, Bitmap>()
 
-    private val activityLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            val resultData = it.data?.getStringExtra("$DETAIL_ACTIVITY_REQUEST_CODE")
-            val isClosingAction = it.data?.getBooleanExtra(IS_CLOSING, false) ?: false
+    private val activityLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                val resultData = it.data?.getStringExtra("$DETAIL_ACTIVITY_REQUEST_CODE")
+                val isClosingAction = it.data?.getBooleanExtra(IS_CLOSING, false) ?: false
 
-            if (resultData == SYNC_NOW) {
-                val resultIntent = Intent()
-                resultIntent.putExtra("$DETAIL_ACTIVITY_REQUEST_CODE", SYNC_NOW)
-                resultIntent.putExtra(IS_CLOSING, isClosingAction)
-                setResult(RESULT_OK, resultIntent)
+                if (resultData == SYNC_NOW) {
+                    val resultIntent = Intent()
+                    resultIntent.putExtra("$DETAIL_ACTIVITY_REQUEST_CODE", SYNC_NOW)
+                    resultIntent.putExtra(IS_CLOSING, isClosingAction)
+                    setResult(RESULT_OK, resultIntent)
 
-                finish()
+                    finish()
+                }
             }
         }
-    }
 
-    private val trackingLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            val resultData = it.data?.getStringExtra(SYNC_NOW)
-            if (resultData == SYNC_NOW) {
-                setupTrackingCourier()
+    private val trackingLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                val resultData = it.data?.getStringExtra(SYNC_NOW)
+                if (resultData == SYNC_NOW) {
+                    setupTrackingCourier()
+                }
             }
         }
-    }
 
     companion object {
         const val ALL_USER_TRACKING_REQUEST = 123
@@ -286,14 +290,19 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         progressBar.setMessage("Mencari ${if (isBasecamp) "basecamp" else "toko"} terdekat…")
         progressBar.setCancelable(false)
 
-        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN){
-            CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-002", userID)
+        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
+            CustomUtility(this).setUserStatusOnline(
+                true,
+                userDistributorIds ?: "-custom-002",
+                userID
+            )
         }
-        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) EventBus.getDefault().register(this)
+        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) EventBus.getDefault()
+            .register(this)
 
         checkLocationPermission()
 
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 myOnBackPressed()
             }
@@ -304,7 +313,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     private fun checkLocationPermission() {
         val urlUtility = URLUtility(this)
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             if (urlUtility.isLocationEnabled(this)) {
 
                 urlUtility.requestLocationUpdate()
@@ -314,7 +327,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                 startActivity(enableLocationIntent)
             }
-        } else ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+        } else ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+            LOCATION_PERMISSION_REQUEST_CODE
+        )
     }
 
     private fun initView() {
@@ -338,7 +355,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         val padding16 = convertDpToPx(16, this)
         etSearch.setPadding(padding16, padding16, padding16, padding16)
-        etSearch.addTextChangedListener(object: TextWatcher {
+        etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
             }
 
@@ -375,7 +392,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         mMap.uiSettings.isScrollGesturesEnabledDuringRotateOrZoom = true
 
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
-            if (isNearestStore && !isNearestStoreHideFilter && !isBasecamp) binding.llFilter.visibility = View.VISIBLE
+            if (isNearestStore && !isNearestStoreHideFilter && !isBasecamp) binding.llFilter.visibility =
+                View.VISIBLE
             binding.llFilter.setOnClickListener {
                 setupFilterTokoModal()
                 filterModal.show()
@@ -389,26 +407,33 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         }
 
         if (binding.btnGetLatLng.isVisible) {
-            mMap.setPadding(0,0,0, convertDpToPx(80, this))
-            mMap.setOnMapLongClickListener { latLng -> setPin(latLng, "Lokasi terpilih", moveCamera = false) }
+            mMap.setPadding(0, 0, 0, convertDpToPx(80, this))
+            mMap.setOnMapLongClickListener { latLng ->
+                setPin(
+                    latLng,
+                    "Lokasi terpilih",
+                    moveCamera = false
+                )
+            }
             if (!sessionManager.pinMapHint()) {
                 showDialog(message = "Tekan dan tahan pada peta untuk menandai lokasi")
                 sessionManager.pinMapHint(true)
             }
         } else if (binding.btnGetDirection.isVisible) {
-            mMap.setPadding(0,0,0, convertDpToPx(80, this))
+            mMap.setPadding(0, 0, 0, convertDpToPx(80, this))
 
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location: Location? ->
-                    if (location != null) currentLatLng = LatLng(location.latitude,location.longitude)
+                    if (location != null) currentLatLng =
+                        LatLng(location.latitude, location.longitude)
                 }
 
             binding.btnGetDirection.setOnClickListener {
                 toggleDirection()
             }
         } else if (binding.llFilter.isVisible) {
-            mMap.setPadding(0,convertDpToPx(36, this),0,0)
-        } else mMap.setPadding(0,0,0,convertDpToPx(16, this))
+            mMap.setPadding(0, convertDpToPx(36, this), 0, 0)
+        } else mMap.setPadding(0, 0, 0, convertDpToPx(16, this))
 
         mMap.setOnMapClickListener {
             if (binding.recyclerView.isVisible) {
@@ -433,8 +458,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     private fun toggleDrawRoute() {
         if (isNearestStore) {
-            if (binding.llFilter.isVisible) mMap.setPadding(0, convertDpToPx(32, this@MapsActivity),0, convertDpToPx(16, this@MapsActivity))
-            else mMap.setPadding(0,0,0, convertDpToPx(16, this@MapsActivity))
+            if (binding.llFilter.isVisible) mMap.setPadding(
+                0,
+                convertDpToPx(32, this@MapsActivity),
+                0,
+                convertDpToPx(16, this@MapsActivity)
+            )
+            else mMap.setPadding(0, 0, 0, convertDpToPx(16, this@MapsActivity))
             if (selectedTargetRoute == null) {
                 binding.cardGetDirection.visibility = View.GONE
                 binding.cardTelusuri.visibility = View.VISIBLE
@@ -444,11 +474,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 binding.cardTelusuri.visibility = View.GONE
                 if (!isRouteActive) {
                     binding.textTitleTarget.text = selectedTargetRoute?.title
-                    binding.textTargetRute.text = "Petunjuk rute menuju ke lokasi ${if (isBasecamp) "basecamp" else "toko"}"
+                    binding.textTargetRute.text =
+                        "Petunjuk rute menuju ke lokasi ${if (isBasecamp) "basecamp" else "toko"}"
 
-                    val itemToFind = "${selectedTargetRoute?.position?.latitude},${selectedTargetRoute?.position?.longitude}"
+                    val itemToFind =
+                        "${selectedTargetRoute?.position?.latitude},${selectedTargetRoute?.position?.longitude}"
                     val indexOfItem = listCoordinate!!.indexOf(itemToFind)
-                    val selectedStatus = if (indexOfItem != -1) listCoordinateStatus!![indexOfItem] else ""
+                    val selectedStatus =
+                        if (indexOfItem != -1) listCoordinateStatus!![indexOfItem] else ""
                     val imgDrawable = when (selectedStatus.lowercase(Locale.getDefault())) {
                         STATUS_CONTACT_DATA -> R.drawable.store_location_status_data_11zon
                         STATUS_CONTACT_ACTIVE -> R.drawable.store_location_status_active_11zon
@@ -456,12 +489,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         STATUS_CONTACT_BID -> R.drawable.store_location_status_biding_11zon
                         else -> {
                             if (selectedCenterPoint != null && selectedCenterPoint?.etc == itemToFind) {
-                                binding.textTargetRute.text = "Petunjuk rute menuju ke lokasi gudang"
+                                binding.textTargetRute.text =
+                                    "Petunjuk rute menuju ke lokasi gudang"
                                 R.drawable.gudang_11zon
                             } else locationBlacklistDrawable
                         }
                     }
-                    binding.imgTargetRoute.setImageDrawable(AppCompatResources.getDrawable(this, imgDrawable))
+                    binding.imgTargetRoute.setImageDrawable(
+                        AppCompatResources.getDrawable(
+                            this,
+                            imgDrawable
+                        )
+                    )
 
                 }
                 binding.btnDrawRoute.setOnClickListener {
@@ -494,7 +533,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 val img = binding.btnDrawRouteImg
                 val title = binding.btnDrawRouteTitle
                 button.setBackgroundResource(R.drawable.bg_primary_round)
-                img.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.direction_white))
+                img.setImageDrawable(
+                    AppCompatResources.getDrawable(
+                        this,
+                        R.drawable.direction_white
+                    )
+                )
                 title.text = "Aktifkan Navigasi"
 
             }, 500)
@@ -508,9 +552,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     limitKm >= 3 -> 13
                     else -> 14
                 }
+
                 else -> 15
             }
-            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(LatLng(selectedLocation!!.latitude, selectedLocation!!.longitude), responsiveZoom.toFloat())
+            val cameraUpdate = CameraUpdateFactory.newLatLngZoom(
+                LatLng(
+                    selectedLocation!!.latitude,
+                    selectedLocation!!.longitude
+                ), responsiveZoom.toFloat()
+            )
             mMap.animateCamera(cameraUpdate, 2000, null)
 
             routeDirections!!.remove()
@@ -539,7 +589,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 val img = binding.btnGetDirectionImg
                 val title = binding.btnGetDirectionTitle
                 button.setBackgroundResource(R.drawable.bg_primary_round)
-                img.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.direction_white))
+                img.setImageDrawable(
+                    AppCompatResources.getDrawable(
+                        this,
+                        R.drawable.direction_white
+                    )
+                )
                 title.text = "Aktifkan Navigasi"
             }, 500)
         }
@@ -582,16 +637,28 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                 fusedLocationClient.lastLocation
                     .addOnSuccessListener { location: Location? ->
-                        if (location != null) currentLatLng = LatLng(location.latitude,location.longitude)
+                        if (location != null) currentLatLng =
+                            LatLng(location.latitude, location.longitude)
                     }
                 binding.cardGetDirection.visibility = View.VISIBLE
-                if (binding.llFilter.isVisible) mMap.setPadding(0, convertDpToPx(32, this@MapsActivity),0, convertDpToPx(16, this@MapsActivity))
-                else mMap.setPadding(0,0,0, convertDpToPx(16, this@MapsActivity))
+                if (binding.llFilter.isVisible) mMap.setPadding(
+                    0,
+                    convertDpToPx(32, this@MapsActivity),
+                    0,
+                    convertDpToPx(16, this@MapsActivity)
+                )
+                else mMap.setPadding(0, 0, 0, convertDpToPx(16, this@MapsActivity))
                 binding.textTitleTarget.text = iMapsName
-                binding.textTargetRute.text = "Petunjuk rute menuju ke lokasi ${if (isBasecamp) "basecamp" else "toko"}"
+                binding.textTargetRute.text =
+                    "Petunjuk rute menuju ke lokasi ${if (isBasecamp) "basecamp" else "toko"}"
 
                 val imgDrawable = locationBlacklistDrawable
-                binding.imgTargetRoute.setImageDrawable(AppCompatResources.getDrawable(this, imgDrawable))
+                binding.imgTargetRoute.setImageDrawable(
+                    AppCompatResources.getDrawable(
+                        this,
+                        imgDrawable
+                    )
+                )
                 binding.btnDrawRoute.setOnClickListener {
                     toggleBtnDrawRoute()
                 }
@@ -606,7 +673,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 val mapsUrlPattern1 = Regex("https://goo\\.gl/maps/\\w+")
                 val mapsUrlPattern2 = Regex("https://maps\\.app\\.goo\\.gl/\\w+")
 
-                if (mapsUrlPattern1.matches(iMaps!!) || mapsUrlPattern2.matches(iMaps!!)) return onFindLocation(iMaps!!)
+                if (mapsUrlPattern1.matches(iMaps!!) || mapsUrlPattern2.matches(iMaps!!)) return onFindLocation(
+                    iMaps!!
+                )
                 else showDialog(message = "Gagal memproses maps url")
             } else {
 
@@ -660,14 +729,22 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 val markerOptions = MarkerOptions()
                     .position(centerPointLatLng!!)
                     .title(selectedCenterPoint?.title!!)
-                    .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap(R.drawable.gudang_11zon, newWidth, newHeight)))
+                    .icon(
+                        BitmapDescriptorFactory.fromBitmap(
+                            resizedBitmap(
+                                R.drawable.gudang_11zon,
+                                newWidth,
+                                newHeight
+                            )
+                        )
+                    )
 
                 mMap.addMarker(markerOptions)
             }
 
             if (isNearestStoreDefaultRange == -1) {
 
-                progressBar.setMessage("Mencari ${listCoordinate?.size} ${ if (isBasecamp) "basecamp" else "toko"}…")
+                progressBar.setMessage("Mencari ${listCoordinate?.size} ${if (isBasecamp) "basecamp" else "toko"}…")
                 binding.radiusContainer.visibility = View.GONE
 
                 val cameraUpdate = CameraUpdateFactory.newLatLngZoom(centerPointLatLng!!, 11f)
@@ -690,12 +767,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             for ((i, item) in listCoordinate!!.iterator().withIndex()) {
 
-                processed ++
+                processed++
                 percentage = (processed * 100) / totalProcess
 
                 if (isNearestStoreDefaultRange == -1) {
                     runOnUiThread {
-                        progressBar.setMessage("Mencari ${listCoordinate?.size} ${ if (isBasecamp) "basecamp" else "toko"}…  ($percentage%)")
+                        progressBar.setMessage("Mencari ${listCoordinate?.size} ${if (isBasecamp) "basecamp" else "toko"}…  ($percentage%)")
                     }
                 } else {
                     runOnUiThread {
@@ -712,7 +789,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                         if (latitude != null && longitude != null) {
 
-                            val distance = urlUtility.calculateDistance(centerPointLatLng!!.latitude, centerPointLatLng!!.longitude, latitude, longitude)
+                            val distance = urlUtility.calculateDistance(
+                                centerPointLatLng!!.latitude,
+                                centerPointLatLng!!.longitude,
+                                latitude,
+                                longitude
+                            )
 
                             if (distance < limitKm || isNearestStoreDefaultRange == -1) {
 
@@ -738,17 +820,32 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                 val markerOptions = MarkerOptions()
                                     .position(latLng)
                                     .title(listCoordinateName?.get(i))
-                                    .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap(iconDrawable, newWidth, newHeight)))
+                                    .icon(
+                                        BitmapDescriptorFactory.fromBitmap(
+                                            resizedBitmap(
+                                                iconDrawable,
+                                                newWidth,
+                                                newHeight
+                                            )
+                                        )
+                                    )
 
-                                val onlyStatus = selectedStatusID != "-1" && selectedCitiesID == null && listCoordinateStatus!![i] == selectedStatusID.lowercase(Locale.getDefault())
-                                val onlyCities = selectedCitiesID != null && selectedStatusID == "-1" && listCoordinateCityID!![i] == selectedCitiesID?.id_city
-                                val statusAndCities = selectedStatusID != "-1" && listCoordinateStatus!![i] == selectedStatusID.lowercase(Locale.getDefault()) && selectedCitiesID != null && listCoordinateCityID!![i] == selectedCitiesID?.id_city
+                                val onlyStatus =
+                                    selectedStatusID != "-1" && selectedCitiesID == null && listCoordinateStatus!![i] == selectedStatusID.lowercase(
+                                        Locale.getDefault()
+                                    )
+                                val onlyCities =
+                                    selectedCitiesID != null && selectedStatusID == "-1" && listCoordinateCityID!![i] == selectedCitiesID?.id_city
+                                val statusAndCities =
+                                    selectedStatusID != "-1" && listCoordinateStatus!![i] == selectedStatusID.lowercase(
+                                        Locale.getDefault()
+                                    ) && selectedCitiesID != null && listCoordinateCityID!![i] == selectedCitiesID?.id_city
 
                                 if (statusAndCities || onlyStatus || onlyCities || (selectedStatusID == "-1" && selectedCitiesID == null)) {
                                     runOnUiThread {
                                         mMap.addMarker(markerOptions)
                                     }
-                                    currentFoundItemTotal ++
+                                    currentFoundItemTotal++
                                     if (isNearestStoreHideFilter && !firstItemSelected) {
                                         selectedLatLng = latLng
                                         firstItemSelected = true
@@ -788,6 +885,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     limitKm >= 3 -> 13
                     else -> 14
                 }
+
                 else -> 15
             }
 
@@ -795,19 +893,24 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             if (isLimitKmDisabled) responsiveZoom = 10
 
             if (isNearestStoreHideFilter && selectedLatLng != null) {
-                val cameraUpdate = CameraUpdateFactory.newLatLngZoom(selectedLatLng!!, responsiveZoom.toFloat())
+                val cameraUpdate =
+                    CameraUpdateFactory.newLatLngZoom(selectedLatLng!!, responsiveZoom.toFloat())
                 mMap.animateCamera(cameraUpdate, durationMs, null)
             } else {
-                val cameraUpdate = CameraUpdateFactory.newLatLngZoom(centerPointLatLng!!, responsiveZoom.toFloat())
+                val cameraUpdate =
+                    CameraUpdateFactory.newLatLngZoom(centerPointLatLng!!, responsiveZoom.toFloat())
                 mMap.animateCamera(cameraUpdate, durationMs, null)
             }
 
-            binding.textTotalNearest.text = "$currentFoundItemTotal / ${listCoordinate?.size} ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }ditemukan ${ if (!isLimitKmDisabled) "dalam radius $limitKm km" else ""}"
+            binding.textTotalNearest.text =
+                "$currentFoundItemTotal / ${listCoordinate?.size} ${if (isBasecamp) "basecamp" else "toko"} ${if (selectedStatusID != "-1") "$selectedStatusID " else ""}ditemukan ${if (!isLimitKmDisabled) "dalam radius $limitKm km" else ""}"
             if (currentFoundItemTotal > 0) {
-                binding.textTitleTotalNearest.text = "Penelusuran ${if (isBasecamp) "Basecamp" else "Toko"} Terdekat"
+                binding.textTitleTotalNearest.text =
+                    "Penelusuran ${if (isBasecamp) "Basecamp" else "Toko"} Terdekat"
             } else {
-                showDialog(message = "Tidak menemukan ${if (isBasecamp) "basecamp" else "toko"} ${ if (selectedStatusID != "-1") "$selectedStatusID " else "" }${ if (!isLimitKmDisabled) "di sekitar anda saat ini dalam radius jarak $limitKm km" else ""}")
-                binding.textTitleTotalNearest.text = "Penelusuran ${if (isBasecamp) "Basecamp" else "Toko"} Terdekat"
+                showDialog(message = "Tidak menemukan ${if (isBasecamp) "basecamp" else "toko"} ${if (selectedStatusID != "-1") "$selectedStatusID " else ""}${if (!isLimitKmDisabled) "di sekitar anda saat ini dalam radius jarak $limitKm km" else ""}")
+                binding.textTitleTotalNearest.text =
+                    "Penelusuran ${if (isBasecamp) "Basecamp" else "Toko"} Terdekat"
             }
 
             binding.cardTelusuri.visibility = View.VISIBLE
@@ -817,8 +920,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     searchModal.show()
                 }
             } else binding.centerPointContainer.visibility = View.GONE
-            if (binding.llFilter.isVisible) mMap.setPadding(0, convertDpToPx(32, this@MapsActivity),0, convertDpToPx(16, this@MapsActivity))
-            else mMap.setPadding(0,0,0, convertDpToPx(16, this@MapsActivity))
+            if (binding.llFilter.isVisible) mMap.setPadding(
+                0,
+                convertDpToPx(32, this@MapsActivity),
+                0,
+                convertDpToPx(16, this@MapsActivity)
+            )
+            else mMap.setPadding(0, 0, 0, convertDpToPx(16, this@MapsActivity))
             binding.btnTelusuri.setOnClickListener {
                 if (binding.etKm.toString().isNotEmpty()) {
                     binding.etKm.error = null
@@ -841,7 +949,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 val etKm = binding.etKm.text.toString().toInt()
                 if (etKm < 100) binding.etKm.setText("${etKm + 1}")
             }
-            binding.etKm.addTextChangedListener(object: TextWatcher {
+            binding.etKm.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(
                     s: CharSequence?,
                     start: Int,
@@ -895,7 +1003,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         val startIndex = mapsUrl.indexOf("/place/") + "/place/".length
         val endIndex = mapsUrl.indexOf("/data=")
 
-        if (startIndex != -1 && endIndex != -1) return mapsUrl.substring(startIndex, endIndex).replace("+", " ")
+        if (startIndex != -1 && endIndex != -1) return mapsUrl.substring(startIndex, endIndex)
+            .replace("+", " ")
 
         return null
     }
@@ -924,11 +1033,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             if (selectedLocation != null) {
 
                 val urlUtility = URLUtility(this)
-                val distance = urlUtility.calculateDistance(currentLatLng!!.latitude, currentLatLng!!.longitude, selectedLocation!!.latitude, selectedLocation!!.longitude)
+                val distance = urlUtility.calculateDistance(
+                    currentLatLng!!.latitude,
+                    currentLatLng!!.longitude,
+                    selectedLocation!!.latitude,
+                    selectedLocation!!.longitude
+                )
                 val shortDistance = "%.3f".format(distance).toDouble()
 
-                val message: String = if (distance > 0.2) "$shortDistance Sorry, your distance has exceeded 200 meters."
-                else "$shortDistance Congratulation, your distance is closer than 200 meters."
+                val message: String =
+                    if (distance > 0.2) "$shortDistance Sorry, your distance has exceeded 200 meters."
+                    else "$shortDistance Congratulation, your distance is closer than 200 meters."
 
                 Toast.makeText(this@MapsActivity, message, TOAST_LONG).show()
 
@@ -949,8 +1064,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
             val directions = DirectionsApi.newRequest(getGeoContext())
                 .mode(TravelMode.DRIVING) // Menggunakan mode perjalanan mengemudi
-                .origin(com.google.maps.model.LatLng(currentLocation.latitude, currentLocation.longitude))
-                .destination(com.google.maps.model.LatLng(destination.latitude, destination.longitude))
+                .origin(
+                    com.google.maps.model.LatLng(
+                        currentLocation.latitude,
+                        currentLocation.longitude
+                    )
+                )
+                .destination(
+                    com.google.maps.model.LatLng(
+                        destination.latitude,
+                        destination.longitude
+                    )
+                )
                 .optimizeWaypoints(true)
                 .alternatives(true)
 
@@ -993,7 +1118,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                             val img = binding.btnDrawRouteImg
                             val title = binding.btnDrawRouteTitle
                             button.setBackgroundResource(R.drawable.bg_passive_round)
-                            img.setImageDrawable(AppCompatResources.getDrawable(this@MapsActivity, R.drawable.direction_line_white))
+                            img.setImageDrawable(
+                                AppCompatResources.getDrawable(
+                                    this@MapsActivity,
+                                    R.drawable.direction_line_white
+                                )
+                            )
                             title.text = "Matikan Navigasi"
 
                             progressBar.dismiss()
@@ -1002,22 +1132,38 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     } else {
                         progressBar.dismiss()
                         runOnUiThread {
-                            Toast.makeText(this@MapsActivity, "Tidak ada rute ditemukan", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@MapsActivity,
+                                "Tidak ada rute ditemukan",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                 }
 
             } catch (e: ApiException) {
                 progressBar.dismiss()
-                handleMessage(this@MapsActivity, "getDirections" , "Gagal memuat navigasi. Err: ${e.message}")
+                handleMessage(
+                    this@MapsActivity,
+                    "getDirections",
+                    "Gagal memuat navigasi. Err: ${e.message}"
+                )
                 e.printStackTrace()
             } catch (e: InterruptedException) {
                 progressBar.dismiss()
-                handleMessage(this@MapsActivity, "getDirections" , "Gagal memuat navigasi. Err: ${e.message}")
+                handleMessage(
+                    this@MapsActivity,
+                    "getDirections",
+                    "Gagal memuat navigasi. Err: ${e.message}"
+                )
                 e.printStackTrace()
             } catch (e: IOException) {
                 progressBar.dismiss()
-                handleMessage(this@MapsActivity, "getDirections" , "Gagal memuat navigasi. Err: ${e.message}")
+                handleMessage(
+                    this@MapsActivity,
+                    "getDirections",
+                    "Gagal memuat navigasi. Err: ${e.message}"
+                )
                 e.printStackTrace()
             }
         }
@@ -1036,27 +1182,27 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location: Location? ->
-            if (location != null) {
-                currentLatLng = LatLng(location.latitude, location.longitude)
+                if (location != null) {
+                    currentLatLng = LatLng(location.latitude, location.longitude)
 
-                if (targetLatLng != null) {
-                    setPin(targetLatLng, targetLatLngName ?: "")
-                } else {
-                    if (isTracking) setupTracking()
-                    else if (isTrackingCourier) setupTrackingCourier()
-                    else if (isTrackingHistory) setupTrackingHistory()
-                    else setPin(currentLatLng!!, "Lokasi Saya")
+                    if (targetLatLng != null) {
+                        setPin(targetLatLng, targetLatLngName ?: "")
+                    } else {
+                        if (isTracking) setupTracking()
+                        else if (isTrackingCourier) setupTrackingCourier()
+                        else if (isTrackingHistory) setupTrackingHistory()
+                        else setPin(currentLatLng!!, "Lokasi Saya")
 
-                    if (isNearestStore && binding.llFilter.isVisible) {
-                        getCities()
-                        getListGudang()
-                    } else if (isNearestStore) {
-                        searchCoordinate()
-                        getListGudang()
+                        if (isNearestStore && binding.llFilter.isVisible) {
+                            getCities()
+                            getListGudang()
+                        } else if (isNearestStore) {
+                            searchCoordinate()
+                            getListGudang()
+                        }
                     }
-                }
-            } else showDialog(message = "Gagal menemukan lokasi Anda saat ini. Pastikan lokasi Anda aktif dan coba buka kembali peta")
-        }
+                } else showDialog(message = "Gagal menemukan lokasi Anda saat ini. Pastikan lokasi Anda aktif dan coba buka kembali peta")
+            }
 
     }
 
@@ -1071,7 +1217,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             MarkerOptions()
                 .position(latLng)
                 .title(placeName)
-                .icon(BitmapDescriptorFactory.fromBitmap(resizedBitmap(locationBlacklistDrawable, newWidth, newHeight)))
+                .icon(
+                    BitmapDescriptorFactory.fromBitmap(
+                        resizedBitmap(
+                            locationBlacklistDrawable,
+                            newWidth,
+                            newHeight
+                        )
+                    )
+                )
         )
 
         if (moveCamera) {
@@ -1096,8 +1250,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             else {
                 val customUtility = CustomUtility(this)
                 if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    val message = "Izin lokasi diperlukan untuk fitur ini. Izinkan aplikasi mengakses lokasi perangkat."
-                    customUtility.showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE) }
+                    val message =
+                        "Izin lokasi diperlukan untuk fitur ini. Izinkan aplikasi mengakses lokasi perangkat."
+                    customUtility.showPermissionDeniedSnackbar(message) {
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                            LOCATION_PERMISSION_REQUEST_CODE
+                        )
+                    }
                 } else customUtility.showPermissionDeniedDialog("Izin lokasi diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
             }
         }
@@ -1126,7 +1287,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         mMap.isMyLocationEnabled = true
     }
 
-    private fun buildGoogleApiClient(){
+    private fun buildGoogleApiClient() {
         mGoogleApiClient = GoogleApiClient.Builder(this)
             .addConnectionCallbacks(this)
             .addOnConnectionFailedListener(this)
@@ -1141,8 +1302,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             var addressList: List<Address>? = null
 
             val geoCoder = Geocoder(this)
-            try { addressList = geoCoder.getFromLocationName(placeName, 1) }
-            catch (e: IOException) { e.printStackTrace() }
+            try {
+                addressList = geoCoder.getFromLocationName(placeName, 1)
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
 
             val address = addressList!![0]
             val latLng = LatLng(address.latitude, address.longitude)
@@ -1151,7 +1315,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         } else {
 
-            val location = "${ etSearch.text }"
+            val location = "${etSearch.text}"
 
             if (location.isNotEmpty()) {
                 if (!binding.recyclerView.isVisible) binding.rvLoading.visibility = View.VISIBLE
@@ -1166,53 +1330,74 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     withContext(Dispatchers.Main) {
                         result.addOnSuccessListener { response: FindAutocompletePredictionsResponse ->
 
-                        val predictions = response.autocompletePredictions
-                        val placeIds = predictions.map { prediction: AutocompletePrediction -> prediction.placeId }
-                        val placeNames = predictions.map { prediction: AutocompletePrediction -> prediction.getPrimaryText(null).toString() }
-                        val placeAddress = predictions.map { prediction: AutocompletePrediction -> prediction.getSecondaryText(null).toString() }
+                            val predictions = response.autocompletePredictions
+                            val placeIds =
+                                predictions.map { prediction: AutocompletePrediction -> prediction.placeId }
+                            val placeNames = predictions.map { prediction: AutocompletePrediction ->
+                                prediction.getPrimaryText(null).toString()
+                            }
+                            val placeAddress =
+                                predictions.map { prediction: AutocompletePrediction ->
+                                    prediction.getSecondaryText(null).toString()
+                                }
 
-                        if (placeNames.isNotEmpty()) {
-                            val placeAdapter = PlaceAdapter(placeNames, placeAddress) { position ->
+                            if (placeNames.isNotEmpty()) {
+                                val placeAdapter =
+                                    PlaceAdapter(placeNames, placeAddress) { position ->
 
-                                val fields = listOf(Place.Field.LAT_LNG)
-                                val requestFetch = FetchPlaceRequest.builder(placeIds[position], fields).build()
+                                        val fields = listOf(Place.Field.LAT_LNG)
+                                        val requestFetch =
+                                            FetchPlaceRequest.builder(placeIds[position], fields)
+                                                .build()
 
-                                placesClient.fetchPlace(requestFetch)
-                                    .addOnSuccessListener { response: FetchPlaceResponse ->
+                                        placesClient.fetchPlace(requestFetch)
+                                            .addOnSuccessListener { response: FetchPlaceResponse ->
 
-                                        val place = response.place
-                                        val latLng = place.latLng
+                                                val place = response.place
+                                                val latLng = place.latLng
 
-                                        if (latLng != null) setPin(latLng, placeNames[position])
-                                        else {
-                                            Toast.makeText(this@MapsActivity, "Gagal menampilkan koordinat", TOAST_SHORT).show()
-                                            binding.recyclerView.visibility = View.GONE
-                                            binding.rvLoading.visibility = View.GONE
-                                        }
+                                                if (latLng != null) setPin(
+                                                    latLng,
+                                                    placeNames[position]
+                                                )
+                                                else {
+                                                    Toast.makeText(
+                                                        this@MapsActivity,
+                                                        "Gagal menampilkan koordinat",
+                                                        TOAST_SHORT
+                                                    ).show()
+                                                    binding.recyclerView.visibility = View.GONE
+                                                    binding.rvLoading.visibility = View.GONE
+                                                }
 
+                                            }
+                                            .addOnFailureListener { _: Exception ->
+                                                Toast.makeText(
+                                                    this@MapsActivity,
+                                                    "Gagal menampilkan lokasi",
+                                                    TOAST_SHORT
+                                                ).show()
+                                                binding.recyclerView.visibility = View.GONE
+                                                binding.rvLoading.visibility = View.GONE
+                                            }
                                     }
-                                    .addOnFailureListener { _: Exception ->
-                                        Toast.makeText(this@MapsActivity, "Gagal menampilkan lokasi", TOAST_SHORT).show()
-                                        binding.recyclerView.visibility = View.GONE
+
+                                binding.recyclerView.apply {
+                                    layoutManager = LinearLayoutManager(this@MapsActivity)
+                                    adapter = placeAdapter
+                                    if (isGetCoordinate) {
+                                        this.visibility = View.VISIBLE
                                         binding.rvLoading.visibility = View.GONE
                                     }
-                            }
-
-                            binding.recyclerView.apply {
-                                layoutManager = LinearLayoutManager(this@MapsActivity)
-                                adapter = placeAdapter
-                                if (isGetCoordinate) {
-                                    this.visibility = View.VISIBLE
-                                    binding.rvLoading.visibility = View.GONE
                                 }
+                            } else {
+                                binding.recyclerView.visibility = View.GONE
+                                binding.rvLoading.visibility = View.GONE
                             }
-                        } else {
-                            binding.recyclerView.visibility = View.GONE
-                            binding.rvLoading.visibility = View.GONE
-                        }
 
-                    }.addOnFailureListener {
-                            Toast.makeText(this@MapsActivity, "Gagal menemukan lokasi", TOAST_SHORT).show()
+                        }.addOnFailureListener {
+                            Toast.makeText(this@MapsActivity, "Gagal menemukan lokasi", TOAST_SHORT)
+                                .show()
                             binding.recyclerView.visibility = View.GONE
                             binding.rvLoading.visibility = View.GONE
                         }
@@ -1229,8 +1414,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private fun setupFilterTokoModal() {
 
         if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
-            val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-            if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.background = AppCompatResources.getDrawable(this, R.color.black_400)
+            val currentNightMode =
+                resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+            if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.background =
+                AppCompatResources.getDrawable(this, R.color.black_400)
             else binding.llFilter.background = AppCompatResources.getDrawable(this, R.color.light)
 
             binding.llFilter.visibility = View.VISIBLE
@@ -1239,8 +1426,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             if (userKind == USER_KIND_ADMIN) {
                 filterModal.setStatuses(selected = selectedStatusID)
                 filterModal.setCities(items = cities, selected = selectedCitiesID)
-            } else if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_ADMIN_CITY) filterModal.setStatuses(selected = selectedStatusID)
-            filterModal.setSendFilterListener(object: FilterTokoModal.SendFilterListener {
+            } else if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_ADMIN_CITY) filterModal.setStatuses(
+                selected = selectedStatusID
+            )
+            filterModal.setSendFilterListener(object : FilterTokoModal.SendFilterListener {
                 override fun onSendFilter(
                     selectedValidStatusID: String,
                     selectedStatusID: String,
@@ -1279,17 +1468,24 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         items.add(ModalSearchModel("-1", "Hapus filter"))
                         for (i in 0 until cities.size) {
                             val data = cities[i]
-                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                            items.add(
+                                ModalSearchModel(
+                                    data.id_city,
+                                    "${data.nama_city} - ${data.kode_city}"
+                                )
+                            )
                         }
 
                         setupFilterTokoModal()
                         searchCoordinate()
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         progressBar.dismiss()
 
                     }
+
                     else -> {
 
                         progressBar.dismiss()
@@ -1303,7 +1499,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@MapsActivity, "Failed MapsActivity on getCities(). Catch: ${e.message}")
+                FirebaseUtils.logErr(
+                    this@MapsActivity,
+                    "Failed MapsActivity on getCities(). Catch: ${e.message}"
+                )
                 progressBar.dismiss()
 
             }
@@ -1340,18 +1539,26 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
-        ){
+        ) {
             LocationServices.getFusedLocationProviderClient(this)
         }
     }
 
-    override fun onConnectionSuspended(p0: Int) { mGoogleApiClient?.connect() }
+    override fun onConnectionSuspended(p0: Int) {
+        mGoogleApiClient?.connect()
+    }
 
     override fun onConnectionFailed(connectionResult: ConnectionResult) {
         if (connectionResult.hasResolution()) {
 
-            try { connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST) }
-            catch (e: IntentSender.SendIntentException) { e.printStackTrace() }
+            try {
+                connectionResult.startResolutionForResult(
+                    this,
+                    CONNECTION_FAILURE_RESOLUTION_REQUEST
+                )
+            } catch (e: IntentSender.SendIntentException) {
+                e.printStackTrace()
+            }
 
         } else Toast.makeText(this, "Koneksi ke Layanan Google Play gagal", TOAST_SHORT).show()
     }
@@ -1384,15 +1591,29 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                 val response = when (userKind) {
                     USER_KIND_ADMIN -> HttpClient.apiService.getListGudang(distributorID = userDistributorId)
-                    else -> HttpClient.apiService.getListGudang(cityId = userCity, distributorID = userDistributorId)
+                    else -> HttpClient.apiService.getListGudang(
+                        cityId = userCity,
+                        distributorID = userDistributorId
+                    )
                 }
 
                 when (response.status) {
                     RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
 
                         listGudang = response.results
-                        listGudang.add(0, GudangModel("-1", "Lokasi Saya", "${currentLatLng!!.latitude},${currentLatLng!!.longitude}"))
-                        selectedCenterPoint = ModalSearchModel(listGudang[0].id_warehouse, listGudang[0].nama_warehouse, listGudang[0].location_warehouse)
+                        listGudang.add(
+                            0,
+                            GudangModel(
+                                "-1",
+                                "Lokasi Saya",
+                                "${currentLatLng!!.latitude},${currentLatLng!!.longitude}"
+                            )
+                        )
+                        selectedCenterPoint = ModalSearchModel(
+                            listGudang[0].id_warehouse,
+                            listGudang[0].nama_warehouse,
+                            listGudang[0].location_warehouse
+                        )
                         binding.centerPointTitle.text = selectedCenterPoint?.title
 
                         binding.centerPointLoading.visibility = View.GONE
@@ -1402,18 +1623,33 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                         val items: ArrayList<ModalSearchModel> = ArrayList()
                         for (i in 0 until listGudang.size) {
                             val data = listGudang[i]
-                            val title = data.nama_warehouse + if (data.kode_city.isNotEmpty()) " - " + data.kode_city else ""
-                            items.add(ModalSearchModel(data.id_warehouse, title, data.location_warehouse))
+                            val title =
+                                data.nama_warehouse + if (data.kode_city.isNotEmpty()) " - " + data.kode_city else ""
+                            items.add(
+                                ModalSearchModel(
+                                    data.id_warehouse,
+                                    title,
+                                    data.location_warehouse
+                                )
+                            )
                         }
                         setupDialogSearch(items)
 
-                    } RESPONSE_STATUS_EMPTY -> {
+                    }
+
+                    RESPONSE_STATUS_EMPTY -> {
 
                         binding.centerPointContainer.visibility = View.GONE
 
-                    } else -> {
+                    }
 
-                        handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                    else -> {
+
+                        handleMessage(
+                            this@MapsActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         binding.centerPointTitle.visibility = View.GONE
                         binding.centerPointMoreIcon.visibility = View.GONE
                         binding.centerPointLoading.visibility = View.VISIBLE
@@ -1427,8 +1663,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@MapsActivity, "Failed MapsActivity on getListGudang(). Catch: ${e.message}")
-                handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@MapsActivity,
+                    "Failed MapsActivity on getListGudang(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@MapsActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 binding.centerPointTitle.visibility = View.GONE
                 binding.centerPointMoreIcon.visibility = View.GONE
                 binding.centerPointLoading.visibility = View.VISIBLE
@@ -1442,7 +1685,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
 
         searchModal = SearchModal(this, items)
-        searchModal.setCustomDialogListener(object: SearchModal.SearchModalListener {
+        searchModal.setCustomDialogListener(object : SearchModal.SearchModalListener {
             override fun onDataReceived(data: ModalSearchModel) {
                 selectedCenterPoint = data
                 binding.centerPointTitle.text = selectedCenterPoint?.title
@@ -1476,7 +1719,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         progressBar.show()
 
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-003")
+        firebaseReference =
+            FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-003")
         childDelivery = firebaseReference?.child(FIREBASE_CHILD_DELIVERY)
         childDriver = childDelivery?.child(deliveryID!!)
         val childStores = childDriver?.child("stores/$iContactID")
@@ -1598,19 +1842,34 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                                             Handler(Looper.getMainLooper()).postDelayed({
                                                 binding.cardDelivery.visibility = View.VISIBLE
-                                                binding.deliveryCourier.text = deliveryData!!.courier?.name
+                                                binding.deliveryCourier.text =
+                                                    deliveryData!!.courier?.name
                                                 binding.deliveryStore.text = store.name
-                                                val processedDate = formatDateYear(store.startDatetime)
-                                                if (processedDate.isEmpty() || processedDate == "null" || processedDate == "-") binding.deliveryDate.text = "Belum diproses"
-                                                else binding.deliveryDate.text = "Diproses pada $processedDate"
+                                                val processedDate =
+                                                    formatDateYear(store.startDatetime)
+                                                if (processedDate.isEmpty() || processedDate == "null" || processedDate == "-") binding.deliveryDate.text =
+                                                    "Belum diproses"
+                                                else binding.deliveryDate.text =
+                                                    "Diproses pada $processedDate"
                                                 binding.btnSuratJalan.setOnClickListener {
-                                                    val intent = Intent(this@MapsActivity, ListSuratJalanActivity::class.java)
+                                                    val intent = Intent(
+                                                        this@MapsActivity,
+                                                        ListSuratJalanActivity::class.java
+                                                    )
                                                     intent.putExtra(CONST_CONTACT_ID, store.id)
                                                     intent.putExtra(CONST_NAME, store.name)
                                                     activityLauncher.launch(intent)
                                                 }
-                                                binding.courierContainer.setOnClickListener { changeFocusCamera(courierLatLng) }
-                                                binding.storeContainer.setOnClickListener { changeFocusCamera(destinationLatLng) }
+                                                binding.courierContainer.setOnClickListener {
+                                                    changeFocusCamera(
+                                                        courierLatLng
+                                                    )
+                                                }
+                                                binding.storeContainer.setOnClickListener {
+                                                    changeFocusCamera(
+                                                        destinationLatLng
+                                                    )
+                                                }
                                                 progressBar.dismiss()
 
                                                 if (ActivityCompat.checkSelfPermission(
@@ -1626,19 +1885,35 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                                         } else {
                                             progressBar.dismiss()
-                                            handleMessage(this@MapsActivity, "setupTracking" , "Tidak dapat menemukan rute.")
+                                            handleMessage(
+                                                this@MapsActivity,
+                                                "setupTracking",
+                                                "Tidak dapat menemukan rute."
+                                            )
                                         }
                                     } catch (e: ApiException) {
                                         progressBar.dismiss()
-                                        handleMessage(this@MapsActivity, "setupTracking" , "Gagal memuat navigasi. Err: ${e.message}")
+                                        handleMessage(
+                                            this@MapsActivity,
+                                            "setupTracking",
+                                            "Gagal memuat navigasi. Err: ${e.message}"
+                                        )
                                         e.printStackTrace()
                                     } catch (e: InterruptedException) {
                                         progressBar.dismiss()
-                                        handleMessage(this@MapsActivity, "setupTracking" , "Gagal memuat navigasi. Err: ${e.message}")
+                                        handleMessage(
+                                            this@MapsActivity,
+                                            "setupTracking",
+                                            "Gagal memuat navigasi. Err: ${e.message}"
+                                        )
                                         e.printStackTrace()
                                     } catch (e: IOException) {
                                         progressBar.dismiss()
-                                        handleMessage(this@MapsActivity, "setupTracking" , "Gagal memuat navigasi. Err: ${e.message}")
+                                        handleMessage(
+                                            this@MapsActivity,
+                                            "setupTracking",
+                                            "Gagal memuat navigasi. Err: ${e.message}"
+                                        )
                                         e.printStackTrace()
                                     }
                                 } else {
@@ -1691,7 +1966,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             override fun onCancelled(error: DatabaseError) {
                 progressBar.dismiss()
 
-                handleMessage(this@MapsActivity, "setupTracking",
+                handleMessage(
+                    this@MapsActivity, "setupTracking",
                     "Failed run service. Exception $error"
                 )
             }
@@ -1717,7 +1993,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         progressBar.show()
 
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-004")
+        firebaseReference =
+            FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-004")
         childAbsent = firebaseReference?.child(FIREBASE_CHILD_ABSENT)
         childCourier = childAbsent?.child(courierID.toString())
 
@@ -1728,7 +2005,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     val courierLng = snapshot.child("lng").getValue(Double::class.java)
                     val courierFullName = snapshot.child("fullname").getValue(String::class.java)
                     val courierIsOnline = snapshot.child("isOnline").getValue(Boolean::class.java)
-                    val courierLastTracking = snapshot.child("lastTracking").getValue(String::class.java)
+                    val courierLastTracking =
+                        snapshot.child("lastTracking").getValue(String::class.java)
 
                     if (courierLat != null && courierLng != null) {
 
@@ -1736,9 +2014,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                         val courierLatLng = LatLng(courierLat, courierLng)
 
-                        binding.initialName.text = CustomUtility(this@MapsActivity).getInitials(courierFullName ?: "Nama Pengguna")
+                        binding.initialName.text = CustomUtility(this@MapsActivity).getInitials(
+                            courierFullName ?: "Nama Pengguna"
+                        )
                         binding.userTrackingName.text = courierFullName
-                        binding.userTrackingDescription.text = "Terakhir dilacak " + DateFormat.format("$courierLastTracking", "yyyy-MM-dd HH:mm:ss", "dd MMM yyyy, HH.mm")
+                        binding.userTrackingDescription.text =
+                            "Terakhir dilacak " + DateFormat.format(
+                                "$courierLastTracking",
+                                "yyyy-MM-dd HH:mm:ss",
+                                "dd MMM yyyy, HH.mm"
+                            )
                         if (courierIsOnline!!) {
                             binding.userTrackingStatus.text = "Online"
                             binding.userTrackingStatus.setTextColor(getColor(R.color.white))
@@ -1771,14 +2056,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                     } else {
 
                         progressBar.dismiss()
-                        handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
+                        handleMessage(
+                            this@MapsActivity, TAG_RESPONSE_CONTACT,
                             "Tidak dapat mendeteksi lokasi pengguna!"
                         )
                     }
                 } else {
 
                     progressBar.dismiss()
-                    handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
+                    handleMessage(
+                        this@MapsActivity, TAG_RESPONSE_CONTACT,
                         "Tidak dapat mendeteksi lokasi pengguna!"
                     )
                 }
@@ -1787,7 +2074,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             override fun onCancelled(error: DatabaseError) {
                 progressBar.dismiss()
 
-                handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
+                handleMessage(
+                    this@MapsActivity, TAG_RESPONSE_CONTACT,
                     "Failed run service. Exception $error"
                 )
             }
@@ -1796,7 +2084,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
         childCourier?.addValueEventListener(courierTrackingListener!!)
 
-        childAbsent?.addListenerForSingleValueEvent(object: ValueEventListener {
+        childAbsent?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
                     val listUserTracking = arrayListOf<UserAbsentModel>()
@@ -1809,31 +2097,45 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                             if (userKind == USER_KIND_ADMIN) {
                                 listUserTracking.add(
                                     UserAbsentModel(
-                                        eveningDateTime = item.child("eveningDateTime").getValue(String::class.java) ?: "",
-                                        fullname = item.child("fullname").getValue(String::class.java) ?: "",
+                                        eveningDateTime = item.child("eveningDateTime")
+                                            .getValue(String::class.java) ?: "",
+                                        fullname = item.child("fullname")
+                                            .getValue(String::class.java) ?: "",
                                         id = item.child("id").getValue(String::class.java) ?: "",
-                                        isOnline = item.child("isOnline").getValue(Boolean::class.java) ?: false,
-                                        lastSeen = item.child("lastSeen").getValue(String::class.java) ?: "",
-                                        lastTracking = item.child("lastTracking").getValue(String::class.java) ?: "",
+                                        isOnline = item.child("isOnline")
+                                            .getValue(Boolean::class.java) ?: false,
+                                        lastSeen = item.child("lastSeen")
+                                            .getValue(String::class.java) ?: "",
+                                        lastTracking = item.child("lastTracking")
+                                            .getValue(String::class.java) ?: "",
                                         lat = item.child("lat").getValue(Double::class.java) ?: 0.0,
                                         lng = item.child("lng").getValue(Double::class.java) ?: 0.0,
-                                        morningDateTime = item.child("morningDateTime").getValue(String::class.java) ?: "",
-                                        username = item.child("username").getValue(String::class.java) ?: "",
+                                        morningDateTime = item.child("morningDateTime")
+                                            .getValue(String::class.java) ?: "",
+                                        username = item.child("username")
+                                            .getValue(String::class.java) ?: "",
                                     )
                                 )
                             } else if (!userIdCity.isNullOrEmpty() && userCity == userIdCity) {
                                 listUserTracking.add(
                                     UserAbsentModel(
-                                        eveningDateTime = item.child("eveningDateTime").getValue(String::class.java) ?: "",
-                                        fullname = item.child("fullname").getValue(String::class.java) ?: "",
+                                        eveningDateTime = item.child("eveningDateTime")
+                                            .getValue(String::class.java) ?: "",
+                                        fullname = item.child("fullname")
+                                            .getValue(String::class.java) ?: "",
                                         id = item.child("id").getValue(String::class.java) ?: "",
-                                        isOnline = item.child("isOnline").getValue(Boolean::class.java) ?: false,
-                                        lastSeen = item.child("lastSeen").getValue(String::class.java) ?: "",
-                                        lastTracking = item.child("lastTracking").getValue(String::class.java) ?: "",
+                                        isOnline = item.child("isOnline")
+                                            .getValue(Boolean::class.java) ?: false,
+                                        lastSeen = item.child("lastSeen")
+                                            .getValue(String::class.java) ?: "",
+                                        lastTracking = item.child("lastTracking")
+                                            .getValue(String::class.java) ?: "",
                                         lat = item.child("lat").getValue(Double::class.java) ?: 0.0,
                                         lng = item.child("lng").getValue(Double::class.java) ?: 0.0,
-                                        morningDateTime = item.child("morningDateTime").getValue(String::class.java) ?: "",
-                                        username = item.child("username").getValue(String::class.java) ?: "",
+                                        morningDateTime = item.child("morningDateTime")
+                                            .getValue(String::class.java) ?: "",
+                                        username = item.child("username")
+                                            .getValue(String::class.java) ?: "",
                                     )
                                 )
                             }
@@ -1849,13 +2151,15 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                         binding.allUserTracking.visibility = View.VISIBLE
                         binding.allUserTracking.setOnClickListener {
-                            val intent = Intent(this@MapsActivity, AllUserTrackingActivity::class.java)
+                            val intent =
+                                Intent(this@MapsActivity, AllUserTrackingActivity::class.java)
                             trackingLauncher.launch(intent)
                         }
 
                         val rvAdapter = UserTrackingRecyclerViewAdapter()
                         rvAdapter.setList(ArrayList(limitedList))
-                        rvAdapter.setOnItemClickListener(object: UserTrackingRecyclerViewAdapter.OnItemClickListener {
+                        rvAdapter.setOnItemClickListener(object :
+                            UserTrackingRecyclerViewAdapter.OnItemClickListener {
                             override fun onItemClick(item: UserAbsentModel) {
                                 // Do something here
                                 refreshUserTracked(item)
@@ -1870,7 +2174,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 } else {
 
                     progressBar.dismiss()
-                    handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
+                    handleMessage(
+                        this@MapsActivity, TAG_RESPONSE_CONTACT,
                         "Tidak dapat mendeteksi lokasi kurir!"
                     )
                 }
@@ -1879,7 +2184,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             override fun onCancelled(error: DatabaseError) {
                 progressBar.dismiss()
 
-                handleMessage(this@MapsActivity, TAG_RESPONSE_CONTACT,
+                handleMessage(
+                    this@MapsActivity, TAG_RESPONSE_CONTACT,
                     "Failed run service. Exception $error"
                 )
             }
@@ -1888,7 +2194,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     }
 
     private fun refreshUserTracked(item: UserAbsentModel? = null) {
-        if (courierTrackingListener != null) childCourier?.removeEventListener(courierTrackingListener!!)
+        if (courierTrackingListener != null) childCourier?.removeEventListener(
+            courierTrackingListener!!
+        )
         courierMarker = null
         mMap.clear()
 
@@ -1907,7 +2215,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         lifecycleScope.launch {
             try {
 
-                val response = HttpClient.apiService.getDetailDelivery(idDelivery = deliveryID.toString(), distributorID = userDistributorId)
+                val response = HttpClient.apiService.getDetailDelivery(
+                    idDelivery = deliveryID.toString(),
+                    distributorID = userDistributorId
+                )
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -2019,18 +2330,31 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                                     binding.deliveryCourier.text = courierName
                                     binding.deliveryStore.text = item.nama
                                     val processedDate = formatDateYear(item.startDatetime)
-                                    if (processedDate.isEmpty() || processedDate == "null" || processedDate == "-") binding.deliveryDate.text = "Belum diproses"
+                                    if (processedDate.isEmpty() || processedDate == "null" || processedDate == "-") binding.deliveryDate.text =
+                                        "Belum diproses"
                                     else binding.deliveryDate.text = "Diproses pada $processedDate"
                                     binding.deliveryEndDateContainer.visibility = View.VISIBLE
-                                    binding.deliveryEndDate.text = "Diselesaikan pada " + formatDateYear(item.endDatetime)
+                                    binding.deliveryEndDate.text =
+                                        "Diselesaikan pada " + formatDateYear(item.endDatetime)
                                     binding.btnSuratJalan.setOnClickListener {
-                                        val intent = Intent(this@MapsActivity, ListSuratJalanActivity::class.java)
+                                        val intent = Intent(
+                                            this@MapsActivity,
+                                            ListSuratJalanActivity::class.java
+                                        )
                                         intent.putExtra(CONST_CONTACT_ID, item.id_contact)
                                         intent.putExtra(CONST_NAME, item.nama)
                                         activityLauncher.launch(intent)
                                     }
-                                    binding.courierContainer.setOnClickListener { changeFocusCamera(courierLatLng) }
-                                    binding.storeContainer.setOnClickListener { changeFocusCamera(destinationLatLng) }
+                                    binding.courierContainer.setOnClickListener {
+                                        changeFocusCamera(
+                                            courierLatLng
+                                        )
+                                    }
+                                    binding.storeContainer.setOnClickListener {
+                                        changeFocusCamera(
+                                            destinationLatLng
+                                        )
+                                    }
                                     progressBar.dismiss()
 
                                     if (ActivityCompat.checkSelfPermission(
@@ -2047,37 +2371,57 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
                             } else {
                                 progressBar.dismiss()
-                                handleMessage(this@MapsActivity, "setupTrackingHistory" , "Tidak dapat menemukan rute.")
+                                handleMessage(
+                                    this@MapsActivity,
+                                    "setupTrackingHistory",
+                                    "Tidak dapat menemukan rute."
+                                )
                             }
                         } catch (e: ApiException) {
                             progressBar.dismiss()
-                            handleMessage(this@MapsActivity, "setupTrackingHistory" , "Gagal memuat navigasi. Err: ${e.message}")
+                            handleMessage(
+                                this@MapsActivity,
+                                "setupTrackingHistory",
+                                "Gagal memuat navigasi. Err: ${e.message}"
+                            )
                             e.printStackTrace()
                         } catch (e: InterruptedException) {
                             progressBar.dismiss()
-                            handleMessage(this@MapsActivity, "setupTrackingHistory" , "Gagal memuat navigasi. Err: ${e.message}")
+                            handleMessage(
+                                this@MapsActivity,
+                                "setupTrackingHistory",
+                                "Gagal memuat navigasi. Err: ${e.message}"
+                            )
                             e.printStackTrace()
                         } catch (e: IOException) {
                             progressBar.dismiss()
-                            handleMessage(this@MapsActivity, "setupTrackingHistory" , "Gagal memuat navigasi. Err: ${e.message}")
+                            handleMessage(
+                                this@MapsActivity,
+                                "setupTrackingHistory",
+                                "Gagal memuat navigasi. Err: ${e.message}"
+                            )
                             e.printStackTrace()
                         }
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
 
                         progressBar.dismiss()
-                        handleMessage(this@MapsActivity, "setupTrackingHistory",
+                        handleMessage(
+                            this@MapsActivity, "setupTrackingHistory",
                             "Tidak dapat menemukan riwayat pengiriman"
                         )
 
                     }
+
                     else -> {
 
 
                         progressBar.dismiss()
-                        handleMessage(this@MapsActivity, "setupTrackingHistory",
+                        handleMessage(
+                            this@MapsActivity, "setupTrackingHistory",
                             "Tidak dapat menemukan riwayat pengiriman. Error " + response.message
                         )
 
@@ -2089,9 +2433,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@MapsActivity, "Failed MapsActivity on setupTrackingHistory(). Catch: ${e.message}")
+                FirebaseUtils.logErr(
+                    this@MapsActivity,
+                    "Failed MapsActivity on setupTrackingHistory(). Catch: ${e.message}"
+                )
                 progressBar.dismiss()
-                handleMessage(this@MapsActivity, "setupTrackingHistory",
+                handleMessage(
+                    this@MapsActivity, "setupTrackingHistory",
                     generateFailedRunServiceMessage(e.message.toString())
                 )
 
@@ -2100,7 +2448,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
 
     }
 
-    private fun resizedBitmap(drawable: Int, targetWidth: Int = convertDpToPx(60, this@MapsActivity), targetHeight: Int = convertDpToPx(60, this@MapsActivity)): Bitmap {
+    private fun resizedBitmap(
+        drawable: Int,
+        targetWidth: Int = convertDpToPx(60, this@MapsActivity),
+        targetHeight: Int = convertDpToPx(60, this@MapsActivity)
+    ): Bitmap {
         bitmapCache[drawable]?.let { return it }
 
         val options = BitmapFactory.Options().apply {
@@ -2112,7 +2464,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         options.inJustDecodeBounds = false
 
         val originalBitmap = BitmapFactory.decodeResource(resources, drawable, options)
-        val scaledBitmap = Bitmap.createScaledBitmap(originalBitmap, targetWidth, targetHeight, false)
+        val scaledBitmap =
+            Bitmap.createScaledBitmap(originalBitmap, targetWidth, targetHeight, false)
 
         originalBitmap.recycle()
 
@@ -2147,7 +2500,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         mMap.animateCamera(cameraUpdate, mapsDuration, null)
     }
 
-    private fun formatDateYear(dateString: String, dateStringFormat: String = "yyyy-MM-dd HH:mm:ss"): String {
+    private fun formatDateYear(
+        dateString: String,
+        dateStringFormat: String = "yyyy-MM-dd HH:mm:ss"
+    ): String {
         try {
             val date = SimpleDateFormat(dateStringFormat, Locale.getDefault()).parse(dateString)
             return if (date != null) {
@@ -2155,7 +2511,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
                 val currentYear = calendar.get(Calendar.YEAR)
                 val dateYear = SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
 
-                if (currentYear == dateYear.toInt()) DateFormat.format(dateString, dateStringFormat, "dd MMM, HH:mm")
+                if (currentYear == dateYear.toInt()) DateFormat.format(
+                    dateString,
+                    dateStringFormat,
+                    "dd MMM, HH:mm"
+                )
                 else DateFormat.format(dateString, dateStringFormat, "dd MMM yyyy, HH:mm")
             } else DateFormat.format(dateString, dateStringFormat, "dd MMM, HH:mm")
         } catch (e: Exception) {
@@ -2173,7 +2533,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         super.onResume()
 
         if (courierID != null) {
-           refreshUserTracked()
+            refreshUserTracked()
         }
     }
 
@@ -2181,8 +2541,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
         super.onStart()
 
         Handler(Looper.getMainLooper()).postDelayed({
-            if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN){
-                CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-002", userID)
+            if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
+                CustomUtility(this).setUserStatusOnline(
+                    true,
+                    userDistributorIds ?: "-custom-002",
+                    userID
+                )
             }
         }, 1000)
 
@@ -2191,13 +2555,19 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
     override fun onStop() {
         super.onStop()
 
-        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN){
-            CustomUtility(this).setUserStatusOnline(false, userDistributorIds ?: "-custom-002", userID)
+        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
+            CustomUtility(this).setUserStatusOnline(
+                false,
+                userDistributorIds ?: "-custom-002",
+                userID
+            )
         }
 
         if (locationListener != null) childDriver?.removeEventListener(locationListener!!)
         if (locationCallback != null) fusedLocationClient.removeLocationUpdates(locationCallback!!)
-        if (courierTrackingListener != null) childCourier?.removeEventListener(courierTrackingListener!!)
+        if (courierTrackingListener != null) childCourier?.removeEventListener(
+            courierTrackingListener!!
+        )
     }
 
     override fun onDestroy() {
@@ -2207,14 +2577,21 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener, 
             progressBar.dismiss()
         }
 
-        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) EventBus.getDefault().unregister(this)
-        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN){
-            CustomUtility(this).setUserStatusOnline(false, userDistributorIds ?: "-custom-002", userID)
+        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) EventBus.getDefault()
+            .unregister(this)
+        if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
+            CustomUtility(this).setUserStatusOnline(
+                false,
+                userDistributorIds ?: "-custom-002",
+                userID
+            )
         }
 
         if (locationListener != null) childDriver?.removeEventListener(locationListener!!)
         if (locationCallback != null) fusedLocationClient.removeLocationUpdates(locationCallback!!)
-        if (courierTrackingListener != null) childCourier?.removeEventListener(courierTrackingListener!!)
+        if (courierTrackingListener != null) childCourier?.removeEventListener(
+            courierTrackingListener!!
+        )
 
         clearBitmapCache()
     }

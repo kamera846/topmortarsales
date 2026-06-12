@@ -21,7 +21,7 @@ class QnAFormReportRVA : RecyclerView.Adapter<QnAFormReportRVA.MyViewHolder>() {
     var items = arrayListOf<QnAFormReportModel>()
     var isAnswerChecklist: Boolean? = null
 
-    inner class MyViewHolder(val binding: ItemQnaFormReportBinding) :
+    class MyViewHolder(val binding: ItemQnaFormReportBinding) :
         RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
@@ -54,13 +54,14 @@ class QnAFormReportRVA : RecyclerView.Adapter<QnAFormReportRVA.MyViewHolder>() {
                 binding.textCard.visibility = View.VISIBLE
                 binding.textQuestion.text = incrementNumber + data.text_question
                 binding.textAnswer.hint = data.placeholder
-                binding.textAnswer.addTextChangedListener(object: TextWatcher {
+                binding.textAnswer.addTextChangedListener(object : TextWatcher {
                     override fun beforeTextChanged(
                         s: CharSequence?,
                         start: Int,
                         count: Int,
                         after: Int
-                    ) {}
+                    ) {
+                    }
 
                     override fun onTextChanged(
                         s: CharSequence?,
@@ -141,7 +142,7 @@ class QnAFormReportRVA : RecyclerView.Adapter<QnAFormReportRVA.MyViewHolder>() {
     private fun setupCheckbox(item: String, data: QnAFormReportModel): CheckBox {
         return CheckBox(context).apply {
             text = item
-            setOnCheckedChangeListener {_, isChecked ->
+            setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) data.selected_answer!!.add(item)
                 else data.selected_answer!!.remove(item)
             }
