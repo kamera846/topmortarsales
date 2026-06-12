@@ -35,7 +35,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Pengguna"
+                android:text="Pengguna *"
                 android:textStyle="bold"
                 android:textSize="16sp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
@@ -66,7 +66,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:text="Basecamp"
+                android:text="Basecamp *"
                 android:textStyle="bold"
                 android:textSize="16sp"
                 android:theme="@style/Theme.TopMortarSales.BaseTextTitle"/>
