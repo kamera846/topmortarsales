@@ -986,10 +986,11 @@ class UserProfileActivity : AppCompatActivity() {
 
                 setDataProgressiveVisitCounter(body.results)
             } catch (e: Exception) {
+                val exceptionMessage = e.message ?: "Terjadi kesalahan"
 
                 handleMessage(
                     this@UserProfileActivity,
-                    message = e.message ?: "Terjadi kesalahan"
+                    message = "[Progressive Visits] $exceptionMessage"
                 )
 
             } finally {
@@ -1032,7 +1033,7 @@ class UserProfileActivity : AppCompatActivity() {
     ): Float {
         if (target <= 0) return 0f
         val progress = (current.toFloat() / target.toFloat()) * 100f
-        return progress.coerceIn(0f, 100f)
+        return progress.coerceIn(0f, 1000f)
     }
 
     private fun toggleProgressiveVisitCounterLoading(isLoading: Boolean) {
