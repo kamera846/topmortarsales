@@ -83,9 +83,9 @@ class DeliveryViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
 
     override fun getPageTitle(position: Int): CharSequence {
         return when (position) {
-            0 -> "Target"
-            1 -> "Riwayat"
-            else -> "Target"
+            0 -> "Order Masuk"
+            1 -> "Terkirim"
+            else -> "Order Masuk"
         }
     }
 }
