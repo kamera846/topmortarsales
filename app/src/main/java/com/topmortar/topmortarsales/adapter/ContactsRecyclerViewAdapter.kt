@@ -108,8 +108,13 @@ class ContactsRecyclerViewAdapter(
             if (chatItem.is_birthday == "1") icCake.visibility = View.VISIBLE
             else icCake.visibility = View.GONE
             tvContactName.text = chatItem.nama
-            tvPhoneNumber.text = chatItem.deliveryStatus.ifEmpty {
-                if (chatItem.nomorhp.isNotEmpty()) "+${chatItem.nomorhp}" else chatItem.created_at
+            if (chatItem.old_city.isNullOrEmpty()) {
+                tvPhoneNumber.text = chatItem.deliveryStatus.ifEmpty {
+                    if (chatItem.nomorhp.isNotEmpty()) "+${chatItem.nomorhp}" else chatItem.created_at
+                }
+            } else {
+                val subtitle = if (chatItem.nomorhp.isNotEmpty()) "+${chatItem.nomorhp}" else chatItem.created_at
+                tvPhoneNumber.text = subtitle + " - dari kota ${chatItem.old_city}"
             }
 
             if (isSelectedItemActive) {

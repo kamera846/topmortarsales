@@ -34,5 +34,6 @@ data class ContactModel(
     var is_printed: String = "",
     var date_printed: String? = null,
     var payment_score: String? = "0.0",
+    var old_city: String? = null,
 
     )
