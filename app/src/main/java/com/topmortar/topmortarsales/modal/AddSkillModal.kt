@@ -2,7 +2,6 @@ package com.topmortar.topmortarsales.modal
 
 import android.app.Dialog
 import android.content.Context
-import android.content.DialogInterface
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.View
@@ -30,7 +29,8 @@ import com.topmortar.topmortarsales.model.SkillModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-class AddSkillModal(private val context: Context, private val lifecycleScope: CoroutineScope) : Dialog(context) {
+class AddSkillModal(private val context: Context, private val lifecycleScope: CoroutineScope) :
+    Dialog(context) {
 
     private lateinit var sessionManager: SessionManager
     private val userDistributorId get() = sessionManager.userDistributor().toString()
@@ -54,18 +54,21 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
         etSkillName.setText(data.nama_skill)
         etSkillCode.setText(data.kode_skill)
     }
+
     fun setTitle(title: String) {
         tvTitleBar.text = title
     }
+
     fun setEditCase(isEdit: Boolean) {
         this.isEdit = isEdit
         btnSubmit.text = context.getString(R.string.save)
     }
 
-    private var modalInterface : AddSkillModalInterface? = null
-    fun initializeInterface(data : AddSkillModalInterface) {
+    private var modalInterface: AddSkillModalInterface? = null
+    fun initializeInterface(data: AddSkillModalInterface) {
         this.modalInterface = data
     }
+
     interface AddSkillModalInterface {
         fun onSubmit(status: Boolean)
     }
@@ -117,7 +120,7 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
         etSkillName.hint = "e.g Tukang Batu"
         etSkillCode.hint = "e.g TB"
 
-        tvTitleBar.setPadding(convertDpToPx(16, context),0, convertDpToPx(16, context), 0)
+        tvTitleBar.setPadding(convertDpToPx(16, context), 0, convertDpToPx(16, context), 0)
     }
 
     private fun initClickHandler() {
@@ -147,24 +150,33 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
 
     private fun submitHandler() {
 
-        if (!formValidation("${ etSkillName.text }", "${ etSkillCode.text }")) return
+        if (!formValidation("${etSkillName.text}", "${etSkillCode.text}")) return
 
         loadingState(true)
 
         lifecycleScope.launch {
             try {
 
-                val skillName = createPartFromString("${ etSkillName.text }")
-                val skillCode = createPartFromString("${ etSkillCode.text }")
+                val skillName = createPartFromString("${etSkillName.text}")
+                val skillCode = createPartFromString("${etSkillCode.text}")
                 val distributorId = createPartFromString(userDistributorId)
 
 //                handleMessage(context, "SUBMIT SKILL", "Name: $skillName, Code: $skillCode")
 //                return@launch
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = isEdit.let {
-                    if (it) apiService.editSkill(id = createPartFromString("$skillID"), name = skillName, code = skillCode, distributorID = distributorId)
-                    else apiService.addSkill(name = skillName, code = skillCode, distributorID = distributorId)
+                    if (it) apiService.editSkill(
+                        id = createPartFromString("$skillID"),
+                        name = skillName,
+                        code = skillCode,
+                        distributorID = distributorId
+                    )
+                    else apiService.addSkill(
+                        name = skillName,
+                        code = skillCode,
+                        distributorID = distributorId
+                    )
                 }
 
                 if (response.isSuccessful) {
@@ -174,7 +186,11 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
                     when (responseBody.status) {
                         RESPONSE_STATUS_OK -> {
 
-                            handleMessage(context, TAG_RESPONSE_CONTACT, if (isEdit) "Berhasil mengubah data" else "Berhasil menambahkan data!")
+                            handleMessage(
+                                context,
+                                TAG_RESPONSE_CONTACT,
+                                if (isEdit) "Berhasil mengubah data" else "Berhasil menambahkan data!"
+                            )
 
                             tvTitleBar.text = "Tambah Keahlian Baru"
                             etSkillName.setText("")
@@ -186,12 +202,18 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
                             this@AddSkillModal.dismiss()
 
                         }
+
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(context, TAG_RESPONSE_MESSAGE, "Gagal menambahkan! Message: ${ responseBody.message }")
+                            handleMessage(
+                                context,
+                                TAG_RESPONSE_MESSAGE,
+                                "Gagal menambahkan! Message: ${responseBody.message}"
+                            )
                             loadingState(false)
 
                         }
+
                         else -> {
 
                             handleMessage(context, TAG_RESPONSE_CONTACT, "Gagal menambahkan data!")
@@ -202,7 +224,11 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
 
                 } else {
 
-                    handleMessage(context, TAG_RESPONSE_CONTACT, "Gagal menambahkan data! Message: " + response.message())
+                    handleMessage(
+                        context,
+                        TAG_RESPONSE_CONTACT,
+                        "Gagal menambahkan data! Message: " + response.message()
+                    )
                     loadingState(false)
 
                 }
@@ -210,7 +236,11 @@ class AddSkillModal(private val context: Context, private val lifecycleScope: Co
 
             } catch (e: Exception) {
 
-                handleMessage(context, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    context,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(false)
 
             }

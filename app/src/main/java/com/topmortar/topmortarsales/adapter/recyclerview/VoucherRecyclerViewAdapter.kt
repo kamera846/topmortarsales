@@ -17,14 +17,17 @@ import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.VoucherModel
 
 @SuppressLint("SetTextI18n")
-class VoucherRecyclerViewAdapter(private val chatList: ArrayList<VoucherModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<VoucherRecyclerViewAdapter.ChatViewHolder>() {
+class VoucherRecyclerViewAdapter(
+    private val chatList: ArrayList<VoucherModel>,
+    private val itemClickListener: ItemClickListener
+) : RecyclerView.Adapter<VoucherRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
 
     interface ItemClickListener {
         fun onItemClick(data: VoucherModel? = null)
     }
 
-    inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         private val imgIcon: ImageView = itemView.findViewById(R.id.iv_contact_profile)
         val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
@@ -36,8 +39,14 @@ class VoucherRecyclerViewAdapter(private val chatList: ArrayList<VoucherModel>, 
             imgIcon.setImageResource(R.drawable.voucher_primary)
             tvContactName.text = item.no_voucher
 
-            if (item.exp_date.isNullOrEmpty()) tvPhoneNumber.text = "Berlaku " + DateFormat.format(item.date_voucher, outputFormat = "dd MMM yyyy") + " - belum ditentukan."
-            else tvPhoneNumber.text = "Berlaku " + DateFormat.format(item.date_voucher, outputFormat = "dd MMM yyyy") + " - " + DateFormat.format(item.exp_date!!, outputFormat = "dd MMM yyyy")
+            if (item.exp_date.isNullOrEmpty()) tvPhoneNumber.text = "Berlaku " + DateFormat.format(
+                item.date_voucher,
+                outputFormat = "dd MMM yyyy"
+            ) + " - belum ditentukan."
+            else tvPhoneNumber.text = "Berlaku " + DateFormat.format(
+                item.date_voucher,
+                outputFormat = "dd MMM yyyy"
+            ) + " - " + DateFormat.format(item.exp_date!!, outputFormat = "dd MMM yyyy")
 
             if (item.is_claimed == "1") {
                 textVerified.setBackgroundResource(R.drawable.bg_active_round)
@@ -58,7 +67,8 @@ class VoucherRecyclerViewAdapter(private val chatList: ArrayList<VoucherModel>, 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
 
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
         context = parent.context
         return ChatViewHolder(view)
 
@@ -69,7 +79,12 @@ class VoucherRecyclerViewAdapter(private val chatList: ArrayList<VoucherModel>, 
         val item = chatList[position]
 
         holder.bind(item)
-        holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
+        holder.itemView.startAnimation(
+            AnimationUtils.loadAnimation(
+                holder.itemView.context,
+                R.anim.rv_item_fade_slide_up
+            )
+        )
 
         holder.itemView.setOnClickListener { onItemClick(holder, position) }
 

@@ -17,7 +17,8 @@ import com.topmortar.topmortarsales.commons.AUTH_LEVEL_ADMIN_CITY
 import com.topmortar.topmortarsales.model.UserModel
 import java.util.Locale
 
-class UsersRecyclerViewAdapter(private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<UsersRecyclerViewAdapter.ViewHolder>() {
+class UsersRecyclerViewAdapter(private val itemClickListener: ItemClickListener) :
+    RecyclerView.Adapter<UsersRecyclerViewAdapter.ViewHolder>() {
     private var listItem: ArrayList<UserModel> = ArrayList()
     private var context: Context? = null
     private var isListReport = false
@@ -50,7 +51,8 @@ class UsersRecyclerViewAdapter(private val itemClickListener: ItemClickListener)
 
             ivProfile.setImageResource(R.drawable.person_red)
             tvContactName.text = item.full_name
-            tvPhoneNumber.text = if (!isListReport) "$userLevel - $userCity" else "+${item.phone_user}"
+            tvPhoneNumber.text =
+                if (!isListReport) "$userLevel - $userCity" else "+${item.phone_user}"
 
         }
 
@@ -58,7 +60,8 @@ class UsersRecyclerViewAdapter(private val itemClickListener: ItemClickListener)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
         context = parent.context
         return ViewHolder(view)
 
@@ -69,7 +72,12 @@ class UsersRecyclerViewAdapter(private val itemClickListener: ItemClickListener)
         val item = listItem[position]
 
         holder.bind(item)
-        holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
+        holder.itemView.startAnimation(
+            AnimationUtils.loadAnimation(
+                holder.itemView.context,
+                R.anim.rv_item_fade_slide_up
+            )
+        )
 
         holder.itemView.setOnClickListener {
 

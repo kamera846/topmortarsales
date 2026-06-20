@@ -72,7 +72,7 @@ class JatemPenagihan3Fragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var sessionManager: SessionManager
-    private lateinit var userDistributorId : String
+    private lateinit var userDistributorId: String
     private lateinit var userKind: String
     private lateinit var userCity: String
     private lateinit var userID: String
@@ -86,16 +86,20 @@ class JatemPenagihan3Fragment : Fragment() {
     private var listener: CounterItem? = null
     private lateinit var apiService: ApiService
     private lateinit var rvAdapter: RencanaVisitRVA
+
     interface CounterItem {
         fun counterItem(count: Int)
     }
+
     fun setCounterItem(listener: CounterItem) {
         this.listener = listener
     }
+
     fun syncNow() {
         if (userKind == USER_KIND_ADMIN) getCities()
         else getList()
     }
+
     fun isSelectBarActive(state: Boolean) {
         this.rvAdapter.clearSelections()
         this.rvAdapter.setSelectBarActive(state)
@@ -107,6 +111,7 @@ class JatemPenagihan3Fragment : Fragment() {
         val eventBusInt = EventBusUtils.IntEvent(0)
         EventBus.getDefault().post(eventBusInt)
     }
+
     fun onConfirmSelected() {
         rvAdapter.getSelectedItems()
     }
@@ -130,7 +135,7 @@ class JatemPenagihan3Fragment : Fragment() {
         userCity = sessionManager.userCityID().toString()
         userID = sessionManager.userID().toString()
 
-        apiService = HttpClient.create()
+        apiService = HttpClient.apiService
 
         if (userKind == USER_KIND_ADMIN) getCities()
         else getList()
@@ -152,9 +157,19 @@ class JatemPenagihan3Fragment : Fragment() {
 
                 val response = when (userKind) {
                     USER_KIND_ADMIN -> {
-                        if (selectedCity != null) apiService.jatemPenagihanFilter(dst = userDistributorId, idCity = selectedCity?.id!!, type = "jatem3")
+                        if (selectedCity != null) apiService.jatemPenagihanFilter(
+                            dst = userDistributorId,
+                            idCity = selectedCity?.id!!,
+                            type = "jatem3"
+                        )
                         else apiService.jatemPenagihan(dst = userDistributorId, type = "jatem3")
-                    } else -> apiService.jatemPenagihanFilter(dst = userDistributorId, idCity = userCity, type = "jatem3")
+                    }
+
+                    else -> apiService.jatemPenagihanFilter(
+                        dst = userDistributorId,
+                        idCity = userCity,
+                        type = "jatem3"
+                    )
                 }
 
                 when (response.status) {
@@ -169,6 +184,7 @@ class JatemPenagihan3Fragment : Fragment() {
                         listener?.counterItem(listItem.size)
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         listItem = arrayListOf()
@@ -178,11 +194,16 @@ class JatemPenagihan3Fragment : Fragment() {
                         listener?.counterItem(0)
 
                     }
+
                     else -> {
 
                         listItem = arrayListOf()
                         setRecyclerView(listItem)
-                        handleMessage(requireContext(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            requireContext(),
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         loadingState(true, getString(R.string.failed_request))
                         showBadgeRefresh(true)
 
@@ -196,7 +217,11 @@ class JatemPenagihan3Fragment : Fragment() {
                 }
                 listItem = arrayListOf()
                 setRecyclerView(listItem)
-                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    requireContext(),
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
 
@@ -209,7 +234,7 @@ class JatemPenagihan3Fragment : Fragment() {
     private fun setRecyclerView(listItem: ArrayList<RencanaVisitModel>) {
 
         if (isAdded) {
-            rvAdapter = RencanaVisitRVA(listItem, object: RencanaVisitRVA.ItemClickListener {
+            rvAdapter = RencanaVisitRVA(listItem, object : RencanaVisitRVA.ItemClickListener {
                 override fun onItemClick(data: RencanaVisitModel?) {
                     context?.let { ctx ->
                         val intent = Intent(ctx, DetailContactActivity::class.java)
@@ -321,7 +346,7 @@ class JatemPenagihan3Fragment : Fragment() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {
@@ -332,7 +357,12 @@ class JatemPenagihan3Fragment : Fragment() {
 
                         for (i in 0 until citiesResults!!.size) {
                             val data = citiesResults!![i]
-                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                            items.add(
+                                ModalSearchModel(
+                                    data.id_city,
+                                    "${data.nama_city} - ${data.kode_city}"
+                                )
+                            )
                         }
                         items.add(0, ModalSearchModel("-1", "Hapus Filter"))
 
@@ -340,14 +370,20 @@ class JatemPenagihan3Fragment : Fragment() {
                         binding.llFilter.componentFilter.visibility = View.VISIBLE
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         handleMessage(requireActivity(), "LIST CITY", "Daftar kota kosong!")
 
                     }
+
                     else -> {
 
-                        handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            requireActivity(),
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
 
                     }
                 }
@@ -358,7 +394,11 @@ class JatemPenagihan3Fragment : Fragment() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    requireActivity(),
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
 
             } finally {
                 getList()
@@ -370,7 +410,7 @@ class JatemPenagihan3Fragment : Fragment() {
     private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
 
         searchModal = SearchModal(requireActivity(), items)
-        searchModal.setCustomDialogListener(object: SearchModal.SearchModalListener{
+        searchModal.setCustomDialogListener(object : SearchModal.SearchModalListener {
             override fun onDataReceived(data: ModalSearchModel) {
                 if (data.id == "-1") {
                     selectedCity = null
@@ -386,8 +426,10 @@ class JatemPenagihan3Fragment : Fragment() {
         searchModal.searchHint = "Ketik untuk mencari…"
 
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(requireContext(), R.color.black_400)
-        else binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(requireContext(), R.color.light)
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background =
+            AppCompatResources.getDrawable(requireContext(), R.color.black_400)
+        else binding.llFilter.componentFilter.background =
+            AppCompatResources.getDrawable(requireContext(), R.color.light)
         binding.llFilter.componentFilter.visibility = View.GONE
         binding.llFilter.componentFilter.setOnClickListener {
             searchModal.show()

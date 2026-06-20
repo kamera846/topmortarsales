@@ -1,6 +1,6 @@
 package com.topmortar.topmortarsales.response
 
-data class ResponseMessage (
+data class ResponseMessage(
     val response: Int = 0,
     val status: String = "",
     val message: String = "",

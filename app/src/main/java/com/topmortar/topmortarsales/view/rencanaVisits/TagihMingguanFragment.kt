@@ -72,7 +72,7 @@ class TagihMingguanFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var sessionManager: SessionManager
-    private lateinit var userDistributorId : String
+    private lateinit var userDistributorId: String
     private lateinit var userKind: String
     private lateinit var userCity: String
     private lateinit var userID: String
@@ -91,22 +91,28 @@ class TagihMingguanFragment : Fragment() {
     private var onSelectedItemListener: OnSelectedItemListener? = null
     private lateinit var apiService: ApiService
     private lateinit var rvAdapter: RencanaVisitRVA
+
     interface CounterItem {
         fun counterItem(count: Int)
     }
+
     interface OnSelectedItemListener {
         fun selectedItems(items: ArrayList<RencanaVisitModel>)
     }
+
     fun setCounterItem(listener: CounterItem) {
         this.listener = listener
     }
+
     fun setReportSource(source: String) {
         this.reportSource = source
     }
+
     fun syncNow() {
         if (userKind == USER_KIND_ADMIN) getCities()
         else getList()
     }
+
     fun isSelectBarActive(state: Boolean) {
         this.rvAdapter.clearSelections()
         this.rvAdapter.setSelectBarActive(state)
@@ -118,6 +124,7 @@ class TagihMingguanFragment : Fragment() {
         val eventBusInt = EventBusUtils.IntEvent(0)
         EventBus.getDefault().post(eventBusInt)
     }
+
     fun onConfirmSelected() {
         rvAdapter.getSelectedItems()
     }
@@ -141,7 +148,7 @@ class TagihMingguanFragment : Fragment() {
         userCity = sessionManager.userCityID().toString()
         userID = sessionManager.userID().toString()
 
-        apiService = HttpClient.create()
+        apiService = HttpClient.apiService
 
         if (userKind == USER_KIND_ADMIN) getCities()
         else getList()
@@ -166,7 +173,9 @@ class TagihMingguanFragment : Fragment() {
                     USER_KIND_ADMIN -> {
                         if (selectedCity != null) apiService.targetWeekly(idCity = selectedCity?.id!!)
                         else apiService.targetWeeklyDst(idDistributor = userDistributorId)
-                    } else -> apiService.targetWeekly(idCity = userCity)
+                    }
+
+                    else -> apiService.targetWeekly(idCity = userCity)
                 }
 
                 when (response.status) {
@@ -179,6 +188,7 @@ class TagihMingguanFragment : Fragment() {
                         LoopingTask(response.results).execute()
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         listItem = arrayListOf()
@@ -188,11 +198,16 @@ class TagihMingguanFragment : Fragment() {
                         listener?.counterItem(0)
 
                     }
+
                     else -> {
 
                         listItem = arrayListOf()
                         setRecyclerView(listItem)
-                        handleMessage(requireContext(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            requireContext(),
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         loadingState(true, getString(R.string.failed_request))
                         showBadgeRefresh(true)
 
@@ -206,7 +221,11 @@ class TagihMingguanFragment : Fragment() {
                 }
                 listItem = arrayListOf()
                 setRecyclerView(listItem)
-                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    requireContext(),
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
 
@@ -216,20 +235,21 @@ class TagihMingguanFragment : Fragment() {
 
     }
 
-    private inner class LoopingTask(private var items: ArrayList<RencanaVisitModel>) : AsyncTask<Void, Void, Void>() {
+    private inner class LoopingTask(private var items: ArrayList<RencanaVisitModel>) :
+        AsyncTask<Void, Void, Void>() {
 
         override fun doInBackground(vararg params: Void?): Void? {
             for (item in items.listIterator()) {
-                    if (item.is_new == "1") item.date_counter = item.date_invoice
-                    else item.date_counter = item.created_at ?: "0000-00-00"
+                if (item.is_new == "1") item.date_counter = item.date_invoice
+                else item.date_counter = item.created_at ?: "0000-00-00"
 
-                    listItem.add(item)
+                listItem.add(item)
 
-                    processed ++
-                    percentage = (processed * 100) / totalProcess
-                    requireActivity().runOnUiThread {
-                        binding.txtLoading.text = getString(R.string.txt_loading) + "($percentage%)"
-                    }
+                processed++
+                percentage = (processed * 100) / totalProcess
+                requireActivity().runOnUiThread {
+                    binding.txtLoading.text = getString(R.string.txt_loading) + "($percentage%)"
+                }
             }
             return null
         }
@@ -249,7 +269,7 @@ class TagihMingguanFragment : Fragment() {
     private fun setRecyclerView(listItem: ArrayList<RencanaVisitModel>) {
 
         if (isAdded) {
-            rvAdapter = RencanaVisitRVA(listItem, object: RencanaVisitRVA.ItemClickListener {
+            rvAdapter = RencanaVisitRVA(listItem, object : RencanaVisitRVA.ItemClickListener {
                 override fun onItemClick(data: RencanaVisitModel?) {
                     context?.let { ctx ->
                         val intent = Intent(ctx, DetailContactActivity::class.java)
@@ -361,7 +381,7 @@ class TagihMingguanFragment : Fragment() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {
@@ -372,7 +392,12 @@ class TagihMingguanFragment : Fragment() {
 
                         for (i in 0 until citiesResults!!.size) {
                             val data = citiesResults!![i]
-                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                            items.add(
+                                ModalSearchModel(
+                                    data.id_city,
+                                    "${data.nama_city} - ${data.kode_city}"
+                                )
+                            )
                         }
                         items.add(0, ModalSearchModel("-1", "Hapus Filter"))
 
@@ -380,14 +405,20 @@ class TagihMingguanFragment : Fragment() {
                         binding.llFilter.componentFilter.visibility = View.VISIBLE
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         handleMessage(requireActivity(), "LIST CITY", "Daftar kota kosong!")
 
                     }
+
                     else -> {
 
-                        handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            requireActivity(),
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
 
                     }
                 }
@@ -398,7 +429,11 @@ class TagihMingguanFragment : Fragment() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    requireActivity(),
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
 
             } finally {
                 getList()
@@ -410,7 +445,7 @@ class TagihMingguanFragment : Fragment() {
     private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
 
         searchModal = SearchModal(requireActivity(), items)
-        searchModal.setCustomDialogListener(object: SearchModal.SearchModalListener{
+        searchModal.setCustomDialogListener(object : SearchModal.SearchModalListener {
             override fun onDataReceived(data: ModalSearchModel) {
                 if (data.id == "-1") {
                     selectedCity = null
@@ -426,8 +461,10 @@ class TagihMingguanFragment : Fragment() {
         searchModal.searchHint = "Ketik untuk mencari…"
 
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(requireContext(), R.color.black_400)
-        else binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(requireContext(), R.color.light)
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background =
+            AppCompatResources.getDrawable(requireContext(), R.color.black_400)
+        else binding.llFilter.componentFilter.background =
+            AppCompatResources.getDrawable(requireContext(), R.color.light)
         binding.llFilter.componentFilter.visibility = View.GONE
         binding.llFilter.componentFilter.setOnClickListener {
             searchModal.show()

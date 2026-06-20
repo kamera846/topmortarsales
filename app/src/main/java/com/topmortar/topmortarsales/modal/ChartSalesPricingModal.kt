@@ -2,20 +2,14 @@ package com.topmortar.topmortarsales.modal
 
 import android.app.Dialog
 import android.content.Context
-import android.graphics.Color
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.WindowManager
 import androidx.core.content.ContextCompat
-import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.BarData
-import com.github.mikephil.charting.data.BarDataSet
-import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
-import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.utils.CurrencyFormat
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
@@ -67,7 +61,7 @@ class ChartSalesPricingModal(private val context: Context) : Dialog(context) {
 
         val titleBar = binding.titleBarLight
         titleBar.tvTitleBar.text = "Rincian Pendapatan"
-        titleBar.tvTitleBar.setPadding(convertDpToPx(16, context),0,0,0)
+        titleBar.tvTitleBar.setPadding(convertDpToPx(16, context), 0, 0, 0)
         titleBar.tvTitleBarDescription.text = "Ini adalah rincian anda pada bulan ini"
 
         setupPricing()
@@ -82,9 +76,12 @@ class ChartSalesPricingModal(private val context: Context) : Dialog(context) {
     }
 
     private fun setupPricing() {
-        binding.tvCountData.text = "($countData x ${CurrencyFormat.format(komisiData.toDouble(), false)} / Toko)"
-        binding.tvCountPassive.text = "($countPassive x ${CurrencyFormat.format(komisiPassive.toDouble(), false)} / Toko)"
-        binding.tvCountPenjualan.text = "($countPenjualan x ${CurrencyFormat.format(komisiPenjualan.toDouble(), false)} / Sak)"
+        binding.tvCountData.text =
+            "($countData x ${CurrencyFormat.format(komisiData.toDouble(), false)} / Toko)"
+        binding.tvCountPassive.text =
+            "($countPassive x ${CurrencyFormat.format(komisiPassive.toDouble(), false)} / Toko)"
+        binding.tvCountPenjualan.text =
+            "($countPenjualan x ${CurrencyFormat.format(komisiPenjualan.toDouble(), false)} / Sak)"
 
         priceData = countData * komisiData
         pricePassive = countPassive * komisiPassive
@@ -103,7 +100,8 @@ class ChartSalesPricingModal(private val context: Context) : Dialog(context) {
         binding.progressBarData.progress = countData
         binding.progressBarPassive.max = maxProgressToko
         binding.progressBarPassive.progress = countPassive
-        binding.progressBarPenjualan.max = if (maxProgressSak > countPenjualan) maxProgressSak else countPenjualan
+        binding.progressBarPenjualan.max =
+            if (maxProgressSak > countPenjualan) maxProgressSak else countPenjualan
         binding.progressBarPenjualan.progress = countPenjualan
     }
 

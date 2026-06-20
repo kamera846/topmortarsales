@@ -54,9 +54,9 @@ class DeliveryTargetFragment : Fragment() {
     private var _binding: FragmentDeliveryTargetBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var firebaseReference : DatabaseReference
+    private lateinit var firebaseReference: DatabaseReference
     private lateinit var sessionManager: SessionManager
-    private lateinit var userDistributorId : String
+    private lateinit var userDistributorId: String
     private lateinit var userKind: String
     private lateinit var userCity: String
     private lateinit var userID: String
@@ -68,12 +68,15 @@ class DeliveryTargetFragment : Fragment() {
     private var selectedCity: ModalSearchModel? = null
 
     private var listener: CounterItem? = null
+
     interface CounterItem {
         fun counterItem(count: Int)
     }
+
     fun setCounterItem(listener: CounterItem) {
         this.listener = listener
     }
+
     fun syncNow() {
         getList()
     }
@@ -94,7 +97,8 @@ class DeliveryTargetFragment : Fragment() {
         userID = sessionManager.userID().toString()
 
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-013")
+        firebaseReference =
+            FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-013")
 
         if (userKind == USER_KIND_ADMIN) getCities()
         getList()
@@ -120,13 +124,21 @@ class DeliveryTargetFragment : Fragment() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
 
                 val response = when (userKind) {
                     USER_KIND_ADMIN -> {
-                        if (selectedCity != null) apiService.sjNotClosing(idCity = selectedCity?.id!!, distributorID = userDistributorid)
+                        if (selectedCity != null) apiService.sjNotClosing(
+                            idCity = selectedCity?.id!!,
+                            distributorID = userDistributorid
+                        )
                         else apiService.sjNotClosing(distributorID = userDistributorid)
-                    } else -> apiService.sjNotClosing(idCity = userCity, distributorID = userDistributorid)
+                    }
+
+                    else -> apiService.sjNotClosing(
+                        idCity = userCity,
+                        distributorID = userDistributorid
+                    )
                 }
 
                 when (response.status) {
@@ -147,10 +159,14 @@ class DeliveryTargetFragment : Fragment() {
                                     for (delivery in dataSnapshot.children) {
                                         if (delivery.child("stores").exists()) {
                                             for (store in delivery.child("stores").children) {
-                                                val storeData = store.getValue(DeliveryModel.Store::class.java)!!
-                                                storeData.courier = delivery.child("courier").getValue(
-                                                    DeliveryModel.Courier::class.java)!!
-                                                storeData.deliveryId = delivery.child("id").getValue(String::class.java)!!
+                                                val storeData =
+                                                    store.getValue(DeliveryModel.Store::class.java)!!
+                                                storeData.courier =
+                                                    delivery.child("courier").getValue(
+                                                        DeliveryModel.Courier::class.java
+                                                    )!!
+                                                storeData.deliveryId = delivery.child("id")
+                                                    .getValue(String::class.java)!!
                                                 storeList.add(storeData)
                                             }
                                         }
@@ -160,10 +176,13 @@ class DeliveryTargetFragment : Fragment() {
                                         val storeTarget = response.results
 
                                         for ((i, item) in storeTarget.withIndex()) {
-                                            val findStoreProcessed = storeList.find { it.id == item.id_contact && it.courier?.id == item.id_courier }
+                                            val findStoreProcessed =
+                                                storeList.find { it.id == item.id_contact && it.courier?.id == item.id_courier }
                                             if (findStoreProcessed != null) {
-                                                storeTarget[i].deliveryId = findStoreProcessed.deliveryId
-                                                storeTarget[i].dateProcessed = findStoreProcessed.startDatetime
+                                                storeTarget[i].deliveryId =
+                                                    findStoreProcessed.deliveryId
+                                                storeTarget[i].dateProcessed =
+                                                    findStoreProcessed.startDatetime
                                             }
                                         }
 
@@ -187,7 +206,8 @@ class DeliveryTargetFragment : Fragment() {
 
                             override fun onCancelled(databaseError: DatabaseError) {
                                 // Handle errors
-                                handleMessage(requireContext(), TAG_RESPONSE_CONTACT,
+                                handleMessage(
+                                    requireContext(), TAG_RESPONSE_CONTACT,
                                     "Failed run service. Exception $databaseError"
                                 )
 
@@ -199,6 +219,7 @@ class DeliveryTargetFragment : Fragment() {
                         })
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(true, "Belum ada target kiriman!")
@@ -206,9 +227,14 @@ class DeliveryTargetFragment : Fragment() {
                         listener?.counterItem(0)
 
                     }
+
                     else -> {
 
-                        handleMessage(requireContext(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            requireContext(),
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         loadingState(true, getString(R.string.failed_request))
                         showBadgeRefresh(true)
 
@@ -217,7 +243,11 @@ class DeliveryTargetFragment : Fragment() {
 
             } catch (e: Exception) {
 
-                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    requireContext(),
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
 
@@ -229,30 +259,32 @@ class DeliveryTargetFragment : Fragment() {
 
     private fun setRecyclerView(listItem: ArrayList<SuratJalanNotClosingModel>) {
 
-        val rvAdapter = SuratJalanNotClosingRecyclerViewAdapter(listItem, object: SuratJalanNotClosingRecyclerViewAdapter.ItemClickListener {
-            override fun onItemClick(data: SuratJalanNotClosingModel?) {
+        val rvAdapter = SuratJalanNotClosingRecyclerViewAdapter(
+            listItem,
+            object : SuratJalanNotClosingRecyclerViewAdapter.ItemClickListener {
+                override fun onItemClick(data: SuratJalanNotClosingModel?) {
 //                if (data != null && data.dateProcessed.isNotEmpty()) {
-                if (data != null) {
-                    if (data.is_printed == "1") {
-                        context?.let {
-                            val intent = Intent(it, MapsActivity::class.java)
-                            intent.putExtra(CONST_IS_TRACKING, true)
-                            intent.putExtra(CONST_DELIVERY_ID, data.deliveryId)
-                            intent.putExtra(CONST_CONTACT_ID, data.id_contact)
-                            startActivity(intent)
-                        }
-                    } else {
-                        context?.let {
-                            val intent = Intent(it, ListSuratJalanActivity::class.java)
-                            intent.putExtra(CONST_CONTACT_ID, data.id_contact)
-                            intent.putExtra(CONST_NAME, data.nama)
-                            startActivity(intent)
+                    if (data != null) {
+                        if (data.is_printed == "1") {
+                            context?.let {
+                                val intent = Intent(it, MapsActivity::class.java)
+                                intent.putExtra(CONST_IS_TRACKING, true)
+                                intent.putExtra(CONST_DELIVERY_ID, data.deliveryId)
+                                intent.putExtra(CONST_CONTACT_ID, data.id_contact)
+                                startActivity(intent)
+                            }
+                        } else {
+                            context?.let {
+                                val intent = Intent(it, ListSuratJalanActivity::class.java)
+                                intent.putExtra(CONST_CONTACT_ID, data.id_contact)
+                                intent.putExtra(CONST_NAME, data.nama)
+                                startActivity(intent)
+                            }
                         }
                     }
                 }
-            }
 
-        })
+            })
 
         context?.let { ctx ->
             binding.rvChatList.layoutManager = LinearLayoutManager(ctx)
@@ -320,7 +352,7 @@ class DeliveryTargetFragment : Fragment() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {
@@ -331,7 +363,12 @@ class DeliveryTargetFragment : Fragment() {
 
                         for (i in 0 until citiesResults!!.size) {
                             val data = citiesResults!![i]
-                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                            items.add(
+                                ModalSearchModel(
+                                    data.id_city,
+                                    "${data.nama_city} - ${data.kode_city}"
+                                )
+                            )
                         }
                         items.add(0, ModalSearchModel("-1", "Hapus Filter"))
 
@@ -340,14 +377,20 @@ class DeliveryTargetFragment : Fragment() {
 //                        binding.llFilter.componentFilter.visibility = View.GONE
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         handleMessage(requireActivity(), "LIST CITY", "Daftar kota kosong!")
 
                     }
+
                     else -> {
 
-                        handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            requireActivity(),
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
 
                     }
                 }
@@ -355,7 +398,11 @@ class DeliveryTargetFragment : Fragment() {
 
             } catch (e: Exception) {
 
-                handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    requireActivity(),
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
 
             }
 
@@ -365,7 +412,7 @@ class DeliveryTargetFragment : Fragment() {
     private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
 
         searchModal = SearchModal(requireActivity(), items)
-        searchModal.setCustomDialogListener(object: SearchModal.SearchModalListener{
+        searchModal.setCustomDialogListener(object : SearchModal.SearchModalListener {
             override fun onDataReceived(data: ModalSearchModel) {
                 if (data.id == "-1") {
                     selectedCity = null
@@ -381,8 +428,10 @@ class DeliveryTargetFragment : Fragment() {
         searchModal.searchHint = "Ketik untuk mencari…"
 
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(requireContext(), R.color.black_400)
-        else binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(requireContext(), R.color.light)
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background =
+            AppCompatResources.getDrawable(requireContext(), R.color.black_400)
+        else binding.llFilter.componentFilter.background =
+            AppCompatResources.getDrawable(requireContext(), R.color.light)
         binding.llFilter.componentFilter.visibility = View.GONE
         binding.llFilter.componentFilter.setOnClickListener {
             searchModal.show()

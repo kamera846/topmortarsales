@@ -114,7 +114,6 @@ import com.topmortar.topmortarsales.commons.utils.URLUtility
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
-import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityDetailSuratJalanBinding
 import com.topmortar.topmortarsales.model.ContactModel
@@ -419,8 +418,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
-                val response = apiService.getContactDetail(contactId = contactId!!)
+                val response = HttpClient.apiService.getContactDetail(contactId = contactId!!)
 
                 if (response.isSuccessful) {
                     val responseBody = response.body()!!
@@ -489,9 +487,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
                 val response =
-                    apiService.getSuratJalanDetail(processNumber = "3", idSj = idSj!!)
+                    HttpClient.apiService.getSuratJalanDetail(processNumber = "3", idSj = idSj!!)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -1030,9 +1027,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
-                val response =
-                    apiService.printSj(idSj = createPartFromString(idSj!!))
+                val response = HttpClient.apiService.printSj(idSj = createPartFromString(idSj!!))
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -1101,9 +1096,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
 
-                    val apiService: ApiService = HttpClient.create()
                     val response =
-                        apiService.printSj(idSj = createPartFromString(idSj!!))
+                        HttpClient.apiService.printSj(idSj = createPartFromString(idSj!!))
 
                     when (response.status) {
                         RESPONSE_STATUS_OK -> {
@@ -1349,8 +1343,8 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
                 txtPotongan += txtTotalAmount - txtTotal
 
-                val apiService = HttpClient.create()
-                val response = apiService.printInvoice(idSj = createPartFromString(idSj ?: ""))
+                val response =
+                    HttpClient.apiService.printInvoice(idSj = createPartFromString(idSj ?: ""))
 
                 when (response.status) {
                     RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {

@@ -7,23 +7,24 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.utils.CurrencyFormat
-import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.ProductModel
 
-class ProductsRVA (private val listItem: ArrayList<ProductModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<ProductsRVA.ChatViewHolder>() {
+class ProductsRVA(
+    private val listItem: ArrayList<ProductModel>,
+    private val itemClickListener: ItemClickListener
+) : RecyclerView.Adapter<ProductsRVA.ChatViewHolder>() {
     private var context: Context? = null
 
     interface ItemClickListener {
         fun onItemClick(data: ProductModel? = null)
     }
 
-    inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
@@ -39,7 +40,8 @@ class ProductsRVA (private val listItem: ArrayList<ProductModel>, private val it
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
 
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
         context = parent.context
         return ChatViewHolder(view)
 
@@ -50,7 +52,12 @@ class ProductsRVA (private val listItem: ArrayList<ProductModel>, private val it
         val item = listItem[position]
 
         holder.bind(item)
-        holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
+        holder.itemView.startAnimation(
+            AnimationUtils.loadAnimation(
+                holder.itemView.context,
+                R.anim.rv_item_fade_slide_up
+            )
+        )
 
         holder.itemView.setOnClickListener { onItemClick(holder, position) }
 

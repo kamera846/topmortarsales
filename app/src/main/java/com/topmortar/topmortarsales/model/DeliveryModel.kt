@@ -1,7 +1,7 @@
 package com.topmortar.topmortarsales.model
 
 object DeliveryModel {
-    data class Delivery (
+    data class Delivery(
         var id: String = "",
         var lat: Double = 0.0,
         var lng: Double = 0.0,
@@ -10,13 +10,15 @@ object DeliveryModel {
     ) {
 //        constructor() : this("")
     }
-    data class Courier (
+
+    data class Courier(
         var id: String = "",
         var name: String = ""
     ) {
 //        constructor() : this("")
     }
-    data class Store (
+
+    data class Store(
         var id: String = "",
         var deliveryId: String = "",
         var idSuratJalan: String = "",
@@ -34,7 +36,7 @@ object DeliveryModel {
 //        constructor() : this("")
     }
 
-    data class History (
+    data class History(
         var id_delivery: String = "",
         var endDatetime: String = "",
         var endLat: String = "",

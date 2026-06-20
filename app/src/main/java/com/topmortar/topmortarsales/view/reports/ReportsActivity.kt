@@ -113,16 +113,22 @@ class ReportsActivity : AppCompatActivity() {
         if (userKind == USER_KIND_PENAGIHAN) isPenagihan = true
         else if (userLevel == AUTH_LEVEL_PENAGIHAN) isPenagihan = true
 
-        if (isCourier) binding.titleBarDark.tvTitleBar.text = if (!contactName.isNullOrEmpty()) contactName else "Laporan Kurir"
-        else if (isBA) binding.titleBarDark.tvTitleBar.text = if (!contactName.isNullOrEmpty()) contactName else "Laporan BA"
-        else if (isPenagihan) binding.titleBarDark.tvTitleBar.text = if (!contactName.isNullOrEmpty()) contactName else "Laporan Penagihan"
-        else binding.titleBarDark.tvTitleBar.text = if (!contactName.isNullOrEmpty()) contactName else "Laporan Sales"
+        if (isCourier) binding.titleBarDark.tvTitleBar.text =
+            if (!contactName.isNullOrEmpty()) contactName else "Laporan Kurir"
+        else if (isBA) binding.titleBarDark.tvTitleBar.text =
+            if (!contactName.isNullOrEmpty()) contactName else "Laporan BA"
+        else if (isPenagihan) binding.titleBarDark.tvTitleBar.text =
+            if (!contactName.isNullOrEmpty()) contactName else "Laporan Penagihan"
+        else binding.titleBarDark.tvTitleBar.text =
+            if (!contactName.isNullOrEmpty()) contactName else "Laporan Sales"
         binding.titleBarDark.tvTitleBarDescription.visibility = View.VISIBLE
 //        println("Laporan Visit: Contact Name $contactName")
 //        println("Laporan Visit: User ID $iUserID")
 //        println("Laporan Visit: User Full Name $userFullName")
-        if (!contactName.isNullOrEmpty()) binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (iUserID.isNullOrEmpty()) "saya" else "$userFullName"} di toko ini"
-        else binding.titleBarDark.tvTitleBarDescription.text = "Daftar laporan ${if (userFullName.isNullOrEmpty()) "" else "$userFullName"}"
+        if (!contactName.isNullOrEmpty()) binding.titleBarDark.tvTitleBarDescription.text =
+            "Daftar laporan ${if (iUserID.isNullOrEmpty()) "saya" else "$userFullName"} di toko ini"
+        else binding.titleBarDark.tvTitleBarDescription.text =
+            "Daftar laporan ${if (userFullName.isNullOrEmpty()) "" else "$userFullName"}"
 
         if (userKind != USER_KIND_COURIER && userLevel != AUTH_LEVEL_COURIER && userKind != USER_KIND_BA && userLevel != AUTH_LEVEL_BA) {
             val contentWidht = convertDpToPx(40, this)
@@ -132,14 +138,34 @@ class ReportsActivity : AppCompatActivity() {
             binding.titleBarDark.icMore.visibility = View.VISIBLE
             binding.titleBarDark.icMore.layoutParams.width = contentWidht
             binding.titleBarDark.icMore.layoutParams.height = contentHeight
-            binding.titleBarDark.icMore.setPadding(paddingHorizontal,paddingVertival,paddingHorizontal,paddingVertival)
-            (binding.titleBarDark.icMore.layoutParams as ViewGroup.MarginLayoutParams).setMargins(0,0,paddingHorizontal,0)
+            binding.titleBarDark.icMore.setPadding(
+                paddingHorizontal,
+                paddingVertival,
+                paddingHorizontal,
+                paddingVertival
+            )
+            (binding.titleBarDark.icMore.layoutParams as ViewGroup.MarginLayoutParams).setMargins(
+                0,
+                0,
+                paddingHorizontal,
+                0
+            )
             binding.titleBarDark.icRow.layoutParams.width = contentWidht
             binding.titleBarDark.icRow.layoutParams.height = contentHeight
-            binding.titleBarDark.icRow.setPadding(paddingHorizontal,paddingVertival,paddingHorizontal,paddingVertival)
+            binding.titleBarDark.icRow.setPadding(
+                paddingHorizontal,
+                paddingVertival,
+                paddingHorizontal,
+                paddingVertival
+            )
             binding.titleBarDark.icGrid.layoutParams.width = contentWidht
             binding.titleBarDark.icGrid.layoutParams.height = contentHeight
-            binding.titleBarDark.icGrid.setPadding(paddingHorizontal,paddingVertival,paddingHorizontal,paddingVertival)
+            binding.titleBarDark.icGrid.setPadding(
+                paddingHorizontal,
+                paddingVertival,
+                paddingHorizontal,
+                paddingVertival
+            )
             binding.titleBarDark.icMore.setOnClickListener { showPopupMenu() }
         }
 
@@ -152,7 +178,7 @@ class ReportsActivity : AppCompatActivity() {
         setDatePickerDialog()
         initClickHandler()
 
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 myOnBackPressed()
             }
@@ -196,16 +222,24 @@ class ReportsActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = when (isCourier || isBA) {
                     true -> {
                         if (contactID.isNullOrEmpty()) {
                             apiService.listAllCourierReport(idUser = if (iUserID.isNullOrEmpty()) userID else iUserID!!)
-                        } else apiService.listCourierReport(idUser = if (iUserID.isNullOrEmpty()) userID else iUserID!!, idGudang = contactID!!)
-                    } else -> {
+                        } else apiService.listCourierReport(
+                            idUser = if (iUserID.isNullOrEmpty()) userID else iUserID!!,
+                            idGudang = contactID!!
+                        )
+                    }
+
+                    else -> {
                         if (contactID.isNullOrEmpty()) {
                             apiService.listAllReport(idUser = if (iUserID.isNullOrEmpty()) userID else iUserID!!)
-                        } else apiService.listReport(idUser = if (iUserID.isNullOrEmpty()) userID else iUserID!!, idContact = contactID!!)
+                        } else apiService.listReport(
+                            idUser = if (iUserID.isNullOrEmpty()) userID else iUserID!!,
+                            idContact = contactID!!
+                        )
                     }
                 }
 
@@ -222,20 +256,23 @@ class ReportsActivity : AppCompatActivity() {
                             val filterResults: ArrayList<ReportVisitModel> = when (activeFilter) {
                                 SALES_REPORT_RENVI -> {
                                     filterMessage = "laporan sales"
-                                    val list = ArrayList(data.filter { it.source_visit == SALES_REPORT_RENVI })
+                                    val list =
+                                        ArrayList(data.filter { it.source_visit == SALES_REPORT_RENVI })
 //                                    println("List $activeFilter size is ${list.size}")
                                     list
                                 }
 
                                 PENAGIHAN_REPORT_RENVI -> {
                                     filterMessage = "laporan penagihan"
-                                    val list = ArrayList(data.filter { it.source_visit == PENAGIHAN_REPORT_RENVI })
+                                    val list =
+                                        ArrayList(data.filter { it.source_visit == PENAGIHAN_REPORT_RENVI })
 //                                    println("List $activeFilter size is ${list.size}")
                                     list
                                 }
 
                                 NORMAL_REPORT -> {
-                                    val list = ArrayList(data.filter { it.source_visit != SALES_REPORT_RENVI && it.source_visit != PENAGIHAN_REPORT_RENVI })
+                                    val list =
+                                        ArrayList(data.filter { it.source_visit != SALES_REPORT_RENVI && it.source_visit != PENAGIHAN_REPORT_RENVI })
 //                                    println("List $activeFilter size is ${list.size}")
                                     list
                                 }
@@ -256,23 +293,26 @@ class ReportsActivity : AppCompatActivity() {
                             }
 
                         }
+
                         RESPONSE_STATUS_EMPTY -> {
 
                             loadingState(true, "Belum ada laporan.")
 //                            binding.llFilter.visibility = View.VISIBLE
 
                         }
+
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            val message = "Gagal memuat laporan! Message: ${ responseBody.message }"
+                            val message = "Gagal memuat laporan! Message: ${responseBody.message}"
                             handleMessage(this@ReportsActivity, TAG_RESPONSE_MESSAGE, message)
                             loadingState(true, message)
                             binding.llFilter.visibility = View.GONE
 
                         }
+
                         else -> {
 
-                            val message = "Gagal memuat laporan!: ${ responseBody.message }"
+                            val message = "Gagal memuat laporan!: ${responseBody.message}"
                             handleMessage(this@ReportsActivity, TAG_RESPONSE_MESSAGE, message)
                             loadingState(true, message)
                             binding.llFilter.visibility = View.GONE
@@ -291,7 +331,10 @@ class ReportsActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                FirebaseUtils.logErr(this@ReportsActivity, "Failed ReportsActivity on getList(). Catch: ${e.message}")
+                FirebaseUtils.logErr(
+                    this@ReportsActivity,
+                    "Failed ReportsActivity on getList(). Catch: ${e.message}"
+                )
                 val message = generateFailedRunServiceMessage(e.message.toString())
                 handleMessage(this@ReportsActivity, TAG_RESPONSE_MESSAGE, message)
                 loadingState(true, message)
@@ -315,10 +358,15 @@ class ReportsActivity : AppCompatActivity() {
         mAdapter.setLayoutStatus(layoutStatus)
 
         binding.recyclerView.apply {
-            layoutManager = if (layoutStatus == LAYOUT_ROW) LinearLayoutManager(this@ReportsActivity) else GridLayoutManager(this@ReportsActivity, 2)
+            layoutManager =
+                if (layoutStatus == LAYOUT_ROW) LinearLayoutManager(this@ReportsActivity) else GridLayoutManager(
+                    this@ReportsActivity,
+                    2
+                )
             adapter = mAdapter
 
-            mAdapter.setOnItemClickListener(object : ReportsRecyclerViewAdapter.OnItemClickListener{
+            mAdapter.setOnItemClickListener(object :
+                ReportsRecyclerViewAdapter.OnItemClickListener {
                 override fun onItemClick(item: ReportVisitModel) {
                     showModalDetail(item)
                 }
@@ -327,7 +375,7 @@ class ReportsActivity : AppCompatActivity() {
         }
 
         if (nTargetIntent != null && nTargetIntent == "to_detail_visit" && nVisitId != null && !notificationOpened) {
-            val item= items.find { it.id_visit == nVisitId }
+            val item = items.find { it.id_visit == nVisitId }
             if (item != null) {
                 notificationOpened = true
                 showModalDetail(item)
@@ -402,19 +450,27 @@ class ReportsActivity : AppCompatActivity() {
                     activeFilter = ALL_REPORT
                     getList()
                     true
-                } R.id.option_normal -> {
+                }
+
+                R.id.option_normal -> {
                     activeFilter = NORMAL_REPORT
                     getList()
                     true
-                } R.id.option_sales -> {
+                }
+
+                R.id.option_sales -> {
                     activeFilter = SALES_REPORT_RENVI
                     getList()
                     true
-                } R.id.option_penagihan -> {
+                }
+
+                R.id.option_penagihan -> {
                     activeFilter = PENAGIHAN_REPORT_RENVI
                     getList()
                     true
-                } else -> false
+                }
+
+                else -> false
             }
         }
         popupMenu.show()

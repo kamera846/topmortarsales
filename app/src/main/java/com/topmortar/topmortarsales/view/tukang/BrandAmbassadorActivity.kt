@@ -78,11 +78,12 @@ class BrandAmbassadorActivity : AppCompatActivity() {
     private var activeTab = 0
 
     lateinit var appUpdateManager: AppUpdateManager
-    private val appUpdateLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-        if (result.resultCode != RESULT_OK) {
-            showForceUpdateDialog()
+    private val appUpdateLauncher =
+        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            if (result.resultCode != RESULT_OK) {
+                showForceUpdateDialog()
+            }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -94,7 +95,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
         sessionManager = SessionManager(this@BrandAmbassadorActivity)
         val isLoggedIn = sessionManager.isLoggedIn()
 
-        if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty()|| userDistributorId.isEmpty()) return missingDataHandler()
+        if (!isLoggedIn || userId.isEmpty() || userCity.isEmpty() || userKind.isEmpty() || userDistributorId.isEmpty()) return missingDataHandler()
 
         setContentView(binding.root)
 
@@ -103,8 +104,10 @@ class BrandAmbassadorActivity : AppCompatActivity() {
         AppUpdateHelper.initialize()
         AppUpdateHelper.checkForUpdate(this)
 
-        binding.titleBarDark.tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
-        binding.titleBarDark.tvTitleBarDescription.visibility = binding.titleBarDark.tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
+        binding.titleBarDark.tvTitleBarDescription.text =
+            sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else "" }
+        binding.titleBarDark.tvTitleBarDescription.visibility =
+            binding.titleBarDark.tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
         binding.titleBarDark.tvTitleBar.setPadding(convertDpToPx(16, this), 0, 0, 0)
         binding.titleBarDark.tvTitleBarDescription.setPadding(convertDpToPx(16, this), 0, 0, 0)
         binding.titleBarDark.icBack.visibility = View.GONE
@@ -120,14 +123,16 @@ class BrandAmbassadorActivity : AppCompatActivity() {
 
         // Connect TabLayout and ViewPager
         tabLayout.setupWithViewPager(viewPager)
-        pagerAdapter.setCounterPageItem(object : BAViewPagerAdapter.CounterPageItem{
+        pagerAdapter.setCounterPageItem(object : BAViewPagerAdapter.CounterPageItem {
             override fun counterItem(count: Int, tabIndex: Int) {
-                if (tabIndex == 0) tabLayout.getTabAt(tabIndex)?.text = "Tukang${if (count != 0) " ($count)" else ""}"
-                else tabLayout.getTabAt(tabIndex)?.text = "Basecamp${if (count != 0) " ($count)" else ""}"
+                if (tabIndex == 0) tabLayout.getTabAt(tabIndex)?.text =
+                    "Tukang${if (count != 0) " ($count)" else ""}"
+                else tabLayout.getTabAt(tabIndex)?.text =
+                    "Basecamp${if (count != 0) " ($count)" else ""}"
             }
 
         })
-        tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener{
+        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 activeTab = tab?.position!!
             }
@@ -142,8 +147,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
             tabLayout.setBackgroundColor(getColor(R.color.black_300))
             tabLayout.setTabTextColors(getColor(R.color.black_600), getColor(R.color.primary))
             tabLayout.setSelectedTabIndicatorColor(getColor(R.color.primary))
-        }
-        else {
+        } else {
             tabLayout.setBackgroundColor(getColor(R.color.primary))
             tabLayout.setTabTextColors(getColor(R.color.primary_600), getColor(R.color.white))
             tabLayout.setSelectedTabIndicatorColor(getColor(R.color.white))
@@ -151,7 +155,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
 
         inAppUpdateHelper(appUpdateManager, appUpdateLauncher)
 
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 myOnBackPressed()
             }
@@ -194,24 +198,35 @@ class BrandAmbassadorActivity : AppCompatActivity() {
                     pagerAdapter.setSyncAction(activeTab)
                     true
                 }
+
                 R.id.nearest_store -> {
                     if (activeTab == 0) navigateChecklocationStore()
                     else navigateChecklocationBasecamp()
                     true
                 }
+
                 R.id.option_my_profile -> {
-                    val intent = Intent(this@BrandAmbassadorActivity, UserProfileActivity::class.java)
+                    val intent =
+                        Intent(this@BrandAmbassadorActivity, UserProfileActivity::class.java)
                     startActivity(intent)
                     true
                 }
+
                 R.id.option_skill -> {
-                    startActivity(Intent(this@BrandAmbassadorActivity, ManageSkillActivity::class.java))
+                    startActivity(
+                        Intent(
+                            this@BrandAmbassadorActivity,
+                            ManageSkillActivity::class.java
+                        )
+                    )
                     true
                 }
+
                 R.id.option_logout -> {
                     logoutConfirmation()
                     true
                 }
+
                 else -> false
             }
         }
@@ -228,8 +243,9 @@ class BrandAmbassadorActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
 
-                    val apiService: ApiService = HttpClient.create()
-                    val response = apiService.getCourierStore(processNumber = "1", courierId = userId)
+                    val apiService: ApiService = HttpClient.apiService
+                    val response =
+                        apiService.getCourierStore(processNumber = "1", courierId = userId)
 
                     when (response.status) {
                         RESPONSE_STATUS_OK -> {
@@ -246,36 +262,56 @@ class BrandAmbassadorActivity : AppCompatActivity() {
                                 listCoordinateCityID.add(item.id_city)
                             }
 
-                            val intent = Intent(this@BrandAmbassadorActivity, MapsActivity::class.java)
+                            val intent =
+                                Intent(this@BrandAmbassadorActivity, MapsActivity::class.java)
 
                             intent.putExtra(CONST_NEAREST_STORE, true)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_NAME,
+                                listCoordinateName
+                            )
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_STATUS,
+                                listCoordinateStatus
+                            )
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_CITY_ID,
+                                listCoordinateCityID
+                            )
 
                             progressBar.dismiss()
                             startActivity(intent)
 
                         }
+
                         RESPONSE_STATUS_EMPTY -> {
 
                             val listCoordinate = arrayListOf<String>()
                             val listCoordinateName = arrayListOf<String>()
 
-                            val intent = Intent(this@BrandAmbassadorActivity, MapsActivity::class.java)
+                            val intent =
+                                Intent(this@BrandAmbassadorActivity, MapsActivity::class.java)
 
                             intent.putExtra(CONST_NEAREST_STORE, true)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_NAME,
+                                listCoordinateName
+                            )
 
                             progressBar.dismiss()
                             startActivity(intent)
 
                         }
+
                         else -> {
 
-                            handleMessage(this@BrandAmbassadorActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                            handleMessage(
+                                this@BrandAmbassadorActivity,
+                                TAG_RESPONSE_CONTACT,
+                                getString(R.string.failed_get_data)
+                            )
                             progressBar.dismiss()
 
                         }
@@ -284,8 +320,15 @@ class BrandAmbassadorActivity : AppCompatActivity() {
 
                 } catch (e: Exception) {
 
-                    FirebaseUtils.logErr(this@BrandAmbassadorActivity, "Failed BrandAmbassadorActivity on navigateCheckLocationStore(). Catch: ${e.message}")
-                    handleMessage(this@BrandAmbassadorActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                    FirebaseUtils.logErr(
+                        this@BrandAmbassadorActivity,
+                        "Failed BrandAmbassadorActivity on navigateCheckLocationStore(). Catch: ${e.message}"
+                    )
+                    handleMessage(
+                        this@BrandAmbassadorActivity,
+                        TAG_RESPONSE_CONTACT,
+                        generateFailedRunServiceMessage(e.message.toString())
+                    )
                     progressBar.dismiss()
 
                 }
@@ -305,8 +348,11 @@ class BrandAmbassadorActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
 
-                    val apiService: ApiService = HttpClient.create()
-                    val response = apiService.getListBaseCamp(cityId = userCity, distributorID = userDistributorId)
+                    val apiService: ApiService = HttpClient.apiService
+                    val response = apiService.getListBaseCamp(
+                        cityId = userCity,
+                        distributorID = userDistributorId
+                    )
 
                     when (response.status) {
                         RESPONSE_STATUS_OK -> {
@@ -323,38 +369,58 @@ class BrandAmbassadorActivity : AppCompatActivity() {
                                 listCoordinateCityID.add(item.id_city)
                             }
 
-                            val intent = Intent(this@BrandAmbassadorActivity, MapsActivity::class.java)
+                            val intent =
+                                Intent(this@BrandAmbassadorActivity, MapsActivity::class.java)
 
                             intent.putExtra(CONST_NEAREST_STORE, true)
                             intent.putExtra(CONST_IS_BASE_CAMP, true)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_STATUS, listCoordinateStatus)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_CITY_ID, listCoordinateCityID)
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_NAME,
+                                listCoordinateName
+                            )
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_STATUS,
+                                listCoordinateStatus
+                            )
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_CITY_ID,
+                                listCoordinateCityID
+                            )
 
                             progressBar.dismiss()
                             startActivity(intent)
 
                         }
+
                         RESPONSE_STATUS_EMPTY -> {
 
                             val listCoordinate = arrayListOf<String>()
                             val listCoordinateName = arrayListOf<String>()
 
-                            val intent = Intent(this@BrandAmbassadorActivity, MapsActivity::class.java)
+                            val intent =
+                                Intent(this@BrandAmbassadorActivity, MapsActivity::class.java)
 
                             intent.putExtra(CONST_NEAREST_STORE, true)
                             intent.putExtra(CONST_IS_BASE_CAMP, true)
                             intent.putStringArrayListExtra(CONST_LIST_COORDINATE, listCoordinate)
-                            intent.putStringArrayListExtra(CONST_LIST_COORDINATE_NAME, listCoordinateName)
+                            intent.putStringArrayListExtra(
+                                CONST_LIST_COORDINATE_NAME,
+                                listCoordinateName
+                            )
 
                             progressBar.dismiss()
                             startActivity(intent)
 
                         }
+
                         else -> {
 
-                            handleMessage(this@BrandAmbassadorActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                            handleMessage(
+                                this@BrandAmbassadorActivity,
+                                TAG_RESPONSE_CONTACT,
+                                getString(R.string.failed_get_data)
+                            )
                             progressBar.dismiss()
 
                         }
@@ -363,8 +429,15 @@ class BrandAmbassadorActivity : AppCompatActivity() {
 
                 } catch (e: Exception) {
 
-                    FirebaseUtils.logErr(this@BrandAmbassadorActivity, "Failed BrandAmbassadorActivity on navigateChecklocationBasecamp(). Catch: ${e.message}")
-                    handleMessage(this@BrandAmbassadorActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                    FirebaseUtils.logErr(
+                        this@BrandAmbassadorActivity,
+                        "Failed BrandAmbassadorActivity on navigateChecklocationBasecamp(). Catch: ${e.message}"
+                    )
+                    handleMessage(
+                        this@BrandAmbassadorActivity,
+                        TAG_RESPONSE_CONTACT,
+                        generateFailedRunServiceMessage(e.message.toString())
+                    )
                     progressBar.dismiss()
 
                 }
@@ -408,7 +481,10 @@ class BrandAmbassadorActivity : AppCompatActivity() {
             userDevice.child("logout_at").setValue(DateFormat.now())
             userDevice.child("login_at").setValue("")
         } catch (e: Exception) {
-            FirebaseUtils.logErr(this@BrandAmbassadorActivity, "Failed BrandAmbassadorActivity on logoutHandler(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this@BrandAmbassadorActivity,
+                "Failed BrandAmbassadorActivity on logoutHandler(). Catch: ${e.message}"
+            )
         }
 
         sessionManager.setLoggedIn(LOGGED_OUT)
@@ -424,7 +500,7 @@ class BrandAmbassadorActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.detailUser(userId = userId)
 
                 when (response.status) {
@@ -433,17 +509,23 @@ class BrandAmbassadorActivity : AppCompatActivity() {
                         val data = response.results[0]
                         sessionManager.setUserLoggedIn(data)
 
-                        binding.titleBarDark.tvTitleBarDescription.text = sessionManager.userName().let { if (!it.isNullOrEmpty()) "Halo, $it" else ""}
-                        binding.titleBarDark.tvTitleBarDescription.visibility = binding.titleBarDark.tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
+                        binding.titleBarDark.tvTitleBarDescription.text = sessionManager.userName()
+                            .let { if (!it.isNullOrEmpty()) "Halo, $it" else "" }
+                        binding.titleBarDark.tvTitleBarDescription.visibility =
+                            binding.titleBarDark.tvTitleBarDescription.text.let { if (it.isNotEmpty()) View.VISIBLE else View.GONE }
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> missingDataHandler()
 
                 }
 
 
             } catch (e: Exception) {
-                FirebaseUtils.logErr(this@BrandAmbassadorActivity, "Failed BrandAmbassadorActivity on getUserLoggedIn(). Catch: ${e.message}")
+                FirebaseUtils.logErr(
+                    this@BrandAmbassadorActivity,
+                    "Failed BrandAmbassadorActivity on getUserLoggedIn(). Catch: ${e.message}"
+                )
                 Log.d("TAG USER LOGGED IN", generateFailedRunServiceMessage(e.message.toString()))
             }
 
@@ -481,7 +563,12 @@ class BrandAmbassadorActivity : AppCompatActivity() {
             }
 
             this@BrandAmbassadorActivity.doubleBackToExitPressedOnce = true
-            handleMessage(this@BrandAmbassadorActivity, TAG_ACTION_MAIN_ACTIVITY, getString(R.string.tekan_sekali_lagi), TOAST_SHORT)
+            handleMessage(
+                this@BrandAmbassadorActivity,
+                TAG_ACTION_MAIN_ACTIVITY,
+                getString(R.string.tekan_sekali_lagi),
+                TOAST_SHORT
+            )
 
             Handler(Looper.getMainLooper()).postDelayed({
                 doubleBackToExitPressedOnce = false

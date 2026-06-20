@@ -12,7 +12,13 @@ object DateFormat {
         return formatResult.format(calendar.time)
     }
 
-    fun format(dateString: String, inputFormat: String = "yyyy-MM-dd", outputFormat: String = "dd MMMM yyyy", inputLocale: Locale = Locale.getDefault(), outputLocale: Locale = Locale.getDefault()): String {
+    fun format(
+        dateString: String,
+        inputFormat: String = "yyyy-MM-dd",
+        outputFormat: String = "dd MMMM yyyy",
+        inputLocale: Locale = Locale.getDefault(),
+        outputLocale: Locale = Locale.getDefault()
+    ): String {
         val dInputFormat = SimpleDateFormat(inputFormat, inputLocale)
         val dOutputFormat = SimpleDateFormat(outputFormat, outputLocale)
 
@@ -79,7 +85,11 @@ object DateFormat {
         }
     }
 
-    fun differenceDateNowDescCustom(dateString: String, dateFormatString: String = "yyyy-MM-dd", inputLocale: Locale = Locale.getDefault(),): Int {
+    fun differenceDateNowDescCustom(
+        dateString: String,
+        dateFormatString: String = "yyyy-MM-dd",
+        inputLocale: Locale = Locale.getDefault(),
+    ): Int {
         val dateFormat = SimpleDateFormat(dateFormatString, inputLocale)
         val dateTime = dateFormat.parse(dateString)!!
 
@@ -90,7 +100,12 @@ object DateFormat {
         return ((today.time - calendar.time.time) / (1000 * 60 * 60 * 24)).toInt()
     }
 
-    fun changeDateToDaysBeforeOrAfter(dateString: String, totalDays: Int, inputDateFormat: String = "yyyy-MM-dd HH:mm:ss", outputDateFormat: String = "dd MMMM yyyy, HH.mm"): String {
+    fun changeDateToDaysBeforeOrAfter(
+        dateString: String,
+        totalDays: Int,
+        inputDateFormat: String = "yyyy-MM-dd HH:mm:ss",
+        outputDateFormat: String = "dd MMMM yyyy, HH.mm"
+    ): String {
         val dateFormat = SimpleDateFormat(inputDateFormat, Locale.getDefault())
 
         return try {
@@ -124,7 +139,7 @@ object DateFormat {
             return false
         } catch (e: Exception) {
             println("DEBUG FAILED FORMAT DATE: $e")
-            return  false
+            return false
         }
     }
 

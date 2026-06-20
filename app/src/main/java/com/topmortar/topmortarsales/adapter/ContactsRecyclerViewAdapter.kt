@@ -27,18 +27,26 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>, private val itemClickListener: ItemClickListener, private val userKind: String = "") : RecyclerView.Adapter<ContactsRecyclerViewAdapter.ChatViewHolder>() {
+class ContactsRecyclerViewAdapter(
+    private val chatList: ArrayList<ContactModel>,
+    private val itemClickListener: ItemClickListener,
+    private val userKind: String = ""
+) : RecyclerView.Adapter<ContactsRecyclerViewAdapter.ChatViewHolder>() {
 
     var callback: ((ArrayList<ContactModel>) -> Unit)? = null
 
     private var context: Context? = null
     private var isSelectedItemActive = false
-//    private var selectedItems = SparseBooleanArray()
+
+    //    private var selectedItems = SparseBooleanArray()
     private var selectedItemsId = mutableSetOf<String>()
 
     interface ItemClickListener {
         fun onItemClick(data: ContactModel? = null)
-        fun updateSelectedItem(count: Int = 0, selectedItemsId: MutableSet<String> = mutableSetOf()) {
+        fun updateSelectedItem(
+            count: Int = 0,
+            selectedItemsId: MutableSet<String> = mutableSetOf()
+        ) {
 
         }
     }
@@ -100,8 +108,13 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
             if (chatItem.is_birthday == "1") icCake.visibility = View.VISIBLE
             else icCake.visibility = View.GONE
             tvContactName.text = chatItem.nama
-            tvPhoneNumber.text = chatItem.deliveryStatus.ifEmpty {
-                if (chatItem.nomorhp.isNotEmpty()) "+${chatItem.nomorhp}" else chatItem.created_at
+            if (chatItem.old_city.isNullOrEmpty()) {
+                tvPhoneNumber.text = chatItem.deliveryStatus.ifEmpty {
+                    if (chatItem.nomorhp.isNotEmpty()) "+${chatItem.nomorhp}" else chatItem.created_at
+                }
+            } else {
+                val subtitle = if (chatItem.nomorhp.isNotEmpty()) "+${chatItem.nomorhp}" else chatItem.created_at
+                tvPhoneNumber.text = subtitle + " - dari kota ${chatItem.old_city}"
             }
 
             if (isSelectedItemActive) {
@@ -110,7 +123,10 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
                 checkBoxItem.isChecked = selectedItemsId.contains(chatItem.id_contact)
 
                 itemView.setBackgroundColor(
-                    if (selectedItemsId.contains(chatItem.id_contact)) ContextCompat.getColor(itemView.context, R.color.primary15)
+                    if (selectedItemsId.contains(chatItem.id_contact)) ContextCompat.getColor(
+                        itemView.context,
+                        R.color.primary15
+                    )
                     else ContextCompat.getColor(itemView.context, R.color.baseBackground)
                 )
             } else {
@@ -118,7 +134,8 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
                 checkBoxItem.visibility = View.GONE
             }
 
-            if (chatItem.pass_contact.isNotEmpty() && chatItem.pass_contact != "0") badgeSeller.visibility = View.VISIBLE
+            if (chatItem.pass_contact.isNotEmpty() && chatItem.pass_contact != "0") badgeSeller.visibility =
+                View.VISIBLE
             else badgeSeller.visibility = View.GONE
         }
 
@@ -126,25 +143,55 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
             tooltipStatus.visibility = View.VISIBLE
             when (status) {
                 STATUS_CONTACT_DATA -> {
-                    tooltipStatus.setImageDrawable(context?.let { getDrawable(it, R.drawable.status_data) })
+                    tooltipStatus.setImageDrawable(context?.let {
+                        getDrawable(
+                            it,
+                            R.drawable.status_data
+                        )
+                    })
                     tooltipHandler(tooltipStatus, "Customer Status Data")
                 }
+
                 STATUS_CONTACT_PASSIVE -> {
-                    tooltipStatus.setImageDrawable(context?.let { getDrawable(it, R.drawable.status_passive) })
+                    tooltipStatus.setImageDrawable(context?.let {
+                        getDrawable(
+                            it,
+                            R.drawable.status_passive
+                        )
+                    })
                     tooltipHandler(tooltipStatus, "Customer Status Passive")
                 }
+
                 STATUS_CONTACT_ACTIVE -> {
-                    tooltipStatus.setImageDrawable(context?.let { getDrawable(it, R.drawable.status_active) })
+                    tooltipStatus.setImageDrawable(context?.let {
+                        getDrawable(
+                            it,
+                            R.drawable.status_active
+                        )
+                    })
                     tooltipHandler(tooltipStatus, "Customer Status Active")
                 }
+
                 STATUS_CONTACT_BLACKLIST -> {
-                    tooltipStatus.setImageDrawable(context?.let { getDrawable(it, R.drawable.status_blacklist) })
+                    tooltipStatus.setImageDrawable(context?.let {
+                        getDrawable(
+                            it,
+                            R.drawable.status_blacklist
+                        )
+                    })
                     tooltipHandler(tooltipStatus, "Customer Status Blacklist")
                 }
+
                 STATUS_CONTACT_BID -> {
-                    tooltipStatus.setImageDrawable(context?.let { getDrawable(it, R.drawable.status_bid) })
+                    tooltipStatus.setImageDrawable(context?.let {
+                        getDrawable(
+                            it,
+                            R.drawable.status_bid
+                        )
+                    })
                     tooltipHandler(tooltipStatus, "Customer Status Bargained")
                 }
+
                 else -> {
                     tooltipStatus.visibility = View.GONE
                 }
@@ -162,7 +209,8 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
 
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
         context = parent.context
         return ChatViewHolder(view)
 
@@ -178,9 +226,19 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
         if (dateNow == dateBirthday) chatItem.is_birthday = "1"
 
         holder.bind(chatItem)
-        holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
+        holder.itemView.startAnimation(
+            AnimationUtils.loadAnimation(
+                holder.itemView.context,
+                R.anim.rv_item_fade_slide_up
+            )
+        )
 
-        holder.itemView.setOnClickListener { if (isSelectedItemActive) toggleSelection(holder, position) else onItemClick(holder, position) }
+        holder.itemView.setOnClickListener {
+            if (isSelectedItemActive) toggleSelection(
+                holder,
+                position
+            ) else onItemClick(holder, position)
+        }
         holder.tooltipStatus.setOnClickListener { onItemClick(holder, position) }
         holder.checkBoxItem.setOnClickListener { toggleSelection(holder, position) }
 
@@ -216,7 +274,7 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
         }
     }
 
-    private fun toggleSelection(holder: ContactsRecyclerViewAdapter.ChatViewHolder, position: Int) {
+    private fun toggleSelection(holder: ChatViewHolder, position: Int) {
 //        if (selectedItems.get(position, false)) {
 //            selectedItems.delete(position)
 //            holder.checkBoxItem.isChecked = false
@@ -237,9 +295,10 @@ class ContactsRecyclerViewAdapter(private val chatList: ArrayList<ContactModel>,
     }
 
     fun clearSelections() {
-        val selectedPositions = selectedItemsId.toMutableSet() // Clone untuk menghindari ConcurrentModificationException
+        val selectedPositions =
+            selectedItemsId.toMutableSet() // Clone untuk menghindari ConcurrentModificationException
         selectedItemsId.clear()
-        for ((position, _) in selectedPositions.withIndex() ) {
+        for ((position, _) in selectedPositions.withIndex()) {
             notifyItemChanged(position)
         }
     }

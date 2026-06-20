@@ -9,7 +9,8 @@ import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.databinding.ItemUserTrackingBinding
 import com.topmortar.topmortarsales.model.UserAbsentModel
 
-class UserTrackingRecyclerViewAdapter : RecyclerView.Adapter<UserTrackingRecyclerViewAdapter.ViewHolder>() {
+class UserTrackingRecyclerViewAdapter :
+    RecyclerView.Adapter<UserTrackingRecyclerViewAdapter.ViewHolder>() {
     private var listItem: ArrayList<UserAbsentModel> = ArrayList()
     private var context: Context? = null
     private var withName: Boolean? = null
@@ -18,21 +19,26 @@ class UserTrackingRecyclerViewAdapter : RecyclerView.Adapter<UserTrackingRecycle
     interface OnItemClickListener {
         fun onItemClick(item: UserAbsentModel)
     }
+
     private var listener: OnItemClickListener? = null
     fun setOnItemClickListener(listener: OnItemClickListener) {
         this.listener = listener
     }
+
     fun setList(data: ArrayList<UserAbsentModel>) {
         listItem = data
     }
+
     fun setIsCourier(data: Boolean) {
         isCourier = data
     }
+
     fun setWithName(withName: Boolean?) {
         this.withName = withName
     }
 
-    inner class ViewHolder(private val binding: ItemUserTrackingBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class ViewHolder(private val binding: ItemUserTrackingBinding) :
+        RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: UserAbsentModel, position: Int) {
 
@@ -41,7 +47,7 @@ class UserTrackingRecyclerViewAdapter : RecyclerView.Adapter<UserTrackingRecycle
 
                 // Set margin (misalnya, 16dp)
                 val marginInPx = itemView.resources.getDimensionPixelSize(R.dimen.margin16)
-                layoutParams.setMargins(marginInPx,0,0,0)
+                layoutParams.setMargins(marginInPx, 0, 0, 0)
 
                 itemView.layoutParams = layoutParams
             } else if (position == (listItem.size - 1)) {
@@ -49,7 +55,7 @@ class UserTrackingRecyclerViewAdapter : RecyclerView.Adapter<UserTrackingRecycle
 
                 // Set margin (misalnya, 16dp)
                 val marginInPx = itemView.resources.getDimensionPixelSize(R.dimen.margin16)
-                layoutParams.setMargins(0,0,marginInPx,0)
+                layoutParams.setMargins(0, 0, marginInPx, 0)
 
                 itemView.layoutParams = layoutParams
             }
@@ -72,7 +78,8 @@ class UserTrackingRecyclerViewAdapter : RecyclerView.Adapter<UserTrackingRecycle
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
-        val binding = ItemUserTrackingBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding =
+            ItemUserTrackingBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         context = parent.context
         return ViewHolder(binding)
 

@@ -44,6 +44,7 @@ appUpdateKtx = "2.1.0"
 appUpdate = "2.1.0"
 workRuntimeKtx = "2.11.2"
 desugarJdkLibs = "2.1.5"
+activityKtx = "1.8.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -88,6 +89,7 @@ app-update-ktx = { group = "com.google.android.play", name = "app-update-ktx", v
 app-update = { group = "com.google.android.play", name = "app-update", version.ref = "appUpdate" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtx" }
 desugar-jdk-libs = {group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugarJdkLibs"}
+androidx-activity-ktx = { group = "androidx.activity", name = "activity-ktx", version.ref = "activityKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

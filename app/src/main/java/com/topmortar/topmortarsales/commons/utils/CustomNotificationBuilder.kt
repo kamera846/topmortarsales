@@ -133,16 +133,16 @@ class CustomNotificationBuilder private constructor(private val context: Context
 
     fun build(): Notification {
         val bChannelId = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                createNotificationChannel(
-                    context,
-                    channelId ?: "topmortar_notifications",
-                    channelName ?: "Topmortar Notifications",
-                    channelDesc ?: "Notifikasi untuk kategori umum",
-                    channelImportance
-                )
-            } else {
-                ""
-            }
+            createNotificationChannel(
+                context,
+                channelId ?: "topmortar_notifications",
+                channelName ?: "Topmortar Notifications",
+                channelDesc ?: "Notifikasi untuk kategori umum",
+                channelImportance
+            )
+        } else {
+            ""
+        }
 
         val notificationBuilder = NotificationCompat.Builder(context, bChannelId)
 
@@ -183,7 +183,13 @@ class CustomNotificationBuilder private constructor(private val context: Context
         return notificationBuilder.build()
     }
 
-    private fun createNotificationChannel(context: Context, channelId: String, channelName: String, channelDesc: String, channelImportance: Int): String {
+    private fun createNotificationChannel(
+        context: Context,
+        channelId: String,
+        channelName: String,
+        channelDesc: String,
+        channelImportance: Int
+    ): String {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
             val audioAttributes = AudioAttributes.Builder()
@@ -209,7 +215,8 @@ class CustomNotificationBuilder private constructor(private val context: Context
                 channel.setSound(null, null)
             }
 
-            val service = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val service =
+                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             service.createNotificationChannel(channel)
             channelId
 

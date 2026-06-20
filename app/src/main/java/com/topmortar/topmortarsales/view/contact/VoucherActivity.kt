@@ -90,7 +90,7 @@ class VoucherActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
         setContentView(binding.root)
 
-        apiService = HttpClient.create()
+        apiService = HttpClient.apiService
 
         idContact = intent.getStringExtra(CONST_CONTACT_ID).toString()
         contactName = intent.getStringExtra(CONST_NAME).toString()
@@ -103,7 +103,8 @@ class VoucherActivity : AppCompatActivity() {
         binding.titleBarDark.icBack.setOnClickListener { finish() }
         binding.titleBarDark.tvTitleBar.text = "Daftar Voucher"
         binding.titleBarDark.tvTitleBarDescription.text = "Toko $contactName"
-        binding.titleBarDark.tvTitleBarDescription.visibility = if (contactName.isNotEmpty()) View.VISIBLE else View.GONE
+        binding.titleBarDark.tvTitleBarDescription.visibility =
+            if (contactName.isNotEmpty()) View.VISIBLE else View.GONE
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -132,14 +133,20 @@ class VoucherActivity : AppCompatActivity() {
                         loadingState(false)
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(true, "Belum ada voucher!")
 
                     }
+
                     else -> {
 
-                        handleMessage(this@VoucherActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@VoucherActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         loadingState(true, getString(R.string.failed_request))
 
                     }
@@ -150,8 +157,15 @@ class VoucherActivity : AppCompatActivity() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@VoucherActivity, "Failed VoucherActivity on getList(). Catch: ${e.message}")
-                handleMessage(this@VoucherActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@VoucherActivity,
+                    "Failed VoucherActivity on getList(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@VoucherActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
 
             }
@@ -161,28 +175,31 @@ class VoucherActivity : AppCompatActivity() {
     }
 
     private fun setRecyclerView(listItem: ArrayList<VoucherModel>) {
-        val rvAdapter = VoucherRecyclerViewAdapter(listItem, object: VoucherRecyclerViewAdapter.ItemClickListener {
-            override fun onItemClick(data: VoucherModel?) {
-                // Do Something
+        val rvAdapter = VoucherRecyclerViewAdapter(
+            listItem,
+            object : VoucherRecyclerViewAdapter.ItemClickListener {
+                override fun onItemClick(data: VoucherModel?) {
+                    // Do Something
 
-                if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
-                    voucherModal = null
-                    voucherModal = AddVoucherModal(this@VoucherActivity, lifecycleScope)
-                    voucherModal!!.setEditCase(true, data)
-                    voucherModal!!.setVoucherId(data!!.id_voucher)
-                    voucherModal!!.setContactCoordinate(shortDistance)
-                    voucherModal!!.initializeInterface(object: AddVoucherModal.AddVoucherModalInterface {
-                        override fun onSubmit(status: Boolean) {
-                            // Do Something
-                            if (status) getList()
-                        }
+                    if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
+                        voucherModal = null
+                        voucherModal = AddVoucherModal(this@VoucherActivity, lifecycleScope)
+                        voucherModal!!.setEditCase(true, data)
+                        voucherModal!!.setVoucherId(data!!.id_voucher)
+                        voucherModal!!.setContactCoordinate(shortDistance)
+                        voucherModal!!.initializeInterface(object :
+                            AddVoucherModal.AddVoucherModalInterface {
+                            override fun onSubmit(status: Boolean) {
+                                // Do Something
+                                if (status) getList()
+                            }
 
-                    })
-                    voucherModal!!.show()
-                } else setupShowModal(data!!)
-            }
+                        })
+                        voucherModal!!.show()
+                    } else setupShowModal(data!!)
+                }
 
-        })
+            })
 
         binding.rvList.apply {
             layoutManager = LinearLayoutManager(this@VoucherActivity)
@@ -240,7 +257,11 @@ class VoucherActivity : AppCompatActivity() {
             val mapsUrl = contactMapsUrl
             val urlUtility = URLUtility(this)
 
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
 
                 if (urlUtility.isLocationEnabled(this)) {
 
@@ -248,7 +269,8 @@ class VoucherActivity : AppCompatActivity() {
 
                     if (!urlUtility.isUrl(mapsUrl) && mapsUrl.isNotEmpty()) {
 
-                        val status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
+                        val status =
+                            GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
                         if (status != ConnectionResult.SUCCESS) {
                             showDialogGooglePlayNotAvailable()
                             return@postDelayed
@@ -268,7 +290,12 @@ class VoucherActivity : AppCompatActivity() {
                             if (latitude != null && longitude != null) {
 
                                 // Calculate Distance
-                                val distance = urlUtility.calculateDistance(currentLatitude, currentLongitude, latitude, longitude)
+                                val distance = urlUtility.calculateDistance(
+                                    currentLatitude,
+                                    currentLongitude,
+                                    latitude,
+                                    longitude
+                                )
                                 shortDistance = "%.3f".format(distance)
 
                                 if (distance > MAX_REPORT_DISTANCE) {
@@ -284,7 +311,10 @@ class VoucherActivity : AppCompatActivity() {
                                             dialog.dismiss()
                                         }
                                         .setNegativeButton("Buka Maps") { dialog, _ ->
-                                            val intent = Intent(this@VoucherActivity, MapsActivity::class.java)
+                                            val intent = Intent(
+                                                this@VoucherActivity,
+                                                MapsActivity::class.java
+                                            )
                                             intent.putExtra(CONST_IS_BASE_CAMP, false)
                                             intent.putExtra(CONST_MAPS, mapsUrl)
                                             intent.putExtra(CONST_MAPS_NAME, contactName)
@@ -301,11 +331,13 @@ class VoucherActivity : AppCompatActivity() {
                                     isDistanceToLong = false
 
                                     voucherModal = null
-                                    voucherModal = AddVoucherModal(this@VoucherActivity, lifecycleScope)
+                                    voucherModal =
+                                        AddVoucherModal(this@VoucherActivity, lifecycleScope)
                                     voucherModal!!.setEditCase(true, data)
                                     voucherModal!!.setVoucherId(data.id_voucher)
                                     voucherModal!!.setContactCoordinate(shortDistance)
-                                    voucherModal!!.initializeInterface(object: AddVoucherModal.AddVoucherModalInterface {
+                                    voucherModal!!.initializeInterface(object :
+                                        AddVoucherModal.AddVoucherModalInterface {
                                         override fun onSubmit(status: Boolean) {
                                             // Do Something
                                             if (status) getList()
@@ -317,23 +349,31 @@ class VoucherActivity : AppCompatActivity() {
 
                             } else {
                                 progressBar.dismiss()
-                                Toast.makeText(this, "Gagal memproses koordinat", TOAST_SHORT).show()
+                                Toast.makeText(this, "Gagal memproses koordinat", TOAST_SHORT)
+                                    .show()
                             }
 
                         }.addOnFailureListener {
                             progressBar.dismiss()
-                            handleMessage(this, "LOG REPORT", "Gagal mendapatkan lokasi anda. Err: " + it.message)
+                            handleMessage(
+                                this,
+                                "LOG REPORT",
+                                "Gagal mendapatkan lokasi anda. Err: " + it.message
+                            )
 //                            Toast.makeText(this, "Gagal mendapatkan lokasi anda", TOAST_SHORT).show()
                         }
 
                     } else {
                         progressBar.dismiss()
-                        val message = "Anda tidak dapat membuat laporan untuk saat ini, silakan hubungi admin untuk memperbarui koordinat toko ini"
+                        val message =
+                            "Anda tidak dapat membuat laporan untuk saat ini, silakan hubungi admin untuk memperbarui koordinat toko ini"
                         val actionTitle = "Hubungi Sekarang"
                         val customUtility = CustomUtility(this@VoucherActivity)
                         customUtility.showPermissionDeniedSnackbar(message, actionTitle) {
-                            val messageText = "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada toko *${ contactName }*"
-                            val distributorNumber = SessionManager(this).userDistributorNumber().toString()
+                            val messageText =
+                                "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada toko *${contactName}*"
+                            val distributorNumber =
+                                SessionManager(this).userDistributorNumber().toString()
                             customUtility.navigateChatAdmin(messageText, distributorNumber)
                         }
                     }
@@ -346,7 +386,11 @@ class VoucherActivity : AppCompatActivity() {
 
             } else {
                 progressBar.dismiss()
-                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    LOCATION_PERMISSION_REQUEST_CODE
+                )
             }
 
         }, 500)
@@ -372,7 +416,10 @@ class VoucherActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on showDialogGooglePlayNotAvailable(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed HomeSalesActivity on showDialogGooglePlayNotAvailable(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Courier Failed",
@@ -385,7 +432,11 @@ class VoucherActivity : AppCompatActivity() {
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
             if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
-                CustomUtility(this).setUserStatusOnline(true, userDistributors ?: "-custom-005", userId)
+                CustomUtility(this).setUserStatusOnline(
+                    true,
+                    userDistributors ?: "-custom-005",
+                    userId
+                )
             }
         }, 1000)
     }
@@ -393,7 +444,11 @@ class VoucherActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
-            CustomUtility(this).setUserStatusOnline(false, userDistributors ?: "-custom-005", userId)
+            CustomUtility(this).setUserStatusOnline(
+                false,
+                userDistributors ?: "-custom-005",
+                userId
+            )
         }
     }
 
@@ -403,7 +458,11 @@ class VoucherActivity : AppCompatActivity() {
             progressBar.dismiss()
         }
         if (userKind == USER_KIND_COURIER || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) {
-            CustomUtility(this).setUserStatusOnline(false, userDistributors ?: "-custom-005", userId)
+            CustomUtility(this).setUserStatusOnline(
+                false,
+                userDistributors ?: "-custom-005",
+                userId
+            )
         }
     }
 }

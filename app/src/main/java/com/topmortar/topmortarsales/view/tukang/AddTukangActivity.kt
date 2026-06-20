@@ -94,16 +94,17 @@ class AddTukangActivity : AppCompatActivity() {
 
     private var iLocation: String? = null
 
-    private val coordinateResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            val latitude = it.data?.getDoubleExtra("latitude", 0.0)
-            val longitude = it.data?.getDoubleExtra("longitude", 0.0)
-            val latLng = "$latitude,$longitude"
-            if (latitude != null && longitude != null) etMapsUrl.setText(latLng)
-            etMapsUrl.error = null
-            etMapsUrl.clearFocus()
+    private val coordinateResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                val latitude = it.data?.getDoubleExtra("latitude", 0.0)
+                val longitude = it.data?.getDoubleExtra("longitude", 0.0)
+                val latLng = "$latitude,$longitude"
+                if (latitude != null && longitude != null) etMapsUrl.setText(latLng)
+                etMapsUrl.error = null
+                etMapsUrl.clearFocus()
+            }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -113,7 +114,7 @@ class AddTukangActivity : AppCompatActivity() {
         applyMyEdgeToEdge(isPrimary = false)
 
         binding = ActivityAddTukangBinding.inflate(layoutInflater)
-        apiService = HttpClient.create()
+        apiService = HttpClient.apiService
         progressBar = CustomProgressBar(this)
         progressBar.setMessage(getString(R.string.txt_loading))
         progressBar.setCancelable(false)
@@ -137,24 +138,27 @@ class AddTukangActivity : AppCompatActivity() {
 
     private fun sendMessage() {
 
-        val phone = "${ etPhone.text }"
-        val name = "${ etName.text }"
-        var birthday = "${ etBirthday.text }"
+        val phone = "${etPhone.text}"
+        val name = "${etName.text}"
+        var birthday = "${etBirthday.text}"
         val cityID = if (userKind == USER_KIND_ADMIN) {
             selectedCity?.id ?: "0"
         } else {
             sessionManager.userCityID().let { if (!it.isNullOrEmpty()) it else "0" }
         }
-        val skillID = if (selectedSkill != null) "${ selectedSkill!!.id }" else "0"
-        val mapsUrl = "${ etMapsUrl.text }"
-        val message = "${ etMessage.text }"
+        val skillID = if (selectedSkill != null) "${selectedSkill!!.id}" else "0"
+        val mapsUrl = "${etMapsUrl.text}"
+        val message = "${etMessage.text}"
         val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
-        val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
+        val currentName = sessionManager.fullName().let { fullName ->
+            if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName()
+                .let { username -> if (!username.isNullOrEmpty()) username else "" }
+        }
 
         if (!formValidation(phone = phone, name = name, skill = skillID, mapsUrl = mapsUrl)) return
 
         birthday = if (birthday.isEmpty()) "0000-00-00"
-        else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
+        else DateFormat.format("${etBirthday.text}", "dd MMMM yyyy", "yyyy-MM-dd")
 
         loadingState(true)
 
@@ -178,7 +182,7 @@ class AddTukangActivity : AppCompatActivity() {
                 val rbUserId = createPartFromString(userId)
                 val rbCurrentName = createPartFromString(currentName)
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = message.let {
                     if (it.isEmpty()) {
                         apiService.insertTukang(
@@ -189,7 +193,8 @@ class AddTukangActivity : AppCompatActivity() {
                             skillId = rbSkill,
                             mapsUrl = rbMapsUrl,
                             userId = rbUserId,
-                            currentName = rbCurrentName)
+                            currentName = rbCurrentName
+                        )
                     } else {
                         apiService.sendMessageTukang(
                             name = rbName,
@@ -200,7 +205,8 @@ class AddTukangActivity : AppCompatActivity() {
                             mapsUrl = rbMapsUrl,
                             currentName = rbCurrentName,
                             userId = rbUserId,
-                            message = rbMessage)
+                            message = rbMessage
+                        )
                     }
                 }
 
@@ -211,7 +217,10 @@ class AddTukangActivity : AppCompatActivity() {
                     when (responseBody.status) {
                         RESPONSE_STATUS_OK -> {
 
-                            handleMessage(this@AddTukangActivity, TAG_RESPONSE_MESSAGE, message.let { if (it.isNotEmpty()) "Berhasil menyimpan & mengirim pesan!" else "Berhasil menyimpan kontak!" })
+                            handleMessage(
+                                this@AddTukangActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                message.let { if (it.isNotEmpty()) "Berhasil menyimpan & mengirim pesan!" else "Berhasil menyimpan kontak!" })
                             loadingState(false)
 
                             val resultIntent = Intent()
@@ -220,15 +229,25 @@ class AddTukangActivity : AppCompatActivity() {
                             finish()
 
                         }
+
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(this@AddTukangActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim pesan: ${ responseBody.message }")
+                            handleMessage(
+                                this@AddTukangActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "Gagal mengirim pesan: ${responseBody.message}"
+                            )
                             loadingState(false)
 
                         }
+
                         else -> {
 
-                            handleMessage(this@AddTukangActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim pesan!")
+                            handleMessage(
+                                this@AddTukangActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "Gagal mengirim pesan!"
+                            )
                             loadingState(false)
 
                         }
@@ -236,15 +255,26 @@ class AddTukangActivity : AppCompatActivity() {
 
                 } else {
 
-                    handleMessage(this@AddTukangActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim pesan! Error: " + response.message())
+                    handleMessage(
+                        this@AddTukangActivity,
+                        TAG_RESPONSE_MESSAGE,
+                        "Gagal mengirim pesan! Error: " + response.message()
+                    )
                     loadingState(false)
 
                 }
 
             } catch (e: Exception) {
 
-                FirebaseUtils.logErr(this@AddTukangActivity, "Failed AddTukangActivity on sendMessage(). Catch: ${e.message}")
-                handleMessage(this@AddTukangActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@AddTukangActivity,
+                    "Failed AddTukangActivity on sendMessage(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@AddTukangActivity,
+                    TAG_RESPONSE_MESSAGE,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(false)
 
             }
@@ -276,7 +306,11 @@ class AddTukangActivity : AppCompatActivity() {
 
     private fun checkLocationPermission() {
         val urlUtility = URLUtility(this)
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             if (urlUtility.isLocationEnabled(this)) {
 
                 urlUtility.requestLocationUpdate()
@@ -285,13 +319,21 @@ class AddTukangActivity : AppCompatActivity() {
                 val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                 startActivity(enableLocationIntent)
             }
-        } else ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+        } else ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+            LOCATION_PERMISSION_REQUEST_CODE
+        )
     }
 
     private fun getCoordinate() {
-        val data = "${ etMapsUrl.text }"
+        val data = "${etMapsUrl.text}"
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             val intent = Intent(this, MapsActivity::class.java)
             intent.putExtra(CONST_MAPS, data)
             intent.putExtra(GET_COORDINATE, true)
@@ -335,7 +377,7 @@ class AddTukangActivity : AppCompatActivity() {
         etBirthday.setOnClickListener { datePicker.show() }
         etMapsUrl.setOnClickListener { getCoordinate() }
         etSkill.setOnClickListener { showSearchModal() }
-        binding.etLocation.setOnClickListener{ showSearchModalCities() }
+        binding.etLocation.setOnClickListener { showSearchModalCities() }
 
         // Focus Listener
         etName.setOnFocusChangeListener { _, hasFocus ->
@@ -384,14 +426,20 @@ class AddTukangActivity : AppCompatActivity() {
         } else {
 
             btnSubmit.isEnabled = true
-            btnSubmit.text = if (etMessage.text.isNullOrEmpty()) "Simpan Kontak" else "Simpan & Kirim Pesan"
+            btnSubmit.text =
+                if (etMessage.text.isNullOrEmpty()) "Simpan Kontak" else "Simpan & Kirim Pesan"
             btnSubmit.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
 
         }
 
     }
 
-    private fun formValidation(phone: String, name: String, skill: String = "", mapsUrl: String = ""): Boolean {
+    private fun formValidation(
+        phone: String,
+        name: String,
+        skill: String = "",
+        mapsUrl: String = ""
+    ): Boolean {
         return if (phone.isEmpty()) {
             etPhone.error = "Nomor telpon wajib diisi!"
             etPhone.requestFocus()
@@ -541,21 +589,32 @@ class AddTukangActivity : AppCompatActivity() {
 
                         for (i in 0 until results.size) {
                             val data = results[i]
-                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                            items.add(
+                                ModalSearchModel(
+                                    data.id_city,
+                                    "${data.nama_city} - ${data.kode_city}"
+                                )
+                            )
                         }
 
                         setupDialogSearchCities(items)
                         getSkills()
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         handleMessage(this@AddTukangActivity, "LIST CITY", "Daftar kota kosong!")
                         getSkills()
 
                     }
+
                     else -> {
 
-                        handleMessage(this@AddTukangActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@AddTukangActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         getSkills()
 
                     }
@@ -564,8 +623,15 @@ class AddTukangActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                FirebaseUtils.logErr(this@AddTukangActivity, "Failed AddTukangActivity on getCities(). Catch: ${e.message}")
-                handleMessage(this@AddTukangActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@AddTukangActivity,
+                    "Failed AddTukangActivity on getCities(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@AddTukangActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 getSkills()
 
             }
@@ -590,14 +656,22 @@ class AddTukangActivity : AppCompatActivity() {
 
                         for (i in 0 until skillResults.size) {
                             val data = skillResults[i]
-                            items.add(ModalSearchModel(data.id_skill, "${data.nama_skill} - ${data.kode_skill}"))
+                            items.add(
+                                ModalSearchModel(
+                                    data.id_skill,
+                                    "${data.nama_skill} - ${data.kode_skill}"
+                                )
+                            )
                         }
 
                         setupDialogSearch(items)
 
                         val foundItem = skillResults.find { it.id_skill == iLocation }
                         if (foundItem != null) {
-                            selectedSkill = ModalSearchModel(foundItem.id_skill, "${foundItem.nama_skill} - ${foundItem.kode_skill}")
+                            selectedSkill = ModalSearchModel(
+                                foundItem.id_skill,
+                                "${foundItem.nama_skill} - ${foundItem.kode_skill}"
+                            )
                             etSkill.setText("${foundItem.nama_skill} - ${foundItem.kode_skill}")
                         } else {
                             selectedSkill = null
@@ -609,16 +683,26 @@ class AddTukangActivity : AppCompatActivity() {
                         isLoaded = true
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
-                        handleMessage(this@AddTukangActivity, "LIST CITY", "Daftar keahlian kosong!")
+                        handleMessage(
+                            this@AddTukangActivity,
+                            "LIST CITY",
+                            "Daftar keahlian kosong!"
+                        )
                         etSkill.isEnabled = true
                         progressBar.dismiss()
 
                     }
+
                     else -> {
 
-                        handleMessage(this@AddTukangActivity, TAG_RESPONSE_CONTACT, "Gagal memuat data")
+                        handleMessage(
+                            this@AddTukangActivity,
+                            TAG_RESPONSE_CONTACT,
+                            "Gagal memuat data"
+                        )
                         etSkill.isEnabled = true
                         progressBar.dismiss()
 
@@ -628,8 +712,15 @@ class AddTukangActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                FirebaseUtils.logErr(this@AddTukangActivity, "Failed AddTukangActivity on getSkill(). Catch: ${e.message}")
-                handleMessage(this@AddTukangActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@AddTukangActivity,
+                    "Failed AddTukangActivity on getSkill(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@AddTukangActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 etSkill.isEnabled = true
                 progressBar.dismiss()
 
@@ -638,7 +729,11 @@ class AddTukangActivity : AppCompatActivity() {
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
@@ -646,8 +741,15 @@ class AddTukangActivity : AppCompatActivity() {
             else {
                 val customUtility = CustomUtility(this)
                 if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    val message = "Izin lokasi diperlukan untuk fitur ini. Izinkan aplikasi mengakses lokasi perangkat."
-                    customUtility.showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE) }
+                    val message =
+                        "Izin lokasi diperlukan untuk fitur ini. Izinkan aplikasi mengakses lokasi perangkat."
+                    customUtility.showPermissionDeniedSnackbar(message) {
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                            LOCATION_PERMISSION_REQUEST_CODE
+                        )
+                    }
                 } else customUtility.showPermissionDeniedDialog("Izin lokasi diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
             }
         }

@@ -90,9 +90,14 @@ class UserProfileActivity : AppCompatActivity() {
     private lateinit var customUtility: CustomUtility
     private lateinit var modalPricingDetails: ChartSalesPricingModal
 
-    private var iUserName: String? = null; private var iFullName: String? = null; private var iUserLevel: String? = null
-    private var iUserID: String? = null; private var iPhone: String? = null; private var iLocation: String? = null
-    private var iIsNotify: String? = null; private var iUserCity: String? = null
+    private var iUserName: String? = null
+    private var iFullName: String? = null
+    private var iUserLevel: String? = null
+    private var iUserID: String? = null
+    private var iPhone: String? = null
+    private var iLocation: String? = null
+    private var iIsNotify: String? = null
+    private var iUserCity: String? = null
 
     private var isRequestSync = false
 
@@ -142,7 +147,8 @@ class UserProfileActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-018")
+        firebaseReference =
+            FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-018")
 
         iUserID = intent.getStringExtra(CONST_USER_ID)
         iPhone = intent.getStringExtra(CONST_PHONE)
@@ -181,7 +187,7 @@ class UserProfileActivity : AppCompatActivity() {
 //        initClickHandler()
         dataActivityValidation()
 
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 myOnBackPressed()
             }
@@ -198,7 +204,7 @@ class UserProfileActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val userId = when (isRequestSync) {
                     true -> iUserID.toString()
                     else -> sessionManager.userID().toString()
@@ -222,12 +228,27 @@ class UserProfileActivity : AppCompatActivity() {
                         initClickHandler()
                         dataActivityValidation()
 
-                    } RESPONSE_STATUS_EMPTY -> handleMessage(this@UserProfileActivity, "GET USER DETAIL", "Gagal memuat detail pengguna: ${response.message}")
-                    else -> handleMessage(this@UserProfileActivity, "GET USER DETAIL", "Gagal memuat data. Error: ${response.message}")
+                    }
+
+                    RESPONSE_STATUS_EMPTY -> handleMessage(
+                        this@UserProfileActivity,
+                        "GET USER DETAIL",
+                        "Gagal memuat detail pengguna: ${response.message}"
+                    )
+
+                    else -> handleMessage(
+                        this@UserProfileActivity,
+                        "GET USER DETAIL",
+                        "Gagal memuat data. Error: ${response.message}"
+                    )
                 }
 
             } catch (e: Exception) {
-                handleMessage(this@UserProfileActivity, "GET USER DETAIL", "Failed run service. Error: ${e.message}")
+                handleMessage(
+                    this@UserProfileActivity,
+                    "GET USER DETAIL",
+                    "Failed run service. Error: ${e.message}"
+                )
             }
 
         }
@@ -338,7 +359,11 @@ class UserProfileActivity : AppCompatActivity() {
 //        }
 
         if (sessionManager.userKind() == USER_KIND_COURIER || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN || sessionManager.userKind() == USER_KIND_MARKETING) {
-            CustomUtility(this).setUserStatusOnline(true, sessionManager.userDistributor() ?: "-custom-019", sessionManager.userID() ?: "")
+            CustomUtility(this).setUserStatusOnline(
+                true,
+                sessionManager.userDistributor() ?: "-custom-019",
+                sessionManager.userID() ?: ""
+            )
             checkAbsent()
         }
         if (iUserLevel == AUTH_LEVEL_COURIER || (iUserLevel == AUTH_LEVEL_SALES || userKind == USER_KIND_SALES) || (iUserLevel == AUTH_LEVEL_PENAGIHAN || userKind == USER_KIND_PENAGIHAN) || (iUserLevel == AUTH_LEVEL_MARKETING || userKind == USER_KIND_MARKETING)) {
@@ -426,7 +451,12 @@ class UserProfileActivity : AppCompatActivity() {
         if (barChart.isVisible) {
             barChart.visibility = View.GONE
             title.text = "Statistik Toko di Kota Malang (tampilkan)"
-            icon.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.chevron_down_solid))
+            icon.setImageDrawable(
+                AppCompatResources.getDrawable(
+                    this,
+                    R.drawable.chevron_down_solid
+                )
+            )
         } else {
             barChart.visibility = View.VISIBLE
             title.text = "Statistik Toko di Kota Malang (sembunyikan)"
@@ -460,11 +490,19 @@ class UserProfileActivity : AppCompatActivity() {
                         if (isAllowed == true) {
                             binding.btnAllowLogout.visibility = View.GONE
                             binding.allowedLogoutInfoText.visibility = View.VISIBLE
-                            binding.textCancelAllowLogout.setOnClickListener { allowedLogoutConfirmation(false) }
+                            binding.textCancelAllowLogout.setOnClickListener {
+                                allowedLogoutConfirmation(
+                                    false
+                                )
+                            }
                         } else {
                             binding.btnAllowLogout.visibility = View.VISIBLE
                             binding.allowedLogoutInfoText.visibility = View.GONE
-                            binding.btnAllowLogout.setOnClickListener { allowedLogoutConfirmation(true) }
+                            binding.btnAllowLogout.setOnClickListener {
+                                allowedLogoutConfirmation(
+                                    true
+                                )
+                            }
                         }
                     } else {
                         binding.btnAllowLogout.visibility = View.VISIBLE
@@ -511,7 +549,8 @@ class UserProfileActivity : AppCompatActivity() {
     }
 
     private fun allowedLogoutConfirmation(state: Boolean) {
-        val message = "Apakah anda yakin akan " + (if (state) "mengizinkan" else "membatalkan izin") + " pengguna ini?"
+        val message =
+            "Apakah anda yakin akan " + (if (state) "mengizinkan" else "membatalkan izin") + " pengguna ini?"
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Konfirmasi Perizinan")
             .setMessage(message)
@@ -566,11 +605,16 @@ class UserProfileActivity : AppCompatActivity() {
 
             // Reset value allowed logout
             val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
-            absentChild.child(sessionManager.userID() ?: "0").child(FIREBASE_CHILD_IS_ALLOWED_LOGOUT).setValue(false)
+            absentChild.child(sessionManager.userID() ?: "0")
+                .child(FIREBASE_CHILD_IS_ALLOWED_LOGOUT).setValue(false)
 
             if (CustomUtility(this).isUserWithOnlineStatus()) {
 
-                CustomUtility(this).setUserStatusOnline(false, sessionManager.userDistributor() ?: "-custom-019", sessionManager.userID().toString())
+                CustomUtility(this).setUserStatusOnline(
+                    false,
+                    sessionManager.userDistributor() ?: "-custom-019",
+                    sessionManager.userID().toString()
+                )
             }
 //            Disabled FCM
 //            deleteFcmToken()
@@ -616,16 +660,22 @@ class UserProfileActivity : AppCompatActivity() {
                     // Successfully subscribed to the fcmTopic
                 } else {
                     // Handle failure
-                    Toast.makeText(applicationContext, "Unsubscribe notification failed. Error: ${task.exception?.stackTrace}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        applicationContext,
+                        "Unsubscribe notification failed. Error: ${task.exception?.stackTrace}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
     }
 
-    private fun  setupCourierMenu() {
+    private fun setupCourierMenu() {
         binding.absentDescription.text = getString(R.string.txt_loading)
 
-        val personCall = if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_COURIER || userKind == USER_KIND_MARKETING) "Anda" else "Pengguna"
-        val personcall = if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_COURIER || userKind == USER_KIND_MARKETING) "anda" else "pengguna"
+        val personCall =
+            if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_COURIER || userKind == USER_KIND_MARKETING) "Anda" else "Pengguna"
+        val personcall =
+            if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_COURIER || userKind == USER_KIND_MARKETING) "anda" else "pengguna"
 
         childAbsent = firebaseReference.child(FIREBASE_CHILD_ABSENT)
         childCourier = childAbsent?.child(iUserID ?: userId ?: "0")
@@ -648,33 +698,52 @@ class UserProfileActivity : AppCompatActivity() {
                             binding.userStatus.setBackgroundResource(R.drawable.bg_green_reseda_round_8)
                             binding.userStatus.setPadding(padding8, padding2, padding8, padding2)
                         } else {
-                            childCourier!!.child("lastSeen").addListenerForSingleValueEvent(object : ValueEventListener {
-                                override fun onDataChange(lastSeenSnaphot: DataSnapshot) {
-                                    if (lastSeenSnaphot.exists()) {
-                                        val lastSeen = lastSeenSnaphot.getValue(String::class.java).toString()
-                                        val dateDescEvening = DateFormat.differenceDateNowDesc(lastSeen)
-                                        val dateEvening =
-                                            DateFormat.format(lastSeen, "yyyy-MM-dd HH:mm:ss", "HH.mm")
-                                        binding.userStatus.text = "Terakhir terlihat $dateEvening $dateDescEvening"
-                                        binding.userStatus.setTextColor(getColor(R.color.black_200))
-                                        binding.userStatus.setBackgroundResource(android.R.color.transparent)
-                                        binding.userStatus.setPadding(0, padding2, 0, padding2)
-                                    } else {
+                            childCourier!!.child("lastSeen")
+                                .addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(lastSeenSnaphot: DataSnapshot) {
+                                        if (lastSeenSnaphot.exists()) {
+                                            val lastSeen =
+                                                lastSeenSnaphot.getValue(String::class.java)
+                                                    .toString()
+                                            val dateDescEvening =
+                                                DateFormat.differenceDateNowDesc(lastSeen)
+                                            val dateEvening =
+                                                DateFormat.format(
+                                                    lastSeen,
+                                                    "yyyy-MM-dd HH:mm:ss",
+                                                    "HH.mm"
+                                                )
+                                            binding.userStatus.text =
+                                                "Terakhir terlihat $dateEvening $dateDescEvening"
+                                            binding.userStatus.setTextColor(getColor(R.color.black_200))
+                                            binding.userStatus.setBackgroundResource(android.R.color.transparent)
+                                            binding.userStatus.setPadding(0, padding2, 0, padding2)
+                                        } else {
+                                            binding.userStatus.text = "Offline"
+                                            binding.userStatus.setTextColor(getColor(R.color.black_200))
+                                            binding.userStatus.setBackgroundResource(R.drawable.bg_light_dark_round)
+                                            binding.userStatus.setPadding(
+                                                padding8,
+                                                padding2,
+                                                padding8,
+                                                padding2
+                                            )
+                                        }
+                                    }
+
+                                    override fun onCancelled(error: DatabaseError) {
                                         binding.userStatus.text = "Offline"
                                         binding.userStatus.setTextColor(getColor(R.color.black_200))
                                         binding.userStatus.setBackgroundResource(R.drawable.bg_light_dark_round)
-                                        binding.userStatus.setPadding(padding8, padding2, padding8, padding2)
+                                        binding.userStatus.setPadding(
+                                            padding8,
+                                            padding2,
+                                            padding8,
+                                            padding2
+                                        )
                                     }
-                                }
 
-                                override fun onCancelled(error: DatabaseError) {
-                                    binding.userStatus.text = "Offline"
-                                    binding.userStatus.setTextColor(getColor(R.color.black_200))
-                                    binding.userStatus.setBackgroundResource(R.drawable.bg_light_dark_round)
-                                    binding.userStatus.setPadding(padding8, padding2, padding8, padding2)
-                                }
-
-                            })
+                                })
                         }
                     }
                 }
@@ -692,39 +761,63 @@ class UserProfileActivity : AppCompatActivity() {
                 if (snapshot.exists()) {
                     // Do something
                     if (snapshot.child("morningDateTime").exists()) {
-                        val morningDateTime = snapshot.child("morningDateTime").getValue(String::class.java).toString()
+                        val morningDateTime =
+                            snapshot.child("morningDateTime").getValue(String::class.java)
+                                .toString()
                         if (morningDateTime.isNotEmpty()) {
                             sessionManager.absentDateTime(morningDateTime)
 
-                            val absentMorningDate = DateFormat.format(morningDateTime, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd")
+                            val absentMorningDate = DateFormat.format(
+                                morningDateTime,
+                                "yyyy-MM-dd HH:mm:ss",
+                                "yyyy-MM-dd"
+                            )
 
                             if (DateFormat.dateAfterNow(absentMorningDate)) {
                                 // Absent morning false
                                 binding.absentTitle.text = "$personCall Belum Absen"
-                                binding.absentDescription.text = "Absen $personcall hari ini belum tercatat"
+                                binding.absentDescription.text =
+                                    "Absen $personcall hari ini belum tercatat"
                             } else {
 
                                 // Absent morning true
-                                val dateDescMorning = DateFormat.differenceDateNowDesc(morningDateTime)
-                                val dateMorning = DateFormat.format(morningDateTime, "yyyy-MM-dd HH:mm:ss", "HH.mm")
+                                val dateDescMorning =
+                                    DateFormat.differenceDateNowDesc(morningDateTime)
+                                val dateMorning = DateFormat.format(
+                                    morningDateTime,
+                                    "yyyy-MM-dd HH:mm:ss",
+                                    "HH.mm"
+                                )
                                 binding.absentTitle.text = "$personCall Telah Absen"
-                                binding.absentDescription.text = "Absen $personcall telah tercatat pada pukul $dateMorning $dateDescMorning"
+                                binding.absentDescription.text =
+                                    "Absen $personcall telah tercatat pada pukul $dateMorning $dateDescMorning"
 
                                 if (snapshot.child("eveningDateTime").exists()) {
-                                    val eveningDateTime = snapshot.child("eveningDateTime").getValue(String::class.java).toString()
+                                    val eveningDateTime = snapshot.child("eveningDateTime")
+                                        .getValue(String::class.java).toString()
 
                                     if (eveningDateTime.isNotEmpty()) {
-                                        val absentEveningDate = DateFormat.format(eveningDateTime, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd")
+                                        val absentEveningDate = DateFormat.format(
+                                            eveningDateTime,
+                                            "yyyy-MM-dd HH:mm:ss",
+                                            "yyyy-MM-dd"
+                                        )
 
                                         if (DateFormat.dateAfterNow(absentEveningDate)) {
                                             // Absent evening false
                                             if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) checkUserAllowLogout()
                                         } else {
                                             // Absent evening true
-                                            val dateDescEvening = DateFormat.differenceDateNowDesc(eveningDateTime)
-                                            val dateEvening = DateFormat.format(eveningDateTime, "yyyy-MM-dd HH:mm:ss", "HH.mm")
+                                            val dateDescEvening =
+                                                DateFormat.differenceDateNowDesc(eveningDateTime)
+                                            val dateEvening = DateFormat.format(
+                                                eveningDateTime,
+                                                "yyyy-MM-dd HH:mm:ss",
+                                                "HH.mm"
+                                            )
                                             binding.absentTitle.text = "$personCall Telah Pulang"
-                                            binding.absentDescription.text = "Absen $personcall telah tercatat pada pukul $dateMorning $dateDescMorning dan pulang pada pukul $dateEvening $dateDescEvening"
+                                            binding.absentDescription.text =
+                                                "Absen $personcall telah tercatat pada pukul $dateMorning $dateDescMorning dan pulang pada pukul $dateEvening $dateDescEvening"
                                         }
                                     } else {
                                         // Absent evening false
@@ -740,7 +833,8 @@ class UserProfileActivity : AppCompatActivity() {
                         } else {
                             // Absent morning false
                             binding.absentTitle.text = "$personCall Belum Absen"
-                            binding.absentDescription.text = "Absen $personcall hari ini belum tercatat"
+                            binding.absentDescription.text =
+                                "Absen $personcall hari ini belum tercatat"
                         }
                     } else {
                         // Absent morning false
@@ -770,7 +864,8 @@ class UserProfileActivity : AppCompatActivity() {
 
     private fun lockBtnLogout() {
         val calendar = Calendar.getInstance()
-        val currentHour = calendar.get(Calendar.HOUR_OF_DAY) // Mengambil jam saat ini dalam format 24 jam
+        val currentHour =
+            calendar.get(Calendar.HOUR_OF_DAY) // Mengambil jam saat ini dalam format 24 jam
 
         if (isAbsentMorningNow && !isAbsentEveningNow && currentHour < 16) {
             checkUserAllowLogout()
@@ -786,16 +881,22 @@ class UserProfileActivity : AppCompatActivity() {
         val absentChild = firebaseReference.child(FIREBASE_CHILD_ABSENT)
         val userChild = absentChild.child(userId)
 
-        userChild.addListenerForSingleValueEvent(object: ValueEventListener {
+        userChild.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
                     // Do something
                     if (snapshot.child("morningDateTime").exists()) {
-                        val morningDateTime = snapshot.child("morningDateTime").getValue(String::class.java).toString()
+                        val morningDateTime =
+                            snapshot.child("morningDateTime").getValue(String::class.java)
+                                .toString()
                         if (morningDateTime.isNotEmpty()) {
                             sessionManager.absentDateTime(morningDateTime)
 
-                            val absentMorningDate = DateFormat.format(morningDateTime, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd")
+                            val absentMorningDate = DateFormat.format(
+                                morningDateTime,
+                                "yyyy-MM-dd HH:mm:ss",
+                                "yyyy-MM-dd"
+                            )
 
                             if (DateFormat.dateAfterNow(absentMorningDate)) {
                                 isAbsentMorningNow = false
@@ -804,10 +905,15 @@ class UserProfileActivity : AppCompatActivity() {
 
                                 isAbsentMorningNow = true
                                 if (snapshot.child("eveningDateTime").exists()) {
-                                    val eveningDateTime = snapshot.child("eveningDateTime").getValue(String::class.java).toString()
+                                    val eveningDateTime = snapshot.child("eveningDateTime")
+                                        .getValue(String::class.java).toString()
 
                                     if (eveningDateTime.isNotEmpty()) {
-                                        val absentEveningDate = DateFormat.format(eveningDateTime, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd")
+                                        val absentEveningDate = DateFormat.format(
+                                            eveningDateTime,
+                                            "yyyy-MM-dd HH:mm:ss",
+                                            "yyyy-MM-dd"
+                                        )
 
                                         if (DateFormat.dateAfterNow(absentEveningDate)) {
                                             isAbsentEveningNow = false
@@ -860,7 +966,7 @@ class UserProfileActivity : AppCompatActivity() {
 
                 toggleProgressiveVisitCounterLoading(true)
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getCounterVisit(iUserID ?: "-1")
 
                 if (!response.isSuccessful) {
@@ -880,10 +986,11 @@ class UserProfileActivity : AppCompatActivity() {
 
                 setDataProgressiveVisitCounter(body.results)
             } catch (e: Exception) {
+                val exceptionMessage = e.message ?: "Terjadi kesalahan"
 
                 handleMessage(
                     this@UserProfileActivity,
-                    message = e.message ?: "Terjadi kesalahan"
+                    message = "[Progressive Visits] $exceptionMessage"
                 )
 
             } finally {
@@ -926,7 +1033,7 @@ class UserProfileActivity : AppCompatActivity() {
     ): Float {
         if (target <= 0) return 0f
         val progress = (current.toFloat() / target.toFloat()) * 100f
-        return progress.coerceIn(0f, 100f)
+        return progress.coerceIn(0f, 1000f)
     }
 
     private fun toggleProgressiveVisitCounterLoading(isLoading: Boolean) {
@@ -989,8 +1096,12 @@ class UserProfileActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         if (userChildListener != null) childCourier?.removeEventListener(userChildListener!!)
-        if (courierTrackingListener != null) userOnlineChild?.removeEventListener(courierTrackingListener!!)
-        if (userAllowLogoutListener != null) userAllowedLogoutChild?.removeEventListener(userAllowLogoutListener!!)
+        if (courierTrackingListener != null) userOnlineChild?.removeEventListener(
+            courierTrackingListener!!
+        )
+        if (userAllowLogoutListener != null) userAllowedLogoutChild?.removeEventListener(
+            userAllowLogoutListener!!
+        )
         if (sessionManager.isLoggedIn()) {
             if (CustomUtility(this).isUserWithOnlineStatus()) {
                 CustomUtility(this).setUserStatusOnline(

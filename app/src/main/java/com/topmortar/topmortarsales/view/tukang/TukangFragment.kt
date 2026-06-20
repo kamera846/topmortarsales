@@ -82,24 +82,27 @@ class TukangFragment : Fragment() {
     private var selectedCity: ModalSearchModel? = null
     private var listItem: ArrayList<RencanaVisitModel> = arrayListOf()
 
-    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {
-        isGranted: Boolean ->
-        if (isGranted) {
-            showQrCodeScanner()
-        } else {
-            CustomUtility(requireActivity()).showPermissionDeniedDialog("Membutuhkan izin penggunaan kamera. Harap aktifkan di pengaturan aplikasi.")
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            if (isGranted) {
+                showQrCodeScanner()
+            } else {
+                CustomUtility(requireActivity()).showPermissionDeniedDialog("Membutuhkan izin penggunaan kamera. Harap aktifkan di pengaturan aplikasi.")
+            }
         }
-    }
 
     private var searchKey: String = ""
 
     private var listener: CounterItem? = null
+
     interface CounterItem {
         fun counterItem(count: Int)
     }
+
     fun setCounterItem(listener: CounterItem) {
         this.listener = listener
     }
+
     fun syncNow() {
         getList()
     }
@@ -121,7 +124,7 @@ class TukangFragment : Fragment() {
         binding.eFabOptionAdd.setOnClickListener { navigateAddTukang() }
         binding.eFabOptionScan.setOnClickListener { checkPermissionCamera(requireActivity()) }
 
-        apiService = HttpClient.create()
+        apiService = HttpClient.apiService
 
         if (userKind == USER_KIND_ADMIN) getCities()
         else getList()
@@ -149,7 +152,12 @@ class TukangFragment : Fragment() {
 
                         for (i in 0 until citiesResults!!.size) {
                             val data = citiesResults!![i]
-                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                            items.add(
+                                ModalSearchModel(
+                                    data.id_city,
+                                    "${data.nama_city} - ${data.kode_city}"
+                                )
+                            )
                         }
                         items.add(0, ModalSearchModel("-1", "Hapus Filter"))
 
@@ -157,14 +165,20 @@ class TukangFragment : Fragment() {
                         binding.llFilter.componentFilter.visibility = View.VISIBLE
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         handleMessage(requireActivity(), "LIST CITY", "Daftar kota kosong!")
 
                     }
+
                     else -> {
 
-                        handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            requireActivity(),
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
 
                     }
                 }
@@ -172,7 +186,11 @@ class TukangFragment : Fragment() {
 
             } catch (e: Exception) {
 
-                handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    requireActivity(),
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
 
             } finally {
                 getList()
@@ -184,7 +202,7 @@ class TukangFragment : Fragment() {
     private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
 
         searchModal = SearchModal(requireActivity(), items)
-        searchModal.setCustomDialogListener(object: SearchModal.SearchModalListener{
+        searchModal.setCustomDialogListener(object : SearchModal.SearchModalListener {
             override fun onDataReceived(data: ModalSearchModel) {
                 if (data.id == "-1") {
                     selectedCity = null
@@ -200,8 +218,10 @@ class TukangFragment : Fragment() {
         searchModal.searchHint = "Ketik untuk mencari…"
 
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(requireContext(), R.color.black_400)
-        else binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(requireContext(), R.color.light)
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background =
+            AppCompatResources.getDrawable(requireContext(), R.color.black_400)
+        else binding.llFilter.componentFilter.background =
+            AppCompatResources.getDrawable(requireContext(), R.color.light)
         binding.llFilter.componentFilter.visibility = View.GONE
         binding.llFilter.componentFilter.setOnClickListener {
             searchModal.show()
@@ -220,9 +240,17 @@ class TukangFragment : Fragment() {
 
                 val response = when (userKind) {
                     USER_KIND_ADMIN -> {
-                        if (selectedCity != null) apiService.getTukang(cityId = selectedCity?.id!!, searchKey = searchKey)
-                        else apiService.getTukangDst(distributorID = userDistributorId!!, searchKey = searchKey)
-                    } else -> apiService.getTukang(cityId = userCity, searchKey = searchKey)
+                        if (selectedCity != null) apiService.getTukang(
+                            cityId = selectedCity?.id!!,
+                            searchKey = searchKey
+                        )
+                        else apiService.getTukangDst(
+                            distributorID = userDistributorId!!,
+                            searchKey = searchKey
+                        )
+                    }
+
+                    else -> apiService.getTukang(cityId = userCity, searchKey = searchKey)
                 }
 
                 val textFilter = if (selectedCity != null) {
@@ -239,6 +267,7 @@ class TukangFragment : Fragment() {
                         binding.llFilter.tvFilter.text = "$textFilter (${response.results.size})"
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(true, "Belum ada tukang!")
@@ -247,9 +276,14 @@ class TukangFragment : Fragment() {
                         binding.llFilter.tvFilter.text = "$textFilter (${response.results.size})"
 
                     }
+
                     else -> {
 
-                        handleMessage(requireContext(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            requireContext(),
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         loadingState(true, getString(R.string.failed_request))
                         showBadgeRefresh(true)
 
@@ -259,7 +293,11 @@ class TukangFragment : Fragment() {
 
             } catch (e: Exception) {
 
-                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    requireContext(),
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
 
@@ -271,14 +309,16 @@ class TukangFragment : Fragment() {
 
     private fun setRecyclerView(listItem: ArrayList<TukangModel>) {
 
-        val rvAdapter = TukangRecyclerViewAdapter(listItem, object: TukangRecyclerViewAdapter.ItemClickListener {
-            override fun onItemClick(data: TukangModel?) {
-                context?.let {
-                    navigateDetailContact(it, data)
+        val rvAdapter = TukangRecyclerViewAdapter(
+            listItem,
+            object : TukangRecyclerViewAdapter.ItemClickListener {
+                override fun onItemClick(data: TukangModel?) {
+                    context?.let {
+                        navigateDetailContact(it, data)
+                    }
                 }
-            }
 
-        })
+            })
 
         context?.let { ctx ->
             binding.rvChatList.layoutManager = LinearLayoutManager(ctx)
@@ -364,11 +404,19 @@ class TukangFragment : Fragment() {
 
     private fun checkPermissionCamera(context: Context) {
         val permissionCamera = android.Manifest.permission.CAMERA
-        if (ContextCompat.checkSelfPermission(context, permissionCamera) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                context,
+                permissionCamera
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             showQrCodeScanner()
         } else if (shouldShowRequestPermissionRationale(permissionCamera)) {
             val message = "Membutuhkan izin penggunaan kamera"
-            CustomUtility(context).showPermissionDeniedSnackbar(message) { launchRequestPermission(permissionCamera) }
+            CustomUtility(context).showPermissionDeniedSnackbar(message) {
+                launchRequestPermission(
+                    permissionCamera
+                )
+            }
         } else {
             launchRequestPermission(permissionCamera)
         }
@@ -425,15 +473,16 @@ class TukangFragment : Fragment() {
         } else badgeRefresh.visibility = View.GONE
     }
 
-    private val someActivityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        // Handle the result
-        val resultCode = result.resultCode
-        val data = result.data
-        // Process the result
-        if (resultCode == RESULT_OK) {
-            val newData = data?.getStringExtra("$MAIN_ACTIVITY_REQUEST_CODE")
-            if (!newData.isNullOrEmpty() && newData == SYNC_NOW) getList()
+    private val someActivityResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            // Handle the result
+            val resultCode = result.resultCode
+            val data = result.data
+            // Process the result
+            if (resultCode == RESULT_OK) {
+                val newData = data?.getStringExtra("$MAIN_ACTIVITY_REQUEST_CODE")
+                if (!newData.isNullOrEmpty() && newData == SYNC_NOW) getList()
+            }
         }
-    }
 
 }

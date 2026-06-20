@@ -15,14 +15,17 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.model.DeliveryModel
 
 @SuppressLint("SetTextI18n")
-class DeliveryRecyclerViewAdapter(private val chatList: ArrayList<DeliveryModel.Store>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<DeliveryRecyclerViewAdapter.ChatViewHolder>() {
+class DeliveryRecyclerViewAdapter(
+    private val chatList: ArrayList<DeliveryModel.Store>,
+    private val itemClickListener: ItemClickListener
+) : RecyclerView.Adapter<DeliveryRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
 
     interface ItemClickListener {
         fun onItemClick(data: DeliveryModel.Store? = null)
     }
 
-    inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
@@ -38,7 +41,8 @@ class DeliveryRecyclerViewAdapter(private val chatList: ArrayList<DeliveryModel.
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
 
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
         context = parent.context
         return ChatViewHolder(view)
 
@@ -49,7 +53,12 @@ class DeliveryRecyclerViewAdapter(private val chatList: ArrayList<DeliveryModel.
         val item = chatList[position]
 
         holder.bind(item)
-        holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
+        holder.itemView.startAnimation(
+            AnimationUtils.loadAnimation(
+                holder.itemView.context,
+                R.anim.rv_item_fade_slide_up
+            )
+        )
 
         holder.itemView.setOnClickListener { onItemClick(holder, position) }
 

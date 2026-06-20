@@ -22,7 +22,10 @@ import java.util.Locale
 
 object FirebaseUtils {
 
-    fun getReference(dbReference: String? = FIREBASE_REFERENCE, distributorId: String): DatabaseReference {
+    fun getReference(
+        dbReference: String? = FIREBASE_REFERENCE,
+        distributorId: String
+    ): DatabaseReference {
 
         val dbDistributor = FIREBASE_CHILD_DISTRIBUTOR + distributorId
         return FirebaseDatabase.getInstance().getReference("$dbReference/$dbDistributor")
@@ -39,13 +42,15 @@ object FirebaseUtils {
         val dateNow = formatter.format(date)
 
         val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-        val randomString =  (1..10)
+        val randomString = (1..10)
             .map { chars.random() }
             .joinToString("")
 
         val dbDistributor = FIREBASE_CHILD_DISTRIBUTOR + (distributorId)
-        val firebaseReference = FirebaseDatabase.getInstance().getReference("$FIREBASE_REFERENCE/$dbDistributor")
-        val isLogActiveChild = FirebaseDatabase.getInstance().getReference("$FIREBASE_REFERENCE/isLogActive")
+        val firebaseReference =
+            FirebaseDatabase.getInstance().getReference("$FIREBASE_REFERENCE/$dbDistributor")
+        val isLogActiveChild =
+            FirebaseDatabase.getInstance().getReference("$FIREBASE_REFERENCE/isLogActive")
 
         isLogActiveChild.get().addOnSuccessListener {
             if (it.exists() && it.value == true) {
@@ -70,14 +75,16 @@ object FirebaseUtils {
         val dateNow = formatter.format(date)
 
         val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-        val randomString =  (1..10)
+        val randomString = (1..10)
             .map { chars.random() }
             .joinToString("")
 
         val errLogId = "$dateNow-$randomString"
         val dbDistributor = FIREBASE_CHILD_DISTRIBUTOR + distributorId
-        val firebaseReference = FirebaseDatabase.getInstance().getReference("$FIREBASE_REFERENCE/$dbDistributor")
-        val isLogActiveChild = FirebaseDatabase.getInstance().getReference("$FIREBASE_REFERENCE/isLogActive")
+        val firebaseReference =
+            FirebaseDatabase.getInstance().getReference("$FIREBASE_REFERENCE/$dbDistributor")
+        val isLogActiveChild =
+            FirebaseDatabase.getInstance().getReference("$FIREBASE_REFERENCE/isLogActive")
 
         isLogActiveChild.get().addOnSuccessListener {
             if (it.exists() && it.value == true) {

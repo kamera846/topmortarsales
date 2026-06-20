@@ -1,9 +1,8 @@
 package com.topmortar.topmortarsales.response
 
-import com.topmortar.topmortarsales.model.CityModel
 import com.topmortar.topmortarsales.model.UserModel
 
-data class ResponseAuth (
+data class ResponseAuth(
     val status: String = "",
     val message: String = "",
     val results: ArrayList<UserModel> = ArrayList()

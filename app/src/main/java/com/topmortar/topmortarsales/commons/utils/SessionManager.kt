@@ -120,7 +120,11 @@ class SessionManager(context: Context) {
         return sharedPreferences.getString("printState", PRINT_METHOD_BLUETOOTH)
     }
 
-    fun selectedBasecampAbsent(selectedBasecampAbsentID: String, selectedBasecampAbsentTitle: String, selectedBasecampAbsentCoordinate: String) {
+    fun selectedBasecampAbsent(
+        selectedBasecampAbsentID: String,
+        selectedBasecampAbsentTitle: String,
+        selectedBasecampAbsentCoordinate: String
+    ) {
         editor.putString("selectedBasecampAbsentID", selectedBasecampAbsentID)
         editor.putString("selectedBasecampAbsentTitle", selectedBasecampAbsentTitle)
         editor.putString("selectedBasecampAbsentCoordinate", selectedBasecampAbsentCoordinate)
@@ -139,7 +143,12 @@ class SessionManager(context: Context) {
         return sharedPreferences.getString("selectedBasecampAbsentCoordinate", "")
     }
 
-    fun selectedStoreAbsent(selectedStoreAbsentID: String, selectedStoreAbsentTitle: String, selectedStoreAbsentCoordinate: String, selectedAbsentMode: String) {
+    fun selectedStoreAbsent(
+        selectedStoreAbsentID: String,
+        selectedStoreAbsentTitle: String,
+        selectedStoreAbsentCoordinate: String,
+        selectedAbsentMode: String
+    ) {
         editor.putString("selectedStoreAbsentID", selectedStoreAbsentID)
         editor.putString("selectedStoreAbsentTitle", selectedStoreAbsentTitle)
         editor.putString("selectedStoreAbsentCoordinate", selectedStoreAbsentCoordinate)

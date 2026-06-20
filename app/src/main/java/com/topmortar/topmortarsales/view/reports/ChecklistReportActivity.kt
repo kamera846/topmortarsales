@@ -97,11 +97,12 @@ class ChecklistReportActivity : AppCompatActivity() {
 
     private var submitCountDown: CountDownTimer? = null
 
-    private val locationResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+    private val locationResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
 //        if (it.resultCode == RESULT_OK) {
 //            checkLocationPermission()
 //        }
-    }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -126,17 +127,19 @@ class ChecklistReportActivity : AppCompatActivity() {
         iInvoiceId = intent.getStringExtra(CONST_INVOICE_ID)
         shortDistance = intent.getStringExtra("shortDistance")
         iVisitId = intent.getStringExtra("visitId")
-        iReportSource = intent.getStringExtra(REPORT_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
-        iRenviSource = intent.getStringExtra(RENVI_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
+        iReportSource = intent.getStringExtra(REPORT_SOURCE)
+            .let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
+        iRenviSource = intent.getStringExtra(RENVI_SOURCE)
+            .let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
 
         binding.titleBar.icBack.setOnClickListener { finish() }
         if (isAnswerChecklist != null && isAnswerChecklist == true) {
             binding.textInfoTitle.text = "Laporan $iUserFullName di toko"
             binding.ivDistance.visibility = View.GONE
         } else {
-            binding.textDistance.setOnClickListener{ getDistance() }
+            binding.textDistance.setOnClickListener { getDistance() }
             binding.ivDistance.setOnClickListener { getDistance() }
-            binding.textDistanceBottom.setOnClickListener{ getDistance() }
+            binding.textDistanceBottom.setOnClickListener { getDistance() }
             binding.ivDistanceBottom.setOnClickListener { getDistance() }
             binding.submitReport.setOnClickListener {
                 getDistance(isSubmit = true)
@@ -212,7 +215,10 @@ class ChecklistReportActivity : AppCompatActivity() {
                                     intent.putExtra(CONST_INVOICE_ID, iInvoiceId)
                                     if (iName == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
                                     else intent.putExtra(CONST_NAME, iName)
-                                    if (iCoordinate == EMPTY_FIELD_VALUE) intent.putExtra(CONST_MAPS, "")
+                                    if (iCoordinate == EMPTY_FIELD_VALUE) intent.putExtra(
+                                        CONST_MAPS,
+                                        ""
+                                    )
                                     else intent.putExtra(CONST_MAPS, iCoordinate)
 
                                     intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -241,7 +247,10 @@ class ChecklistReportActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed ChecklistReportActivity on checkMockLocation(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed ChecklistReportActivity on checkMockLocation(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Sales Failed",
@@ -272,7 +281,10 @@ class ChecklistReportActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed ChecklistReportActivity on showDialogIsMock(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed ChecklistReportActivity on showDialogIsMock(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Sales Failed",
@@ -313,7 +325,8 @@ class ChecklistReportActivity : AppCompatActivity() {
             binding.txtLoading.visibility = View.GONE
             binding.cardInformation.visibility = View.VISIBLE
             binding.recyclerView.visibility = View.VISIBLE
-            if (isAnswerChecklist == null || isAnswerChecklist == false) binding.cardSubmit.visibility = View.VISIBLE
+            if (isAnswerChecklist == null || isAnswerChecklist == false) binding.cardSubmit.visibility =
+                View.VISIBLE
             else binding.cardSubmit.visibility = View.GONE
 
             binding.swipeRefreshLayout.isRefreshing = false
@@ -337,7 +350,11 @@ class ChecklistReportActivity : AppCompatActivity() {
             val mapsUrl = iCoordinate!!
             val urlUtility = URLUtility(this)
 
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
 
                 if (urlUtility.isLocationEnabled(this)) {
 
@@ -345,7 +362,8 @@ class ChecklistReportActivity : AppCompatActivity() {
 
                     if (!urlUtility.isUrl(mapsUrl) && mapsUrl.isNotEmpty()) {
 
-                        val status = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
+                        val status =
+                            GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this)
                         if (status != ConnectionResult.SUCCESS) {
                             showDialogGooglePlayNotAvailable()
                             return@postDelayed
@@ -386,9 +404,11 @@ class ChecklistReportActivity : AppCompatActivity() {
                                                 progressBar.dismiss()
 
                                                 binding.tvDistance.setTextColor(getColor(R.color.primary))
-                                                binding.tvDistance.text = "Jarak anda dengan toko $shortDistance km."
+                                                binding.tvDistance.text =
+                                                    "Jarak anda dengan toko $shortDistance km."
                                                 binding.tvDistanceBottom.setTextColor(getColor(R.color.primary))
-                                                binding.tvDistanceBottom.text = "Jarak anda dengan toko $shortDistance km."
+                                                binding.tvDistanceBottom.text =
+                                                    "Jarak anda dengan toko $shortDistance km."
                                                 dialog.dismiss()
                                             }
                                             .setNegativeButton("Buka Maps") { dialog, _ ->
@@ -403,9 +423,11 @@ class ChecklistReportActivity : AppCompatActivity() {
                                                 progressBar.dismiss()
 
                                                 binding.tvDistance.setTextColor(getColor(R.color.primary))
-                                                binding.tvDistance.text = "Jarak anda dengan toko $shortDistance km."
+                                                binding.tvDistance.text =
+                                                    "Jarak anda dengan toko $shortDistance km."
                                                 binding.tvDistanceBottom.setTextColor(getColor(R.color.primary))
-                                                binding.tvDistanceBottom.text = "Jarak anda dengan toko $shortDistance km."
+                                                binding.tvDistanceBottom.text =
+                                                    "Jarak anda dengan toko $shortDistance km."
 
                                                 dialog.dismiss()
                                             }
@@ -417,19 +439,24 @@ class ChecklistReportActivity : AppCompatActivity() {
                                             getColor(R.color.black_600)
 
                                         binding.tvDistance.setTextColor(textColor)
-                                        binding.tvDistance.text = "Jarak anda dengan toko $shortDistance km."
+                                        binding.tvDistance.text =
+                                            "Jarak anda dengan toko $shortDistance km."
                                         binding.tvDistanceBottom.setTextColor(textColor)
-                                        binding.tvDistanceBottom.text = "Jarak anda dengan toko $shortDistance km."
+                                        binding.tvDistanceBottom.text =
+                                            "Jarak anda dengan toko $shortDistance km."
 
                                         if (isSubmit) {
                                             if (iDistance != null && iDistance!! <= MAX_REPORT_DISTANCE) {
                                                 submitForm()
                                             } else {
                                                 progressBar.dismiss()
-                                                handleMessage(this, "SUBMIT FORM VISIT", "Cobalah untuk lebih dekat dengan toko")
+                                                handleMessage(
+                                                    this,
+                                                    "SUBMIT FORM VISIT",
+                                                    "Cobalah untuk lebih dekat dengan toko"
+                                                )
                                             }
-                                        }
-                                        else progressBar.dismiss()
+                                        } else progressBar.dismiss()
                                     }
 
                                 } else {
@@ -451,15 +478,23 @@ class ChecklistReportActivity : AppCompatActivity() {
 
                         }.addOnFailureListener {
                             progressBar.dismiss()
-                            handleMessage(this, "LOG REPORT", "Gagal mendapatkan lokasi anda. Err: " + it.message)
+                            handleMessage(
+                                this,
+                                "LOG REPORT",
+                                "Gagal mendapatkan lokasi anda. Err: " + it.message
+                            )
 //                            Toast.makeText(this, "Gagal mendapatkan lokasi anda", TOAST_SHORT).show()
                         }
 
                     } else {
                         progressBar.dismiss()
-                        val message = "Anda tidak dapat membuat laporan untuk saat ini, silakan hubungi admin untuk memperbarui koordinat toko ini"
+                        val message =
+                            "Anda tidak dapat membuat laporan untuk saat ini, silakan hubungi admin untuk memperbarui koordinat toko ini"
                         val actionTitle = "Hubungi Sekarang"
-                        CustomUtility(this).showPermissionDeniedSnackbar(message, actionTitle) { navigateChatAdmin() }
+                        CustomUtility(this).showPermissionDeniedSnackbar(
+                            message,
+                            actionTitle
+                        ) { navigateChatAdmin() }
                     }
 
                 } else {
@@ -470,7 +505,11 @@ class ChecklistReportActivity : AppCompatActivity() {
 
             } else {
                 progressBar.dismiss()
-                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    LOCATION_PERMISSION_REQUEST_CODE
+                )
             }
 
         }, 500)
@@ -496,7 +535,10 @@ class ChecklistReportActivity : AppCompatActivity() {
             if (e is CancellationException) {
                 return
             }
-            FirebaseUtils.logErr(this, "Failed HomeSalesActivity on showDialogGooglePlayNotAvailable(). Catch: ${e.message}")
+            FirebaseUtils.logErr(
+                this,
+                "Failed HomeSalesActivity on showDialogGooglePlayNotAvailable(). Catch: ${e.message}"
+            )
             handleMessage(
                 this,
                 "Home Courier Failed",
@@ -508,10 +550,12 @@ class ChecklistReportActivity : AppCompatActivity() {
     private fun navigateChatAdmin() {
         val distributorNumber = sessionManager.userDistributorNumber()!!
         val phoneNumber = distributorNumber.ifEmpty { getString(R.string.topmortar_wa_number) }
-        val message = "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada toko *${ iName }*"
+        val message =
+            "*#Courier Service*\nHalo admin, tolong bantu saya untuk memperbarui koordinat pada toko *${iName}*"
 
         val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")
+        intent.data =
+            Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")
 
         try {
             startActivity(intent)
@@ -525,11 +569,11 @@ class ChecklistReportActivity : AppCompatActivity() {
     private fun getAnswers() {
         loadingState(true)
 
-        val apiService = HttpClient.create()
+        val apiService = HttpClient.apiService
         lifecycleScope.launch {
             try {
                 val response = apiService.getVisitAnswers(idVisit = iVisitId ?: "")
-                when(response.status) {
+                when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
                         questions = response.results
@@ -537,11 +581,13 @@ class ChecklistReportActivity : AppCompatActivity() {
                         loadingState(false)
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(true, "Jawaban tidak ditemukan")
 
                     }
+
                     else -> {
 
                         loadingState(true, getString(R.string.failed_get_data))
@@ -550,7 +596,10 @@ class ChecklistReportActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
 
-                FirebaseUtils.logErr(this@ChecklistReportActivity, "Failed ChecklistReportActivity on getAnswer(). Catch: ${e.message}")
+                FirebaseUtils.logErr(
+                    this@ChecklistReportActivity,
+                    "Failed ChecklistReportActivity on getAnswer(). Catch: ${e.message}"
+                )
                 loadingState(true, generateFailedRunServiceMessage(e.message.toString()))
 
             }
@@ -560,36 +609,40 @@ class ChecklistReportActivity : AppCompatActivity() {
     private fun getQuestions() {
         loadingState(true)
 
-        val apiService = HttpClient.create()
+        val apiService = HttpClient.apiService
         lifecycleScope.launch {
             try {
                 val response = apiService.getVisitQuestion(idDistributor = userDistributorId)
-                when(response.status) {
+                when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
                         questions = response.results
-                        questions.add(QnAFormReportModel(
-                            id_visit_question = "-1",
-                            text_question = "Pesan Laporan",
-                            is_required = "1",
-                            answer_type = "text",
-                            created_at = "",
-                            updated_at = "",
-                            answer_option = null,
-                            selected_answer = null,
-                            text_answer = "",
-                            placeholder = getString(R.string.laporan_toko_hint)
-                        ))
+                        questions.add(
+                            QnAFormReportModel(
+                                id_visit_question = "-1",
+                                text_question = "Pesan Laporan",
+                                is_required = "1",
+                                answer_type = "text",
+                                created_at = "",
+                                updated_at = "",
+                                answer_option = null,
+                                selected_answer = null,
+                                text_answer = "",
+                                placeholder = getString(R.string.laporan_toko_hint)
+                            )
+                        )
                         setupRecyclerView()
                         loadingState(false)
                         getDistance()
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(true, "Belum ada pertanyaan")
 
                     }
+
                     else -> {
 
                         loadingState(true, getString(R.string.failed_get_data))
@@ -598,7 +651,10 @@ class ChecklistReportActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
 
-                FirebaseUtils.logErr(this@ChecklistReportActivity, "Failed ChecklistReportActivity on getQuestions(). Catch: ${e.message}")
+                FirebaseUtils.logErr(
+                    this@ChecklistReportActivity,
+                    "Failed ChecklistReportActivity on getQuestions(). Catch: ${e.message}"
+                )
                 loadingState(true, generateFailedRunServiceMessage(e.message.toString()))
 
             }
@@ -626,7 +682,7 @@ class ChecklistReportActivity : AppCompatActivity() {
                 val rbRenviSource = createPartFromString(iRenviSource)
                 val rbInvoiceId = createPartFromString(iInvoiceId ?: "")
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.makeVisitReport(
                     idContact = rbidContact,
                     idUser = rbidUser,
@@ -640,30 +696,55 @@ class ChecklistReportActivity : AppCompatActivity() {
 
                 if (response.isSuccessful) {
                     val responseBody = response.body()!!
-                    when(responseBody.status) {
+                    when (responseBody.status) {
                         RESPONSE_STATUS_OK -> {
                             iVisitId = responseBody.id_visit
                             postSubmitAnswer(arrayAnswer)
                         }
+
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
                             progressBar.dismiss()
-                            handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan! Message: ${ responseBody.message }")
+                            handleMessage(
+                                this@ChecklistReportActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "Gagal mengirim laporan! Message: ${responseBody.message}"
+                            )
                         }
+
                         else -> {
                             progressBar.dismiss()
-                            handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan!: ${ responseBody.message }")
+                            handleMessage(
+                                this@ChecklistReportActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "Gagal mengirim laporan!: ${responseBody.message}"
+                            )
                         }
                     }
                 } else {
                     progressBar.dismiss()
-                    handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan! Error: " + response.message())
+                    handleMessage(
+                        this@ChecklistReportActivity,
+                        TAG_RESPONSE_MESSAGE,
+                        "Gagal mengirim laporan! Error: " + response.message()
+                    )
                 }
             } catch (e: Exception) {
                 progressBar.dismiss()
-                FirebaseUtils.logErr(this@ChecklistReportActivity, "Failed ChecklistReportActivity on submitReport(). Catch: ${e.message}")
-                handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@ChecklistReportActivity,
+                    "Failed ChecklistReportActivity on submitReport(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@ChecklistReportActivity,
+                    TAG_RESPONSE_MESSAGE,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
             } finally {
-                saveTrackingServiceLocation(userId = idUser, contactId = iContactId ?: "0", actionType = TrackingService.ACTION_TYPE_VISIT)
+                saveTrackingServiceLocation(
+                    userId = idUser,
+                    contactId = iContactId ?: "0",
+                    actionType = TrackingService.ACTION_TYPE_VISIT
+                )
                 submitCountDown = object : CountDownTimer(10000, 1000) {
 
                     override fun onTick(millisUntilFinished: Long) {
@@ -683,36 +764,44 @@ class ChecklistReportActivity : AppCompatActivity() {
     }
 
     private fun submitForm() {
-            val questionSubmission: ArrayList<QuestionSubmission> = arrayListOf()
-            val items = rvAdapter.submitForm()
-            var isAnswerValid = false
+        val questionSubmission: ArrayList<QuestionSubmission> = arrayListOf()
+        val items = rvAdapter.submitForm()
+        var isAnswerValid = false
 
-            for (i in 0 until items.size) {
-                val item = items[i]
-                val isTextEmpty = (item.answer_type == "text" || item.answer_type == "date" || item.answer_type == "radio") && item.text_answer.isEmpty()
-                val isSelectedEmpty = item.answer_type == "checkbox" && item.selected_answer.isNullOrEmpty()
-                if (item.is_required == "1" && (isTextEmpty || isSelectedEmpty)) {
-                    progressBar.dismiss()
-                    AlertDialog.Builder(this)
-                        .setCancelable(false)
-                        .setTitle("Perhatian!")
-                        .setMessage("Pertanyaan no ${i + 1} harus dijawab")
-                        .setPositiveButton("Oke") { dialog, _ ->
-                            dialog.dismiss()
-                        }
-                        .show()
-                    isAnswerValid = false
-                    break
+        for (i in 0 until items.size) {
+            val item = items[i]
+            val isTextEmpty =
+                (item.answer_type == "text" || item.answer_type == "date" || item.answer_type == "radio") && item.text_answer.isEmpty()
+            val isSelectedEmpty =
+                item.answer_type == "checkbox" && item.selected_answer.isNullOrEmpty()
+            if (item.is_required == "1" && (isTextEmpty || isSelectedEmpty)) {
+                progressBar.dismiss()
+                AlertDialog.Builder(this)
+                    .setCancelable(false)
+                    .setTitle("Perhatian!")
+                    .setMessage("Pertanyaan no ${i + 1} harus dijawab")
+                    .setPositiveButton("Oke") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .show()
+                isAnswerValid = false
+                break
 
-                } else {
-                    if (item.id_visit_question != "-1") questionSubmission.add(QuestionSubmission(id_visit_question = item.id_visit_question, text_answer = item.text_answer, selected_answer = item.selected_answer))
-                    isAnswerValid = true
-                }
+            } else {
+                if (item.id_visit_question != "-1") questionSubmission.add(
+                    QuestionSubmission(
+                        id_visit_question = item.id_visit_question,
+                        text_answer = item.text_answer,
+                        selected_answer = item.selected_answer
+                    )
+                )
+                isAnswerValid = true
             }
-            if (isAnswerValid) {
-                val arrayAnswer = convertToJsonString(questionSubmission)
-                submitReport(items, arrayAnswer)
-            }
+        }
+        if (isAnswerValid) {
+            val arrayAnswer = convertToJsonString(questionSubmission)
+            submitReport(items, arrayAnswer)
+        }
     }
 
     private fun convertToJsonString(questions: ArrayList<QuestionSubmission>): String {
@@ -741,7 +830,7 @@ class ChecklistReportActivity : AppCompatActivity() {
 
     private fun postSubmitAnswer(arrayAnswer: String) {
 
-        val apiService = HttpClient.create()
+        val apiService = HttpClient.apiService
         lifecycleScope.launch {
             try {
                 val response = apiService.postVisitQuestion(
@@ -750,30 +839,55 @@ class ChecklistReportActivity : AppCompatActivity() {
                 )
                 if (response.isSuccessful) {
                     val responseBody = response.body()!!
-                    when(responseBody.status) {
+                    when (responseBody.status) {
                         RESPONSE_STATUS_OK -> {
                             progressBar.dismiss()
-                            handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, responseBody.message)
+                            handleMessage(
+                                this@ChecklistReportActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                responseBody.message
+                            )
                             finish()
                         }
+
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
                             progressBar.dismiss()
-                            handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan checklist! Message: ${ responseBody.message }")
+                            handleMessage(
+                                this@ChecklistReportActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "Gagal mengirim laporan checklist! Message: ${responseBody.message}"
+                            )
                         }
+
                         else -> {
                             progressBar.dismiss()
-                            handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan checklist!: ${ responseBody.message }")
+                            handleMessage(
+                                this@ChecklistReportActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "Gagal mengirim laporan checklist!: ${responseBody.message}"
+                            )
                         }
                     }
                 } else {
                     progressBar.dismiss()
-                    handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, "Gagal mengirim laporan checklist! Error: " + response.message())
+                    handleMessage(
+                        this@ChecklistReportActivity,
+                        TAG_RESPONSE_MESSAGE,
+                        "Gagal mengirim laporan checklist! Error: " + response.message()
+                    )
                 }
             } catch (e: Exception) {
 
                 progressBar.dismiss()
-                FirebaseUtils.logErr(this@ChecklistReportActivity, "Failed ChecklistReportActivity on postSubmitReport(). Catch: ${e.message}")
-                handleMessage(this@ChecklistReportActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@ChecklistReportActivity,
+                    "Failed ChecklistReportActivity on postSubmitReport(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@ChecklistReportActivity,
+                    TAG_RESPONSE_MESSAGE,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
 
             }
         }

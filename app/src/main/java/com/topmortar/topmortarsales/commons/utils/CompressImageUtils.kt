@@ -47,7 +47,11 @@ object CompressImageUtil {
         return Uri.fromFile(compressedFile)
     }
 
-    private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+    private fun calculateInSampleSize(
+        options: BitmapFactory.Options,
+        reqWidth: Int,
+        reqHeight: Int
+    ): Int {
         val (height: Int, width: Int) = options.run { outHeight to outWidth }
         var inSampleSize = 1
 
@@ -62,7 +66,11 @@ object CompressImageUtil {
         return inSampleSize
     }
 
-    private fun resizeBitmapKeepingAspectRatio(bitmap: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
+    private fun resizeBitmapKeepingAspectRatio(
+        bitmap: Bitmap,
+        maxWidth: Int,
+        maxHeight: Int
+    ): Bitmap {
         val width = bitmap.width
         val height = bitmap.height
 

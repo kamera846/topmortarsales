@@ -16,9 +16,10 @@ import com.topmortar.topmortarsales.databinding.ActivityPermissionBinding
 class PermissionActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityPermissionBinding
-    private val locationResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        checkPermissions()
-    }
+    private val locationResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            checkPermissions()
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,7 +74,8 @@ class PermissionActivity : AppCompatActivity() {
         val isBackgroundPermissionGranted = PermissionsHandler.hasBackgroundLocationPermission(this)
 
         binding.switchLocation.isChecked = isGpsEnabled
-        binding.switchPermissions.isChecked = isForegroundPermissionGranted && isBackgroundPermissionGranted
+        binding.switchPermissions.isChecked =
+            isForegroundPermissionGranted && isBackgroundPermissionGranted
 
         if (isGpsEnabled && isForegroundPermissionGranted && isBackgroundPermissionGranted) {
             finish()

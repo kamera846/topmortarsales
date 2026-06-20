@@ -26,7 +26,11 @@ object MySntpClient {
         return withContext(Dispatchers.IO) {
             var attempt = 0
             while (attempt < 5) {
-                FirebaseUtils.firebaseLogging(mContext, "Absent", "Trying to get time from internet, with attempt $attempt")
+                FirebaseUtils.firebaseLogging(
+                    mContext,
+                    "Absent",
+                    "Trying to get time from internet, with attempt $attempt"
+                )
                 val networkTimeMillis = getNetworkTime()
                 if (networkTimeMillis != null) {
                     return@withContext Calendar.getInstance().apply {

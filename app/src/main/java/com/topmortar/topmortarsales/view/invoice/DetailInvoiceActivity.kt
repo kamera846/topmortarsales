@@ -73,7 +73,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
 //                    insets
 //                }
 //            } else {
-                window.statusBarColor = getColor(R.color.primary)
+            window.statusBarColor = getColor(R.color.primary)
 //            }
         }
 
@@ -82,7 +82,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
         binding = ActivityDetailInvoiceBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        apiService = HttpClient.create()
+        apiService = HttpClient.apiService
 
         if (CustomUtility(this).isUserWithOnlineStatus()) {
             CustomUtility(this).setUserStatusOnline(
@@ -143,7 +143,8 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         }
 
                         val dateLastPayment = data[0].date_payment
-                        val remaining = totalInvoice.toDouble() - totalPay - totalDiscnt - totalAdjustmnt
+                        val remaining =
+                            totalInvoice.toDouble() - totalPay - totalDiscnt - totalAdjustmnt
 
                         tvTotalPotongan.text = CurrencyFormat.format(totalDiscnt)
                         tvTotalAdjustment.text = CurrencyFormat.format(totalAdjustmnt)
@@ -151,7 +152,11 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         val iStatusInvoice = intent.getStringExtra(CONST_STATUS_INVOICE)
                         if (!iStatusInvoice.isNullOrEmpty()) {
                             if (iStatusInvoice == INVOICE_PAID || totalInvoice == "0") {
-                                tvDateInvoice.text = DateFormat.format(dateString = dateLastPayment, inputFormat = "yyyy-MM-dd HH:mm:ss", outputFormat = "EEEE, dd MMMM yyyy")
+                                tvDateInvoice.text = DateFormat.format(
+                                    dateString = dateLastPayment,
+                                    inputFormat = "yyyy-MM-dd HH:mm:ss",
+                                    outputFormat = "EEEE, dd MMMM yyyy"
+                                )
                                 tvStatus.text = "paid".uppercase(Locale.ROOT)
                                 tvStatus.setTextColor(getColor(R.color.white))
                                 tvStatus.setBackgroundResource(R.drawable.bg_active_round)
@@ -166,6 +171,7 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         loadingState(false)
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         val remaining = totalInvoice.toDouble() - totalPay
@@ -177,9 +183,14 @@ class DetailInvoiceActivity : AppCompatActivity() {
                         loadingState(true, "Belum ada pembayaran")
 
                     }
+
                     else -> {
 
-                        handleMessage(this@DetailInvoiceActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@DetailInvoiceActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         loadingState(true, getString(R.string.failed_request))
 
                     }
@@ -187,8 +198,15 @@ class DetailInvoiceActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                FirebaseUtils.logErr(this@DetailInvoiceActivity, "Failed DetailInvoiceActivity on getList(). Catch: ${e.message}")
-                handleMessage(this@DetailInvoiceActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@DetailInvoiceActivity,
+                    "Failed DetailInvoiceActivity on getList(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@DetailInvoiceActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
 
             }
@@ -239,8 +257,8 @@ class DetailInvoiceActivity : AppCompatActivity() {
         val iDateInvoiceCreated = intent.getStringExtra(CONST_DATE_INVOICE)
 
         if (!iTotalInvoice.isNullOrEmpty()) {
-                totalInvoice = iTotalInvoice
-                tvTotalInvoice.text = CurrencyFormat.format(totalInvoice.toDouble())
+            totalInvoice = iTotalInvoice
+            tvTotalInvoice.text = CurrencyFormat.format(totalInvoice.toDouble())
         } else tvTotalInvoice.text = CurrencyFormat.format(0.0)
 
         if (!iInvoiceNumber.isNullOrEmpty()) {
@@ -257,7 +275,11 @@ class DetailInvoiceActivity : AppCompatActivity() {
         }
 
         if (!iDateInvoiceCreated.isNullOrEmpty()) {
-            binding.tvDateInvoiceCreated.text = DateFormat.format(dateString = iDateInvoiceCreated, inputFormat = "yyyy-MM-dd HH:mm:ss", outputFormat = "dd MMM yyyy HH.mm")
+            binding.tvDateInvoiceCreated.text = DateFormat.format(
+                dateString = iDateInvoiceCreated,
+                inputFormat = "yyyy-MM-dd HH:mm:ss",
+                outputFormat = "dd MMM yyyy HH.mm"
+            )
         }
 
     }

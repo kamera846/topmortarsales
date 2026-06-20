@@ -37,7 +37,10 @@ import com.topmortar.topmortarsales.model.TukangModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-class SendMessageTukangModal(private val context: Context, private val lifecycleScope: CoroutineScope) : Dialog(context) {
+class SendMessageTukangModal(
+    private val context: Context,
+    private val lifecycleScope: CoroutineScope
+) : Dialog(context) {
 
     private lateinit var titleBar: LinearLayout
     private lateinit var icBack: ImageView
@@ -58,7 +61,8 @@ class SendMessageTukangModal(private val context: Context, private val lifecycle
         this.item = data
     }
 
-    private var modalInterface : SendMessageModalInterface? = null
+    private var modalInterface: SendMessageModalInterface? = null
+
     interface SendMessageModalInterface {
         fun onSubmit(status: Boolean)
     }
@@ -157,7 +161,7 @@ class SendMessageTukangModal(private val context: Context, private val lifecycle
 
     private fun submitHandler() {
 
-        if (!formValidation( "${ etMessage.text }")) return
+        if (!formValidation("${etMessage.text}")) return
 
         val builder = AlertDialog.Builder(context)
         builder.setTitle("Koneksi Tidak Stabil!")
@@ -173,7 +177,10 @@ class SendMessageTukangModal(private val context: Context, private val lifecycle
             try {
                 val data = item!!
                 val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
-                val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
+                val currentName = sessionManager.fullName().let { fullName ->
+                    if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName()
+                        .let { username -> if (!username.isNullOrEmpty()) username else "" }
+                }
 
                 val rbPhone = createPartFromString(PhoneHandler.formatPhoneNumber(data.nomorhp))
                 val rbName = createPartFromString(data.nama)
@@ -181,7 +188,7 @@ class SendMessageTukangModal(private val context: Context, private val lifecycle
                 val rbSkill = createPartFromString(data.id_skill)
                 val rbBirthday = createPartFromString(data.tgl_lahir)
                 val rbMapsUrl = createPartFromString(data.maps_url)
-                val rbMessage = createPartFromString("${ etMessage.text }")
+                val rbMessage = createPartFromString("${etMessage.text}")
                 val rbUserId = createPartFromString(userId)
                 val rbCurrentName = createPartFromString(currentName)
 
@@ -193,7 +200,7 @@ class SendMessageTukangModal(private val context: Context, private val lifecycle
 //                this@SendMessageTukangModal.dismiss()
 //                return@launch
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.sendMessageTukang(
                     name = rbName,
                     phone = rbPhone,
@@ -203,7 +210,8 @@ class SendMessageTukangModal(private val context: Context, private val lifecycle
                     mapsUrl = rbMapsUrl,
                     currentName = rbCurrentName,
                     userId = rbUserId,
-                    message = rbMessage)
+                    message = rbMessage
+                )
 
                 if (response.isSuccessful) {
 
@@ -220,12 +228,18 @@ class SendMessageTukangModal(private val context: Context, private val lifecycle
                             this@SendMessageTukangModal.dismiss()
 
                         }
+
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(context, TAG_RESPONSE_MESSAGE, "Gagal mengirim pesan: ${ responseBody.message }")
+                            handleMessage(
+                                context,
+                                TAG_RESPONSE_MESSAGE,
+                                "Gagal mengirim pesan: ${responseBody.message}"
+                            )
                             loadingState(false)
 
                         }
+
                         else -> {
 
                             handleMessage(context, TAG_RESPONSE_CONTACT, "Gagal mengirim pesan!")
@@ -236,7 +250,11 @@ class SendMessageTukangModal(private val context: Context, private val lifecycle
 
                 } else {
 
-                    handleMessage(context, TAG_RESPONSE_CONTACT, "Gagal mengirim pesan. Error: " + response.message())
+                    handleMessage(
+                        context,
+                        TAG_RESPONSE_CONTACT,
+                        "Gagal mengirim pesan. Error: " + response.message()
+                    )
                     loadingState(false)
 
                 }
@@ -244,7 +262,11 @@ class SendMessageTukangModal(private val context: Context, private val lifecycle
 
             } catch (e: Exception) {
 
-                handleMessage(context, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    context,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(false)
 
             }

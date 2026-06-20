@@ -17,14 +17,17 @@ import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.GudangModel
 
 @SuppressLint("SetTextI18n")
-class GudangRecyclerViewAdapter(private val chatList: ArrayList<GudangModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<GudangRecyclerViewAdapter.ChatViewHolder>() {
+class GudangRecyclerViewAdapter(
+    private val chatList: ArrayList<GudangModel>,
+    private val itemClickListener: ItemClickListener
+) : RecyclerView.Adapter<GudangRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
 
     interface ItemClickListener {
         fun onItemClick(data: GudangModel? = null)
     }
 
-    inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
@@ -33,7 +36,12 @@ class GudangRecyclerViewAdapter(private val chatList: ArrayList<GudangModel>, pr
         fun bind(chatItem: GudangModel) {
 
             tvContactName.text = chatItem.nama_warehouse
-            tvPhoneNumber.text = "Ditambahkan pada ${DateFormat.format(chatItem.created_at, outputFormat = "dd MMM yyyy")}"
+            tvPhoneNumber.text = "Ditambahkan pada ${
+                DateFormat.format(
+                    chatItem.created_at,
+                    outputFormat = "dd MMM yyyy"
+                )
+            }"
 
         }
 
@@ -41,7 +49,8 @@ class GudangRecyclerViewAdapter(private val chatList: ArrayList<GudangModel>, pr
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
 
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
         context = parent.context
         return ChatViewHolder(view)
 
@@ -52,7 +61,12 @@ class GudangRecyclerViewAdapter(private val chatList: ArrayList<GudangModel>, pr
         val chatItem = chatList[position]
 
         holder.bind(chatItem)
-        holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
+        holder.itemView.startAnimation(
+            AnimationUtils.loadAnimation(
+                holder.itemView.context,
+                R.anim.rv_item_fade_slide_up
+            )
+        )
 
         holder.itemView.setOnClickListener { onItemClick(holder, position) }
         holder.tooltipStatus.setOnClickListener { onItemClick(holder, position) }

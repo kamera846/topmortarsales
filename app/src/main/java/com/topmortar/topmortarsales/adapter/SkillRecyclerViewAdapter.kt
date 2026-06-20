@@ -14,7 +14,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.model.SkillModel
 
-class SkillRecyclerViewAdapter(private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<SkillRecyclerViewAdapter.ViewHolder>() {
+class SkillRecyclerViewAdapter(private val itemClickListener: ItemClickListener) :
+    RecyclerView.Adapter<SkillRecyclerViewAdapter.ViewHolder>() {
     private var listItem: ArrayList<SkillModel> = ArrayList()
     private var context: Context? = null
 
@@ -26,7 +27,7 @@ class SkillRecyclerViewAdapter(private val itemClickListener: ItemClickListener)
         this.listItem = listItem
     }
 
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         private val ivProfile: ImageView = itemView.findViewById(R.id.iv_contact_profile)
         private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
@@ -44,7 +45,8 @@ class SkillRecyclerViewAdapter(private val itemClickListener: ItemClickListener)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
         context = parent.context
         return ViewHolder(view)
 
@@ -55,7 +57,12 @@ class SkillRecyclerViewAdapter(private val itemClickListener: ItemClickListener)
         val item = listItem[position]
 
         holder.bind(item)
-        holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
+        holder.itemView.startAnimation(
+            AnimationUtils.loadAnimation(
+                holder.itemView.context,
+                R.anim.rv_item_fade_slide_up
+            )
+        )
 
         holder.itemView.setOnClickListener {
 
