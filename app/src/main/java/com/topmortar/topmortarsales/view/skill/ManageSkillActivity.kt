@@ -121,7 +121,7 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getSkills(distributorID = userDistributorId)
 
                 when (response.status) {
@@ -131,14 +131,20 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
                         loadingState(false)
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
-                        loadingState(true,  "Skill data is empty!")
+                        loadingState(true, "Skill data is empty!")
 
                     }
+
                     else -> {
 
-                        handleMessage(this@ManageSkillActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@ManageSkillActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         loadingState(true, getString(R.string.failed_request))
 
                     }
@@ -147,8 +153,15 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
 
             } catch (e: Exception) {
 
-                FirebaseUtils.logErr(this@ManageSkillActivity, "Failed ManageSkillActivity on getList(). Catch: ${e.message}")
-                handleMessage(this@ManageSkillActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@ManageSkillActivity,
+                    "Failed ManageSkillActivity on getList(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@ManageSkillActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
 
             }
@@ -210,9 +223,9 @@ class ManageSkillActivity : AppCompatActivity(), SkillRecyclerViewAdapter.ItemCl
     override fun onItemClick(data: SkillModel?) {
         addCityModal.show()
 //        Handler(Looper.getMainLooper()).postDelayed({
-            addCityModal.setEditCase(true)
-            addCityModal.setItem(data!!)
-            addCityModal.setTitle("Edit Keahlian")
+        addCityModal.setEditCase(true)
+        addCityModal.setItem(data!!)
+        addCityModal.setTitle("Edit Keahlian")
 //        }, 500)
     }
 

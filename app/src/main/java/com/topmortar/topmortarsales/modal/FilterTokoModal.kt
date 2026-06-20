@@ -2,8 +2,6 @@ package com.topmortar.topmortarsales.modal
 
 import android.app.Dialog
 import android.content.Context
-import android.content.DialogInterface
-import android.graphics.Color
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.view.Gravity
@@ -23,7 +21,8 @@ class FilterTokoModal(private val context: Context) : Dialog(context) {
     private lateinit var binding: ModalFilterTokoBinding
 
     private var validStatuses: ArrayList<String> = arrayListOf("Sudah Valid", "Tidak Valid")
-    private var statuses: ArrayList<String> = arrayListOf("Data", "Passive", "Active", "Bid", "Blacklist")
+    private var statuses: ArrayList<String> =
+        arrayListOf("Data", "Passive", "Active", "Bid", "Blacklist")
     private var selectedValidStatusID: String = "-1"
     private var selectedStatusID: String = "-1"
 
@@ -59,7 +58,12 @@ class FilterTokoModal(private val context: Context) : Dialog(context) {
     }
 
     interface SendFilterListener {
-        fun onSendFilter(selectedValidStatusID: String, selectedStatusID: String, selectedVisitedID: String, selectedCitiesID: CityModel? = null)
+        fun onSendFilter(
+            selectedValidStatusID: String,
+            selectedStatusID: String,
+            selectedVisitedID: String,
+            selectedCitiesID: CityModel? = null
+        )
     }
 
     private var listener: SendFilterListener? = null
@@ -99,7 +103,7 @@ class FilterTokoModal(private val context: Context) : Dialog(context) {
 
         val titleBar = binding.titleBarLight
         titleBar.tvTitleBar.text = "Filter Toko"
-        titleBar.tvTitleBar.setPadding(convertDpToPx(16, context),0,0,0)
+        titleBar.tvTitleBar.setPadding(convertDpToPx(16, context), 0, 0, 0)
 
     }
 
@@ -109,11 +113,16 @@ class FilterTokoModal(private val context: Context) : Dialog(context) {
         titleBar.icClose.visibility = View.VISIBLE
         titleBar.icClose.setOnClickListener { this@FilterTokoModal.dismiss() }
         binding.btnHapusFilter.setOnClickListener {
-            listener!!.onSendFilter("-1","-1", "-1", null)
+            listener!!.onSendFilter("-1", "-1", "-1", null)
             this@FilterTokoModal.dismiss()
         }
         binding.btnFilter.setOnClickListener {
-            listener!!.onSendFilter(selectedValidStatusID, selectedStatusID, selectedVisitedID, selectedCitiesID)
+            listener!!.onSendFilter(
+                selectedValidStatusID,
+                selectedStatusID,
+                selectedVisitedID,
+                selectedCitiesID
+            )
             this@FilterTokoModal.dismiss()
         }
     }
@@ -135,22 +144,29 @@ class FilterTokoModal(private val context: Context) : Dialog(context) {
                 FlexboxLayout.LayoutParams.WRAP_CONTENT
             )
             textView.gravity = Gravity.CENTER
-            textView.setTextColor(context.getColor(
-                if (item == selectedValidStatusID) R.color.white
-                else {
-                    if (customUtility.isDarkMode()) R.color.black_600
-                    else R.color.black_200
-                }
-            ))
+            textView.setTextColor(
+                context.getColor(
+                    if (item == selectedValidStatusID) R.color.white
+                    else {
+                        if (customUtility.isDarkMode()) R.color.black_600
+                        else R.color.black_200
+                    }
+                )
+            )
             textView.setBackgroundResource(
                 if (item == selectedValidStatusID) R.drawable.bg_primary_round
                 else R.drawable.bg_border_round
             )
-            textView.setPadding(paddingHorizontal, paddingVertical, paddingHorizontal, paddingVertical)
+            textView.setPadding(
+                paddingHorizontal,
+                paddingVertical,
+                paddingHorizontal,
+                paddingVertical
+            )
             layoutParams.setMargins(margin, margin, margin, margin)
             textView.layoutParams = layoutParams
 
-            textView.setOnClickListener{
+            textView.setOnClickListener {
                 selectedValidStatusID = if (item == selectedValidStatusID) "-1"
                 else item
                 flexBoxCities.removeAllViews()
@@ -178,22 +194,29 @@ class FilterTokoModal(private val context: Context) : Dialog(context) {
                 FlexboxLayout.LayoutParams.WRAP_CONTENT
             )
             textView.gravity = Gravity.CENTER
-            textView.setTextColor(context.getColor(
-                if (item == selectedStatusID) R.color.white
-                else {
-                    if (customUtility.isDarkMode()) R.color.black_600
-                    else R.color.black_200
-                }
-            ))
+            textView.setTextColor(
+                context.getColor(
+                    if (item == selectedStatusID) R.color.white
+                    else {
+                        if (customUtility.isDarkMode()) R.color.black_600
+                        else R.color.black_200
+                    }
+                )
+            )
             textView.setBackgroundResource(
                 if (item == selectedStatusID) R.drawable.bg_primary_round
                 else R.drawable.bg_border_round
             )
-            textView.setPadding(paddingHorizontal, paddingVertical, paddingHorizontal, paddingVertical)
+            textView.setPadding(
+                paddingHorizontal,
+                paddingVertical,
+                paddingHorizontal,
+                paddingVertical
+            )
             layoutParams.setMargins(margin, margin, margin, margin)
             textView.layoutParams = layoutParams
 
-            textView.setOnClickListener{
+            textView.setOnClickListener {
                 selectedStatusID = if (item == selectedStatusID) "-1"
                 else item
                 flexBoxCities.removeAllViews()
@@ -221,22 +244,29 @@ class FilterTokoModal(private val context: Context) : Dialog(context) {
                 FlexboxLayout.LayoutParams.WRAP_CONTENT
             )
             textView.gravity = Gravity.CENTER
-            textView.setTextColor(context.getColor(
-                if (item == selectedVisitedID) R.color.white
-                else {
-                    if (customUtility.isDarkMode()) R.color.black_600
-                    else R.color.black_200
-                }
-            ))
+            textView.setTextColor(
+                context.getColor(
+                    if (item == selectedVisitedID) R.color.white
+                    else {
+                        if (customUtility.isDarkMode()) R.color.black_600
+                        else R.color.black_200
+                    }
+                )
+            )
             textView.setBackgroundResource(
                 if (item == selectedVisitedID) R.drawable.bg_primary_round
                 else R.drawable.bg_border_round
             )
-            textView.setPadding(paddingHorizontal, paddingVertical, paddingHorizontal, paddingVertical)
+            textView.setPadding(
+                paddingHorizontal,
+                paddingVertical,
+                paddingHorizontal,
+                paddingVertical
+            )
             layoutParams.setMargins(margin, margin, margin, margin)
             textView.layoutParams = layoutParams
 
-            textView.setOnClickListener{
+            textView.setOnClickListener {
                 selectedVisitedID = if (item == selectedVisitedID) "-1"
                 else item
                 flexBoxCities.removeAllViews()
@@ -264,22 +294,29 @@ class FilterTokoModal(private val context: Context) : Dialog(context) {
                 FlexboxLayout.LayoutParams.WRAP_CONTENT
             )
             textView.gravity = Gravity.CENTER
-            textView.setTextColor(context.getColor(
-                if (item.id_city == selectedCitiesID?.id_city) R.color.white
-                else {
-                    if (customUtility.isDarkMode()) R.color.black_600
-                    else R.color.black_200
-                }
-            ))
+            textView.setTextColor(
+                context.getColor(
+                    if (item.id_city == selectedCitiesID?.id_city) R.color.white
+                    else {
+                        if (customUtility.isDarkMode()) R.color.black_600
+                        else R.color.black_200
+                    }
+                )
+            )
             textView.setBackgroundResource(
                 if (item.id_city == selectedCitiesID?.id_city) R.drawable.bg_primary_round
                 else R.drawable.bg_border_round
             )
-            textView.setPadding(paddingHorizontal, paddingVertical, paddingHorizontal, paddingVertical)
+            textView.setPadding(
+                paddingHorizontal,
+                paddingVertical,
+                paddingHorizontal,
+                paddingVertical
+            )
             layoutParams.setMargins(margin, margin, margin, margin)
             textView.layoutParams = layoutParams
 
-            textView.setOnClickListener{
+            textView.setOnClickListener {
                 selectedCitiesID = if (item.id_city == selectedCitiesID?.id_city) null
                 else item
                 flexBoxCities.removeAllViews()
@@ -291,7 +328,8 @@ class FilterTokoModal(private val context: Context) : Dialog(context) {
     }
 
     private fun setBtnHapus() {
-        if (selectedValidStatusID != "-1" || selectedStatusID != "-1" || selectedVisitedID != "-1" || selectedCitiesID != null) binding.btnHapusFilter.visibility = View.VISIBLE
+        if (selectedValidStatusID != "-1" || selectedStatusID != "-1" || selectedVisitedID != "-1" || selectedCitiesID != null) binding.btnHapusFilter.visibility =
+            View.VISIBLE
         else binding.btnHapusFilter.visibility = View.GONE
     }
 }

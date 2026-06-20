@@ -74,8 +74,10 @@ class ScannerActivity : AppCompatActivity() {
         }
         codeScanner.errorCallback = ErrorCallback {
             runOnUiThread {
-                Toast.makeText(this, "Terjadi kesalahan: ${it.message}",
-                    Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    this, "Terjadi kesalahan: ${it.message}",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
 
@@ -90,8 +92,7 @@ class ScannerActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                val apiService = HttpClient.create()
-                val response = apiService.assignTukang(
+                val response = HttpClient.apiService.assignTukang(
                     idUser = createPartFromString(userId ?: "-1"),
                     idMd5 = createPartFromString(scannResult.text)
                 )
@@ -106,11 +107,13 @@ class ScannerActivity : AppCompatActivity() {
                             responseMessage = responseBody.message
 
                         }
+
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
                             responseMessage = responseBody.message
 
                         }
+
                         else -> {
 
                             responseMessage = "Gagal memindai qr tukang!"
@@ -140,19 +143,16 @@ class ScannerActivity : AppCompatActivity() {
                 alertDialog.setTitle("Pemindaian Selesai")
                 alertDialog.setMessage(responseMessage)
                 if (isSuccess) {
-                    alertDialog.setPositiveButton("Oke") {
-                            dialog, _ ->
+                    alertDialog.setPositiveButton("Oke") { dialog, _ ->
                         dialog.dismiss()
                         finish()
                     }
                 } else {
-                    alertDialog.setNegativeButton("Ulangi") {
-                        dialog, _ ->
+                    alertDialog.setNegativeButton("Ulangi") { dialog, _ ->
                         dialog.dismiss()
                         codeScanner.startPreview()
                     }
-                    alertDialog.setPositiveButton("Keluar") {
-                        dialog, _ ->
+                    alertDialog.setPositiveButton("Keluar") { dialog, _ ->
                         dialog.dismiss()
                         finish()
                     }

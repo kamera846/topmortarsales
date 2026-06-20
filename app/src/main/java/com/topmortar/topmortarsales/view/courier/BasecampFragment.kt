@@ -72,12 +72,15 @@ class BasecampFragment : Fragment() {
 
 
     private var listener: CounterItem? = null
+
     interface CounterItem {
         fun counterItem(count: Int)
     }
+
     fun setCounterItem(listener: CounterItem) {
         this.listener = listener
     }
+
     fun syncNow() {
         getContacts()
     }
@@ -111,9 +114,12 @@ class BasecampFragment : Fragment() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 var response = apiService.getListBaseCamp(distributorID = userDistributorid)
-                if (selectedCity != null) response = apiService.getListBaseCamp(distributorID = userDistributorid, cityId = selectedCity!!.id!!)
+                if (selectedCity != null) response = apiService.getListBaseCamp(
+                    distributorID = userDistributorid,
+                    cityId = selectedCity!!.id!!
+                )
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -124,6 +130,7 @@ class BasecampFragment : Fragment() {
                         listener?.counterItem(response.results.size)
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(true, "Belum ada basecamp!")
@@ -131,9 +138,14 @@ class BasecampFragment : Fragment() {
                         listener?.counterItem(0)
 
                     }
+
                     else -> {
 
-                        handleMessage(requireContext(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            requireContext(),
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         loadingState(true, getString(R.string.failed_request))
                         showBadgeRefresh(true)
 
@@ -146,7 +158,11 @@ class BasecampFragment : Fragment() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    requireContext(),
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
 
@@ -158,14 +174,16 @@ class BasecampFragment : Fragment() {
 
     private fun setRecyclerView(listItem: ArrayList<BaseCampModel>) {
 
-        val rvAdapter = BaseCampRecyclerViewAdapter(listItem, object: BaseCampRecyclerViewAdapter.ItemClickListener {
-            override fun onItemClick(data: BaseCampModel?) {
-                context?.let {
-                    navigateItemAction(it, data)
+        val rvAdapter = BaseCampRecyclerViewAdapter(
+            listItem,
+            object : BaseCampRecyclerViewAdapter.ItemClickListener {
+                override fun onItemClick(data: BaseCampModel?) {
+                    context?.let {
+                        navigateItemAction(it, data)
+                    }
                 }
-            }
 
-        })
+            })
 
         context?.let { ctx ->
             binding.rvChatList.layoutManager = LinearLayoutManager(ctx)
@@ -273,12 +291,13 @@ class BasecampFragment : Fragment() {
         } else badgeRefresh.visibility = View.GONE
     }
 
-    private val activityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_BASECAMP_FRAGMENT) {
-            val newData = it.data?.getStringExtra(REQUEST_BASECAMP_FRAGMENT)
-            if (!newData.isNullOrEmpty() && newData == SYNC_NOW) getContacts()
+    private val activityResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_BASECAMP_FRAGMENT) {
+                val newData = it.data?.getStringExtra(REQUEST_BASECAMP_FRAGMENT)
+                if (!newData.isNullOrEmpty() && newData == SYNC_NOW) getContacts()
+            }
         }
-    }
 
     private fun getCities() {
 
@@ -288,7 +307,7 @@ class BasecampFragment : Fragment() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getCities(distributorID = userDistributorid)
 
                 when (response.status) {
@@ -299,7 +318,12 @@ class BasecampFragment : Fragment() {
 
                         for (i in 0 until citiesResults!!.size) {
                             val data = citiesResults!![i]
-                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                            items.add(
+                                ModalSearchModel(
+                                    data.id_city,
+                                    "${data.nama_city} - ${data.kode_city}"
+                                )
+                            )
                         }
                         items.add(0, ModalSearchModel("-1", "Hapus Filter"))
 
@@ -309,15 +333,21 @@ class BasecampFragment : Fragment() {
 //                        binding.filterLayout.componentFilter.visibility = View.GONE
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         handleMessage(requireActivity(), "LIST CITY", "Daftar kota kosong!")
                         getContacts()
 
                     }
+
                     else -> {
 
-                        handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            requireActivity(),
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         loadingState(true, getString(R.string.failed_get_data))
                         showBadgeRefresh(true)
 
@@ -330,7 +360,11 @@ class BasecampFragment : Fragment() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    requireActivity(),
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
 
@@ -342,7 +376,7 @@ class BasecampFragment : Fragment() {
     private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
 
         searchModal = SearchModal(requireActivity(), items)
-        searchModal.setCustomDialogListener(object: SearchModal.SearchModalListener{
+        searchModal.setCustomDialogListener(object : SearchModal.SearchModalListener {
             override fun onDataReceived(data: ModalSearchModel) {
                 if (data.id == "-1") {
                     selectedCity = null
@@ -358,8 +392,10 @@ class BasecampFragment : Fragment() {
         searchModal.searchHint = "Ketik untuk mencari…"
 
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.filterLayout.componentFilter.background = AppCompatResources.getDrawable(requireContext(), R.color.black_400)
-        else binding.filterLayout.componentFilter.background = AppCompatResources.getDrawable(requireContext(), R.color.light)
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.filterLayout.componentFilter.background =
+            AppCompatResources.getDrawable(requireContext(), R.color.black_400)
+        else binding.filterLayout.componentFilter.background =
+            AppCompatResources.getDrawable(requireContext(), R.color.light)
         binding.filterLayout.componentFilter.visibility = View.GONE
         binding.filterLayout.componentFilter.setOnClickListener {
             searchModal.show()

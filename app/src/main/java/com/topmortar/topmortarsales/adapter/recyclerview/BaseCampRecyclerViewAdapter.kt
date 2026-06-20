@@ -14,14 +14,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.model.BaseCampModel
 
-class BaseCampRecyclerViewAdapter(private val chatList: ArrayList<BaseCampModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<BaseCampRecyclerViewAdapter.ChatViewHolder>() {
+class BaseCampRecyclerViewAdapter(
+    private val chatList: ArrayList<BaseCampModel>,
+    private val itemClickListener: ItemClickListener
+) : RecyclerView.Adapter<BaseCampRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
 
     interface ItemClickListener {
         fun onItemClick(data: BaseCampModel? = null)
     }
 
-    inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
@@ -30,7 +33,8 @@ class BaseCampRecyclerViewAdapter(private val chatList: ArrayList<BaseCampModel>
         fun bind(chatItem: BaseCampModel) {
 
             tvContactName.text = chatItem.nama_gudang
-            tvPhoneNumber.text = if (chatItem.nomorhp_gudang != "") "+${ chatItem.nomorhp_gudang } - ${ chatItem.kode_city }" else chatItem.kode_city
+            tvPhoneNumber.text =
+                if (chatItem.nomorhp_gudang != "") "+${chatItem.nomorhp_gudang} - ${chatItem.kode_city}" else chatItem.kode_city
 
         }
 
@@ -38,7 +42,8 @@ class BaseCampRecyclerViewAdapter(private val chatList: ArrayList<BaseCampModel>
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
 
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
         context = parent.context
         return ChatViewHolder(view)
 
@@ -49,7 +54,12 @@ class BaseCampRecyclerViewAdapter(private val chatList: ArrayList<BaseCampModel>
         val chatItem = chatList[position]
 
         holder.bind(chatItem)
-        holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
+        holder.itemView.startAnimation(
+            AnimationUtils.loadAnimation(
+                holder.itemView.context,
+                R.anim.rv_item_fade_slide_up
+            )
+        )
 
         holder.itemView.setOnClickListener { onItemClick(holder, position) }
         holder.tooltipStatus.setOnClickListener { onItemClick(holder, position) }

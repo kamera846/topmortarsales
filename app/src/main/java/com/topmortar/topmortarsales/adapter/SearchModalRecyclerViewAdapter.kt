@@ -14,7 +14,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.model.ModalSearchModel
 
-class SearchModalRecyclerViewAdapter(private val items: ArrayList<ModalSearchModel>, private val itemClickListener: ItemClickListener): RecyclerView.Adapter<SearchModalRecyclerViewAdapter.ViewHolder>() {
+class SearchModalRecyclerViewAdapter(
+    private val items: ArrayList<ModalSearchModel>,
+    private val itemClickListener: ItemClickListener
+) : RecyclerView.Adapter<SearchModalRecyclerViewAdapter.ViewHolder>() {
     private var filteredItemList: ArrayList<ModalSearchModel> = ArrayList(items)
     private var context: Context? = null
     var withEtc: Boolean = false
@@ -23,7 +26,7 @@ class SearchModalRecyclerViewAdapter(private val items: ArrayList<ModalSearchMod
         fun onItemClick(data: ModalSearchModel? = null)
     }
 
-    inner class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
+    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         private val title = itemView.findViewById<TextView>(R.id.title)
         private val etc = itemView.findViewById<TextView>(R.id.etcText)
@@ -44,19 +47,25 @@ class SearchModalRecyclerViewAdapter(private val items: ArrayList<ModalSearchMod
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): SearchModalRecyclerViewAdapter.ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_search_modal, parent, false)
+    ): ViewHolder {
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_search_modal, parent, false)
         context = parent.context
         return ViewHolder(view)
     }
 
     override fun onBindViewHolder(
-        holder: SearchModalRecyclerViewAdapter.ViewHolder,
+        holder: ViewHolder,
         position: Int
     ) {
         val item = filteredItemList[position]
         holder.bind(item)
-        holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
+        holder.itemView.startAnimation(
+            AnimationUtils.loadAnimation(
+                holder.itemView.context,
+                R.anim.rv_item_fade_slide_up
+            )
+        )
         holder.itemView.setOnClickListener {
             val animateDuration = 100L
 

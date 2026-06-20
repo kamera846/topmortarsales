@@ -15,7 +15,8 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.SuratJalanModel
 
-class SuratJalanRecyclerViewAdapter(private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<SuratJalanRecyclerViewAdapter.ViewHolder>() {
+class SuratJalanRecyclerViewAdapter(private val itemClickListener: ItemClickListener) :
+    RecyclerView.Adapter<SuratJalanRecyclerViewAdapter.ViewHolder>() {
     private var listItem: ArrayList<SuratJalanModel> = ArrayList()
     private var context: Context? = null
 
@@ -27,7 +28,7 @@ class SuratJalanRecyclerViewAdapter(private val itemClickListener: ItemClickList
         this.listItem = listItem
     }
 
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         private val ivProfile: ImageView = itemView.findViewById(R.id.iv_contact_profile)
         private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
@@ -37,7 +38,11 @@ class SuratJalanRecyclerViewAdapter(private val itemClickListener: ItemClickList
 
             ivProfile.setImageResource(R.drawable.file_list_red)
             tvContactName.text = item.no_surat_jalan
-            tvPhoneNumber.text = DateFormat.format(dateString = item.dalivery_date, inputFormat = "yyyy-MM-dd HH:mm:ss", outputFormat = "dd MMMM yyyy HH.mm")
+            tvPhoneNumber.text = DateFormat.format(
+                dateString = item.dalivery_date,
+                inputFormat = "yyyy-MM-dd HH:mm:ss",
+                outputFormat = "dd MMMM yyyy HH.mm"
+            )
 
         }
 
@@ -45,7 +50,8 @@ class SuratJalanRecyclerViewAdapter(private val itemClickListener: ItemClickList
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
         context = parent.context
         return ViewHolder(view)
 
@@ -56,7 +62,12 @@ class SuratJalanRecyclerViewAdapter(private val itemClickListener: ItemClickList
         val item = listItem[position]
 
         holder.bind(item)
-        holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
+        holder.itemView.startAnimation(
+            AnimationUtils.loadAnimation(
+                holder.itemView.context,
+                R.anim.rv_item_fade_slide_up
+            )
+        )
 
         holder.itemView.setOnClickListener {
 

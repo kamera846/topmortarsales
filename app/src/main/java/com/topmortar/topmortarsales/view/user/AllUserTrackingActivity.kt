@@ -66,7 +66,7 @@ class AllUserTrackingActivity : AppCompatActivity() {
         setContentView(binding.root)
         initView()
 
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 myOnBackPressed()
             }
@@ -93,8 +93,10 @@ class AllUserTrackingActivity : AppCompatActivity() {
 
         // Get the current theme mode (light or dark)
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(this, R.color.black_400)
-        else binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(this, R.color.light)
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background =
+            AppCompatResources.getDrawable(this, R.color.black_400)
+        else binding.llFilter.componentFilter.background =
+            AppCompatResources.getDrawable(this, R.color.light)
         binding.llFilter.componentFilter.setOnClickListener { showFilterMenu() }
 
         synchFilter()
@@ -105,80 +107,86 @@ class AllUserTrackingActivity : AppCompatActivity() {
         loadingState(true)
         binding.llFilter.componentFilter.visibility = View.GONE
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-017")
+        firebaseReference =
+            FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-017")
         childAbsent = firebaseReference?.child(FIREBASE_CHILD_ABSENT)
 
         try {
-            childAbsent?.orderByChild("lastTracking")?.addListenerForSingleValueEvent(object: ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if (snapshot.exists()) {
-                        val listUserTracking = arrayListOf<UserAbsentModel>()
+            childAbsent?.orderByChild("lastTracking")
+                ?.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (snapshot.exists()) {
+                            val listUserTracking = arrayListOf<UserAbsentModel>()
 
-                        for (item in snapshot.children) {
-                            val userIdCity = item.child("idCity").getValue(String::class.java)
-                            val userLat = item.child("lat").getValue(Double::class.java)
-                            val userLng = item.child("lng").getValue(Double::class.java)
-                            val userLevel = item.child("userLevel").getValue(String::class.java)
+                            for (item in snapshot.children) {
+                                val userIdCity = item.child("idCity").getValue(String::class.java)
+                                val userLat = item.child("lat").getValue(Double::class.java)
+                                val userLng = item.child("lng").getValue(Double::class.java)
+                                val userLevel = item.child("userLevel").getValue(String::class.java)
 
-                            if (userLat != null && userLng != null) {
-                                if (activeFilter == EMPTY_FIELD_VALUE) {
-                                    if (userKind == USER_KIND_ADMIN) {
-                                        listUserTracking.add(setListItem(item))
-                                    } else if (!userIdCity.isNullOrEmpty() && userCity == userIdCity) {
-                                        listUserTracking.add(setListItem(item))
-                                    }
-                                } else {
-                                    if (!userLevel.isNullOrEmpty() && userLevel == activeFilter) {
+                                if (userLat != null && userLng != null) {
+                                    if (activeFilter == EMPTY_FIELD_VALUE) {
                                         if (userKind == USER_KIND_ADMIN) {
                                             listUserTracking.add(setListItem(item))
                                         } else if (!userIdCity.isNullOrEmpty() && userCity == userIdCity) {
                                             listUserTracking.add(setListItem(item))
                                         }
+                                    } else {
+                                        if (!userLevel.isNullOrEmpty() && userLevel == activeFilter) {
+                                            if (userKind == USER_KIND_ADMIN) {
+                                                listUserTracking.add(setListItem(item))
+                                            } else if (!userIdCity.isNullOrEmpty() && userCity == userIdCity) {
+                                                listUserTracking.add(setListItem(item))
+                                            }
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        if (listUserTracking.isNotEmpty()) {
+                            if (listUserTracking.isNotEmpty()) {
 
-                            val rvAdapter = AllUserTrackingRVA()
-                            listUserTracking.sortByDescending { it.lastTracking }
-                            rvAdapter.setList(ArrayList(listUserTracking))
-                            rvAdapter.setOnItemClickListener(object: AllUserTrackingRVA.OnItemClickListener {
-                                override fun onItemClick(item: UserAbsentModel) {
-                                    // Do something here
-                                    val messageEvent = EventBusUtils.UserAbsentModelEvent(item)
-                                    EventBus.getDefault().post(messageEvent)
-                                    finish()
+                                val rvAdapter = AllUserTrackingRVA()
+                                listUserTracking.sortByDescending { it.lastTracking }
+                                rvAdapter.setList(ArrayList(listUserTracking))
+                                rvAdapter.setOnItemClickListener(object :
+                                    AllUserTrackingRVA.OnItemClickListener {
+                                    override fun onItemClick(item: UserAbsentModel) {
+                                        // Do something here
+                                        val messageEvent = EventBusUtils.UserAbsentModelEvent(item)
+                                        EventBus.getDefault().post(messageEvent)
+                                        finish()
+                                    }
+                                })
+
+                                binding.rvList.apply {
+                                    layoutManager =
+                                        LinearLayoutManager(this@AllUserTrackingActivity)
+                                    adapter = rvAdapter
                                 }
-                            })
 
-                            binding.rvList.apply {
-                                layoutManager = LinearLayoutManager(this@AllUserTrackingActivity)
-                                adapter = rvAdapter
+                                binding.llFilter.componentFilter.visibility = View.VISIBLE
+                                loadingState(false)
+                            } else {
+                                loadingState(true, "Belum ada pengguna yang bisa dilacak")
                             }
-
-                            binding.llFilter.componentFilter.visibility = View.VISIBLE
-                            loadingState(false)
                         } else {
                             loadingState(true, "Belum ada pengguna yang bisa dilacak")
+                            handleMessage(
+                                this@AllUserTrackingActivity, TAG_RESPONSE_CONTACT,
+                                "Belum ada pengguna yang bisa dilacak"
+                            )
                         }
-                    } else {
-                        loadingState(true, "Belum ada pengguna yang bisa dilacak")
-                        handleMessage(this@AllUserTrackingActivity, TAG_RESPONSE_CONTACT,
-                            "Belum ada pengguna yang bisa dilacak"
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        loadingState(true, "Memuat data dibatalkan")
+                        handleMessage(
+                            this@AllUserTrackingActivity, TAG_RESPONSE_CONTACT,
+                            "Failed run service. Exception $error"
                         )
                     }
-                }
 
-                override fun onCancelled(error: DatabaseError) {
-                    loadingState(true, "Memuat data dibatalkan")
-                    handleMessage(this@AllUserTrackingActivity, TAG_RESPONSE_CONTACT,
-                        "Failed run service. Exception $error"
-                    )
-                }
-
-            })
+                })
         } catch (e: Error) {
             loadingState(true, "Gagal memuat data. Error: ${e.message}")
             handleMessage(this, TAG_RESPONSE_CONTACT, e.message.toString())
@@ -191,87 +199,106 @@ class AllUserTrackingActivity : AppCompatActivity() {
         loadingState(true)
         binding.llFilter.componentFilter.visibility = View.GONE
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-017")
+        firebaseReference =
+            FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-017")
         childAbsent = firebaseReference?.child(FIREBASE_CHILD_ABSENT)
 
         try {
             lifecycleScope.launch {
-                val apiService = HttpClient.create()
+                val apiService = HttpClient.apiService
                 val response = apiService.getUsers(distributorID = userDistributorId.toString())
                 when (response.status) {
                     RESPONSE_STATUS_OK, RESPONSE_STATUS_SUCCESS -> {
                         val usersDb = response.results
-                        childAbsent?.orderByChild("lastTracking")?.addListenerForSingleValueEvent(object: ValueEventListener {
-                            override fun onDataChange(snapshot: DataSnapshot) {
-                                if (snapshot.exists()) {
-                                    val listUserTracking = arrayListOf<UserAbsentModel>()
-                                    onRefreshed = true
-                                    activeFilter = EMPTY_FIELD_VALUE
-                                    binding.llFilter.tvFilter.text = activeFilter
+                        childAbsent?.orderByChild("lastTracking")
+                            ?.addListenerForSingleValueEvent(object : ValueEventListener {
+                                override fun onDataChange(snapshot: DataSnapshot) {
+                                    if (snapshot.exists()) {
+                                        val listUserTracking = arrayListOf<UserAbsentModel>()
+                                        onRefreshed = true
+                                        activeFilter = EMPTY_FIELD_VALUE
+                                        binding.llFilter.tvFilter.text = activeFilter
 
-                                    for (item in snapshot.children) {
-                                        val userIdCity = item.child("idCity").getValue(String::class.java)
-                                        val userLat = item.child("lat").getValue(Double::class.java)
-                                        val userLng = item.child("lng").getValue(Double::class.java)
-                                        val userId = item.child("id").getValue(String::class.java) ?: "-1"
+                                        for (item in snapshot.children) {
+                                            val userIdCity =
+                                                item.child("idCity").getValue(String::class.java)
+                                            val userLat =
+                                                item.child("lat").getValue(Double::class.java)
+                                            val userLng =
+                                                item.child("lng").getValue(Double::class.java)
+                                            val userId =
+                                                item.child("id").getValue(String::class.java)
+                                                    ?: "-1"
 
-                                        if (userLat != null && userLng != null) {
-                                            val matchesUser = usersDb.find { it.id_user ==  userId}
-                                            if (matchesUser != null) {
-                                                if (matchesUser.phone_user == "0") {
-                                                    childAbsent?.child(userId)?.removeValue()
-                                                } else {
-                                                    if (userKind == USER_KIND_ADMIN) {
-                                                        listUserTracking.add(setListItem(item))
-                                                    } else if (!userIdCity.isNullOrEmpty() && userCity == userIdCity) {
-                                                        listUserTracking.add(setListItem(item))
+                                            if (userLat != null && userLng != null) {
+                                                val matchesUser =
+                                                    usersDb.find { it.id_user == userId }
+                                                if (matchesUser != null) {
+                                                    if (matchesUser.phone_user == "0") {
+                                                        childAbsent?.child(userId)?.removeValue()
+                                                    } else {
+                                                        if (userKind == USER_KIND_ADMIN) {
+                                                            listUserTracking.add(setListItem(item))
+                                                        } else if (!userIdCity.isNullOrEmpty() && userCity == userIdCity) {
+                                                            listUserTracking.add(setListItem(item))
+                                                        }
                                                     }
                                                 }
                                             }
                                         }
-                                    }
 
-                                    if (listUserTracking.isNotEmpty()) {
+                                        if (listUserTracking.isNotEmpty()) {
 
-                                        val rvAdapter = AllUserTrackingRVA()
-                                        listUserTracking.sortByDescending { it.lastTracking }
-                                        rvAdapter.setList(ArrayList(listUserTracking))
-                                        rvAdapter.setOnItemClickListener(object: AllUserTrackingRVA.OnItemClickListener {
-                                            override fun onItemClick(item: UserAbsentModel) {
-                                                // Do something here
-                                                val messageEvent = EventBusUtils.UserAbsentModelEvent(item)
-                                                EventBus.getDefault().post(messageEvent)
-                                                finish()
+                                            val rvAdapter = AllUserTrackingRVA()
+                                            listUserTracking.sortByDescending { it.lastTracking }
+                                            rvAdapter.setList(ArrayList(listUserTracking))
+                                            rvAdapter.setOnItemClickListener(object :
+                                                AllUserTrackingRVA.OnItemClickListener {
+                                                override fun onItemClick(item: UserAbsentModel) {
+                                                    // Do something here
+                                                    val messageEvent =
+                                                        EventBusUtils.UserAbsentModelEvent(item)
+                                                    EventBus.getDefault().post(messageEvent)
+                                                    finish()
+                                                }
+                                            })
+
+                                            binding.rvList.apply {
+                                                layoutManager =
+                                                    LinearLayoutManager(this@AllUserTrackingActivity)
+                                                adapter = rvAdapter
                                             }
-                                        })
 
-                                        binding.rvList.apply {
-                                            layoutManager = LinearLayoutManager(this@AllUserTrackingActivity)
-                                            adapter = rvAdapter
+                                            binding.llFilter.componentFilter.visibility =
+                                                View.VISIBLE
+                                            loadingState(false)
+                                        } else {
+                                            loadingState(
+                                                true,
+                                                "Belum ada pengguna yang bisa dilacak"
+                                            )
                                         }
-
-                                        binding.llFilter.componentFilter.visibility = View.VISIBLE
-                                        loadingState(false)
                                     } else {
                                         loadingState(true, "Belum ada pengguna yang bisa dilacak")
+                                        handleMessage(
+                                            this@AllUserTrackingActivity, TAG_RESPONSE_CONTACT,
+                                            "Belum ada pengguna yang bisa dilacak"
+                                        )
                                     }
-                                } else {
-                                    loadingState(true, "Belum ada pengguna yang bisa dilacak")
-                                    handleMessage(this@AllUserTrackingActivity, TAG_RESPONSE_CONTACT,
-                                        "Belum ada pengguna yang bisa dilacak"
+                                }
+
+                                override fun onCancelled(error: DatabaseError) {
+                                    loadingState(true, "Memuat data dibatalkan")
+                                    handleMessage(
+                                        this@AllUserTrackingActivity, TAG_RESPONSE_CONTACT,
+                                        "Failed run service. Exception $error"
                                     )
                                 }
-                            }
 
-                            override fun onCancelled(error: DatabaseError) {
-                                loadingState(true, "Memuat data dibatalkan")
-                                handleMessage(this@AllUserTrackingActivity, TAG_RESPONSE_CONTACT,
-                                    "Failed run service. Exception $error"
-                                )
-                            }
+                            })
+                    }
 
-                        })
-                    } else -> getList()
+                    else -> getList()
                 }
             }
         } catch (e: Error) {
@@ -332,20 +359,28 @@ class AllUserTrackingActivity : AppCompatActivity() {
                 R.id.option_none -> {
                     activeFilter = EMPTY_FIELD_VALUE
                     synchFilter()
-                    return@setOnMenuItemClickListener  true
-                } R.id.option_sales -> {
+                    return@setOnMenuItemClickListener true
+                }
+
+                R.id.option_sales -> {
                     activeFilter = AUTH_LEVEL_SALES
                     synchFilter()
-                    return@setOnMenuItemClickListener  true
-                } R.id.option_courier -> {
+                    return@setOnMenuItemClickListener true
+                }
+
+                R.id.option_courier -> {
                     activeFilter = AUTH_LEVEL_COURIER
                     synchFilter()
-                    return@setOnMenuItemClickListener  true
-                } R.id.option_penagihan -> {
+                    return@setOnMenuItemClickListener true
+                }
+
+                R.id.option_penagihan -> {
                     activeFilter = AUTH_LEVEL_PENAGIHAN
                     synchFilter()
-                    return@setOnMenuItemClickListener  true
-                } else -> return@setOnMenuItemClickListener false
+                    return@setOnMenuItemClickListener true
+                }
+
+                else -> return@setOnMenuItemClickListener false
             }
         }
 

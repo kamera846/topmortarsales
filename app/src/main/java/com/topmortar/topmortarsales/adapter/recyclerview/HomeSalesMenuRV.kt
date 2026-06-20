@@ -14,8 +14,9 @@ class HomeSalesMenuRV : RecyclerView.Adapter<HomeSalesMenuRV.ViewHolder>() {
     private var listItem: ArrayList<HomeMenuSalesModel> = ArrayList()
     private var context: Context? = null
 
-    inner class ViewHolder(private val binding: ItemMenuHomeSalesBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind (item: HomeMenuSalesModel, position: Int) {
+    inner class ViewHolder(private val binding: ItemMenuHomeSalesBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(item: HomeMenuSalesModel, position: Int) {
             binding.itemIcon.setBackgroundResource(item.bgColor!!)
             binding.itemIcon.setImageResource(item.icon!!)
             binding.itemTitle.text = item.title
@@ -31,7 +32,8 @@ class HomeSalesMenuRV : RecyclerView.Adapter<HomeSalesMenuRV.ViewHolder>() {
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val binding = ItemMenuHomeSalesBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding =
+            ItemMenuHomeSalesBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         context = parent.context
         return ViewHolder(binding)
     }
@@ -46,10 +48,12 @@ class HomeSalesMenuRV : RecyclerView.Adapter<HomeSalesMenuRV.ViewHolder>() {
     interface OnItemClickListener {
         fun onItemClick(item: HomeMenuSalesModel)
     }
+
     private var listener: OnItemClickListener? = null
     fun setOnItemClickListener(listener: OnItemClickListener) {
         this.listener = listener
     }
+
     fun setList(data: ArrayList<HomeMenuSalesModel>) {
         listItem = data
     }

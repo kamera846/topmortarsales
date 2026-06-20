@@ -284,8 +284,7 @@ class TrackingService : Service() {
         serviceScope.launch {
             try {
 
-                val apiService = HttpClient.create()
-                val response = apiService.savePosition(
+                val response = HttpClient.apiService.savePosition(
                     idUser = createPartFromString(uid),
                     idContact = createPartFromString(contactId),
                     type = createPartFromString(actionType),

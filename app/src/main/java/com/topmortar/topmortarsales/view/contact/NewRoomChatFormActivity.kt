@@ -103,23 +103,42 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
     private val msgMaxLength = 200
     private var selectedDate: Calendar = Calendar.getInstance()
     private var selectedCity: ModalSearchModel? = null
-    private var cities = listOf("Malang", "Gresik", "Sidoarjo", "Blitar", "Surabaya", "Jakarta", "Bandung", "Yogyakarta", "Kediri")
+    private var cities = listOf(
+        "Malang",
+        "Gresik",
+        "Sidoarjo",
+        "Blitar",
+        "Surabaya",
+        "Jakarta",
+        "Bandung",
+        "Yogyakarta",
+        "Kediri"
+    )
 
     private lateinit var phoneCategoriesFRC: FirebaseRemoteConfig
     private var spinPhoneCatItems: List<String> = listOf()
 
-    private var terminItem: List<String> = listOf("Pilih Termin Payment", "COD", "COD + Transfer", "COD + Tunai", "30 Hari", "45 Hari", "60 Hari")
+    private var terminItem: List<String> = listOf(
+        "Pilih Termin Payment",
+        "COD",
+        "COD + Transfer",
+        "COD + Tunai",
+        "30 Hari",
+        "45 Hari",
+        "60 Hari"
+    )
     private var selectedTermin: String = ""
 
-    private val coordinateLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            val latitude = it.data?.getDoubleExtra("latitude", 0.0)
-            val longitude = it.data?.getDoubleExtra("longitude", 0.0)
-            if (latitude != null && longitude != null) etMapsUrl.setText("$latitude,$longitude")
-            etMapsUrl.error = null
-            etMapsUrl.clearFocus()
+    private val coordinateLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                val latitude = it.data?.getDoubleExtra("latitude", 0.0)
+                val longitude = it.data?.getDoubleExtra("longitude", 0.0)
+                if (latitude != null && longitude != null) etMapsUrl.setText("$latitude,$longitude")
+                etMapsUrl.error = null
+                etMapsUrl.clearFocus()
+            }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -186,15 +205,15 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             if (it.selectedItemPosition < 1) ""
             else it.selectedItem.toString()
         }
-        val phone = "${ etPhone.text }"
+        val phone = "${etPhone.text}"
 //        val phone2 = "${ binding.etPhone2.text }"
-        val name = "${ etName.text }"
-        var birthday = "${ etBirthday.text }"
-        val owner = "${ etOwner.text }"
+        val name = "${etName.text}"
+        var birthday = "${etBirthday.text}"
+        val owner = "${etOwner.text}"
         val cityId = sessionManager.userCityID().let { if (!it.isNullOrEmpty()) it else "0" }
-        val mapsUrl = "${ etMapsUrl.text }"
-        val message = "${ etMessage.text }"
-        val address = "${ binding.etAddress.text }"
+        val mapsUrl = "${etMapsUrl.text}"
+        val message = "${etMessage.text}"
+        val address = "${binding.etAddress.text}"
         val termin = if (selectedTermin.isEmpty()) "-1" else {
             when (selectedTermin) {
                 terminItem[1] -> STATUS_TERMIN_COD
@@ -207,12 +226,24 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             }
         }
         val userId = sessionManager.userID().let { if (!it.isNullOrEmpty()) it else "" }
-        val currentName = sessionManager.fullName().let { fullName -> if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName().let { username -> if (!username.isNullOrEmpty()) username else "" } }
+        val currentName = sessionManager.fullName().let { fullName ->
+            if (!fullName.isNullOrEmpty()) fullName else sessionManager.userName()
+                .let { username -> if (!username.isNullOrEmpty()) username else "" }
+        }
 
-        if (!formValidation(phone = phone, name = name, owner = owner, mapsUrl = mapsUrl, message = message, address = address, termin = termin)) return
+        if (!formValidation(
+                phone = phone,
+                name = name,
+                owner = owner,
+                mapsUrl = mapsUrl,
+                message = message,
+                address = address,
+                termin = termin
+            )
+        ) return
 
         birthday = if (birthday.isEmpty()) "0000-00-00"
-        else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
+        else DateFormat.format("${etBirthday.text}", "dd MMMM yyyy", "yyyy-MM-dd")
 
 //        if (iLocation.isNullOrEmpty()) cityId = "0"
 
@@ -254,7 +285,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                 val rbCurrentName = createPartFromString(currentName)
                 val rbTermin = createPartFromString(termin)
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = message.let {
                     if (it.isEmpty()) {
                         apiService.insertContact(
@@ -296,7 +327,10 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                     when (responseBody.status) {
                         RESPONSE_STATUS_OK -> {
 
-                            handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, message.let { if (it.isNotEmpty()) "Berhasil menyimpan & mengirim pesan!" else "Berhasil menyimpan kontak!" })
+                            handleMessage(
+                                this@NewRoomChatFormActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                message.let { if (it.isNotEmpty()) "Berhasil menyimpan & mengirim pesan!" else "Berhasil menyimpan kontak!" })
                             loadingState(false)
 
                             val resultIntent = Intent()
@@ -306,22 +340,36 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                             finish()
 
                         }
+
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, message.let { if (it.isNotEmpty()) "Gagal mengirim pesan: ${ responseBody.message }" else "Gagal menyimpan kontak: ${ responseBody.message }" })
+                            handleMessage(
+                                this@NewRoomChatFormActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                message.let { if (it.isNotEmpty()) "Gagal mengirim pesan: ${responseBody.message}" else "Gagal menyimpan kontak: ${responseBody.message}" })
                             loadingState(false)
 
                         }
+
                         RESPONSE_STATUS_ERROR -> {
 
-                            val errorMessages = responseBody.error?.messages.let { if (it?.size != 0) it?.get(0) else "" }
-                            handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, "Error Code ${ responseBody.error?.code } $errorMessages")
+                            val errorMessages =
+                                responseBody.error?.messages.let { if (it?.size != 0) it?.get(0) else "" }
+                            handleMessage(
+                                this@NewRoomChatFormActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "Error Code ${responseBody.error?.code} $errorMessages"
+                            )
                             loadingState(false)
 
                         }
+
                         else -> {
 
-                            handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, message.let { if (it.isNotEmpty()) "Gagal mengirim pesan" else "Gagal menyimpan kontak" })
+                            handleMessage(
+                                this@NewRoomChatFormActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                message.let { if (it.isNotEmpty()) "Gagal mengirim pesan" else "Gagal menyimpan kontak" })
                             loadingState(false)
 
                         }
@@ -329,7 +377,10 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
                 } else {
 
-                    handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, message.let { if (it.isNotEmpty()) "Gagal mengirim pesan. Error: " + response.message() else "Gagal menyimpan kontak. Error: " + response.message() })
+                    handleMessage(
+                        this@NewRoomChatFormActivity,
+                        TAG_RESPONSE_MESSAGE,
+                        message.let { if (it.isNotEmpty()) "Gagal mengirim pesan. Error: " + response.message() else "Gagal menyimpan kontak. Error: " + response.message() })
                     loadingState(false)
 
                 }
@@ -340,8 +391,15 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@NewRoomChatFormActivity, "Failed NewRoomChatFormActivity on sendMessage(). Catch: ${e.message}")
-                handleMessage(this@NewRoomChatFormActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@NewRoomChatFormActivity,
+                    "Failed NewRoomChatFormActivity on sendMessage(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@NewRoomChatFormActivity,
+                    TAG_RESPONSE_MESSAGE,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(false)
 
             }
@@ -373,7 +431,11 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
     private fun checkLocationPermission() {
         val urlUtility = URLUtility(this)
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             if (urlUtility.isLocationEnabled(this)) {
 
                 urlUtility.requestLocationUpdate()
@@ -382,13 +444,21 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                 val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                 startActivity(enableLocationIntent)
             }
-        } else ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+        } else ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+            LOCATION_PERMISSION_REQUEST_CODE
+        )
     }
 
     private fun getCoordinate() {
-        val data = "${ etMapsUrl.text }"
+        val data = "${etMapsUrl.text}"
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             val intent = Intent(this, MapsActivity::class.java)
             intent.putExtra(CONST_MAPS, data)
             intent.putExtra(GET_COORDINATE, true)
@@ -479,7 +549,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             }
 
         })
-        etStoreLocated.addTextChangedListener (object : TextWatcher {
+        etStoreLocated.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
             }
@@ -512,7 +582,8 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         } else {
 
             btnSubmit.isEnabled = true
-            btnSubmit.text = if (etMessage.text.isNullOrEmpty()) "Simpan Kontak" else "Simpan & Kirim Pesan"
+            btnSubmit.text =
+                if (etMessage.text.isNullOrEmpty()) "Simpan Kontak" else "Simpan & Kirim Pesan"
             btnSubmit.setBackgroundColor(ContextCompat.getColor(this, R.color.primary))
 
         }
@@ -520,7 +591,15 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
     }
 
 
-    private fun formValidation(phone: String, name: String, owner: String = "", mapsUrl: String = "", message: String = "", address: String, termin: String = "-1"): Boolean {
+    private fun formValidation(
+        phone: String,
+        name: String,
+        owner: String = "",
+        mapsUrl: String = "",
+        message: String = "",
+        address: String,
+        termin: String = "-1"
+    ): Boolean {
         return if (phone.isEmpty()) {
             etPhone.error = "Nomor telpon wajib diisi!"
             etPhone.requestFocus()
@@ -627,7 +706,12 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
         spinTermin.adapter = adapter
         spinTermin.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 selectedTermin = if (position != 0) terminItem[position]
                 else ""
             }
@@ -661,7 +745,11 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         selectedCity = data
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
@@ -669,8 +757,15 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             else {
                 val customUtility = CustomUtility(this)
                 if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    val message = "Izin lokasi diperlukan untuk fitur ini. Izinkan aplikasi mengakses lokasi perangkat."
-                    customUtility.showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE) }
+                    val message =
+                        "Izin lokasi diperlukan untuk fitur ini. Izinkan aplikasi mengakses lokasi perangkat."
+                    customUtility.showPermissionDeniedSnackbar(message) {
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                            LOCATION_PERMISSION_REQUEST_CODE
+                        )
+                    }
                 } else customUtility.showPermissionDeniedDialog("Izin lokasi diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
             }
         }

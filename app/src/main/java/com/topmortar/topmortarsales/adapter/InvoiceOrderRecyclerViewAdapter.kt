@@ -12,7 +12,8 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.model.DetailSuratJalanModel
 
 @SuppressLint("SetTextI18n")
-class InvoiceOrderRecyclerViewAdapter : RecyclerView.Adapter<InvoiceOrderRecyclerViewAdapter.ViewHolder>() {
+class InvoiceOrderRecyclerViewAdapter :
+    RecyclerView.Adapter<InvoiceOrderRecyclerViewAdapter.ViewHolder>() {
     private var listItem: ArrayList<DetailSuratJalanModel> = ArrayList()
     private var context: Context? = null
 
@@ -25,7 +26,8 @@ class InvoiceOrderRecyclerViewAdapter : RecyclerView.Adapter<InvoiceOrderRecycle
         private val tvProductId: TextView = itemView.findViewById(R.id.tv_product_id)
         private val tvQtyNumber: TextView = itemView.findViewById(R.id.tv_qty_number)
         private val tvProductName: TextView = itemView.findViewById(R.id.tv_product_name)
-        private val tvProductSerialNumber: TextView = itemView.findViewById(R.id.tv_product_serial_number)
+        private val tvProductSerialNumber: TextView =
+            itemView.findViewById(R.id.tv_product_serial_number)
         private val tvVoucher: TextView = itemView.findViewById(R.id.tv_voucher)
 
         fun bind(item: DetailSuratJalanModel) {
@@ -53,7 +55,8 @@ class InvoiceOrderRecyclerViewAdapter : RecyclerView.Adapter<InvoiceOrderRecycle
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_invoice_order, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_invoice_order, parent, false)
         context = parent.context
         return ViewHolder(view)
 
@@ -64,7 +67,12 @@ class InvoiceOrderRecyclerViewAdapter : RecyclerView.Adapter<InvoiceOrderRecycle
         val item = listItem[position]
 
         holder.bind(item)
-        holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
+        holder.itemView.startAnimation(
+            AnimationUtils.loadAnimation(
+                holder.itemView.context,
+                R.anim.rv_item_fade_slide_up
+            )
+        )
 
         val animateDuration = 200L
 

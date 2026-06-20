@@ -58,17 +58,18 @@ class ManageGudangActivity : AppCompatActivity() {
     private var selectedCity: ModalSearchModel? = null
     private var citiesResults: ArrayList<CityModel> = arrayListOf()
 
-    private val activityResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == RESULT_OK) {
-            val resultData = it.data?.getStringExtra(REQUEST_BASECAMP_FRAGMENT)
+    private val activityResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                val resultData = it.data?.getStringExtra(REQUEST_BASECAMP_FRAGMENT)
 
-            if (resultData == SYNC_NOW) {
+                if (resultData == SYNC_NOW) {
 
-                getList()
+                    getList()
 
+                }
             }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,7 +86,8 @@ class ManageGudangActivity : AppCompatActivity() {
         binding.btnFabAdd.setOnClickListener { navigateFab() }
 
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background = getDrawable(R.color.black_400)
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background =
+            getDrawable(R.color.black_400)
         else binding.llFilter.componentFilter.background = getDrawable(R.color.light)
         binding.llFilter.componentFilter.visibility = View.GONE
         binding.llFilter.componentFilter.setOnClickListener {
@@ -109,12 +111,20 @@ class ManageGudangActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = when (userKind) {
                     USER_KIND_ADMIN -> {
-                        if (selectedCity != null) apiService.getListGudang(cityId = selectedCity?.id!!, distributorID = userDistributorId)
+                        if (selectedCity != null) apiService.getListGudang(
+                            cityId = selectedCity?.id!!,
+                            distributorID = userDistributorId
+                        )
                         else apiService.getListGudang(distributorID = userDistributorId)
-                    } else -> apiService.getListGudang(cityId = userCity, distributorID = userDistributorId)
+                    }
+
+                    else -> apiService.getListGudang(
+                        cityId = userCity,
+                        distributorID = userDistributorId
+                    )
                 }
 
                 when (response.status) {
@@ -125,15 +135,21 @@ class ManageGudangActivity : AppCompatActivity() {
                         showBadgeRefresh(false)
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(true, "Belum ada gudang!")
                         showBadgeRefresh(false)
 
                     }
+
                     else -> {
 
-                        handleMessage(this@ManageGudangActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@ManageGudangActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         loadingState(true, getString(R.string.failed_request))
                         showBadgeRefresh(true)
 
@@ -142,8 +158,15 @@ class ManageGudangActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                FirebaseUtils.logErr(this@ManageGudangActivity, "Failed ManageGudangActivity on getList(). Catch: ${e.message}")
-                handleMessage(this@ManageGudangActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@ManageGudangActivity,
+                    "Failed ManageGudangActivity on getList(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@ManageGudangActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
 
@@ -155,12 +178,14 @@ class ManageGudangActivity : AppCompatActivity() {
 
     private fun setRecyclerView(listItem: ArrayList<GudangModel>) {
 
-        val rvAdapter = GudangRecyclerViewAdapter(listItem, object: GudangRecyclerViewAdapter.ItemClickListener {
-            override fun onItemClick(data: GudangModel?) {
-                navigateItemAction(data)
-            }
+        val rvAdapter = GudangRecyclerViewAdapter(
+            listItem,
+            object : GudangRecyclerViewAdapter.ItemClickListener {
+                override fun onItemClick(data: GudangModel?) {
+                    navigateItemAction(data)
+                }
 
-        })
+            })
 
         binding.rvChatList.layoutManager = LinearLayoutManager(this@ManageGudangActivity)
         binding.rvChatList.adapter = rvAdapter
@@ -257,7 +282,7 @@ class ManageGudangActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {
@@ -268,7 +293,12 @@ class ManageGudangActivity : AppCompatActivity() {
 
                         for (i in 0 until citiesResults.size) {
                             val data = citiesResults[i]
-                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                            items.add(
+                                ModalSearchModel(
+                                    data.id_city,
+                                    "${data.nama_city} - ${data.kode_city}"
+                                )
+                            )
                         }
                         items.add(0, ModalSearchModel("-1", "Hapus Filter"))
 
@@ -276,14 +306,20 @@ class ManageGudangActivity : AppCompatActivity() {
                         binding.llFilter.componentFilter.visibility = View.VISIBLE
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         handleMessage(this@ManageGudangActivity, "LIST CITY", "Daftar kota kosong!")
 
                     }
+
                     else -> {
 
-                        handleMessage(this@ManageGudangActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@ManageGudangActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
 
                     }
                 }
@@ -291,8 +327,15 @@ class ManageGudangActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
 
-                FirebaseUtils.logErr(this@ManageGudangActivity, "Failed ManageGudangActivity on getCities(). Catch: ${e.message}")
-                handleMessage(this@ManageGudangActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@ManageGudangActivity,
+                    "Failed ManageGudangActivity on getCities(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@ManageGudangActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
 
             }
 
@@ -302,7 +345,7 @@ class ManageGudangActivity : AppCompatActivity() {
     private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
 
         searchModal = SearchModal(this, items)
-        searchModal.setCustomDialogListener(object: SearchModal.SearchModalListener{
+        searchModal.setCustomDialogListener(object : SearchModal.SearchModalListener {
             override fun onDataReceived(data: ModalSearchModel) {
                 if (data.id == "-1") {
                     selectedCity = null

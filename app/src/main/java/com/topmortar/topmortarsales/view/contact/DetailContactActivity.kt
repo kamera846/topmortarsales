@@ -132,7 +132,6 @@ import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.convertDpToPx
 import com.topmortar.topmortarsales.commons.utils.createPartFromString
 import com.topmortar.topmortarsales.commons.utils.handleMessage
-import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityDetailContactBinding
 import com.topmortar.topmortarsales.databinding.ModalEditHobiBinding
@@ -168,7 +167,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     PingUtility.PingResultInterface {
 
     private lateinit var progressBar: CustomProgressBar
-    private lateinit var apiService: ApiService
     private lateinit var sessionManager: SessionManager
     private val userKind get() = sessionManager.userKind().toString()
     private val userID get() = sessionManager.userID().toString()
@@ -256,13 +254,30 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var itemSendMessage: ContactModel? = null
     private var isContactXSource = false
 
-    private var statusItem: List<String> = listOf("Reset Pilihan", "Data - New Customer", "Passive - Long time no visit", "Active - Need a visit", "Blacklist - Cannot be visited", "Bid - Customers are being Bargained")
+    private var statusItem: List<String> = listOf(
+        "Reset Pilihan",
+        "Data - New Customer",
+        "Passive - Long time no visit",
+        "Active - Need a visit",
+        "Blacklist - Cannot be visited",
+        "Bid - Customers are being Bargained"
+    )
     private var statusWeeklyVisitItem: List<String> = listOf("Reset Pilihan", "Active")
-    private var terminItem: List<String> = listOf("Reset Pilihan", "COD", "COD + Transfer", "COD + Tunai", "30 Hari", "45 Hari", "60 Hari")
+    private var terminItem: List<String> = listOf(
+        "Reset Pilihan",
+        "COD",
+        "COD + Transfer",
+        "COD + Tunai",
+        "30 Hari",
+        "45 Hari",
+        "60 Hari"
+    )
     private var paymentMethodItem: List<String> = listOf("Reset Pilihan", "Tunai", "Transfer")
-    private var clusterItem: List<String> = listOf("Reset Pilihan", "Data Cluster 1", "Data Cluster 2", "Data Cluster 3")
+    private var clusterItem: List<String> =
+        listOf("Reset Pilihan", "Data Cluster 1", "Data Cluster 2", "Data Cluster 3")
     private var reputationItem: List<String> = listOf("Reset Pilihan", "Good", "Bad")
-    private var hariBayarItem: List<String> = listOf("Reset Pilihan", "Bebas", "Senin", "Selasa", "Rabu", "Kamis", "Jum'at", "Sabtu")
+    private var hariBayarItem: List<String> =
+        listOf("Reset Pilihan", "Bebas", "Senin", "Selasa", "Rabu", "Kamis", "Jum'at", "Sabtu")
     private var spinPhoneCatItems: List<String> = listOf()
     private var selectedStatus: String = ""
     private var selectedWeeklyVisitStatus: String = ""
@@ -322,7 +337,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private lateinit var phoneCategoriesFRC: FirebaseRemoteConfig
 
     private val detailLauncher = registerForActivityResult(
-    ActivityResultContracts.StartActivityForResult()
+        ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == RESULT_OK) {
             val data = result.data
@@ -335,7 +350,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     }
 
     private val coordinateLauncher = registerForActivityResult(
-    ActivityResultContracts.StartActivityForResult()
+        ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == RESULT_OK) {
             val data = result.data
@@ -351,36 +366,44 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
     }
 
-    private val cameraPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-        if (!isGranted) {
-            handleMessage(this@DetailContactActivity, "CAMERA ACCESS DENIED", "Izin kamera ditolak")
+    private val cameraPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (!isGranted) {
+                handleMessage(
+                    this@DetailContactActivity,
+                    "CAMERA ACCESS DENIED",
+                    "Izin kamera ditolak"
+                )
+            }
+            etKtp.clearFocus()
         }
-        etKtp.clearFocus()
-    }
 
-    private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK) {
-            val data: Intent? = result.data
-            selectedUri = if (data == null || data.data == null) currentPhotoUri else data.data
-            tvSelectedKtp.text = "File terpilih: " + selectedUri?.let { getFileNameFromUri(it) }
+    private val imagePickerLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val data: Intent? = result.data
+                selectedUri = if (data == null || data.data == null) currentPhotoUri else data.data
+                tvSelectedKtp.text = "File terpilih: " + selectedUri?.let { getFileNameFromUri(it) }
+            }
+            etKtp.clearFocus()
         }
-        etKtp.clearFocus()
-    }
 
-    private val imgMessagePickerLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK) {
-            val data: Intent? = result.data
-            selectedUri = if (data == null || data.data == null) currentPhotoUri else data.data
-            sendMessageModal.setUri(selectedUri)
-            sendMessageModal.show()
+    private val imgMessagePickerLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val data: Intent? = result.data
+                selectedUri = if (data == null || data.data == null) currentPhotoUri else data.data
+                sendMessageModal.setUri(selectedUri)
+                sendMessageModal.show()
+            }
         }
-    }
 
-    private val sendMessageLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK) {
-            getDetailContact(false)
+    private val sendMessageLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                getDetailContact(false)
+            }
         }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -398,10 +421,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         progressBar.setCancelable(false)
         progressBar.setMessage(getString(R.string.txt_loading))
 
-        apiService = HttpClient.create()
-
         if (CustomUtility(this).isUserWithOnlineStatus()) {
-            CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-003", userID)
+            CustomUtility(this).setUserStatusOnline(
+                true,
+                userDistributorIds ?: "-custom-003",
+                userID
+            )
         }
 
         phoneCategoriesFRC = FirebaseRemoteConfig.getInstance()
@@ -413,13 +438,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         phoneCategoriesFRC.fetchAndActivate()
             .addOnCompleteListener(this) {
-                    val itemsJson = phoneCategoriesFRC.getString(PHONE_CATEGORIES)
-                    val itemsArray = JSONArray(itemsJson)
-                    val items = Array(itemsArray.length()) { i -> itemsArray.getString(i) }
+                val itemsJson = phoneCategoriesFRC.getString(PHONE_CATEGORIES)
+                val itemsArray = JSONArray(itemsJson)
+                val items = Array(itemsArray.length()) { i -> itemsArray.getString(i) }
 
-                    spinPhoneCatItems = items.toList()
+                spinPhoneCatItems = items.toList()
 
-                val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, spinPhoneCatItems)
+                val adapter =
+                    ArrayAdapter(this, android.R.layout.simple_spinner_item, spinPhoneCatItems)
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
                 binding.spinPhoneCategories1.adapter = adapter
@@ -428,7 +454,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 initView()
             }
 
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 myOnBackPressed()
             }
@@ -529,7 +555,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         // Setup Phone Toggle
         binding.itemPhone2.visibility = View.VISIBLE
-        binding.tvPhoneContainer.setPadding(0,0,0, convertDpToPx(12, this))
+        binding.tvPhoneContainer.setPadding(0, 0, 0, convertDpToPx(12, this))
         binding.togglePhoneSize.visibility = View.VISIBLE
 
         // Setup Date Picker Dialog
@@ -665,7 +691,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             if (!isPhoneFieldOpened) {
                 isPhoneFieldOpened = true
                 val startHeight = binding.tvPhoneContainer.height
-                binding.tvPhoneContainer.measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+                binding.tvPhoneContainer.measure(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
                 val targetHeight = binding.tvPhoneContainer.measuredHeight
                 phoneAnimation(startHeight, targetHeight)
             } else {
@@ -795,22 +824,34 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val tooltipMapsText = "Maps URL"
         val tooltipMapsTextOpen = "Tekan untuk menampilkan lokasi pada maps"
         tooltipMaps.setOnClickListener {
-            if (tvMaps.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsTextOpen)
+            if (tvMaps.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(
+                tooltipMaps,
+                tooltipMapsTextOpen
+            )
             else TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsText)
         }
         tooltipMaps.setOnLongClickListener {
-            if (tvMaps.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsTextOpen)
+            if (tvMaps.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(
+                tooltipMaps,
+                tooltipMapsTextOpen
+            )
             else TooltipCompat.setTooltipText(tooltipMaps, tooltipMapsText)
             false
         }
         val tooltipKtpText = "Ktp File"
         val tooltipKtpTextOpen = "Tekan untuk menampilkan KTP dan melihat detailnya"
         tooltipKtp.setOnClickListener {
-            if (tvKtp.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(tooltipKtp, tooltipKtpTextOpen)
+            if (tvKtp.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(
+                tooltipKtp,
+                tooltipKtpTextOpen
+            )
             else TooltipCompat.setTooltipText(tooltipKtp, tooltipKtpText)
         }
         tooltipKtp.setOnLongClickListener {
-            if (tvKtp.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(tooltipKtp, tooltipKtpTextOpen)
+            if (tvKtp.text != EMPTY_FIELD_VALUE) TooltipCompat.setTooltipText(
+                tooltipKtp,
+                tooltipKtpTextOpen
+            )
             else TooltipCompat.setTooltipText(tooltipKtp, tooltipKtpText)
             false
         }
@@ -819,7 +860,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun checkLocationPermission() {
         val urlUtility = URLUtility(this)
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             if (urlUtility.isLocationEnabled(this)) {
 
                 urlUtility.requestLocationUpdate()
@@ -828,13 +873,21 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val enableLocationIntent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                 startActivity(enableLocationIntent)
             }
-        } else ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+        } else ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+            LOCATION_PERMISSION_REQUEST_CODE
+        )
     }
 
     private fun getCoordinate() {
-        val data = "${ etMaps.text }"
+        val data = "${etMaps.text}"
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             val intent = Intent(this, MapsActivity::class.java)
             intent.putExtra(CONST_MAPS, data)
             intent.putExtra(GET_COORDINATE, true)
@@ -852,10 +905,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     searchClusterModal.show()
                     true
                 }
+
                 R.id.option_edit_hobi -> {
                     showModalEditHobi()
                     true
                 }
+
                 else -> false
             }
         }
@@ -897,7 +952,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 etPhoneContainer.visibility = View.VISIBLE
                 etOwnerContainer.visibility = View.VISIBLE
-                if (sessionManager.userKind() == USER_KIND_ADMIN_CITY) etLocationContainer.visibility = View.GONE
+                if (sessionManager.userKind() == USER_KIND_ADMIN_CITY) etLocationContainer.visibility =
+                    View.GONE
                 else etLocationContainer.visibility = View.VISIBLE
                 etMapsContainer.visibility = View.VISIBLE
                 etBirthdayContainer.visibility = View.VISIBLE
@@ -928,14 +984,16 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 if (iCredit.isNullOrEmpty()) binding.etCredit.setText("")
 
                 // Status
-                statusContainer.visibility = if (userKind == USER_KIND_ADMIN) View.VISIBLE else View.GONE
+                statusContainer.visibility =
+                    if (userKind == USER_KIND_ADMIN) View.VISIBLE else View.GONE
                 statusContainer.setBackgroundResource(R.drawable.et_background)
                 tooltipStatus.visibility = View.GONE
                 tvStatus.visibility = View.GONE
                 spinStatus.visibility = View.VISIBLE
 
                 // Weekly Visit Status
-                binding.weeklyVisitContainer.visibility = if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) View.VISIBLE else View.GONE
+                binding.weeklyVisitContainer.visibility =
+                    if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) View.VISIBLE else View.GONE
                 binding.weeklyVisitContainer.setBackgroundResource(R.drawable.et_background)
                 binding.tooltipWeeklyVisit.visibility = View.GONE
                 binding.tvWeeklyVisit.visibility = View.GONE
@@ -1035,7 +1093,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 // Interval Visit
                 binding.intervalVisitContainer.setBackgroundResource(R.drawable.background_rounded_16)
                 binding.etIntervalVisit.isEnabled = false
-                if (iIntervalVisit.isNullOrEmpty()) binding.etIntervalVisit.setText(EMPTY_FIELD_VALUE)
+                if (iIntervalVisit.isNullOrEmpty()) binding.etIntervalVisit.setText(
+                    EMPTY_FIELD_VALUE
+                )
                 else binding.etIntervalVisit.setText(iIntervalVisit)
 
                 // Credit
@@ -1108,7 +1168,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
     private fun editConfirmation() {
 
-        if (!formValidation("${ etPhone.text }","${ binding.etPhone2.text }","${ etName.text }")) return
+        if (!formValidation("${etPhone.text}", "${binding.etPhone2.text}", "${etName.text}")) return
 
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Konfirmasi Perubahan")
@@ -1125,19 +1185,19 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private fun saveEdit() {
 
         val pPhoneCategory1 = binding.spinPhoneCategories1.let {
-            if (it.selectedItemPosition < 1) "" else "${ it.selectedItem }"
+            if (it.selectedItemPosition < 1) "" else "${it.selectedItem}"
         }
-        val pPhone = "${ etPhone.text }"
+        val pPhone = "${etPhone.text}"
         val pPhoneCategory2 = binding.spinPhoneCategories2.let {
-            if (it.selectedItemPosition < 1) "" else "${ it.selectedItem }"
+            if (it.selectedItemPosition < 1) "" else "${it.selectedItem}"
         }
         val pPhone2 = binding.etPhone2.text.let { if (it.toString().isEmpty()) "0" else "$it" }
-        val pName = "${ etName.text }"
-        val pOwner = "${ etOwner.text }"
-        var pBirthday = "${ etBirthday.text }"
-        val pMapsUrl = "${ etMaps.text }"
-        val pAddress = "${ etAddress.text }"
-        val pHobiContact = "${ binding.etHobiContact.text }"
+        val pName = "${etName.text}"
+        val pOwner = "${etOwner.text}"
+        var pBirthday = "${etBirthday.text}"
+        val pMapsUrl = "${etMaps.text}"
+        val pAddress = "${etAddress.text}"
+        val pHobiContact = "${binding.etHobiContact.text}"
         val pIsSendContent = if (binding.isSendContent.isChecked) "1" else "0"
         val pIntervalVisit = binding.etIntervalVisit.text.toString()
         val textCredit = binding.etCredit.text.toString()
@@ -1147,7 +1207,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         val priceCredit = if (textCredit.isNotEmpty()) textCredit.toDouble() else 0.0
         val pCredit = "${priceCredit.toInt()}"
         val formatedCredit = CurrencyFormat.format(priceCredit)
-        val pStatus = if (selectedStatus.isEmpty()) "" else selectedStatus.substringBefore(" - ").lowercase(Locale.getDefault())
+        val pStatus = if (selectedStatus.isEmpty()) "" else selectedStatus.substringBefore(" - ")
+            .lowercase(Locale.getDefault())
         val pWeeklyVisitStatus = if (selectedWeeklyVisitStatus.isEmpty()) "0" else "1"
         val pPaymentMethod = when (selectedPaymentMethod) {
             paymentMethodItem[1] -> PAYMENT_TUNAI
@@ -1204,7 +1265,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             val byteArray = inputStream?.readBytes()
 
             if (byteArray != null) {
-                val requestFile: RequestBody = byteArray.toRequestBody("image/*".toMediaTypeOrNull())
+                val requestFile: RequestBody =
+                    byteArray.toRequestBody("image/*".toMediaTypeOrNull())
                 imagePart = MultipartBody.Part.createFormData("ktp", "image.jpg", requestFile)
             } else {
                 handleMessage(this, TAG_RESPONSE_CONTACT, "Gambar tidak ditemukan")
@@ -1212,7 +1274,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
 
         pBirthday = if (pBirthday.isEmpty() || pBirthday == EMPTY_FIELD_VALUE) "0000-00-00"
-        else DateFormat.format("${ etBirthday.text }", "dd MMMM yyyy", "yyyy-MM-dd")
+        else DateFormat.format("${etBirthday.text}", "dd MMMM yyyy", "yyyy-MM-dd")
 
         val pCityID = if (selectedCity != null) selectedCity!!.id else "0"
         val pPromoID = if (selectedPromo != null) selectedPromo!!.id else "0"
@@ -1262,7 +1324,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbPhoneCategory1 = createPartFromString(formatPhoneNumber(pPhoneCategory1))
                 val rbPhone = createPartFromString(formatPhoneNumber(pPhone))
                 val rbPhoneCategory2 = createPartFromString(pPhoneCategory2)
-                val rbPhone2 = createPartFromString(pPhone2.let{ if (it == "0") it else formatPhoneNumber(it) })
+                val rbPhone2 =
+                    createPartFromString(pPhone2.let { if (it == "0") it else formatPhoneNumber(it) })
                 val rbName = createPartFromString(pName)
                 val rbOwner = createPartFromString(pOwner)
                 val rbBirthday = createPartFromString(pBirthday)
@@ -1283,7 +1346,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 val rbJamBayar = createPartFromString(pJamBayar)
                 val rbPromoId = createPartFromString(pPromoID!!)
 
-                val response = apiService.editContact(
+                val response = HttpClient.apiService.editContact(
                     id = rbId,
                     phoneCategory1 = rbPhoneCategory1,
                     phone = rbPhone,
@@ -1333,18 +1396,22 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             )
                             setupDialogSendMessage(itemSendMessage)
 
-                            tvName.text = "${ etName.text }"
+                            tvName.text = "${etName.text}"
 
-                            val iPhoneCat1Position = binding.spinPhoneCategories1.selectedItemPosition
+                            val iPhoneCat1Position =
+                                binding.spinPhoneCategories1.selectedItemPosition
                             if (iPhoneCat1Position == 0) binding.tvPhoneCat1.text = "Nomor 1"
-                            else binding.tvPhoneCat1.text = "${ binding.spinPhoneCategories1.selectedItem }"
+                            else binding.tvPhoneCat1.text =
+                                "${binding.spinPhoneCategories1.selectedItem}"
 
-                            tvPhone.text = "+" + formatPhoneNumber("${ etPhone.text }")
-                            etPhone.setText(formatPhoneNumber("${ etPhone.text }"))
+                            tvPhone.text = "+" + formatPhoneNumber("${etPhone.text}")
+                            etPhone.setText(formatPhoneNumber("${etPhone.text}"))
 
-                            val iPhoneCat2Position = binding.spinPhoneCategories2.selectedItemPosition
+                            val iPhoneCat2Position =
+                                binding.spinPhoneCategories2.selectedItemPosition
                             if (iPhoneCat2Position == 0) binding.tvPhoneCat2.text = "Nomor 2"
-                            else binding.tvPhoneCat2.text = "${ binding.spinPhoneCategories2.selectedItem }"
+                            else binding.tvPhoneCat2.text =
+                                "${binding.spinPhoneCategories2.selectedItem}"
 
                             val iPhone2 = binding.etPhone2.text.toString()
                             if (iPhone2.isNotEmpty() && iPhone2 != "0") {
@@ -1355,8 +1422,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                 binding.etPhone2.setText("")
                             }
 
-                            iAddress = "${ etAddress.text }"
-                            iHobiContact = "${ binding.etHobiContact.text }"
+                            iAddress = "${etAddress.text}"
+                            iHobiContact = "${binding.etHobiContact.text}"
                             iSendContent = binding.isSendContent.isChecked
 
                             iIntervalVisit = pIntervalVisit
@@ -1366,28 +1433,30 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 //                            loadingState(false)
 //                            toggleEdit(false)
 
-                            if (!etOwner.text.isNullOrEmpty()) tvOwner.text = "${ etOwner.text }"
+                            if (!etOwner.text.isNullOrEmpty()) tvOwner.text = "${etOwner.text}"
                             else tvOwner.text = EMPTY_FIELD_VALUE
-                            if (!etBirthday.text.isNullOrEmpty()) tvBirthday.text = "${ etBirthday.text }"
+                            if (!etBirthday.text.isNullOrEmpty()) tvBirthday.text =
+                                "${etBirthday.text}"
                             else tvBirthday.text = EMPTY_FIELD_VALUE
                             if (!etMaps.text.isNullOrEmpty()) {
                                 tvMaps.text = "Tekan untuk menampilkan lokasi"
-                                iMapsUrl = "${ etMaps.text }"
+                                iMapsUrl = "${etMaps.text}"
                             } else {
                                 tvMaps.text = EMPTY_FIELD_VALUE
                                 iMapsUrl = ""
                             }
                             if (selectedCity != null) {
-                                if (selectedCity!!.id != "0") tvLocation.text = "${ etLocation.text }"
+                                if (selectedCity!!.id != "0") tvLocation.text = "${etLocation.text}"
                                 else tvLocation.text = EMPTY_FIELD_VALUE
                             } else tvLocation.text = EMPTY_FIELD_VALUE
                             if (selectedPromo != null) {
-                                if (selectedPromo!!.id != "0") tvPromo.text = "${ etPromo.text }"
+                                if (selectedPromo!!.id != "0") tvPromo.text = "${etPromo.text}"
                                 else tvPromo.text = EMPTY_FIELD_VALUE
                             } else tvPromo.text = EMPTY_FIELD_VALUE
 
                             iStatus = pStatus.ifEmpty { null }
-                            iWeeklyVisitStatus = pWeeklyVisitStatus.let { if (it === "1") it else "" }
+                            iWeeklyVisitStatus =
+                                pWeeklyVisitStatus.let { if (it === "1") it else "" }
                             iReputation = pReputation.ifEmpty { null }
                             iHariBayar = pHariBayar.ifEmpty { null }
                             iJamBayar = pJamBayar.ifEmpty { null }
@@ -1405,17 +1474,27 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             getDetailContact()
 
                         }
+
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal mengubah! Message: ${ responseBody.message }")
+                            handleMessage(
+                                this@DetailContactActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "Gagal mengubah! Message: ${responseBody.message}"
+                            )
                             loadingState(false)
                             progressBar.dismiss()
                             toggleEdit(false)
 
                         }
+
                         else -> {
 
-                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal mengubah data!")
+                            handleMessage(
+                                this@DetailContactActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "Gagal mengubah data!"
+                            )
                             loadingState(false)
                             progressBar.dismiss()
                             toggleEdit(false)
@@ -1425,7 +1504,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 } else {
 
-                    handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal mengubah data! Error: " + response.message())
+                    handleMessage(
+                        this@DetailContactActivity,
+                        TAG_RESPONSE_MESSAGE,
+                        "Gagal mengubah data! Error: " + response.message()
+                    )
                     loadingState(false)
                     progressBar.dismiss()
                     toggleEdit(false)
@@ -1438,8 +1521,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on saveEdit(). Catch: ${e.message}")
-                handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@DetailContactActivity,
+                    "Failed DetailContactActivity on saveEdit(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@DetailContactActivity,
+                    TAG_RESPONSE_MESSAGE,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(false)
                 progressBar.dismiss()
                 toggleEdit(false)
@@ -1460,7 +1550,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         lifecycleScope.launch {
             try {
 
-                val response = contactId?.let { apiService.getContactDetail(contactId = it) }
+                val response =
+                    contactId?.let { HttpClient.apiService.getContactDetail(contactId = it) }
 
                 if (response!!.isSuccessful) {
 
@@ -1473,18 +1564,28 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             setupAllField(data)
 
                         }
+
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak! Message: Response status $RESPONSE_STATUS_FAIL or $RESPONSE_STATUS_FAILED")
+                            handleMessage(
+                                this@DetailContactActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "Gagal memuat kontak! Message: Response status $RESPONSE_STATUS_FAIL or $RESPONSE_STATUS_FAILED"
+                            )
 //                            loadingState(false)
 //                            progressBar.dismiss()
                             toggleEdit(false)
                             setToGetCities()
 
                         }
+
                         else -> {
 
-                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak!")
+                            handleMessage(
+                                this@DetailContactActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "Gagal memuat kontak!"
+                            )
 //                            loadingState(false)
 //                            progressBar.dismiss()
                             toggleEdit(false)
@@ -1495,7 +1596,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 } else {
 
-                    handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak! Error: " + response.message())
+                    handleMessage(
+                        this@DetailContactActivity,
+                        TAG_RESPONSE_MESSAGE,
+                        "Gagal memuat kontak! Error: " + response.message()
+                    )
 //                    loadingState(false)
 //                    progressBar.dismiss()
                     toggleEdit(false)
@@ -1509,8 +1614,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getContact(). Catch: ${e.message}")
-                handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@DetailContactActivity,
+                    "Failed DetailContactActivity on getContact(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@DetailContactActivity,
+                    TAG_RESPONSE_MESSAGE,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(false)
                 progressBar.dismiss()
                 toggleEdit(false)
@@ -1538,7 +1650,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         lifecycleScope.launch {
             try {
 
-                val response = contactId?.let { apiService.getContactDetail(contactId = it) }
+                val response =
+                    contactId?.let { HttpClient.apiService.getContactDetail(contactId = it) }
 
                 if (response!!.isSuccessful) {
 
@@ -1555,7 +1668,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                                     iKtp = data.ktp_owner
                                 }
 
-                                handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Berhasil mengubah data!")
+                                handleMessage(
+                                    this@DetailContactActivity,
+                                    TAG_RESPONSE_MESSAGE,
+                                    "Berhasil mengubah data!"
+                                )
                                 toggleEdit(false)
 
 //                                if (iStatus == STATUS_CONTACT_BLACKLIST) {
@@ -1591,17 +1708,27 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             progressBar.dismiss()
 
                         }
+
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak! Message: Response status $RESPONSE_STATUS_FAIL or $RESPONSE_STATUS_FAILED")
+                            handleMessage(
+                                this@DetailContactActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "Gagal memuat kontak! Message: Response status $RESPONSE_STATUS_FAIL or $RESPONSE_STATUS_FAILED"
+                            )
                             loadingState(false)
                             progressBar.dismiss()
                             toggleEdit(false)
 
                         }
+
                         else -> {
 
-                            handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak!")
+                            handleMessage(
+                                this@DetailContactActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "Gagal memuat kontak!"
+                            )
                             loadingState(false)
                             progressBar.dismiss()
                             toggleEdit(false)
@@ -1611,7 +1738,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 } else {
 
-                    handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, "Gagal memuat kontak! Error: " + response.message())
+                    handleMessage(
+                        this@DetailContactActivity,
+                        TAG_RESPONSE_MESSAGE,
+                        "Gagal memuat kontak! Error: " + response.message()
+                    )
                     loadingState(false)
                     progressBar.dismiss()
                     toggleEdit(false)
@@ -1623,8 +1754,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getDetailContact(). Catch: ${e.message}")
-                handleMessage(this@DetailContactActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@DetailContactActivity,
+                    "Failed DetailContactActivity on getDetailContact(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@DetailContactActivity,
+                    TAG_RESPONSE_MESSAGE,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(false)
                 progressBar.dismiss()
                 toggleEdit(false)
@@ -1662,8 +1800,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             .setTitleText("Input Waktu")
             .setTimeFormat(TimeFormat.CLOCK_24H)
             .setInputMode(INPUT_MODE_KEYBOARD)
-            .setHour(selectedJamBayar.substring(0,2).toInt())
-            .setMinute(selectedJamBayar.substring(3,5).toInt())
+            .setHour(selectedJamBayar.substring(0, 2).toInt())
+            .setMinute(selectedJamBayar.substring(3, 5).toInt())
 
             .build()
 
@@ -1673,7 +1811,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             val selectedMinute = picker.minute
             val selectedTime = String.format("%02d:%02d:%02d", selectedHour, selectedMinute, 0)
             selectedJamBayar = selectedTime
-            binding.tvJamBayar.text = if (selectedJamBayar == "00:00:00") "bebas" else "pukul ${selectedJamBayar.substring(0,5)} lebih"
+            binding.tvJamBayar.text = if (selectedJamBayar == "00:00:00") "bebas" else "pukul ${
+                selectedJamBayar.substring(
+                    0,
+                    5
+                )
+            } lebih"
         }
 
         // Tampilkan Dialog
@@ -1781,7 +1924,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         } else {
             val parentLayout: ViewGroup = findViewById(R.id.detail_contact_activity)
-            val bottomSheetLayout = layoutInflater.inflate(R.layout.fragment_bottom_sheet_detail_contact, parentLayout, false)
+            val bottomSheetLayout = layoutInflater.inflate(
+                R.layout.fragment_bottom_sheet_detail_contact,
+                parentLayout,
+                false
+            )
 
             val invoiceOption = bottomSheetLayout.findViewById<LinearLayout>(R.id.invoiceOption)
             val reportOption = bottomSheetLayout.findViewById<LinearLayout>(R.id.reportOption)
@@ -1838,7 +1985,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 detailLauncher.launch(intent)
 
-            } R.id.suratJalanOption, R.id.invoiceOption -> {
+            }
+
+            R.id.suratJalanOption, R.id.invoiceOption -> {
 
                 val intent = Intent(this@DetailContactActivity, ListSuratJalanActivity::class.java)
 
@@ -1849,11 +1998,14 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 detailLauncher.launch(intent)
 
-            } R.id.reportOption -> {
+            }
+
+            R.id.reportOption -> {
 
                 var intent = Intent(this@DetailContactActivity, ReportsActivity::class.java)
 
-                if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) intent = Intent(this@DetailContactActivity, UsersReportActivity::class.java)
+                if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) intent =
+                    Intent(this@DetailContactActivity, UsersReportActivity::class.java)
 
                 intent.putExtra(CONST_CONTACT_ID, contactId)
                 if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
@@ -1868,7 +2020,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 //                intent.putExtra(CONST_MAPS, iMapsUrl)
 //                detailLauncher.launch(intent)
 
-            } else -> {
+            }
+
+            else -> {
 
                 var intent = Intent(this@DetailContactActivity, NewReportActivity::class.java)
 
@@ -1931,7 +2085,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         searchClusterModal = SearchModal(this, items)
         searchClusterModal.label = "Pilih Cluster"
         searchClusterModal.searchHint = "Ketik untuk mencari…"
-        searchClusterModal.setCustomDialogListener(object: SearchModal.SearchModalListener{
+        searchClusterModal.setCustomDialogListener(object : SearchModal.SearchModalListener {
             override fun onDataReceived(data: ModalSearchModel) {
                 selectedCluster = data.id ?: ""
                 saveEdit()
@@ -1944,7 +2098,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private fun setupDialogSendMessage(item: ContactModel? = null) {
 
         sendMessageModal = SendMessageModal(this, lifecycleScope)
-        sendMessageModal.initializeInterface(object: SendMessageModal.SendMessageModalInterface {
+        sendMessageModal.initializeInterface(object : SendMessageModal.SendMessageModalInterface {
             override fun onSubmitMessage(status: Boolean) {
                 getDetailContact(false)
                 setupDialogSendMessage(itemSendMessage)
@@ -1964,50 +2118,49 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         // Panggil layanan untuk memulai operasi ping di latar belakang
         if (pingUtility == null) {
             pingUtility = PingUtility()
-            pingUtility!!.startPingMonitoring(host = PING_HOST, listener = object: PingUtility.PingResultListener {
-                override fun onPingResult(result: Long) {
+            pingUtility!!.startPingMonitoring(
+                host = PING_HOST,
+                listener = object : PingUtility.PingResultListener {
+                    override fun onPingResult(result: Long) {
 
-                    binding.titleBar.tvIndicatorView.text = "$result ms"
+                        binding.titleBar.tvIndicatorView.text = "$result ms"
 
-                    if (result > 999) {
-                        binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_primary_round)
-                        binding.titleBar.indicatorView.visibility = View.GONE
-                        binding.titleBar.tvIndicatorView.text = "999+ ms"
-                        binding.titleBar.tvIndicatorView.setTextColor(getColor(R.color.primary))
-                        binding.titleBar.tvIndicatorView.visibility = View.VISIBLE
-                        sendMessageModal.setPingStatus(PING_MEDIUM)
+                        if (result > 999) {
+                            binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_primary_round)
+                            binding.titleBar.indicatorView.visibility = View.GONE
+                            binding.titleBar.tvIndicatorView.text = "999+ ms"
+                            binding.titleBar.tvIndicatorView.setTextColor(getColor(R.color.primary))
+                            binding.titleBar.tvIndicatorView.visibility = View.VISIBLE
+                            sendMessageModal.setPingStatus(PING_MEDIUM)
+                        } else if (result > 350) {
+                            binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_primary_round)
+                            binding.titleBar.indicatorView.visibility = View.GONE
+                            binding.titleBar.tvIndicatorView.setTextColor(getColor(R.color.primary))
+                            binding.titleBar.tvIndicatorView.visibility = View.VISIBLE
+                            sendMessageModal.setPingStatus(PING_MEDIUM)
+                        } else if (result > 300) {
+                            binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_data_round)
+                            binding.titleBar.indicatorView.visibility = View.GONE
+                            binding.titleBar.tvIndicatorView.setTextColor(getColor(R.color.status_data))
+                            binding.titleBar.tvIndicatorView.visibility = View.VISIBLE
+                            sendMessageModal.setPingStatus(PING_MEDIUM)
+                        } else if (result > 0) {
+                            binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_active_round)
+                            binding.titleBar.indicatorView.visibility = View.VISIBLE
+                            binding.titleBar.tvIndicatorView.setTextColor(getColor(R.color.status_active))
+                            binding.titleBar.tvIndicatorView.visibility = View.GONE
+                            sendMessageModal.setPingStatus(PING_NORMAL)
+                        } else {
+                            binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_primary_round)
+                            binding.titleBar.indicatorView.visibility = View.GONE
+                            binding.titleBar.tvIndicatorView.text = "999+ ms"
+                            binding.titleBar.tvIndicatorView.setTextColor(getColor(R.color.primary))
+                            binding.titleBar.tvIndicatorView.visibility = View.VISIBLE
+                            sendMessageModal.setPingStatus(PING_MEDIUM)
+                        }
                     }
-                    else if (result > 350) {
-                        binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_primary_round)
-                        binding.titleBar.indicatorView.visibility = View.GONE
-                        binding.titleBar.tvIndicatorView.setTextColor(getColor(R.color.primary))
-                        binding.titleBar.tvIndicatorView.visibility = View.VISIBLE
-                        sendMessageModal.setPingStatus(PING_MEDIUM)
-                    }
-                    else if (result > 300) {
-                        binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_data_round)
-                        binding.titleBar.indicatorView.visibility = View.GONE
-                        binding.titleBar.tvIndicatorView.setTextColor(getColor(R.color.status_data))
-                        binding.titleBar.tvIndicatorView.visibility = View.VISIBLE
-                        sendMessageModal.setPingStatus(PING_MEDIUM)
-                    }
-                    else if (result > 0) {
-                        binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_active_round)
-                        binding.titleBar.indicatorView.visibility = View.VISIBLE
-                        binding.titleBar.tvIndicatorView.setTextColor(getColor(R.color.status_active))
-                        binding.titleBar.tvIndicatorView.visibility = View.GONE
-                        sendMessageModal.setPingStatus(PING_NORMAL)
-                    } else {
-                        binding.titleBar.indicatorView.setBackgroundResource(R.drawable.bg_primary_round)
-                        binding.titleBar.indicatorView.visibility = View.GONE
-                        binding.titleBar.tvIndicatorView.text = "999+ ms"
-                        binding.titleBar.tvIndicatorView.setTextColor(getColor(R.color.primary))
-                        binding.titleBar.tvIndicatorView.visibility = View.VISIBLE
-                        sendMessageModal.setPingStatus(PING_MEDIUM)
-                    }
-                }
 
-            })
+                })
         }
     }
 
@@ -2058,7 +2211,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         lifecycleScope.launch {
             try {
 
-                val response = apiService.getContactSales(idContact = contactId ?: "0")
+                val response = HttpClient.apiService.getContactSales(idContact = contactId ?: "0")
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -2070,23 +2223,31 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             val resultMap = data as? Map<*, *>
 
                             // Membuat objek ContactSales baru
-                            val contactSales = ContactSales(username = resultMap?.get("username").toString())
+                            val contactSales =
+                                ContactSales(username = resultMap?.get("username").toString())
 
                             binding.textBy.visibility = View.VISIBLE
-                            binding.textBy.text = " " + getString(R.string.text_by) + " " + contactSales.username
+                            binding.textBy.text =
+                                " " + getString(R.string.text_by) + " " + contactSales.username
                         }
                         getCities()
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         // Empty creator name
                         getCities()
 
                     }
+
                     else -> {
 
-                        handleMessage(this@DetailContactActivity, "CONTACT SALES", getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@DetailContactActivity,
+                            "CONTACT SALES",
+                            getString(R.string.failed_get_data)
+                        )
                         getCities()
 
                     }
@@ -2098,8 +2259,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getContactSales(). Catch: ${e.message}")
-                handleMessage(this@DetailContactActivity, "CONTACT SALES", generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@DetailContactActivity,
+                    "Failed DetailContactActivity on getContactSales(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@DetailContactActivity,
+                    "CONTACT SALES",
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 getCities()
 
             }
@@ -2112,7 +2280,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         lifecycleScope.launch {
             try {
 
-                val response = apiService.getCities(distributorID = userDistributorId)
+                val response = HttpClient.apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -2122,7 +2290,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                         for (i in 0 until results.size) {
                             val data = results[i]
-                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                            items.add(
+                                ModalSearchModel(
+                                    data.id_city,
+                                    "${data.nama_city} - ${data.kode_city}"
+                                )
+                            )
                         }
 
                         setupDialogSearch(items)
@@ -2147,15 +2320,25 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 //                            if (sessionManager.userKind() == USER_KIND_ADMIN) tvKtpContainer.visibility = View.VISIBLE
 //                        }
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
-                        handleMessage(this@DetailContactActivity, "LIST CITY", "Daftar kota kosong!")
+                        handleMessage(
+                            this@DetailContactActivity,
+                            "LIST CITY",
+                            "Daftar kota kosong!"
+                        )
                         getPromo()
 
                     }
+
                     else -> {
 
-                        handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@DetailContactActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         getPromo()
 
                     }
@@ -2167,8 +2350,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getCities(). Catch: ${e.message}")
-                handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@DetailContactActivity,
+                    "Failed DetailContactActivity on getCities(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@DetailContactActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 getPromo()
 
             }
@@ -2182,7 +2372,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         lifecycleScope.launch {
             try {
 
-                val response = apiService.getPromo()
+                val response = HttpClient.apiService.getPromo()
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -2202,7 +2392,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         if (foundItem != null) {
                             tvPromo.text = foundItem.nama_promo
                             etPromo.setText(foundItem.nama_promo)
-                            selectedPromo = ModalSearchModel(foundItem.id_promo, foundItem.nama_promo)
+                            selectedPromo =
+                                ModalSearchModel(foundItem.id_promo, foundItem.nama_promo)
                         } else {
                             tvPromo.text = EMPTY_FIELD_VALUE
                             etPromo.setText("")
@@ -2216,23 +2407,34 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             }
                             val indicatorImageView = findViewById<View>(R.id.indicatorView)
                             indicatorImageView.visibility = View.VISIBLE
-                            if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) tvKtpContainer.visibility = View.VISIBLE
+                            if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) tvKtpContainer.visibility =
+                                View.VISIBLE
                         }
 
                         loadingState(false)
                         progressBar.dismiss()
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
-                        handleMessage(this@DetailContactActivity, "LIST PROMO", "Daftar promo kosong!")
+                        handleMessage(
+                            this@DetailContactActivity,
+                            "LIST PROMO",
+                            "Daftar promo kosong!"
+                        )
 
                         loadingState(false)
                         progressBar.dismiss()
 
                     }
+
                     else -> {
 
-                        handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@DetailContactActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
 
                         loadingState(false)
                         progressBar.dismiss()
@@ -2246,8 +2448,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@DetailContactActivity, "Failed DetailContactActivity on getPromo(). Catch: ${e.message}")
-                handleMessage(this@DetailContactActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@DetailContactActivity,
+                    "Failed DetailContactActivity on getPromo(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@DetailContactActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
 
                 loadingState(false)
                 progressBar.dismiss()
@@ -2272,7 +2481,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 overlayMaps.alpha = 0f
                 overlayMaps.visibility = View.GONE
 
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                if (ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
                     val intent = Intent(this@DetailContactActivity, MapsActivity::class.java)
                     intent.putExtra(CONST_MAPS, iMapsUrl)
                     intent.putExtra(CONST_MAPS_NAME, tvName.text)
@@ -2309,35 +2522,65 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         tooltipStatus.visibility = View.VISIBLE
         when (status) {
             STATUS_CONTACT_DATA -> {
-                tooltipStatus.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_data))
+                tooltipStatus.setImageDrawable(
+                    AppCompatResources.getDrawable(
+                        this,
+                        R.drawable.status_data
+                    )
+                )
                 tooltipHandler(tooltipStatus, "Customer Status is Data")
                 tvStatus.text = statusItem[1]
                 spinStatus.setSelection(1)
             }
+
             STATUS_CONTACT_PASSIVE -> {
-                tooltipStatus.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_passive))
+                tooltipStatus.setImageDrawable(
+                    AppCompatResources.getDrawable(
+                        this,
+                        R.drawable.status_passive
+                    )
+                )
                 tooltipHandler(tooltipStatus, "Customer Status is Passive")
                 tvStatus.text = statusItem[2]
                 spinStatus.setSelection(2)
             }
+
             STATUS_CONTACT_ACTIVE -> {
-                tooltipStatus.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_active))
+                tooltipStatus.setImageDrawable(
+                    AppCompatResources.getDrawable(
+                        this,
+                        R.drawable.status_active
+                    )
+                )
                 tooltipHandler(tooltipStatus, "Customer Status is Active")
                 tvStatus.text = statusItem[3]
                 spinStatus.setSelection(3)
             }
+
             STATUS_CONTACT_BLACKLIST -> {
-                tooltipStatus.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_blacklist))
+                tooltipStatus.setImageDrawable(
+                    AppCompatResources.getDrawable(
+                        this,
+                        R.drawable.status_blacklist
+                    )
+                )
                 tooltipHandler(tooltipStatus, "Customer Status is Blacklist")
                 tvStatus.text = statusItem[4]
                 spinStatus.setSelection(4)
             }
+
             STATUS_CONTACT_BID -> {
-                tooltipStatus.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_bid))
+                tooltipStatus.setImageDrawable(
+                    AppCompatResources.getDrawable(
+                        this,
+                        R.drawable.status_bid
+                    )
+                )
                 tooltipHandler(tooltipStatus, "Customer Status is Bargained")
                 tvStatus.text = statusItem[5]
                 spinStatus.setSelection(5)
             }
+
             else -> {
                 tooltipStatus.visibility = View.GONE
                 tvStatus.text = EMPTY_FIELD_VALUE
@@ -2350,13 +2593,24 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         binding.tooltipWeeklyVisit.visibility = View.VISIBLE
         when (status) {
             "1" -> {
-                binding.tooltipWeeklyVisit.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_active))
+                binding.tooltipWeeklyVisit.setImageDrawable(
+                    AppCompatResources.getDrawable(
+                        this,
+                        R.drawable.status_active
+                    )
+                )
                 tooltipHandler(binding.tooltipWeeklyVisit, "Weekly Status is active")
                 binding.tvWeeklyVisit.text = statusWeeklyVisitItem[1]
                 binding.spinWeeklyVisit.setSelection(1)
             }
+
             else -> {
-                binding.tooltipWeeklyVisit.setImageDrawable(AppCompatResources.getDrawable(this, R.drawable.status_passive))
+                binding.tooltipWeeklyVisit.setImageDrawable(
+                    AppCompatResources.getDrawable(
+                        this,
+                        R.drawable.status_passive
+                    )
+                )
                 tooltipHandler(binding.tooltipWeeklyVisit, "Weekly Status is not set")
                 binding.tvWeeklyVisit.text = EMPTY_FIELD_VALUE
                 binding.spinWeeklyVisit.setSelection(0)
@@ -2370,10 +2624,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 binding.tvPaymentMethod.text = paymentMethodItem[1]
                 binding.spinPaymentMethod.setSelection(1)
             }
+
             PAYMENT_TRANSFER -> {
                 binding.tvPaymentMethod.text = paymentMethodItem[2]
                 binding.spinPaymentMethod.setSelection(2)
             }
+
             else -> {
                 binding.tvPaymentMethod.text = EMPTY_FIELD_VALUE
                 binding.spinPaymentMethod.setSelection(0)
@@ -2384,10 +2640,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private fun setupCluster(cluster: String? = null) {
         val clusterNumber = cluster?.toInt() ?: 0
         when (clusterNumber) {
-            1,2,3 -> {
+            1, 2, 3 -> {
                 binding.tvCluster.text = clusterItem[clusterNumber]
                 binding.spinCluster.setSelection(clusterNumber)
             }
+
             else -> {
                 binding.tvCluster.text = EMPTY_FIELD_VALUE
                 binding.spinCluster.setSelection(0)
@@ -2401,26 +2658,32 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 tvTermin.text = terminItem[1]
                 spinTermin.setSelection(1)
             }
+
             STATUS_TERMIN_COD_TF -> {
                 tvTermin.text = terminItem[2]
                 spinTermin.setSelection(2)
             }
+
             STATUS_TERMIN_COD_TUNAI -> {
                 tvTermin.text = terminItem[3]
                 spinTermin.setSelection(3)
             }
+
             STATUS_TERMIN_30 -> {
                 tvTermin.text = terminItem[4]
                 spinTermin.setSelection(4)
             }
+
             STATUS_TERMIN_45 -> {
                 tvTermin.text = terminItem[5]
                 spinTermin.setSelection(5)
             }
+
             STATUS_TERMIN_60 -> {
                 tvTermin.text = terminItem[6]
                 spinTermin.setSelection(6)
             }
+
             else -> {
                 tvTermin.text = EMPTY_FIELD_VALUE
                 spinTermin.setSelection(0)
@@ -2434,10 +2697,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 tvReputation.text = reputationItem[1]
                 spinReputation.setSelection(1)
             }
+
             "bad" -> {
                 tvReputation.text = reputationItem[2]
                 spinReputation.setSelection(2)
             }
+
             else -> {
                 tvReputation.text = EMPTY_FIELD_VALUE
                 spinReputation.setSelection(0)
@@ -2450,25 +2715,38 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             "bebas" -> {
                 binding.tvHariBayar.text = hariBayarItem[1]
                 binding.spinHariBayar.setSelection(1)
-            }"senin" -> {
+            }
+
+            "senin" -> {
                 binding.tvHariBayar.text = hariBayarItem[2]
                 binding.spinHariBayar.setSelection(2)
-            }"selasa" -> {
+            }
+
+            "selasa" -> {
                 binding.tvHariBayar.text = hariBayarItem[3]
                 binding.spinHariBayar.setSelection(3)
-            }"rabu" -> {
+            }
+
+            "rabu" -> {
                 binding.tvHariBayar.text = hariBayarItem[4]
                 binding.spinHariBayar.setSelection(4)
-            }"kamis" -> {
+            }
+
+            "kamis" -> {
                 binding.tvHariBayar.text = hariBayarItem[5]
                 binding.spinHariBayar.setSelection(5)
-            }"jumat" -> {
+            }
+
+            "jumat" -> {
                 binding.tvHariBayar.text = hariBayarItem[6]
                 binding.spinHariBayar.setSelection(6)
-            }"sabtu" -> {
+            }
+
+            "sabtu" -> {
                 binding.tvHariBayar.text = hariBayarItem[7]
                 binding.spinHariBayar.setSelection(7)
             }
+
             else -> {
                 binding.tvHariBayar.text = EMPTY_FIELD_VALUE
                 binding.spinHariBayar.setSelection(0)
@@ -2482,7 +2760,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         spinStatus.adapter = adapter
         spinStatus.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 selectedStatus = if (position != 0) statusItem[position]
                 else ""
             }
@@ -2497,20 +2780,27 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     }
 
     private fun setupWeekliVisitStatusSpinner() {
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, statusWeeklyVisitItem)
+        val adapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_item, statusWeeklyVisitItem)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
         binding.spinWeeklyVisit.adapter = adapter
-        binding.spinWeeklyVisit.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                selectedWeeklyVisitStatus = if (position != 0) statusWeeklyVisitItem[position]
-                else ""
-            }
+        binding.spinWeeklyVisit.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    selectedWeeklyVisitStatus = if (position != 0) statusWeeklyVisitItem[position]
+                    else ""
+                }
 
-            override fun onNothingSelected(parent: AdapterView<*>?) {
+                override fun onNothingSelected(parent: AdapterView<*>?) {
 
+                }
             }
-        }
 
         selectedWeeklyVisitStatus = iWeeklyVisitStatus
         setupWeeklyVisitStatus(iWeeklyVisitStatus)
@@ -2521,15 +2811,21 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
         binding.spinPaymentMethod.adapter = adapter
-        binding.spinPaymentMethod.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                selectedPaymentMethod = paymentMethodItem[position]
-            }
+        binding.spinPaymentMethod.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    selectedPaymentMethod = paymentMethodItem[position]
+                }
 
-            override fun onNothingSelected(parent: AdapterView<*>?) {
+                override fun onNothingSelected(parent: AdapterView<*>?) {
 
+                }
             }
-        }
 
         selectedPaymentMethod = when (iPaymentMethod) {
             PAYMENT_TUNAI -> paymentMethodItem[1]
@@ -2545,7 +2841,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         binding.spinCluster.adapter = adapter
         binding.spinCluster.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 selectedCluster = clusterItem[position]
             }
 
@@ -2556,7 +2857,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         val clusterNumber = iCluster?.toInt() ?: 0
         selectedCluster = when (clusterNumber) {
-            1,2,3 -> clusterItem[clusterNumber]
+            1, 2, 3 -> clusterItem[clusterNumber]
             else -> clusterItem[0]
         }
         setupCluster(iCluster)
@@ -2568,7 +2869,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         spinTermin.adapter = adapter
         spinTermin.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 selectedTermin = if (position != 0) terminItem[position]
                 else ""
             }
@@ -2579,12 +2885,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
 
         selectedTermin = when (iTermin) {
-             STATUS_TERMIN_COD -> terminItem[1]
-             STATUS_TERMIN_COD_TF -> terminItem[2]
-             STATUS_TERMIN_COD_TUNAI -> terminItem[3]
-             STATUS_TERMIN_30 -> terminItem[4]
-             STATUS_TERMIN_45 -> terminItem[5]
-             STATUS_TERMIN_60 -> terminItem[6]
+            STATUS_TERMIN_COD -> terminItem[1]
+            STATUS_TERMIN_COD_TF -> terminItem[2]
+            STATUS_TERMIN_COD_TUNAI -> terminItem[3]
+            STATUS_TERMIN_30 -> terminItem[4]
+            STATUS_TERMIN_45 -> terminItem[5]
+            STATUS_TERMIN_60 -> terminItem[6]
             else -> "-1"
         }
         setupTermin(iTermin)
@@ -2596,7 +2902,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         spinReputation.adapter = adapter
         spinReputation.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 selectedReputation = if (position != 0) reputationItem[position]
                 else ""
             }
@@ -2607,8 +2918,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
 
         selectedReputation = when (iReputation) {
-             "good" -> reputationItem[1]
-             "bad" -> reputationItem[2]
+            "good" -> reputationItem[1]
+            "bad" -> reputationItem[2]
             else -> "-1"
         }
         setupReputation(iReputation)
@@ -2620,7 +2931,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         binding.spinHariBayar.adapter = adapter
         binding.spinHariBayar.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 selectedHariBayar = if (position != 0) hariBayarItem[position]
                 else ""
             }
@@ -2631,28 +2947,37 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
 
         selectedHariBayar = when (iHariBayar) {
-             "bebas" -> hariBayarItem[1]
-             "senin" -> hariBayarItem[2]
-             "selasa" -> hariBayarItem[3]
-             "rabu" -> hariBayarItem[4]
-             "kamis" -> hariBayarItem[5]
-             "jumat" -> hariBayarItem[6]
-             "sabtu" -> hariBayarItem[7]
+            "bebas" -> hariBayarItem[1]
+            "senin" -> hariBayarItem[2]
+            "selasa" -> hariBayarItem[3]
+            "rabu" -> hariBayarItem[4]
+            "kamis" -> hariBayarItem[5]
+            "jumat" -> hariBayarItem[6]
+            "sabtu" -> hariBayarItem[7]
             else -> "-1"
         }
         setupHariBayar(iHariBayar)
     }
 
     private fun chooseFile(launcher: ActivityResultLauncher<Intent>) {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-            val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            val galleryIntent =
+                Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
 
             // Create a file to store the captured image
             val photoFile: File? = createImageFile()
 
             if (photoFile != null) {
-                val photoUri: Uri = FileProvider.getUriForFile(this, "com.topmortar.topmortarsales.fileprovider", photoFile)
+                val photoUri: Uri = FileProvider.getUriForFile(
+                    this,
+                    "com.topmortar.topmortarsales.fileprovider",
+                    photoFile
+                )
                 cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri)
                 currentPhotoUri = photoUri
             }
@@ -2669,7 +2994,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     @Throws(IOException::class)
     private fun createImageFile(): File? {
         // Create an image file name
-        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val timeStamp: String =
+            SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
         val storageDir: File? = getExternalFilesDir("Invoices")
         return File.createTempFile("JPEG_${timeStamp}_", ".jpg", storageDir)
     }
@@ -2721,7 +3047,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         sendMessageModal.setPingStatus(pingResult)
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
@@ -2729,8 +3059,15 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             else {
                 val customUtility = CustomUtility(this)
                 if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    val message = "Izin lokasi diperlukan untuk fitur ini. Izinkan aplikasi mengakses lokasi perangkat."
-                    customUtility.showPermissionDeniedSnackbar(message) { ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE) }
+                    val message =
+                        "Izin lokasi diperlukan untuk fitur ini. Izinkan aplikasi mengakses lokasi perangkat."
+                    customUtility.showPermissionDeniedSnackbar(message) {
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                            LOCATION_PERMISSION_REQUEST_CODE
+                        )
+                    }
                 } else customUtility.showPermissionDeniedDialog("Izin lokasi diperlukan untuk fitur ini. Harap aktifkan di pengaturan aplikasi.")
             }
         }
@@ -2754,49 +3091,58 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         deliveryId = "$AUTH_LEVEL_COURIER$userID"
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-007")
+        firebaseReference =
+            FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-007")
         childDelivery = firebaseReference?.child(FIREBASE_CHILD_DELIVERY)
         childDriver = childDelivery?.child(deliveryId)
 
         childDriver?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
-                    childDriver?.child("stores")?.addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            if (snapshot.exists()) {
-                                var isStoreAvailable = false
-                                for (item in snapshot.children) {
-                                    val data = item.getValue(DeliveryModel.Store::class.java)!!
-                                    if (data.id == contactId) {
-                                        isStoreAvailable = true
-                                        break
+                    childDriver?.child("stores")
+                        ?.addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
+                                if (snapshot.exists()) {
+                                    var isStoreAvailable = false
+                                    for (item in snapshot.children) {
+                                        val data = item.getValue(DeliveryModel.Store::class.java)!!
+                                        if (data.id == contactId) {
+                                            isStoreAvailable = true
+                                            break
+                                        }
                                     }
-                                }
-                                if (isStoreAvailable) {
-                                    binding.textLoading.visibility = View.GONE
-                                    binding.btnDeliveryContainer.visibility = View.GONE
-                                    binding.contactAction.visibility = View.VISIBLE
-                                    binding.textDelivery.visibility = View.VISIBLE
-                                    binding.btnDirection.visibility = View.VISIBLE
-                                    binding.btnDirection.setOnClickListener {
-                                        val intent = Intent(this@DetailContactActivity, MapsActivity::class.java)
-                                        intent.putExtra(CONST_IS_TRACKING, true)
-                                        intent.putExtra(CONST_DELIVERY_ID, deliveryId)
-                                        intent.putExtra(CONST_CONTACT_ID, contactId)
-                                        detailLauncher.launch(intent)
-                                    }
+                                    if (isStoreAvailable) {
+                                        binding.textLoading.visibility = View.GONE
+                                        binding.btnDeliveryContainer.visibility = View.GONE
+                                        binding.contactAction.visibility = View.VISIBLE
+                                        binding.textDelivery.visibility = View.VISIBLE
+                                        binding.btnDirection.visibility = View.VISIBLE
+                                        binding.btnDirection.setOnClickListener {
+                                            val intent = Intent(
+                                                this@DetailContactActivity,
+                                                MapsActivity::class.java
+                                            )
+                                            intent.putExtra(CONST_IS_TRACKING, true)
+                                            intent.putExtra(CONST_DELIVERY_ID, deliveryId)
+                                            intent.putExtra(CONST_CONTACT_ID, contactId)
+                                            detailLauncher.launch(intent)
+                                        }
 //                                    checkServiceStatus()
+                                    } else setupBtnDelivery()
                                 } else setupBtnDelivery()
-                            } else setupBtnDelivery()
-                        }
+                            }
 
-                        override fun onCancelled(error: DatabaseError) {
-                            binding.textLoading.visibility = View.GONE
-                            handleMessage(this@DetailContactActivity, "onSetupDelivery", "Failed get store child")
-                            Log.e("onSetupDelivery", error.message)
-                        }
+                            override fun onCancelled(error: DatabaseError) {
+                                binding.textLoading.visibility = View.GONE
+                                handleMessage(
+                                    this@DetailContactActivity,
+                                    "onSetupDelivery",
+                                    "Failed get store child"
+                                )
+                                Log.e("onSetupDelivery", error.message)
+                            }
 
-                    })
+                        })
                 } else {
                     setupBtnDelivery()
                 }
@@ -2804,7 +3150,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
             override fun onCancelled(error: DatabaseError) {
                 binding.textLoading.visibility = View.GONE
-                handleMessage(this@DetailContactActivity, "onSetupDelivery", "Failed get driver child")
+                handleMessage(
+                    this@DetailContactActivity,
+                    "onSetupDelivery",
+                    "Failed get driver child"
+                )
                 Log.e("onSetupDelivery", error.message)
             }
 
@@ -2861,7 +3211,8 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                         binding.textDelivery.visibility = View.VISIBLE
                         binding.btnDirection.visibility = View.VISIBLE
                         binding.btnDirection.setOnClickListener {
-                            val intent = Intent(this@DetailContactActivity, MapsActivity::class.java)
+                            val intent =
+                                Intent(this@DetailContactActivity, MapsActivity::class.java)
                             intent.putExtra(CONST_IS_TRACKING, true)
                             intent.putExtra(CONST_DELIVERY_ID, deliveryId)
                             intent.putExtra(CONST_CONTACT_ID, contactId)
@@ -2923,7 +3274,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
         if (!isDeliveryLoading) {
             binding.btnDeliveryContainer.setOnClickListener {
-                if (ContextCompat.checkSelfPermission(this@DetailContactActivity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                if (ContextCompat.checkSelfPermission(
+                        this@DetailContactActivity,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                         // Meminta izin background location
                         if (ContextCompat.checkSelfPermission(
@@ -2946,7 +3301,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                             val message = getString(R.string.bg_service_location_permission_message)
                             val title = getString(R.string.bg_service_location_permission_title)
                             val customUtility = CustomUtility(this@DetailContactActivity)
-                            customUtility.showPermissionDeniedDialog(title = title, message = message) {
+                            customUtility.showPermissionDeniedDialog(
+                                title = title,
+                                message = message
+                            ) {
                                 ActivityCompat.requestPermissions(
                                     this@DetailContactActivity,
                                     arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
@@ -2957,7 +3315,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                     } else startDelivery()
                 } else {
                     // Meminta izin lokasi jika belum diberikan
-                    ActivityCompat.requestPermissions(this@DetailContactActivity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+                    ActivityCompat.requestPermissions(
+                        this@DetailContactActivity,
+                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                        LOCATION_PERMISSION_REQUEST_CODE
+                    )
                 }
             }
         }
@@ -3038,7 +3400,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         iKtp = data.ktp_owner
         iMapsUrl = data.maps_url
         iStatus = data.store_status
-        iWeeklyVisitStatus = data.tagih_mingguan.let { if (it == "1") it else ""}
+        iWeeklyVisitStatus = data.tagih_mingguan.let { if (it == "1") it else "" }
         iPaymentMethod = data.payment_method
         iCluster = data.cluster
         iTermin = data.termin_payment
@@ -3064,8 +3426,10 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
         iLocation = data.id_city
         iPromo = data.id_promo
-        iReportSource = intent.getStringExtra(REPORT_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
-        iRenviSource = intent.getStringExtra(RENVI_SOURCE).let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
+        iReportSource = intent.getStringExtra(REPORT_SOURCE)
+            .let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
+        iRenviSource = intent.getStringExtra(RENVI_SOURCE)
+            .let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
         iInvoiceId = intent.getStringExtra(CONST_INVOICE_ID)
         iReportPaymentStatus = intent.getBooleanExtra(REPORT_TYPE_IS_PAYMENT, false)
 
@@ -3093,7 +3457,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             val indexItem = spinPhoneCatItems.indexOf(iPhoneCategory1)
             if (indexItem > 0) {
                 binding.spinPhoneCategories1.setSelection(indexItem)
-                binding.tvPhoneCat1.text = "${ binding.spinPhoneCategories1.selectedItem }"
+                binding.tvPhoneCat1.text = "${binding.spinPhoneCategories1.selectedItem}"
             }
         }
         if (iPhone.isNotEmpty()) {
@@ -3108,7 +3472,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             val indexItem = spinPhoneCatItems.indexOf(iPhoneCategory2)
             if (indexItem > 0) {
                 binding.spinPhoneCategories2.setSelection(indexItem)
-                binding.tvPhoneCat2.text = "${ binding.spinPhoneCategories2.selectedItem }"
+                binding.tvPhoneCat2.text = "${binding.spinPhoneCategories2.selectedItem}"
             }
         }
         if (iPhone2.isNotEmpty() && iPhone2 != "0") {
@@ -3172,7 +3536,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
         if (!iJamBayar.isNullOrEmpty()) {
             selectedJamBayar = iJamBayar.toString()
-            binding.tvJamBayar.text = if (iJamBayar == "00:00:00") "bebas" else "pukul ${selectedJamBayar.substring(0,5)} lebih"
+            binding.tvJamBayar.text = if (iJamBayar == "00:00:00") "bebas" else "pukul ${
+                selectedJamBayar.substring(
+                    0,
+                    5
+                )
+            } lebih"
         } else {
             binding.tvJamBayar.text = EMPTY_FIELD_VALUE
         }
@@ -3208,7 +3577,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         super.onStart()
         Handler(Looper.getMainLooper()).postDelayed({
             if (CustomUtility(this).isUserWithOnlineStatus()) {
-                CustomUtility(this).setUserStatusOnline(true, userDistributorIds ?: "-custom-003", userID)
+                CustomUtility(this).setUserStatusOnline(
+                    true,
+                    userDistributorIds ?: "-custom-003",
+                    userID
+                )
             }
         }, 1000)
     }
@@ -3216,7 +3589,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     override fun onStop() {
         super.onStop()
         if (CustomUtility(this).isUserWithOnlineStatus()) {
-            CustomUtility(this).setUserStatusOnline(false, userDistributorIds ?: "-custom-003", userID)
+            CustomUtility(this).setUserStatusOnline(
+                false,
+                userDistributorIds ?: "-custom-003",
+                userID
+            )
         }
     }
 
@@ -3227,7 +3604,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
         if (pingUtility != null) pingUtility!!.stopPingMonitoring()
         if (CustomUtility(this).isUserWithOnlineStatus()) {
-            CustomUtility(this).setUserStatusOnline(false, userDistributorIds ?: "-custom-003", userID)
+            CustomUtility(this).setUserStatusOnline(
+                false,
+                userDistributorIds ?: "-custom-003",
+                userID
+            )
         }
     }
 

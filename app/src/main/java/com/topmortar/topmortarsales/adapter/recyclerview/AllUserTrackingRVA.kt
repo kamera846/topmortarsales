@@ -17,20 +17,27 @@ class AllUserTrackingRVA : RecyclerView.Adapter<AllUserTrackingRVA.ViewHolder>()
     interface OnItemClickListener {
         fun onItemClick(item: UserAbsentModel)
     }
+
     private var listener: OnItemClickListener? = null
     fun setOnItemClickListener(listener: OnItemClickListener) {
         this.listener = listener
     }
+
     fun setList(data: ArrayList<UserAbsentModel>) {
         listItem = data
     }
 
-    inner class ViewHolder(private val binding: ItemAllUserTrackingBinding) : RecyclerView.ViewHolder(binding.root) {
+    inner class ViewHolder(private val binding: ItemAllUserTrackingBinding) :
+        RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: UserAbsentModel) {
 
             binding.tvName.text = item.fullname
-            binding.tvDescription.text = "Terakhir dilacak " + DateFormat.format("${item.lastTracking}", "yyyy-MM-dd HH:mm:ss", "dd MMM yyyy, HH.mm")
+            binding.tvDescription.text = "Terakhir dilacak " + DateFormat.format(
+                "${item.lastTracking}",
+                "yyyy-MM-dd HH:mm:ss",
+                "dd MMM yyyy, HH.mm"
+            )
             binding.initialName.text = CustomUtility(context!!).getInitials(item.fullname)
 
             if (item.isOnline) {
@@ -44,7 +51,8 @@ class AllUserTrackingRVA : RecyclerView.Adapter<AllUserTrackingRVA.ViewHolder>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
-        val binding = ItemAllUserTrackingBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding =
+            ItemAllUserTrackingBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         context = parent.context
         return ViewHolder(binding)
 

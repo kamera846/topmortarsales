@@ -1,6 +1,5 @@
 package com.topmortar.topmortarsales.view.delivery
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import androidx.activity.OnBackPressedCallback
@@ -44,7 +43,9 @@ class HistoryDeliveryActivity : AppCompatActivity() {
         val fragmentTransaction = fragmentManager.beginTransaction()
 
         val myFragment = HistoryDeliveryFragment()
-        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) myFragment.setUserID(intent.getStringExtra(CONST_USER_ID)) else myFragment.setUserID(userID)
+        if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) myFragment.setUserID(
+            intent.getStringExtra(CONST_USER_ID)
+        ) else myFragment.setUserID(userID)
         fragmentTransaction.replace(R.id.historyDeliveryFragmentContainer, myFragment)
         fragmentTransaction.addToBackStack(null)
 
@@ -55,7 +56,7 @@ class HistoryDeliveryActivity : AppCompatActivity() {
         End Call Fragment
          */
 
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 myOnBackPressed()
             }

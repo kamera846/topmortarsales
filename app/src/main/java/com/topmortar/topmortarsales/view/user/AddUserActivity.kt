@@ -139,17 +139,26 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         onSubmit = true
 
         val level = selectedLevel
-        var city = "${ etUserCity.text }"
-        val phone = "${ etPhone.text }"
-        val username = "${ etUsername.text }".trim().replace(" ", "").lowercase(Locale.getDefault())
-        val fullName = "${ etFullName.text }"
-        val password = "${ etPassword.text }"
-        val confirmPassword = "${ etConfirmPassword.text }"
+        var city = "${etUserCity.text}"
+        val phone = "${etPhone.text}"
+        val username = "${etUsername.text}".trim().replace(" ", "").lowercase(Locale.getDefault())
+        val fullName = "${etFullName.text}"
+        val password = "${etPassword.text}"
+        val confirmPassword = "${etConfirmPassword.text}"
         val isNotify = if (selectedLevel == AUTH_LEVEL_SALES) {
             binding.isNotifyCheckbox.isChecked.let { if (it) "1" else "0" }
         } else "0"
 
-        if (!formValidation(level = level, city = city, phone = phone, username = username, fullName = fullName, password = password, confirmPassword = confirmPassword)) return
+        if (!formValidation(
+                level = level,
+                city = city,
+                phone = phone,
+                username = username,
+                fullName = fullName,
+                password = password,
+                confirmPassword = confirmPassword
+            )
+        ) return
 
         city = if (selectedCity == null) "0" else selectedCity!!.id!!
 
@@ -175,12 +184,30 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                 val rbDistributorId = createPartFromString(userDistributorId)
                 val rbIsNotify = createPartFromString(isNotify)
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = if (userID == null) {
-                    apiService.addUser(level = rbLevel, cityId = rbCityId, phone = rbPhone, username = rbUsername, fullName = rbFullName, password = rbPassword, distributorID = rbDistributorId, isNotify = rbIsNotify)
+                    apiService.addUser(
+                        level = rbLevel,
+                        cityId = rbCityId,
+                        phone = rbPhone,
+                        username = rbUsername,
+                        fullName = rbFullName,
+                        password = rbPassword,
+                        distributorID = rbDistributorId,
+                        isNotify = rbIsNotify
+                    )
                 } else {
                     val rbUserID = createPartFromString(userID!!)
-                    apiService.editUser(ID = rbUserID, level = rbLevel, cityId = rbCityId, phone = rbPhone, username = rbUsername, fullName = rbFullName, distributorID = rbDistributorId, isNotify = rbIsNotify)
+                    apiService.editUser(
+                        ID = rbUserID,
+                        level = rbLevel,
+                        cityId = rbCityId,
+                        phone = rbPhone,
+                        username = rbUsername,
+                        fullName = rbFullName,
+                        distributorID = rbDistributorId,
+                        isNotify = rbIsNotify
+                    )
                 }
 
                 if (response.isSuccessful) {
@@ -190,7 +217,11 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                     when (responseBody.status) {
                         RESPONSE_STATUS_OK -> {
 
-                            handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Successfully ${ if (userID == null) "added" else "edit" } data!")
+                            handleMessage(
+                                this@AddUserActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "Successfully ${if (userID == null) "added" else "edit"} data!"
+                            )
                             loadingState(false)
                             onSubmit = false
 
@@ -200,16 +231,26 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                             finish()
 
                         }
+
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Failed to ${ if (userID == null) "added" else "edit" }! Message: ${ responseBody.message }")
+                            handleMessage(
+                                this@AddUserActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "Failed to ${if (userID == null) "added" else "edit"}! Message: ${responseBody.message}"
+                            )
                             loadingState(false)
                             onSubmit = false
 
                         }
+
                         else -> {
 
-                            handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Failed ${ if (userID == null) "added" else "edit" } data!: ${ responseBody.message }")
+                            handleMessage(
+                                this@AddUserActivity,
+                                TAG_RESPONSE_MESSAGE,
+                                "Failed ${if (userID == null) "added" else "edit"} data!: ${responseBody.message}"
+                            )
                             loadingState(false)
                             onSubmit = false
 
@@ -218,7 +259,11 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
                 } else {
 
-                    handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, "Failed ${ if (userID == null) "added" else "edit" } data! Error: " + response.message())
+                    handleMessage(
+                        this@AddUserActivity,
+                        TAG_RESPONSE_MESSAGE,
+                        "Failed ${if (userID == null) "added" else "edit"} data! Error: " + response.message()
+                    )
                     loadingState(false)
                     onSubmit = false
 
@@ -230,7 +275,11 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                 if (e is CancellationException) {
                     return@launch
                 }
-                handleMessage(this@AddUserActivity, TAG_RESPONSE_MESSAGE, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    this@AddUserActivity,
+                    TAG_RESPONSE_MESSAGE,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(false)
                 onSubmit = false
 
@@ -262,7 +311,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         // Text View Generated Username
         val usernameGeneratedDescription = "Username akan dibuat menjadi:"
-        etUsername.addTextChangedListener(object: TextWatcher {
+        etUsername.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
             }
@@ -276,8 +325,11 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
                 if (currentText.isNotEmpty()) {
                     tvUsernameGenerated.visibility = View.VISIBLE
-                    tvUsernameGenerated.text = "$usernameGeneratedDescription <b><i>${currentText.replace(" ", "").lowercase(Locale.getDefault())}</i></b>"
-                    tvUsernameGenerated.text = Html.fromHtml("${ tvUsernameGenerated.text }", Html.FROM_HTML_MODE_COMPACT)
+                    tvUsernameGenerated.text = "$usernameGeneratedDescription <b><i>${
+                        currentText.replace(" ", "").lowercase(Locale.getDefault())
+                    }</i></b>"
+                    tvUsernameGenerated.text =
+                        Html.fromHtml("${tvUsernameGenerated.text}", Html.FROM_HTML_MODE_COMPACT)
                 } else tvUsernameGenerated.visibility = View.GONE
             }
 
@@ -367,7 +419,15 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
     }
 
-    private fun formValidation(level: String? = null, city: String = "", phone: String = "", username: String = "", fullName: String = "", password: String = "", confirmPassword: String = ""): Boolean {
+    private fun formValidation(
+        level: String? = null,
+        city: String = "",
+        phone: String = "",
+        username: String = "",
+        fullName: String = "",
+        password: String = "",
+        confirmPassword: String = ""
+    ): Boolean {
         return if (level == null) {
             handleMessage(this, "ERROR SPINNER", "Pilih level pengguna")
             false
@@ -462,12 +522,12 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         spinLevel.adapter = adapter
 
         val userLevel = when (iUserLevel) {
-            AUTH_LEVEL_ADMIN_CITY ->  1
-            AUTH_LEVEL_SALES ->  2
-            AUTH_LEVEL_COURIER ->  3
-            AUTH_LEVEL_BA ->  4
-            AUTH_LEVEL_MARKETING ->  5
-            AUTH_LEVEL_PENAGIHAN ->  6
+            AUTH_LEVEL_ADMIN_CITY -> 1
+            AUTH_LEVEL_SALES -> 2
+            AUTH_LEVEL_COURIER -> 3
+            AUTH_LEVEL_BA -> 4
+            AUTH_LEVEL_MARKETING -> 5
+            AUTH_LEVEL_PENAGIHAN -> 6
             else -> 0
         }
 
@@ -475,7 +535,12 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
         // Handle the selected option
         spinLevel.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 // Get the selected item value (e.g., "admin" or "sales")
                 selectedLevel = when (position) {
                     0 -> null
@@ -487,7 +552,8 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                     6 -> AUTH_LEVEL_PENAGIHAN
                     else -> null
                 }
-                if (selectedLevel == AUTH_LEVEL_SALES) binding.isNotifyCheckbox.visibility = View.VISIBLE
+                if (selectedLevel == AUTH_LEVEL_SALES) binding.isNotifyCheckbox.visibility =
+                    View.VISIBLE
                 else {
                     binding.isNotifyCheckbox.isChecked = false
                     binding.isNotifyCheckbox.visibility = View.GONE
@@ -506,7 +572,8 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                     else -> null
                 }
 
-                if (selectedLevel == AUTH_LEVEL_SALES) binding.isNotifyCheckbox.visibility = View.VISIBLE
+                if (selectedLevel == AUTH_LEVEL_SALES) binding.isNotifyCheckbox.visibility =
+                    View.VISIBLE
                 else {
                     binding.isNotifyCheckbox.isChecked = false
                     binding.isNotifyCheckbox.visibility = View.GONE
@@ -541,7 +608,7 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {
@@ -552,12 +619,18 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
                         for (i in 0 until citiesResults.size) {
                             val data = citiesResults[i]
-                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                            items.add(
+                                ModalSearchModel(
+                                    data.id_city,
+                                    "${data.nama_city} - ${data.kode_city}"
+                                )
+                            )
                         }
 
                         setupDialogSearch(items)
 
-                        val foundItem = citiesResults.find { it.id_city == if (userKind == USER_KIND_ADMIN_CITY) userCityID else iLocation }
+                        val foundItem =
+                            citiesResults.find { it.id_city == if (userKind == USER_KIND_ADMIN_CITY) userCityID else iLocation }
                         if (foundItem != null) {
                             etUserCity.setText("${foundItem.nama_city} - ${foundItem.kode_city}")
                             selectedCity = ModalSearchModel(foundItem.id_city, foundItem.nama_city)
@@ -567,15 +640,21 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
                         isLoaded = true
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         handleMessage(this@AddUserActivity, "LIST CITY", "Daftar kota kosong!")
                         isCitiesLoaded = false
 
                     }
+
                     else -> {
 
-                        handleMessage(this@AddUserActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@AddUserActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         isCitiesLoaded = false
 
                     }
@@ -584,7 +663,11 @@ class AddUserActivity : AppCompatActivity(), SearchModal.SearchModalListener {
 
             } catch (e: Exception) {
 
-                handleMessage(this@AddUserActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    this@AddUserActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 isCitiesLoaded = false
 
             }

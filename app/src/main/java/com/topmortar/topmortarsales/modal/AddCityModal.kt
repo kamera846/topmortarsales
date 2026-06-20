@@ -34,7 +34,8 @@ import com.topmortar.topmortarsales.model.DistributorModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-class AddCityModal(private val context: Context, private val lifecycleScope: CoroutineScope) : Dialog(context) {
+class AddCityModal(private val context: Context, private val lifecycleScope: CoroutineScope) :
+    Dialog(context) {
 
     private lateinit var sessionManager: SessionManager
     private val userDistributorId get() = sessionManager.userDistributor().toString()
@@ -52,15 +53,19 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
         this.item = data
     }
 
-    private var modalInterface : AddCityModalInterface? = null
-    fun initializeInterface(data : AddCityModalInterface) {
+    private var modalInterface: AddCityModalInterface? = null
+    fun initializeInterface(data: AddCityModalInterface) {
         this.modalInterface = data
     }
+
     interface AddCityModalInterface {
         fun onSubmit(status: Boolean)
     }
-    private var distributorOptions = arrayListOf(DistributorModel(id_distributor = "-1", nama_distributor = "Memuat..."))
-    private var selectedDistributor = DistributorModel(id_distributor = "-1", nama_distributor = "Memuat...")
+
+    private var distributorOptions =
+        arrayListOf(DistributorModel(id_distributor = "-1", nama_distributor = "Memuat..."))
+    private var selectedDistributor =
+        DistributorModel(id_distributor = "-1", nama_distributor = "Memuat...")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,7 +111,7 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
         icClose.visibility = View.VISIBLE
         tvTitleBar.text = "Add New City"
 
-        tvTitleBar.setPadding(convertDpToPx(16, context),0, convertDpToPx(16, context), 0)
+        tvTitleBar.setPadding(convertDpToPx(16, context), 0, convertDpToPx(16, context), 0)
     }
 
     private fun initClickHandler() {
@@ -136,19 +141,23 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
 
     private fun submitHandler() {
 
-        if (!formValidation("${ etCityName.text }", "${ etCityCode.text }")) return
+        if (!formValidation("${etCityName.text}", "${etCityCode.text}")) return
 
         loadingState(true)
 
         lifecycleScope.launch {
             try {
 
-                val cityName = createPartFromString("${ etCityName.text }")
-                val cityCode = createPartFromString("${ etCityCode.text }")
+                val cityName = createPartFromString("${etCityName.text}")
+                val cityCode = createPartFromString("${etCityCode.text}")
                 val distributorID = createPartFromString(userDistributorId)
 
-                val apiService: ApiService = HttpClient.create()
-                val response = apiService.addCity(name = cityName, code = cityCode, distributorID = distributorID)
+                val apiService: ApiService = HttpClient.apiService
+                val response = apiService.addCity(
+                    name = cityName,
+                    code = cityCode,
+                    distributorID = distributorID
+                )
 
                 if (response.isSuccessful) {
 
@@ -160,18 +169,28 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
                             etCityName.setText("")
                             etCityCode.setText("")
                             loadingState(false)
-                            handleMessage(context, TAG_RESPONSE_CONTACT, "Berhasil menambahkan data!")
+                            handleMessage(
+                                context,
+                                TAG_RESPONSE_CONTACT,
+                                "Berhasil menambahkan data!"
+                            )
 
                             modalInterface!!.onSubmit(true)
                             this@AddCityModal.dismiss()
 
                         }
+
                         RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
 
-                            handleMessage(context, TAG_RESPONSE_MESSAGE, "Gagal menambahkan! Message: ${ responseBody.message }")
+                            handleMessage(
+                                context,
+                                TAG_RESPONSE_MESSAGE,
+                                "Gagal menambahkan! Message: ${responseBody.message}"
+                            )
                             loadingState(false)
 
                         }
+
                         else -> {
 
                             handleMessage(context, TAG_RESPONSE_CONTACT, "Gagal menambahkan data!")
@@ -182,7 +201,11 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
 
                 } else {
 
-                    handleMessage(context, TAG_RESPONSE_CONTACT, "Gagal menambahkan data! Message: " + response.message())
+                    handleMessage(
+                        context,
+                        TAG_RESPONSE_CONTACT,
+                        "Gagal menambahkan data! Message: " + response.message()
+                    )
                     loadingState(false)
 
                 }
@@ -190,7 +213,11 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
 
             } catch (e: Exception) {
 
-                handleMessage(context, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    context,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(false)
 
             }
@@ -227,11 +254,17 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
     private fun setSpinner() {
 
         val spinner: Spinner = findViewById(R.id.spin_distributor)
-        val adapter = ArrayAdapter(context, android.R.layout.simple_spinner_item, distributorOptions)
+        val adapter =
+            ArrayAdapter(context, android.R.layout.simple_spinner_item, distributorOptions)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = adapter
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: android.view.View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
                 // Get the selected item value (e.g., "admin" or "sales")
                 selectedDistributor = distributorOptions[position]
             }
@@ -248,27 +281,49 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getListDistributor()
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
                         distributorOptions = response.results
-                        distributorOptions.add(0, DistributorModel(id_distributor = "-1", nama_distributor = "Pilih Distributor"))
+                        distributorOptions.add(
+                            0,
+                            DistributorModel(
+                                id_distributor = "-1",
+                                nama_distributor = "Pilih Distributor"
+                            )
+                        )
                         setSpinner()
                         loadingState(false)
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
-                        handleMessage(context, TAG_RESPONSE_CONTACT, context.getString(R.string.failed_get_data))
-                        distributorOptions.add(0, DistributorModel(id_distributor = "-1", nama_distributor = "Pilih Distributor"))
+                        handleMessage(
+                            context,
+                            TAG_RESPONSE_CONTACT,
+                            context.getString(R.string.failed_get_data)
+                        )
+                        distributorOptions.add(
+                            0,
+                            DistributorModel(
+                                id_distributor = "-1",
+                                nama_distributor = "Pilih Distributor"
+                            )
+                        )
                         setSpinner()
                         loadingState(false)
                     }
+
                     else -> {
 
-                        handleMessage(context, TAG_RESPONSE_CONTACT, context.getString(R.string.failed_get_data))
+                        handleMessage(
+                            context,
+                            TAG_RESPONSE_CONTACT,
+                            context.getString(R.string.failed_get_data)
+                        )
                         loadingState(true)
 
                     }
@@ -277,7 +332,11 @@ class AddCityModal(private val context: Context, private val lifecycleScope: Cor
 
             } catch (e: Exception) {
 
-                handleMessage(context, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    context,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true)
 
             }

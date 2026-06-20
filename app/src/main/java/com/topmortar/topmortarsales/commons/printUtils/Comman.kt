@@ -6,7 +6,7 @@ import java.io.File
 
 object Comman {
 
-    fun getAppPath(context: Context): String? {
+    fun getAppPath(context: Context): String {
         //File dir = new File(android.os.Environment.getExternalStorageDirectory()
         val dir = File(
             context.filesDir

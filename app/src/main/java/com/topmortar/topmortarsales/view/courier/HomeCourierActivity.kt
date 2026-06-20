@@ -66,7 +66,6 @@ import com.topmortar.topmortarsales.commons.utils.CustomProgressBar
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
 import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.commons.utils.FirebaseUtils
-import com.topmortar.topmortarsales.commons.utils.MySntpClient.checkTimeFromInternet
 import com.topmortar.topmortarsales.commons.utils.PermissionsHandler
 import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailedRunServiceMessage
 import com.topmortar.topmortarsales.commons.utils.SessionManager
@@ -87,10 +86,8 @@ import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.PermissionActivity
 import com.topmortar.topmortarsales.view.SplashScreenActivity
 import com.topmortar.topmortarsales.view.user.UserProfileActivity
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -209,7 +206,7 @@ class HomeCourierActivity : AppCompatActivity() {
         val userDistributorIds = sessionManager.userDistributor()
         firebaseReference =
             FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-011")
-        apiService = HttpClient.create()
+        apiService = HttpClient.apiService
         customUtility = CustomUtility(this)
 
         // Set User Absent Level (TEMP)
@@ -317,13 +314,15 @@ class HomeCourierActivity : AppCompatActivity() {
                 currentTime >= eveningStart -> {
 
                     var title = "Waktunya Pulang"
-                    var description = "Jangan lupa melakukan absen pulang untuk menyelesaikan pekerjaan."
+                    var description =
+                        "Jangan lupa melakukan absen pulang untuk menyelesaikan pekerjaan."
 
                     if (!isAbsentMorningNow) {
-                        description = "Jam kerja berakhir, dan Anda belum melakukan absen masuk hari ini."
+                        description =
+                            "Jam kerja berakhir, dan Anda belum melakukan absen masuk hari ini."
                         hideBtnAbsent()
                     } else if (!isAbsentEveningNow) {
-                        showBtnAbsent("PULANG SEKARANG",R.color.red_claret)
+                        showBtnAbsent("PULANG SEKARANG", R.color.red_claret)
                     } else {
                         title = getString(R.string.absen_pulang_sudah_tercatat)
                         description = getString(R.string.terima_kasih_atas_kinerja_hari_ini)
@@ -339,7 +338,8 @@ class HomeCourierActivity : AppCompatActivity() {
                 currentTime in morningEnd..eveningStart -> {
 
                     var title = getString(R.string.kehadiranmu_telah_tercatat)
-                    val description = getString(R.string.terimakasih_sudah_mencatat_kehadiran_hari_ini_without_clock)
+                    val description =
+                        getString(R.string.terimakasih_sudah_mencatat_kehadiran_hari_ini_without_clock)
 
                     if (!isAbsentMorningNow) {
                         title = "Wah, Kamu Terlambat"
@@ -358,7 +358,8 @@ class HomeCourierActivity : AppCompatActivity() {
                 currentTime in morningStart..morningEnd -> {
 
                     var title = getString(R.string.kehadiranmu_telah_tercatat)
-                    val description = getString(R.string.terimakasih_sudah_mencatat_kehadiran_hari_ini_without_clock)
+                    val description =
+                        getString(R.string.terimakasih_sudah_mencatat_kehadiran_hari_ini_without_clock)
 
                     if (!isAbsentMorningNow) {
                         title = getString(R.string.yuk_catat_kehadiranmu_hari_ini)
@@ -386,7 +387,10 @@ class HomeCourierActivity : AppCompatActivity() {
         }
     }
 
-    private fun setAbsentText(title: String = "Sabar Dulu Ya", description: String = "Absen masuk hanya bisa dilakukan pada pukul 07.00-09.00 WIB.") {
+    private fun setAbsentText(
+        title: String = "Sabar Dulu Ya",
+        description: String = "Absen masuk hanya bisa dilakukan pada pukul 07.00-09.00 WIB."
+    ) {
         binding.absentTitle.text = title
         binding.absentDescription.text = description
     }
@@ -1253,7 +1257,7 @@ class HomeCourierActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
 
-                    val apiService: ApiService = HttpClient.create()
+                    val apiService: ApiService = HttpClient.apiService
 //                    val response = apiService.getListBaseCamp(cityId = userCity ?: "0", distributorID = userDistributorId ?: "0")
                     val response =
                         apiService.getListBaseCamp(distributorID = userDistributorId ?: "0")
@@ -1736,7 +1740,7 @@ class HomeCourierActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.detailUser(userId = userId ?: "")
 
                 when (response.status) {

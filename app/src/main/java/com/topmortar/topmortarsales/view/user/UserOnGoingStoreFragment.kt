@@ -74,9 +74,11 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
 
 
     private var listener: CounterItem? = null
+
     interface CounterItem {
         fun counterItem(count: Int)
     }
+
     fun setCounterItem(listener: CounterItem) {
         this.listener = listener
     }
@@ -105,21 +107,22 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
         val padding8 = convertDpToPx(8, requireContext())
         binding.searchBox.vBorderTop.visibility = View.VISIBLE
         binding.searchBox.icCloseSearch.visibility = View.GONE
-        binding.searchBox.etSearchBox.setPadding(padding16,0,padding16,0)
+        binding.searchBox.etSearchBox.setPadding(padding16, 0, padding16, 0)
         binding.searchBox.icClearSearch.visibility = View.INVISIBLE
-        binding.searchBox.icClearSearch.setPadding(padding8,padding8,padding8,padding8)
+        binding.searchBox.icClearSearch.setPadding(padding8, padding8, padding8, padding8)
         val params = binding.searchBox.icClearSearch.layoutParams
         params.width = convertDpToPx(40, requireContext())
         params.height = convertDpToPx(40, requireContext())
         binding.searchBox.icClearSearch.layoutParams = params
 
-        binding.searchBox.etSearchBox.addTextChangedListener(object: TextWatcher {
+        binding.searchBox.etSearchBox.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(
                 s: CharSequence?,
                 start: Int,
                 count: Int,
                 after: Int
-            ) {}
+            ) {
+            }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
 
@@ -167,8 +170,9 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
-                val response = apiService.getContactsUserBid(userId = userIDParam!!.ifEmpty { userID })
+                val apiService: ApiService = HttpClient.apiService
+                val response =
+                    apiService.getContactsUserBid(userId = userIDParam!!.ifEmpty { userID })
 //                val response = when (userKind) {
 //                    USER_KIND_ADMIN -> {
 //                        if (selectedCity != null ) {
@@ -182,7 +186,10 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
 
                         binding.recyclerView.apply {
                             layoutManager = LinearLayoutManager(requireContext())
-                            adapter = ContactsRecyclerViewAdapter(response.results, this@UserOnGoingStoreFragment)
+                            adapter = ContactsRecyclerViewAdapter(
+                                response.results,
+                                this@UserOnGoingStoreFragment
+                            )
                         }
 
 //                        if (userKind == USER_KIND_ADMIN) getCities()
@@ -191,15 +198,21 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
                         loadingState(false)
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         listener?.counterItem(0)
                         loadingState(true, "Daftar kontak kosong!")
 
                     }
+
                     else -> {
 
-                        handleMessage(requireContext(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            requireContext(),
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         loadingState(true, getString(R.string.failed_request))
 
                     }
@@ -211,8 +224,15 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(requireContext(), "Failed UserOnGoingStoreFragment on getContacts(). Catch: ${e.message}")
-                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    requireContext(),
+                    "Failed UserOnGoingStoreFragment on getContacts(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    requireContext(),
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
 
             }
@@ -231,41 +251,70 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
                 val searchCity = createPartFromString(userCityParam!!.ifEmpty { userCity })
                 val distributorId = createPartFromString(userDistributorId)
 
-                val apiService: ApiService = HttpClient.create()
-                val response = if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
-                    if (selectedCity != null ) {
-                        if (selectedCity!!.id != "-1") {
-                            val cityId = createPartFromString(selectedCity!!.id!!)
-                            apiService.searchContact(key = searchKey, cityId = cityId, distributorID = distributorId)
-                        } else apiService.searchContact(key = searchKey, cityId = searchCity, distributorID = distributorId)
-                    } else apiService.searchContact(key = searchKey, cityId = searchCity, distributorID = distributorId)
-                } else apiService.searchContact(cityId = searchCity, key = searchKey, distributorID = distributorId)
+                val apiService: ApiService = HttpClient.apiService
+                val response =
+                    if (userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY) {
+                        if (selectedCity != null) {
+                            if (selectedCity!!.id != "-1") {
+                                val cityId = createPartFromString(selectedCity!!.id!!)
+                                apiService.searchContact(
+                                    key = searchKey,
+                                    cityId = cityId,
+                                    distributorID = distributorId
+                                )
+                            } else apiService.searchContact(
+                                key = searchKey,
+                                cityId = searchCity,
+                                distributorID = distributorId
+                            )
+                        } else apiService.searchContact(
+                            key = searchKey,
+                            cityId = searchCity,
+                            distributorID = distributorId
+                        )
+                    } else apiService.searchContact(
+                        cityId = searchCity,
+                        key = searchKey,
+                        distributorID = distributorId
+                    )
 
                 if (response.isSuccessful) {
 
                     val responseBody = response.body()!!
-                    val textFilter = if (selectedCity != null && selectedCity?.id != "-1") selectedCity?.title else getString(R.string.all_cities)
+                    val textFilter =
+                        if (selectedCity != null && selectedCity?.id != "-1") selectedCity?.title else getString(
+                            R.string.all_cities
+                        )
 
                     when (responseBody.status) {
                         RESPONSE_STATUS_OK -> {
 
                             binding.recyclerView.apply {
                                 layoutManager = LinearLayoutManager(requireContext())
-                                adapter = ContactsRecyclerViewAdapter(responseBody.results, this@UserOnGoingStoreFragment)
+                                adapter = ContactsRecyclerViewAdapter(
+                                    responseBody.results,
+                                    this@UserOnGoingStoreFragment
+                                )
                             }
                             binding.tvFilter.text = "$textFilter (${responseBody.results.size})"
                             loadingState(false)
 
                         }
+
                         RESPONSE_STATUS_EMPTY -> {
 
                             loadingState(true, "Daftar kontak kosong!")
                             binding.tvFilter.text = "$textFilter (${responseBody.results.size})"
 
                         }
+
                         else -> {
 
-                            handleMessage(requireContext(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                            handleMessage(
+                                requireContext(),
+                                TAG_RESPONSE_CONTACT,
+                                getString(R.string.failed_get_data)
+                            )
                             loadingState(true, getString(R.string.failed_request))
 
                         }
@@ -273,7 +322,11 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
 
                 } else {
 
-                    handleMessage(requireContext(), TAG_RESPONSE_CONTACT, "Failed get data! Message: " + response.message())
+                    handleMessage(
+                        requireContext(),
+                        TAG_RESPONSE_CONTACT,
+                        "Failed get data! Message: " + response.message()
+                    )
                     loadingState(true, getString(R.string.failed_request))
 
                 }
@@ -284,8 +337,15 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(requireContext(), "Failed UserOnGoingStoreFragment on searchContact(). Catch: ${e.message}")
-                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    requireContext(),
+                    "Failed UserOnGoingStoreFragment on searchContact(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    requireContext(),
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
 
             }
@@ -302,7 +362,7 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {
@@ -314,22 +374,33 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
                         items.add(ModalSearchModel("-1", "Hapus filter"))
                         for (i in 0 until results.size) {
                             val data = results[i]
-                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                            items.add(
+                                ModalSearchModel(
+                                    data.id_city,
+                                    "${data.nama_city} - ${data.kode_city}"
+                                )
+                            )
                         }
 
                         setupFilterContacts(items)
                         loadingState(false)
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         handleMessage(requireContext(), "LIST CITY", "Daftar kota kosong!")
                         loadingState(false)
 
                     }
+
                     else -> {
 
-                        handleMessage(requireContext(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            requireContext(),
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         loadingState(false)
 
                     }
@@ -341,8 +412,15 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(requireContext(), "Failed UserOnGoingStoreFragment on getCities(). Catch: ${e.message}")
-                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    requireContext(),
+                    "Failed UserOnGoingStoreFragment on getCities(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    requireContext(),
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(false)
 
             }
@@ -353,7 +431,8 @@ class UserOnGoingStoreFragment : Fragment(), ContactsRecyclerViewAdapter.ItemCli
     private fun setupFilterContacts(items: ArrayList<ModalSearchModel> = ArrayList()) {
 
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.filterBox.background = requireContext().getDrawable(R.color.black_400)
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.filterBox.background =
+            requireContext().getDrawable(R.color.black_400)
         else binding.filterBox.background = requireContext().getDrawable(R.color.light)
 
         binding.filterBox.visibility = View.VISIBLE

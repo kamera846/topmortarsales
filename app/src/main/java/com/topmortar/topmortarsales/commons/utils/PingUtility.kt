@@ -24,6 +24,7 @@ class PingUtility(private val indicatorImageView: View? = null) : AsyncTask<Stri
     fun setInterface(pingResultInterface: PingResultInterface) {
         this.pingResultInterface = pingResultInterface
     }
+
     interface PingResultInterface {
         fun onPingResult(pingResult: Int? = null)
     }

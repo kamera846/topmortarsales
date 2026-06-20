@@ -22,7 +22,8 @@ import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.adapter.SearchModalRecyclerViewAdapter
 import com.topmortar.topmortarsales.model.ModalSearchModel
 
-class SearchModal(private val context: Context, private val listItem: ArrayList<ModalSearchModel>) : Dialog(context), SearchModalRecyclerViewAdapter.ItemClickListener {
+class SearchModal(private val context: Context, private val listItem: ArrayList<ModalSearchModel>) :
+    Dialog(context), SearchModalRecyclerViewAdapter.ItemClickListener {
 
     interface SearchModalListener {
         fun onDataReceived(data: ModalSearchModel)
@@ -124,7 +125,7 @@ class SearchModal(private val context: Context, private val listItem: ArrayList<
             }
         })
 
-        etSearch.addTextChangedListener(object: TextWatcher{
+        etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
 
             }

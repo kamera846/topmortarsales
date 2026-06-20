@@ -51,7 +51,7 @@ class DeliveryProgressFragment : Fragment() {
     private var _binding: FragmentDeliveryProgressBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var firebaseReference : DatabaseReference
+    private lateinit var firebaseReference: DatabaseReference
     private lateinit var sessionManager: SessionManager
     private val userKind get() = sessionManager.userKind().toString()
     private val userDistributorId get() = sessionManager.userDistributor().toString()
@@ -63,12 +63,15 @@ class DeliveryProgressFragment : Fragment() {
     private var selectedCity: ModalSearchModel? = null
 
     private var listener: CounterItem? = null
+
     interface CounterItem {
         fun counterItem(count: Int)
     }
+
     fun setCounterItem(listener: CounterItem) {
         this.listener = listener
     }
+
     fun syncNow() {
         getList()
     }
@@ -84,7 +87,8 @@ class DeliveryProgressFragment : Fragment() {
 
         sessionManager = SessionManager(requireContext())
         val userDistributorIds = sessionManager.userDistributor()
-        firebaseReference = FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-012")
+        firebaseReference =
+            FirebaseUtils.getReference(distributorId = userDistributorIds ?: "-firebase-012")
 
         if (userKind == USER_KIND_ADMIN) getCities()
         getList()
@@ -105,14 +109,22 @@ class DeliveryProgressFragment : Fragment() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
 
                 val response = when (userKind) {
                     USER_KIND_ADMIN -> {
-                        if (selectedCity != null) apiService.sjNotClosing(idCity = selectedCity?.id!!, distributorID = userDistributorId)
+                        if (selectedCity != null) apiService.sjNotClosing(
+                            idCity = selectedCity?.id!!,
+                            distributorID = userDistributorId
+                        )
                         else apiService.sjNotClosing(distributorID = userDistributorId)
                         apiService.sjNotClosing(distributorID = userDistributorId)
-                    } else -> apiService.sjNotClosing(idCity = userCity, distributorID = userDistributorId)
+                    }
+
+                    else -> apiService.sjNotClosing(
+                        idCity = userCity,
+                        distributorID = userDistributorId
+                    )
                 }
 
                 when (response.status) {
@@ -122,7 +134,8 @@ class DeliveryProgressFragment : Fragment() {
                         val listStores = response.results
 
                         // Get a reference to your database
-                        val myRef: DatabaseReference = firebaseReference.child(FIREBASE_CHILD_DELIVERY)
+                        val myRef: DatabaseReference =
+                            firebaseReference.child(FIREBASE_CHILD_DELIVERY)
 
                         // Add a ValueEventListener to retrieve the data
                         myRef.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -134,9 +147,12 @@ class DeliveryProgressFragment : Fragment() {
                                     for (delivery in dataSnapshot.children) {
                                         if (delivery.child("stores").exists()) {
                                             for (store in delivery.child("stores").children) {
-                                                val storeData = store.getValue(DeliveryModel.Store::class.java)!!
-                                                storeData.courier = delivery.child("courier").getValue(DeliveryModel.Courier::class.java)!!
-                                                storeData.deliveryId = delivery.child("id").getValue(String::class.java)!!
+                                                val storeData =
+                                                    store.getValue(DeliveryModel.Store::class.java)!!
+                                                storeData.courier = delivery.child("courier")
+                                                    .getValue(DeliveryModel.Courier::class.java)!!
+                                                storeData.deliveryId = delivery.child("id")
+                                                    .getValue(String::class.java)!!
 
                                                 val validation = when (selectedCity) {
                                                     null -> listStores.find { it.id_contact == storeData.id }
@@ -166,7 +182,8 @@ class DeliveryProgressFragment : Fragment() {
 
                             override fun onCancelled(databaseError: DatabaseError) {
                                 // Handle errors
-                                handleMessage(requireContext(), TAG_RESPONSE_CONTACT,
+                                handleMessage(
+                                    requireContext(), TAG_RESPONSE_CONTACT,
                                     "Failed run service. Exception $databaseError"
                                 )
                                 loadingState(true, getString(R.string.failed_request))
@@ -176,6 +193,7 @@ class DeliveryProgressFragment : Fragment() {
 
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         loadingState(true, "Belum ada pengiriman yang berlangsung.")
@@ -183,9 +201,14 @@ class DeliveryProgressFragment : Fragment() {
                         listener?.counterItem(0)
 
                     }
+
                     else -> {
 
-                        handleMessage(requireContext(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            requireContext(),
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
                         loadingState(true, getString(R.string.failed_request))
                         showBadgeRefresh(true)
 
@@ -194,7 +217,11 @@ class DeliveryProgressFragment : Fragment() {
 
             } catch (e: Exception) {
 
-                handleMessage(requireContext(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    requireContext(),
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
                 loadingState(true, getString(R.string.failed_request))
                 showBadgeRefresh(true)
 
@@ -205,19 +232,21 @@ class DeliveryProgressFragment : Fragment() {
     }
 
     private fun setRecyclerView(listItem: ArrayList<DeliveryModel.Store>) {
-        val rvAdapter = DeliveryRecyclerViewAdapter(listItem, object: DeliveryRecyclerViewAdapter.ItemClickListener {
-            override fun onItemClick(data: DeliveryModel.Store?) {
-                // Do Something
-                context?.let {
-                    val intent = Intent(it, MapsActivity::class.java)
-                    intent.putExtra(CONST_IS_TRACKING, true)
-                    intent.putExtra(CONST_DELIVERY_ID, data?.deliveryId)
-                    intent.putExtra(CONST_CONTACT_ID, data?.id)
-                    startActivity(intent)
+        val rvAdapter = DeliveryRecyclerViewAdapter(
+            listItem,
+            object : DeliveryRecyclerViewAdapter.ItemClickListener {
+                override fun onItemClick(data: DeliveryModel.Store?) {
+                    // Do Something
+                    context?.let {
+                        val intent = Intent(it, MapsActivity::class.java)
+                        intent.putExtra(CONST_IS_TRACKING, true)
+                        intent.putExtra(CONST_DELIVERY_ID, data?.deliveryId)
+                        intent.putExtra(CONST_CONTACT_ID, data?.id)
+                        startActivity(intent)
+                    }
                 }
-            }
 
-        })
+            })
 
         context?.let { ctx ->
             binding.recyclerview.layoutManager = LinearLayoutManager(ctx)
@@ -268,6 +297,7 @@ class DeliveryProgressFragment : Fragment() {
         }
 
     }
+
     private fun showBadgeRefresh(action: Boolean) {
         val tvTitle = badgeRefresh.findViewById<TextView>(R.id.tvTitle)
         val icClose = badgeRefresh.findViewById<ImageView>(R.id.icClose)
@@ -284,7 +314,7 @@ class DeliveryProgressFragment : Fragment() {
         lifecycleScope.launch {
             try {
 
-                val apiService: ApiService = HttpClient.create()
+                val apiService: ApiService = HttpClient.apiService
                 val response = apiService.getCities(distributorID = userDistributorId)
 
                 when (response.status) {
@@ -295,7 +325,12 @@ class DeliveryProgressFragment : Fragment() {
 
                         for (i in 0 until citiesResults!!.size) {
                             val data = citiesResults!![i]
-                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                            items.add(
+                                ModalSearchModel(
+                                    data.id_city,
+                                    "${data.nama_city} - ${data.kode_city}"
+                                )
+                            )
                         }
                         items.add(0, ModalSearchModel("-1", "Hapus Filter"))
 
@@ -304,14 +339,20 @@ class DeliveryProgressFragment : Fragment() {
 //                        binding.llFilter.componentFilter.visibility = View.GONE
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         handleMessage(requireActivity(), "LIST CITY", "Daftar kota kosong!")
 
                     }
+
                     else -> {
 
-                        handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            requireActivity(),
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
 
                     }
                 }
@@ -319,7 +360,11 @@ class DeliveryProgressFragment : Fragment() {
 
             } catch (e: Exception) {
 
-                handleMessage(requireActivity(), TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                handleMessage(
+                    requireActivity(),
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
 
             }
 
@@ -329,7 +374,7 @@ class DeliveryProgressFragment : Fragment() {
     private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
 
         searchModal = SearchModal(requireActivity(), items)
-        searchModal.setCustomDialogListener(object: SearchModal.SearchModalListener{
+        searchModal.setCustomDialogListener(object : SearchModal.SearchModalListener {
             override fun onDataReceived(data: ModalSearchModel) {
                 if (data.id == "-1") {
                     selectedCity = null
@@ -345,8 +390,10 @@ class DeliveryProgressFragment : Fragment() {
         searchModal.searchHint = "Ketik untuk mencari…"
 
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(requireContext(), R.color.black_400)
-        else binding.llFilter.componentFilter.background = AppCompatResources.getDrawable(requireContext(), R.color.light)
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.componentFilter.background =
+            AppCompatResources.getDrawable(requireContext(), R.color.black_400)
+        else binding.llFilter.componentFilter.background =
+            AppCompatResources.getDrawable(requireContext(), R.color.light)
         binding.llFilter.componentFilter.visibility = View.GONE
         binding.llFilter.componentFilter.setOnClickListener {
             searchModal.show()

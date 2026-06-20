@@ -30,8 +30,8 @@ android {
         applicationId = "com.topmortar.topmortarsales"
         minSdk = 24
         targetSdk = 36
-        versionCode = 190
-        versionName = "3.4.260610190"
+        versionCode = 192
+        versionName = "3.4.260620192"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
@@ -61,6 +61,7 @@ android {
 
 dependencies {
 
+    implementation(libs.androidx.activity.ktx)
     // Default
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)

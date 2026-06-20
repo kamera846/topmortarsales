@@ -121,7 +121,8 @@ class URLUtility(private val context: Context) {
         return radius * c
     }
 
-    private inner class FetchOriginalUrlTask(private val onComplete: (String) -> Unit) : AsyncTask<String, Void, String>() {
+    private class FetchOriginalUrlTask(private val onComplete: (String) -> Unit) :
+        AsyncTask<String, Void, String>() {
         override fun doInBackground(vararg params: String?): String {
             val shortenedUrl = params[0]
 

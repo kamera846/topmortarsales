@@ -19,7 +19,10 @@ import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.RencanaVisitModel
 import java.util.Locale
 
-class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<RencanaVisitRVA.ChatViewHolder>() {
+class RencanaVisitRVA(
+    private val listItem: ArrayList<RencanaVisitModel>,
+    private val itemClickListener: ItemClickListener
+) : RecyclerView.Adapter<RencanaVisitRVA.ChatViewHolder>() {
 
     var callback: ((ArrayList<RencanaVisitModel>) -> Unit)? = null
 
@@ -66,7 +69,11 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
 
             val dateCounter = responseDateCounter.let {
                 if (!it.isNullOrEmpty()) {
-                    if (typeRencana == "jatemPenagihan1" && item.is_new == "1") DateFormat.differenceDateNowDescCustom(it, "dd MMM yyyy", Locale.ENGLISH)
+                    if (typeRencana == "jatemPenagihan1" && item.is_new == "1") DateFormat.differenceDateNowDescCustom(
+                        it,
+                        "dd MMM yyyy",
+                        Locale.ENGLISH
+                    )
                     else DateFormat.differenceDateNowDescCustom(it)
                 } else -1
             }
@@ -90,32 +97,60 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
                 if (selectedItems.get(position, false)) {
                     ContextCompat.getColor(itemView.context, R.color.primary15)
                 } else {
-                    if (dateCounter > 4 && (typeRencana == "jatemPenagihan1" || typeRencana == "jatemPenagihan2" || typeRencana == "jatemPenagihan3")) ContextCompat.getColor(itemView.context, R.color.primary15)
+                    if (dateCounter > 4 && (typeRencana == "jatemPenagihan1" || typeRencana == "jatemPenagihan2" || typeRencana == "jatemPenagihan3")) ContextCompat.getColor(
+                        itemView.context,
+                        R.color.primary15
+                    )
                     else ContextCompat.getColor(itemView.context, R.color.baseBackground)
                 }
             )
 
             var dateJatem =
-                if (typeRencana == "voucher") "Didapatkan " + DateFormat.format(item.created_at ?: "0000-00-00")
-                else if ((typeRencana == "jatemPenagihan1" || typeRencana == "jatemPenagihan2" || typeRencana == "jatemPenagihan3") && item.jatuh_tempo.isNotEmpty()) "Jatuh tempo " + DateFormat.format(dateString =  item.jatuh_tempo, inputFormat = "dd MMM yyyy", inputLocale = Locale.ENGLISH)
-                else if (typeRencana == "passive" || typeRencana == "mg") "Terakhir divisit " + DateFormat.format(item.last_visit ?: "0000-00-00")
+                if (typeRencana == "voucher") "Didapatkan " + DateFormat.format(
+                    item.created_at ?: "0000-00-00"
+                )
+                else if ((typeRencana == "jatemPenagihan1" || typeRencana == "jatemPenagihan2" || typeRencana == "jatemPenagihan3") && item.jatuh_tempo.isNotEmpty()) "Jatuh tempo " + DateFormat.format(
+                    dateString = item.jatuh_tempo,
+                    inputFormat = "dd MMM yyyy",
+                    inputLocale = Locale.ENGLISH
+                )
+                else if (typeRencana == "passive" || typeRencana == "mg") "Terakhir divisit " + DateFormat.format(
+                    item.last_visit ?: "0000-00-00"
+                )
 //                else if (typeRencana == "tagihMingguan") "Tanggal invoice " + DateFormat.format(item.date_invoice)
                 else "Terakhir divisit " + DateFormat.format(item.created_at ?: "0000-00-00")
 
             if (!item.is_new.isNullOrEmpty()) {
                 val isNew = item.is_new == "1"
                 val isInvalidLastVisit = item.last_visit == "0000-00-00"
-                val isRelevantType = typeRencana in listOf("jatem", "jatemPenagihan2", "jatemPenagihan3", "passive", "mg")
+                val isRelevantType = typeRencana in listOf(
+                    "jatem",
+                    "jatemPenagihan2",
+                    "jatemPenagihan3",
+                    "passive",
+                    "mg"
+                )
 
                 if (isNew) {
                     if (isRelevantType && isInvalidLastVisit) dateJatem = "Belum pernah divisit"
-                    if (typeRencana == "tagihMingguan") dateJatem = "Tanggal invoice " + DateFormat.format(item.date_invoice)
+                    if (typeRencana == "tagihMingguan") dateJatem =
+                        "Tanggal invoice " + DateFormat.format(item.date_invoice)
                     badgeNew.visibility = View.VISIBLE
                 } else {
                     if (isInvalidLastVisit) dateJatem = "Belum pernah divisit"
                     if ((typeRencana == "jatemPenagihan1" || typeRencana == "jatemPenagihan2" || typeRencana == "jatemPenagihan3")) {
-                        if (typeRencana == "jatemPenagihan1") itemView.setBackgroundColor(ContextCompat.getColor(itemView.context, R.color.status_active15))
-                        dateJatem = "Jatem " + DateFormat.format(dateString =  item.jatuh_tempo, inputFormat = "dd MMM yyyy", inputLocale = Locale.ENGLISH, outputFormat = "dd MMM") + ", Telah divisit " + DateFormat.format(item.created_at ?: "0000-00-00", outputFormat = "dd MMM")
+                        if (typeRencana == "jatemPenagihan1") itemView.setBackgroundColor(
+                            ContextCompat.getColor(itemView.context, R.color.status_active15)
+                        )
+                        dateJatem = "Jatem " + DateFormat.format(
+                            dateString = item.jatuh_tempo,
+                            inputFormat = "dd MMM yyyy",
+                            inputLocale = Locale.ENGLISH,
+                            outputFormat = "dd MMM"
+                        ) + ", Telah divisit " + DateFormat.format(
+                            item.created_at ?: "0000-00-00",
+                            outputFormat = "dd MMM"
+                        )
                     }
                     badgeNew.visibility = View.GONE
                 }
@@ -132,7 +167,8 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
             textVerified.setBackgroundResource(R.drawable.bg_passive_round)
             textVerified.visibility = View.VISIBLE
 
-            if (item.pass_contact.isNotEmpty() && item.pass_contact != "0") badgeSeller.visibility = View.VISIBLE
+            if (item.pass_contact.isNotEmpty() && item.pass_contact != "0") badgeSeller.visibility =
+                View.VISIBLE
             else badgeSeller.visibility = View.GONE
 
         }
@@ -141,7 +177,8 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
 
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
         context = parent.context
         return ChatViewHolder(view)
 
@@ -152,9 +189,19 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
         val item = listItem[position]
 
         holder.bind(item, position)
-        if (!isSelectBarActive) holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
+        if (!isSelectBarActive) holder.itemView.startAnimation(
+            AnimationUtils.loadAnimation(
+                holder.itemView.context,
+                R.anim.rv_item_fade_slide_up
+            )
+        )
 
-        holder.itemView.setOnClickListener { if (isSelectBarActive) toggleSelection(holder, position) else onItemClick(holder, position) }
+        holder.itemView.setOnClickListener {
+            if (isSelectBarActive) toggleSelection(
+                holder,
+                position
+            ) else onItemClick(holder, position)
+        }
         holder.checkListImage.setOnClickListener { onItemClick(holder, position) }
         holder.checkBoxItem.setOnClickListener { toggleSelection(holder, position) }
 
@@ -203,7 +250,8 @@ class RencanaVisitRVA (private val listItem: ArrayList<RencanaVisitModel>, priva
     }
 
     fun clearSelections() {
-        val selectedPositions = selectedItems.clone() // Clone untuk menghindari ConcurrentModificationException
+        val selectedPositions =
+            selectedItems.clone() // Clone untuk menghindari ConcurrentModificationException
         selectedItems.clear()
         for (i in 0 until selectedPositions.size()) {
             notifyItemChanged(selectedPositions.keyAt(i))

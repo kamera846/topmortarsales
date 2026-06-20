@@ -20,14 +20,17 @@ import com.topmortar.topmortarsales.commons.utils.DateFormat
 import com.topmortar.topmortarsales.model.SuratJalanNotClosingModel
 
 @SuppressLint("SetTextI18n")
-class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<SuratJalanNotClosingModel>, private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<SuratJalanNotClosingRecyclerViewAdapter.ChatViewHolder>() {
+class SuratJalanNotClosingRecyclerViewAdapter(
+    private val listItem: ArrayList<SuratJalanNotClosingModel>,
+    private val itemClickListener: ItemClickListener
+) : RecyclerView.Adapter<SuratJalanNotClosingRecyclerViewAdapter.ChatViewHolder>() {
     private var context: Context? = null
 
     interface ItemClickListener {
         fun onItemClick(data: SuratJalanNotClosingModel? = null)
     }
 
-    inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         private val tvContactName: TextView = itemView.findViewById(R.id.tv_contact_name)
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
@@ -62,7 +65,13 @@ class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<S
                 ContextCompat.getColor(itemView.context, itemColor)
             )
 
-            var notesText = "* Dibuat ${DateFormat.format(item.dalivery_date, "yyyy-MM-dd HH:mm:ss", "dd MMM, HH:mm")}"
+            var notesText = "* Dibuat ${
+                DateFormat.format(
+                    item.dalivery_date,
+                    "yyyy-MM-dd HH:mm:ss",
+                    "dd MMM, HH:mm"
+                )
+            }"
             val dateProcessed = item.dateProcessed
             var dateCounter = item.dalivery_date.let {
                 if (it.isNotEmpty()) {
@@ -86,7 +95,8 @@ class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<S
             }
 
             deliveryStatus.visibility = View.VISIBLE
-            dateCounter.let { if (it != -1) {
+            dateCounter.let {
+                if (it != -1) {
                     deliveryStatusText.visibility = View.VISIBLE
                     deliveryStatusText.text = "$it hari"
                 } else {
@@ -123,7 +133,8 @@ class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<S
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
 
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
         context = parent.context
         return ChatViewHolder(view)
 
@@ -134,7 +145,12 @@ class SuratJalanNotClosingRecyclerViewAdapter (private val listItem: ArrayList<S
         val item = listItem[position]
 
         holder.bind(item)
-        holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
+        holder.itemView.startAnimation(
+            AnimationUtils.loadAnimation(
+                holder.itemView.context,
+                R.anim.rv_item_fade_slide_up
+            )
+        )
 
         holder.itemView.setOnClickListener { onItemClick(holder, position) }
         holder.checkListImage.setOnClickListener { onItemClick(holder, position) }

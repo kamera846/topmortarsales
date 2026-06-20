@@ -50,8 +50,8 @@ import com.topmortar.topmortarsales.response.ResponseInvoice
 import com.topmortar.topmortarsales.response.ResponseKonten
 import com.topmortar.topmortarsales.response.ResponseList
 import com.topmortar.topmortarsales.response.ResponseMessage
-import com.topmortar.topmortarsales.response.ResponseObject.PrintInvoice
 import com.topmortar.topmortarsales.response.ResponseObject
+import com.topmortar.topmortarsales.response.ResponseObject.PrintInvoice
 import com.topmortar.topmortarsales.response.ResponsePayment
 import com.topmortar.topmortarsales.response.ResponseProduct
 import com.topmortar.topmortarsales.response.ResponsePromo
@@ -82,12 +82,14 @@ interface ApiService {
         @Query("c") cityId: String,
         @Query("dst") distributorID: String
     ): ResponseContactList
+
     @GET(CONTACT)
     suspend fun getContacts(
         @Query("c") cityId: String,
         @Query("status") status: String,
         @Query("dst") distributorID: String
     ): ResponseContactList
+
     @GET(CONTACT)
     suspend fun getContacts(
         @Query("c") cityId: String,
@@ -96,18 +98,36 @@ interface ApiService {
         @Query("dst") distributorID: String
     ): ResponseContactList
 
-//    @GET(CONTACT)
+    //    @GET(CONTACT)
 //    suspend fun getContacts(): ResponseContactList
     @GET(CONTACT)
     suspend fun getContactsByDistributor(@Query("dst") distributorID: String): ResponseContactList
+
     @GET(CONTACT)
-    suspend fun getContactsByStatus(@Query("status") status: String, @Query("dst") distributorID: String): ResponseContactList
+    suspend fun getContactsByStatus(
+        @Query("status") status: String,
+        @Query("dst") distributorID: String
+    ): ResponseContactList
+
     @GET(CONTACT)
-    suspend fun getContactsByCityAndValidationStatus(@Query("c") cityId: String, @Query("validation_status") validationStatus: String, @Query("dst") distributorID: String): ResponseContactList
+    suspend fun getContactsByCityAndValidationStatus(
+        @Query("c") cityId: String,
+        @Query("validation_status") validationStatus: String,
+        @Query("dst") distributorID: String
+    ): ResponseContactList
+
     @GET(CONTACT)
-    suspend fun getContactsByStatusAndValidationStatus(@Query("status") status: String, @Query("validation_status") validationStatus: String, @Query("dst") distributorID: String): ResponseContactList
+    suspend fun getContactsByStatusAndValidationStatus(
+        @Query("status") status: String,
+        @Query("validation_status") validationStatus: String,
+        @Query("dst") distributorID: String
+    ): ResponseContactList
+
     @GET(CONTACT)
-    suspend fun getContactsByValidationStatus(@Query("validation_status") validationStatus: String, @Query("dst") distributorID: String): ResponseContactList
+    suspend fun getContactsByValidationStatus(
+        @Query("validation_status") validationStatus: String,
+        @Query("dst") distributorID: String
+    ): ResponseContactList
 
     @GET(CONTACT)
     suspend fun getContactDetail(@Query("id") contactId: String): Response<ResponseContactList>
@@ -277,7 +297,10 @@ interface ApiService {
     suspend fun getUsers(@Query("dst") distributorID: String): ResponseUsers
 
     @GET(GET_USERS)
-    suspend fun getUsers(@Query("c") cityId: String, @Query("dst") distributorID: String): ResponseUsers
+    suspend fun getUsers(
+        @Query("c") cityId: String,
+        @Query("dst") distributorID: String
+    ): ResponseUsers
 
     @GET(GET_USERS)
     suspend fun detailUser(@Query("id") userId: String): ResponseUsers
@@ -387,13 +410,13 @@ interface ApiService {
     @POST(INVOICE)
     suspend fun addInvoice(
         @Part("id_surat_jalan") invoiceId: RequestBody
-     ): ResponseInvoice
+    ): ResponseInvoice
 
     @Multipart
     @POST("invoiceTopSeller.php")
     suspend fun addInvoiceSeller(
         @Part("id_surat_jalan") invoiceId: RequestBody
-     ): ResponseInvoice
+    ): ResponseInvoice
 
     @GET(SKILL)
     suspend fun getSkills(@Query("dst") distributorID: String): ResponseSkills
@@ -439,10 +462,16 @@ interface ApiService {
     ): Response<ResponseMessage>
 
     @GET(TUKANG)
-    suspend fun getTukang(@Query("c") cityId: String, @Query("key") searchKey: String): ResponseTukangList
+    suspend fun getTukang(
+        @Query("c") cityId: String,
+        @Query("key") searchKey: String
+    ): ResponseTukangList
 
     @GET(TUKANG)
-    suspend fun getTukangDst(@Query("dst") distributorID: String, @Query("key") searchKey: String): ResponseTukangList
+    suspend fun getTukangDst(
+        @Query("dst") distributorID: String,
+        @Query("key") searchKey: String
+    ): ResponseTukangList
 
     @GET(TUKANG)
     suspend fun getDetailTukang(@Query("id") tukangId: String): Response<ResponseTukangList>
@@ -576,6 +605,7 @@ interface ApiService {
         @Part("is_pay") isPay: RequestBody,
         @Part("pay_value") payValue: RequestBody,
     ): Response<ResponseReportVisit>
+
     @Multipart
     @POST(VISIT)
     suspend fun makeVisitReportPaymentLater(
@@ -973,4 +1003,16 @@ interface ApiService {
 
     @GET("counterVisit.php")
     suspend fun getCounterVisit(@Query("id_user") idUser: String): Response<ResponseObject.ResponseCounterVisit>
+
+    @Multipart
+    @POST("absenManual.php")
+    suspend fun absentManualInBasecamp(
+        @Part("id_gudang") idGudang: RequestBody,
+        @Part("id_user") idUser: RequestBody,
+        @Part("distance_visit") distanceVisit: RequestBody? = createPartFromString("0"),
+        @Part("laporan_visit") laporanVisit: RequestBody? = createPartFromString("Absen masuk\n•by system•"),
+        @Part("source") source: RequestBody = createPartFromString("absen_in"),
+        @Part("type_renvi") renviSource: RequestBody = createPartFromString(NORMAL_REPORT),
+        @Part("level_user") levelUser: RequestBody
+    ): Response<ResponseReportVisit>
 }

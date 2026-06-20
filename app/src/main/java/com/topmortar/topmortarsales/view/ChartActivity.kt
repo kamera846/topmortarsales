@@ -21,7 +21,6 @@ import com.topmortar.topmortarsales.commons.utils.ResponseMessage.generateFailed
 import com.topmortar.topmortarsales.commons.utils.SessionManager
 import com.topmortar.topmortarsales.commons.utils.applyMyEdgeToEdge
 import com.topmortar.topmortarsales.commons.utils.handleMessage
-import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityChartBinding
 import com.topmortar.topmortarsales.modal.SearchModal
@@ -44,7 +43,6 @@ class ChartActivity : AppCompatActivity() {
     private var _binding: ActivityChartBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var apiService: ApiService
     private lateinit var searchModal: SearchModal
     private var citiesResults: ArrayList<CityModel>? = null
     private var listResponse: ArrayList<ActiveStoreModel>? = null
@@ -62,8 +60,6 @@ class ChartActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
         _binding = ActivityChartBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        apiService = HttpClient.create()
 
         binding.titleBarDark.tvTitleBar.text = "Grafik Status Toko"
         binding.titleBarDark.icBack.setOnClickListener { finish() }
@@ -109,20 +105,31 @@ class ChartActivity : AppCompatActivity() {
             try {
                 val response = when (selectedCity) {
                     null -> {
-                        if (userKind == USER_KIND_ADMIN) apiService.getActiveStore(idDistributor = userDistributorId ?: "")
+                        if (userKind == USER_KIND_ADMIN) HttpClient.apiService.getActiveStore(
+                            idDistributor = userDistributorId ?: ""
+                        )
                         else {
                             binding.chartDesc.text = "Menampilkan data di kota $userCityName"
-                            apiService.getActiveStore(idCity = userCity ?: "", idDistributor = userDistributorId ?: "")
+                            HttpClient.apiService.getActiveStore(
+                                idCity = userCity ?: "",
+                                idDistributor = userDistributorId ?: ""
+                            )
                         }
-                    } else -> apiService.getActiveStore(idCity = selectedCity?.id!!, idDistributor = userDistributorId ?: "")
+                    }
+
+                    else -> HttpClient.apiService.getActiveStore(
+                        idCity = selectedCity?.id!!,
+                        idDistributor = userDistributorId ?: ""
+                    )
                 }
-                when(response.status) {
+                when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
                         listResponse = response.results
 
                         salesDates.forEach { item ->
-                            val findMatch = listResponse?.firstOrNull { data -> data.month_active ==  item.first.toString() }
+                            val findMatch =
+                                listResponse?.firstOrNull { data -> data.month_active == item.first.toString() }
                             if (findMatch != null) {
                                 salesDates = salesDates.map {
                                     when (it.first) {
@@ -134,7 +141,9 @@ class ChartActivity : AppCompatActivity() {
                         }
 
                         salesData.forEach { item ->
-                            val findMatch = listResponse?.firstOrNull { data -> data.month_active ==  item.first.toInt().toString() }
+                            val findMatch = listResponse?.firstOrNull { data ->
+                                data.month_active == item.first.toInt().toString()
+                            }
                             if (findMatch != null) {
                                 salesData = salesData.map {
                                     when (it.first) {
@@ -146,14 +155,24 @@ class ChartActivity : AppCompatActivity() {
                         }
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
-                        handleMessage(this@ChartActivity, "TAG_CHART_ACTIVE", "Data tidak ditemukan")
+                        handleMessage(
+                            this@ChartActivity,
+                            "TAG_CHART_ACTIVE",
+                            "Data tidak ditemukan"
+                        )
 
                     }
+
                     else -> {
 
-                        handleMessage(this@ChartActivity, "TAG_CHART_ACTIVE",  getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@ChartActivity,
+                            "TAG_CHART_ACTIVE",
+                            getString(R.string.failed_get_data)
+                        )
 
                     }
                 }
@@ -162,8 +181,15 @@ class ChartActivity : AppCompatActivity() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@ChartActivity, "Failed ChartActivity on loadBarChartData(). Catch: ${e.message}")
-                handleMessage(this@ChartActivity, "TAG_CHART_ACTIVE", generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@ChartActivity,
+                    "Failed ChartActivity on loadBarChartData(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@ChartActivity,
+                    "TAG_CHART_ACTIVE",
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
 
             } finally {
 
@@ -193,7 +219,11 @@ class ChartActivity : AppCompatActivity() {
                 val colorList = mutableListOf<Int>()
 
                 for (item in sortedSalesData) {
-                    colorList.add(if (item.first > currentMonth) getColor(R.color.status_passive) else getColor(R.color.status_active))
+                    colorList.add(
+                        if (item.first > currentMonth) getColor(R.color.status_passive) else getColor(
+                            R.color.status_active
+                        )
+                    )
                 }
 
                 barDataSet.setValueTextColors(colorList)
@@ -284,7 +314,8 @@ class ChartActivity : AppCompatActivity() {
         return dynamicMonths
     }
 
-    inner class MonthValueFormatter(private val months: Array<String>) : com.github.mikephil.charting.formatter.ValueFormatter() {
+    class MonthValueFormatter(private val months: Array<String>) :
+        com.github.mikephil.charting.formatter.ValueFormatter() {
         override fun getFormattedValue(value: Float): String {
             val index = value.toInt()
             return if (index in 0..11) months[index] else ""
@@ -296,7 +327,8 @@ class ChartActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
 
-                val response = apiService.getCities(distributorID = userDistributorId ?: "")
+                val response =
+                    HttpClient.apiService.getCities(distributorID = userDistributorId ?: "")
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
@@ -306,7 +338,12 @@ class ChartActivity : AppCompatActivity() {
 
                         for (i in 0 until citiesResults!!.size) {
                             val data = citiesResults!![i]
-                            items.add(ModalSearchModel(data.id_city, "${data.nama_city} - ${data.kode_city}"))
+                            items.add(
+                                ModalSearchModel(
+                                    data.id_city,
+                                    "${data.nama_city} - ${data.kode_city}"
+                                )
+                            )
                         }
                         items.add(0, ModalSearchModel("-1", "Hapus Filter"))
 
@@ -314,14 +351,20 @@ class ChartActivity : AppCompatActivity() {
                         binding.filterContainer.visibility = View.VISIBLE
 
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         handleMessage(this@ChartActivity, "LIST CITY", "Daftar kota kosong!")
 
                     }
+
                     else -> {
 
-                        handleMessage(this@ChartActivity, TAG_RESPONSE_CONTACT, getString(R.string.failed_get_data))
+                        handleMessage(
+                            this@ChartActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
 
                     }
                 }
@@ -332,8 +375,15 @@ class ChartActivity : AppCompatActivity() {
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@ChartActivity, "Failed ChartActivity on getCities(). Catch: ${e.message}")
-                handleMessage(this@ChartActivity, TAG_RESPONSE_CONTACT, generateFailedRunServiceMessage(e.message.toString()))
+                FirebaseUtils.logErr(
+                    this@ChartActivity,
+                    "Failed ChartActivity on getCities(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@ChartActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
 
             }
 
@@ -343,7 +393,7 @@ class ChartActivity : AppCompatActivity() {
     private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
 
         searchModal = SearchModal(this, items)
-        searchModal.setCustomDialogListener(object: SearchModal.SearchModalListener{
+        searchModal.setCustomDialogListener(object : SearchModal.SearchModalListener {
             override fun onDataReceived(data: ModalSearchModel) {
                 if (data.id == "-1") {
                     selectedCity = null
@@ -363,7 +413,9 @@ class ChartActivity : AppCompatActivity() {
         searchModal.searchHint = "Ketik untuk mencari…"
 
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.filterCities.setTextColor(getColor(R.color.white))
+        if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.filterCities.setTextColor(
+            getColor(R.color.white)
+        )
         else binding.filterCities.setTextColor(getColor(R.color.black_200))
         binding.filterContainer.visibility = View.GONE
         binding.filterContainer.setOnClickListener {

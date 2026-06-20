@@ -7,8 +7,11 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.highlight.Highlight
 import com.topmortar.topmortarsales.R
 
-class CustomMarkerView(context: Context, layoutResource: Int, private val dates: List<Pair<Int, String>>)
-    : MarkerView(context, layoutResource) {
+class CustomMarkerView(
+    context: Context,
+    layoutResource: Int,
+    private val dates: List<Pair<Int, String>>
+) : MarkerView(context, layoutResource) {
 
     private val tvContent: TextView = findViewById(R.id.tvContent)
 

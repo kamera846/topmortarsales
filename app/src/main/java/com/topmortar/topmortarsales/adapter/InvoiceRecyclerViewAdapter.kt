@@ -23,7 +23,8 @@ import java.util.Calendar
 import java.util.Locale
 
 @SuppressLint("SetTextI18n")
-class InvoiceRecyclerViewAdapter(private val itemClickListener: ItemClickListener) : RecyclerView.Adapter<InvoiceRecyclerViewAdapter.ViewHolder>() {
+class InvoiceRecyclerViewAdapter(private val itemClickListener: ItemClickListener) :
+    RecyclerView.Adapter<InvoiceRecyclerViewAdapter.ViewHolder>() {
     private var listItem: ArrayList<InvoiceModel> = ArrayList()
     private var context: Context? = null
 
@@ -57,17 +58,31 @@ class InvoiceRecyclerViewAdapter(private val itemClickListener: ItemClickListene
                 val currentYear = calendar.get(Calendar.YEAR)
                 val dateYear = SimpleDateFormat("yyyy", Locale.getDefault()).format(date)
 
-                if (currentYear == dateYear.toInt()) DateFormat.format(itemDate, "yyyy-MM-dd HH:mm:ss", "dd MMMM, HH:mm")
+                if (currentYear == dateYear.toInt()) DateFormat.format(
+                    itemDate,
+                    "yyyy-MM-dd HH:mm:ss",
+                    "dd MMMM, HH:mm"
+                )
                 else DateFormat.format(itemDate, "yyyy-MM-dd HH:mm:ss", "dd MMMM yyyy, HH:mm")
             } else {
                 DateFormat.format(itemDate, "yyyy-MM-dd HH:mm:ss", "dd MMMM, HH:mm")
             }
             tvPhoneNumber.text = item.no_surat_jalan + " | " + dateFormat
             if (item.status_invoice == INVOICE_PAID || item.total_invoice == "0") {
-                tooltipStatus.setImageDrawable(context?.let { ContextCompat.getDrawable(it, R.drawable.status_active) })
+                tooltipStatus.setImageDrawable(context?.let {
+                    ContextCompat.getDrawable(
+                        it,
+                        R.drawable.status_active
+                    )
+                })
                 tooltipHandler(tooltipStatus, "Invoice has been paid")
             } else {
-                tooltipStatus.setImageDrawable(context?.let { ContextCompat.getDrawable(it, R.drawable.status_data) })
+                tooltipStatus.setImageDrawable(context?.let {
+                    ContextCompat.getDrawable(
+                        it,
+                        R.drawable.status_data
+                    )
+                })
                 tooltipHandler(tooltipStatus, "Unpaid invoice")
             }
 
@@ -84,7 +99,8 @@ class InvoiceRecyclerViewAdapter(private val itemClickListener: ItemClickListene
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.item_chat_room, parent, false)
         context = parent.context
         return ViewHolder(view)
 
@@ -95,7 +111,12 @@ class InvoiceRecyclerViewAdapter(private val itemClickListener: ItemClickListene
         val item = listItem[position]
 
         holder.bind(item)
-        holder.itemView.startAnimation(AnimationUtils.loadAnimation(holder.itemView.context, R.anim.rv_item_fade_slide_up))
+        holder.itemView.startAnimation(
+            AnimationUtils.loadAnimation(
+                holder.itemView.context,
+                R.anim.rv_item_fade_slide_up
+            )
+        )
 
         holder.itemView.setOnClickListener {
 

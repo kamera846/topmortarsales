@@ -23,7 +23,11 @@ import java.util.Calendar
 class CustomUtility(private val context: Context) {
     private lateinit var sessionManager: SessionManager
 
-    fun showPermissionDeniedSnackbar(message: String, actionTitle: String = "Coba Lagi", unit: () -> Unit) {
+    fun showPermissionDeniedSnackbar(
+        message: String,
+        actionTitle: String = "Coba Lagi",
+        unit: () -> Unit
+    ) {
         Snackbar.make(
             (context as Activity).findViewById(android.R.id.content), // Replace with your root view
             message,
@@ -33,7 +37,11 @@ class CustomUtility(private val context: Context) {
             .show()
     }
 
-    fun showPermissionDeniedDialog(message: String, title: String = "Izin Diperlukan", unit: (() -> Unit)? = null) {
+    fun showPermissionDeniedDialog(
+        message: String,
+        title: String = "Izin Diperlukan",
+        unit: (() -> Unit)? = null
+    ) {
         val openSettings = context.getString(R.string.open_settings)
         val textCancel = context.getString(R.string.cancel)
         AlertDialog.Builder(context)
@@ -114,17 +122,20 @@ class CustomUtility(private val context: Context) {
     }
 
     fun navigateChatAdmin(message: String, distributorNumber: String) {
-        val phoneNumber = distributorNumber.ifEmpty { context.getString(R.string.topmortar_wa_number) }
+        val phoneNumber =
+            distributorNumber.ifEmpty { context.getString(R.string.topmortar_wa_number) }
 
         val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")
+        intent.data =
+            Uri.parse("https://api.whatsapp.com/send?phone=$phoneNumber&text=${Uri.encode(message)}")
 
         try {
             val context = (context as Activity)
             context.startActivity(intent)
             context.finishAffinity()
         } catch (e: ActivityNotFoundException) {
-            Toast.makeText(context as Activity, "Gagal menghubungkan ke whatsapp", TOAST_SHORT).show()
+            Toast.makeText(context as Activity, "Gagal menghubungkan ke whatsapp", TOAST_SHORT)
+                .show()
         }
 
     }

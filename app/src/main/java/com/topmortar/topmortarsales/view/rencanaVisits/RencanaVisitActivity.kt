@@ -59,7 +59,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
     private lateinit var viewPager: ViewPager
     private lateinit var pagerAdapter: RencanaVisitVPA
     private lateinit var progressBar: CustomProgressBar
-    private var pagerAdapterItemCount = arrayListOf(0,0,0,0)
+    private var pagerAdapterItemCount = arrayListOf(0, 0, 0, 0)
     private var activeTab = 0
     private var selectedItemCount = 0
     private var isSelectBarActive = false
@@ -87,7 +87,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
 
         setContentView(binding.root)
 
-        apiService = HttpClient.create()
+        apiService = HttpClient.apiService
         progressBar = CustomProgressBar(this)
         progressBar.setMessage(getString(R.string.txt_loading))
         binding.selectTitleBarDark.componentSelectTitleBarDark.visibility = View.GONE
@@ -109,7 +109,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
 
         initLayout()
 
-        onBackPressedDispatcher.addCallback(this, object: OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 myOnBackPressed()
             }
@@ -138,20 +138,22 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
         // Connect TabLayout and ViewPager
         tabLayout.setupWithViewPager(viewPager)
         for ((idx, item) in tabTitles.listIterator().withIndex()) {
-            val textView = LayoutInflater.from(this).inflate(R.layout.tab_renvi_title, null) as TextView
+            val textView =
+                LayoutInflater.from(this).inflate(R.layout.tab_renvi_title, null) as TextView
             textView.text = item
             tabTitleViews.add(textView)
             tabLayout.getTabAt(idx)?.customView = textView
         }
         tabTitleViews[0].setTypeface(null, android.graphics.Typeface.BOLD)
-        pagerAdapter.setCounterPageItem(object : RencanaVisitVPA.CounterPageItem{
+        pagerAdapter.setCounterPageItem(object : RencanaVisitVPA.CounterPageItem {
             override fun counterItem(count: Int, tabIndex: Int) {
                 pagerAdapterItemCount[tabIndex] = count
-                tabTitleViews[tabIndex].text = "${if (count != 0) "($count) " else ""}" +  tabTitles[tabIndex]
+                tabTitleViews[tabIndex].text =
+                    "${if (count != 0) "($count) " else ""}" + tabTitles[tabIndex]
             }
 
         })
-        tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener{
+        tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 activeTab = tab?.position!!
                 tabTitleViews[activeTab].setTypeface(null, android.graphics.Typeface.BOLD)
@@ -169,8 +171,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
             tabLayout.setBackgroundColor(getColor(R.color.black_300))
             tabLayout.setTabTextColors(getColor(R.color.black_600), getColor(R.color.primary))
             tabLayout.setSelectedTabIndicatorColor(getColor(R.color.primary))
-        }
-        else {
+        } else {
             tabLayout.setBackgroundColor(getColor(R.color.primary))
             tabLayout.setTabTextColors(getColor(R.color.primary_600), getColor(R.color.white))
             tabLayout.setSelectedTabIndicatorColor(getColor(R.color.white))
@@ -206,11 +207,17 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
         when (activeTab) {
             0 -> {
                 menuPerCategory.title = "Lihat lokasi renvi Jatuh Tempo"
-            } 1 -> {
+            }
+
+            1 -> {
                 menuPerCategory.title = "Lihat lokasi renvi Voucher"
-            } 2 -> {
+            }
+
+            2 -> {
                 menuPerCategory.title = "Lihat lokasi renvi Pasif"
-            } 3 -> {
+            }
+
+            3 -> {
                 menuPerCategory.title = "Lihat lokasi renvi Mingguan"
             }
         }
@@ -221,6 +228,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
                     getAllRenvi()
                     true
                 }
+
                 R.id.option_per_category -> {
                     if (pagerAdapterItemCount[activeTab] != 0) {
                         val listIem = pagerAdapter.getAllListItem(activeTab)
@@ -228,10 +236,12 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
                     }
                     true
                 }
+
                 R.id.option_choices -> {
                     if (pagerAdapterItemCount[activeTab] != 0) toggleSelectBar()
                     true
                 }
+
                 else -> false
             }
         }
@@ -353,8 +363,9 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
 
         getListRenviPerCategory("jatem")
     }
+
     private fun getListRenviPerCategory(category: String) {
-        processed ++
+        processed++
         progressBar.setMessage(getString(R.string.txt_loading) + "($processed/$totalProcess)")
 
         lifecycleScope.launch {
@@ -363,12 +374,25 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
                 val response = when (userKind) {
                     USER_KIND_ADMIN -> {
                         when (category) {
-                            "jatem" -> apiService.targetJatemDst(idDistributor = userDistributorId ?: "0")
-                            "voucher" -> apiService.targetVoucherDst(idDistributor = userDistributorId ?: "0")
-                            "passive" -> apiService.targetPasifDst(idDistributor = userDistributorId ?: "0")
-                            else -> apiService.targetWeeklyDst(idDistributor = userDistributorId ?: "0")
+                            "jatem" -> apiService.targetJatemDst(
+                                idDistributor = userDistributorId ?: "0"
+                            )
+
+                            "voucher" -> apiService.targetVoucherDst(
+                                idDistributor = userDistributorId ?: "0"
+                            )
+
+                            "passive" -> apiService.targetPasifDst(
+                                idDistributor = userDistributorId ?: "0"
+                            )
+
+                            else -> apiService.targetWeeklyDst(
+                                idDistributor = userDistributorId ?: "0"
+                            )
                         }
-                    } else -> {
+                    }
+
+                    else -> {
                         when (category) {
                             "jatem" -> apiService.targetJatem(idCity = userCityID ?: "0")
                             "voucher" -> apiService.targetVoucher(idCity = userCityID ?: "0")
@@ -393,6 +417,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
                             }
                         }
                     }
+
                     RESPONSE_STATUS_EMPTY -> {
 
                         when (category) {
@@ -408,6 +433,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
                         }
 
                     }
+
                     else -> {
 
                         when (category) {
@@ -430,7 +456,10 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
                 if (e is CancellationException) {
                     return@launch
                 }
-                FirebaseUtils.logErr(this@RencanaVisitActivity, "Failed RencanaVisitActivity on getListRenviPerCategory(). Catch: ${e.message}")
+                FirebaseUtils.logErr(
+                    this@RencanaVisitActivity,
+                    "Failed RencanaVisitActivity on getListRenviPerCategory(). Catch: ${e.message}"
+                )
                 when (category) {
                     "jatem" -> getListRenviPerCategory("voucher")
                     "voucher" -> getListRenviPerCategory("passive")
@@ -498,7 +527,8 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
 //        }, 1000)
     }
 
-    private inner class LoopingTask(private var items: ArrayList<RencanaVisitModel>) : AsyncTask<Void, Void, Void>() {
+    private inner class LoopingTask(private var items: ArrayList<RencanaVisitModel>) :
+        AsyncTask<Void, Void, Void>() {
 
         override fun doInBackground(vararg params: Void?): Void? {
             for (item in items.listIterator()) {
@@ -507,7 +537,7 @@ class RencanaVisitActivity : AppCompatActivity(), TagihMingguanFragment.OnSelect
                 listCoordinateStatus.add(item.store_status)
                 listCoordinateCityID.add(item.id_city)
 
-                processed ++
+                processed++
                 percentage = (processed * 100) / totalProcess
                 runOnUiThread {
                     progressBar.setMessage(getString(R.string.txt_loading) + "($percentage%)")
