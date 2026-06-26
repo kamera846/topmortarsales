@@ -46,6 +46,7 @@ import com.topmortar.topmortarsales.response.ResponseCountStore
 import com.topmortar.topmortarsales.response.ResponseDelivery
 import com.topmortar.topmortarsales.response.ResponseDistributor
 import com.topmortar.topmortarsales.response.ResponseGudang
+import com.topmortar.topmortarsales.response.ResponseHobby
 import com.topmortar.topmortarsales.response.ResponseInvoice
 import com.topmortar.topmortarsales.response.ResponseKonten
 import com.topmortar.topmortarsales.response.ResponseList
@@ -1015,4 +1016,9 @@ interface ApiService {
         @Part("type_renvi") renviSource: RequestBody = createPartFromString(NORMAL_REPORT),
         @Part("level_user") levelUser: RequestBody
     ): Response<ResponseReportVisit>
+
+    @GET("hobi.php")
+    suspend fun listHobby(
+        @Query("search") searchKey: String,
+    ): Response<ResponseHobby>
 }
