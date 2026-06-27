@@ -250,6 +250,10 @@
             android:name=".view.user.UserAbsentManualActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".view.hobby.HobbyActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>
