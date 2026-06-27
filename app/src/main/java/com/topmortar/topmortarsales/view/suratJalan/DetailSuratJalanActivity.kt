@@ -497,8 +497,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
 
                         idAppOrder = dataSj.id_apporder
                         isClosing = dataSj.is_closing == "1"
-                        isPrintInvoice =
-                            dataSj.is_print_inv == "1" && dataSj.date_printed_inv == null
+                        isPrintInvoice = dataSj.is_print_inv.toInt() > 0
                         isCod = dataSj.is_cod == "1"
                         isCanClosing = dataSj.can_closing == "yes"
                         msgCanClosing = dataSj.msg_can_closing
@@ -528,6 +527,9 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                         tvCourier.text = "Kurir: ${dataSj.courier_name}"
                         tvVehicle.text = "Kendaraan: ${dataSj.nama_kendaraan}"
                         tvVehicleNumber.text = "No. Polisi: ${dataSj.nopol_kendaraan}"
+
+                        binding.lnrPrintInvoice.visibility = View.GONE
+
                         if (isClosing) {
                             tvReceivedBy.visibility = View.VISIBLE
                             tvReceivedDate.visibility = View.VISIBLE
@@ -547,7 +549,6 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                             tvReceivedBy.visibility = View.GONE
                             tvReceivedDate.visibility = View.GONE
                             bottomActionSj.visibility = View.VISIBLE
-                            binding.lnrPrintInvoice.visibility = View.GONE
                         }
 
                         var details = dataSj.details.let { if (it.isEmpty()) arrayListOf() else it }
@@ -1383,7 +1384,7 @@ class DetailSuratJalanActivity : AppCompatActivity() {
                             this@DetailSuratJalanActivity,
                             message = "Berhasil print invoice"
                         )
-                        binding.lnrPrintInvoice.visibility = View.GONE
+                        getDetailSj()
                     }
 
                     RESPONSE_STATUS_FAIL, RESPONSE_STATUS_FAILED -> {
