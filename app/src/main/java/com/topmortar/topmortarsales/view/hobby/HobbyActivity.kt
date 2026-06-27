@@ -263,6 +263,8 @@ class HobbyActivity : AppCompatActivity() {
                 }
 
                 isSuccess = true
+                handleMessage(this@HobbyActivity, message = "Berhasil menyimpan hobi")
+
             } catch (e: Exception) {
                 val message = e.message ?: "Terjadi kesalahan menyimpan data"
                 handleMessage(this@HobbyActivity, message = "[Simpan Hobi] $message")

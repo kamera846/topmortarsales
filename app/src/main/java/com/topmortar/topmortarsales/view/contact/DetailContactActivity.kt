@@ -919,7 +919,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 }
 
                 R.id.option_edit_hobi -> {
-                    showModalEditHobi()
+                    navigateToEditHobby()
                     true
                 }
 
@@ -2420,6 +2420,9 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 //                        if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) {
                             if (!isContactXSource) {
                                 icEdit.visibility = View.VISIBLE
+                                if (sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_ADMIN_CITY) {
+                                    binding.btnEditHobi.visibility = View.VISIBLE
+                                }
                             }
                             val indicatorImageView = findViewById<View>(R.id.indicatorView)
                             indicatorImageView.visibility = View.VISIBLE
