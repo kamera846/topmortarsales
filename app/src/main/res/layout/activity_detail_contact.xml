@@ -1644,11 +1644,11 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="2dp"
                         android:orientation="horizontal">
 
                         <TextView
-                            android:layout_weight="1"
-                            android:layout_width="0dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:gravity="center_vertical"
                             android:text="Hobi"
@@ -1658,10 +1658,27 @@
 
                         <TextView
                             android:id="@+id/status_hobi"
-                            android:layout_width="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
+                            android:layout_marginHorizontal="4dp"
                             android:textColor="@color/black_600"
                             android:text="(Aktif)"/>
+
+                        <LinearLayout
+                            android:id="@+id/btn_edit_hobi"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="3dp"
+                            android:background="@drawable/bg_primary_round">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/white"
+                                android:textSize="12sp"
+                                android:text="Edit"/>
+                        </LinearLayout>
 
                         <com.google.android.material.switchmaterial.SwitchMaterial
                             android:visibility="gone"

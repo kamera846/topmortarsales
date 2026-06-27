@@ -1018,7 +1018,20 @@ interface ApiService {
     ): Response<ResponseReportVisit>
 
     @GET("hobi.php")
-    suspend fun listHobby(
+    suspend fun hobi(
         @Query("search") searchKey: String,
+    ): Response<ResponseHobby>
+
+    @GET("hobiToko.php")
+    suspend fun hobiToko(
+        @Query("id_contact") idContact: String,
+    ): Response<ResponseHobby>
+
+    @Multipart
+    @POST("hobiToko.php")
+    suspend fun saveHobiToko(
+        @Part("id_contact") idContact: RequestBody,
+        @Part("id_hobis") idHobis: RequestBody,
+        @Part("id_user") idUser: RequestBody,
     ): Response<ResponseHobby>
 }

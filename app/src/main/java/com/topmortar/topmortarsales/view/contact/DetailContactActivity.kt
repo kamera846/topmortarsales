@@ -72,6 +72,7 @@ import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.CONST_MAPS_NAME
 import com.topmortar.topmortarsales.commons.CONST_MAPS_STATUS
 import com.topmortar.topmortarsales.commons.CONST_NAME
+import com.topmortar.topmortarsales.commons.CONST_USER_ID
 import com.topmortar.topmortarsales.commons.DETAIL_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.EMPTY_FIELD_VALUE
 import com.topmortar.topmortarsales.commons.FIREBASE_CHILD_DELIVERY
@@ -140,9 +141,11 @@ import com.topmortar.topmortarsales.modal.SendMessageModal
 import com.topmortar.topmortarsales.model.ContactModel
 import com.topmortar.topmortarsales.model.ContactSales
 import com.topmortar.topmortarsales.model.DeliveryModel
+import com.topmortar.topmortarsales.model.HobbyModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import com.topmortar.topmortarsales.view.SendMessageActivity
+import com.topmortar.topmortarsales.view.hobby.HobbyActivity
 import com.topmortar.topmortarsales.view.reports.ChecklistReportActivity
 import com.topmortar.topmortarsales.view.reports.NewReportActivity
 import com.topmortar.topmortarsales.view.reports.ReportsActivity
@@ -252,6 +255,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var selectedCity: ModalSearchModel? = null
     private var selectedPromo: ModalSearchModel? = null
     private var itemSendMessage: ContactModel? = null
+    private var hobbies: List<HobbyModel> = listOf()
     private var isContactXSource = false
 
     private var statusItem: List<String> = listOf(
@@ -399,6 +403,13 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
 
     private val sendMessageLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                getDetailContact(false)
+            }
+        }
+
+    private val editHobbyLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 getDetailContact(false)
@@ -601,6 +612,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         etLocationContainer.setOnClickListener { showSearchModal() }
         etLocation.setOnClickListener { showSearchModal() }
         etPromo.setOnClickListener { showSearchPromoModal() }
+        binding.btnEditHobi.setOnClickListener { navigateToEditHobby() }
         addressContainer.setOnClickListener {
             if (isEdit) {
                 etAddress.postDelayed({
@@ -967,10 +979,12 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 if (iAddress.isNullOrEmpty()) etAddress.setText("")
 
                 binding.hobiContainer.setBackgroundResource(R.drawable.et_background)
-                binding.statusHobi.visibility = View.GONE
+                binding.statusHobi.visibility = View.INVISIBLE
                 binding.isSendContent.visibility = View.VISIBLE
-                binding.etHobiContact.isEnabled = true
-                if (iHobiContact.isNullOrEmpty()) binding.etHobiContact.setText("")
+                binding.btnEditHobi.visibility = View.GONE
+                binding.etHobiContact.isEnabled = false
+                if (iHobiContact.isNullOrEmpty()) binding.etHobiContact.setText(EMPTY_FIELD_VALUE)
+                else binding.etHobiContact.setText(iHobiContact)
                 binding.isSendContent.isChecked = iSendContent ?: false
 
                 // Interval Visit
@@ -1084,6 +1098,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 binding.hobiContainer.setBackgroundResource(R.drawable.background_rounded_16)
                 binding.statusHobi.visibility = View.VISIBLE
                 binding.isSendContent.visibility = View.GONE
+                binding.btnEditHobi.visibility = View.VISIBLE
                 binding.etHobiContact.isEnabled = false
                 if (iHobiContact.isNullOrEmpty()) binding.etHobiContact.setText(EMPTY_FIELD_VALUE)
                 else binding.etHobiContact.setText(iHobiContact)
@@ -1697,6 +1712,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                                 setupStatus(data.store_status)
                                 setupWeeklyVisitStatus(data.tagih_mingguan)
+                                setupHobbies(data.hobi_toko)
 //                                setupPaymentMethod(data.payment_method)
 //                                setupCluster(data.cluster)
 //                                setupTermin(data.termin_payment)
@@ -3417,7 +3433,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         btnInvoice.visibility = View.VISIBLE
 
         iAddress = data.address
-        iHobiContact = data.hobi_contact
+        setupHobbies(data.hobi_toko)
         iSendContent = data.is_send_content == "1"
         iIntervalVisit = data.interval_visit
         iCredit = data.kredit_limit.let {
@@ -3549,8 +3565,6 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         // Other columns handle
         if (!iAddress.isNullOrEmpty()) etAddress.setText(iAddress)
         else etAddress.setText(EMPTY_FIELD_VALUE)
-        if (!iHobiContact.isNullOrEmpty()) binding.etHobiContact.setText(iHobiContact)
-        else binding.etHobiContact.setText(EMPTY_FIELD_VALUE)
         val sendContent = iSendContent ?: false
         binding.isSendContent.isChecked = sendContent
         binding.statusHobi.text = if (sendContent) "(Aktif)" else "(Nonaktif)"
@@ -3571,6 +3585,19 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         setupReputationSpinner()
         setupHariBayarSpinner()
         setToGetCities()
+    }
+
+    private fun setupHobbies(data: List<HobbyModel>?) {
+        if (data.isNullOrEmpty()) {
+            iHobiContact = ""
+            hobbies = listOf()
+        } else {
+            hobbies = data
+            iHobiContact = hobbies.joinToString { it.name_hobi }
+        }
+
+        if (!iHobiContact.isNullOrEmpty()) binding.etHobiContact.setText(iHobiContact)
+        else binding.etHobiContact.setText(EMPTY_FIELD_VALUE)
     }
 
     override fun onStart() {
@@ -3618,6 +3645,16 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             val intent = Intent(this, SendMessageActivity::class.java)
             sendMessageLauncher.launch(intent)
         }
+    }
+
+    private fun navigateToEditHobby() {
+        EventBus.getDefault().postSticky(EventBusUtils.ListHobbyEvent(hobbies))
+        editHobbyLauncher.launch(
+            Intent(this, HobbyActivity::class.java).apply {
+                putExtra(CONST_CONTACT_ID, contactId)
+                putExtra(CONST_USER_ID, userID)
+            }
+        )
     }
 
 }
