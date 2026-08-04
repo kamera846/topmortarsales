@@ -1,4 +1,3 @@
-import org.gradle.kotlin.dsl.coreLibraryDesugaring
 import java.util.Properties
 
 val secretsProperties = Properties()
@@ -30,8 +29,8 @@ android {
         applicationId = "com.topmortar.topmortarsales"
         minSdk = 24
         targetSdk = 36
-        versionCode = 193
-        versionName = "3.4.260627193"
+        versionCode = 194
+        versionName = "3.4.260805194"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
