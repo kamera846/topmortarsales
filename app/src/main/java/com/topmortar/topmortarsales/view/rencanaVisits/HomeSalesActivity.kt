@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.provider.Settings
 import android.util.Log
 import android.view.View
@@ -88,7 +89,6 @@ import com.topmortar.topmortarsales.commons.utils.handleMessage
 import com.topmortar.topmortarsales.commons.utils.inAppUpdateHelper
 import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
-import com.topmortar.topmortarsales.data.WorldTimeClient
 import com.topmortar.topmortarsales.databinding.ActivityHomeSalesBinding
 import com.topmortar.topmortarsales.modal.SearchModal
 import com.topmortar.topmortarsales.model.BaseCampModel
@@ -114,7 +114,9 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.text.SimpleDateFormat
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
@@ -197,19 +199,91 @@ class HomeSalesActivity : AppCompatActivity() {
 
     private var eveningStart: Int = (16 * 3600)
 
+    private var serverTimeOffset: Long = 0L
+
     private val runnable = object : Runnable {
         override fun run() {
+            // 1. Hitung waktu akurat berdasarkan Uptime HP + Selisih Waktu Server
+            val currentAccurateMillis = SystemClock.elapsedRealtime() + serverTimeOffset
 
-            currentInternetTime?.let {
+            // 2. Konversi ke LocalDateTime dengan zona waktu WIB (Asia/Jakarta)
+            currentInternetTime = Instant.ofEpochMilli(currentAccurateMillis)
+                .atZone(ZoneId.of("Asia/Jakarta"))
+                .toLocalDateTime()
 
-                currentInternetTime = it.plusSeconds(1)
+            // 3. Update UI dan validasi tombol
+            updateRealtimeClock()
+            validateAttendanceButton()
 
-                updateRealtimeClock()
-                validateAttendanceButton()
-            }
-
+            // 4. Ulangi setiap 1 detik
             handler.postDelayed(this, 1000)
         }
+    }
+
+    private fun getInternetTime() {
+        handler.removeCallbacks(runnable)
+
+        // 1. Catat waktu (uptime) tepat SEBELUM request dikirim
+        val requestStartTime = SystemClock.elapsedRealtime()
+
+        HttpClient.apiService.getJakartaTime()
+            .enqueue(object : Callback<WorldTimeResponse> {
+                override fun onResponse(
+                    call: Call<WorldTimeResponse>,
+                    response: Response<WorldTimeResponse>
+                ) {
+                    // 1. Catat waktu (uptime) SEDINI MUNGKIN saat respons masuk agar RTT akurat
+                    val responseTime = SystemClock.elapsedRealtime()
+
+                    if (response.isSuccessful) {
+                        val dateTimeStr = response.body()?.date_time
+
+                        if (dateTimeStr != null) {
+                            try {
+                                // 2. Gunakan Formatter khusus karena format server "yyyy-MM-dd HH:mm:ss"
+                                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                                val localDateTime = LocalDateTime.parse(dateTimeStr, formatter)
+
+                                // 3. Konversi ke Epoch Millis dengan menetapkan Zona Waktu Jakarta (WIB)
+                                val zonedDateTime = localDateTime.atZone(ZoneId.of("Asia/Jakarta"))
+                                val serverMillis = zonedDateTime.toInstant().toEpochMilli()
+
+                                // 4. Hitung Round Trip Time (RTT) dan kompensasi Latency
+                                val rtt = responseTime - requestStartTime
+                                val latency = rtt / 2 // Asumsi waktu upload & download seimbang
+
+                                // 5. Hitung offset
+                                val correctedServerMillis = serverMillis + latency
+                                serverTimeOffset = correctedServerMillis - responseTime
+
+                                // Lanjutkan eksekusi
+                                handler.post(runnable)
+
+                            } catch (e: Exception) {
+                                // Tangkap error jika format string waktu dari server tiba-tiba berubah
+                                e.printStackTrace()
+                                handleTimeFailure()
+                            }
+                        } else {
+                            // Body atau date_time null
+                            handleTimeFailure()
+                        }
+                    } else {
+                        // Respons HTTP error (4xx atau 5xx)
+                        handleTimeFailure()
+                    }
+                }
+
+                override fun onFailure(call: Call<WorldTimeResponse>, t: Throwable) {
+                    handleTimeFailure()
+                }
+            })
+    }
+
+    // Ekstrak ke fungsi terpisah agar kode di onFailure dan !isSuccessful lebih rapi
+    private fun handleTimeFailure() {
+        binding.tvRealtimeClock.text = "Gagal mengambil waktu realtime"
+        binding.btnAbsent.isEnabled = false
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -238,42 +312,6 @@ class HomeSalesActivity : AppCompatActivity() {
 
         })
 
-    }
-
-    private fun getInternetTime() {
-        handler.removeCallbacks(runnable)
-
-        WorldTimeClient.api.getJakartaTime()
-            .enqueue(object : Callback<WorldTimeResponse> {
-
-                override fun onResponse(
-                    call: Call<WorldTimeResponse>,
-                    response: Response<WorldTimeResponse>
-                ) {
-
-                    if (response.isSuccessful) {
-
-                        response.body()?.let { result ->
-
-                            val dateTime = result.date_time.substring(0, 19)
-
-                            currentInternetTime = LocalDateTime.parse(dateTime)
-
-                            updateRealtimeClock()
-                            validateAttendanceButton()
-
-                            handler.post(runnable)
-                        }
-                    }
-                }
-
-                override fun onFailure(call: Call<WorldTimeResponse>, t: Throwable) {
-
-                    binding.tvRealtimeClock.text = "Gagal mengambil waktu realtime"
-
-                    binding.btnAbsent.isEnabled = false
-                }
-            })
     }
 
     private fun updateRealtimeClock() {

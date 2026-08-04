@@ -64,8 +64,10 @@ import com.topmortar.topmortarsales.response.ResponseSuratJalan
 import com.topmortar.topmortarsales.response.ResponseSuratJalanNotClosing
 import com.topmortar.topmortarsales.response.ResponseTukangList
 import com.topmortar.topmortarsales.response.ResponseUsers
+import com.topmortar.topmortarsales.response.WorldTimeResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Multipart
@@ -1034,4 +1036,7 @@ interface ApiService {
         @Part("id_hobis") idHobis: RequestBody,
         @Part("id_user") idUser: RequestBody,
     ): Response<ResponseHobby>
+
+    @GET("time.php")
+    fun getJakartaTime(): Call<WorldTimeResponse>
 }
