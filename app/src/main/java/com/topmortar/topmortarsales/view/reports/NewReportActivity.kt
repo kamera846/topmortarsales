@@ -6,6 +6,7 @@ import android.app.DatePickerDialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Typeface
 import android.location.Location
 import android.net.Uri
 import android.os.Build
@@ -329,7 +330,11 @@ class NewReportActivity : AppCompatActivity() {
         }
 
         if (isSalesOrPenagihan) {
-//            binding.reportPaymentContainer.visibility = View.VISIBLE
+            if (iReportSource == NORMAL_REPORT) {
+                binding.reportPaymentContainer.visibility = View.VISIBLE
+            } else {
+                binding.reportPaymentContainer.visibility = View.GONE
+            }
             binding.reportPaymentTrueContainer.visibility = View.VISIBLE
 
             binding.etPaymentYes.addTextChangedListener(object : TextWatcher {
@@ -406,16 +411,20 @@ class NewReportActivity : AppCompatActivity() {
         if (!isReportPaymentStatus) {
             binding.reportPaymentFalse.setBackgroundResource(R.drawable.bg_primary_round_8)
             binding.reportPaymentFalse.setTextColor(getColor(R.color.white))
-            binding.reportPaymentTrue.setBackgroundResource(R.drawable.et_background_clickable)
-            if (!customUtility.isDarkMode()) binding.reportPaymentTrue.setTextColor(getColor(R.color.black_200))
-            else binding.reportPaymentTrue.setTextColor(getColor(R.color.black_600))
+            binding.reportPaymentFalse.setTypeface(null, Typeface.BOLD)
+            binding.reportPaymentTrue.setBackgroundResource(R.drawable.et_background_clickable_primary)
+            binding.reportPaymentTrue.setTypeface(null, Typeface.NORMAL)
+            if (!customUtility.isDarkMode()) binding.reportPaymentTrue.setTextColor(getColor(R.color.primary_200))
+            else binding.reportPaymentTrue.setTextColor(getColor(R.color.primary_200))
             binding.reportPaymentTrueContainer.visibility = View.GONE
         } else {
             binding.reportPaymentTrue.setBackgroundResource(R.drawable.bg_primary_round_8)
             binding.reportPaymentTrue.setTextColor(getColor(R.color.white))
-            binding.reportPaymentFalse.setBackgroundResource(R.drawable.et_background_clickable)
-            if (!customUtility.isDarkMode()) binding.reportPaymentFalse.setTextColor(getColor(R.color.black_200))
-            else binding.reportPaymentFalse.setTextColor(getColor(R.color.black_600))
+            binding.reportPaymentTrue.setTypeface(null, Typeface.BOLD)
+            binding.reportPaymentFalse.setBackgroundResource(R.drawable.et_background_clickable_primary)
+            binding.reportPaymentFalse.setTypeface(null, Typeface.NORMAL)
+            if (!customUtility.isDarkMode()) binding.reportPaymentFalse.setTextColor(getColor(R.color.primary_200))
+            else binding.reportPaymentFalse.setTextColor(getColor(R.color.primary_200))
             binding.reportPaymentTrueContainer.visibility = View.VISIBLE
         }
     }
