@@ -2051,6 +2051,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 intent.putExtra(CONST_CONTACT_ID, contactId)
                 intent.putExtra(CONST_INVOICE_ID, iInvoiceId)
                 intent.putExtra(REPORT_TYPE_IS_PAYMENT, iReportPaymentStatus)
+                intent.putExtra("const_contact_status", iStatus)
                 if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
                 else intent.putExtra(CONST_NAME, tvName.text)
                 if (iMapsUrl == EMPTY_FIELD_VALUE) intent.putExtra(CONST_MAPS, "")
