@@ -102,6 +102,7 @@ class NewReportActivity : AppCompatActivity() {
     private var isDistanceToLong = false
     private var isBaseCamp = false
     private var isReportPaymentStatus = true
+    private var iContactStatus = ""
     private var iInvoiceId: String? = null
     private var reportType: String = "toko"
     private var id: String = ""
@@ -163,6 +164,7 @@ class NewReportActivity : AppCompatActivity() {
         isBaseCamp = intent.getBooleanExtra(CONST_IS_BASE_CAMP, false)
         iInvoiceId = intent.getStringExtra(CONST_INVOICE_ID)
         isReportPaymentStatus = intent.getBooleanExtra(REPORT_TYPE_IS_PAYMENT, false)
+        iContactStatus = intent.getStringExtra("const_contact_status").toString()
 
         checkLocationPermission()
     }
@@ -330,7 +332,7 @@ class NewReportActivity : AppCompatActivity() {
         }
 
         if (isSalesOrPenagihan) {
-            if (iReportSource == NORMAL_REPORT) {
+            if (iReportSource == NORMAL_REPORT && iContactStatus == "active") {
                 binding.reportPaymentContainer.visibility = View.VISIBLE
             } else {
                 binding.reportPaymentContainer.visibility = View.GONE
