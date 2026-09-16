@@ -311,6 +311,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
     private var iMapsUrl: String? = null
     private var iKtp: String? = null
     private var iPromo: String? = null
+    private var isCanVisitNormal: Int = 0
     private var iReportSource: String? = NORMAL_REPORT
     private var iRenviSource: String? = NORMAL_REPORT
     private var iInvoiceId: String? = null
@@ -1967,7 +1968,11 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 btnNewReport.visibility = View.GONE
             } else if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN || sessionManager.userKind() == USER_KIND_MARKETING) {
                 if (iReportSource == NORMAL_REPORT) {
-                    btnNewReport.visibility = View.VISIBLE
+                    if (isCanVisitNormal > 0) {
+                        btnNewReport.visibility = View.VISIBLE
+                    } else {
+                        btnNewReport.visibility = View.GONE
+                    }
 //                    checklistReportOption.visibility = View.GONE
                 }
 //                if (userDistributorId == "1" && iReportSource == NORMAL_REPORT) btnNewReport.visibility = View.GONE
@@ -2052,6 +2057,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 intent.putExtra(CONST_INVOICE_ID, iInvoiceId)
                 intent.putExtra(REPORT_TYPE_IS_PAYMENT, iReportPaymentStatus)
                 intent.putExtra("const_contact_status", iStatus)
+                intent.putExtra("can_visit_normal", isCanVisitNormal)
                 if (tvName.text == EMPTY_FIELD_VALUE) intent.putExtra(CONST_NAME, "")
                 else intent.putExtra(CONST_NAME, tvName.text)
                 if (iMapsUrl == EMPTY_FIELD_VALUE) intent.putExtra(CONST_MAPS, "")
@@ -3446,12 +3452,16 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
         iLocation = data.id_city
         iPromo = data.id_promo
+        isCanVisitNormal = 2
         iReportSource = intent.getStringExtra(REPORT_SOURCE)
             .let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
         iRenviSource = intent.getStringExtra(RENVI_SOURCE)
             .let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
         iInvoiceId = intent.getStringExtra(CONST_INVOICE_ID)
         iReportPaymentStatus = intent.getBooleanExtra(REPORT_TYPE_IS_PAYMENT, false)
+        if (isCanVisitNormal == 1) {
+            iReportPaymentStatus = true
+        }
 
         activityRequestCode = intent.getIntExtra(ACTIVITY_REQUEST_CODE, activityRequestCode)
 

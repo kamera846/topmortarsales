@@ -36,5 +36,6 @@ data class ContactModel(
     var payment_score: String? = "0.0",
     var old_city: String? = null,
     var hobi_toko: ArrayList<HobbyModel>? = null,
+    var can_visit_normal: String? = "0",
 
     )
