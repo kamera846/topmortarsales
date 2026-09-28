@@ -21,15 +21,18 @@ class FilterTokoModal(private val context: Context) : Dialog(context) {
     private lateinit var binding: ModalFilterTokoBinding
 
     private var validStatuses: ArrayList<String> = arrayListOf("Sudah Valid", "Tidak Valid")
+    private var clusters: ArrayList<String> = arrayListOf("Cluster 1", "Cluster 2", "Cluster 3", "Not Set")
     private var statuses: ArrayList<String> =
         arrayListOf("Data", "Passive", "Active", "Bid", "Blacklist")
     private var selectedValidStatusID: String = "-1"
     private var selectedStatusID: String = "-1"
+    private var selectedClusterID: String = "-1"
 
     private var showFilterValidStatus = false
     private var showFilterStatus = false
     private var showFilterVisited = false
     private var showFilterCities = false
+    private var showFilterCluster = false
     private var showBtnHapus = false
 
     fun setValidStatuses(selected: String = "-1") {
@@ -37,11 +40,15 @@ class FilterTokoModal(private val context: Context) : Dialog(context) {
         showFilterValidStatus = true
     }
 
+    fun setCluster(selected: String = "-1") {
+        selectedClusterID = selected
+        showFilterCluster = true
+    }
+
     fun setStatuses(selected: String = "-1") {
         selectedStatusID = selected
         showFilterStatus = true
     }
-
     private var visited: ArrayList<String> = arrayListOf("Unvisited", "Visited")
     private var selectedVisitedID: String = "-1"
     fun setVisited(selected: String = "-1") {
@@ -60,6 +67,7 @@ class FilterTokoModal(private val context: Context) : Dialog(context) {
     interface SendFilterListener {
         fun onSendFilter(
             selectedValidStatusID: String,
+            selectedClusterID: String,
             selectedStatusID: String,
             selectedVisitedID: String,
             selectedCitiesID: CityModel? = null
@@ -84,6 +92,7 @@ class FilterTokoModal(private val context: Context) : Dialog(context) {
         setupFilterStatuses()
         setupFilterVisited()
         setupFilterCities()
+        setupFilterCluster()
         setBtnHapus()
     }
 
@@ -113,12 +122,13 @@ class FilterTokoModal(private val context: Context) : Dialog(context) {
         titleBar.icClose.visibility = View.VISIBLE
         titleBar.icClose.setOnClickListener { this@FilterTokoModal.dismiss() }
         binding.btnHapusFilter.setOnClickListener {
-            listener!!.onSendFilter("-1", "-1", "-1", null)
+            listener!!.onSendFilter("-1", "-1", "-1", "-1", null)
             this@FilterTokoModal.dismiss()
         }
         binding.btnFilter.setOnClickListener {
             listener!!.onSendFilter(
                 selectedValidStatusID,
+                selectedClusterID,
                 selectedStatusID,
                 selectedVisitedID,
                 selectedCitiesID
@@ -174,6 +184,56 @@ class FilterTokoModal(private val context: Context) : Dialog(context) {
             }
 
             flexBoxCities.addView(textView)
+        }
+    }
+
+    private fun setupFilterCluster() {
+        if (showFilterCluster) binding.filterClusterContainer.visibility = View.VISIBLE
+        else binding.filterClusterContainer.visibility = View.GONE
+
+        val flexboxCluster = binding.flexboxCluster
+        val margin = convertDpToPx(2, context)
+        val paddingVertical = convertDpToPx(6, context)
+        val paddingHorizontal = convertDpToPx(10, context)
+
+        for (item in clusters.listIterator()) {
+            val textView = TextView(context)
+            textView.text = item
+            val layoutParams = FlexboxLayout.LayoutParams(
+                FlexboxLayout.LayoutParams.WRAP_CONTENT,
+                FlexboxLayout.LayoutParams.WRAP_CONTENT
+            )
+            textView.gravity = Gravity.CENTER
+            textView.setTextColor(
+                context.getColor(
+                    if (item == selectedClusterID) R.color.white
+                    else {
+                        if (customUtility.isDarkMode()) R.color.black_600
+                        else R.color.black_200
+                    }
+                )
+            )
+            textView.setBackgroundResource(
+                if (item == selectedClusterID) R.drawable.bg_primary_round
+                else R.drawable.bg_border_round
+            )
+            textView.setPadding(
+                paddingHorizontal,
+                paddingVertical,
+                paddingHorizontal,
+                paddingVertical
+            )
+            layoutParams.setMargins(margin, margin, margin, margin)
+            textView.layoutParams = layoutParams
+
+            textView.setOnClickListener {
+                selectedClusterID = if (item == selectedClusterID) "-1"
+                else item
+                flexboxCluster.removeAllViews()
+                setupFilterCluster()
+            }
+
+            flexboxCluster.addView(textView)
         }
     }
 
@@ -328,7 +388,7 @@ class FilterTokoModal(private val context: Context) : Dialog(context) {
     }
 
     private fun setBtnHapus() {
-        if (selectedValidStatusID != "-1" || selectedStatusID != "-1" || selectedVisitedID != "-1" || selectedCitiesID != null) binding.btnHapusFilter.visibility =
+        if (selectedValidStatusID != "-1" || selectedClusterID != "-1" || selectedStatusID != "-1" || selectedVisitedID != "-1" || selectedCitiesID != null) binding.btnHapusFilter.visibility =
             View.VISIBLE
         else binding.btnHapusFilter.visibility = View.GONE
     }

@@ -139,6 +139,7 @@ interface ApiService {
     @POST(EDIT_CONTACT)
     suspend fun editContact(
         @Part("id") id: RequestBody,
+        @Part("id_user") idUser: RequestBody,
         @Part("nomor_cat_1") phoneCategory1: RequestBody,
         @Part("nomorhp") phone: RequestBody,
         @Part("nomor_cat_2") phoneCategory2: RequestBody,

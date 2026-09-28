@@ -1432,6 +1432,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener,
             filterModal.setSendFilterListener(object : FilterTokoModal.SendFilterListener {
                 override fun onSendFilter(
                     selectedValidStatusID: String,
+                    selectedClusterID: String,
                     selectedStatusID: String,
                     selectedVisitedID: String,
                     selectedCitiesID: CityModel?
