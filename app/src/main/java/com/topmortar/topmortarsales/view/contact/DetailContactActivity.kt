@@ -1301,6 +1301,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 //        Handler(Looper.getMainLooper()).postDelayed({
 //            handleMessage(this,
 //                message = "ID: ${contactId!!},\n" +
+//                        "ID USER: $userID,\n" +
 //                        "NOMOR CAT 1: $pPhoneCategory1,\n" +
 //                        "NOMOR HP: $pPhone,\n" +
 //                        "NOMOR CAT 2: $pPhoneCategory2,\n" +
@@ -1337,6 +1338,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             try {
 
                 val rbId = createPartFromString(contactId!!)
+                val rbIdUser = createPartFromString(userID)
                 val rbPhoneCategory1 = createPartFromString(formatPhoneNumber(pPhoneCategory1))
                 val rbPhone = createPartFromString(formatPhoneNumber(pPhone))
                 val rbPhoneCategory2 = createPartFromString(pPhoneCategory2)
@@ -1364,6 +1366,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
 
                 val response = HttpClient.apiService.editContact(
                     id = rbId,
+                    idUser = rbIdUser,
                     phoneCategory1 = rbPhoneCategory1,
                     phone = rbPhone,
                     phoneCategory2 = rbPhoneCategory2,

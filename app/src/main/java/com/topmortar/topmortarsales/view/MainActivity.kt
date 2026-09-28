@@ -182,6 +182,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
     // Setup Filter
     private var selectedValidStatusID: String = "-1"
+    private var selectedClusterID: String = "-1"
     private var selectedStatusID: String = "-1"
     private var selectedVisitedID: String = "-1"
     private var selectedCitiesID: CityModel? = null
@@ -1015,6 +1016,30 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         lifecycleScope.launch {
             try {
 
+                val clusterFilter = selectedClusterID.lowercase(Locale.ROOT).let {
+                    when (it) {
+                        "cluster 1" -> {
+                            "1"
+                        }
+
+                        "cluster 2" -> {
+                            "2"
+                        }
+
+                        "cluster 3" -> {
+                            "3"
+                        }
+
+                        "not set" -> {
+                            "0"
+                        }
+
+                        else -> {
+                            "-1"
+                        }
+                    }
+                }
+
                 val response = when (userKind) {
                     USER_KIND_COURIER -> HttpClient.apiService.getCourierStore(
                         processNumber = "1",
@@ -1089,21 +1114,27 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
                 var textFilter = ""
 
-                if (selectedValidStatusID != "-1" || selectedStatusID != "-1" || selectedVisitedID != "-1" || selectedCitiesID != null) {
+                if (selectedValidStatusID != "-1" || selectedClusterID != "-1" || selectedStatusID != "-1" || selectedVisitedID != "-1" || selectedCitiesID != null) {
                     textFilter += if (selectedCitiesID != null && selectedCitiesID?.id_city != "-1") selectedCitiesID?.nama_city else ""
                     textFilter += if (selectedStatusID != "-1") if (textFilter.isNotEmpty()) ", $selectedStatusID" else selectedStatusID else ""
                     textFilter += if (selectedValidStatusID != "-1") if (textFilter.isNotEmpty()) ", $selectedValidStatusID" else selectedValidStatusID else ""
+                    textFilter += if (selectedClusterID != "-1") if (textFilter.isNotEmpty()) ", $selectedClusterID" else selectedClusterID else ""
                     textFilter += if (selectedVisitedID != "-1") if (textFilter.isNotEmpty()) ", $selectedVisitedID" else selectedVisitedID else ""
                 } else textFilter = getString(R.string.tidak_ada_filter)
-
-                Log.w("[DEBUG]", "Filter logging")
 
                 when (response.status) {
                     RESPONSE_STATUS_OK -> {
 
-                        contacts = response.results
-                        setRecyclerView(response.results)
-                        binding.tvFilter.text = "$textFilter (${response.results.size})"
+                        contacts = if (clusterFilter != "-1") {
+                            response.results.filterTo(ArrayList()) {
+                                it.cluster == clusterFilter
+                            }
+                        } else {
+                            response.results
+                        }
+                        setRecyclerView(contacts)
+                        binding.tvFilter.text = "$textFilter (${contacts.size})"
+                        
                         loadingState(false)
                         setupFilterTokoModal()
 
@@ -1302,20 +1333,24 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             if (userKind == USER_KIND_ADMIN) {
                 filterModal.setValidStatuses(selected = selectedValidStatusID)
                 filterModal.setStatuses(selected = selectedStatusID)
+                filterModal.setCluster(selected = selectedClusterID)
                 filterModal.setCities(items = cities, selected = selectedCitiesID)
             } else if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_MARKETING || userKind == USER_KIND_ADMIN_CITY) {
                 filterModal.setValidStatuses(selected = selectedValidStatusID)
                 filterModal.setStatuses(selected = selectedStatusID)
+                filterModal.setCluster(selected = selectedClusterID)
             }
             filterModal.setSendFilterListener(object : FilterTokoModal.SendFilterListener {
                 override fun onSendFilter(
                     selectedValidStatusID: String,
+                    selectedClusterID: String,
                     selectedStatusID: String,
                     selectedVisitedID: String,
                     selectedCitiesID: CityModel?
                 ) {
 
                     this@MainActivity.selectedValidStatusID = selectedValidStatusID
+                    this@MainActivity.selectedClusterID = selectedClusterID
                     this@MainActivity.selectedStatusID = selectedStatusID
                     this@MainActivity.selectedVisitedID = selectedVisitedID
                     this@MainActivity.selectedCitiesID = selectedCitiesID
@@ -1392,6 +1427,30 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             try {
 
                 val rbSearchKey = createPartFromString(PhoneHandler.formatPhoneNumber62(key))
+
+                val clusterFilter = selectedClusterID.lowercase(Locale.ROOT).let {
+                    when (it) {
+                        "cluster 1" -> {
+                            "1"
+                        }
+
+                        "cluster 2" -> {
+                            "2"
+                        }
+
+                        "cluster 3" -> {
+                            "3"
+                        }
+
+                        "not set" -> {
+                            "0"
+                        }
+
+                        else -> {
+                            "-1"
+                        }
+                    }
+                }
 
                 val validStatusFilter = selectedValidStatusID.lowercase(Locale.ROOT).let {
                     when (it) {
@@ -1486,19 +1545,26 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
                     var textFilter = ""
 
-                    if (selectedValidStatusID != "-1" || selectedStatusID != "-1" || selectedVisitedID != "-1" || selectedCitiesID != null) {
+                    if (selectedValidStatusID != "-1" || selectedClusterID != "-1" || selectedStatusID != "-1" || selectedVisitedID != "-1" || selectedCitiesID != null) {
                         textFilter += if (selectedCitiesID != null && selectedCitiesID?.id_city != "-1") selectedCitiesID?.nama_city else ""
                         textFilter += if (selectedStatusID != "-1") if (textFilter.isNotEmpty()) ", $selectedStatusID" else selectedStatusID else ""
                         textFilter += if (selectedValidStatusID != "-1") if (textFilter.isNotEmpty()) ", $selectedValidStatusID" else selectedValidStatusID else ""
+                        textFilter += if (selectedClusterID != "-1") if (textFilter.isNotEmpty()) ", $selectedClusterID" else selectedClusterID else ""
                         textFilter += if (selectedVisitedID != "-1") if (textFilter.isNotEmpty()) ", $selectedVisitedID" else selectedVisitedID else ""
                     } else textFilter = getString(R.string.tidak_ada_filter)
 
                     when (responseBody.status) {
                         RESPONSE_STATUS_OK -> {
 
-                            contacts = responseBody.results
-                            setRecyclerView(responseBody.results)
-                            binding.tvFilter.text = "$textFilter (${responseBody.results.size})"
+                            contacts = if (clusterFilter != "-1") {
+                                responseBody.results.filterTo(ArrayList()) {
+                                    it.cluster == clusterFilter
+                                }
+                            } else {
+                                responseBody.results
+                            }
+                            setRecyclerView(contacts)
+                            binding.tvFilter.text = "$textFilter (${contacts.size})"
                             loadingState(false)
 
                         }
