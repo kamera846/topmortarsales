@@ -424,9 +424,9 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
         // Set Title Bar
         if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN || userKind == USER_KIND_MARKETING) {
-            if (!isContactXSource) {
+//            if (!isContactXSource) {
                 icMore.visibility = View.VISIBLE
-            }
+//            }
             binding.titleBar.icMenu.visibility = View.GONE
             tvTitleBarDescription.visibility = View.GONE
             binding.titleBar.tvTitleBar.text = if (isContactXSource) "Toko X" else "Semua Toko"
@@ -515,9 +515,11 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         icClearSearch.setOnClickListener { etSearchBox.setText("") }
         rlLoading.setOnTouchListener { _, event -> blurSearchBox(event) }
         rvListChat.setOnTouchListener { _, event -> blurSearchBox(event) }
-        binding.llFilter.setOnClickListener {
-            setupFilterTokoModal()
-            showFilterModal()
+        if (!isContactXSource) {
+            binding.llFilter.setOnClickListener {
+                setupFilterTokoModal()
+                showFilterModal()
+            }
         }
         binding.titleBar.icConfirmSelect.setOnClickListener {
             if (selectedItemCount > 0) {
@@ -621,7 +623,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             lifecycleScope.launch {
                 try {
 
-                    val response = when (userKind) {
+                    var response = when (userKind) {
                         USER_KIND_ADMIN, USER_KIND_PENAGIHAN, USER_KIND_MARKETING -> HttpClient.apiService.getContactsByDistributor(
                             distributorID = userDistributorId
                         )
@@ -635,6 +637,10 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                             cityId = userCity,
                             distributorID = userDistributorId
                         )
+                    }
+
+                    if (isContactXSource) {
+                        response = HttpClient.apiService.getContactXs(cityId = userCity, userId = userId)
                     }
 
                     when (response.status) {
@@ -1325,9 +1331,9 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
                 AppCompatResources.getDrawable(this, R.color.black_400)
             else binding.llFilter.background = AppCompatResources.getDrawable(this, R.color.light)
 
-            if (!isContactXSource) {
+//            if (!isContactXSource) {
                 binding.llFilter.visibility = View.VISIBLE
-            }
+//            }
 
             filterModal = FilterTokoModal(this)
             if (userKind == USER_KIND_ADMIN) {
