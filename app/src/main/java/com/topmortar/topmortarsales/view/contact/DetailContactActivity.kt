@@ -3455,7 +3455,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
         }
         iLocation = data.id_city
         iPromo = data.id_promo
-        isCanVisitNormal = 2
+        isCanVisitNormal = data.can_visit_normal?.toInt() ?: 0
         iReportSource = intent.getStringExtra(REPORT_SOURCE)
             .let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
         iRenviSource = intent.getStringExtra(RENVI_SOURCE)
