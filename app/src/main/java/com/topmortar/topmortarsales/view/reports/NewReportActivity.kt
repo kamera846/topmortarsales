@@ -54,6 +54,8 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.USER_KIND_PENAGIHAN
 import com.topmortar.topmortarsales.commons.USER_KIND_SALES
 import com.topmortar.topmortarsales.commons.services.TrackingService
@@ -98,6 +100,7 @@ class NewReportActivity : AppCompatActivity() {
     private val msgMaxLines = 6
     private val msgMaxLength = 500
 
+    private var isAdmin = false
     private var isSalesOrPenagihan = false
     private var isDistanceToLong = false
     private var isBaseCamp = false
@@ -282,7 +285,9 @@ class NewReportActivity : AppCompatActivity() {
     private fun showDialogIsMock() {
         try {
 
-            stopTrackingService()
+            if (userKind != USER_KIND_ADMIN && userKind != USER_KIND_ADMIN_CITY) {
+                stopTrackingService()
+            }
 
             val dialogView = layoutInflater.inflate(R.layout.modal_mock_location, null)
             AlertDialog.Builder(this)
@@ -312,6 +317,7 @@ class NewReportActivity : AppCompatActivity() {
     }
 
     private fun initContent() {
+        isAdmin = userKind == USER_KIND_ADMIN || userKind == USER_KIND_ADMIN_CITY
         isSalesOrPenagihan = userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN
         binding.titleBarLight.tvTitleBar.text = "Buat Laporan"
 
@@ -333,7 +339,7 @@ class NewReportActivity : AppCompatActivity() {
             }
         }
 
-        if (isSalesOrPenagihan) {
+        if (isSalesOrPenagihan || isAdmin) {
             if (iReportSource == NORMAL_REPORT && isCanVisitNormal == 2) {
                 binding.reportPaymentContainer.visibility = View.VISIBLE
             } else {
@@ -699,7 +705,9 @@ class NewReportActivity : AppCompatActivity() {
 
             progressBar.dismiss()
 
-            stopTrackingService()
+            if (userKind != USER_KIND_ADMIN && userKind != USER_KIND_ADMIN_CITY) {
+                stopTrackingService()
+            }
 
             AlertDialog.Builder(this)
                 .setCancelable(false)
@@ -1015,11 +1023,13 @@ class NewReportActivity : AppCompatActivity() {
                 loadingSubmit(false)
 
             } finally {
+                if (userKind != USER_KIND_ADMIN && userKind != USER_KIND_ADMIN_CITY) {
                 saveTrackingServiceLocation(
                     userId = idUser,
                     contactId = id,
                     actionType = TrackingService.ACTION_TYPE_VISIT
                 )
+                }
                 submitCountDown = object : CountDownTimer(10000, 1000) {
 
                     override fun onTick(millisUntilFinished: Long) {
