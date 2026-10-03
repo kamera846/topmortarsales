@@ -1327,9 +1327,12 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         if (userKind != USER_KIND_COURIER && userKind != USER_KIND_BA) {
             val currentNightMode =
                 resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-            if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) binding.llFilter.background =
-                AppCompatResources.getDrawable(this, R.color.black_400)
-            else binding.llFilter.background = AppCompatResources.getDrawable(this, R.color.light)
+            if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) {
+                binding.llFilter.background =
+                    AppCompatResources.getDrawable(this, R.color.black_400)
+            } else {
+                binding.llFilter.background = AppCompatResources.getDrawable(this, R.color.light)
+            }
 
 //            if (!isContactXSource) {
                 binding.llFilter.visibility = View.VISIBLE
