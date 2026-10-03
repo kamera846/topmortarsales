@@ -1968,7 +1968,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 reportsTitle.text = "Lihat Laporan Sales"
                 reportOption.visibility = View.VISIBLE
 //                checklistReportOption.visibility = View.GONE
-                btnNewReport.visibility = View.GONE
+//                btnNewReport.visibility = View.GONE
             } else if (sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN || sessionManager.userKind() == USER_KIND_MARKETING) {
                 if (iReportSource == NORMAL_REPORT) {
                     if (isCanVisitNormal > 0) {

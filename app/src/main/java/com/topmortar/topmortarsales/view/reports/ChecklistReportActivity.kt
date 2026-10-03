@@ -48,6 +48,8 @@ import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_OK
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
 import com.topmortar.topmortarsales.commons.TOAST_SHORT
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN_CITY
 import com.topmortar.topmortarsales.commons.services.TrackingService
 import com.topmortar.topmortarsales.commons.services.saveTrackingServiceLocation
 import com.topmortar.topmortarsales.commons.services.stopTrackingService
@@ -79,6 +81,7 @@ class ChecklistReportActivity : AppCompatActivity() {
 
     private val idUser get() = sessionManager.userID().toString()
     private val userDistributorId get() = sessionManager.userDistributor().toString()
+    private val userKind get() = sessionManager.userKind().toString()
     private var iContactId: String? = null
     private var iInvoiceId: String? = null
     private var iName: String? = null
@@ -264,7 +267,9 @@ class ChecklistReportActivity : AppCompatActivity() {
     private fun showDialogIsMock() {
         try {
 
+            if (userKind != USER_KIND_ADMIN && userKind != USER_KIND_ADMIN_CITY) {
             stopTrackingService()
+                }
 
             val dialogView = layoutInflater.inflate(R.layout.modal_mock_location, null)
             AlertDialog.Builder(this)
@@ -520,7 +525,9 @@ class ChecklistReportActivity : AppCompatActivity() {
 
             progressBar.dismiss()
 
-            stopTrackingService()
+            if (userKind != USER_KIND_ADMIN && userKind != USER_KIND_ADMIN_CITY) {
+                stopTrackingService()
+            }
 
             AlertDialog.Builder(this)
                 .setCancelable(false)
@@ -740,11 +747,13 @@ class ChecklistReportActivity : AppCompatActivity() {
                     generateFailedRunServiceMessage(e.message.toString())
                 )
             } finally {
-                saveTrackingServiceLocation(
-                    userId = idUser,
-                    contactId = iContactId ?: "0",
-                    actionType = TrackingService.ACTION_TYPE_VISIT
-                )
+                if (userKind != USER_KIND_ADMIN && userKind != USER_KIND_ADMIN_CITY) {
+                    saveTrackingServiceLocation(
+                        userId = idUser,
+                        contactId = iContactId ?: "0",
+                        actionType = TrackingService.ACTION_TYPE_VISIT
+                    )
+                }
                 submitCountDown = object : CountDownTimer(10000, 1000) {
 
                     override fun onTick(millisUntilFinished: Long) {
