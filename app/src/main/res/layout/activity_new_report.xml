@@ -364,6 +364,7 @@
                             android:text="Iya"/>
 
                         <RadioButton
+                            android:visibility="gone"
                             android:id="@+id/rbNotPay"
                             android:layout_width="match_parent"
                             android:layout_height="48dp"
