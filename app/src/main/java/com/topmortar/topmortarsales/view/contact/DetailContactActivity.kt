@@ -1237,7 +1237,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             clusterItem[3] -> "3"
             else -> "0"
         }
-        val pTermin = if (selectedTermin.isEmpty()) "-1" else {
+        val pTermin = if (selectedTermin.isEmpty()) STATUS_TERMIN_30 else {
             when (selectedTermin) {
                 terminItem[1] -> STATUS_TERMIN_COD
                 terminItem[2] -> STATUS_TERMIN_COD_TF
@@ -1245,7 +1245,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
                 terminItem[4] -> STATUS_TERMIN_30
                 terminItem[5] -> STATUS_TERMIN_45
                 terminItem[6] -> STATUS_TERMIN_60
-                else -> "-1"
+                else -> STATUS_TERMIN_30
             }
         }
         val pReputation = if (selectedReputation.isEmpty()) "-1" else {
