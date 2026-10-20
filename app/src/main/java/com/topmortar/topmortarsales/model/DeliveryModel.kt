@@ -71,6 +71,7 @@ object DeliveryModel {
         var id_promo: String = "",
         var reputation: String = "",
         var created_at: String = "",
+        var total_day: String = "",
         var sj: SuratJalanModel? = null
     )
 }

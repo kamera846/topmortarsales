@@ -497,7 +497,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
         }
 
         // Set Floating Action Button
-        if ((sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) && !isContactXSource) btnFab.visibility =
+        if ((sessionManager.userKind() == USER_KIND_ADMIN || sessionManager.userKind() == USER_KIND_SALES || sessionManager.userKind() == USER_KIND_PENAGIHAN) && !isContactXSource) btnFab.visibility =
             View.VISIBLE
         if (sessionManager.userKind() != USER_KIND_COURIER) icSearch.visibility = View.VISIBLE
         if (sessionManager.userKind() == USER_KIND_COURIER) btnFabAdmin.visibility = View.VISIBLE
@@ -1789,7 +1789,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
 
         } else {
             icMore.visibility = View.VISIBLE
-            if (userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) binding.btnFab.visibility =
+            if (sessionManager.userKind() == USER_KIND_ADMIN || userKind == USER_KIND_SALES || userKind == USER_KIND_PENAGIHAN) binding.btnFab.visibility =
                 View.VISIBLE
             binding.titleBar.icConfirmSelect.visibility = View.GONE
             binding.titleBar.tvTitleBar.text = if (isContactXSource) "Toko X" else "Semua Toko"
