@@ -29,11 +29,13 @@ import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import com.topmortar.topmortarsales.R
 import com.topmortar.topmortarsales.commons.ABSENT_MODE_STORE
+import com.topmortar.topmortarsales.commons.CONST_LOCATION
 import com.topmortar.topmortarsales.commons.CONST_MAPS
 import com.topmortar.topmortarsales.commons.GET_COORDINATE
 import com.topmortar.topmortarsales.commons.LOCATION_PERMISSION_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.MAIN_ACTIVITY_REQUEST_CODE
 import com.topmortar.topmortarsales.commons.PHONE_CATEGORIES
+import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_EMPTY
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_ERROR
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAIL
 import com.topmortar.topmortarsales.commons.RESPONSE_STATUS_FAILED
@@ -46,7 +48,9 @@ import com.topmortar.topmortarsales.commons.STATUS_TERMIN_COD
 import com.topmortar.topmortarsales.commons.STATUS_TERMIN_COD_TF
 import com.topmortar.topmortarsales.commons.STATUS_TERMIN_COD_TUNAI
 import com.topmortar.topmortarsales.commons.SYNC_NOW
+import com.topmortar.topmortarsales.commons.TAG_RESPONSE_CONTACT
 import com.topmortar.topmortarsales.commons.TAG_RESPONSE_MESSAGE
+import com.topmortar.topmortarsales.commons.USER_KIND_ADMIN
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.setMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomEtHandler.updateTxtMaxLength
 import com.topmortar.topmortarsales.commons.utils.CustomUtility
@@ -65,6 +69,7 @@ import com.topmortar.topmortarsales.data.ApiService
 import com.topmortar.topmortarsales.data.HttpClient
 import com.topmortar.topmortarsales.databinding.ActivityNewRoomChatFormBinding
 import com.topmortar.topmortarsales.modal.SearchModal
+import com.topmortar.topmortarsales.model.CityModel
 import com.topmortar.topmortarsales.model.ModalSearchModel
 import com.topmortar.topmortarsales.view.MapsActivity
 import kotlinx.coroutines.launch
@@ -73,7 +78,7 @@ import java.util.Calendar
 import kotlin.coroutines.cancellation.CancellationException
 
 @SuppressLint("SetTextI18n")
-class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalListener {
+class NewRoomChatFormActivity : AppCompatActivity() {
 
     private lateinit var icBack: ImageView
     private lateinit var tvTitleBar: TextView
@@ -83,13 +88,12 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
     private lateinit var etName: EditText
     private lateinit var etOwner: EditText
     private lateinit var etBirthday: EditText
-    private lateinit var etStoreLocated: EditText
     private lateinit var etMapsUrl: EditText
     private lateinit var etMessage: EditText
     private lateinit var spinTermin: Spinner
-    private lateinit var spinnerSearchBox: AutoCompleteTextView
-
     private lateinit var sessionManager: SessionManager
+    private val userDistributorId get() = sessionManager.userDistributor() ?: "0"
+    private val userKind get() = sessionManager.userKind() ?: "0"
     private lateinit var binding: ActivityNewRoomChatFormBinding
 
     private lateinit var spinnerAdapter: ArrayAdapter<CharSequence>
@@ -103,17 +107,8 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
     private val msgMaxLength = 200
     private var selectedDate: Calendar = Calendar.getInstance()
     private var selectedCity: ModalSearchModel? = null
-    private var cities = listOf(
-        "Malang",
-        "Gresik",
-        "Sidoarjo",
-        "Blitar",
-        "Surabaya",
-        "Jakarta",
-        "Bandung",
-        "Yogyakarta",
-        "Kediri"
-    )
+    private var citiesResults: ArrayList<CityModel> = ArrayList()
+    private var iCities: String? = null
 
     private lateinit var phoneCategoriesFRC: FirebaseRemoteConfig
     private var spinPhoneCatItems: List<String> = listOf()
@@ -160,6 +155,12 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             )
         }
 
+        if (userKind == USER_KIND_ADMIN) {
+//            binding.titleBar.icTrash.visibility = View.VISIBLE
+//            binding.titleBar.icTrash.setOnClickListener { deleteValidation() }
+            setCitiesOption()
+        }
+
         phoneCategoriesFRC = FirebaseRemoteConfig.getInstance()
         val configSettings = FirebaseRemoteConfigSettings.Builder()
             .setMinimumFetchIntervalInSeconds(0)
@@ -199,6 +200,123 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         }, 500)
     }
 
+    private fun setCitiesOption() {
+
+        binding.citiesOptionContainer.visibility = View.VISIBLE
+
+        iCities = intent.getStringExtra(CONST_LOCATION)
+        if (!iCities.isNullOrEmpty()) binding.etCityOption.setText(getString(R.string.txt_loading))
+        else binding.etCityOption.setText("")
+
+        binding.etCityOption.setOnClickListener { showSearchModal() }
+        binding.etCityOption.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                showSearchModal()
+                binding.etCityOption.setSelection(binding.etCityOption.length())
+            } else binding.etCityOption.clearFocus()
+        }
+
+        // Setup Dialog Search
+        setupDialogSearch()
+        getCities()
+
+    }
+
+    private fun getCities() {
+
+        lifecycleScope.launch {
+            try {
+
+                val apiService: ApiService = HttpClient.apiService
+                val response = apiService.getCities(distributorID = userDistributorId)
+
+                when (response.status) {
+                    RESPONSE_STATUS_OK -> {
+
+                        citiesResults = response.results
+                        val items: ArrayList<ModalSearchModel> = ArrayList()
+
+                        for (i in 0 until citiesResults.size) {
+                            val data = citiesResults[i]
+                            items.add(
+                                ModalSearchModel(
+                                    data.id_city,
+                                    "${data.nama_city} - ${data.kode_city}"
+                                )
+                            )
+                        }
+
+                        setupDialogSearch(items)
+
+                        val foundItem = citiesResults.find { it.id_city == iCities }
+                        if (foundItem != null) {
+                            binding.etCityOption.setText("${foundItem.nama_city} - ${foundItem.kode_city}")
+                            selectedCity = ModalSearchModel(foundItem.id_city, foundItem.nama_city)
+                        } else binding.etCityOption.setText("")
+
+                    }
+
+                    RESPONSE_STATUS_EMPTY -> {
+
+                        handleMessage(this@NewRoomChatFormActivity, "LIST CITY", "Daftar kota kosong!")
+
+                    }
+
+                    else -> {
+
+                        handleMessage(
+                            this@NewRoomChatFormActivity,
+                            TAG_RESPONSE_CONTACT,
+                            getString(R.string.failed_get_data)
+                        )
+
+                    }
+                }
+
+
+            } catch (e: Exception) {
+
+                if (e is CancellationException) {
+                    return@launch
+                }
+                FirebaseUtils.logErr(
+                    this@NewRoomChatFormActivity,
+                    "Fathis@NewRoomChatFormActivity on getCities(). Catch: ${e.message}"
+                )
+                handleMessage(
+                    this@NewRoomChatFormActivity,
+                    TAG_RESPONSE_CONTACT,
+                    generateFailedRunServiceMessage(e.message.toString())
+                )
+
+            }
+
+        }
+    }
+
+    private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
+
+        searchModal = SearchModal(this, items)
+        searchModal.setCustomDialogListener(object : SearchModal.SearchModalListener {
+            override fun onDataReceived(data: ModalSearchModel) {
+                binding.etCityOption.setText(data.title)
+                selectedCity = data
+            }
+
+        })
+        searchModal.searchHint = "Masukkan nama kota…"
+        searchModal.setOnDismissListener {
+            binding.etCityOption.clearFocus()
+        }
+
+    }
+
+    private fun showSearchModal() {
+        val searchKey = binding.etCityOption.text.toString()
+        if (searchKey.isNotEmpty()) searchModal.setSearchKey(searchKey)
+        searchModal.show()
+    }
+
     private fun sendMessage() {
 
         val phoneCategory = binding.spinPhoneCategories.let {
@@ -210,7 +328,11 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         val name = "${etName.text}"
         var birthday = "${etBirthday.text}"
         val owner = "${etOwner.text}"
-        val cityId = sessionManager.userCityID().let { if (!it.isNullOrEmpty()) it else "0" }
+        val cityId = if (userKind == USER_KIND_ADMIN) {
+            selectedCity?.id ?: "0"
+        } else {
+            sessionManager.userCityID().let { if (!it.isNullOrEmpty()) it else "0" }
+        }
         val mapsUrl = "${etMapsUrl.text}"
         val message = "${etMessage.text}"
         val address = "${binding.etAddress.text}"
@@ -236,6 +358,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                 name = name,
                 owner = owner,
                 mapsUrl = mapsUrl,
+                cityId = cityId,
                 message = message,
                 address = address,
                 termin = termin
@@ -266,6 +389,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 //            )
 //            loadingState(false)
 //        }, 1000)
+//        return
 
         lifecycleScope.launch {
             try {
@@ -476,10 +600,8 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         etName = findViewById(R.id.et_name)
         etOwner = findViewById(R.id.et_owner)
         etBirthday = findViewById(R.id.et_birthday)
-        etStoreLocated = findViewById(R.id.et_store_located)
         etMessage = findViewById(R.id.et_message)
         spinTermin = findViewById(R.id.spin_termin)
-        spinnerSearchBox = findViewById(R.id.spinner_search_box)
         etMapsUrl = findViewById(R.id.et_maps_url)
 
         // Set Title Bar
@@ -495,9 +617,6 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         // Setup Termin
         setupTerminSpinner()
 
-        // Setup Dialog Search
-        setupDialogSearch()
-
     }
 
     private fun initClickHandler() {
@@ -506,7 +625,6 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         btnSubmit.setOnClickListener { if (isLoaded) sendMessage() }
         etBirthday.setOnClickListener { datePicker.show() }
         etMapsUrl.setOnClickListener { getCoordinate() }
-        etStoreLocated.setOnClickListener { showSearchModal() }
 
         // Focus Listener
         etName.setOnFocusChangeListener { _, hasFocus ->
@@ -527,12 +645,6 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
                 etMapsUrl.setSelection(etMapsUrl.length())
             } else etMapsUrl.clearFocus()
         }
-        etStoreLocated.setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) {
-                showSearchModal()
-                etStoreLocated.setSelection(etStoreLocated.length())
-            } else etStoreLocated.clearFocus()
-        }
 
         // Change Listener
         etBirthday.addTextChangedListener(object : TextWatcher {
@@ -546,23 +658,6 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
             override fun afterTextChanged(s: Editable?) {
                 if (isLoaded) datePicker.show()
-            }
-
-        })
-        etStoreLocated.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-
-            }
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-
-            }
-
-            override fun afterTextChanged(s: Editable?) {
-                if (isLoaded) {
-                    if (s.toString().isNotEmpty()) etStoreLocated.error = null
-                    showSearchModal()
-                }
             }
 
         })
@@ -596,6 +691,7 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
         name: String,
         owner: String = "",
         mapsUrl: String = "",
+        cityId: String = "",
         message: String = "",
         address: String,
         termin: String = "-1"
@@ -630,9 +726,19 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 //            etMapsUrl.clearFocus()
 //            etMessage.error = "Tambahkan pesan untuk toko!"
 //            false
+        } else if (userKind == USER_KIND_ADMIN && (cityId.isEmpty() || cityId == "0")) {
+            etMapsUrl.error = null
+            etMapsUrl.clearFocus()
+            binding.etCityOption.error = "Kota wajib dipilih!"
+            handleMessage(this, message = "Kota wajib dipilih")
+            false
         } else if (address.isEmpty()) {
             etMapsUrl.error = null
             etMapsUrl.clearFocus()
+            if (userKind == USER_KIND_ADMIN) {
+                binding.etCityOption.error = null
+                binding.etCityOption.clearFocus()
+            }
             binding.etAddress.error = "Alamat wajib diisi!"
             false
 //        } else if (termin == "-1") {
@@ -646,15 +752,19 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
             etOwner.error = null
             etBirthday.error = null
             etMapsUrl.error = null
+            if (userKind == USER_KIND_ADMIN) {
+                binding.etCityOption.error = null
+            }
             etMessage.error = null
             binding.etAddress.error = null
-            etStoreLocated.error = null
             etPhone.clearFocus()
             etName.clearFocus()
-            etStoreLocated.clearFocus()
             etBirthday.clearFocus()
             etOwner.clearFocus()
             etMapsUrl.clearFocus()
+            if (userKind == USER_KIND_ADMIN) {
+                binding.etCityOption.clearFocus()
+            }
             etMessage.clearFocus()
             binding.etAddress.clearFocus()
             true
@@ -687,19 +797,6 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
     }
 
-    private fun setSpinnerCities() {
-
-        spinnerAdapter = ArrayAdapter(
-            this@NewRoomChatFormActivity,
-            android.R.layout.simple_dropdown_item_1line,
-            cities
-        )
-
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line)
-        spinnerSearchBox.setAdapter(spinnerAdapter)
-
-    }
-
     private fun setupTerminSpinner() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, terminItem)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -720,29 +817,6 @@ class NewRoomChatFormActivity : AppCompatActivity(), SearchModal.SearchModalList
 
             }
         }
-    }
-
-    private fun setupDialogSearch(items: ArrayList<ModalSearchModel> = ArrayList()) {
-
-        searchModal = SearchModal(this, items)
-        searchModal.setCustomDialogListener(this)
-        searchModal.searchHint = "Ketik nama kota…"
-        searchModal.setOnDismissListener {
-            etStoreLocated.clearFocus()
-            etOwner.requestFocus()
-        }
-
-    }
-
-    private fun showSearchModal() {
-        val searchKey = etStoreLocated.text.toString()
-        if (searchKey.isNotEmpty()) searchModal.setSearchKey(searchKey)
-        searchModal.show()
-    }
-
-    override fun onDataReceived(data: ModalSearchModel) {
-        etStoreLocated.setText(data.title)
-        selectedCity = data
     }
 
     override fun onRequestPermissionsResult(

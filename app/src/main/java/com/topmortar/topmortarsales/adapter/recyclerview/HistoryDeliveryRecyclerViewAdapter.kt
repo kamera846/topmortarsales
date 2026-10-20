@@ -39,6 +39,9 @@ class HistoryDeliveryRecyclerViewAdapter(
         private val tvPhoneNumber: TextView = itemView.findViewById(R.id.tv_phone_number)
         private val tvNotes: TextView = itemView.findViewById(R.id.tv_notes)
         val tooltipStatus: ImageView = itemView.findViewById(R.id.tooltip_status)
+        private val deliveryStatus: LinearLayout = itemView.findViewById(R.id.deliveryStatus)
+        private val deliveryStatusText: TextView = itemView.findViewById(R.id.deliveryStatusText)
+        private val deliveryStatusIcon: ImageView = itemView.findViewById(R.id.deliveryStatusIcon)
 
         fun bind(item: DeliveryModel.History) {
             var itemDescription = "Diselesaikan pada " + DateFormat.format(
@@ -47,8 +50,16 @@ class HistoryDeliveryRecyclerViewAdapter(
                 "dd MMM, HH:mm"
             )
 
-            if (!isHistoryCourier) {
-                itemDescription = if (item.sj != null) {
+//            if (!isHistoryCourier) {
+//                itemDescription = if (item.sj != null) {
+//                    "${item.sj?.no_surat_jalan ?: ""} - ${item.full_name}"
+//                } else {
+//                    item.full_name
+//                }
+
+                itemDescription = if (isHistoryCourier) {
+                    item.sj?.no_surat_jalan ?: ""
+                } else if (item.sj != null) {
                     "${item.sj?.no_surat_jalan ?: ""} - ${item.full_name}"
                 } else {
                     item.full_name
@@ -70,7 +81,13 @@ class HistoryDeliveryRecyclerViewAdapter(
                 tvNotes.setTypeface(null, Typeface.NORMAL)
 
                 tvNotes.visibility = View.VISIBLE
-            }
+
+                deliveryStatus.visibility = View.VISIBLE
+                deliveryStatusText.visibility = View.VISIBLE
+                deliveryStatusText.text = "${item.total_day} hari"
+                deliveryStatusIcon.visibility = View.VISIBLE
+                deliveryStatusIcon.setImageResource(R.drawable.checkbox_circle_light)
+//            }
 
             tvContactName.text = item.nama
             tvPhoneNumber.text = itemDescription
