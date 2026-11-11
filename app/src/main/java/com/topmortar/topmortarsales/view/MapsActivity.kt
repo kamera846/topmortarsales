@@ -2096,28 +2096,38 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener,
 
                         if (!userId.isNullOrEmpty() && userId != courierID) {
                             if (userKind == USER_KIND_ADMIN) {
-                                listUserTracking.add(
-                                    UserAbsentModel(
-                                        eveningDateTime = item.child("eveningDateTime")
-                                            .getValue(String::class.java) ?: "",
-                                        fullname = item.child("fullname")
-                                            .getValue(String::class.java) ?: "",
-                                        id = item.child("id").getValue(String::class.java) ?: "",
-                                        isOnline = item.child("isOnline")
-                                            .getValue(Boolean::class.java) ?: false,
-                                        lastSeen = item.child("lastSeen")
-                                            .getValue(String::class.java) ?: "",
-                                        lastTracking = item.child("lastTracking")
-                                            .getValue(String::class.java) ?: "",
-                                        lat = item.child("lat").getValue(Double::class.java) ?: 0.0,
-                                        lng = item.child("lng").getValue(Double::class.java) ?: 0.0,
-                                        morningDateTime = item.child("morningDateTime")
-                                            .getValue(String::class.java) ?: "",
-                                        username = item.child("username")
-                                            .getValue(String::class.java) ?: "",
+
+                                try {
+                                    listUserTracking.add(
+                                        UserAbsentModel(
+                                            eveningDateTime = item.child("eveningDateTime")
+                                                .getValue(String::class.java) ?: "",
+                                            fullname = item.child("fullname")
+                                                .getValue(String::class.java) ?: "",
+                                            id = item.child("id").getValue(String::class.java)
+                                                ?: "",
+                                            isOnline = item.child("isOnline")
+                                                .getValue(Boolean::class.java) ?: false,
+                                            lastSeen = item.child("lastSeen")
+                                                .getValue(String::class.java) ?: "",
+                                            lastTracking = item.child("lastTracking")
+                                                .getValue(String::class.java) ?: "",
+                                            lat = item.child("lat").getValue(Double::class.java)
+                                                ?: 0.0,
+                                            lng = item.child("lng").getValue(Double::class.java)
+                                                ?: 0.0,
+                                            morningDateTime = item.child("morningDateTime")
+                                                .getValue(String::class.java) ?: "",
+                                            username = item.child("username")
+                                                .getValue(String::class.java) ?: "",
+                                        )
                                     )
-                                )
+                                } catch (e: Exception) {
+                                    handleMessage(this@MapsActivity, message = "Terjadi kelasahan firebase: ${e.message}. ${item.child("lastSeen")
+                                        .getValue(String::class.java)}")
+                                }
                             } else if (!userIdCity.isNullOrEmpty() && userCity == userIdCity) {
+                                try {
                                 listUserTracking.add(
                                     UserAbsentModel(
                                         eveningDateTime = item.child("eveningDateTime")
@@ -2139,6 +2149,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, LocationListener,
                                             .getValue(String::class.java) ?: "",
                                     )
                                 )
+                                } catch (e: Exception) {
+                                    handleMessage(this@MapsActivity, message = "Terjadi kelasahan firebase: ${e.message}. ${item.child("lastSeen")
+                                        .getValue(String::class.java)}")
+                                }
                             }
                         }
                     }
