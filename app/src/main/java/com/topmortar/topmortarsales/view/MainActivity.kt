@@ -50,6 +50,7 @@ import com.topmortar.topmortarsales.commons.CONST_BIRTHDAY
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_ID
 import com.topmortar.topmortarsales.commons.CONST_CONTACT_X
 import com.topmortar.topmortarsales.commons.CONST_DATE
+import com.topmortar.topmortarsales.commons.CONST_INVOICE_ID
 import com.topmortar.topmortarsales.commons.CONST_KTP
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE
 import com.topmortar.topmortarsales.commons.CONST_LIST_COORDINATE_CITY_ID
@@ -608,6 +609,7 @@ class MainActivity : AppCompatActivity(), SearchModal.SearchModalListener,
             intent.putExtra(CONST_REPUTATION, data.reputation)
             intent.putExtra(CONST_DATE, data.created_at)
             intent.putExtra(CONST_WEEKLY_VISIT_STATUS, data.tagih_mingguan)
+            intent.putExtra(CONST_INVOICE_ID, data.id_invoice)
             intent.putExtra(CONST_CONTACT_X, isContactXSource)
         }
 
