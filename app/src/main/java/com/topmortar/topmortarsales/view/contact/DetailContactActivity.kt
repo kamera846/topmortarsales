@@ -3460,7 +3460,7 @@ class DetailContactActivity : AppCompatActivity(), SearchModal.SearchModalListen
             .let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
         iRenviSource = intent.getStringExtra(RENVI_SOURCE)
             .let { if (it.isNullOrEmpty()) NORMAL_REPORT else it }
-        iInvoiceId = intent.getStringExtra(CONST_INVOICE_ID)
+        iInvoiceId = intent.getStringExtra(CONST_INVOICE_ID) ?: data.id_invoice
         iReportPaymentStatus = intent.getBooleanExtra(REPORT_TYPE_IS_PAYMENT, false)
         if (isCanVisitNormal == 1) {
             iReportPaymentStatus = true
